@@ -1,0 +1,260 @@
+import { useState, useRef } from 'react';
+import { useStore } from '../store/useStore';
+import { importExcel, exportToExcel, exportNonSoldesToExcel, exportClassToExcel } from '../utils/excelService';
+import { CLASSES } from '../types';
+import { 
+  Upload, 
+  Download, 
+  FileSpreadsheet, 
+  CheckCircle2, 
+  AlertCircle,
+  Loader2,
+  FileDown,
+  Users,
+  AlertTriangle
+} from 'lucide-react';
+
+export const ImportExport = () => {
+  const { students, setStudents } = useStore();
+  const [importing, setImporting] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [selectedClasse, setSelectedClasse] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const allClasses = [...CLASSES.Primaire, ...CLASSES.Collège, ...CLASSES.Lycée];
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+    setMessage(null);
+
+    try {
+      const imported = await importExcel(file);
+      
+      if (imported.length === 0) {
+        setMessage({ type: 'error', text: 'Aucun élève trouvé dans le fichier.' });
+      } else {
+        // Ask if replace or merge
+        const replace = students.length === 0 || 
+          confirm(`Voulez-vous remplacer les ${students.length} élèves existants ? (Annuler pour fusionner)`);
+        
+        if (replace) {
+          setStudents(imported);
+        } else {
+          setStudents([...students, ...imported]);
+        }
+        
+        setMessage({ 
+          type: 'success', 
+          text: `${imported.length} élèves importés avec succès !` 
+        });
+      }
+    } catch (error) {
+      setMessage({ 
+        type: 'error', 
+        text: error instanceof Error ? error.message : 'Erreur lors de l\'importation' 
+      });
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  return (
+    <div className="p-6 space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-800">Import / Export Excel</h1>
+        <p className="text-gray-500">Gérez vos données élèves via fichiers Excel</p>
+      </div>
+
+      {/* Message */}
+      {message && (
+        <div className={`p-4 rounded-lg flex items-center gap-3 ${
+          message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+        }`}>
+          {message.type === 'success' ? (
+            <CheckCircle2 className="w-5 h-5" />
+          ) : (
+            <AlertCircle className="w-5 h-5" />
+          )}
+          {message.text}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Import Section */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Upload className="w-5 h-5" />
+            Importer un fichier Excel
+          </h2>
+
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleFileChange}
+              className="hidden"
+              id="excel-upload"
+            />
+            <label 
+              htmlFor="excel-upload"
+              className="cursor-pointer"
+            >
+              {importing ? (
+                <div className="flex flex-col items-center">
+                  <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
+                  <p className="text-gray-600">Importation en cours...</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <FileSpreadsheet className="w-12 h-12 text-gray-400 mb-4" />
+                  <p className="text-gray-600 mb-2">Cliquez ou déposez un fichier Excel</p>
+                  <p className="text-sm text-gray-400">.xlsx ou .xls</p>
+                </div>
+              )}
+            </label>
+          </div>
+
+          <div className="mt-6 bg-blue-50 rounded-lg p-4">
+            <h3 className="font-medium text-blue-800 mb-2">Format attendu:</h3>
+            <ul className="text-sm text-blue-700 space-y-1">
+              <li>• Colonne B: NOMS</li>
+              <li>• Colonne C: PRÉNOMS</li>
+              <li>• Colonne D: CLASSE</li>
+              <li>• Colonne E: TELEPHONE</li>
+              <li>• Colonne F: SEXE (M/F)</li>
+              <li>• Colonne G: REDOUBLANT (Oui/Non)</li>
+              <li>• Colonne H: ÉCOLE DE PROVENANCE</li>
+              <li>• Colonne I: ÉCOLAGE</li>
+              <li>• Colonne J: DÉJÀ PAYÉ</li>
+              <li>• Colonne K: RESTANT (ou "SOLDE")</li>
+              <li>• Colonne L: REÇU</li>
+            </ul>
+            <p className="text-xs text-blue-600 mt-2">* Les données commencent à la ligne 2</p>
+          </div>
+        </div>
+
+        {/* Export Section */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Download className="w-5 h-5" />
+            Exporter les données
+          </h2>
+
+          <div className="space-y-4">
+            {/* Export All */}
+            <div className="p-4 border rounded-lg hover:bg-gray-50 transition">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Users className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Tous les élèves</p>
+                    <p className="text-sm text-gray-500">{students.length} élèves</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => exportToExcel(students, 'tous_les_eleves.xlsx')}
+                  disabled={students.length === 0}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Exporter
+                </button>
+              </div>
+            </div>
+
+            {/* Export Non-Soldés */}
+            <div className="p-4 border rounded-lg hover:bg-gray-50 transition">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Élèves non soldés</p>
+                    <p className="text-sm text-gray-500">
+                      {students.filter(s => s.restant > 0).length} élèves
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => exportNonSoldesToExcel(students)}
+                  disabled={students.filter(s => s.restant > 0).length === 0}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Exporter
+                </button>
+              </div>
+            </div>
+
+            {/* Export by Class */}
+            <div className="p-4 border rounded-lg">
+              <p className="font-medium mb-3">Exporter par classe</p>
+              <div className="flex gap-3">
+                <select
+                  value={selectedClasse}
+                  onChange={(e) => setSelectedClasse(e.target.value)}
+                  className="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Sélectionner une classe</option>
+                  {allClasses.map(c => (
+                    <option key={c} value={c}>
+                      {c} ({students.filter(s => s.classe === c).length} élèves)
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => selectedClasse && exportClassToExcel(students, selectedClasse)}
+                  disabled={!selectedClasse}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Exporter
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Statistics */}
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">Statistiques actuelles</h2>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <p className="text-3xl font-bold text-blue-900">{students.length}</p>
+            <p className="text-sm text-blue-700">Total élèves</p>
+          </div>
+          <div className="text-center p-4 bg-green-50 rounded-lg">
+            <p className="text-3xl font-bold text-green-600">
+              {students.filter(s => s.restant === 0).length}
+            </p>
+            <p className="text-sm text-green-700">Élèves soldés</p>
+          </div>
+          <div className="text-center p-4 bg-red-50 rounded-lg">
+            <p className="text-3xl font-bold text-red-600">
+              {students.filter(s => s.restant > 0).length}
+            </p>
+            <p className="text-sm text-red-700">Non soldés</p>
+          </div>
+          <div className="text-center p-4 bg-purple-50 rounded-lg">
+            <p className="text-3xl font-bold text-purple-600">
+              {new Set(students.map(s => s.classe)).size}
+            </p>
+            <p className="text-sm text-purple-700">Classes</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
