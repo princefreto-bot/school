@@ -144,7 +144,6 @@ export const Login: React.FC = () => {
             <LinkStudent onComplete={finishSetup} />
           )}
 
-          )}
         </div>
 
         <p className="text-center text-blue-400/50 text-xs mt-6">
