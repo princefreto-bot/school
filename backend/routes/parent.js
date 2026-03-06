@@ -2,7 +2,7 @@
 // ROUTES — Espace Parent (protégées par JWT)
 // ============================================================
 const router = require('express').Router();
-const auth = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 const {
     getDashboard,
     getPayments,
@@ -12,7 +12,7 @@ const {
 } = require('../controllers/parentController');
 
 // Toutes les routes parent nécessitent un token valide
-router.use(auth);
+router.use(authenticateToken);
 
 router.get('/dashboard', getDashboard);
 router.get('/payments/:studentId', getPayments);
