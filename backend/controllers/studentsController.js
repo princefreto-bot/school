@@ -1,107 +1,128 @@
-// ============================================================
-// CONTRÔLEUR — Élèves (Version JSON)
-// ============================================================
-const { getDb, saveDb } = require('../models/db');
+const { supabase } = require('../utils/supabase');
 
-// ── GET /api/students ─────────────────────────────────────────
-function listStudents(req, res) {
-    const db = getDb();
+/**
+ * GET /api/students
+ * Recherche d'élèves par nom, prénom ou classe.
+ */
+async function listStudents(req, res) {
     const { nom, prenom, classe, search } = req.query;
 
-    let results = db.students;
+    try {
+        let query = supabase
+            .from('students')
+            .select('*');
 
-    // Si on a un paramètre 'search' global ou si 'nom' est utilisé comme recherche globale
-    if (search || nom) {
-        const q = (search || nom).toLowerCase();
-        results = results.filter(s =>
-            s.nom.toLowerCase().includes(q) ||
-            s.prenom.toLowerCase().includes(q)
-        );
-    }
-
-    if (prenom && !search && prenom !== nom) {
-        const q = prenom.toLowerCase();
-        results = results.filter(s => s.prenom.toLowerCase().includes(q));
-    }
-
-    if (classe) {
-        const q = classe.toLowerCase();
-        results = results.filter(s => s.classe.toLowerCase().includes(q));
-    }
-
-    // Trier par nom croissant et limiter à 100
-    results = results.sort((a, b) => a.nom.localeCompare(b.nom)).slice(0, 100);
-
-    return res.json({ students: results, total: results.length });
-}
-
-// ── Link Student to Parent ────────────────────────────────────
-function linkStudentToParent(req, res) {
-    const db = getDb();
-    const parentId = req.parentId;
-    const { studentId } = req.body;
-
-    if (!studentId) {
-        return res.status(400).json({ error: "studentId est requis." });
-    }
-
-    const student = db.students.find(s => s.id === studentId);
-    if (!student) {
-        return res.status(404).json({ error: "Élève introuvable." });
-    }
-
-    // Vérifie si la relation existe déjà
-    const existing = db.parent_student.find(
-        link => link.parent_id === parentId && link.student_id === studentId
-    );
-    if (existing) {
-        return res.status(409).json({ error: "Cet élève est déjà lié à votre compte." });
-    }
-
-    db.parent_student.push({ parent_id: parentId, student_id: studentId });
-    _autoAssignBadges(db, parentId, studentId);
-
-    saveDb();
-
-    return res.status(201).json({
-        message: `${student.prenom} ${student.nom} a été ajouté à votre compte.`,
-        student: { id: student.id, nom: student.nom, prenom: student.prenom },
-    });
-}
-
-function _autoAssignBadges(db, parentId, studentId) {
-    const student = db.students.find(s => s.id === studentId);
-    if (!student) return;
-
-    const now = new Date().toISOString();
-
-    const addBadge = (code, label, description, icon) => {
-        const exists = db.badges.find(
-            b => b.parent_id === parentId && b.student_id === studentId && b.code === code
-        );
-        if (!exists) {
-            db.badges.push({
-                id: Date.now() + Math.random(),
-                parent_id: parentId,
-                student_id: studentId,
-                code,
-                label,
-                description,
-                icon,
-                earned_at: now
-            });
+        if (search || nom) {
+            const q = search || nom;
+            query = query.or(`nom.ilike.%${q}%,prenom.ilike.%${q}%`);
         }
-    };
 
-    addBadge('welcome', 'Parent Responsable', 'Compte créé et enfant enregistré', '⭐');
+        if (prenom && !search && prenom !== nom) {
+            query = query.ilike('prenom', `%${prenom}%`);
+        }
 
-    if (student.status === 'Soldé') {
-        addBadge('fully_paid', 'Paiement Complet', 'Scolarité entièrement réglée', '🏆');
+        if (classe) {
+            query = query.ilike('classe', `%${classe}%`);
+        }
+
+        const { data, error } = await query
+            .order('nom', { ascending: true })
+            .limit(100);
+
+        if (error) throw error;
+
+        return res.json({ students: data, total: data.length });
+    } catch (err) {
+        console.error('ListStudents Error:', err.message);
+        return res.status(500).json({ error: 'Erreur lors de la récupération des élèves.' });
+    }
+}
+
+/**
+ * POST /api/students/link
+ * Lie un ou plusieurs élèves à un parent.
+ */
+async function linkStudentToParent(req, res) {
+    const { id: parentId } = req.user;
+    const { studentId, studentIds } = req.body;
+
+    // Supporter à la fois un ID unique ou un tableau d'IDs (Multi-select)
+    const idsToLink = Array.isArray(studentIds) ? studentIds : (studentId ? [studentId] : []);
+
+    if (idsToLink.length === 0) {
+        return res.status(400).json({ error: "Au moins un studentId est requis." });
     }
 
-    const ratio = student.ecolage > 0 ? student.deja_paye / student.ecolage : 0;
-    if (ratio >= 0.5 && student.status !== 'Soldé') {
-        addBadge('half_paid', '2ème Tranche Validée', 'Plus de 50% de la scolarité payée', '🥈');
+    try {
+        // Mettre à jour les élèves pour leur assigner le parentId
+        // Dans une structure plus complexe, on utiliserait une table de liaison,
+        // mais ici nous utilisons la colonne parentId dans la table students.
+
+        const { error } = await supabase
+            .from('students')
+            .update({ parent_id: parentId })
+            .in('id', idsToLink);
+
+        if (error) throw error;
+
+        // Auto-assignation des badges de base
+        for (const sId of idsToLink) {
+            await _autoAssignBadges(parentId, sId);
+        }
+
+        return res.status(201).json({
+            message: `${idsToLink.length} élève(s) lié(s) avec succès.`
+        });
+    } catch (err) {
+        console.error('Link Error:', err.message);
+        return res.status(500).json({ error: 'Erreur lors de la liaison des élèves.' });
+    }
+}
+
+async function _autoAssignBadges(parentId, studentId) {
+    try {
+        const { data: student } = await supabase
+            .from('students')
+            .select('*')
+            .eq('id', studentId)
+            .single();
+
+        if (!student) return;
+
+        const addBadge = async (code, label, description, icon) => {
+            const { data: exists } = await supabase
+                .from('badges')
+                .select('id')
+                .eq('parent_id', parentId)
+                .eq('student_id', studentId)
+                .eq('code', code)
+                .single();
+
+            if (!exists) {
+                await supabase.from('badges').insert({
+                    parent_id: parentId,
+                    student_id: studentId,
+                    code,
+                    label,
+                    description,
+                    icon,
+                    earned_at: new Date().toISOString()
+                });
+            }
+        };
+
+        await addBadge('welcome', 'Parent Responsable', 'Compte créé et enfant enregistré', '⭐');
+
+        if (student.status === 'Soldé') {
+            await addBadge('fully_paid', 'Paiement Complet', 'Scolarité entièrement réglée', '🏆');
+        }
+
+        const ratio = student.ecolage > 0 ? student.deja_paye / student.ecolage : 0;
+        if (ratio >= 0.5 && student.status !== 'Soldé') {
+            await addBadge('half_paid', '2ème Tranche Validée', 'Plus de 50% de la scolarité payée', '🥈');
+        }
+    } catch (err) {
+        console.error('Badge Error:', err.message);
     }
 }
 
