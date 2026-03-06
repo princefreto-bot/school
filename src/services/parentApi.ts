@@ -57,7 +57,14 @@ export const parentApi = {
         return await res.json();
     },
 
-    // ── Liaison Parent-Enfant ────────────────────────────────────
+    // ── Dashboard ──────────────────────────────────────────────
+    getDashboard: async () => {
+        const res = await fetch(`${API_URL}/parent/dashboard`, {
+            headers: getHeaders()
+        });
+        if (!res.ok) throw await res.json();
+        return await res.json();
+    },
     linkStudent: async (studentId: string) => {
         const res = await fetch(`${API_URL}/students/link`, {
             method: 'POST',
@@ -81,15 +88,6 @@ export const parentApi = {
     unlinkStudent: async (studentId: string) => {
         const res = await fetch(`${API_URL}/students/unlink/${studentId}`, {
             method: 'DELETE',
-            headers: getHeaders()
-        });
-        if (!res.ok) throw await res.json();
-        return await res.json();
-    },
-
-    // ── Données du Dashboard ─────────────────────────────────────
-    getDashboard: async () => {
-        const res = await fetch(`${API_URL}/parent/dashboard`, {
             headers: getHeaders()
         });
         if (!res.ok) throw await res.json();
