@@ -2,6 +2,7 @@ services:
   - name: gestioschool
     type: web
     env: node
-    buildCommand: npm install && npm run build
+    # ensure devDependencies (vite) are installed even in production environment
+    buildCommand: NPM_CONFIG_PRODUCTION=false npm install && npm run build
     startCommand: npm run start
     plan: free
