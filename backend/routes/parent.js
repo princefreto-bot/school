@@ -5,6 +5,7 @@ const {
     getPayments,
     getBadges,
     getActiveParentsCount,
+    getAllParents
 } = require('../controllers/parentController');
 
 // Routes protégées
@@ -14,5 +15,6 @@ router.get('/dashboard', getDashboard);
 router.get('/payments/:studentId', getPayments);
 router.get('/badges', getBadges);
 router.get('/active-count', getActiveParentsCount);
+router.get('/list', getAllParents);
 
 module.exports = router;

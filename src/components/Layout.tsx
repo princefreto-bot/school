@@ -12,6 +12,7 @@ interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: n
 const NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'dashboard', label: 'Tableau de bord', icon: <LayoutDashboard className="w-5 h-5" /> },
   { id: 'eleves', label: 'Élèves', icon: <Users className="w-5 h-5" /> },
+  { id: 'parents_list', label: 'Parents', icon: <Users className="w-5 h-5 text-emerald-500" /> },
   { id: 'paiements', label: 'Paiements', icon: <CreditCard className="w-5 h-5" /> },
   { id: 'recouvrement', label: 'Priorité de Recouvrement', icon: <Target className="w-5 h-5 text-red-500" /> },
   { id: 'analyses', label: 'Analyses', icon: <BarChart3 className="w-5 h-5" /> },
@@ -123,10 +124,10 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
           </div>
         </div>
         <button
-          onClick={() => { setCurrentPage('chat'); setSidebarOpen(false); }}
+          onClick={() => { setCurrentPage('parents_list'); setSidebarOpen(false); }}
           className="w-full text-left p-2 rounded-lg bg-slate-800/50 hover:bg-slate-800 text-xs text-slate-300 transition-colors flex items-center justify-between group"
         >
-          Voir les connectés
+          Voir les comptes
           <ChevronRight className="w-3 h-3 text-slate-500 group-hover:text-blue-400" />
         </button>
       </div>

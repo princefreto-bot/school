@@ -84,6 +84,25 @@ async function sendMessage(req, res) {
             convId = conv.id;
         }
 
+        // Si admin initie sans conversationId (via bouton Contacter)
+        if (!convId && role !== 'parent') {
+            const { parentId, adminRole } = req.body;
+            if (!parentId) return res.status(400).json({ error: "parentId manquant pour l'initiation." });
+
+            const { data: conv, error: convErr } = await supabase
+                .from('conversations')
+                .upsert({
+                    parent_id: parentId,
+                    admin_role: adminRole || (role === 'comptable' ? 'comptabilite' : 'administration'),
+                    last_message: text || 'Photo'
+                }, { onConflict: 'parent_id, admin_role' })
+                .select()
+                .single();
+
+            if (convErr) throw convErr;
+            convId = conv.id;
+        }
+
         const { data: message, error } = await supabase
             .from('messages')
             .insert({

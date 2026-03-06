@@ -84,4 +84,5 @@ export type AppPage =
   | 'parent_recus'
   | 'parent_badges'
   | 'parent_messages'
+  | 'parents_list'
   | 'chat';

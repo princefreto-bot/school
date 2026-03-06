@@ -123,6 +123,14 @@ export const parentApi = {
         return await res.json();
     },
 
+    getParentList: async () => {
+        const res = await fetch(`${API_URL}/parent/list`, {
+            headers: getHeaders()
+        });
+        if (!res.ok) throw await res.json();
+        return await res.json();
+    },
+
     logout: () => {
         localStorage.removeItem('parent_token');
     }
