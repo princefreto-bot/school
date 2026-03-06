@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { parentApi } from '../services/parentApi';
 import { useStore } from '../store/useStore';
-import { Users, Phone, Calendar, MessageSquare, Search, Loader2, UserCheck } from 'lucide-react';
+import { Users, Phone, Calendar, MessageSquare, Search, Loader2, UserCheck, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 export const ParentsList: React.FC = () => {
     const [parents, setParents] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const setCurrentPage = useStore((s) => s.setCurrentPage);
+    const user = useStore((s) => s.user);
 
     const fetchParents = async () => {
         setLoading(true);
@@ -19,6 +21,21 @@ export const ParentsList: React.FC = () => {
             console.error("Erreur chargement parents:", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleAdminDelete = async (parentId: string) => {
+        if (deleteConfirm !== parentId) {
+            setDeleteConfirm(parentId);
+            return;
+        }
+
+        try {
+            await parentApi.adminDeleteParent(parentId);
+            setParents(prev => prev.filter(p => p.id !== parentId));
+            setDeleteConfirm(null);
+        } catch (err) {
+            alert("Erreur lors de la suppression. Seul le Directeur Général peut le faire.");
         }
     };
 
@@ -67,11 +84,20 @@ export const ParentsList: React.FC = () => {
                             <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold text-lg group-hover:bg-blue-600 group-hover:text-white transition-all">
                                 {parent.nom.charAt(0).toUpperCase()}
                             </div>
-                            <div className="flex flex-col items-end">
+                            <div className="flex flex-col items-end gap-2">
                                 <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-lg uppercase flex items-center gap-1">
                                     <UserCheck className="w-3 h-3" />
                                     Actif
                                 </span>
+                                {user?.role === 'directeur' && (
+                                    <button
+                                        onClick={() => handleAdminDelete(parent.id)}
+                                        className={`p-1.5 rounded-lg transition-colors ${deleteConfirm === parent.id ? 'bg-red-600 text-white animate-pulse' : 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white'}`}
+                                        title="Supprimer définitivement ce compte"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                )}
                             </div>
                         </div>
 

@@ -145,10 +145,35 @@ async function getAllParents(req, res) {
     }
 }
 
+async function adminDeleteAccount(req, res) {
+    const { parentId } = req.params;
+    const { role } = req.user;
+
+    // Seul le directeur peut supprimer des comptes
+    if (role !== 'directeur') {
+        return res.status(403).json({ error: 'Permission refusée. Seul le Directeur Général peut supprimer des comptes.' });
+    }
+
+    try {
+        const { error } = await supabase
+            .from('profiles')
+            .delete()
+            .eq('id', parentId)
+            .neq('role', 'directeur') // Sécurité : ne peut pas s'auto-supprimer via cette route
+            .neq('role', 'comptable'); // Sécurité : ne peut pas supprimer le comptable général
+
+        if (error) throw error;
+        return res.json({ message: 'Compte supprimé par l\'administrateur.' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
 module.exports = {
     getDashboard,
     getPayments,
     getBadges,
     getActiveParentsCount,
-    getAllParents
+    getAllParents,
+    adminDeleteAccount
 };

@@ -131,6 +131,24 @@ export const parentApi = {
         return await res.json();
     },
 
+    deleteAccount: async () => {
+        const res = await fetch(`${API_URL}/auth/me`, {
+            method: 'DELETE',
+            headers: getHeaders()
+        });
+        if (!res.ok) throw await res.json();
+        return await res.json();
+    },
+
+    adminDeleteParent: async (parentId: string) => {
+        const res = await fetch(`${API_URL}/parent/${parentId}`, {
+            method: 'DELETE',
+            headers: getHeaders()
+        });
+        if (!res.ok) throw await res.json();
+        return await res.json();
+    },
+
     logout: () => {
         localStorage.removeItem('parent_token');
     }

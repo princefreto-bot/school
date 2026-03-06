@@ -8,7 +8,7 @@ import { CreditCard, Plus, X, Check, Search, Clock, ChevronDown, ChevronUp } fro
 import { CLASS_CONFIG } from '../data/classConfig';
 
 const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n) + ' FCFA';
-const fmtDate  = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+const fmtDate = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
 
 // ── Modale ajout paiement ────────────────────────────────────
 const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ student, onClose }) => {
@@ -95,10 +95,9 @@ const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => voi
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-gray-900 text-sm">{student.prenom} {student.nom}</span>
             <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{student.classe}</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-              student.status === 'Soldé' ? 'bg-emerald-100 text-emerald-700' :
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${student.status === 'Soldé' ? 'bg-emerald-100 text-emerald-700' :
               student.status === 'Partiel' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
-            }`}>{student.status}</span>
+              }`}>{student.status}</span>
           </div>
           <div className="flex items-center gap-2 mt-1">
             <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden max-w-32">
@@ -113,7 +112,7 @@ const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => voi
           <p className="text-sm font-semibold text-emerald-700">{new Intl.NumberFormat('fr-FR').format(student.dejaPaye)} F</p>
           <p className="text-xs text-red-500">{student.restant > 0 ? `- ${new Intl.NumberFormat('fr-FR').format(student.restant)} F` : 'SOLDÉ'}</p>
         </div>
-        {student.restant > 0 && (
+        {student.restant > 0 && (user?.role === 'directeur' || user?.role === 'comptable') && (
           <button
             onClick={(e) => { e.stopPropagation(); onPay(student); }}
             className="shrink-0 flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"
@@ -150,6 +149,7 @@ const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => voi
 // ── PAGE PRINCIPALE ──────────────────────────────────────────
 export const Paiements: React.FC = () => {
   const students = useStore((s) => s.students);
+  const user = useStore((s) => s.user);
   const [search, setSearch] = useState('');
   const [filterClasse, setFilterClasse] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -166,7 +166,7 @@ export const Paiements: React.FC = () => {
     return list.sort((a, b) => a.nom.localeCompare(b.nom));
   }, [students, search, filterClasse, filterStatus]);
 
-  const totalPaye    = filtered.reduce((a, s) => a + s.dejaPaye, 0);
+  const totalPaye = filtered.reduce((a, s) => a + s.dejaPaye, 0);
   const totalRestant = filtered.reduce((a, s) => a + s.restant, 0);
   const totalPayements = filtered.reduce((a, s) => a + s.historiquesPaiements.length, 0);
 

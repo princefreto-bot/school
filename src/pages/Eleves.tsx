@@ -19,8 +19,8 @@ const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n) + ' F';
 // ── Badge statut ─────────────────────────────────────────────
 const StatusBadge: React.FC<{ status: Student['status'] }> = ({ status }) => {
   const map: Record<string, string> = {
-    'Soldé':     'bg-emerald-100 text-emerald-700 border-emerald-200',
-    'Partiel':   'bg-amber-100 text-amber-700 border-amber-200',
+    'Soldé': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    'Partiel': 'bg-amber-100 text-amber-700 border-amber-200',
     'Non soldé': 'bg-red-100 text-red-700 border-red-200',
   };
   return (
@@ -36,19 +36,19 @@ const StatusBadge: React.FC<{ status: Student['status'] }> = ({ status }) => {
 interface ModalProps { student?: Student | null; onClose: () => void }
 
 const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
-  const addStudent  = useStore((s) => s.addStudent);
+  const addStudent = useStore((s) => s.addStudent);
   const updateStudent = useStore((s) => s.updateStudent);
 
   const [form, setForm] = useState({
-    nom:             student?.nom            ?? '',
-    prenom:          student?.prenom         ?? '',
-    classe:          student?.classe         ?? CLASS_CONFIG[0].name,
-    telephone:       student?.telephone      ?? '+228',
-    sexe:            (student?.sexe          ?? 'M') as 'M' | 'F',
-    redoublant:      student?.redoublant     ?? false,
+    nom: student?.nom ?? '',
+    prenom: student?.prenom ?? '',
+    classe: student?.classe ?? CLASS_CONFIG[0].name,
+    telephone: student?.telephone ?? '+228',
+    sexe: (student?.sexe ?? 'M') as 'M' | 'F',
+    redoublant: student?.redoublant ?? false,
     ecoleProvenance: student?.ecoleProvenance ?? '',
-    dejaPaye:        student?.dejaPaye       ?? 0,
-    recu:            student?.recu           ?? '',
+    dejaPaye: student?.dejaPaye ?? 0,
+    recu: student?.recu ?? '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -160,32 +160,33 @@ const WhatsAppBtn: React.FC<{ student: Student; schoolName: string }> = ({ stude
 type SortKey = 'nom' | 'classe' | 'dejaPaye' | 'restant' | 'status';
 
 export const Eleves: React.FC = () => {
-  const students          = useStore((s) => s.students);
-  const deleteStudent     = useStore((s) => s.deleteStudent);
-  const setStudents       = useStore((s) => s.setStudents);
-  const searchQuery       = useStore((s) => s.searchQuery);
-  const setSearchQuery    = useStore((s) => s.setSearchQuery);
-  const filterClasse      = useStore((s) => s.filterClasse);
-  const setFilterClasse   = useStore((s) => s.setFilterClasse);
-  const filterCycle       = useStore((s) => s.filterCycle);
-  const setFilterCycle    = useStore((s) => s.setFilterCycle);
-  const filterStatus      = useStore((s) => s.filterStatus);
-  const setFilterStatus   = useStore((s) => s.setFilterStatus);
-  const selectedStudent    = useStore((s) => s.selectedStudent);
+  const students = useStore((s) => s.students);
+  const deleteStudent = useStore((s) => s.deleteStudent);
+  const setStudents = useStore((s) => s.setStudents);
+  const searchQuery = useStore((s) => s.searchQuery);
+  const setSearchQuery = useStore((s) => s.setSearchQuery);
+  const filterClasse = useStore((s) => s.filterClasse);
+  const setFilterClasse = useStore((s) => s.setFilterClasse);
+  const filterCycle = useStore((s) => s.filterCycle);
+  const setFilterCycle = useStore((s) => s.setFilterCycle);
+  const filterStatus = useStore((s) => s.filterStatus);
+  const setFilterStatus = useStore((s) => s.setFilterStatus);
+  const selectedStudent = useStore((s) => s.selectedStudent);
   const setSelectedStudent = useStore((s) => s.setSelectedStudent);
-  const schoolName        = useStore((s) => s.schoolName);
-  const schoolYear        = useStore((s) => s.schoolYear);
+  const schoolName = useStore((s) => s.schoolName);
+  const schoolYear = useStore((s) => s.schoolYear);
   const messageRemerciement = useStore((s) => s.messageRemerciement);
-  const messageRappel     = useStore((s) => s.messageRappel);
+  const messageRappel = useStore((s) => s.messageRappel);
+  const user = useStore((s) => s.user);
 
-  const [modal, setModal]               = useState<{ open: boolean; student?: Student | null }>({ open: false });
-  const [sortKey, setSortKey]           = useState<SortKey>('nom');
-  const [sortDir, setSortDir]           = useState<'asc' | 'desc'>('asc');
-  const [importing, setImporting]       = useState(false);
-  const [importMsg, setImportMsg]       = useState('');
-  const fileRef                         = useRef<HTMLInputElement>(null);
+  const [modal, setModal] = useState<{ open: boolean; student?: Student | null }>({ open: false });
+  const [sortKey, setSortKey] = useState<SortKey>('nom');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-  const [showFilters, setShowFilters]   = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -216,7 +217,7 @@ export const Eleves: React.FC = () => {
       );
     }
     if (filterClasse) list = list.filter((s) => s.classe === filterClasse);
-    if (filterCycle)  list = list.filter((s) => s.cycle  === filterCycle);
+    if (filterCycle) list = list.filter((s) => s.cycle === filterCycle);
     if (filterStatus) list = list.filter((s) => s.status === filterStatus);
 
     list.sort((a, b) => {
@@ -265,14 +266,18 @@ export const Eleves: React.FC = () => {
         <button onClick={() => setShowFilters((f) => !f)} className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-medium transition-colors ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
           <Filter className="w-4 h-4" /> Filtres
         </button>
-        <button onClick={() => setModal({ open: true })} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">
-          <Plus className="w-4 h-4" /> Ajouter
-        </button>
-        <label className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm cursor-pointer">
-          <Upload className="w-4 h-4" />
-          {importing ? 'Import...' : 'Import Excel'}
-          <input type="file" accept=".xlsx,.xls" className="hidden" ref={fileRef} onChange={handleImport} />
-        </label>
+        {(user?.role === 'directeur' || user?.role === 'comptable') && (
+          <>
+            <button onClick={() => setModal({ open: true })} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">
+              <Plus className="w-4 h-4" /> Ajouter
+            </button>
+            <label className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm cursor-pointer">
+              <Upload className="w-4 h-4" />
+              {importing ? 'Import...' : 'Import Excel'}
+              <input type="file" accept=".xlsx,.xls" className="hidden" ref={fileRef} onChange={handleImport} />
+            </label>
+          </>
+        )}
       </div>
 
       {showFilters && (
@@ -320,13 +325,13 @@ export const Eleves: React.FC = () => {
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 {[
-                  { key: 'nom' as SortKey,     label: 'Élève' },
-                  { key: 'classe' as SortKey,  label: 'Classe' },
-                  { key: null,                 label: 'Téléphone' },
+                  { key: 'nom' as SortKey, label: 'Élève' },
+                  { key: 'classe' as SortKey, label: 'Classe' },
+                  { key: null, label: 'Téléphone' },
                   { key: 'dejaPaye' as SortKey, label: 'Payé' },
                   { key: 'restant' as SortKey, label: 'Restant' },
-                  { key: 'status' as SortKey,  label: 'Statut' },
-                  { key: null,                 label: 'Actions' },
+                  { key: 'status' as SortKey, label: 'Statut' },
+                  { key: null, label: 'Actions' },
                 ].map((col) => (
                   <th
                     key={col.label}
@@ -374,12 +379,16 @@ export const Eleves: React.FC = () => {
                           <Download className="w-3.5 h-3.5" />
                         </button>
                         <WhatsAppBtn student={s} schoolName={schoolName} />
-                        <button onClick={() => setModal({ open: true, student: s })} className="p-1.5 hover:bg-amber-100 rounded-lg text-amber-600 transition-colors" title="Modifier">
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => handleDelete(s.id)} className={`p-1.5 rounded-lg transition-colors ${deleteConfirm === s.id ? 'bg-red-100 text-red-700' : 'hover:bg-red-100 text-red-500'}`} title={deleteConfirm === s.id ? 'Confirmer' : 'Supprimer'}>
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        {(user?.role === 'directeur' || user?.role === 'comptable') && (
+                          <>
+                            <button onClick={() => setModal({ open: true, student: s })} className="p-1.5 hover:bg-amber-100 rounded-lg text-amber-600 transition-colors" title="Modifier">
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => handleDelete(s.id)} className={`p-1.5 rounded-lg transition-colors ${deleteConfirm === s.id ? 'bg-red-100 text-red-700' : 'hover:bg-red-100 text-red-500'}`} title={deleteConfirm === s.id ? 'Confirmer' : 'Supprimer'}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

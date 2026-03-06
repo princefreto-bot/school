@@ -4,7 +4,6 @@
 import * as XLSX from 'xlsx';
 import { Student } from '../types';
 import { getEcolage, getCycle } from '../data/classConfig';
-import { v4 as uuid } from './uuid';
 
 type RawRow = {
   B?: string; C?: string; D?: string; E?: string;
@@ -59,24 +58,29 @@ export const importFromExcel = async (file: File): Promise<Student[]> => {
         const students: Student[] = rows
           .filter((row) => row['B'] && String(row['B']).trim() !== '')
           .map((row) => {
-            const nom     = String(row['B'] || '').trim();
-            const prenom  = String(row['C'] || '').trim();
-            const classe  = String(row['D'] || '').trim();
-            const tel     = formatPhone(row['E']);
-            const sexe    = parseSexe(row['F']);
-            const redoub  = parseBoolean(row['G']);
-            const ecole   = String(row['H'] || '').trim();
+            const nom = String(row['B'] || '').trim();
+            const prenom = String(row['C'] || '').trim();
+            const classe = String(row['D'] || '').trim();
+            const tel = formatPhone(row['E']);
+            const sexe = parseSexe(row['F']);
+            const redoub = parseBoolean(row['G']);
+            const ecole = String(row['H'] || '').trim();
             const ecolage = getEcolage(classe);
             const dejaPaye = Number(row['J']) || 0;
-            const restant  = Math.max(0, ecolage - dejaPaye);
-            const recu     = String(row['L'] || '').trim();
+            const restant = Math.max(0, ecolage - dejaPaye);
+            const recu = String(row['L'] || '').trim();
 
             let status: Student['status'] = 'Non soldé';
             if (restant <= 0) status = 'Soldé';
             else if (dejaPaye / ecolage >= 0.7) status = 'Partiel';
 
+            // ID DÉTERMINISTE pour éviter les doublons lors des ré-imports
+            const studentId = `${nom}_${prenom}_${classe}`.toLowerCase()
+              .replace(/[^a-z0-9]/g, '_')
+              .replace(/_+/g, '_');
+
             return {
-              id: uuid(),
+              id: studentId,
               nom,
               prenom,
               classe,
@@ -96,7 +100,13 @@ export const importFromExcel = async (file: File): Promise<Student[]> => {
             };
           });
 
-        resolve(students);
+        // DÉDUPLICATION INTERNE (si l'Excel contient des doublons)
+        const uniqueMap = new Map();
+        students.forEach(s => {
+          if (!uniqueMap.has(s.id)) uniqueMap.set(s.id, s);
+        });
+
+        resolve(Array.from(uniqueMap.values()));
       } catch (err) {
         reject(err);
       }

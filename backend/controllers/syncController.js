@@ -6,9 +6,11 @@ const { supabase } = require('../utils/supabase');
  */
 async function syncFromFrontend(req, res) {
     const { students = [] } = req.body;
+    const { role } = req.user;
 
-    if (!Array.isArray(students) || students.length === 0) {
-        return res.status(400).json({ error: 'Données invalides pour la sync.' });
+    // Seuls le directeur et le comptable peuvent synchroniser les données
+    if (role !== 'directeur' && role !== 'comptable') {
+        return res.status(403).json({ error: 'Permission refusée. Seul la Direction ou la Comptabilité peut synchroniser.' });
     }
 
     try {

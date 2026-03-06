@@ -86,6 +86,11 @@ async function sendMessage(req, res) {
 
         // Si admin initie sans conversationId (via bouton Contacter)
         if (!convId && role !== 'parent') {
+            // Seuls le directeur et le comptable peuvent initier pro-activement
+            if (role !== 'directeur' && role !== 'comptable') {
+                return res.status(403).json({ error: "Action restreinte. Seul le Directeur ou le Comptable peut initier un contact." });
+            }
+
             const { parentId, adminRole } = req.body;
             if (!parentId) return res.status(400).json({ error: "parentId manquant pour l'initiation." });
 

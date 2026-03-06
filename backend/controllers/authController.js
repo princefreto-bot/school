@@ -96,4 +96,23 @@ async function login(req, res) {
     }
 }
 
-module.exports = { register, login };
+// ── Delete Account (Self) ─────────────────────────────────────
+async function deleteSelfAccount(req, res) {
+    const { id } = req.user;
+
+    try {
+        const { error } = await supabase
+            .from('profiles')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        return res.json({ message: 'Compte supprimé avec succès.' });
+    } catch (err) {
+        console.error('Delete Error:', err.message);
+        return res.status(500).json({ error: 'Erreur lors de la suppression du compte.' });
+    }
+}
+
+module.exports = { register, login, deleteSelfAccount };

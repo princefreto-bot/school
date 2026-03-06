@@ -162,7 +162,8 @@ export const Parametres: React.FC = () => {
               Nom de l'application (affiché dans la sidebar)
             </label>
             <input
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium"
+              disabled={user?.role !== 'directeur' && user?.role !== 'comptable'}
+              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium disabled:bg-gray-50 disabled:text-gray-400"
               value={localAppName}
               onChange={(e) => setLocalAppName(e.target.value)}
               placeholder="Ex : EduFinance, SchoolPay, MonÉcole..."
@@ -295,16 +296,18 @@ export const Parametres: React.FC = () => {
             </div>
           </div>
 
-          <button
-            type="submit"
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all ${saved
-              ? 'bg-emerald-500 text-white'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-          >
-            <Save className="w-4 h-4" />
-            {saved ? '✓ Paramètres enregistrés !' : 'Enregistrer les paramètres'}
-          </button>
+          {(user?.role === 'directeur' || user?.role === 'comptable') && (
+            <button
+              type="submit"
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all ${saved
+                ? 'bg-emerald-500 text-white'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+            >
+              <Save className="w-4 h-4" />
+              {saved ? '✓ Paramètres enregistrés !' : 'Enregistrer les paramètres'}
+            </button>
+          )}
         </form>
       </div>
 
@@ -580,13 +583,37 @@ doc.setFontSize(9);   // texte normal`}
         <div className="space-y-2 text-sm text-gray-600">
           <p><strong className="text-gray-800">{appName} v1.0</strong> — Gestion financière scolaire</p>
           <p>Développé avec React, TypeScript, TailwindCSS, Recharts, jsPDF.</p>
-          <p>Données stockées localement dans le navigateur (localStorage).</p>
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-400">Stack : React · TypeScript · TailwindCSS · Zustand · Recharts · jsPDF · SheetJS</p>
-            <p className="text-xs text-gray-400 mt-1">Conçu pour être déployé en local et évolutif vers PostgreSQL.</p>
-          </div>
+          <p>Données stockées de manière sécurisée sur le Cloud (Supabase).</p>
         </div>
       </div>
+
+      {/* ── ZONE DE DANGER (Uniquement Parents) ───────────── */}
+      {user?.role === 'parent' && (
+        <div className="bg-red-50 rounded-2xl border border-red-100 p-6">
+          <h3 className="font-bold text-red-800 flex items-center gap-2 mb-2">
+            <AlertCircle className="w-5 h-5" /> Zone de Danger
+          </h3>
+          <p className="text-sm text-red-600 mb-4 font-medium">
+            La suppression de votre compte est irréversible. Toutes vos données personnelles et vos liaisons avec les élèves seront effacées.
+          </p>
+          <button
+            onClick={async () => {
+              if (window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.")) {
+                try {
+                  const { parentApi } = await import('../services/parentApi');
+                  await parentApi.deleteAccount();
+                  useStore.getState().logout();
+                } catch (err) {
+                  alert("Erreur lors de la suppression du compte.");
+                }
+              }
+            }}
+            className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-200 transition-all"
+          >
+            Supprimer mon compte définitivement
+          </button>
+        </div>
+      )}
 
     </div>
   );
