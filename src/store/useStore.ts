@@ -120,7 +120,9 @@ export const useStore = create<AppState>()(
 
         // Fallback local pour admin classique si serveur off (debug)
         if (username === 'admin' && password === 'admin123') {
-          set({ user: { id: 'admin', username: 'admin', role: 'admin', nom: 'Admin Local' }, isAuthenticated: true, currentPage: 'dashboard' });
+          const loggedUser: User = { id: 'admin', username: 'admin', role: 'admin', nom: 'Admin Local' };
+          // On essaie de garder un token générique pour les appels API locaux si besoin
+          set({ user: loggedUser, isAuthenticated: true, currentPage: 'dashboard' });
           return true;
         }
 

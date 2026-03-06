@@ -29,7 +29,9 @@ async function syncFromFrontend(req, res) {
         }));
 
         if (studentData.length > 0) {
-            const { error: sErr } = await supabase.from('students').upsert(studentData);
+            const { error: sErr } = await supabase
+                .from('students')
+                .upsert(studentData, { onConflict: 'id' });
             if (sErr) throw sErr;
         }
 
@@ -51,7 +53,9 @@ async function syncFromFrontend(req, res) {
         });
 
         if (allPayments.length > 0) {
-            const { error: pErr } = await supabase.from('payments').upsert(allPayments);
+            const { error: pErr } = await supabase
+                .from('payments')
+                .upsert(allPayments, { onConflict: 'id' });
             if (pErr) throw pErr;
         }
 
@@ -66,7 +70,5 @@ async function syncFromFrontend(req, res) {
         return res.status(500).json({ error: 'Erreur lors de la synchronisation.', details: err.message });
     }
 }
-
-module.exports = { syncFromFrontend };
 
 module.exports = { syncFromFrontend };

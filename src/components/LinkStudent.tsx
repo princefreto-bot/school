@@ -54,7 +54,7 @@ export const LinkStudent: React.FC<LinkStudentProps> = ({ onComplete }) => {
         setError('');
         try {
             // Utilisation du nouvel endpoint supportant les tableaux d'IDs
-            await fetch('/api/students/link', {
+            const res = await fetch('/api/students/link', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -63,12 +63,17 @@ export const LinkStudent: React.FC<LinkStudentProps> = ({ onComplete }) => {
                 body: JSON.stringify({ studentIds: selectedIds })
             });
 
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Erreur lors de la liaison");
+            }
+
             setMessage(`${selectedIds.length} enfant(s) lié(s) avec succès !`);
             setTimeout(() => {
                 onComplete();
             }, 1500);
         } catch (err: any) {
-            setError("Impossible de lier les élèves sélectionnés.");
+            setError(err.message || "Impossible de lier les élèves sélectionnés.");
         } finally {
             setLinking(false);
         }
