@@ -1,210 +1,113 @@
-# 🏫 GestioSchool — Architecture du projet
-> Fichier de référence. À consulter avant toute modification.
-> Dernière mise à jour : 2025
+# 🏫 GestioSchool — Architecture de Production Cloud
+> Fichier de référence technique. État actuel : **Full Production**.
+> Dernière mise à jour : Mars 2026
 
 ---
 
-## 📁 Arborescence complète
+## 🏗️ Architecture Globale (FullStack Cloud)
+L'application est passée d'un mode local à une architecture **SaaS (Software as a Service)** décentralisée :
+
+1.  **Frontend (UI)** : React + Vite + Tailwind CSS v4. Hébergé sur **Render**.
+2.  **Backend (API)** : Node.js + Express. Hébergé sur **Render**.
+3.  **Base de Données** : PostgreSQL via **Supabase**.
+4.  **Authentification** : JWT (JSON Web Tokens) sécurisés avec hachage **Bcrypt**.
+5.  **Messagerie** : Système de chat en temps réel via Supabase et API Node.js.
+
+---
+
+## 📁 Structure du Projet
 
 ```
 gestioschool/
-├── public/
-│   └── vite.svg
-├── src/
-│   ├── components/           # Composants réutilisables
-│   │   ├── Login.tsx         # Page de connexion (JWT simulé)
-│   │   ├── Layout.tsx        # Shell principal (sidebar + header)
-│   │   └── StudentDetail.tsx # Modal fiche détaillée d'un élève
-│   │
-│   ├── pages/                # Pages principales (une par route)
-│   │   ├── Dashboard.tsx     # Tableau de bord + KPIs + graphiques
-│   │   ├── Eleves.tsx        # Liste, import Excel, CRUD élèves
-│   │   ├── Paiements.tsx     # Historique et saisie des paiements
-│   │   ├── Analyses.tsx      # Analyses financières avancées
-│   │   ├── Documents.tsx     # Export PDF masse + Excel
-│   │   └── Parametres.tsx    # Réglages école + messages PDF
-│   │
-│   ├── store/
-│   │   └── useStore.ts       # Store global Zustand (état app complet)
-│   │
-│   ├── data/
-│   │   └── classConfig.ts    # Configuration des 19 classes + écolages
-│   │
-│   ├── types/
-│   │   └── index.ts          # Types TypeScript centralisés
-│   │
-│   ├── utils/
-│   │   ├── excelImport.ts    # Import fichier Excel (feuille 2, col B→L)
-│   │   ├── excelExport.ts    # Export Excel mis à jour
-│   │   └── pdfGenerator.ts   # Génération PDF (reçu, fiche, masse)
-│   │
-│   ├── App.tsx               # Routeur principal (login → pages)
-│   ├── main.tsx              # Point d'entrée React
-│   └── index.css             # Tailwind CSS v4
+├── backend/                  # SERVEUR API (Node.js)
+│   ├── config/               # Configuration Supabase & JWT
+│   ├── controllers/          # Logique métier (Auth, Sync, Parents, Chat)
+│   ├── middleware/           # Sécurité (authenticateToken)
+│   ├── routes/               # Endpoints API (/api/auth, /api/parent, etc.)
+│   ├── scripts/              # Migration et maintenance
+│   └── server.js             # Point d'entrée serveur
 │
-├── ARCHITECTURE.md           # CE FICHIER — référence du projet
-├── index.html                # HTML racine (titre, meta)
-├── package.json              # Dépendances npm
-├── tsconfig.json             # Config TypeScript
-└── vite.config.ts            # Config Vite
+├── src/                      # FRONTEND (React)
+│   ├── components/           # Composants UI (LinkStudent, ChatWindow, etc.)
+│   ├── pages/                # Pages Admin & Parents
+│   ├── services/             # Client API (parentApi.ts, chatApi.ts, etc.)
+│   ├── store/                # État global Zustand (useStore.ts)
+│   ├── types/                # Types TypeScript (index.ts)
+│   ├── utils/                # Générateurs PDF et Utilitaires
+│   ├── App.tsx               # Routeur de l'application
+│   └── main.tsx              # Rendu React
+│
+├── .env                      # Variables de production (URL, Keys)
+├── ARCHITECTURE.md           # Ce fichier
+└── package.json              # Dépendances FullStack
 ```
 
 ---
 
-## 🗂️ Rôle de chaque fichier clé
+## 🗂️ Composants Clés de Production
 
-### `src/types/index.ts`
-Types centralisés partagés dans tout le projet :
-- `Student` — données complètes d'un élève
-- `Payment` — enregistrement d'un paiement
-- `User` — compte admin/comptable
-- `Cycle` — `'Primaire' | 'Collège' | 'Lycée'`
-- `StudentStatus` — `'Soldé' | 'Partiel' | 'Non soldé'`
-- `ClassConfig` — nom + cycle + écolage d'une classe
-- `AppSettings` — paramètres école (nom, année, messages PDF)
+### 1. Moteur de Synchronisation (`syncController.js`)
+- Reçoit les données brutes du frontend (355 élèves).
+- Utilise une logique de dédoublonnage par **ID unique**.
+- Effectue des **Upserts** (Update or Insert) dans Supabase pour garantir l'intégrité des données.
 
-### `src/data/classConfig.ts`
-Source de vérité des 19 classes et leurs écolages.
-**Ne jamais modifier les noms de classe** sans mettre à jour l'import Excel.
+### 2. Portail Parent (`parentController.js`)
+- Gestion des liens sécurisés via la table de jonction `parent_student`.
+- Accès restreint : un parent ne voit que ses propres enfants liés.
+- Dossier scolaire complet : Historique financier, reste à payer, badges.
 
-| Cycle | Classes | Écolage |
-|-------|---------|---------|
-| Primaire | CP1, CP2, CE1, CE2, CM1 | 50 000 F |
-| Primaire | CI, CI 1, CI 2, CM2 | 55 000 F |
-| Collège | 6ème, 5ème, 4ème | 60 000 F |
-| Collège | 3ème | 70 000 F |
-| Lycée | 2nde S, 2nde A4 | 75 000 F |
-| Lycée | 1ère A4, 1ère D | 85 000 F |
-| Lycée | Tle A4, Tle D | 95 000 F |
-
-### `src/store/useStore.ts`
-Store Zustand — état global de l'application.
-
-**State principal :**
-- `students[]` — liste de tous les élèves
-- `payments[]` — historique de tous les paiements
-- `currentUser` — utilisateur connecté (null = déconnecté)
-- `settings` — paramètres école
-- `filters` — filtres actifs (cycle, classe, statut, recherche)
-- `selectedStudent` — élève sélectionné pour la fiche détaillée
-- `currentPage` — page active (navigation sans react-router)
-
-**Actions principales :**
-- `login(id, pass)` / `logout()`
-- `importStudents(students[])` — import depuis Excel
-- `addStudent()` / `updateStudent()` / `deleteStudent()`
-- `addPayment()` — enregistrer un paiement
-- `setFilters()` / `setCurrentPage()` / `setSelectedStudent()`
-
-### `src/utils/excelImport.ts`
-- Lit la **feuille 2** (index 1) du fichier Excel
-- Colonnes : B=Noms, C=Prénoms, D=Classe, E=Téléphone, F=Sexe, G=Redoublant, H=École provenance, I=Écolage, J=Déjà payé, K=Restant, L=Reçu
-- Données à partir de la **ligne 2** (index 1 en 0-based)
-- Calcule automatiquement le `status` et le `cycle`
-
-### `src/utils/pdfGenerator.ts`
-Fonctions exportées :
-- `generateRecuPDF(student, settings)` — reçu individuel
-- `generateFicheCompletePDF(student, settings)` — fiche détaillée
-- `generateClassePDF(students[], classe, settings)` — PDF d'une classe
-- `generateNonSoldesPDF(students[], settings)` — PDF non soldés
-- `generateGlobalPDF(students[], settings)` — PDF tous élèves
-
-**Règles badges PDF :**
-- `restant === 0` → Badge vert "✅ Élève Soldé" + message remerciement
-- `dejaPaye/ecolage >= 70%` → Badge bleu "2ᵉ Tranche Validée"
-- Sinon → Badge orange "⚠️ Non soldé" + message rappel + montant restant
-
-### `src/components/Login.tsx`
-- Comptes démo : `admin / admin123` et `comptable / compta123`
-- Rôles : `admin` (accès complet) | `comptable` (lecture + paiements)
-- ⚠️ En production : remplacer par JWT + bcrypt côté backend
-
-### `src/App.tsx`
-Navigation sans react-router. Utilise `currentPage` du store.
-Pages disponibles : `dashboard | eleves | paiements | analyses | documents | parametres`
+### 3. Système de Messagerie (`ChatWindow.tsx`)
+- Communication bi-directionnelle : Administration ↔ Parents.
+- Support des images et notifications de lecture.
+- Initiation des discussions par l'administration via la liste des parents.
 
 ---
 
-## 🔄 Flux de données
+## 🔄 Flux de Données (Production)
 
 ```
-Fichier Excel (.xlsx)
-       ↓ excelImport.ts (feuille 2)
-  students[] dans le Store (Zustand)
-       ↓
-  Pages (Dashboard, Élèves, Analyses...)
-       ↓
-  pdfGenerator.ts → PDF téléchargé
-  excelExport.ts  → Excel téléchargé
-  WhatsApp link   → wa.me/+228...
+[ FRONTEND React ] <--- JWT ---> [ BACKEND Node.js ] <--- SQL ---> [ SUPABASE DB ]
+       |                                |                             |
+       |-- Sync des élèves (Batch) ---->|-- Dédoublonnage Automatique -|
+       |-- Consultation Dashboard ---->|-- Requête SQL par ParentID --|
+       |-- Envoi Message Chat -------->|-- Insertion & Realtime ------|
 ```
 
 ---
 
-## 📦 Dépendances principales
+## � Sécurité et Rôles
 
-| Package | Usage |
-|---------|-------|
-| `react` + `typescript` | Framework UI |
-| `tailwindcss` v4 | Style |
-| `zustand` | État global |
-| `recharts` | Graphiques |
-| `xlsx` (SheetJS) | Import/Export Excel |
-| `jspdf` + `jspdf-autotable` | Génération PDF |
-| `lucide-react` | Icônes |
+Le système utilise un RBAC (Role-Based Access Control) strict :
 
----
-
-## 🚀 Lancer le projet
-
-```bash
-# Installation
-npm install
-
-# Développement
-npm run dev
-# → http://localhost:5173
-
-# Build production
-npm run build
-
-# Prévisualiser le build
-npm run preview
-```
+| Rôle | Capacités |
+|------|-----------|
+| **Directeur** | Accès total, KPIS, Gestion de la base, Messagerie. |
+| **Comptable** | Enregistrement paiements, Analyses, Messagerie "Comptabilité". |
+| **Proviseur/Censeur** | Consultation, Documents, Messagerie "Administration". |
+| **Parent** | Consultation propre, Recherche & Liaison d'enfants, Chat. |
 
 ---
 
-## 🔐 Comptes de test
-
-| Rôle | Login | Mot de passe |
-|------|-------|-------------|
-| Admin | `admin` | `admin123` |
-| Comptable | `comptable` | `compta123` |
+## 🚀 Déploiement (CI/CD)
+Le projet est configuré pour un déploiement automatique via **GitHub + Render** :
+- Tout commit sur la branche `main` déclenche un build Frontend et un redémarrage Backend.
+- La base de données Supabase est persistante et accessible 24/7.
 
 ---
 
-## 📋 Règles de développement
+## 🔐 Identifiants Officiels (Accès Production)
 
-1. **Ne jamais modifier** `package.json` ou `vite.config.ts` directement
-2. **Types** → toujours dans `src/types/index.ts`
-3. **Config classes** → uniquement dans `src/data/classConfig.ts`
-4. **État global** → passer par le store Zustand, jamais de state local pour les données métier
-5. **Nouveaux composants** → `src/components/NomComposant.tsx`
-6. **Nouvelles pages** → `src/pages/NomPage.tsx` + ajouter dans `App.tsx` + Layout sidebar
-7. **PDF** → ajouter dans `src/utils/pdfGenerator.ts` uniquement
-8. **Excel** → `src/utils/excelImport.ts` (import) et `src/utils/excelExport.ts` (export)
+| Compte | Identifiant | Mot de passe |
+|--------|-------------|--------------|
+| **Directeur Général** | `0001` | `admin123` |
+| **Comptable Principal** | `0002` | `compta123` |
+| **Proviseur** | `0003` | `proviseur123` |
+| **Censeur** | `0004` (à créer) | `censeur123` |
 
 ---
 
-## 🗺️ Roadmap extensions futures
-
-- [ ] Backend Node.js + Express + PostgreSQL
-- [ ] Authentification JWT + bcrypt réelle
-- [ ] Module Notes / Bulletins
-- [ ] Module Absences
-- [ ] Module Emploi du temps
-- [ ] WhatsApp API Business (envoi automatique)
-- [ ] Notifications push
-- [ ] Mode hors-ligne (PWA)
-- [ ] Multi-établissement
+## 📋 Règles Critiques de Développement
+1.  **NE JAMAIS** coder d'identifiants en dur (utiliser `.env`).
+2.  **UNICITÉ** : Toujours utiliser l'ID élève comme clé primaire.
+3.  **PRODUCTION** : Ne plus utiliser de stockage local (`localStorage`) pour les données sensibles, uniquement pour le Token JWT.
+4.  **SYNC** : Toute modification majeure dans le frontend doit être synchronisée via `syncToBackend`.
