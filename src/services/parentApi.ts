@@ -16,7 +16,7 @@ const getHeaders = () => {
 export const parentApi = {
     // ── Authentification ────────────────────────────────────────
     register: async (data: any) => {
-        const res = await fetch(`${API_URL}/parent/register`, {
+        const res = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -28,7 +28,7 @@ export const parentApi = {
     },
 
     login: async (data: any) => {
-        const res = await fetch(`${API_URL}/parent/login`, {
+        const res = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)

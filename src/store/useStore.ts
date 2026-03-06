@@ -254,27 +254,6 @@ export const useStore = create<AppState>()(
           });
           state.students = repaired;
 
-          // Démo Parent
-          const parentDemoPhone = '90000000';
-          const parentsList = state.parents || [];
-          const hasDemo = parentsList.find(p => p.telephone === parentDemoPhone);
-
-          if (!hasDemo) {
-            const demoParentId = 'parent-demo-id';
-            const newParent: Parent = {
-              id: demoParentId,
-              nom: 'Parent Demo',
-              telephone: parentDemoPhone,
-              password: 'demo123',
-              createdAt: new Date().toISOString()
-            };
-            state.parents = [...parentsList, newParent];
-
-            // Link to the first student
-            if (state.students.length > 0 && !state.students[0].parentId) {
-              state.students[0].parentId = demoParentId;
-            }
-          }
         }
       },
     }
