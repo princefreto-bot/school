@@ -12,20 +12,16 @@ export const ParentDashboard: React.FC = () => {
     const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
 
     const fetchData = async () => {
-        console.log('🔄 [Frontend] Début chargement dashboard');
         setLoading(true);
         try {
-            console.log('📡 [Frontend] Appel API getDashboard');
             const data = await parentApi.getDashboard();
-            console.log('✅ [Frontend] Données reçues:', data);
             setChildren(data.students || []);
             setError('');
         } catch (err: any) {
-            console.error('❌ [Frontend] Erreur API:', err);
             setError(err.error || "Impossible de charger vos données. Vérifiez votre connexion.");
+            console.error(err);
         } finally {
             setLoading(false);
-            console.log('🏁 [Frontend] Fin chargement dashboard');
         }
     };
 
