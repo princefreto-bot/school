@@ -14,7 +14,8 @@ async function listStudents(req, res) {
             .select('*');
 
         if (search || nom) {
-            const q = search || nom;
+            const q = (search || nom).toLowerCase().trim();
+            // Recherche flexible : nom, prénom, ou combinaison
             query = query.or(`nom.ilike.%${q}%,prenom.ilike.%${q}%`);
         }
 
@@ -51,6 +52,24 @@ async function listStudents(req, res) {
     } catch (err) {
         console.error('ListStudents Error:', err.message);
         return res.status(500).json({ error: 'Erreur lors de la récupération des élèves.' });
+    }
+}
+
+/**
+ * GET /api/students/count
+ * Compte le nombre total d'élèves dans la base
+ */
+async function countStudents(req, res) {
+    try {
+        const { count, error } = await supabase
+            .from('students')
+            .select('*', { count: 'exact', head: true });
+
+        if (error) throw error;
+        return res.json({ count: count || 0 });
+    } catch (err) {
+        console.error('CountStudents Error:', err.message);
+        return res.status(500).json({ error: 'Erreur lors du comptage.' });
     }
 }
 

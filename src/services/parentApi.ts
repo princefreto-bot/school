@@ -49,6 +49,14 @@ export const parentApi = {
         return await res.json();
     },
 
+    countStudents: async () => {
+        const res = await fetch(`${API_URL}/students/count`, {
+            headers: getHeaders()
+        });
+        if (!res.ok) throw await res.json();
+        return await res.json();
+    },
+
     // ── Liaison Parent-Enfant ────────────────────────────────────
     linkStudent: async (studentId: string) => {
         const res = await fetch(`${API_URL}/students/link`, {

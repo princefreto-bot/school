@@ -13,8 +13,8 @@ export const LinkStudentModal: React.FC<LinkStudentModalProps> = ({ isOpen, onCl
     const [students, setStudents] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [linking, setLinking] = useState<string | null>(null);
-    const [error, setError] = useState('');
-    const [message, setMessage] = useState('');
+    const [hasSearched, setHasSearched] = useState(false);
+    const [totalStudents, setTotalStudents] = useState<number | null>(null);
 
     useEffect(() => {
         if (!isOpen) {
@@ -22,8 +22,23 @@ export const LinkStudentModal: React.FC<LinkStudentModalProps> = ({ isOpen, onCl
             setStudents([]);
             setError('');
             setMessage('');
+            setHasSearched(false);
+            setTotalStudents(null);
+        } else {
+            // Vérifier le nombre total d'élèves disponibles
+            checkTotalStudents();
         }
     }, [isOpen]);
+
+    const checkTotalStudents = async () => {
+        try {
+            const result = await parentApi.countStudents();
+            setTotalStudents(result.count);
+        } catch (err) {
+            console.error('Erreur comptage élèves:', err);
+            setTotalStudents(0);
+        }
+    };
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -42,9 +57,17 @@ export const LinkStudentModal: React.FC<LinkStudentModalProps> = ({ isOpen, onCl
         try {
             // Utilise 'search' qui cherche dans nom et prenom sur le backend maintenant
             const result = await parentApi.searchStudents({ nom: search });
-            setStudents(result.students);
+            if (!result.students || result.students.length === 0) {
+                console.warn('Aucun élève trouvé pour:', search);
+                setStudents([]);
+            } else {
+                setStudents(result.students);
+            }
+            setHasSearched(true);
         } catch (err: any) {
-            setError("Erreur lors de la recherche.");
+            console.error('Erreur recherche:', err);
+            setError(err.error || "Erreur lors de la recherche. Vérifiez votre connexion.");
+            setHasSearched(true);
         } finally {
             setLoading(false);
         }
@@ -143,12 +166,26 @@ export const LinkStudentModal: React.FC<LinkStudentModalProps> = ({ isOpen, onCl
                                 <Search className="w-12 h-12 opacity-10" />
                                 <p className="font-medium text-slate-500">Aucun élève ne correspond à votre recherche.</p>
                                 <p className="text-xs">Vérifiez l'orthographe du nom ou du prénom.</p>
+                                {totalStudents === 0 && (
+                                    <p className="text-xs text-red-400 mt-2 font-medium">
+                                        ⚠️ Aucun élève n'est synchronisé dans la base de données.<br/>
+                                        L'administrateur doit importer les données depuis Excel.
+                                    </p>
+                                )}
                             </div>
                         )}
 
-                        {!loading && search.length < 2 && search.length > 0 && (
+                        {!loading && !hasSearched && search.length < 2 && (
                             <div className="text-center py-8 text-slate-400 border border-dashed border-slate-100 rounded-2xl">
-                                <p className="text-xs">Tapez au moins 2 caractères pour rechercher</p>
+                                <p className="text-xs mb-2">Tapez au moins 2 caractères pour rechercher</p>
+                                {totalStudents !== null && (
+                                    <p className="text-xs text-slate-400">
+                                        {totalStudents > 0 
+                                            ? `💡 ${totalStudents} élève(s) disponible(s) dans la base`
+                                            : '⚠️ Aucun élève synchronisé - Contactez l\'administrateur'
+                                        }
+                                    </p>
+                                )}
                             </div>
                         )}
                     </div>
