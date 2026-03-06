@@ -1,0 +1,2 @@
+{"sessionId":"3a64d7","runId":"run1","hypothesisId":"H3","location":"backend/server.js:57","message":"About to start server listen","data":{"configPort":"3001","envPort":"3001","nodeEnv":null},"timestamp":1772796281292}
+{"sessionId":"3a64d7","runId":"run1","hypothesisId":"H3","location":"backend/server.js:63","message":"Server listen callback invoked","data":{"configPort":"3001","envPort":"3001","nodeEnv":null},"timestamp":1772796281320}
