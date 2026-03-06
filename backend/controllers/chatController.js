@@ -184,4 +184,4 @@ async function uploadImage(req, res) {
     }
 }
 
-module.exports = { getConversations, getMessages, sendMessage, uploadImage };
+module.exports = { getConversations, getMessages, sendMessage, uploadImage, getUnreadCount };
