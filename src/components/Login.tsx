@@ -144,25 +144,6 @@ export const Login: React.FC = () => {
             <LinkStudent onComplete={finishSetup} />
           )}
 
-          {/* Comptes de démo */}
-          {view === 'login' && (
-            <div className="mt-6 pt-5 border-t border-white/10">
-              <p className="text-xs text-blue-300 text-center mb-3">Comptes de démonstration</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div className="bg-white/5 rounded-lg p-3 border border-white/10 hover:bg-white/10 cursor-pointer transition" onClick={() => { setUsername('admin'); setPassword('admin123'); }}>
-                  <p className="text-white font-medium">Admin</p>
-                  <p className="text-blue-300">admin / admin123</p>
-                </div>
-                <div className="bg-white/5 rounded-lg p-3 border border-white/10 hover:bg-white/10 cursor-pointer transition" onClick={() => { setUsername('comptable'); setPassword('compta123'); }}>
-                  <p className="text-white font-medium">Comptable</p>
-                  <p className="text-blue-300">comptable / compta123</p>
-                </div>
-                <div className="bg-white/5 rounded-lg p-3 border border-white/10 hover:bg-white/10 cursor-pointer transition" onClick={() => { setUsername('90000000'); setPassword('demo123'); }}>
-                  <p className="text-white font-medium">Parent</p>
-                  <p className="text-blue-300">90000000 / demo123</p>
-                </div>
-              </div>
-            </div>
           )}
         </div>
 
