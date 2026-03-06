@@ -3,6 +3,6 @@ services:
     type: web
     env: node
     # ensure devDependencies (vite) are installed even in production environment
-    buildCommand: NPM_CONFIG_PRODUCTION=false npm install && npm run build
+    buildCommand: rm -rf node_modules && NPM_CONFIG_PRODUCTION=false npm install && npm run build
     startCommand: npm run start
     plan: free
