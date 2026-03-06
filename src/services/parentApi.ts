@@ -96,6 +96,14 @@ export const parentApi = {
         return await res.json();
     },
 
+    getActiveCount: async () => {
+        const res = await fetch(`${API_URL}/parent/active-count`, {
+            headers: getHeaders()
+        });
+        if (!res.ok) throw await res.json();
+        return await res.json();
+    },
+
     logout: () => {
         localStorage.removeItem('parent_token');
     }

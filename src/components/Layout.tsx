@@ -171,19 +171,29 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const connectedParentsCount = useStore((s) => s.connectedParentsCount);
   const setConnectedParentsCount = useStore((s) => s.setConnectedParentsCount);
 
-  // Sync automatique et simulateur de parents connectés
+  // Sync automatique et récupération du vrai compteur de parents
   useEffect(() => {
-    if (user?.role !== 'parent' && students.length > 0) {
-      import('../services/backendSync').then(({ syncToBackend }) => {
-        syncToBackend({ students, parents });
-      });
-    }
-
-    // Simulation de parents connectés pour la démo
     if (user?.role !== 'parent') {
-      const interval = setInterval(() => {
-        setConnectedParentsCount(Math.floor(Math.random() * 5) + 1);
-      }, 10000);
+      // 1. Sync students
+      if (students.length > 0) {
+        import('../services/backendSync').then(({ syncToBackend }) => {
+          syncToBackend({ students, parents });
+        });
+      }
+
+      // 2. Récupérer le vrai nombre de parents inscrits (Polling toutes les 30s)
+      const fetchActiveCount = async () => {
+        try {
+          const { parentApi } = await import('../services/parentApi');
+          const res = await parentApi.getActiveCount();
+          setConnectedParentsCount(res.count || 0);
+        } catch (err) {
+          console.error("Erreur compteur parents:", err);
+        }
+      };
+
+      fetchActiveCount();
+      const interval = setInterval(fetchActiveCount, 30000);
       return () => clearInterval(interval);
     }
   }, [students, parents, user?.role, setConnectedParentsCount]);

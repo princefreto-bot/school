@@ -1,129 +1,112 @@
-// ============================================================
-// CONTRÔLEUR — Dashboard & Données Parent (Version JSON)
-// ============================================================
-const path = require('path');
-const fs = require('fs');
-const { getDb } = require('../models/db');
+const { supabase } = require('../utils/supabase');
 
-// ── GET /api/parent/dashboard ─────────────────────────────────
-function getDashboard(req, res) {
-    const db = getDb();
-    const parentId = req.parentId;
+/**
+ * GET /api/parent/dashboard
+ */
+async function getDashboard(req, res) {
+    const { id: parentId } = req.user;
 
-    // Récupérer les ids des élèves liés
-    const studentIds = db.parent_student
-        .filter(link => link.parent_id === parentId)
-        .map(link => link.student_id);
+    try {
+        const { data: students, error } = await supabase
+            .from('students')
+            .select('*')
+            .eq('parent_id', parentId)
+            .order('nom', { ascending: true });
 
-    // Récupérer les élèves correspondants
-    const students = db.students
-        .filter(s => studentIds.includes(s.id))
-        .sort((a, b) => a.nom.localeCompare(b.nom));
+        if (error) throw error;
 
-    if (students.length === 0) {
-        return res.json({
-            message: 'Aucun enfant lié à ce compte.',
-            students: [],
-        });
+        return res.json({ students: students || [] });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
     }
-
-    return res.json({ students });
 }
 
-// ── GET /api/parent/payments/:studentId ───────────────────────
-function getPayments(req, res) {
-    const db = getDb();
-    const parentId = req.parentId;
+/**
+ * GET /api/parent/payments/:studentId
+ */
+async function getPayments(req, res) {
+    const { id: parentId } = req.user;
     const { studentId } = req.params;
 
-    const isLinked = db.parent_student.some(
-        link => link.parent_id === parentId && link.student_id === studentId
-    );
-    if (!isLinked) {
-        return res.status(403).json({ error: 'Accès refusé.' });
+    try {
+        // Vérifier lien
+        const { data: student, error: sErr } = await supabase
+            .from('students')
+            .select('*')
+            .eq('id', studentId)
+            .eq('parent_id', parentId)
+            .single();
+
+        if (sErr || !student) {
+            return res.status(403).json({ error: 'Accès refusé ou enfant non lié.' });
+        }
+
+        const { data: payments, error: pErr } = await supabase
+            .from('payments')
+            .select('*')
+            .eq('student_id', studentId)
+            .order('date', { ascending: false });
+
+        if (pErr) throw pErr;
+
+        return res.json({ student, payments });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
     }
-
-    const payments = db.payments
-        .filter(p => p.student_id === studentId)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    const student = db.students.find(s => s.id === studentId);
-
-    return res.json({ student, payments });
 }
 
-// ── GET /api/parent/receipt/:receiptId ───────────────────────
-function downloadReceipt(req, res) {
-    const db = getDb();
-    const parentId = req.parentId;
-    const { receiptId } = req.params;
+/**
+ * GET /api/parent/badges
+ */
+async function getBadges(req, res) {
+    const { id: parentId } = req.user;
 
-    const payment = db.payments.find(p => p.recu === receiptId);
-    if (!payment) {
-        return res.status(404).json({ error: 'Reçu introuvable.' });
+    try {
+        const { data: badges, error } = await supabase
+            .from('badges')
+            .select(`
+                *,
+                student:student_id (nom, prenom, classe)
+            `)
+            .eq('parent_id', parentId)
+            .order('earned_at', { ascending: false });
+
+        if (error) throw error;
+
+        const formatted = badges.map(b => ({
+            ...b,
+            student_nom: b.student?.nom,
+            student_prenom: b.student?.prenom,
+            classe: b.student?.classe
+        }));
+
+        return res.json({ badges: formatted });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
     }
-
-    const isLinked = db.parent_student.some(
-        link => link.parent_id === parentId && link.student_id === payment.student_id
-    );
-    if (!isLinked) {
-        return res.status(403).json({ error: 'Accès refusé.' });
-    }
-
-    // Chercher fichier physique
-    const receiptsDir = path.join(__dirname, '..', 'data', 'receipts');
-    const filePath = path.join(receiptsDir, `${receiptId}.pdf`);
-
-    if (!fs.existsSync(filePath)) {
-        return res.json({
-            message: 'Données du reçu disponibles (PDF à générer côté client).',
-            receipt: {
-                id: payment.id,
-                receiptId: payment.recu,
-                studentId: payment.student_id,
-                montant: payment.montant,
-                date: payment.date,
-                note: payment.note,
-            },
-        });
-    }
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="recu-${receiptId}.pdf"`);
-    return fs.createReadStream(filePath).pipe(res);
 }
 
-// ── GET /api/parent/badges ────────────────────────────────────
-function getBadges(req, res) {
-    const db = getDb();
-    const parentId = req.parentId;
+/**
+ * GET /api/parent/active-count
+ * Utilisé par l'admin pour voir le nombre de parents inscrits en temps réel
+ */
+async function getActiveParentsCount(req, res) {
+    try {
+        const { count, error } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('role', 'parent');
 
-    const badges = db.badges
-        .filter(b => b.parent_id === parentId)
-        .map(b => {
-            const student = db.students.find(s => s.id === b.student_id);
-            return {
-                ...b,
-                student_nom: student ? student.nom : null,
-                student_prenom: student ? student.prenom : null,
-                classe: student ? student.classe : null,
-            };
-        })
-        .sort((a, b) => new Date(b.earned_at) - new Date(a.earned_at));
-
-    return res.json({ badges });
+        if (error) throw error;
+        return res.json({ count: count || 0 });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
 }
 
-// ── GET /api/parent/messages ──────────────────────────────────
-function getMessages(req, res) {
-    const db = getDb();
-    const parentId = req.parentId;
-
-    const messages = (db.messages || [])
-        .filter(m => m.parent_id === parentId)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    return res.json({ messages });
-}
-
-module.exports = { getDashboard, getPayments, downloadReceipt, getBadges, getMessages };
+module.exports = {
+    getDashboard,
+    getPayments,
+    getBadges,
+    getActiveParentsCount
+};
