@@ -6,6 +6,7 @@ const { supabase } = require('../utils/supabase');
  */
 async function listStudents(req, res) {
     const { nom, prenom, classe, search } = req.query;
+    const parentId = req.user ? req.user.id : null;
 
     try {
         let query = supabase
@@ -25,13 +26,28 @@ async function listStudents(req, res) {
             query = query.ilike('classe', `%${classe}%`);
         }
 
-        const { data, error } = await query
+        const { data: students, error } = await query
             .order('nom', { ascending: true })
             .limit(100);
 
         if (error) throw error;
 
-        return res.json({ students: data, total: data.length });
+        // Vérifier quels élèves sont déjà liés à ce parent
+        let linkedIds = [];
+        if (parentId) {
+            const { data: links } = await supabase
+                .from('parent_student')
+                .select('student_id')
+                .eq('parent_id', parentId);
+            if (links) linkedIds = links.map(l => l.student_id);
+        }
+
+        const results = students.map(s => ({
+            ...s,
+            is_linked: linkedIds.includes(s.id)
+        }));
+
+        return res.json({ students: results, total: results.length });
     } catch (err) {
         console.error('ListStudents Error:', err.message);
         return res.status(500).json({ error: 'Erreur lors de la récupération des élèves.' });

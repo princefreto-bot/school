@@ -60,6 +60,16 @@ export const parentApi = {
         return await res.json();
     },
 
+    linkStudents: async (studentIds: string[]) => {
+        const res = await fetch(`${API_URL}/students/link`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({ studentIds })
+        });
+        if (!res.ok) throw await res.json();
+        return await res.json();
+    },
+
     // ── Données du Dashboard ─────────────────────────────────────
     getDashboard: async () => {
         const res = await fetch(`${API_URL}/parent/dashboard`, {

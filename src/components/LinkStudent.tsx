@@ -42,7 +42,8 @@ export const LinkStudent: React.FC<LinkStudentProps> = ({ onComplete }) => {
         }
     };
 
-    const toggleSelect = (id: string) => {
+    const toggleSelect = (id: string, isAlreadyLinked: boolean) => {
+        if (isAlreadyLinked) return;
         setSelectedIds(prev =>
             prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
         );
@@ -53,27 +54,14 @@ export const LinkStudent: React.FC<LinkStudentProps> = ({ onComplete }) => {
         setLinking(true);
         setError('');
         try {
-            // Utilisation du nouvel endpoint supportant les tableaux d'IDs
-            const res = await fetch('/api/students/link', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('parent_token')}`
-                },
-                body: JSON.stringify({ studentIds: selectedIds })
-            });
-
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || "Erreur lors de la liaison");
-            }
+            await parentApi.linkStudents(selectedIds);
 
             setMessage(`${selectedIds.length} enfant(s) lié(s) avec succès !`);
             setTimeout(() => {
                 onComplete();
             }, 1500);
         } catch (err: any) {
-            setError(err.message || "Impossible de lier les élèves sélectionnés.");
+            setError(err.error || "Impossible de lier les élèves sélectionnés.");
         } finally {
             setLinking(false);
         }
@@ -108,27 +96,36 @@ export const LinkStudent: React.FC<LinkStudentProps> = ({ onComplete }) => {
             <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
                 {students.map((student) => {
                     const isSelected = selectedIds.includes(student.id);
+                    const isAlreadyLinked = student.is_linked;
                     return (
                         <div
                             key={student.id}
-                            onClick={() => toggleSelect(student.id)}
-                            className={`flex items-center justify-between p-4 border rounded-xl transition cursor-pointer group ${isSelected
-                                ? 'bg-blue-600/20 border-blue-500/50'
-                                : 'bg-white/5 border-white/10 hover:bg-white/10'
+                            onClick={() => toggleSelect(student.id, isAlreadyLinked)}
+                            className={`flex items-center justify-between p-4 border rounded-xl transition group ${isAlreadyLinked
+                                ? 'bg-slate-800/50 border-white/5 opacity-60 cursor-not-allowed'
+                                : isSelected
+                                    ? 'bg-blue-600/20 border-blue-500/50 cursor-pointer'
+                                    : 'bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer'
                                 }`}
                         >
                             <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isSelected ? 'bg-blue-600' : 'bg-blue-600/30'}`}>
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isAlreadyLinked ? 'bg-slate-700' : isSelected ? 'bg-blue-600' : 'bg-blue-600/30'}`}>
                                     <GraduationCap className="w-5 h-5 text-white" />
                                 </div>
-                                <div>
-                                    <p className="text-white font-medium">{student.prenom} {student.nom}</p>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-white font-medium truncate">{student.prenom} {student.nom}</p>
                                     <p className="text-blue-300 text-xs">{student.classe} ({student.cycle})</p>
                                 </div>
                             </div>
 
-                            <div className={isSelected ? 'text-blue-400' : 'text-slate-500'}>
-                                {isSelected ? <CheckSquare className="w-6 h-6" /> : <Square className="w-6 h-6" />}
+                            <div className="flex items-center gap-3">
+                                {isAlreadyLinked ? (
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase bg-slate-800 px-2 py-1 rounded-lg">Déjà lié</span>
+                                ) : (
+                                    <div className={isSelected ? 'text-blue-400' : 'text-slate-500'}>
+                                        {isSelected ? <CheckSquare className="w-6 h-6" /> : <Square className="w-6 h-6" />}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     );
