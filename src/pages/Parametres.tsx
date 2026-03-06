@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { isBackendAvailable, syncToBackend } from '../services/backendSync';
+import { syncToBackend } from '../services/backendSync';
 import {
   Save, School, MessageSquare, Shield, Info,
   Upload, X, Image, Code2, ChevronDown, ChevronRight,
@@ -75,17 +75,6 @@ export const Parametres: React.FC = () => {
   // États pour la sync
   const [syncing, setSyncing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
-  const [backendOnline, setBackendOnline] = useState(false);
-
-  useEffect(() => {
-    const checkBackend = async () => {
-      const online = await isBackendAvailable();
-      setBackendOnline(online);
-    };
-    checkBackend();
-    const interval = setInterval(checkBackend, 10000); // Check every 10s
-    return () => clearInterval(interval);
-  }, []);
 
   // ── Gestion upload logo PNG ────────────────────────────────
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -309,76 +298,6 @@ export const Parametres: React.FC = () => {
             </button>
           )}
         </form>
-      </div>
-
-      {/* ── PORTAIL PARENT & SYNC ─────────────────────────── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-2">
-          <Globe className="w-4 h-4 text-emerald-600" />
-          Portail Parent & Synchronisation
-        </h3>
-        <p className="text-xs text-gray-500 mb-5">
-          Gérez la connexion entre votre base locale (Excel) et l'espace en ligne des parents.
-        </p>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-            <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full animate-pulse ${backendOnline ? 'bg-emerald-500' : 'bg-red-500'}`} />
-              <div>
-                <p className="text-sm font-bold text-slate-800">Serveur Backend</p>
-                <p className="text-xs text-slate-500">
-                  {backendOnline ? 'Opérationnel - Prêt pour la synchronisation' : 'Hors ligne - Lancez le backend pour activer le portail parent'}
-                </p>
-              </div>
-            </div>
-            {backendOnline && (
-              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md uppercase tracking-wider">Connecté</span>
-            )}
-          </div>
-
-          <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
-                <Database className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold text-blue-900 mb-1">Mise à disposition des données</p>
-                <p className="text-xs text-blue-700 leading-relaxed">
-                  Pour que les parents puissent trouver leurs enfants, vos données locales (données importées via Excel ou saisies manuellement) doivent être envoyées au serveur.
-                  <strong> La synchronisation est automatique</strong>, mais vous pouvez la forcer ici.
-                </p>
-
-                <div className="mt-4 flex items-center gap-3">
-                  <button
-                    onClick={async () => {
-                      const students = useStore.getState().students;
-                      const parents = useStore.getState().parents;
-                      setSyncing(true);
-                      const res = await syncToBackend({ students, parents });
-                      setSyncing(false);
-                      if (res) {
-                        setSyncSuccess(true);
-                        setTimeout(() => setSyncSuccess(false), 3000);
-                      }
-                    }}
-                    disabled={syncing}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50"
-                  >
-                    {syncing ? <RefreshCcw className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
-                    Synchroniser maintenant
-                  </button>
-
-                  {syncSuccess && (
-                    <span className="text-emerald-600 text-xs font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4" /> Sync réussie !
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* ── GUIDE DE PERSONNALISATION DU CODE ─────────────── */}

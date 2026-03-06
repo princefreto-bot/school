@@ -33,6 +33,16 @@ app.use('/api/students', require('./routes/students'));
 app.use('/api/sync', require('./routes/sync'));
 app.use('/api/chat', require('./routes/chat'));
 
+// ── Health Check ──────────────────────────────────────────────
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        backend: 'online',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
+
 // ── Service du Frontend (Static Files) ───────────────────────
 // On pointe vers le dossier 'dist' à la racine du projet
 const frontendDir = path.join(__dirname, '..', 'dist');
@@ -54,8 +64,26 @@ app.use((err, req, res, _next) => {
 });
 
 // ── Démarrage ─────────────────────────────────────────────────
-app.listen(PORT, () => {
-    console.log(`\n🚀 Serveur actif sur http://localhost:${PORT}`);
-    console.log(`🛡️  Base de données : Supabase PostgreSQL`);
-    console.log(`💬 Messagerie active : /api/chat\n`);
+const server = app.listen(PORT, () => {
+    console.log(`\n${'='.repeat(60)}`);
+    console.log(`🚀 GestioSchool Backend démarré`);
+    console.log(`${'='.repeat(60)}`);
+    console.log(`📡 Serveur: http://localhost:${PORT}`);
+    console.log(`🛡️  Base de données: Supabase PostgreSQL`);
+    console.log(`🔑 Auth: JWT ${process.env.JWT_SECRET ? '(configuré)' : '(DÉFAUT)'}`);
+    console.log(`📁 Node env: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`💬 Routes actives: /api/auth, /api/parent, /api/students, /api/sync, /api/chat`);
+    console.log(`🏥 Health check: /api/health`);
+    console.log(`${'='.repeat(60)}\n`);
+});
+
+// Gestion des erreurs de démarrage
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`❌ Le port ${PORT} est déjà utilisé. Utilisez un autre port.`);
+    } else {
+        console.error(`❌ Erreur au démarrage du serveur:`, err);
+    }
+    process.exit(1);
+});
 });

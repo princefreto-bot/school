@@ -177,10 +177,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   // Sync automatique et récupération du vrai compteur de parents
   useEffect(() => {
     if (user?.role !== 'parent') {
-      // 1. Sync students
+      // 1. Sync students (non-bloquant, avec timeout court)
       if (students.length > 0) {
         import('../services/backendSync').then(({ syncToBackend }) => {
-          syncToBackend({ students, parents });
+          const timer = setTimeout(() => {
+            syncToBackend({ students, parents }).catch(() => {
+              // Fail silently, backend peut être down
+            });
+          }, 100);
+          return () => clearTimeout(timer);
         });
       }
 
@@ -188,10 +193,20 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       const fetchActiveCount = async () => {
         try {
           const { parentApi } = await import('../services/parentApi');
-          const res = await parentApi.getActiveCount();
-          setConnectedParentsCount(res.count || 0);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          
+          const res = await fetch(`/api/parent/active-count`, {
+            signal: controller.signal,
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('parent_token') || ''}` }
+          }).finally(() => clearTimeout(timeoutId));
+          
+          if (res.ok) {
+            const data = await res.json();
+            setConnectedParentsCount(data.count || 0);
+          }
         } catch (err) {
-          console.error("Erreur compteur parents:", err);
+          // Backend indisponible - pas grave, on continue
         }
       };
 
