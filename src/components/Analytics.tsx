@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 
 export const Analytics = () => {
-  const { students, settings } = useStore();
+  const { students } = useStore();
   const classStats = calculateClassStats(students);
 
   // Données pour analyse par cycle

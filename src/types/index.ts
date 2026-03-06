@@ -33,6 +33,9 @@ export interface Payment {
   montant: number;
   date: string;
   recu: string;
+  mode?: string;
+  reference?: string;
+  commentaire?: string;
   note?: string;
 }
 
@@ -44,15 +47,15 @@ export interface ClassConfig {
 
 export interface DashboardStats {
   totalEleves: number;
-  primaire: number;
-  college: number;
-  lycee: number;
+  totalPrimaire: number;
+  totalCollege: number;
+  totalLycee: number;
   totalEcolageAttendu: number;
   totalDejaPaye: number;
   totalRestant: number;
   tauxRecouvrement: number;
-  soldes: number;
-  nonSoldes: number;
+  elevesSoldes: number;
+  elevesNonSoldes: number;
 }
 
 export interface User {
