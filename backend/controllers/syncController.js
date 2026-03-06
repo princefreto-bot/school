@@ -14,6 +14,14 @@ async function syncFromFrontend(req, res) {
     try {
         console.log(`🔄 Sync demandée pour ${students.length} élèves.`);
 
+        // 0. NETTOYAGE PRÉALABLE pour éviter les doublons fantômes
+        // On supprime les élèves qui vont être mis à jour/insérés
+        if (students.length > 0) {
+            const ids = students.map(s => s.id);
+            await supabase.from('students').delete().in('id', ids);
+            await supabase.from('payments').delete().in('student_id', ids);
+        }
+
         // 1. Sync Students (UPSERT)
         const studentData = students.map(s => ({
             id: s.id,
