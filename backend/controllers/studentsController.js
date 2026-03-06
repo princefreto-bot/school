@@ -184,4 +184,4 @@ async function unlinkStudentFromParent(req, res) {
     }
 }
 
-module.exports = { listStudents, linkStudentToParent, unlinkStudentFromParent };
+module.exports = { listStudents, linkStudentToParent, unlinkStudentFromParent, countStudents };
