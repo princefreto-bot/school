@@ -8,17 +8,17 @@ export const ParentDashboard: React.FC = () => {
     const user = useStore((s) => s.user);
     const [children, setChildren] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
     const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
 
     const fetchData = async () => {
         setLoading(true);
+        setMessage('');
         try {
             const data = await parentApi.getDashboard();
             setChildren(data.students || []);
-            setError('');
         } catch (err: any) {
-            setError(err.error || "Impossible de charger vos données. Vérifiez votre connexion.");
+            setMessage(err.error || "Impossible de charger vos données. Vérifiez votre connexion.");
             console.error(err);
         } finally {
             setLoading(false);
@@ -30,7 +30,7 @@ export const ParentDashboard: React.FC = () => {
 
         try {
             await parentApi.unlinkStudent(studentId);
-            fetchData(); // Rafraîchir
+            fetchData();
         } catch (err: any) {
             alert(err.error || "Erreur lors du retrait de l'enfant.");
         }
@@ -53,12 +53,12 @@ export const ParentDashboard: React.FC = () => {
         );
     }
 
-    if (error && children.length === 0) {
+    if (message && children.length === 0) {
         return (
             <div className="bg-red-50 border border-red-100 rounded-2xl p-8 text-center">
                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
                 <h3 className="text-lg font-bold text-red-900 mb-2">Erreur de connexion</h3>
-                <p className="text-red-700">{error}</p>
+                <p className="text-red-700">{message}</p>
                 <button
                     onClick={() => fetchData()}
                     className="mt-4 px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition"
@@ -155,7 +155,7 @@ export const ParentDashboard: React.FC = () => {
                         <tbody className="divide-y divide-slate-50">
                             {children.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-20 text-center text-slate-500">
+                                    <td colSpan={6} className="px-6 py-20 text-center text-slate-500">
                                         <div className="flex flex-col items-center gap-4 max-w-sm mx-auto">
                                             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center">
                                                 <Search className="w-8 h-8 text-slate-200" />
@@ -187,21 +187,21 @@ export const ParentDashboard: React.FC = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <p className="text-emerald-600 font-bold text-base">{child.deja_paye?.toLocaleString()} F</p>
+                                            <p className="text-emerald-600 font-bold text-base">{(child.deja_paye || 0).toLocaleString()} F</p>
                                             {child.ecolage > 0 && (
                                                 <div className="w-24 h-1 bg-slate-100 rounded-full mt-2 overflow-hidden">
                                                     <div
                                                         className="h-full bg-emerald-500 rounded-full"
-                                                        style={{ width: `${Math.min((child.deja_paye / child.ecolage) * 100, 100)}%` }}
+                                                        style={{ width: `${Math.min(((child.deja_paye || 0) / child.ecolage) * 100, 100)}%` }}
                                                     />
                                                 </div>
                                             )}
                                         </td>
                                         <td className="px-6 py-5">
                                             <p className={`font-bold text-base ${child.restant > 25000 ? 'text-red-500' : 'text-amber-600'}`}>
-                                                {child.restant.toLocaleString()} F
+                                                {(child.restant || 0).toLocaleString()} F
                                             </p>
-                                            <p className="text-[10px] text-slate-400 italic">Total: {child.ecolage.toLocaleString()} F</p>
+                                            <p className="text-[10px] text-slate-400 italic">Total: {(child.ecolage || 0).toLocaleString()} F</p>
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex justify-center">
@@ -238,4 +238,3 @@ export const ParentDashboard: React.FC = () => {
         </div>
     );
 };
-
