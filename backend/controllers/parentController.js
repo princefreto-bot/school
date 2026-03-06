@@ -5,6 +5,7 @@ const { supabase } = require('../utils/supabase');
  */
 async function getDashboard(req, res) {
     const { id: parentId } = req.user;
+    console.log('🔍 [Dashboard] Parent ID:', parentId);
 
     try {
         // Récupérer les ids des élèves liés via la table parent_student
@@ -13,11 +14,18 @@ async function getDashboard(req, res) {
             .select('student_id')
             .eq('parent_id', parentId);
 
-        if (lErr) throw lErr;
+        if (lErr) {
+            console.error('❌ [Dashboard] Erreur récupération liens:', lErr);
+            throw lErr;
+        }
+
+        console.log('📋 [Dashboard] Liens trouvés:', links?.length || 0);
 
         const studentIds = links.map(l => l.student_id);
+        console.log('👨‍👩‍👧‍👦 [Dashboard] IDs élèves:', studentIds);
 
         if (studentIds.length === 0) {
+            console.log('⚠️ [Dashboard] Aucun élève lié');
             return res.json({ students: [] });
         }
 
@@ -27,10 +35,15 @@ async function getDashboard(req, res) {
             .in('id', studentIds)
             .order('nom', { ascending: true });
 
-        if (sErr) throw sErr;
+        if (sErr) {
+            console.error('❌ [Dashboard] Erreur récupération élèves:', sErr);
+            throw sErr;
+        }
 
+        console.log('✅ [Dashboard] Élèves récupérés:', students?.length || 0);
         return res.json({ students: students || [] });
     } catch (err) {
+        console.error('💥 [Dashboard] Erreur générale:', err);
         return res.status(500).json({ error: err.message });
     }
 }

@@ -16,6 +16,7 @@ export const ParentDashboard: React.FC = () => {
         try {
             const data = await parentApi.getDashboard();
             setChildren(data.students || []);
+            setError('');
         } catch (err: any) {
             setError(err.error || "Impossible de charger vos données. Vérifiez votre connexion.");
             console.error(err);
