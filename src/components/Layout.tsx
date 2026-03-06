@@ -210,8 +210,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   }, [user?.role, fetchUnreadMessages]);
 
-  const unreadMessages = useStore((s) => s.unreadMessages);
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const nonSoldes = students.filter((s) => s.status !== 'Soldé').length;
