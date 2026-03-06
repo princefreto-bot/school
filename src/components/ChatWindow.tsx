@@ -71,6 +71,8 @@ export const ChatWindow: React.FC = () => {
         try {
             const data = await chatApi.getMessages(convId);
             setMessages(data);
+            // Update unread count after viewing messages
+            await useStore.getState().fetchUnreadMessages();
         } catch (err) {
             console.error(err);
         }

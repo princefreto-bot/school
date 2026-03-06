@@ -18,6 +18,14 @@ export const chatApi = {
         return res.json();
     },
 
+    getUnreadCount: async () => {
+        const token = localStorage.getItem('parent_token');
+        const res = await fetch(`${API_URL}/unread`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return res.json();
+    },
+
     sendMessage: async (data: { conversationId?: string; text?: string; imageUrl?: string; targetRole?: string }) => {
         const token = localStorage.getItem('parent_token');
         const res = await fetch(`${API_URL}/send`, {

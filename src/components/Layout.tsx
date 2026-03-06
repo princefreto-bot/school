@@ -171,6 +171,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const parents = useStore((s) => s.parents);
   const connectedParentsCount = useStore((s) => s.connectedParentsCount);
   const setConnectedParentsCount = useStore((s) => s.setConnectedParentsCount);
+  const unreadMessages = useStore((s) => s.unreadMessages);
+  const fetchUnreadMessages = useStore((s) => s.fetchUnreadMessages);
 
   // Sync automatique et récupération du vrai compteur de parents
   useEffect(() => {
@@ -199,6 +201,17 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   }, [students, parents, user?.role, setConnectedParentsCount]);
 
+  // Fetch unread messages for parents
+  useEffect(() => {
+    if (user?.role === 'parent') {
+      fetchUnreadMessages();
+      const interval = setInterval(fetchUnreadMessages, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user?.role, fetchUnreadMessages]);
+
+  const unreadMessages = useStore((s) => s.unreadMessages);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const nonSoldes = students.filter((s) => s.status !== 'Soldé').length;
@@ -208,7 +221,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const navItems: NavItem[] = baseNavItems.map((item) => ({
     ...item,
-    badge: item.id === 'eleves' && nonSoldes > 0 ? nonSoldes : undefined,
+    badge: item.id === 'eleves' && nonSoldes > 0 ? nonSoldes : item.id === 'chat' && unreadMessages > 0 ? unreadMessages : undefined,
   }));
 
   const currentLabel = [...NAV_ITEMS, ...PARENT_NAV_ITEMS].find((n) => n.id === currentPage)?.label ?? '';

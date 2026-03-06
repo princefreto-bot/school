@@ -20,6 +20,9 @@ export interface AppState {
   isAuthenticated: boolean;
   connectedParentsCount: number;
   setConnectedParentsCount: (count: number) => void;
+  unreadMessages: number;
+  setUnreadMessages: (count: number) => void;
+  fetchUnreadMessages: () => Promise<void>;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 
@@ -86,6 +89,17 @@ export const useStore = create<AppState>()(
       isAuthenticated: false,
       connectedParentsCount: 0,
       setConnectedParentsCount: (count) => set({ connectedParentsCount: count }),
+      unreadMessages: 0,
+      setUnreadMessages: (count) => set({ unreadMessages: count }),
+      fetchUnreadMessages: async () => {
+        try {
+          const { chatApi } = await import('../services/chatApi');
+          const count = await chatApi.getUnreadCount();
+          set({ unreadMessages: count });
+        } catch (err) {
+          console.error('Failed to fetch unread messages:', err);
+        }
+      },
       login: async (username, password) => {
         try {
           const res = await fetch(`${API_BASE_URL}/auth/login`, {

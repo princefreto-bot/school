@@ -134,8 +134,33 @@ async function sendMessage(req, res) {
 }
 
 /**
- * Upload d'image vers Supabase Storage
+ * Récupère le nombre de messages non lus pour l'utilisateur
  */
+async function getUnreadCount(req, res) {
+    const { id, role } = req.user;
+
+    try {
+        let query = supabase
+            .from('messages')
+            .select('*, conversations!inner(parent_id)', { count: 'exact', head: true })
+            .neq('sender_id', id)
+            .eq('read_status', false);
+
+        if (role === 'parent') {
+            query = query.eq('conversations.parent_id', id);
+        } else {
+            // For admins, count messages in their conversations
+            query = query.eq('conversations.admin_role', role === 'comptable' ? 'comptabilite' : 'administration');
+        }
+
+        const { count, error } = await query;
+
+        if (error) throw error;
+        return res.json(count || 0);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
 async function uploadImage(req, res) {
     if (!req.file) return res.status(400).json({ error: 'Aucun fichier.' });
 
