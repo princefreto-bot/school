@@ -54,14 +54,13 @@ async function linkStudentToParent(req, res) {
     }
 
     try {
-        // Mettre à jour les élèves pour leur assigner le parentId
-        // Dans une structure plus complexe, on utiliserait une table de liaison,
-        // mais ici nous utilisons la colonne parentId dans la table students.
-
+        // Dans Supabase, on utilise une table de liaison parent_student { parent_id, student_id }
         const { error } = await supabase
-            .from('students')
-            .update({ parent_id: parentId })
-            .in('id', idsToLink);
+            .from('parent_student')
+            .upsert(
+                idsToLink.map(sId => ({ parent_id: parentId, student_id: sId })),
+                { onConflict: 'parent_id, student_id' }
+            );
 
         if (error) throw error;
 

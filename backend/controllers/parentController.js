@@ -7,13 +7,27 @@ async function getDashboard(req, res) {
     const { id: parentId } = req.user;
 
     try {
-        const { data: students, error } = await supabase
+        // Récupérer les ids des élèves liés via la table parent_student
+        const { data: links, error: lErr } = await supabase
+            .from('parent_student')
+            .select('student_id')
+            .eq('parent_id', parentId);
+
+        if (lErr) throw lErr;
+
+        const studentIds = links.map(l => l.student_id);
+
+        if (studentIds.length === 0) {
+            return res.json({ students: [] });
+        }
+
+        const { data: students, error: sErr } = await supabase
             .from('students')
             .select('*')
-            .eq('parent_id', parentId)
+            .in('id', studentIds)
             .order('nom', { ascending: true });
 
-        if (error) throw error;
+        if (sErr) throw sErr;
 
         return res.json({ students: students || [] });
     } catch (err) {
@@ -29,17 +43,25 @@ async function getPayments(req, res) {
     const { studentId } = req.params;
 
     try {
-        // Vérifier lien
+        // Vérifier lien dans la table parent_student
+        const { data: isLinked, error: lErr } = await supabase
+            .from('parent_student')
+            .select('student_id')
+            .eq('parent_id', parentId)
+            .eq('student_id', studentId)
+            .single();
+
+        if (lErr || !isLinked) {
+            return res.status(403).json({ error: 'Accès refusé ou enfant non lié.' });
+        }
+
         const { data: student, error: sErr } = await supabase
             .from('students')
             .select('*')
             .eq('id', studentId)
-            .eq('parent_id', parentId)
             .single();
 
-        if (sErr || !student) {
-            return res.status(403).json({ error: 'Accès refusé ou enfant non lié.' });
-        }
+        if (sErr) throw sErr;
 
         const { data: payments, error: pErr } = await supabase
             .from('payments')
