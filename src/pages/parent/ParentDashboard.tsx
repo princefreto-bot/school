@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useStore } from '../../store/useStore';
 import { parentApi } from '../../services/parentApi';
-import { CreditCard, Wallet, TrendingUp, Loader2, AlertCircle, UserPlus, Search, GraduationCap } from 'lucide-react';
+import { CreditCard, Wallet, TrendingUp, Loader2, AlertCircle, UserPlus, Search, GraduationCap, X } from 'lucide-react';
 import { LinkStudentModal } from '../../components/LinkStudentModal';
 
 export const ParentDashboard: React.FC = () => {
@@ -21,6 +21,17 @@ export const ParentDashboard: React.FC = () => {
             console.error(err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleUnlink = async (studentId: string, name: string) => {
+        if (!window.confirm(`Voulez-vous vraiment retirer ${name} de votre compte ?`)) return;
+
+        try {
+            await parentApi.unlinkStudent(studentId);
+            fetchData(); // Rafraîchir
+        } catch (err: any) {
+            alert(err.error || "Erreur lors du retrait de l'enfant.");
         }
     };
 
@@ -136,7 +147,8 @@ export const ParentDashboard: React.FC = () => {
                                 <th className="px-6 py-4">Classe & Cycle</th>
                                 <th className="px-6 py-4">Scolarité Payée</th>
                                 <th className="px-6 py-4">Reste à Payer</th>
-                                <th className="px-6 py-4 text-center">Statut du Dossier</th>
+                                <th className="px-6 py-4 text-center">Statut</th>
+                                <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -192,16 +204,22 @@ export const ParentDashboard: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex justify-center">
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-xl text-xs font-bold ${child.status === 'Soldé' ? 'bg-emerald-100 text-emerald-700' :
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold ${child.status === 'Soldé' ? 'bg-emerald-100 text-emerald-700' :
                                                     child.status === 'Partiel' ? 'bg-amber-100 text-amber-700' :
                                                         'bg-red-100 text-red-700'
                                                     }`}>
-                                                    <span className={`w-1.5 h-1.5 rounded-full mr-2 ${child.status === 'Soldé' ? 'bg-emerald-500' :
-                                                        child.status === 'Partiel' ? 'bg-amber-500' : 'bg-red-500'
-                                                        }`} />
                                                     {child.status}
                                                 </span>
                                             </div>
+                                        </td>
+                                        <td className="px-6 py-5 text-right">
+                                            <button
+                                                onClick={() => handleUnlink(child.id, `${child.prenom} ${child.nom}`)}
+                                                className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                                title="Retirer cet enfant"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))

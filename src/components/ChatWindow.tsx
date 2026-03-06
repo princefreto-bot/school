@@ -173,15 +173,17 @@ export const ChatWindow: React.FC = () => {
                             className={`w-full p-4 flex items-start gap-3 hover:bg-slate-50 transition-colors border-b border-slate-50 ${activeConv?.id === conv.id ? 'bg-blue-50/50' : ''}`}
                         >
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center font-bold text-slate-600 shrink-0">
-                                {user?.role === 'parent' ? (conv.admin_role === 'comptabilite' ? '💰' : '🏢') : (conv.parent?.nom.charAt(0))}
+                                {user?.role === 'parent'
+                                    ? (conv.admin_role === 'comptabilite' ? '💰' : '🏢')
+                                    : (conv.parent?.nom?.charAt(0) || 'P')}
                             </div>
                             <div className="flex-1 text-left overflow-hidden">
                                 <div className="flex justify-between items-center mb-0.5">
                                     <span className="font-bold text-slate-800 text-sm truncate">
-                                        {user?.role === 'parent' ? (conv.admin_role === 'comptabilite' ? 'Comptabilité' : 'Administration') : conv.parent?.nom}
+                                        {user?.role === 'parent' ? (conv.admin_role === 'comptabilite' ? 'Comptabilité' : 'Administration') : (conv.parent?.nom || 'Parent inconnu')}
                                     </span>
                                     <span className="text-[10px] text-slate-400">
-                                        {format(new Date(conv.updated_at), 'HH:mm')}
+                                        {conv.updated_at ? format(new Date(conv.updated_at), 'HH:mm') : '--:--'}
                                     </span>
                                 </div>
                                 <p className="text-xs text-slate-500 truncate">{conv.last_message}</p>
@@ -206,9 +208,12 @@ export const ChatWindow: React.FC = () => {
                                 </div>
                                 <div>
                                     <h4 className="font-bold text-slate-800 text-sm leading-tight">
-                                        {user?.role === 'parent' ? (activeConv.admin_role === 'comptabilite' ? 'Comptabilité' : 'Administration') : activeConv.parent?.nom}
+                                        {user?.role === 'parent' ? (activeConv.admin_role === 'comptabilite' ? 'Comptabilité' : 'Administration') : (activeConv.parent?.nom || 'Parent inconnu')}
                                     </h4>
-                                    <p className="text-[10px] text-emerald-500 font-medium">En ligne</p>
+                                    <p className="text-[10px] text-emerald-500 font-medium tracking-tight flex items-center gap-1">
+                                        <span className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
+                                        En ligne
+                                    </p>
                                 </div>
                             </div>
 
@@ -249,8 +254,8 @@ export const ChatWindow: React.FC = () => {
                                             ) : null}
                                             {msg.message_text && <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.message_text}</p>}
                                             <div className={`flex items-center justify-end gap-1 mt-1 ${isMe ? 'text-blue-100' : 'text-slate-400'}`}>
-                                                <span className="text-[9px] font-medium">
-                                                    {format(new Date(msg.created_at), 'HH:mm')}
+                                                <span className="text-[9px] font-medium tracking-tighter">
+                                                    {msg.created_at ? format(new Date(msg.created_at), 'HH:mm') : '--:--'}
                                                 </span>
                                                 {isMe && (
                                                     msg.read_status ? <CheckCheck className="w-3 h-3" /> : <Check className="w-3 h-3" />

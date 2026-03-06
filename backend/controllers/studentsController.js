@@ -141,4 +141,28 @@ async function _autoAssignBadges(parentId, studentId) {
     }
 }
 
-module.exports = { listStudents, linkStudentToParent };
+async function unlinkStudentFromParent(req, res) {
+    const { id: parentId } = req.user;
+    const { studentId } = req.params;
+
+    if (!studentId) {
+        return res.status(400).json({ error: "studentId est requis." });
+    }
+
+    try {
+        const { error } = await supabase
+            .from('parent_student')
+            .delete()
+            .eq('parent_id', parentId)
+            .eq('student_id', studentId);
+
+        if (error) throw error;
+
+        return res.json({ message: "Enfant retiré avec succès." });
+    } catch (err) {
+        console.error('Unlink Error:', err.message);
+        return res.status(500).json({ error: 'Erreur lors de la suppression du lien.' });
+    }
+}
+
+module.exports = { listStudents, linkStudentToParent, unlinkStudentFromParent };
