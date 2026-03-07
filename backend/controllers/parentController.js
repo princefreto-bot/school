@@ -203,11 +203,6 @@ async function getParentById(req, res) {
         return res.status(500).json({ error: err.message });
     }
 }
-    } catch (err) {
-        console.error('❌ [ParentById] handler error:', err);
-        return res.status(500).json({ error: err.message });
-    }
-}
 
 async function adminDeleteAccount(req, res) {
     const { parentId } = req.params;

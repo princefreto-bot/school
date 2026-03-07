@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useStore } from '../../store/useStore';
 import { parentApi } from '../../services/parentApi';
 import { Clock, Download, Loader2, AlertCircle } from 'lucide-react';
 import { jsPDF } from 'jspdf';

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { CLASSES } from '../types';
+import { CLASSES_BY_CYCLE, StatusPaiement } from '../types';
 import { formatMontant, getStatusPaiement, generateWhatsAppLink } from '../utils/helpers';
 import { generateReceipt, generateClassReport, generateNonSoldesReport } from '../utils/pdfService';
 import {
@@ -17,7 +17,7 @@ export const Reports = () => {
   const { students, settings } = useStore();
   const [selectedClasse, setSelectedClasse] = useState('');
 
-  const allClasses = [...CLASSES.Primaire, ...CLASSES.Collège, ...CLASSES.Lycée];
+  const allClasses = [...CLASSES_BY_CYCLE.Primaire, ...CLASSES_BY_CYCLE.Collège, ...CLASSES_BY_CYCLE.Lycée];
   const nonSoldes = students.filter(s => s.restant > 0);
   const classStudents = selectedClasse ? students.filter(s => s.classe === selectedClasse) : [];
 
@@ -109,13 +109,13 @@ export const Reports = () => {
                 <div className="border rounded-lg max-h-64 overflow-y-auto">
                   {classStudents.map(student => {
                     const status = getStatusPaiement(student, settings.seuilDeuxiemeTranche);
-                    const statusColors = {
+                    const statusColors: Record<StatusPaiement, string> = {
                       solde: 'bg-green-100 text-green-800',
                       tranche_validee: 'bg-blue-100 text-blue-800',
                       tranche_partielle: 'bg-yellow-100 text-yellow-800',
                       non_solde: 'bg-red-100 text-red-800'
                     };
-                    const statusLabels = {
+                    const statusLabels: Record<StatusPaiement, string> = {
                       solde: 'Soldé',
                       tranche_validee: '2ème Tranche OK',
                       tranche_partielle: 'Partiel',

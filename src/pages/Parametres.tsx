@@ -1,11 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useStore } from '../store/useStore';
-import { syncToBackend } from '../services/backendSync';
 import {
   Save, School, MessageSquare, Shield, Info,
   Upload, X, Image, Code2, ChevronDown, ChevronRight,
-  Palette, Type, FileText, Database, Globe, RefreshCcw,
-  CheckCircle2, AlertCircle
+  Palette, Type, FileText, Database,
+  AlertCircle
 } from 'lucide-react';
 
 // ── Composant accordéon pour le guide développeur ───────────
@@ -71,10 +70,6 @@ export const Parametres: React.FC = () => {
   const [logoPreview, setLogoPreview] = useState<string | null>(schoolLogo);
   const [logoError, setLogoError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
-
-  // États pour la sync
-  const [syncing, setSyncing] = useState(false);
-  const [syncSuccess, setSyncSuccess] = useState(false);
 
   // ── Gestion upload logo PNG ────────────────────────────────
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

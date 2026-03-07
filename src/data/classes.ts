@@ -1,4 +1,8 @@
-import { ClassInfo } from '../types';
+interface ClassInfo {
+  nom: string;
+  cycle: 'Primaire' | 'Collège' | 'Lycée';
+  ecolage: number;
+}
 
 export const CLASSES: ClassInfo[] = [
   // Primaire

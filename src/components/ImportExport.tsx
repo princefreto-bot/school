@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { importExcel, exportToExcel, exportNonSoldesToExcel, exportClassToExcel } from '../utils/excelService';
-import { CLASSES } from '../types';
+import { CLASSES_BY_CYCLE as CLASSES } from '../types';
 import { 
   Upload, 
   Download, 

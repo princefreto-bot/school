@@ -2,7 +2,6 @@
 // COMPOSANT — Inscription Parent
 // ============================================================
 import React, { useState } from 'react';
-import { useStore } from '../store/useStore';
 import { parentApi } from '../services/parentApi';
 import { User, Phone, Lock, AlertCircle, ArrowLeft, CheckCircle } from 'lucide-react';
 

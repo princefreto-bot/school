@@ -1,5 +1,3 @@
-import { API_BASE_URL } from '../config';
-
 /**
  * Parse a Response as JSON and provide a clear error when the body is invalid.
  */

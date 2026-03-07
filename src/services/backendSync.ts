@@ -4,7 +4,7 @@
 // ============================================================
 
 import { BACKEND_URL } from '../config';
-import { parseResponse, getAuthHeaders } from './apiHelpers';
+import { getAuthHeaders } from './apiHelpers';
 
 import { AppState } from '../store/useStore';
 

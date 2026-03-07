@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useStore } from '../store/useStore';
-import { Student, CLASSES, Payment } from '../types';
+import { Student, Payment } from '../types';
+import { CLASSES_BY_CYCLE as CLASSES } from '../types';
 import { 
   getStatusPaiement, 
   getStatusLabel, 
@@ -505,10 +506,12 @@ const PaymentModal = ({ student, onClose, onSave }: PaymentModalProps) => {
     e.preventDefault();
     onSave({
       id: generateId(),
+      studentId: student.id,
       date: new Date().toISOString(),
       montant: Math.min(montant, student.restant),
       methode,
-      reference: reference || `PAY-${Date.now()}`
+      reference: reference || `PAY-${Date.now()}`,
+      recu: `REC-${Date.now()}`
     });
   };
 
@@ -627,7 +630,7 @@ const HistoryModal = ({ student, onClose }: { student: Student; onClose: () => v
           </div>
 
           <div className="overflow-y-auto max-h-60">
-            {student.paiements.length === 0 ? (
+            {!student.paiements || student.paiements.length === 0 ? (
               <p className="text-center text-gray-400 py-8">Aucun paiement enregistré</p>
             ) : (
               <div className="space-y-3">

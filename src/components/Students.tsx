@@ -4,6 +4,7 @@ import { parseExcelFile, exportToExcel } from '../utils/excelUtils';
 import { generateReceipt, generateStudentCard } from '../utils/pdfUtils';
 import { Student, Payment } from '../types';
 import { CLASSES } from '../data/classes';
+import { formatMontant, getCycleFromClasse, getEcolageFromClasse } from '../utils/helpers';
 import {
   Search,
   Upload,
@@ -176,8 +177,13 @@ export default function Students() {
         dejaPaye: formData.dejaPaye || 0,
         restant,
         recu: formData.recu || '',
+        cycle: getCycleFromClasse(formData.classe || ''),
+        status: restant === 0 ? 'Soldé' : restant <= ecolage * 0.3 ? 'Non soldé' : 'Partiel',
+        historiquesPaiements: [],
+        paiements: [],
         dateInscription: new Date().toISOString().split('T')[0],
-        paiements: []
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
       addStudent(newStudent);
     }
@@ -192,11 +198,13 @@ export default function Students() {
 
     const payment: Payment = {
       id: `payment-${Date.now()}`,
+      studentId: selectedStudent.id,
       date: new Date().toISOString().split('T')[0],
       montant: paymentData.montant || 0,
       mode: (paymentData.mode as Payment['mode']) || 'Espèces',
       reference: paymentData.reference || '',
-      commentaire: paymentData.commentaire || ''
+      commentaire: paymentData.commentaire || '',
+      recu: `REC-${Date.now()}`
     };
 
     addPayment(selectedStudent.id, payment);

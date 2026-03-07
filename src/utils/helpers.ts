@@ -1,4 +1,4 @@
-import { Student, StatusPaiement, DashboardStats, ClassStats, CLASSES, ECOLAGE_PAR_CLASSE } from '../types';
+import { Student, StatusPaiement, DashboardStats, ClassStats, CLASSES_BY_CYCLE as CLASSES, ECOLAGE_PAR_CLASSE } from '../types';
 
 export const generateId = (): string => {
   return Math.random().toString(36).substring(2, 15) + Date.now().toString(36);

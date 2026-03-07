@@ -3,7 +3,7 @@
 // ============================================================
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Student, User, AppPage, Payment, Parent } from '../types';
+import { Student, User, AppPage, Payment, Parent, AppSettings } from '../types';
 import { API_BASE_URL } from '../config';
 import { getEcolage, getCycle } from '../data/classConfig';
 import { v4 as uuid } from '../utils/uuid';
@@ -63,6 +63,8 @@ export interface AppState {
   setMessageRemerciement: (m: string) => void;
   messageRappel: string;
   setMessageRappel: (m: string) => void;
+  settings: AppSettings;
+  updateSettings: (settings: AppSettings) => void;
 }
 
 // Authentification gérée par Supabase
@@ -246,6 +248,22 @@ export const useStore = create<AppState>()(
       messageRappel:
         "Nous vous rappelons cordialement que le règlement du solde de scolarité est attendu. Veuillez régulariser votre situation dans les meilleurs délais.",
       setMessageRappel: (m) => set({ messageRappel: m }),
+      settings: {
+        seuilDeuxiemeTranche: 70,
+        schoolName: 'Établissement Scolaire',
+        schoolYear: '2024-2025',
+        messageRemerciement: "Nous vous remercions sincèrement pour votre ponctualité dans le règlement de la scolarité. Votre soutien contribue au bon fonctionnement de notre établissement.",
+        messageRappel: "Nous vous rappelons cordialement que le règlement du solde de scolarité est attendu. Veuillez régulariser votre situation dans les meilleurs délais.",
+        currency: 'FCFA',
+        nomEcole: 'Établissement Scolaire',
+        anneScolaire: '2024-2025',
+        adresse: 'Adresse de l\'établissement',
+        telephone: '+225 XX XX XX XX',
+        email: 'contact@ecole.ci',
+        badgeParentResponsable: 'Parent Responsable',
+        badge2emeTranche: '2ème Tranche Validée'
+      },
+      updateSettings: (newSettings) => set({ settings: newSettings }),
     }),
     {
       name: 'edufinance-storage',
