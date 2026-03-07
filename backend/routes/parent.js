@@ -6,6 +6,7 @@ const {
     getBadges,
     getActiveParentsCount,
     getAllParents,
+    getParentById,
     adminDeleteAccount
 } = require('../controllers/parentController');
 
@@ -17,6 +18,7 @@ router.get('/payments/:studentId', getPayments);
 router.get('/badges', getBadges);
 router.get('/active-count', getActiveParentsCount);
 router.get('/list', getAllParents);
+router.get('/:id', getParentById);
 router.delete('/:parentId', adminDeleteAccount);
 
 module.exports = router;

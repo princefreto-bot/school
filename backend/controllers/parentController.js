@@ -166,16 +166,63 @@ async function getAllParents(req, res) {
     }
 }
 
+/**
+ * GET /api/parent/:id
+ * Get a specific parent by ID (for admin purposes)
+ */
+async function getParentById(req, res) {
+    const { id } = req.params;
+    const { role } = req.user;
+
+    // Only admin can access this
+    if (role !== 'directeur' && role !== 'comptable') {
+        return res.status(403).json({ error: 'Permission refusée.' });
+    }
+
+    try {
+        console.log(`🔍 [ParentById] fetching parent ${id}`);
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, nom, telephone, created_at, role')
+            .eq('id', id)
+            .eq('role', 'parent')
+            .single();
+
+        if (error) {
+            console.error('❌ [ParentById] Supabase error:', error.message);
+            if (error.code === 'PGRST116') { // No rows returned
+                return res.status(404).json({ error: 'Parent non trouvé.' });
+            }
+            throw error;
+        }
+
+        console.log(`✅ [ParentById] found parent: ${data.nom}`);
+        return res.json({ success: true, data });
+    } catch (err) {
+        console.error('❌ [ParentById] handler error:', err);
+        return res.status(500).json({ error: err.message });
+    }
+}
+    } catch (err) {
+        console.error('❌ [ParentById] handler error:', err);
+        return res.status(500).json({ error: err.message });
+    }
+}
+
 async function adminDeleteAccount(req, res) {
     const { parentId } = req.params;
     const { role } = req.user;
 
+    console.log(`🗑️ [AdminDelete] Attempting to delete parent ${parentId} by role ${role}`);
+
     // Seul le directeur peut supprimer des comptes
     if (role !== 'directeur') {
+        console.warn(`⚠️ [AdminDelete] Permission denied for role ${role}`);
         return res.status(403).json({ error: 'Permission refusée. Seul le Directeur Général peut supprimer des comptes.' });
     }
 
     try {
+        console.log(`🗑️ [AdminDelete] Deleting parent ${parentId} from profiles`);
         const { error } = await supabase
             .from('profiles')
             .delete()
@@ -183,10 +230,16 @@ async function adminDeleteAccount(req, res) {
             .neq('role', 'directeur') // Sécurité : ne peut pas s'auto-supprimer via cette route
             .neq('role', 'comptable'); // Sécurité : ne peut pas supprimer le comptable général
 
-        if (error) throw error;
+        if (error) {
+            console.error('❌ [AdminDelete] Supabase error:', error.message);
+            throw error;
+        }
+
+        console.log(`✅ [AdminDelete] Parent ${parentId} deleted successfully`);
         return res.json({ message: 'Compte supprimé par l\'administrateur.' });
     } catch (err) {
-        return res.status(500).json({ error: err.message });
+        console.error('💥 [AdminDelete] Fatal error:', err.message);
+        return res.status(500).json({ error: 'Erreur lors de la suppression: ' + err.message });
     }
 }
 
@@ -196,5 +249,6 @@ module.exports = {
     getBadges,
     getActiveParentsCount,
     getAllParents,
+    getParentById,
     adminDeleteAccount
 };

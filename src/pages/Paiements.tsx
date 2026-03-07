@@ -3,11 +3,11 @@
 // ============================================================
 import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { Student, Payment } from '../types';
-import { CreditCard, Plus, X, Check, Search, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Student, Payment, User } from '../types';
+import { CreditCard, Plus, X, Check, Search, Clock, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import { API_BASE_URL } from '../config';
-import { parseResponse } from '../services/apiHelpers';
+import { parseResponse, getAuthHeaders } from '../services/apiHelpers';
 import { getCycle } from '../data/classConfig';
 
 // utility used when normalizing students from backend
@@ -93,7 +93,9 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
 };
 
 // ── Ligne d'historique d'un élève ─────────────────────────────
-const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => void }> = ({ student, onPay }) => {
+const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => void; user: User | null }> = ({ student, onPay, user }) => {
+  if (!user) return null; // Guard against undefined user
+
   const [open, setOpen] = useState(false);
   const taux = Math.round((student.dejaPaye / student.ecolage) * 100);
 
@@ -169,6 +171,16 @@ export const Paiements: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState('');
   const [payModal, setPayModal] = useState<Student | null>(null);
 
+  // Guard: if user is not loaded, show loading
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" />
+        <p>Chargement des informations utilisateur...</p>
+      </div>
+    );
+  }
+
   const filtered = useMemo(() => {
     let list = [...students];
     if (search) {
@@ -188,36 +200,48 @@ export const Paiements: React.FC = () => {
   useEffect(() => {
     if (students.length === 0) {
       setLoading(true);
-      fetch(`${API_BASE_URL}/students`, { headers: { 'Content-Type': 'application/json' } })
-        .then((res) => parseResponse(res).then((d) => ({ res, data: d })))
-        .then(({ res, data }) => {
-          if (!res.ok) throw data;
+      fetch(`${API_BASE_URL}/students`, { headers: getAuthHeaders() })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+          return parseResponse(res);
+        })
+        .then((data) => {
           if (data && Array.isArray(data.students)) {
-            const normalized: Student[] = data.students.map((s: any) => {
-              const ecolage = s.ecolage || 0;
-              const dejaPaye = s.deja_paye ?? 0;
-              const restantVal = typeof s.restant === 'number' ? s.restant : ecolage - dejaPaye;
-              return {
-                id: s.id,
-                nom: s.nom,
-                prenom: s.prenom,
-                classe: s.classe,
-                telephone: s.telephone || s.telephone_parent || '',
-                parentId: s.parent_id || undefined,
-                sexe: s.sexe || 'M',
-                redoublant: s.redoublant || false,
-                ecoleProvenance: s.ecole_provenance || '',
-                ecolage,
-                dejaPaye,
-                restant: restantVal,
-                recu: s.recu || '',
-                cycle: getCycle(s.classe),
-                status: computeStatus(restantVal, ecolage),
-                historiquesPaiements: s.historiques_paiements || [],
-                createdAt: s.created_at || new Date().toISOString(),
-                updatedAt: s.updated_at || new Date().toISOString(),
-              };
-            });
+            const normalized: Student[] = data.students
+              .filter((s: any) => s && typeof s === 'object' && s.id) // filter invalid items
+              .map((s: any) => {
+                try {
+                  const ecolage = s.ecolage || 0;
+                  const dejaPaye = s.deja_paye ?? 0;
+                  const restantVal = typeof s.restant === 'number' ? s.restant : ecolage - dejaPaye;
+                  return {
+                    id: s.id,
+                    nom: s.nom,
+                    prenom: s.prenom || '',
+                    classe: s.classe || 'Inconnue',
+                    telephone: s.telephone || s.telephone_parent || '',
+                    parentId: s.parent_id || undefined,
+                    sexe: s.sexe || 'M',
+                    redoublant: s.redoublant || false,
+                    ecoleProvenance: s.ecole_provenance || '',
+                    ecolage,
+                    dejaPaye,
+                    restant: restantVal,
+                    recu: s.recu || '',
+                    cycle: getCycle(s.classe),
+                    status: computeStatus(restantVal, ecolage),
+                    historiquesPaiements: s.historiques_paiements || [],
+                    createdAt: s.created_at || new Date().toISOString(),
+                    updatedAt: s.updated_at || new Date().toISOString(),
+                  };
+                } catch (err) {
+                  console.warn('Failed to normalize student:', s, err);
+                  return null;
+                }
+              })
+              .filter(Boolean); // remove nulls
             setStudents(normalized);
           }
         })
@@ -292,7 +316,7 @@ export const Paiements: React.FC = () => {
           <p className="text-sm text-gray-500">{filtered.length} élève(s) — Cliquez sur une ligne pour voir l'historique</p>
           <div className="space-y-2">
             {filtered.map((s) => (
-              <StudentPaymentRow key={s.id} student={s} onPay={setPayModal} />
+              <StudentPaymentRow key={s.id} student={s} onPay={setPayModal} user={user} />
             ))}
           </div>
         </>
