@@ -231,10 +231,10 @@ export default function Students() {
   const uniqueClasses = [...new Set(students.map(s => s.classe))].sort();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header actions */}
-      <div className="flex flex-wrap gap-4 items-center justify-between">
-        <div className="flex flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
           <input
             type="file"
             ref={fileInputRef}
@@ -245,37 +245,40 @@ export default function Students() {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isLoading}
-            className="btn btn-primary"
+            className="px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium shadow-sm hover:bg-blue-700 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all inline-flex items-center justify-center gap-2 text-sm"
           >
             <Upload className="w-4 h-4" />
-            {isLoading ? 'Importation...' : 'Importer Excel'}
+            <span className="hidden sm:inline">{isLoading ? 'Importation...' : 'Importer Excel'}</span>
+            <span className="sm:hidden">{isLoading ? '...' : 'Import'}</span>
           </button>
           <button
             onClick={handleExport}
             disabled={students.length === 0}
-            className="btn btn-secondary"
+            className="px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-medium shadow-sm hover:bg-gray-300 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all inline-flex items-center justify-center gap-2 text-sm"
           >
             <Download className="w-4 h-4" />
-            Exporter
+            <span className="hidden sm:inline">Exporter</span>
+            <span className="sm:hidden">Export</span>
           </button>
           <button
             onClick={openAddModal}
-            className="btn btn-success"
+            className="px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium shadow-sm hover:bg-green-700 hover:shadow-md transition-all inline-flex items-center justify-center gap-2 text-sm"
           >
             <Plus className="w-4 h-4" />
-            Ajouter
+            <span className="hidden sm:inline">Ajouter</span>
+            <span className="sm:hidden">+</span>
           </button>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm">
-          <Users className="w-5 h-5 text-blue-500" />
-          <span className="text-gray-600">
+        <div className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-white rounded-xl shadow-sm border border-gray-100">
+          <Users className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+          <span className="text-xs sm:text-sm text-gray-600">
             <span className="font-bold text-gray-800">{filteredStudents.length}</span> élève(s) sur <span className="font-bold">{students.length}</span>
           </span>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="card p-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
             <Filter className="w-5 h-5 text-blue-600" />
@@ -326,7 +329,7 @@ export default function Students() {
       </div>
 
       {/* Students table */}
-      <div className="card overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
         {filteredStudents.length === 0 ? (
           <div className="p-12 text-center">
             <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl flex items-center justify-center">
@@ -358,16 +361,16 @@ export default function Students() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 sticky top-0">
                 <tr>
-                  <th className="text-left py-4 px-4 font-semibold text-gray-700">Élève</th>
-                  <th className="text-left py-4 px-4 font-semibold text-gray-700">Classe</th>
-                  <th className="text-left py-4 px-4 font-semibold text-gray-700">Téléphone</th>
-                  <th className="text-right py-4 px-4 font-semibold text-gray-700">Écolage</th>
-                  <th className="text-right py-4 px-4 font-semibold text-gray-700">Payé</th>
-                  <th className="text-right py-4 px-4 font-semibold text-gray-700">Restant</th>
-                  <th className="text-center py-4 px-4 font-semibold text-gray-700">Statut</th>
-                  <th className="text-center py-4 px-4 font-semibold text-gray-700">Actions</th>
+                  <th className="text-left py-3 sm:py-4 px-3 sm:px-4 font-semibold text-xs sm:text-sm text-gray-700">Élève</th>
+                  <th className="text-left py-3 sm:py-4 px-3 sm:px-4 font-semibold text-xs sm:text-sm text-gray-700 hidden md:table-cell">Classe</th>
+                  <th className="text-left py-3 sm:py-4 px-3 sm:px-4 font-semibold text-xs sm:text-sm text-gray-700 hidden lg:table-cell">Téléphone</th>
+                  <th className="text-right py-3 sm:py-4 px-3 sm:px-4 font-semibold text-xs sm:text-sm text-gray-700 hidden sm:table-cell">Écolage</th>
+                  <th className="text-right py-3 sm:py-4 px-3 sm:px-4 font-semibold text-xs sm:text-sm text-gray-700 hidden sm:table-cell">Payé</th>
+                  <th className="text-right py-3 sm:py-4 px-3 sm:px-4 font-semibold text-xs sm:text-sm text-gray-700">Restant</th>
+                  <th className="text-center py-3 sm:py-4 px-3 sm:px-4 font-semibold text-xs sm:text-sm text-gray-700">Statut</th>
+                  <th className="text-center py-3 sm:py-4 px-3 sm:px-4 font-semibold text-xs sm:text-sm text-gray-700">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -377,36 +380,35 @@ export default function Students() {
                     className="hover:bg-blue-50/50 transition-colors cursor-pointer"
                     style={{animationDelay: `${index * 0.02}s`}}
                   >
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg flex-shrink-0 ${
+                    <td className="py-3 sm:py-4 px-3 sm:px-4">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center text-white font-bold text-xs sm:text-sm shadow-md flex-shrink-0 ${
                           student.sexe === 'F' 
                             ? 'bg-gradient-to-br from-pink-400 to-rose-500' 
                             : 'bg-gradient-to-br from-blue-400 to-indigo-500'
                         }`}>
                           {student.nom.charAt(0)}{student.prenom.charAt(0)}
                         </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-gray-800 truncate">{student.nom} {student.prenom}</p>
-                          <p className="text-xs text-gray-400 flex items-center gap-1">
-                            {student.sexe === 'F' ? '👩' : '👨'} {student.sexe === 'F' ? 'Fille' : 'Garçon'}
-                            {student.redoublant && <span className="text-amber-500 ml-1">• R</span>}
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-gray-800 text-sm truncate">{student.nom} {student.prenom}</p>
+                          <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                            {student.classe}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 sm:py-4 px-3 sm:px-4 hidden md:table-cell">
                       <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-100 text-blue-700">
                         {student.classe}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-600 text-sm">{student.telephone || '—'}</td>
-                    <td className="py-3 px-4 text-right font-medium text-gray-700 text-sm">{formatMoney(student.ecolage)}</td>
-                    <td className="py-3 px-4 text-right font-semibold text-green-600 text-sm">{formatMoney(student.dejaPaye)}</td>
-                    <td className="py-3 px-4 text-right font-semibold text-red-600 text-sm">
+                    <td className="py-3 sm:py-4 px-3 sm:px-4 text-gray-600 text-xs sm:text-sm hidden lg:table-cell">{student.telephone || '—'}</td>
+                    <td className="py-3 sm:py-4 px-3 sm:px-4 text-right font-medium text-gray-700 text-xs sm:text-sm hidden sm:table-cell">{formatMoney(student.ecolage)}</td>
+                    <td className="py-3 sm:py-4 px-3 sm:px-4 text-right font-semibold text-green-600 text-xs sm:text-sm hidden sm:table-cell">{formatMoney(student.dejaPaye)}</td>
+                    <td className="py-3 sm:py-4 px-3 sm:px-4 text-right font-semibold text-red-600 text-xs sm:text-sm">
                       {student.restant === 0 ? '—' : formatMoney(student.restant)}
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-3 sm:py-4 px-3 sm:px-4 text-center">
                       {student.restant === 0 ? (
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
                           ✓ Soldé
@@ -421,11 +423,11 @@ export default function Students() {
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center justify-center gap-1">
+                    <td className="py-3 sm:py-4 px-3 sm:px-4">
+                      <div className="flex items-center justify-center gap-0.5 sm:gap-1">
                         <button
                           onClick={(e) => openDetailModal(student, e)}
-                          className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
+                          className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                           title="Voir détails"
                         >
                           <Eye className="w-4 h-4" />

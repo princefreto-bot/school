@@ -65,16 +65,16 @@ export const ImportExport = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">Import / Export Excel</h1>
-        <p className="text-gray-500">Gérez vos données élèves via fichiers Excel</p>
+    <div className="p-4 sm:p-6 space-y-6">
+      <div className="page-header">
+        <h1>Import / Export Excel</h1>
+        <p className="text-gray-500 text-sm sm:text-base">Gérez vos données élèves via fichiers Excel</p>
       </div>
 
       {/* Message */}
       {message && (
-        <div className={`p-4 rounded-lg flex items-center gap-3 ${
-          message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+        <div className={`p-3 sm:p-4 rounded-lg flex items-center gap-2 sm:gap-3 text-sm sm:text-base ${
+          message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
         }`}>
           {message.type === 'success' ? (
             <CheckCircle2 className="w-5 h-5" />
@@ -85,85 +85,90 @@ export const ImportExport = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Import Section */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Upload className="w-5 h-5" />
-            Importer un fichier Excel
-          </h2>
-
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleFileChange}
-              className="hidden"
-              id="excel-upload"
-            />
-            <label 
-              htmlFor="excel-upload"
-              className="cursor-pointer"
-            >
-              {importing ? (
-                <div className="flex flex-col items-center">
-                  <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
-                  <p className="text-gray-600">Importation en cours...</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center">
-                  <FileSpreadsheet className="w-12 h-12 text-gray-400 mb-4" />
-                  <p className="text-gray-600 mb-2">Cliquez ou déposez un fichier Excel</p>
-                  <p className="text-sm text-gray-400">.xlsx ou .xls</p>
-                </div>
-              )}
-            </label>
+        <div className="card">
+          <div className="card-header">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Upload className="w-5 h-5" />
+              Importer un fichier Excel
+            </h2>
           </div>
+          <div className="card-body space-y-4">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center hover:border-blue-400 hover:bg-blue-50/30 transition">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileChange}
+                className="hidden"
+                id="excel-upload"
+              />
+              <label
+                htmlFor="excel-upload"
+                className="cursor-pointer"
+              >
+                {importing ? (
+                  <div className="flex flex-col items-center">
+                    <Loader2 className="w-10 sm:w-12 h-10 sm:h-12 text-blue-500 animate-spin mb-2 sm:mb-4" />
+                    <p className="text-sm sm:text-base text-gray-600">Importation en cours...</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <FileSpreadsheet className="w-10 sm:w-12 h-10 sm:h-12 text-gray-400 mb-2 sm:mb-4" />
+                    <p className="text-sm sm:text-base text-gray-600 mb-1 sm:mb-2">Cliquez ou déposez un fichier Excel</p>
+                    <p className="text-xs sm:text-sm text-gray-400">.xlsx ou .xls</p>
+                  </div>
+                )}
+              </label>
+            </div>
 
-          <div className="mt-6 bg-blue-50 rounded-lg p-4">
-            <h3 className="font-medium text-blue-800 mb-2">Format attendu:</h3>
-            <ul className="text-sm text-blue-700 space-y-1">
-              <li>• Colonne B: NOMS</li>
-              <li>• Colonne C: PRÉNOMS</li>
-              <li>• Colonne D: CLASSE</li>
-              <li>• Colonne E: TELEPHONE</li>
-              <li>• Colonne F: SEXE (M/F)</li>
-              <li>• Colonne G: REDOUBLANT (Oui/Non)</li>
-              <li>• Colonne H: ÉCOLE DE PROVENANCE</li>
-              <li>• Colonne I: ÉCOLAGE</li>
-              <li>• Colonne J: DÉJÀ PAYÉ</li>
-              <li>• Colonne K: RESTANT (ou "SOLDE")</li>
-              <li>• Colonne L: REÇU</li>
-            </ul>
-            <p className="text-xs text-blue-600 mt-2">* Les données commencent à la ligne 2</p>
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 sm:p-4">
+              <h3 className="font-medium text-blue-800 mb-2 text-sm sm:text-base">Format attendu:</h3>
+              <ul className="text-xs sm:text-sm text-blue-700 space-y-0.5 sm:space-y-1">
+                <li>• Colonne B: NOMS</li>
+                <li>• Colonne C: PRÉNOMS</li>
+                <li>• Colonne D: CLASSE</li>
+                <li>• Colonne E: TELEPHONE</li>
+                <li>• Colonne F: SEXE (M/F)</li>
+                <li>• Colonne G: REDOUBLANT (Oui/Non)</li>
+                <li>• Colonne H: ÉCOLE DE PROVENANCE</li>
+                <li>• Colonne I: ÉCOLAGE</li>
+                <li>• Colonne J: DÉJÀ PAYÉ</li>
+                <li>• Colonne K: RESTANT (ou "SOLDE")</li>
+                <li>• Colonne L: REÇU</li>
+              </ul>
+              <p className="text-xs text-blue-600 mt-2">* Les données commencent à la ligne 2</p>
+            </div>
           </div>
         </div>
 
         {/* Export Section */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Download className="w-5 h-5" />
-            Exporter les données
-          </h2>
-
-          <div className="space-y-4">
+        {/* Export Section */}
+        <div className="card">
+          <div className="card-header">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              Exporter les données
+            </h2>
+          </div>
+          <div className="card-body space-y-3 sm:space-y-4">
             {/* Export All */}
-            <div className="p-4 border rounded-lg hover:bg-gray-50 transition">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className="p-3 sm:p-4 border border-gray-100 rounded-lg hover:bg-gray-50 hover:shadow-sm transition">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Users className="w-5 h-5 text-green-600" />
                   </div>
                   <div>
-                    <p className="font-medium">Tous les élèves</p>
-                    <p className="text-sm text-gray-500">{students.length} élèves</p>
+                    <p className="font-medium text-sm sm:text-base">Tous les élèves</p>
+                    <p className="text-xs sm:text-sm text-gray-500">{students.length} élèves</p>
                   </div>
                 </div>
                 <button
                   onClick={() => exportToExcel(students, 'tous_les_eleves.xlsx')}
                   disabled={students.length === 0}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="btn-success text-xs sm:text-sm whitespace-nowrap"
                 >
                   <FileDown className="w-4 h-4" />
                   Exporter
@@ -172,15 +177,15 @@ export const ImportExport = () => {
             </div>
 
             {/* Export Non-Soldés */}
-            <div className="p-4 border rounded-lg hover:bg-gray-50 transition">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+            <div className="p-3 sm:p-4 border border-gray-100 rounded-lg hover:bg-gray-50 hover:shadow-sm transition">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
                     <AlertTriangle className="w-5 h-5 text-red-600" />
                   </div>
                   <div>
-                    <p className="font-medium">Élèves non soldés</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium text-sm sm:text-base">Élèves non soldés</p>
+                    <p className="text-xs sm:text-sm text-gray-500">
                       {students.filter(s => s.restant > 0).length} élèves
                     </p>
                   </div>
@@ -188,7 +193,7 @@ export const ImportExport = () => {
                 <button
                   onClick={() => exportNonSoldesToExcel(students)}
                   disabled={students.filter(s => s.restant > 0).length === 0}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="btn-danger text-xs sm:text-sm whitespace-nowrap"
                 >
                   <FileDown className="w-4 h-4" />
                   Exporter
@@ -197,25 +202,25 @@ export const ImportExport = () => {
             </div>
 
             {/* Export by Class */}
-            <div className="p-4 border rounded-lg">
-              <p className="font-medium mb-3">Exporter par classe</p>
-              <div className="flex gap-3">
+            <div className="p-3 sm:p-4 border border-gray-100 rounded-lg">
+              <p className="font-medium text-sm sm:text-base mb-3">Exporter par classe</p>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <select
                   value={selectedClasse}
                   onChange={(e) => setSelectedClasse(e.target.value)}
-                  className="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 border border-gray-300 text-sm px-3 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Sélectionner une classe</option>
                   {allClasses.map(c => (
                     <option key={c} value={c}>
-                      {c} ({students.filter(s => s.classe === c).length} élèves)
+                      {c} ({students.filter(s => s.classe === c).length})
                     </option>
                   ))}
                 </select>
                 <button
                   onClick={() => selectedClasse && exportClassToExcel(students, selectedClasse)}
                   disabled={!selectedClasse}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="btn-primary text-xs sm:text-sm whitespace-nowrap"
                 >
                   <FileDown className="w-4 h-4" />
                   Exporter
@@ -227,31 +232,34 @@ export const ImportExport = () => {
       </div>
 
       {/* Statistics */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Statistiques actuelles</h2>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <p className="text-3xl font-bold text-blue-900">{students.length}</p>
-            <p className="text-sm text-blue-700">Total élèves</p>
-          </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <p className="text-3xl font-bold text-green-600">
-              {students.filter(s => s.restant === 0).length}
-            </p>
-            <p className="text-sm text-green-700">Élèves soldés</p>
-          </div>
-          <div className="text-center p-4 bg-red-50 rounded-lg">
-            <p className="text-3xl font-bold text-red-600">
-              {students.filter(s => s.restant > 0).length}
-            </p>
-            <p className="text-sm text-red-700">Non soldés</p>
-          </div>
-          <div className="text-center p-4 bg-purple-50 rounded-lg">
-            <p className="text-3xl font-bold text-purple-600">
-              {new Set(students.map(s => s.classe)).size}
-            </p>
-            <p className="text-sm text-purple-700">Classes</p>
+      <div className="card">
+        <div className="card-header">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-800">Statistiques actuelles</h2>
+        </div>
+        <div className="card-body">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <div className="text-center p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-100">
+              <p className="text-2xl sm:text-3xl font-bold text-blue-900">{students.length}</p>
+              <p className="text-xs sm:text-sm text-blue-700 mt-1">Total élèves</p>
+            </div>
+            <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg border border-green-100">
+              <p className="text-2xl sm:text-3xl font-bold text-green-600">
+                {students.filter(s => s.restant === 0).length}
+              </p>
+              <p className="text-xs sm:text-sm text-green-700 mt-1">Élèves soldés</p>
+            </div>
+            <div className="text-center p-3 sm:p-4 bg-red-50 rounded-lg border border-red-100">
+              <p className="text-2xl sm:text-3xl font-bold text-red-600">
+                {students.filter(s => s.restant > 0).length}
+              </p>
+              <p className="text-xs sm:text-sm text-red-700 mt-1">Non soldés</p>
+            </div>
+            <div className="text-center p-3 sm:p-4 bg-purple-50 rounded-lg border border-purple-100">
+              <p className="text-2xl sm:text-3xl font-bold text-purple-600">
+                {new Set(students.map(s => s.classe)).size}
+              </p>
+              <p className="text-xs sm:text-sm text-purple-700 mt-1">Classes</p>
+            </div>
           </div>
         </div>
       </div>

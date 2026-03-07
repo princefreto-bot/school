@@ -53,7 +53,7 @@ export const Dashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
         <StatCard
           icon={Users}
           label="Total Élèves"
@@ -85,9 +85,9 @@ export const Dashboard = () => {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Bar Chart - Recouvrement par classe */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-md transition-shadow">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <BookOpen className="w-5 h-5" />
             Taux de recouvrement par classe
@@ -113,9 +113,9 @@ export const Dashboard = () => {
         </div>
 
         {/* Pie Charts */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Répartition par cycle */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-md transition-shadow">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
               <GraduationCap className="w-5 h-5" />
               Par cycle
@@ -148,7 +148,7 @@ export const Dashboard = () => {
           </div>
 
           {/* Statut paiement */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-md transition-shadow">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
               <AlertCircle className="w-5 h-5" />
               Statut paiements
@@ -183,12 +183,12 @@ export const Dashboard = () => {
       </div>
 
       {/* Class Rankings */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-md transition-shadow overflow-hidden">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">
           Classement des classes (par taux de recouvrement)
         </h3>
         {classStats.length > 0 ? (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 -mx-4 sm:-mx-6 sm:mx-0">
             <table className="w-full">
               <thead>
                 <tr className="border-b">
@@ -285,15 +285,15 @@ const StatCard = ({ icon: Icon, label, value, subtext, color }: StatCardProps) =
   };
 
   return (
-    <div className={`${colorClasses[color]} rounded-xl p-5`}>
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium opacity-80">{label}</p>
-          <p className="text-2xl font-bold mt-1">{value}</p>
-          <p className="text-xs mt-2 opacity-70">{subtext}</p>
+    <div className={`${colorClasses[color]} rounded-2xl p-5 md:p-6 border border-opacity-20 shadow-sm hover:shadow-md transition-all duration-200`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs md:text-sm font-semibold opacity-75 uppercase tracking-wide">{label}</p>
+          <p className="text-xl md:text-2xl font-bold mt-2">{value}</p>
+          <p className="text-xs md:text-sm mt-2 opacity-60 line-clamp-2">{subtext}</p>
         </div>
-        <div className={`w-10 h-10 ${iconColors[color]} rounded-lg flex items-center justify-center`}>
-          <Icon className="w-5 h-5" />
+        <div className={`w-11 h-11 md:w-12 md:h-12 ${iconColors[color]} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm`}>
+          <Icon className="w-5 h-5 md:w-6 md:h-6" />
         </div>
       </div>
     </div>
