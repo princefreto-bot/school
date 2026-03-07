@@ -1,17 +1,10 @@
 import { API_BASE_URL } from '../config';
+import { parseResponse, getAuthHeaders } from './apiHelpers';
 
 const API_URL = API_BASE_URL;
 
-/**
- * Gère les en-têtes avec le token JWT si présent
- */
-const getHeaders = () => {
-    const token = localStorage.getItem('parent_token');
-    return {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    };
-};
+// alias for clarity in this file
+const getHeaders = getAuthHeaders;
 
 export const parentApi = {
     // ── Authentification ────────────────────────────────────────
@@ -21,8 +14,8 @@ export const parentApi = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        if (!res.ok) throw await res.json();
-        const result = await res.json();
+        const result = await parseResponse(res);
+        if (!res.ok) throw result;
         if (result.token) localStorage.setItem('parent_token', result.token);
         return result;
     },
@@ -33,8 +26,8 @@ export const parentApi = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        if (!res.ok) throw await res.json();
-        const result = await res.json();
+        const result = await parseResponse(res);
+        if (!res.ok) throw result;
         if (result.token) localStorage.setItem('parent_token', result.token);
         return result;
     },
@@ -45,16 +38,18 @@ export const parentApi = {
         const res = await fetch(`${API_URL}/students?${query}`, {
             headers: getHeaders()
         });
-        if (!res.ok) throw await res.json();
-        return await res.json();
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
     },
 
     countStudents: async () => {
         const res = await fetch(`${API_URL}/students/count`, {
             headers: getHeaders()
         });
-        if (!res.ok) throw await res.json();
-        return await res.json();
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
     },
 
     // ── Dashboard ──────────────────────────────────────────────
@@ -62,8 +57,9 @@ export const parentApi = {
         const res = await fetch(`${API_URL}/parent/dashboard`, {
             headers: getHeaders()
         });
-        if (!res.ok) throw await res.json();
-        return await res.json();
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
     },
     linkStudent: async (studentId: string) => {
         const res = await fetch(`${API_URL}/students/link`, {
@@ -71,8 +67,9 @@ export const parentApi = {
             headers: getHeaders(),
             body: JSON.stringify({ studentId })
         });
-        if (!res.ok) throw await res.json();
-        return await res.json();
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
     },
 
     linkStudents: async (studentIds: string[]) => {
@@ -81,8 +78,9 @@ export const parentApi = {
             headers: getHeaders(),
             body: JSON.stringify({ studentIds })
         });
-        if (!res.ok) throw await res.json();
-        return await res.json();
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
     },
 
     unlinkStudent: async (studentId: string) => {
@@ -90,8 +88,9 @@ export const parentApi = {
             method: 'DELETE',
             headers: getHeaders()
         });
-        if (!res.ok) throw await res.json();
-        return await res.json();
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
     },
 
     // ── Historique des paiements ───────────────────────────────
@@ -99,8 +98,9 @@ export const parentApi = {
         const res = await fetch(`${API_URL}/parent/payments/${studentId}`, {
             headers: getHeaders()
         });
-        if (!res.ok) throw await res.json();
-        return await res.json();
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
     },
 
     // ── Badges ──────────────────────────────────────────────────
@@ -108,8 +108,9 @@ export const parentApi = {
         const res = await fetch(`${API_URL}/parent/badges`, {
             headers: getHeaders()
         });
-        if (!res.ok) throw await res.json();
-        return await res.json();
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
     },
 
     // ── Messages ────────────────────────────────────────────────
@@ -117,24 +118,27 @@ export const parentApi = {
         const res = await fetch(`${API_URL}/parent/messages`, {
             headers: getHeaders()
         });
-        if (!res.ok) throw await res.json();
-        return await res.json();
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
     },
 
     getActiveCount: async () => {
         const res = await fetch(`${API_URL}/parent/active-count`, {
             headers: getHeaders()
         });
-        if (!res.ok) throw await res.json();
-        return await res.json();
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
     },
 
     getParentList: async () => {
         const res = await fetch(`${API_URL}/parent/list`, {
             headers: getHeaders()
         });
-        if (!res.ok) throw await res.json();
-        return await res.json();
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
     },
 
     deleteAccount: async () => {
@@ -142,8 +146,9 @@ export const parentApi = {
             method: 'DELETE',
             headers: getHeaders()
         });
-        if (!res.ok) throw await res.json();
-        return await res.json();
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
     },
 
     adminDeleteParent: async (parentId: string) => {

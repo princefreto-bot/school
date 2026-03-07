@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { parseResponse, getAuthHeaders } from '../services/apiHelpers';
 import { useStore } from '../store/useStore';
 import { AppPage } from '../types';
 import {
@@ -192,17 +193,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       // 2. Récupérer le vrai nombre de parents inscrits (Polling toutes les 30s)
       const fetchActiveCount = async () => {
         try {
-          const { parentApi } = await import('../services/parentApi');
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 3000);
-          
+
           const res = await fetch(`/api/parent/active-count`, {
             signal: controller.signal,
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('parent_token') || ''}` }
+            headers: getAuthHeaders()
           }).finally(() => clearTimeout(timeoutId));
-          
           if (res.ok) {
-            const data = await res.json();
+            const data = await parseResponse(res);
             setConnectedParentsCount(data.count || 0);
           }
         } catch (err) {

@@ -4,6 +4,7 @@
 // ============================================================
 
 import { BACKEND_URL } from '../config';
+import { parseResponse } from './apiHelpers';
 
 import { AppState } from '../store/useStore';
 
@@ -24,12 +25,12 @@ export async function syncToBackend(store: Partial<AppState>) {
             body: JSON.stringify({ students, parents }),
         });
 
+        // use parseResponse helper for consistent parsing
+        const result = await parseResponse(response);
         if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error || 'Erreur de synchronisation');
+            throw new Error(result.error || 'Erreur de synchronisation');
         }
-
-        return await response.json();
+        return result;
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         console.warn('⚠️ Sync backend indisponible:', errorMessage);

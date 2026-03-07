@@ -127,33 +127,41 @@ async function getBadges(req, res) {
  */
 async function getActiveParentsCount(req, res) {
     try {
+        console.log('🔍 [ActiveCount] start');
         const { count, error } = await supabase
             .from('profiles')
             .select('*', { count: 'exact', head: true })
             .eq('role', 'parent');
 
         if (error) {
-            console.error('❌ Counter Error:', error.message);
+            console.error('❌ [ActiveCount] Supabase error:', error.message);
             throw error;
         }
-        console.log(`📊 Parents inscrits détectés : ${count || 0}`);
+        console.log(`📊 [ActiveCount] parents count: ${count || 0}`);
         return res.json({ count: count || 0 });
     } catch (err) {
+        console.error('❌ [ActiveCount] handler error:', err);
         return res.status(500).json({ error: err.message });
     }
 }
 
 async function getAllParents(req, res) {
     try {
+        console.log('🔍 [ParentList] fetching all parents');
         const { data, error } = await supabase
             .from('profiles')
             .select('id, nom, telephone, created_at, role')
             .eq('role', 'parent')
             .order('nom', { ascending: true });
 
-        if (error) throw error;
+        if (error) {
+            console.error('❌ [ParentList] Supabase error:', error.message);
+            throw error;
+        }
+        console.log(`✅ [ParentList] returned ${data?.length || 0} items`);
         return res.json(data);
     } catch (err) {
+        console.error('❌ [ParentList] handler error:', err);
         return res.status(500).json({ error: err.message });
     }
 }

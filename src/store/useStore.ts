@@ -108,26 +108,35 @@ export const useStore = create<AppState>()(
             body: JSON.stringify({ telephone: username, password })
           });
 
-          if (res.ok) {
-            const result = await res.json();
-            if (result.token) {
-              localStorage.setItem('parent_token', result.token);
-              const loggedUser: User = {
-                id: result.user.id,
-                username: result.user.telephone,
-                role: result.user.role,
-                nom: result.user.nom,
-                telephone: result.user.telephone
-              };
-
-              // Déterminer la page de redirection
-              let targetPage: AppPage = 'dashboard';
-              if (loggedUser.role === 'parent') targetPage = 'parent_dashboard';
-
-              set({ user: loggedUser, isAuthenticated: true, currentPage: targetPage });
-              return true;
-            }
+          // parse with same helper as other services
+          const text = await res.text();
+          let result: any;
+          try {
+            result = JSON.parse(text);
+          } catch (parseErr) {
+            console.error('Login response not JSON:', text);
+            throw new Error('Réponse API invalide');
           }
+
+          if (res.ok && result.token) {
+            localStorage.setItem('parent_token', result.token);
+            const loggedUser: User = {
+              id: result.user.id,
+              username: result.user.telephone,
+              role: result.user.role,
+              nom: result.user.nom,
+              telephone: result.user.telephone
+            };
+
+            // Déterminer la page de redirection
+            let targetPage: AppPage = 'dashboard';
+            if (loggedUser.role === 'parent') targetPage = 'parent_dashboard';
+
+            set({ user: loggedUser, isAuthenticated: true, currentPage: targetPage });
+            return true;
+          }
+
+          // if we reached this point, login failed on server
         } catch (err) {
           console.error("Erreur login backend, essai local...", err);
         }

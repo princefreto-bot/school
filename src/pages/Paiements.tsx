@@ -1,11 +1,23 @@
 // ============================================================
 // PAGE PAIEMENTS — Historique & enregistrement de paiements
 // ============================================================
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Student, Payment } from '../types';
 import { CreditCard, Plus, X, Check, Search, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
+import { API_BASE_URL } from '../config';
+import { parseResponse } from '../services/apiHelpers';
+import { getCycle } from '../data/classConfig';
+
+// utility used when normalizing students from backend
+const computeStatus = (restant: number, ecolage: number): 'Soldé' | 'Partiel' | 'Non soldé' => {
+  if (restant <= 0) return 'Soldé';
+  const paye = ecolage - restant;
+  const taux = ecolage > 0 ? paye / ecolage : 0;
+  if (taux >= 0.7) return 'Partiel';
+  return 'Non soldé';
+};
 
 const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n) + ' FCFA';
 const fmtDate = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -149,7 +161,9 @@ const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => voi
 // ── PAGE PRINCIPALE ──────────────────────────────────────────
 export const Paiements: React.FC = () => {
   const students = useStore((s) => s.students);
+  const setStudents = useStore((s) => s.setStudents);
   const user = useStore((s) => s.user);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [filterClasse, setFilterClasse] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -169,6 +183,50 @@ export const Paiements: React.FC = () => {
   const totalPaye = filtered.reduce((a, s) => a + s.dejaPaye, 0);
   const totalRestant = filtered.reduce((a, s) => a + s.restant, 0);
   const totalPayements = filtered.reduce((a, s) => a + s.historiquesPaiements.length, 0);
+
+  // fetch students if none are currently in store
+  useEffect(() => {
+    if (students.length === 0) {
+      setLoading(true);
+      fetch(`${API_BASE_URL}/students`, { headers: { 'Content-Type': 'application/json' } })
+        .then((res) => parseResponse(res).then((d) => ({ res, data: d })))
+        .then(({ res, data }) => {
+          if (!res.ok) throw data;
+          if (data && Array.isArray(data.students)) {
+            const normalized: Student[] = data.students.map((s: any) => {
+              const ecolage = s.ecolage || 0;
+              const dejaPaye = s.deja_paye ?? 0;
+              const restantVal = typeof s.restant === 'number' ? s.restant : ecolage - dejaPaye;
+              return {
+                id: s.id,
+                nom: s.nom,
+                prenom: s.prenom,
+                classe: s.classe,
+                telephone: s.telephone || s.telephone_parent || '',
+                parentId: s.parent_id || undefined,
+                sexe: s.sexe || 'M',
+                redoublant: s.redoublant || false,
+                ecoleProvenance: s.ecole_provenance || '',
+                ecolage,
+                dejaPaye,
+                restant: restantVal,
+                recu: s.recu || '',
+                cycle: getCycle(s.classe),
+                status: computeStatus(restantVal, ecolage),
+                historiquesPaiements: s.historiques_paiements || [],
+                createdAt: s.created_at || new Date().toISOString(),
+                updatedAt: s.updated_at || new Date().toISOString(),
+              };
+            });
+            setStudents(normalized);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to load students for payments page:', err);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [students.length, setStudents]);
 
   const classes = [...new Set(CLASS_CONFIG.map((c) => c.name))];
 
@@ -219,7 +277,11 @@ export const Paiements: React.FC = () => {
         )}
       </div>
 
-      {students.length === 0 ? (
+      {loading ? (
+        <div className="text-center py-20 text-gray-400">
+          <p>Chargement des élèves...</p>
+        </div>
+      ) : students.length === 0 ? (
         <div className="text-center py-20 text-gray-400">
           <CreditCard className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p className="font-medium">Aucun élève enregistré</p>
