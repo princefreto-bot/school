@@ -15,6 +15,8 @@ export const LinkStudentModal: React.FC<LinkStudentModalProps> = ({ isOpen, onCl
     const [linking, setLinking] = useState<string | null>(null);
     const [hasSearched, setHasSearched] = useState(false);
     const [totalStudents, setTotalStudents] = useState<number | null>(null);
+    const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
         if (!isOpen) {

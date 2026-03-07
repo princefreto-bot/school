@@ -8,17 +8,17 @@ export const ParentDashboard: React.FC = () => {
     const user = useStore((s) => s.user);
     const [children, setChildren] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [message, setMessage] = useState('');
+    const [errorMsg, setErrorMsg] = useState('');
     const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
 
     const fetchData = async () => {
         setLoading(true);
-        setMessage('');
+        setErrorMsg('');
         try {
             const data = await parentApi.getDashboard();
             setChildren(data.students || []);
         } catch (err: any) {
-            setMessage(err.error || "Impossible de charger vos données. Vérifiez votre connexion.");
+            setErrorMsg(err.error || "Impossible de charger vos données. Vérifiez votre connexion.");
             console.error(err);
         } finally {
             setLoading(false);
@@ -53,12 +53,12 @@ export const ParentDashboard: React.FC = () => {
         );
     }
 
-    if (message && children.length === 0) {
+    if (errorMsg && children.length === 0) {
         return (
             <div className="bg-red-50 border border-red-100 rounded-2xl p-8 text-center">
                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
                 <h3 className="text-lg font-bold text-red-900 mb-2">Erreur de connexion</h3>
-                <p className="text-red-700">{message}</p>
+                <p className="text-red-700">{errorMsg}</p>
                 <button
                     onClick={() => fetchData()}
                     className="mt-4 px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition"
