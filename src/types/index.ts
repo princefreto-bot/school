@@ -119,6 +119,42 @@ export interface Parent {
   createdAt: string;
 }
 
+// ── Présences (pointage QR) ──────────────────────────────
+export interface Presence {
+  id: string;
+  eleveId: string;
+  eleveNom: string;
+  elevePrenom: string;
+  eleveClasse: string;
+  date: string;      // YYYY-MM-DD
+  heure: string;     // HH:mm:ss
+  statut: 'present' | 'absent' | 'retard';
+}
+
+// ── Logs d'activité ──────────────────────────────────────
+export interface ActivityLog {
+  id: string;
+  utilisateur: string;
+  utilisateurRole: string;
+  action: 'connexion' | 'paiement' | 'modification_eleve' | 'generation_recu' | 'presence' | 'import' | 'export' | 'suppression' | 'autre';
+  description: string;
+  dateHeure: string;  // ISO string
+  metadata?: Record<string, any>;
+}
+
+// ── Vérification de reçu ─────────────────────────────────
+export interface ReceiptVerification {
+  code: string;       // REC-ANNEE-NUMERO
+  studentId: string;
+  eleveNom: string;
+  elevePrenom: string;
+  eleveClasse: string;
+  montant: number;
+  date: string;
+  tranche: string;
+  statut: 'authentique' | 'invalide';
+}
+
 export type AppPage =
   | 'dashboard'
   | 'eleves'
@@ -127,6 +163,10 @@ export type AppPage =
   | 'documents'
   | 'parametres'
   | 'recouvrement'
+  | 'scan_presence'
+  | 'carte_scolaire'
+  | 'verification_recu'
+  | 'historique_activites'
   | 'parent_dashboard'
   | 'parent_historique'
   | 'parent_recus'

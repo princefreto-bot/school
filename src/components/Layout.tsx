@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { parseResponse, getAuthHeaders } from '../services/apiHelpers';
 import { useStore } from '../store/useStore';
 import { AppPage } from '../types';
+import { getFilteredNavItems } from '../utils/rolePermissions';
 import {
   GraduationCap, LayoutDashboard, Users, CreditCard,
   BarChart3, FileText, Settings, LogOut, Menu, X,
-  Bell, ChevronRight, Target, Award, MessageSquare
+  Bell, ChevronRight, Target, Award, MessageSquare,
+  ScanLine, IdCard, ShieldCheck, Activity
 } from 'lucide-react';
 
 interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: number }
@@ -15,9 +17,13 @@ const NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'eleves', label: 'Élèves', icon: <Users className="w-5 h-5" /> },
   { id: 'parents_list', label: 'Parents', icon: <Users className="w-5 h-5 text-emerald-500" /> },
   { id: 'paiements', label: 'Paiements', icon: <CreditCard className="w-5 h-5" /> },
-  { id: 'recouvrement', label: 'Priorité de Recouvrement', icon: <Target className="w-5 h-5 text-red-500" /> },
+  { id: 'recouvrement', label: 'Recouvrement', icon: <Target className="w-5 h-5 text-red-500" /> },
+  { id: 'scan_presence', label: 'Scan Présence', icon: <ScanLine className="w-5 h-5 text-cyan-500" /> },
+  { id: 'carte_scolaire', label: 'Cartes Scolaires', icon: <IdCard className="w-5 h-5 text-indigo-500" /> },
+  { id: 'verification_recu', label: 'Vérif. Reçus', icon: <ShieldCheck className="w-5 h-5 text-purple-500" /> },
   { id: 'analyses', label: 'Analyses', icon: <BarChart3 className="w-5 h-5" /> },
   { id: 'documents', label: 'Documents', icon: <FileText className="w-5 h-5" /> },
+  { id: 'historique_activites', label: 'Historique', icon: <Activity className="w-5 h-5 text-slate-500" /> },
   { id: 'chat', label: 'Messagerie', icon: <MessageSquare className="w-5 h-5" /> },
   { id: 'parametres', label: 'Paramètres', icon: <Settings className="w-5 h-5" /> },
 ];
@@ -231,7 +237,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isParent = user?.role === 'parent';
   const baseNavItems = isParent ? PARENT_NAV_ITEMS : NAV_ITEMS;
 
-  const navItems: NavItem[] = baseNavItems.map((item) => ({
+  // Filtrer les items par rôle
+  const filteredItems = getFilteredNavItems(user?.role, baseNavItems) as Omit<NavItem, 'badge'>[];
+
+  const navItems: NavItem[] = filteredItems.map((item) => ({
     ...item,
     badge: item.id === 'eleves' && nonSoldes > 0 ? nonSoldes : item.id === 'chat' && unreadMessages > 0 ? unreadMessages : undefined,
   }));

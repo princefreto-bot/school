@@ -3,7 +3,7 @@
 // ============================================================
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Student, User, AppPage, Payment, Parent, AppSettings } from '../types';
+import { Student, User, AppPage, Payment, Parent, AppSettings, Presence, ActivityLog } from '../types';
 import { API_BASE_URL } from '../config';
 import { getEcolage, getCycle } from '../data/classConfig';
 import { v4 as uuid } from '../utils/uuid';
@@ -65,6 +65,20 @@ export interface AppState {
   setMessageRappel: (m: string) => void;
   settings: AppSettings;
   updateSettings: (settings: AppSettings) => void;
+
+  // Présences
+  presences: Presence[];
+  addPresence: (presence: Presence) => void;
+  getPresencesToday: () => Presence[];
+  isAlreadyPresent: (eleveId: string) => boolean;
+
+  // Logs d'activité
+  activityLogs: ActivityLog[];
+  addActivityLog: (log: ActivityLog) => void;
+
+  // Reçus vérifiables
+  receiptCounter: number;
+  incrementReceiptCounter: () => string;
 }
 
 // Authentification gérée par Supabase
@@ -258,12 +272,38 @@ export const useStore = create<AppState>()(
         nomEcole: 'Établissement Scolaire',
         anneScolaire: '2024-2025',
         adresse: 'Adresse de l\'établissement',
-        telephone: '+225 XX XX XX XX',
+        telephone: '+229 XX XX XX XX',
         email: 'contact@ecole.ci',
         badgeParentResponsable: 'Parent Responsable',
         badge2emeTranche: '2ème Tranche Validée'
       },
       updateSettings: (newSettings) => set({ settings: newSettings }),
+
+      // ── Présences ─────────────────────────────────────────
+      presences: [],
+      addPresence: (presence) => set({ presences: [...get().presences, presence] }),
+      getPresencesToday: () => {
+        const today = new Date().toISOString().split('T')[0];
+        return get().presences.filter(p => p.date === today);
+      },
+      isAlreadyPresent: (eleveId: string) => {
+        const today = new Date().toISOString().split('T')[0];
+        return get().presences.some(p => p.eleveId === eleveId && p.date === today);
+      },
+
+      // ── Logs d'activité ────────────────────────────────────
+      activityLogs: [],
+      addActivityLog: (log) => set({ activityLogs: [log, ...get().activityLogs].slice(0, 500) }),
+
+      // ── Compteur reçus ─────────────────────────────────────
+      receiptCounter: 0,
+      incrementReceiptCounter: () => {
+        const next = get().receiptCounter + 1;
+        const year = new Date().getFullYear();
+        const code = `REC-${year}-${String(next).padStart(6, '0')}`;
+        set({ receiptCounter: next });
+        return code;
+      },
     }),
     {
       name: 'edufinance-storage',
@@ -278,6 +318,9 @@ export const useStore = create<AppState>()(
         appName: state.appName,
         schoolLogo: state.schoolLogo,
         parents: state.parents || [],
+        presences: state.presences || [],
+        activityLogs: (state.activityLogs || []).slice(0, 500),
+        receiptCounter: state.receiptCounter || 0,
       }),
       onRehydrateStorage: () => (state) => {
         // Auto-réparation : recalcule cycle + écolage + restant + status

@@ -8,7 +8,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
-import { Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, GraduationCap, Target, ArrowUpRight, ArrowDownRight, BarChart2, FileText } from 'lucide-react';
+import { Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, GraduationCap, Target, ArrowUpRight, ArrowDownRight, BarChart2, FileText, UserCheck } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import {
   computeRecouvrement,
@@ -63,6 +63,10 @@ export const Dashboard: React.FC = () => {
   const students = useStore((s) => s.students);
   const parents = useStore((s) => s.parents);
   const user = useStore((s) => s.user);
+  const getPresencesToday = useStore((s) => s.getPresencesToday);
+
+  const todayPresences = useMemo(() => getPresencesToday(), [getPresencesToday]);
+  const tauxPresence = students.length > 0 ? Math.round((todayPresences.length / students.length) * 100) : 0;
 
   // Sync auto avec le backend (Node.js) pour alimenter le portail parent
   useEffect(() => {
@@ -207,7 +211,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* KPIs principaux */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
         <StatCard
           title="Total Élèves"
           value={students.length}
@@ -236,6 +240,14 @@ export const Dashboard: React.FC = () => {
           sub="À recouvrer"
           icon={<AlertCircle className="w-5 h-5 text-red-500" />}
           color="bg-red-50"
+        />
+        <StatCard
+          title="Présences Aujourd'hui"
+          value={`${todayPresences.length} / ${students.length}`}
+          sub="Élèves pointés"
+          icon={<UserCheck className="w-5 h-5 text-cyan-600" />}
+          color="bg-cyan-50"
+          trend={`${tauxPresence}% de présence`}
         />
       </div>
 
