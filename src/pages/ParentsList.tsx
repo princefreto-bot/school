@@ -89,7 +89,7 @@ export const ParentsList: React.FC = () => {
                                     <UserCheck className="w-3 h-3" />
                                     Actif
                                 </span>
-                                {user?.role === 'directeur' && (
+                                {(user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general') && (
                                     <button
                                         onClick={() => handleAdminDelete(parent.id)}
                                         className={`p-1.5 rounded-lg transition-colors ${deleteConfirm === parent.id ? 'bg-red-600 text-white animate-pulse' : 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white'}`}

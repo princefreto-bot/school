@@ -6,7 +6,7 @@ const { supabase } = require('../utils/supabase');
  */
 async function syncFromFrontend(req, res) {
     console.log('🔄 [Sync] Request received');
-    
+
     // Check auth
     if (!req.user) {
         console.warn('⚠️ [Sync] req.user is undefined - auth failed');
@@ -19,7 +19,7 @@ async function syncFromFrontend(req, res) {
     console.log(`📊 [Sync] User role: ${role}, Students count: ${students.length}`);
 
     // Only directeur and comptable can sync
-    if (role !== 'directeur' && role !== 'comptable') {
+    if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
         console.warn(`⚠️ [Sync] Permission denied for role: ${role}`);
         return res.status(403).json({ error: 'Permission refusée. Seul la Direction ou la Comptabilité peut synchroniser.' });
     }

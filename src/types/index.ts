@@ -2,6 +2,8 @@
 // TYPES PRINCIPAUX — EduFinance
 // ============================================================
 
+import { CLASSES } from '../data/classes';
+
 export type Cycle = 'Primaire' | 'Collège' | 'Lycée';
 
 export type PaymentStatus = 'Soldé' | 'Partiel' | 'Non soldé';
@@ -104,7 +106,7 @@ export interface DashboardStats {
 export interface User {
   id: string;
   username: string; // phone number for parents
-  role: 'admin' | 'directeur' | 'proviseur' | 'censeur' | 'superviseur' | 'comptable' | 'parent';
+  role: 'admin' | 'directeur' | 'directeur_general' | 'proviseur' | 'censeur' | 'superviseur' | 'comptable' | 'parent';
   nom: string;
   telephone?: string;
 }

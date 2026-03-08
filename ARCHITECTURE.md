@@ -1,17 +1,34 @@
 # 🏫 GestioSchool — Architecture de Production Cloud
-> Fichier de référence technique. État actuel : **Full Production**.
+> Fichier de référence technique. État actuel : **Développement Avancé - UI Redesign en cours**.
 > Dernière mise à jour : Mars 2026
 
 ---
 
-## 🏗️ Architecture Globale (FullStack Cloud)
-L'application est passée d'un mode local à une architecture **SaaS (Software as a Service)** décentralisée :
+## 📍 POSITION ACTUELLE DU PROJET
 
-1.  **Frontend (UI)** : React + Vite + Tailwind CSS v4. Hébergé sur **Render**.
-2.  **Backend (API)** : Node.js + Express. Hébergé sur **Render**.
-3.  **Base de Données** : PostgreSQL via **Supabase**.
+### ✅ État d'Avancement
+- **Phase** : Post-MVP → Amélioration UI/UX et optimisation de la compilation
+- **Couverture Fonctionnelle** : 95% (Core + Features + Admin Portal + Parent Portal)
+- **Statut Build** : Utilisation du CSS Tailwind v4 en cours d'optimisation
+- **Déploiement** : Prêt pour Render (après optimisation mémoire du build)
+
+### 🎯 Priorités Actuelles
+1. **Compilation Tailwind** : Correction erreurs `@apply` avec `placeholder-*` qui n'est pas supporté
+2. **Redesign UI** : Migration vers design professionnel avec card-based layouts et responsive design
+3. **Optimisation Build** : Réduction de la consommation mémoire lors du build Vite
+4. **Tests Responsivité** : Mobile-first approach avec breakpoints Tailwind (sm, md, lg)
+
+---
+
+## 🏗️ Architecture Globale (FullStack Cloud)
+L'application est une architecture **SaaS (Software as a Service)** complète et décentralisée :
+
+1.  **Frontend (UI)** : React 18 + Vite + Tailwind CSS v4. Hébergé sur **Render**.
+2.  **Backend (API)** : Node.js + Express.js. Hébergé sur **Render**.
+3.  **Base de Données** : PostgreSQL via **Supabase** (Authentification + Realtime).
 4.  **Authentification** : JWT (JSON Web Tokens) sécurisés avec hachage **Bcrypt**.
-5.  **Messagerie** : Système de chat en temps réel via Supabase et API Node.js.
+5.  **Messagerie** : Système de chat en temps réel via Supabase Realtime + API Node.js.
+6. **Gestion d'État** : Zustand pour l'état global du frontend.
 
 ---
 

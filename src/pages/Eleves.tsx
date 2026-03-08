@@ -266,7 +266,7 @@ export const Eleves: React.FC = () => {
         <button onClick={() => setShowFilters((f) => !f)} className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-medium transition-colors ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
           <Filter className="w-4 h-4" /> Filtres
         </button>
-        {(user?.role === 'directeur' || user?.role === 'comptable') && (
+        {(user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') && (
           <>
             <button onClick={() => setModal({ open: true })} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">
               <Plus className="w-4 h-4" /> Ajouter
@@ -379,7 +379,7 @@ export const Eleves: React.FC = () => {
                           <Download className="w-3.5 h-3.5" />
                         </button>
                         <WhatsAppBtn student={s} schoolName={schoolName} />
-                        {(user?.role === 'directeur' || user?.role === 'comptable') && (
+                        {(user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') && (
                           <>
                             <button onClick={() => setModal({ open: true, student: s })} className="p-1.5 hover:bg-amber-100 rounded-lg text-amber-600 transition-colors" title="Modifier">
                               <Edit2 className="w-3.5 h-3.5" />

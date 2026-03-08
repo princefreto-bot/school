@@ -126,7 +126,7 @@ const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => voi
           <p className="text-sm font-semibold text-emerald-700">{new Intl.NumberFormat('fr-FR').format(student.dejaPaye)} F</p>
           <p className="text-xs text-red-500">{student.restant > 0 ? `- ${new Intl.NumberFormat('fr-FR').format(student.restant)} F` : 'SOLDÉ'}</p>
         </div>
-        {student.restant > 0 && (user?.role === 'directeur' || user?.role === 'comptable') && (
+        {student.restant > 0 && (user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') && (
           <button
             onClick={(e) => { e.stopPropagation(); onPay(student); }}
             className="shrink-0 flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"

@@ -66,7 +66,7 @@ export const Dashboard: React.FC = () => {
 
   // Sync auto avec le backend (Node.js) pour alimenter le portail parent
   useEffect(() => {
-    if (user?.role === 'admin' || user?.role === 'comptable') {
+    if (user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') {
       const runSync = async () => {
         const available = await isBackendAvailable();
         if (available) {

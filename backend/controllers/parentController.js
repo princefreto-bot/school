@@ -175,7 +175,7 @@ async function getParentById(req, res) {
     const { role } = req.user;
 
     // Only admin can access this
-    if (role !== 'directeur' && role !== 'comptable') {
+    if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
     }
 
@@ -211,7 +211,7 @@ async function adminDeleteAccount(req, res) {
     console.log(`🗑️ [AdminDelete] Attempting to delete parent ${parentId} by role ${role}`);
 
     // Seul le directeur peut supprimer des comptes
-    if (role !== 'directeur') {
+    if (!['admin', 'directeur', 'directeur_general'].includes(role)) {
         console.warn(`⚠️ [AdminDelete] Permission denied for role ${role}`);
         return res.status(403).json({ error: 'Permission refusée. Seul le Directeur Général peut supprimer des comptes.' });
     }

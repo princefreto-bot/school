@@ -472,11 +472,11 @@ doc.setFontSize(9);   // texte normal`}
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500">Rôle</span>
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${user?.role === 'admin'
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general'
               ? 'bg-blue-100 text-blue-700'
               : 'bg-emerald-100 text-emerald-700'
               }`}>
-              {user?.role === 'admin' ? '🛡 Admin' : '📊 Comptable'}
+              {user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' ? '🛡 Admin' : '📊 Comptable'}
             </span>
           </div>
         </div>
