@@ -7,7 +7,7 @@ import { Presence } from '../types';
 import { v4 as uuid } from '../utils/uuid';
 import { createActivityLog } from '../utils/activityLogger';
 import { sendWhatsApp, messagePresenceArrivee } from '../utils/whatsappHelper';
-import { BrowserQRCodeReader, IScannerControls } from '@zxing/browser';
+import { Html5Qrcode } from "html5-qrcode";
 import {
     Camera, Search, CheckCircle2, AlertTriangle, UserCheck,
     Clock, Users, X, Smartphone
@@ -77,9 +77,7 @@ export const ScanPresence: React.FC = () => {
     } | null>(null);
     const [cameraActive, setCameraActive] = useState(false);
     const [cameraError, setCameraError] = useState('');
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const codeReaderRef = useRef<BrowserQRCodeReader | null>(null);
-    const controlsRef = useRef<IScannerControls | null>(null);
+    const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
     const isScanningPaused = useRef(false);
 
     const today = new Date().toISOString().split('T')[0];
@@ -130,58 +128,57 @@ export const ScanPresence: React.FC = () => {
         isScanningPaused.current = true;
     }, [students, today, isAlreadyPresent, addPresence, addActivityLog, user]);
 
-    // ── Caméra QR avec Google ZXing ──────────────────────────────
-    const startCamera = async () => {
+    // ── Caméra QR avec HTML5-QRCode (Optimisé Mobile) ────────────────
+    const startCamera = () => {
         setCameraError('');
-        try {
-            setCameraActive(true);
+        setCameraActive(true);
 
-            // Attendre un instant que la balise video soit bien rendue par React
-            setTimeout(async () => {
-                if (!videoRef.current) return;
+        setTimeout(() => {
+            const html5QrCode = new Html5Qrcode("reader");
+            html5QrCodeRef.current = html5QrCode;
 
-                const codeReader = new BrowserQRCodeReader();
-                codeReaderRef.current = codeReader;
-
-                // ZXing gère automatiquement le focus, l'accès matériel, et le flux !
-                try {
-                    const controls = await codeReader.decodeFromVideoDevice(
-                        undefined, // undefined = caméra de dos par défaut
-                        videoRef.current,
-                        (result, error, controls) => {
-                            if (result && !isScanningPaused.current) {
-                                const code = result.getText();
-                                const exist = students.some(s => s.id === code);
-                                if (exist) {
-                                    registerPresence(code);
-                                }
-                            }
+            html5QrCode.start(
+                { facingMode: "environment" }, // Caméra arrière par défaut
+                {
+                    fps: 10, // 10 images par seconde (optimise la batterie)
+                    qrbox: { width: 250, height: 250 } // Zone de scan réduite pour focaliser
+                },
+                (decodedText) => {
+                    // Succès du scan
+                    if (!isScanningPaused.current) {
+                        const exist = students.some(s => s.id === decodedText);
+                        if (exist) {
+                            registerPresence(decodedText);
                         }
-                    );
-                    controlsRef.current = controls;
-                } catch (err) {
-                    console.error("ZXing Camera Error:", err);
-                    setCameraError('Erreur matérielle de la caméra.');
-                    setCameraActive(false);
+                    }
+                },
+                (errorMessage) => {
+                    // Erreurs ignorées (se produit à chaque frame sans QR code)
                 }
-            }, 100);
-
-        } catch (err) {
-            setCameraError('Impossible d\'accéder à la caméra. Vérifiez les permissions.');
-            setCameraActive(false);
-        }
+            ).catch((err) => {
+                console.error("Camera Error:", err);
+                setCameraError('Erreur matérielle ou permissions refusées.');
+                setCameraActive(false);
+            });
+        }, 300); // Petit délai pour s'assurer que le DOM est prêt
     };
 
     const stopCamera = () => {
-        if (controlsRef.current) {
-            controlsRef.current.stop();
-            controlsRef.current = null;
+        if (html5QrCodeRef.current) {
+            html5QrCodeRef.current.stop().then(() => {
+                html5QrCodeRef.current?.clear();
+                html5QrCodeRef.current = null;
+            }).catch(e => console.error("Erreur arrêt caméra:", e));
         }
         setCameraActive(false);
     };
 
     useEffect(() => {
-        return () => stopCamera();
+        return () => {
+            if (html5QrCodeRef.current) {
+                html5QrCodeRef.current.stop().catch(() => { });
+            }
+        };
     }, []);
 
     // ── Recherche élève (alternative au scan) ──────────────────
@@ -241,28 +238,9 @@ export const ScanPresence: React.FC = () => {
                 </div>
 
                 {cameraActive && (
-                    <div className="relative bg-black aspect-video max-h-[300px] flex items-center justify-center overflow-hidden">
-                        {/* ZXing override la vidéo et gère le stream directement depuis le DOM */}
-                        <video
-                            ref={videoRef}
-                            className="w-full h-full object-cover"
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            autoPlay
-                            playsInline
-                            muted
-                        />
-                        {/* Overlay de scan */}
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div className="w-48 h-48 border-2 border-white/60 rounded-2xl shadow-lg">
-                                <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-cyan-400 rounded-tl-xl" />
-                                <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-cyan-400 rounded-tr-xl" />
-                                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-cyan-400 rounded-bl-xl" />
-                                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-cyan-400 rounded-br-xl" />
-                            </div>
-                        </div>
-                        <p className="absolute bottom-3 text-white/80 text-xs font-medium bg-black/40 px-3 py-1 rounded-full">
-                            Placez le QR Code dans le cadre
-                        </p>
+                    <div className="relative bg-black w-full" style={{ minHeight: '300px' }}>
+                        {/* Conteneur pour Html5Qrcode */}
+                        <div id="reader" className="w-full h-full"></div>
                     </div>
                 )}
 
