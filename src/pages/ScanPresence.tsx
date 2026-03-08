@@ -7,6 +7,7 @@ import { Presence } from '../types';
 import { v4 as uuid } from '../utils/uuid';
 import { createActivityLog } from '../utils/activityLogger';
 import { sendWhatsApp, messagePresenceArrivee } from '../utils/whatsappHelper';
+import jsQR from 'jsqr';
 import {
     Camera, Search, CheckCircle2, AlertTriangle, UserCheck,
     Clock, Users, X, Smartphone
@@ -80,6 +81,7 @@ export const ScanPresence: React.FC = () => {
     const streamRef = useRef<MediaStream | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const scanIntervalRef = useRef<number | null>(null);
+    const isScanningPaused = useRef(false);
 
     const today = new Date().toISOString().split('T')[0];
     const todayPresences = presences.filter(p => p.date === today);
@@ -126,6 +128,7 @@ export const ScanPresence: React.FC = () => {
             dejaPresent: already,
             telephone: student.telephone,
         });
+        isScanningPaused.current = true;
     }, [students, today, isAlreadyPresent, addPresence, addActivityLog, user]);
 
     // ── Caméra QR ──────────────────────────────────────────────
@@ -164,9 +167,31 @@ export const ScanPresence: React.FC = () => {
     };
 
     const scanFrame = () => {
-        // Note: Un vrai décodeur QR nécessiterait jsQR ou zxing.
-        // Pour ce MVP, on utilise la recherche manuelle par nom/id.
-        // Le scan caméra est prêt pour intégration avec une lib QR.
+        if (isScanningPaused.current) return;
+        if (!videoRef.current || !canvasRef.current || !cameraActive) return;
+
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        // On demande un accès fréquent (willReadFrequently: true) pour optimiser les performances de getImageData
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+
+        if (video.readyState === video.HAVE_ENOUGH_DATA && context) {
+            canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: "dontInvert",
+            });
+
+            if (code && code.data) {
+                const studentExists = students.some(s => s.id === code.data);
+                if (studentExists) {
+                    registerPresence(code.data);
+                }
+            }
+        }
     };
 
     // Attacher le flux vidéo une fois le composant React rendu
@@ -321,7 +346,10 @@ export const ScanPresence: React.FC = () => {
                 <StudentScanned
                     {...scannedStudent}
                     schoolName={schoolName}
-                    onClose={() => setScannedStudent(null)}
+                    onClose={() => {
+                        setScannedStudent(null);
+                        isScanningPaused.current = false;
+                    }}
                 />
             )}
 
