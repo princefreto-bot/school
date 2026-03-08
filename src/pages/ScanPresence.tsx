@@ -135,7 +135,11 @@ export const ScanPresence: React.FC = () => {
         setCameraError('');
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } },
+                video: {
+                    facingMode: 'environment',
+                    width: { ideal: 720 },
+                    height: { ideal: 720 }
+                },
             });
             streamRef.current = stream;
             setCameraActive(true);
@@ -167,27 +171,37 @@ export const ScanPresence: React.FC = () => {
             const canvas = canvasRef.current;
 
             if (video && canvas && video.readyState === video.HAVE_ENOUGH_DATA) {
-                if (video.videoWidth > 0 && video.videoHeight > 0) {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
+                // Optimisation mobile : on réduit la résolution pour que jsQR soit ultra-rapide
+                const size = Math.min(video.videoWidth, video.videoHeight, 400);
+
+                if (size > 0) {
+                    canvas.width = size;
+                    canvas.height = size;
                     const context = canvas.getContext('2d', { willReadFrequently: true });
 
                     if (context) {
-                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        // On centre et on coupe l'image pour se concentrer sur le milieu (là où l'utilisateur vise)
+                        const startX = (video.videoWidth - size) / 2;
+                        const startY = (video.videoHeight - size) / 2;
+
+                        context.drawImage(video, startX, startY, size, size, 0, 0, size, size);
+
                         try {
-                            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                            const imageData = context.getImageData(0, 0, size, size);
+                            // attemptBoth = scan normal + scan en négatif, très utile sur mobile avec l'éclairage
                             const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                                inversionAttempts: "dontInvert",
+                                inversionAttempts: "attemptBoth",
                             });
 
                             if (code && code.data) {
+                                // On vérifie si c'est un ID élève connu
                                 const exist = students.some(s => s.id === code.data);
                                 if (exist) {
                                     registerPresence(code.data);
                                 }
                             }
                         } catch (e) {
-                            console.warn("Erreur extraction image", e);
+                            console.warn("Erreur extraction image QR:", e);
                         }
                     }
                 }
