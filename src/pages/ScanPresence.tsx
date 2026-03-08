@@ -7,7 +7,7 @@ import { Presence } from '../types';
 import { v4 as uuid } from '../utils/uuid';
 import { createActivityLog } from '../utils/activityLogger';
 import { sendWhatsApp, messagePresenceArrivee } from '../utils/whatsappHelper';
-import jsQR from 'jsqr';
+import { BrowserQRCodeReader, IScannerControls } from '@zxing/browser';
 import {
     Camera, Search, CheckCircle2, AlertTriangle, UserCheck,
     Clock, Users, X, Smartphone
@@ -78,8 +78,8 @@ export const ScanPresence: React.FC = () => {
     const [cameraActive, setCameraActive] = useState(false);
     const [cameraError, setCameraError] = useState('');
     const videoRef = useRef<HTMLVideoElement>(null);
-    const streamRef = useRef<MediaStream | null>(null);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const codeReaderRef = useRef<BrowserQRCodeReader | null>(null);
+    const controlsRef = useRef<IScannerControls | null>(null);
     const isScanningPaused = useRef(false);
 
     const today = new Date().toISOString().split('T')[0];
@@ -130,100 +130,55 @@ export const ScanPresence: React.FC = () => {
         isScanningPaused.current = true;
     }, [students, today, isAlreadyPresent, addPresence, addActivityLog, user]);
 
-    // ── Caméra QR ──────────────────────────────────────────────
+    // ── Caméra QR avec Google ZXing ──────────────────────────────
     const startCamera = async () => {
         setCameraError('');
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'environment',
-                    width: { ideal: 720 },
-                    height: { ideal: 720 }
-                },
-            });
-            streamRef.current = stream;
             setCameraActive(true);
+
+            // Attendre un instant que la balise video soit bien rendue par React
+            setTimeout(async () => {
+                if (!videoRef.current) return;
+
+                const codeReader = new BrowserQRCodeReader();
+                codeReaderRef.current = codeReader;
+
+                // ZXing gère automatiquement le focus, l'accès matériel, et le flux !
+                try {
+                    const controls = await codeReader.decodeFromVideoDevice(
+                        undefined, // undefined = caméra de dos par défaut
+                        videoRef.current,
+                        (result, error, controls) => {
+                            if (result && !isScanningPaused.current) {
+                                const code = result.getText();
+                                const exist = students.some(s => s.id === code);
+                                if (exist) {
+                                    registerPresence(code);
+                                }
+                            }
+                        }
+                    );
+                    controlsRef.current = controls;
+                } catch (err) {
+                    console.error("ZXing Camera Error:", err);
+                    setCameraError('Erreur matérielle de la caméra.');
+                    setCameraActive(false);
+                }
+            }, 100);
+
         } catch (err) {
             setCameraError('Impossible d\'accéder à la caméra. Vérifiez les permissions.');
+            setCameraActive(false);
         }
     };
 
     const stopCamera = () => {
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(t => t.stop());
-            streamRef.current = null;
+        if (controlsRef.current) {
+            controlsRef.current.stop();
+            controlsRef.current = null;
         }
         setCameraActive(false);
     };
-
-    // Boucle de scan ultra-fluide avec requestAnimationFrame
-    useEffect(() => {
-        if (!cameraActive) return;
-        let animationFrameId: number;
-
-        const scan = () => {
-            if (isScanningPaused.current) {
-                animationFrameId = requestAnimationFrame(scan);
-                return;
-            }
-
-            const video = videoRef.current;
-            const canvas = canvasRef.current;
-
-            if (video && canvas && video.readyState === video.HAVE_ENOUGH_DATA) {
-                // Optimisation mobile : on réduit la résolution pour que jsQR soit ultra-rapide
-                const size = Math.min(video.videoWidth, video.videoHeight, 400);
-
-                if (size > 0) {
-                    canvas.width = size;
-                    canvas.height = size;
-                    const context = canvas.getContext('2d', { willReadFrequently: true });
-
-                    if (context) {
-                        // On centre et on coupe l'image pour se concentrer sur le milieu (là où l'utilisateur vise)
-                        const startX = (video.videoWidth - size) / 2;
-                        const startY = (video.videoHeight - size) / 2;
-
-                        context.drawImage(video, startX, startY, size, size, 0, 0, size, size);
-
-                        try {
-                            const imageData = context.getImageData(0, 0, size, size);
-                            // attemptBoth = scan normal + scan en négatif, très utile sur mobile avec l'éclairage
-                            const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                                inversionAttempts: "attemptBoth",
-                            });
-
-                            if (code && code.data) {
-                                // On vérifie si c'est un ID élève connu
-                                const exist = students.some(s => s.id === code.data);
-                                if (exist) {
-                                    registerPresence(code.data);
-                                }
-                            }
-                        } catch (e) {
-                            console.warn("Erreur extraction image QR:", e);
-                        }
-                    }
-                }
-            }
-            animationFrameId = requestAnimationFrame(scan);
-        };
-
-        animationFrameId = requestAnimationFrame(scan);
-
-        return () => {
-            cancelAnimationFrame(animationFrameId);
-        };
-    }, [cameraActive, students, registerPresence]);
-
-    // Attacher le flux vidéo une fois le composant React rendu
-    useEffect(() => {
-        if (cameraActive && videoRef.current && streamRef.current) {
-            videoRef.current.srcObject = streamRef.current;
-            videoRef.current.setAttribute('playsinline', 'true'); // Sécurise la lecture sur iOS
-            videoRef.current.play().catch(e => console.warn("Erreur autoPlay:", e));
-        }
-    }, [cameraActive]);
 
     useEffect(() => {
         return () => stopCamera();
@@ -286,9 +241,16 @@ export const ScanPresence: React.FC = () => {
                 </div>
 
                 {cameraActive && (
-                    <div className="relative bg-black aspect-video max-h-[300px] flex items-center justify-center">
-                        <video ref={videoRef} className="w-full h-full object-cover" autoPlay playsInline muted />
-                        <canvas ref={canvasRef} className="hidden" />
+                    <div className="relative bg-black aspect-video max-h-[300px] flex items-center justify-center overflow-hidden">
+                        {/* ZXing override la vidéo et gère le stream directement depuis le DOM */}
+                        <video
+                            ref={videoRef}
+                            className="w-full h-full object-cover"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            autoPlay
+                            playsInline
+                            muted
+                        />
                         {/* Overlay de scan */}
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                             <div className="w-48 h-48 border-2 border-white/60 rounded-2xl shadow-lg">
