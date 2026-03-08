@@ -80,7 +80,6 @@ export const ScanPresence: React.FC = () => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const scanIntervalRef = useRef<number | null>(null);
     const isScanningPaused = useRef(false);
 
     const today = new Date().toISOString().split('T')[0];
@@ -139,16 +138,7 @@ export const ScanPresence: React.FC = () => {
                 video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } },
             });
             streamRef.current = stream;
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                videoRef.current.play();
-            }
             setCameraActive(true);
-
-            // Scan par intervalles
-            scanIntervalRef.current = window.setInterval(() => {
-                scanFrame();
-            }, 500);
         } catch (err) {
             setCameraError('Impossible d\'accéder à la caméra. Vérifiez les permissions.');
         }
@@ -159,45 +149,64 @@ export const ScanPresence: React.FC = () => {
             streamRef.current.getTracks().forEach(t => t.stop());
             streamRef.current = null;
         }
-        if (scanIntervalRef.current) {
-            clearInterval(scanIntervalRef.current);
-            scanIntervalRef.current = null;
-        }
         setCameraActive(false);
     };
 
-    const scanFrame = () => {
-        if (isScanningPaused.current) return;
-        if (!videoRef.current || !canvasRef.current || !cameraActive) return;
+    // Boucle de scan ultra-fluide avec requestAnimationFrame
+    useEffect(() => {
+        if (!cameraActive) return;
+        let animationFrameId: number;
 
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-        // On demande un accès fréquent (willReadFrequently: true) pour optimiser les performances de getImageData
-        const context = canvas.getContext('2d', { willReadFrequently: true });
+        const scan = () => {
+            if (isScanningPaused.current) {
+                animationFrameId = requestAnimationFrame(scan);
+                return;
+            }
 
-        if (video.readyState === video.HAVE_ENOUGH_DATA && context) {
-            canvas.height = video.videoHeight;
-            canvas.width = video.videoWidth;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
 
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                inversionAttempts: "dontInvert",
-            });
+            if (video && canvas && video.readyState === video.HAVE_ENOUGH_DATA) {
+                if (video.videoWidth > 0 && video.videoHeight > 0) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    const context = canvas.getContext('2d', { willReadFrequently: true });
 
-            if (code && code.data) {
-                const studentExists = students.some(s => s.id === code.data);
-                if (studentExists) {
-                    registerPresence(code.data);
+                    if (context) {
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        try {
+                            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                                inversionAttempts: "dontInvert",
+                            });
+
+                            if (code && code.data) {
+                                const exist = students.some(s => s.id === code.data);
+                                if (exist) {
+                                    registerPresence(code.data);
+                                }
+                            }
+                        } catch (e) {
+                            console.warn("Erreur extraction image", e);
+                        }
+                    }
                 }
             }
-        }
-    };
+            animationFrameId = requestAnimationFrame(scan);
+        };
+
+        animationFrameId = requestAnimationFrame(scan);
+
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, [cameraActive, students, registerPresence]);
 
     // Attacher le flux vidéo une fois le composant React rendu
     useEffect(() => {
         if (cameraActive && videoRef.current && streamRef.current) {
             videoRef.current.srcObject = streamRef.current;
+            videoRef.current.setAttribute('playsinline', 'true'); // Sécurise la lecture sur iOS
             videoRef.current.play().catch(e => console.warn("Erreur autoPlay:", e));
         }
     }, [cameraActive]);
