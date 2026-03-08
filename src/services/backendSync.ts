@@ -16,18 +16,18 @@ import { AppState } from '../store/useStore';
  * @returns {Promise<any>} - Résultat de la sync
  */
 export async function syncToBackend(store: Partial<AppState>) {
-    const { students = [], parents = [] } = store;
+    const { students = [], parents = [], presences = [], activityLogs = [] } = store;
 
     try {
         const response = await fetch(`${BACKEND_URL}/api/sync`, {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ students, parents }),
+            body: JSON.stringify({ students, parents, presences, activityLogs }),
         });
 
         // read text first so we can fall back if it's not JSON
         const text = await response.text();
-        
+
         // If response is empty, server is likely down
         if (!text) {
             console.warn('⚠️ Sync: empty response from backend');
@@ -55,6 +55,29 @@ export async function syncToBackend(store: Partial<AppState>) {
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         console.warn('⚠️ Sync fetch error:', errorMessage);
+        return null;
+    }
+}
+
+/**
+ * Récupère toutes les données depuis le backend Supabase (Single Source of Truth).
+ */
+export async function fetchFromBackend() {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/sync`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            console.warn('⚠️ Fetch from backend failed:', response.status);
+            return null;
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (err) {
+        console.error('⚠️ Fetch from backend error:', err);
         return null;
     }
 }

@@ -7,95 +7,199 @@ const { supabase } = require('../utils/supabase');
 async function syncFromFrontend(req, res) {
     console.log('🔄 [Sync] Request received');
 
-    // Check auth
     if (!req.user) {
-        console.warn('⚠️ [Sync] req.user is undefined - auth failed');
         return res.status(401).json({ error: 'Authentification requise.' });
     }
 
-    const { students = [] } = req.body;
+    const { students = [], presences = [], activityLogs = [] } = req.body;
     const { role } = req.user;
 
-    console.log(`📊 [Sync] User role: ${role}, Students count: ${students.length}`);
-
-    // Only directeur and comptable can sync
     if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
-        console.warn(`⚠️ [Sync] Permission denied for role: ${role}`);
-        return res.status(403).json({ error: 'Permission refusée. Seul la Direction ou la Comptabilité peut synchroniser.' });
+        return res.status(403).json({ error: 'Permission refusée.' });
     }
 
     try {
-        console.log(`🔄 [Sync] Processing ${students.length} students...`);
+        // --- 1. Sync Students ---
+        if (students.length > 0) {
+            const studentData = students.map(s => ({
+                id: s.id,
+                nom: s.nom,
+                prenom: s.prenom || '',
+                classe: s.classe || 'Inconnue',
+                cycle: s.cycle || 'Primaire',
+                ecolage: s.ecolage || 0,
+                deja_paye: s.dejaPaye || 0,
+                restant: s.restant || 0,
+                status: s.status || 'Non soldé',
+                telephone_parent: s.telephone || null
+            }));
 
-        // REAL UNIQUENESS: Filter by ID (like frontend)
-        const uniqueItems = new Map();
-        students.forEach(s => {
-            if (s.id) uniqueItems.set(s.id, s);
-        });
+            await supabase.from('students').upsert(studentData, { onConflict: 'id' });
 
-        const filteredStudents = Array.from(uniqueItems.values());
-        console.log(`✅ [Sync] After dedup: ${filteredStudents.length} unique students`);
-
-        // Prepare student data
-        const studentData = filteredStudents.map(s => ({
-            id: s.id,
-            nom: s.nom,
-            prenom: s.prenom || '',
-            classe: s.classe || 'Inconnue',
-            cycle: s.cycle || 'Primaire',
-            ecolage: s.ecolage || 0,
-            deja_paye: s.dejaPaye || 0,
-            restant: s.restant || 0,
-            status: s.status || 'Non soldé',
-            telephone_parent: s.telephone || null
-        }));
-
-        // Upsert with ID constraint
-        console.log(`📤 [Sync] Upserting ${studentData.length} students to Supabase...`);
-        const { error: sErr } = await supabase
-            .from('students')
-            .upsert(studentData, { onConflict: 'id' });
-
-        if (sErr) {
-            console.error('❌ [Sync] Student upsert failed:', sErr.message);
-            throw sErr;
-        }
-        console.log('✅ [Sync] Students upserted successfully');
-
-        // Sync payments
-        const allPayments = [];
-        filteredStudents.forEach(s => {
-            if (Array.isArray(s.historiquesPaiements)) {
-                s.historiquesPaiements.forEach(p => {
-                    allPayments.push({
-                        id: p.id,
-                        student_id: s.id,
-                        montant: p.montant,
-                        date: p.date,
-                        recu: p.recu || null,
-                        note: p.note || null
+            // --- 2. Sync Payments ---
+            const allPayments = [];
+            students.forEach(s => {
+                if (Array.isArray(s.historiquesPaiements)) {
+                    s.historiquesPaiements.forEach(p => {
+                        allPayments.push({
+                            id: p.id,
+                            student_id: s.id,
+                            montant: p.montant,
+                            date: p.date,
+                            recu: p.recu || null,
+                            note: p.note || null
+                        });
                     });
-                });
-            }
-        });
+                }
+            });
 
-        if (allPayments.length > 0) {
-            console.log(`📤 [Sync] Upserting ${allPayments.length} payments...`);
-            await supabase.from('payments').upsert(allPayments, { onConflict: 'id' });
-            console.log('✅ [Sync] Payments upserted successfully');
+            if (allPayments.length > 0) {
+                await supabase.from('payments').upsert(allPayments, { onConflict: 'id' });
+            }
         }
 
-        console.log(`🎉 [Sync] Completed: ${studentData.length} students`);
-        return res.json({
-            message: 'Synchronisation terminée sans doublons.',
-            count: studentData.length
-        });
+        // --- 3. Sync Presences ---
+        if (presences.length > 0) {
+            const presenceData = presences.map(p => ({
+                id: p.id,
+                student_id: p.eleveId,
+                eleve_nom: p.eleveNom,
+                eleve_prenom: p.elevePrenom,
+                eleve_classe: p.eleveClasse,
+                date: p.date,
+                heure: p.heure,
+                statut: p.statut
+            }));
+            await supabase.from('presences').upsert(presenceData, { onConflict: 'id' });
+        }
+
+        // --- 4. Sync Activity Logs ---
+        if (activityLogs.length > 0) {
+            const logData = activityLogs.map(l => ({
+                id: l.id,
+                utilisateur: l.utilisateur,
+                utilisateur_role: l.utilisateurRole,
+                action: l.action,
+                description: l.description,
+                date_heure: l.dateHeure
+            }));
+            await supabase.from('activity_logs').upsert(logData, { onConflict: 'id' });
+        }
+
+        console.log(`🎉 [Sync] Completed: ${students.length} students, ${presences.length} presences, ${activityLogs.length} logs`);
+        return res.json({ message: 'Synchronisation cloud réussie.' });
 
     } catch (err) {
-        console.error('💥 [Sync] Fatal error:', err.message, err.code);
+        console.error('💥 [Sync] Fatal error:', err.message);
         return res.status(500).json({ error: 'Échec de la synchronisation cloud: ' + err.message });
     }
 }
 
 
-module.exports = { syncFromFrontend };
+/**
+ * GET /api/sync
+ * Fetches all data from Supabase to initialize/sync frontend store.
+ */
+async function syncToFrontend(req, res) {
+    console.log('🔄 [Sync] Fetching data for frontend...');
+
+    if (!req.user) {
+        return res.status(401).json({ error: 'Authentification requise.' });
+    }
+
+    const { role } = req.user;
+    if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
+        return res.status(403).json({ error: 'Permission refusée.' });
+    }
+
+    try {
+        // Fetch students
+        const { data: students, error: sErr } = await supabase
+            .from('students')
+            .select('*')
+            .order('nom');
+
+        if (sErr) throw sErr;
+
+        // Fetch payments
+        const { data: payments, error: pErr } = await supabase
+            .from('payments')
+            .select('*')
+            .order('date', { ascending: false });
+
+        if (pErr) throw pErr;
+
+        // Fetch presences
+        const { data: presences, error: prErr } = await supabase
+            .from('presences')
+            .select('*')
+            .order('date', { ascending: false })
+            .order('heure', { ascending: false });
+
+        if (prErr) throw prErr;
+
+        // Fetch activity logs
+        const { data: logs, error: lErr } = await supabase
+            .from('activity_logs')
+            .select('*')
+            .order('date_heure', { ascending: false })
+            .limit(500);
+
+        if (lErr) throw lErr;
+
+        // Group payments by student
+        const studentMap = new Map();
+        students.forEach(s => {
+            studentMap.set(s.id, {
+                ...s,
+                dejaPaye: s.deja_paye,
+                telephone: s.telephone_parent,
+                historiquesPaiements: []
+            });
+        });
+
+        payments.forEach(p => {
+            const s = studentMap.get(p.student_id);
+            if (s) {
+                s.historiquesPaiements.push({
+                    id: p.id,
+                    studentId: p.student_id,
+                    montant: p.montant,
+                    date: p.date,
+                    recu: p.recu,
+                    note: p.note
+                });
+            }
+        });
+
+        console.log(`✅ [Sync] Dispatched ${students.length} students and ${payments.length} payments`);
+
+        return res.json({
+            students: Array.from(studentMap.values()),
+            presences: presences.map(pr => ({
+                id: pr.id,
+                eleveId: pr.student_id,
+                eleveNom: pr.eleve_nom,
+                elevePrenom: pr.eleve_prenom,
+                eleveClasse: pr.eleve_classe,
+                date: pr.date,
+                heure: pr.heure,
+                statut: pr.statut
+            })),
+            activityLogs: logs.map(l => ({
+                id: l.id,
+                utilisateur: l.utilisateur,
+                utilisateurRole: l.utilisateur_role,
+                action: l.action,
+                description: l.description,
+                dateHeure: l.date_heure
+            }))
+        });
+
+    } catch (err) {
+        console.error('💥 [Sync] Fetch error:', err.message);
+        return res.status(500).json({ error: 'Échec de la récupération des données: ' + err.message });
+    }
+}
+
+module.exports = { syncFromFrontend, syncToFrontend };

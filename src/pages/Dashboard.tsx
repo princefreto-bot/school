@@ -68,19 +68,34 @@ export const Dashboard: React.FC = () => {
   const todayPresences = useMemo(() => getPresencesToday(), [getPresencesToday]);
   const tauxPresence = students.length > 0 ? Math.round((todayPresences.length / students.length) * 100) : 0;
 
-  // Sync auto avec le backend (Node.js) pour alimenter le portail parent
+  // Synchronisation Cloud au montage du dashboard
   useEffect(() => {
-    if (user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') {
-      const runSync = async () => {
+    if (user?.role && ['admin', 'directeur', 'directeur_general', 'comptable'].includes(user.role)) {
+      const initSync = async () => {
         const available = await isBackendAvailable();
         if (available) {
-          console.log("🔄 Synchronisation avec le backend...");
-          await syncToBackend({ students, parents });
+          console.log("🔄 Synchronisation Cloud en cours...");
+
+          // 1. Récupérer les données fraîches du serveur (Single Source of Truth)
+          const fetchAllFromBackend = useStore.getState().fetchAllFromBackend;
+          await fetchAllFromBackend();
+
+          // 2. Si on a des données locales mais que le cloud est potentiellement vide (premier usage), 
+          // on pousse aussi vers le haut.
+          if (students.length > 0) {
+            console.log("📤 Envoi des données locales vers le cloud...");
+            await syncToBackend({
+              students,
+              parents,
+              presences: useStore.getState().presences,
+              activityLogs: useStore.getState().activityLogs
+            });
+          }
         }
       };
-      runSync();
+      initSync();
     }
-  }, []); // Une fois au montage du dashboard
+  }, []); // Une fois au montage
 
   // ── Indicateurs financiers avancés (via analyticsService) ──
   const recouvrement = useMemo(() => computeRecouvrement(students), [students]);

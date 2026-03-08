@@ -7,6 +7,7 @@ import { Student, User, AppPage, Payment, Parent, AppSettings, Presence, Activit
 import { API_BASE_URL } from '../config';
 import { getEcolage, getCycle } from '../data/classConfig';
 import { v4 as uuid } from '../utils/uuid';
+import { createActivityLog } from '../utils/activityLogger';
 
 export interface AppState {
   // Identité de l'app
@@ -79,6 +80,9 @@ export interface AppState {
   // Reçus vérifiables
   receiptCounter: number;
   incrementReceiptCounter: () => string;
+
+  // Synchronisation Cloud
+  fetchAllFromBackend: () => Promise<void>;
 }
 
 // Authentification gérée par Supabase
@@ -149,6 +153,11 @@ export const useStore = create<AppState>()(
             if (loggedUser.role === 'parent') targetPage = 'parent_dashboard';
 
             set({ user: loggedUser, isAuthenticated: true, currentPage: targetPage });
+            get().addActivityLog(createActivityLog(loggedUser.nom, loggedUser.role, 'connexion', 'Connexion API réussie'));
+
+            // Sync data immediately after login
+            get().fetchAllFromBackend();
+
             return true;
           }
 
@@ -162,12 +171,17 @@ export const useStore = create<AppState>()(
           const loggedUser: User = { id: 'admin', username: 'admin', role: 'admin', nom: 'Admin Local' };
           // On essaie de garder un token générique pour les appels API locaux si besoin
           set({ user: loggedUser, isAuthenticated: true, currentPage: 'dashboard' });
+          get().addActivityLog(createActivityLog('Admin Local', 'admin', 'connexion', 'Connexion locale réussie'));
           return true;
         }
 
         return false;
       },
       logout: () => {
+        const u = get().user;
+        if (u) {
+          get().addActivityLog(createActivityLog(u.nom, u.role, 'connexion', 'Déconnexion'));
+        }
         localStorage.removeItem('parent_token');
         set({ user: null, isAuthenticated: false, currentPage: 'dashboard' });
       },
@@ -197,7 +211,19 @@ export const useStore = create<AppState>()(
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
+        const u = get().user;
+        if (u) get().addActivityLog(createActivityLog(u.nom, u.role, 'autre', `Ajout de l'élève : ${data.prenom} ${data.nom}`));
+
         set({ students: [...get().students, student] });
+
+        // Background sync
+        import('../services/backendSync').then(({ syncToBackend }) => {
+          syncToBackend({
+            students: get().students,
+            presences: get().presences,
+            activityLogs: get().activityLogs
+          });
+        });
       },
       updateStudent: (id, updates) => {
         const students = get().students.map((s) => {
@@ -213,10 +239,41 @@ export const useStore = create<AppState>()(
           updated.status = computeStatus(updated.restant, updated.ecolage);
           return updated;
         });
+
+        const u = get().user;
+        if (u) {
+          const student = get().students.find(s => s.id === id);
+          get().addActivityLog(createActivityLog(u.nom, u.role, 'modification_eleve', `Modification : ${student ? student.prenom + ' ' + student.nom : id}`));
+        }
+
         set({ students });
+
+        // Background sync
+        import('../services/backendSync').then(({ syncToBackend }) => {
+          syncToBackend({
+            students: get().students,
+            presences: get().presences,
+            activityLogs: get().activityLogs
+          });
+        });
       },
-      deleteStudent: (id) =>
-        set({ students: get().students.filter((s) => s.id !== id) }),
+      deleteStudent: (id) => {
+        const u = get().user;
+        if (u) {
+          const student = get().students.find(s => s.id === id);
+          get().addActivityLog(createActivityLog(u.nom, u.role, 'suppression', `Suppression : ${student ? student.prenom + ' ' + student.nom : id}`));
+        }
+        set({ students: get().students.filter((s) => s.id !== id) });
+
+        // Background sync
+        import('../services/backendSync').then(({ syncToBackend }) => {
+          syncToBackend({
+            students: get().students,
+            presences: get().presences,
+            activityLogs: get().activityLogs
+          });
+        });
+      },
       addPayment: (studentId, paymentData) => {
         const students = get().students.map((s) => {
           if (s.id !== studentId) return s;
@@ -232,7 +289,23 @@ export const useStore = create<AppState>()(
             updatedAt: new Date().toISOString(),
           };
         });
+
+        const u = get().user;
+        if (u) {
+          const student = get().students.find(s => s.id === studentId);
+          get().addActivityLog(createActivityLog(u.nom, u.role, 'paiement', `Paiement : ${paymentData.montant} FCFA pour ${student ? student.prenom + ' ' + student.nom : studentId}`));
+        }
+
         set({ students });
+
+        // Background sync
+        import('../services/backendSync').then(({ syncToBackend }) => {
+          syncToBackend({
+            students: get().students,
+            presences: get().presences,
+            activityLogs: get().activityLogs
+          });
+        });
       },
 
       // ── Parents ──────────────────────────────────────────
@@ -281,7 +354,17 @@ export const useStore = create<AppState>()(
 
       // ── Présences ─────────────────────────────────────────
       presences: [],
-      addPresence: (presence) => set({ presences: [...get().presences, presence] }),
+      addPresence: (presence) => {
+        set({ presences: [presence, ...get().presences] });
+        // Background sync
+        import('../services/backendSync').then(({ syncToBackend }) => {
+          syncToBackend({
+            students: get().students,
+            presences: get().presences,
+            activityLogs: get().activityLogs
+          });
+        });
+      },
       getPresencesToday: () => {
         const today = new Date().toISOString().split('T')[0];
         return get().presences.filter(p => p.date === today);
@@ -304,6 +387,24 @@ export const useStore = create<AppState>()(
         set({ receiptCounter: next });
         return code;
       },
+
+      // ── Synchronisation Cloud ───────────────────────────
+      fetchAllFromBackend: async () => {
+        try {
+          const { fetchFromBackend } = await import('../services/backendSync');
+          const data = await fetchFromBackend();
+          if (data) {
+            set({
+              students: data.students || get().students,
+              presences: data.presences || get().presences,
+              activityLogs: data.activityLogs || get().activityLogs
+            });
+            console.log('✅ Cloud data synchronized');
+          }
+        } catch (err) {
+          console.error('Failed to sync from cloud:', err);
+        }
+      }
     }),
     {
       name: 'edufinance-storage',
