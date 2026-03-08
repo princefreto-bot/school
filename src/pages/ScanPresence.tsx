@@ -169,6 +169,14 @@ export const ScanPresence: React.FC = () => {
         // Le scan caméra est prêt pour intégration avec une lib QR.
     };
 
+    // Attacher le flux vidéo une fois le composant React rendu
+    useEffect(() => {
+        if (cameraActive && videoRef.current && streamRef.current) {
+            videoRef.current.srcObject = streamRef.current;
+            videoRef.current.play().catch(e => console.warn("Erreur autoPlay:", e));
+        }
+    }, [cameraActive]);
+
     useEffect(() => {
         return () => stopCamera();
     }, []);
