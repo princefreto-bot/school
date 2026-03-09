@@ -14,64 +14,45 @@ import {
 } from 'lucide-react';
 
 import { sendDirectNotification } from '../services/whatsappService';
+import { notificationService } from '../services/notificationService';
+import { playSuccessSound, playErrorSound } from '../utils/audio';
 
-// ── Composant carte d'élève scanné ───────────────────────────
+// ── Composant carte d'élève scanné (OVERLAY) ────────────────
 const StudentScanned: React.FC<{
     nom: string; prenom: string; classe: string; heure: string;
     dejaPresent: boolean; telephone?: string; schoolName: string;
-    onClose: () => void;
-}> = ({ nom, prenom, classe, heure, dejaPresent, telephone, schoolName, onClose }) => {
-    // Si on veut aussi le bouton manuel pour wa.me, on garde sendWhatsApp
-    const handleManualNotify = () => {
-        if (telephone) {
-            sendWhatsApp(telephone, messagePresenceArrivee(`${prenom} ${nom}`, heure, schoolName));
-        }
-    };
-
+}> = ({ nom, prenom, classe, heure, dejaPresent }) => {
     return (
-        <div className={`rounded-2xl border-2 p-6 text-center transition-all animate-fade-in ${dejaPresent
-            ? 'border-amber-300 bg-amber-50'
-            : 'border-emerald-300 bg-emerald-50'
-            }`}>
-            <div className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center ${dejaPresent ? 'bg-amber-100' : 'bg-emerald-100'
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className={`w-full max-w-sm rounded-[2.5rem] border-4 p-8 text-center shadow-2xl transition-all ${dejaPresent
+                ? 'border-amber-400 bg-white'
+                : 'border-emerald-400 bg-white'
                 }`}>
-                {dejaPresent ? (
-                    <AlertTriangle className="w-8 h-8 text-amber-600" />
-                ) : (
-                    <CheckCircle2 className="w-8 h-8 text-emerald-600" />
-                )}
-            </div>
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 mx-auto mb-3 flex items-center justify-center text-white text-xl font-bold">
-                {prenom.charAt(0)}{nom.charAt(0)}
-            </div>
-            <h3 className="text-lg font-bold text-gray-900">{prenom} {nom}</h3>
-            <p className="text-sm text-gray-500 font-medium">{classe}</p>
-            <p className={`text-sm font-bold mt-2 ${dejaPresent ? 'text-amber-600' : 'text-emerald-600'}`}>
-                {dejaPresent ? '⚠️ Présence déjà enregistrée aujourd\'hui' : `✅ Présence enregistrée à ${heure}`}
-            </p>
+                <div className={`w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center ${dejaPresent ? 'bg-amber-100' : 'bg-emerald-100'
+                    }`}>
+                    {dejaPresent ? (
+                        <AlertTriangle className="w-12 h-12 text-amber-600" />
+                    ) : (
+                        <CheckCircle2 className="w-12 h-12 text-emerald-600" />
+                    )}
+                </div>
 
-            <div className="flex gap-2 mt-4 justify-center">
-                {telephone && !dejaPresent && (
-                    <button
-                        onClick={handleManualNotify}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
-                    >
-                        <Smartphone className="w-3.5 h-3.5" />
-                        Notifier parent
-                    </button>
-                )}
-                <button
-                    onClick={onClose}
-                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl text-xs font-bold transition-colors"
-                >
-                    Fermer
-                </button>
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 mx-auto mb-4 flex items-center justify-center text-white text-3xl font-black">
+                    {prenom.charAt(0)}{nom.charAt(0)}
+                </div>
+
+                <h3 className="text-2xl font-black text-gray-900 mb-1">{prenom} {nom}</h3>
+                <p className="text-lg text-gray-500 font-bold mb-6">{classe}</p>
+
+                <div className={`py-3 px-6 rounded-2xl font-black text-lg ${dejaPresent ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                    {dejaPresent ? 'DÉJÀ POINTÉ' : `PRÉSENT À ${heure}`}
+                </div>
             </div>
         </div>
     );
 };
 
-import { playSuccessSound, playErrorSound } from '../utils/audio';
+// import { playSuccessSound, playErrorSound } from '../utils/audio'; // Déplacé en haut
 
 // ── Page principale ──────────────────────────────────────────
 export const ScanPresence: React.FC = () => {
@@ -90,6 +71,7 @@ export const ScanPresence: React.FC = () => {
     } | null>(null);
     const [cameraActive, setCameraActive] = useState(false);
     const [cameraError, setCameraError] = useState('');
+    const [flashError, setFlashError] = useState<string | null>(null);
     const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
     const isScanningPaused = useRef(false);
 
@@ -97,18 +79,29 @@ export const ScanPresence: React.FC = () => {
     const todayPresences = presences.filter(p => p.date === today);
 
     // ── Enregistrer la présence d'un élève ─────────────────────
-    const registerPresence = useCallback((studentId: string) => {
+    const registerPresence = useCallback(async (studentId: string) => {
         const student = students.find(s => s.id === studentId);
-        if (!student) return;
+
+        // Cas : Élève inconnu ou non lié (pas de parentId)
+        if (!student || !student.parentId) {
+            playErrorSound(); // Buzzer
+            setFlashError("PAS LIÉE");
+            isScanningPaused.current = true;
+            setTimeout(() => {
+                setFlashError(null);
+                isScanningPaused.current = false;
+            }, 1000);
+            return;
+        }
 
         const now = new Date();
         const heure = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
         const already = isAlreadyPresent(studentId);
 
         if (!already) {
-            // Confirmation sonore et tactile
+            // Confirmation sonore Premium (iph.mp3)
             playSuccessSound();
-            if (navigator.vibrate) navigator.vibrate(200);
+            if (navigator.vibrate) navigator.vibrate(100);
 
             const presence: Presence = {
                 id: uuid(),
@@ -130,18 +123,16 @@ export const ScanPresence: React.FC = () => {
                 `Présence enregistrée : ${student.prenom} ${student.nom} (${student.classe}) à ${heure}`
             ));
 
-            // Notifier le parent automatiquement via API arrière-plan
-            if (student.telephone) {
-                const message = messagePresenceArrivee(`${student.prenom} ${student.nom}`, heure, schoolName);
-                // Envoi via l'API payante d'arrière-plan (ne bloque pas le scan)
-                sendDirectNotification(student.telephone, message);
-            }
+            // Notification Push instantanée aux parents
+            const msg = `✅ Présence validée : ${student.prenom} ${student.nom} est arrivé(e) à l'école à ${heure}.`;
+            notificationService.notifyParents(student.id, msg);
         } else {
-            // Son d'erreur si déjà présent
+            // Son d'erreur (buzzer) si déjà présent
             playErrorSound();
             if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
         }
 
+        // Affichage fiche avec auto-fermeture (Scan Séquentiel)
         setScannedStudent({
             nom: student.nom,
             prenom: student.prenom,
@@ -151,7 +142,13 @@ export const ScanPresence: React.FC = () => {
             telephone: student.telephone,
         });
         isScanningPaused.current = true;
-    }, [students, today, isAlreadyPresent, addPresence, addActivityLog, user, schoolName]);
+
+        // Reset automatique après 1.5s pour enchaîner
+        setTimeout(() => {
+            setScannedStudent(null);
+            isScanningPaused.current = false;
+        }, 1500);
+    }, [students, today, isAlreadyPresent, addPresence, addActivityLog, user]);
 
     // ── Caméra QR avec HTML5-QRCode (Optimisé Mobile) ────────────────
     const startCamera = () => {
@@ -171,10 +168,8 @@ export const ScanPresence: React.FC = () => {
                 (decodedText) => {
                     // Succès du scan
                     if (!isScanningPaused.current) {
-                        const exist = students.some(s => s.id === decodedText);
-                        if (exist) {
-                            registerPresence(decodedText);
-                        }
+                        // On appelle systématiquement registerPresence pour gérer le succès ou l'erreur "PAS LIÉE"
+                        registerPresence(decodedText);
                     }
                 },
                 (errorMessage) => {
@@ -269,6 +264,14 @@ export const ScanPresence: React.FC = () => {
                     <div className="relative bg-black w-full" style={{ minHeight: '300px' }}>
                         {/* Conteneur pour Html5Qrcode */}
                         <div id="reader" className="w-full h-full"></div>
+
+                        {/* Overlay Flash Erreur Link */}
+                        {flashError && (
+                            <div className="absolute inset-0 bg-red-600/90 flex flex-col items-center justify-center text-white z-50 animate-pulse">
+                                <AlertTriangle className="w-20 h-20 mb-4" />
+                                <h2 className="text-4xl font-extrabold tracking-taller">{flashError}</h2>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -332,15 +335,11 @@ export const ScanPresence: React.FC = () => {
                 )}
             </div>
 
-            {/* Résultat du scan */}
+            {/* Résultat du scan (Overlay Auto-fermant) */}
             {scannedStudent && (
                 <StudentScanned
                     {...scannedStudent}
                     schoolName={schoolName}
-                    onClose={() => {
-                        setScannedStudent(null);
-                        isScanningPaused.current = false;
-                    }}
                 />
             )}
 
