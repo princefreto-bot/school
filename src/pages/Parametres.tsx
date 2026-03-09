@@ -489,6 +489,44 @@ doc.setFontSize(9);   // texte normal`}
         </div>
       </div>
 
+      {/* ── MAINTENANCE DES DONNÉES CLOUD ──────────────────── */}
+      {(user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general') && (
+        <div className="bg-amber-50 rounded-2xl border border-amber-100 p-6 mb-6">
+          <h3 className="font-bold text-amber-800 flex items-center gap-2 mb-2">
+            <Database className="w-5 h-5 text-amber-600" /> Maintenance des Données Cloud
+          </h3>
+          <p className="text-sm text-amber-700 mb-4">
+            Actions de nettoyage pour la base de données. Ces actions sont définitives.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={async () => {
+                if (window.confirm("Voulez-vous vraiment VIDER tout l'historique des scans de présence ? Cette action est irréversible.")) {
+                  const success = await useStore.getState().clearCloudPresences();
+                  if (success) alert("Historique des présences vidé avec succès.");
+                  else alert("Erreur lors du nettoyage des présences.");
+                }
+              }}
+              className="px-4 py-2 bg-white border border-amber-200 text-amber-700 hover:bg-amber-100 rounded-xl text-xs font-bold transition-all shadow-sm"
+            >
+              Vider l'Historique des Scans
+            </button>
+            <button
+              onClick={async () => {
+                if (window.confirm("Voulez-vous vraiment VIDER tous les logs d'activité ?")) {
+                  const success = await useStore.getState().clearCloudActivityLogs();
+                  if (success) alert("Logs d'activité vidés avec succès.");
+                  else alert("Erreur lors du nettoyage des logs.");
+                }
+              }}
+              className="px-4 py-2 bg-white border border-amber-200 text-amber-700 hover:bg-amber-100 rounded-xl text-xs font-bold transition-all shadow-sm"
+            >
+              Vider les Logs d'Activité
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── À PROPOS ──────────────────────────────────────── */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-4">

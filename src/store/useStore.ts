@@ -83,6 +83,8 @@ export interface AppState {
 
   // Synchronisation Cloud
   fetchAllFromBackend: () => Promise<void>;
+  clearCloudPresences: () => Promise<boolean>;
+  clearCloudActivityLogs: () => Promise<boolean>;
 }
 
 // Authentification gérée par Supabase
@@ -403,6 +405,40 @@ export const useStore = create<AppState>()(
           }
         } catch (err) {
           console.error('Failed to sync from cloud:', err);
+        }
+      },
+      clearCloudPresences: async () => {
+        try {
+          const { getAuthHeaders } = await import('../services/apiHelpers');
+          const res = await fetch(`${API_BASE_URL}/sync/presences`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+          if (res.ok) {
+            set({ presences: [] });
+            return true;
+          }
+          return false;
+        } catch (err) {
+          console.error('Failed to clear presences:', err);
+          return false;
+        }
+      },
+      clearCloudActivityLogs: async () => {
+        try {
+          const { getAuthHeaders } = await import('../services/apiHelpers');
+          const res = await fetch(`${API_BASE_URL}/sync/logs`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+          if (res.ok) {
+            set({ activityLogs: [] });
+            return true;
+          }
+          return false;
+        } catch (err) {
+          console.error('Failed to clear logs:', err);
+          return false;
         }
       }
     }),

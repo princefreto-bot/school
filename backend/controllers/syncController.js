@@ -202,4 +202,40 @@ async function syncToFrontend(req, res) {
     }
 }
 
-module.exports = { syncFromFrontend, syncToFrontend };
+/**
+ * DELETE /api/sync/presences
+ * Vider tout l'historique des présences.
+ */
+async function clearPresences(req, res) {
+    if (!req.user || !['admin', 'directeur_general'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Action non autorisée.' });
+    }
+
+    try {
+        const { error } = await supabase.from('presences').delete().neq('id', '0'); // Supprime tout
+        if (error) throw error;
+        return res.json({ message: 'Historique des présences vidé.' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+/**
+ * DELETE /api/sync/logs
+ * Vider les logs d'activité.
+ */
+async function clearActivityLogs(req, res) {
+    if (!req.user || !['admin', 'directeur_general'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Action non autorisée.' });
+    }
+
+    try {
+        const { error } = await supabase.from('activity_logs').delete().neq('id', '0');
+        if (error) throw error;
+        return res.json({ message: 'Logs d\'activité vidés.' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+module.exports = { syncFromFrontend, syncToFrontend, clearPresences, clearActivityLogs };
