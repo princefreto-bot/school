@@ -52,6 +52,23 @@ const PageContent: React.FC = () => {
 
 export function App() {
   const isAuthenticated = useStore((s) => s.isAuthenticated);
+  const fetchAllFromBackend = useStore((s) => s.fetchAllFromBackend);
+
+  // ── Synchronisation Automatique (Temps Réel) ──────────────────
+  // Permet de garder le mobile et le PC synchro sans action manuelle
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+
+    // Premier fetch au montage
+    fetchAllFromBackend();
+
+    // Polling toutes les 10 secondes pour le "temps réel"
+    const interval = setInterval(() => {
+      fetchAllFromBackend();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, fetchAllFromBackend]);
 
   if (!isAuthenticated) {
     return <Login />;

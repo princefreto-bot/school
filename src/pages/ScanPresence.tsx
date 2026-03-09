@@ -13,52 +13,65 @@ import {
     Clock, Users, X, Smartphone
 } from 'lucide-react';
 
+import { sendDirectNotification } from '../services/whatsappService';
+
 // ── Composant carte d'élève scanné ───────────────────────────
 const StudentScanned: React.FC<{
     nom: string; prenom: string; classe: string; heure: string;
     dejaPresent: boolean; telephone?: string; schoolName: string;
     onClose: () => void;
-}> = ({ nom, prenom, classe, heure, dejaPresent, telephone, schoolName, onClose }) => (
-    <div className={`rounded-2xl border-2 p-6 text-center transition-all animate-fade-in ${dejaPresent
-        ? 'border-amber-300 bg-amber-50'
-        : 'border-emerald-300 bg-emerald-50'
-        }`}>
-        <div className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center ${dejaPresent ? 'bg-amber-100' : 'bg-emerald-100'
-            }`}>
-            {dejaPresent ? (
-                <AlertTriangle className="w-8 h-8 text-amber-600" />
-            ) : (
-                <CheckCircle2 className="w-8 h-8 text-emerald-600" />
-            )}
-        </div>
-        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 mx-auto mb-3 flex items-center justify-center text-white text-xl font-bold">
-            {prenom.charAt(0)}{nom.charAt(0)}
-        </div>
-        <h3 className="text-lg font-bold text-gray-900">{prenom} {nom}</h3>
-        <p className="text-sm text-gray-500 font-medium">{classe}</p>
-        <p className={`text-sm font-bold mt-2 ${dejaPresent ? 'text-amber-600' : 'text-emerald-600'}`}>
-            {dejaPresent ? '⚠️ Présence déjà enregistrée aujourd\'hui' : `✅ Présence enregistrée à ${heure}`}
-        </p>
+}> = ({ nom, prenom, classe, heure, dejaPresent, telephone, schoolName, onClose }) => {
+    // Si on veut aussi le bouton manuel pour wa.me, on garde sendWhatsApp
+    const handleManualNotify = () => {
+        if (telephone) {
+            sendWhatsApp(telephone, messagePresenceArrivee(`${prenom} ${nom}`, heure, schoolName));
+        }
+    };
 
-        <div className="flex gap-2 mt-4 justify-center">
-            {telephone && !dejaPresent && (
+    return (
+        <div className={`rounded-2xl border-2 p-6 text-center transition-all animate-fade-in ${dejaPresent
+            ? 'border-amber-300 bg-amber-50'
+            : 'border-emerald-300 bg-emerald-50'
+            }`}>
+            <div className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center ${dejaPresent ? 'bg-amber-100' : 'bg-emerald-100'
+                }`}>
+                {dejaPresent ? (
+                    <AlertTriangle className="w-8 h-8 text-amber-600" />
+                ) : (
+                    <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+                )}
+            </div>
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 mx-auto mb-3 flex items-center justify-center text-white text-xl font-bold">
+                {prenom.charAt(0)}{nom.charAt(0)}
+            </div>
+            <h3 className="text-lg font-bold text-gray-900">{prenom} {nom}</h3>
+            <p className="text-sm text-gray-500 font-medium">{classe}</p>
+            <p className={`text-sm font-bold mt-2 ${dejaPresent ? 'text-amber-600' : 'text-emerald-600'}`}>
+                {dejaPresent ? '⚠️ Présence déjà enregistrée aujourd\'hui' : `✅ Présence enregistrée à ${heure}`}
+            </p>
+
+            <div className="flex gap-2 mt-4 justify-center">
+                {telephone && !dejaPresent && (
+                    <button
+                        onClick={handleManualNotify}
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+                    >
+                        <Smartphone className="w-3.5 h-3.5" />
+                        Notifier parent
+                    </button>
+                )}
                 <button
-                    onClick={() => sendWhatsApp(telephone, messagePresenceArrivee(`${prenom} ${nom}`, heure, schoolName))}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+                    onClick={onClose}
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl text-xs font-bold transition-colors"
                 >
-                    <Smartphone className="w-3.5 h-3.5" />
-                    Notifier parent
+                    Fermer
                 </button>
-            )}
-            <button
-                onClick={onClose}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl text-xs font-bold transition-colors"
-            >
-                Fermer
-            </button>
+            </div>
         </div>
-    </div>
-);
+    );
+};
+
+import { playSuccessSound, playErrorSound } from '../utils/audio';
 
 // ── Page principale ──────────────────────────────────────────
 export const ScanPresence: React.FC = () => {
@@ -93,6 +106,10 @@ export const ScanPresence: React.FC = () => {
         const already = isAlreadyPresent(studentId);
 
         if (!already) {
+            // Confirmation sonore et tactile
+            playSuccessSound();
+            if (navigator.vibrate) navigator.vibrate(200);
+
             const presence: Presence = {
                 id: uuid(),
                 eleveId: student.id,
@@ -113,8 +130,16 @@ export const ScanPresence: React.FC = () => {
                 `Présence enregistrée : ${student.prenom} ${student.nom} (${student.classe}) à ${heure}`
             ));
 
-            // Vibration du téléphone
-            if (navigator.vibrate) navigator.vibrate(200);
+            // Notifier le parent automatiquement via API arrière-plan
+            if (student.telephone) {
+                const message = messagePresenceArrivee(`${student.prenom} ${student.nom}`, heure, schoolName);
+                // Envoi via l'API payante d'arrière-plan (ne bloque pas le scan)
+                sendDirectNotification(student.telephone, message);
+            }
+        } else {
+            // Son d'erreur si déjà présent
+            playErrorSound();
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
         }
 
         setScannedStudent({
@@ -126,7 +151,7 @@ export const ScanPresence: React.FC = () => {
             telephone: student.telephone,
         });
         isScanningPaused.current = true;
-    }, [students, today, isAlreadyPresent, addPresence, addActivityLog, user]);
+    }, [students, today, isAlreadyPresent, addPresence, addActivityLog, user, schoolName]);
 
     // ── Caméra QR avec HTML5-QRCode (Optimisé Mobile) ────────────────
     const startCamera = () => {
@@ -153,7 +178,10 @@ export const ScanPresence: React.FC = () => {
                     }
                 },
                 (errorMessage) => {
-                    // Erreurs ignorées (se produit à chaque frame sans QR code)
+                    // Masquer l'erreur de frame sans code QR pour plus de propreté log
+                    if (process.env.NODE_ENV === 'development' && !errorMessage.includes('No QR code found')) {
+                        console.debug("Scan info:", errorMessage);
+                    }
                 }
             ).catch((err) => {
                 console.error("Camera Error:", err);
