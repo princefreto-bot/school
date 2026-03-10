@@ -238,10 +238,46 @@ async function adminDeleteAccount(req, res) {
     }
 }
 
+/**
+ * GET /api/parent/presences/:studentId
+ */
+async function getPresences(req, res) {
+    const { id: parentId } = req.user;
+    const { studentId } = req.params;
+
+    try {
+        // Vérifier lien dans la table parent_student
+        const { data: isLinked, error: lErr } = await supabase
+            .from('parent_student')
+            .select('student_id')
+            .eq('parent_id', parentId)
+            .eq('student_id', studentId)
+            .single();
+
+        if (lErr || !isLinked) {
+            return res.status(403).json({ error: 'Accès refusé ou enfant non lié.' });
+        }
+
+        const { data: presences, error: pErr } = await supabase
+            .from('presences')
+            .select('*')
+            .eq('eleve_id', studentId)
+            .order('date', { ascending: false })
+            .order('heure', { ascending: false });
+
+        if (pErr) throw pErr;
+
+        return res.json({ presences: presences || [] });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
 module.exports = {
     getDashboard,
     getPayments,
     getBadges,
+    getPresences,
     getActiveParentsCount,
     getAllParents,
     getParentById,

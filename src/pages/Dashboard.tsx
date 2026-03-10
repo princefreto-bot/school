@@ -64,28 +64,27 @@ export const Dashboard: React.FC = () => {
   const parents = useStore((s) => s.parents);
   const user = useStore((s) => s.user);
   const getPresencesToday = useStore((s) => s.getPresencesToday);
+  const isSyncing = useStore((s) => s.isSyncing);
 
   const todayPresences = useMemo(() => getPresencesToday(), [getPresencesToday]);
   const tauxPresence = students.length > 0 ? Math.round((todayPresences.length / students.length) * 100) : 0;
 
   // Synchronisation Cloud au montage du dashboard
   useEffect(() => {
-    if (user?.role && ['admin', 'directeur', 'directeur_general', 'comptable'].includes(user.role)) {
+    const roles = ['admin', 'directeur', 'directeur_general', 'comptable'];
+    if (user?.role && roles.includes(user.role)) {
       const initSync = async () => {
         const available = await isBackendAvailable();
         if (available) {
-          console.log("🔄 Synchronisation Cloud en cours...");
-
           // 1. Récupérer les données fraîches du serveur (Single Source of Truth)
           const fetchAllFromBackend = useStore.getState().fetchAllFromBackend;
           await fetchAllFromBackend();
 
-          // 2. Si on a des données locales mais que le cloud est potentiellement vide (premier usage), 
-          // on pousse aussi vers le haut.
-          if (students.length > 0) {
-            console.log("📤 Envoi des données locales vers le cloud...");
-            await syncToBackend({
-              students,
+          // 2. Sync background si on a des données locales 
+          const currentStudents = useStore.getState().students;
+          if (currentStudents.length > 0) {
+            syncToBackend({
+              students: currentStudents,
               parents,
               presences: useStore.getState().presences,
               activityLogs: useStore.getState().activityLogs
@@ -95,9 +94,9 @@ export const Dashboard: React.FC = () => {
       };
       initSync();
     }
-  }, []); // Une fois au montage
+  }, []);
 
-  // ── Indicateurs financiers avancés (via analyticsService) ──
+  // ── Indicateurs financiers avancés ──
   const recouvrement = useMemo(() => computeRecouvrement(students), [students]);
   const projection = useMemo(() => computeProjection(students), [students]);
   const classComp = useMemo(() => computeClassComparison(students), [students]);
@@ -137,7 +136,6 @@ export const Dashboard: React.FC = () => {
     };
   }, [students]);
 
-  // Données graphique barres par classe
   const classData = useMemo(() => {
     return CLASS_CONFIG.map((c) => {
       const cls = students.filter((s) => s.classe === c.name);
@@ -150,14 +148,12 @@ export const Dashboard: React.FC = () => {
     }).filter((c) => c.total > 0);
   }, [students]);
 
-  // Données camembert cycles
   const cycleData = [
     { name: 'Primaire', value: stats.primaire },
     { name: 'Collège', value: stats.college },
     { name: 'Lycée', value: stats.lycee },
   ].filter((d) => d.value > 0);
 
-  // Top classes solvables
   const topClasses = useMemo(() => {
     return CLASS_CONFIG.map((c) => {
       const cls = students.filter((s) => s.classe === c.name);
@@ -168,15 +164,26 @@ export const Dashboard: React.FC = () => {
     }).filter(Boolean).sort((a, b) => (b?.taux ?? 0) - (a?.taux ?? 0)).slice(0, 5) as { name: string; cycle: string; taux: number; count: number }[];
   }, [students]);
 
+  if (isSyncing && students.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
+        <h2 className="text-lg font-bold text-gray-800 mb-1">Synchronisation Cloud...</h2>
+        <p className="text-gray-500 text-sm">Récupération de vos données depuis le serveur sécurisé.</p>
+      </div>
+    );
+  }
+
   if (students.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-4">
           <GraduationCap className="w-10 h-10 text-blue-400" />
         </div>
-        <h2 className="text-xl font-bold text-gray-800 mb-2">Aucune donnée</h2>
-        <p className="text-gray-500 max-w-md">
-          Importez un fichier Excel depuis la page <strong>Élèves</strong> pour commencer, ou ajoutez des élèves manuellement.
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Aucune donnée trouvée</h2>
+        <p className="text-gray-500 max-w-md mx-auto px-4">
+          Importez un fichier Excel ou patientez si une synchronisation est en cours.
+          Vérifiez que vous êtes bien connecté à internet.
         </p>
       </div>
     );
@@ -188,7 +195,6 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* ═══ Header avec Action et Santé Financière ═══ */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
         <div>
           <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
@@ -198,7 +204,6 @@ export const Dashboard: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Indice de Santé Financière */}
           <div className="flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
             <div>
               <p className="text-xs text-gray-500 font-medium">Santé Financière</p>
@@ -225,7 +230,6 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* KPIs principaux */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
         <StatCard
           title="Total Élèves"
@@ -266,7 +270,6 @@ export const Dashboard: React.FC = () => {
         />
       </div>
 
-      {/* Taux de recouvrement global */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <div className="flex items-center justify-between mb-3">
           <div>
@@ -288,7 +291,6 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Cycles — cards détaillées */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {([
           {
@@ -316,7 +318,6 @@ export const Dashboard: React.FC = () => {
           const cs = stats.cycleStats[c.key];
           return (
             <div key={c.label} className={`${c.bg} border ${c.border} rounded-2xl p-5`}>
-              {/* En-tête */}
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
                   {c.icon}
@@ -328,7 +329,6 @@ export const Dashboard: React.FC = () => {
                 <span className={`ml-auto text-2xl font-extrabold ${c.text}`}>{cs.count}</span>
               </div>
 
-              {/* Stats financières */}
               <div className="space-y-1 text-xs mb-3">
                 <div className="flex justify-between text-gray-500">
                   <span>Écolage attendu</span>
@@ -348,7 +348,6 @@ export const Dashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Barre de recouvrement */}
               <div>
                 <div className="flex justify-between text-[10px] text-gray-400 mb-1">
                   <span>Recouvrement</span>
@@ -366,9 +365,7 @@ export const Dashboard: React.FC = () => {
         })}
       </div>
 
-      {/* Graphiques */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        {/* Barres par classe */}
         <div className="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
           <h3 className="font-semibold text-gray-800 mb-1">Paiements par classe</h3>
           <p className="text-xs text-gray-500 mb-4">Montants payés vs. restants (FCFA)</p>
@@ -389,7 +386,6 @@ export const Dashboard: React.FC = () => {
           )}
         </div>
 
-        {/* Camembert cycles */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
           <h3 className="font-semibold text-gray-800 mb-1">Répartition par cycle</h3>
           <p className="text-xs text-gray-500 mb-4">Distribution des élèves</p>
@@ -409,7 +405,6 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* ═══ INDICATEUR 1 : Taux de recouvrement avancé ═══ */}
       {students.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
           <div className="flex items-center justify-between mb-4">
@@ -441,7 +436,6 @@ export const Dashboard: React.FC = () => {
               <p className="text-[10px] text-gray-400">FCFA à recouvrer</p>
             </div>
           </div>
-          {/* Barre de progression avec taux précis */}
           <div className="relative">
             <div className="flex justify-between text-xs text-gray-500 mb-1">
               <span>Progression</span>
@@ -464,7 +458,6 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* ═══ INDICATEUR 2 : Projection fin d'année ═══ */}
       {students.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
           <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-1">
@@ -475,7 +468,6 @@ export const Dashboard: React.FC = () => {
             Basée sur le taux actuel de {(projection.tauxActuel * 100).toFixed(1)}% · Projection = Théorique × Taux
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Scénario pessimiste */}
             <div className="border border-red-100 bg-red-50 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <ArrowDownRight className="w-4 h-4 text-red-500" />
@@ -484,7 +476,6 @@ export const Dashboard: React.FC = () => {
               <p className="text-xl font-bold text-red-600">{fmtMoney(projection.scenarioPessimiste)}</p>
               <p className="text-[10px] text-red-400 mt-1">Taux − 10% = {((projection.tauxActuel - 0.10) * 100).toFixed(1)}%</p>
             </div>
-            {/* Projection réaliste */}
             <div className="border border-violet-200 bg-violet-50 rounded-xl p-4 ring-2 ring-violet-200">
               <div className="flex items-center gap-2 mb-2">
                 <Target className="w-4 h-4 text-violet-600" />
@@ -496,7 +487,6 @@ export const Dashboard: React.FC = () => {
                 Reste à encaisser : {fmtMoney(projection.resteAEncaisser)} FCFA
               </p>
             </div>
-            {/* Scénario optimiste */}
             <div className="border border-emerald-100 bg-emerald-50 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <ArrowUpRight className="w-4 h-4 text-emerald-500" />
@@ -509,7 +499,6 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* ═══ INDICATEUR 3 : Comparaison financière par classe ═══ */}
       {classComp.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
           <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-1">
@@ -518,7 +507,6 @@ export const Dashboard: React.FC = () => {
           </h3>
           <p className="text-xs text-gray-500 mb-4">Classé du meilleur taux au plus faible — Cliquez pour détails</p>
 
-          {/* BarChart Recharts */}
           <ResponsiveContainer width="100%" height={220}>
             <BarChart
               data={classComp.map((r) => ({
@@ -563,7 +551,6 @@ export const Dashboard: React.FC = () => {
             </BarChart>
           </ResponsiveContainer>
 
-          {/* Tableau récapitulatif */}
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
@@ -611,7 +598,6 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Top classes solvables */}
       {topClasses.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
           <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">

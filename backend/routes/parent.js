@@ -4,6 +4,7 @@ const {
     getDashboard,
     getPayments,
     getBadges,
+    getPresences,
     getActiveParentsCount,
     getAllParents,
     getParentById,
@@ -15,6 +16,7 @@ router.use(authenticateToken);
 
 router.get('/dashboard', getDashboard);
 router.get('/payments/:studentId', getPayments);
+router.get('/presences/:studentId', getPresences);
 router.get('/badges', getBadges);
 router.get('/active-count', getActiveParentsCount);
 router.get('/list', getAllParents);

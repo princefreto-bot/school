@@ -147,6 +147,13 @@ async function syncToFrontend(req, res) {
 
         if (lErr) throw lErr;
 
+        // Fetch parent-student links to check if a student is linked
+        const { data: links, error: psErr } = await supabase
+            .from('parent_student')
+            .select('*');
+
+        if (psErr) throw psErr;
+
         // Group payments by student
         const studentMap = new Map();
         students.forEach(s => {
@@ -193,7 +200,8 @@ async function syncToFrontend(req, res) {
                 action: l.action,
                 description: l.description,
                 dateHeure: l.date_heure
-            }))
+            })),
+            links: links || []
         });
 
     } catch (err) {

@@ -82,7 +82,11 @@ export interface AppState {
   incrementReceiptCounter: () => string;
 
   // Synchronisation Cloud
+  links: any[];
+  setLinks: (links: any[]) => void;
   fetchAllFromBackend: () => Promise<void>;
+  isSyncing: boolean;
+  setIsSyncing: (s: boolean) => void;
   clearCloudPresences: () => Promise<boolean>;
   clearCloudActivityLogs: () => Promise<boolean>;
 }
@@ -391,20 +395,39 @@ export const useStore = create<AppState>()(
       },
 
       // ── Synchronisation Cloud ───────────────────────────
+      links: [],
+      setLinks: (links) => set({ links }),
+      isSyncing: false,
+      setIsSyncing: (s) => set({ isSyncing: s }),
       fetchAllFromBackend: async () => {
+        const user = get().user;
+        if (!user || user.role === 'parent') return; // parents use parentApi, not bulk sync
+
+        set({ isSyncing: true });
         try {
           const { fetchFromBackend } = await import('../services/backendSync');
           const data = await fetchFromBackend();
-          if (data) {
-            set({
-              students: data.students || get().students,
-              presences: data.presences || get().presences,
-              activityLogs: data.activityLogs || get().activityLogs
-            });
-            console.log('✅ Cloud data synchronized');
+
+          if (data && Array.isArray(data.students)) {
+            // Priority to cloud data if it is not empty, 
+            // OR if local data is empty (new device)
+            const hasCloudStudents = data.students.length > 0;
+            const hasLocalStudents = get().students.length > 0;
+
+            if (hasCloudStudents || !hasLocalStudents) {
+              set({
+                students: data.students,
+                presences: data.presences || [],
+                activityLogs: data.activityLogs || [],
+                links: data.links || []
+              });
+              console.log(`✅ Cloud data synchronized: ${data.students.length} students loaded.`);
+            }
           }
         } catch (err) {
           console.error('Failed to sync from cloud:', err);
+        } finally {
+          set({ isSyncing: false });
         }
       },
       clearCloudPresences: async () => {

@@ -38,11 +38,12 @@ app.use('/api/parent', require('./routes/parent'));
 app.use('/api/students', require('./routes/students'));
 app.use('/api/sync', require('./routes/sync'));
 app.use('/api/chat', require('./routes/chat'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 // ── Health Check ──────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'ok', 
+    res.json({
+        status: 'ok',
         backend: 'online',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development'
@@ -78,7 +79,7 @@ const server = app.listen(PORT, () => {
     console.log(`🛡️  Base de données: Supabase PostgreSQL`);
     console.log(`🔑 Auth: JWT ${process.env.JWT_SECRET ? '(configuré)' : '(DÉFAUT)'}`);
     console.log(`📁 Node env: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`💬 Routes actives: /api/auth, /api/parent, /api/students, /api/sync, /api/chat`);
+    console.log(`💬 Routes actives: /api/auth, /api/parent, /api/students, /api/sync, /api/chat, /api/notifications`);
     console.log(`🏥 Health check: /api/health`);
     console.log(`${'='.repeat(60)}\n`);
 });

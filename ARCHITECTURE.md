@@ -80,6 +80,11 @@ gestioschool/
 
 ---
 
+## 🌐 Stratégie de Notifications
+Le projet utilise exclusivement l'API **Web Push** standard (Service Workers + Push API) pour les notifications système sur navigateur (PC et mobile), garantissant une compatibilité SaaS universelle.
+
+---
+
 ## 🔄 Flux de Données (Production)
 
 ```
@@ -92,7 +97,7 @@ gestioschool/
 
 ---
 
-## � Sécurité et Rôles
+## 🔐 Sécurité et Rôles
 
 Le système utilise un RBAC (Role-Based Access Control) strict :
 

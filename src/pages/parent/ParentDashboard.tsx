@@ -38,6 +38,8 @@ export const ParentDashboard: React.FC = () => {
 
     useEffect(() => {
         fetchData();
+        // Demande l'autorisation des notifications sur mobile
+        import('../../utils/capacitorNotifications').then(m => m.checkAndAskNotifications());
     }, []);
 
     const totalEcolage = children.reduce((acc, s) => acc + s.ecolage, 0);

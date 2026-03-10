@@ -103,6 +103,15 @@ export const parentApi = {
         return data;
     },
 
+    getPresences: async (studentId: string) => {
+        const res = await fetch(`${API_URL}/parent/presences/${studentId}`, {
+            headers: getHeaders()
+        });
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
+    },
+
     // ── Badges ──────────────────────────────────────────────────
     getBadges: async () => {
         const res = await fetch(`${API_URL}/parent/badges`, {

@@ -81,9 +81,15 @@ export const ScanPresence: React.FC = () => {
     // ── Enregistrer la présence d'un élève ─────────────────────
     const registerPresence = useCallback(async (studentId: string) => {
         const student = students.find(s => s.id === studentId);
+        const { links } = useStore.getState(); // Utilise les liens synchronisés
 
-        // Cas : Élève inconnu ou non lié (pas de parentId)
-        if (!student || !student.parentId) {
+        // Un élève est "lié" s'il existe une entrée dans links correspondant à cet élève (casse insensible)
+        const isLinked = links && links.some((l: any) =>
+            l.student_id?.trim().toLowerCase() === studentId?.trim().toLowerCase()
+        );
+
+        // Cas : Élève inconnu ou non lié
+        if (!student || !isLinked) {
             playErrorSound(); // Buzzer
             setFlashError("PAS LIÉE");
             isScanningPaused.current = true;
