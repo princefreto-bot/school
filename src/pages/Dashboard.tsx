@@ -295,21 +295,21 @@ export const Dashboard: React.FC = () => {
         {([
           {
             label: 'Primaire',
-            sub: 'CI · CI1 · CI2 · CP1 · CP2 · CE1 · CE2 · CM1 · CM2',
+            sub: 'CI · CI 1 · CI 2 · CP1 · CP2 · CE1 · CE2 · CM1 · CM2',
             icon: <School className="w-5 h-5 text-amber-600" />,
             border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-700',
             bar: 'bg-amber-400', key: 'Primaire' as const,
           },
           {
             label: 'Collège',
-            sub: '6ème · 5ème · 4ème · 3ème',
+            sub: '6EME · 5EME · 4EME · 3EME',
             icon: <BookOpen className="w-5 h-5 text-blue-600" />,
             border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-700',
             bar: 'bg-blue-500', key: 'Collège' as const,
           },
           {
             label: 'Lycée',
-            sub: '2nde · 1ère · Terminale',
+            sub: '2nde S/A4 · 1er D/A4 · Tle D/A4',
             icon: <GraduationCap className="w-5 h-5 text-purple-600" />,
             border: 'border-purple-200', bg: 'bg-purple-50', text: 'text-purple-700',
             bar: 'bg-purple-500', key: 'Lycée' as const,

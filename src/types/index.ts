@@ -176,18 +176,5 @@ export type AppPage =
   | 'import_export'
   | 'chat';
 
-// Re-export CLASSES from data/classes.ts
-export { CLASSES } from '../data/classes';
-
-// CLASSES as object structure for helpers
-export const CLASSES_BY_CYCLE = {
-  Primaire: ['CP1', 'CP2', 'CE1', 'CE2', 'CM1', 'CM2', 'CI', 'CI 1', 'CI 2'],
-  Collège: ['6ème', '5ème', '4ème', '3ème'],
-  Lycée: ['2nde A', '2nde C', '2nde D', '2nde S', '2nde A4', '1ère A', '1ère A4', '1ère C', '1ère D', 'Tle A', 'Tle A4', 'Tle C', 'Tle D', 'Tle G2']
-};
-
-// ECOLAGE_PAR_CLASSE mapping
-export const ECOLAGE_PAR_CLASSE: Record<string, number> = CLASSES.reduce((acc, c) => {
-  acc[c.nom] = c.ecolage;
-  return acc;
-}, {} as Record<string, number>);
+// Les types de cycles existants
+export const CYCLES: Cycle[] = ['Primaire', 'Collège', 'Lycée'];

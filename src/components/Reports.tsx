@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { CLASSES_BY_CYCLE, StatusPaiement } from '../types';
+import { StatusPaiement } from '../types';
+import { CLASSES_BY_CYCLE } from '../data/classConfig';
 import { formatMontant, getStatusPaiement, generateWhatsAppLink } from '../utils/helpers';
 import { generateReceipt, generateClassReport, generateNonSoldesReport } from '../utils/pdfService';
 import {

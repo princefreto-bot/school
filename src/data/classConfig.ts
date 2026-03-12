@@ -38,11 +38,17 @@ export const CLASS_CONFIG: ClassConfig[] = [
   { name: 'Tle D',  cycle: 'Lycée', ecolage: 95000 },
 ];
 
-// Normalise pour la recherche flexible
+// Normalise pour la recherche flexible (essentiel pour Excel)
 const normalize = (s: string): string => {
-  return s.toLowerCase().trim()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]/g, '');
+  let n = s.toLowerCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // retire accents
+    .replace(/[^a-z0-9]/g, '');                       // retire tout sauf alphanum
+  
+  // Harmoniser les variations (ex: 1er vs 1ere, 6e vs 6eme)
+  n = n.replace(/1ere/g, '1er');
+  n = n.replace(/ere/g, 'er');
+  n = n.replace(/eme/g, 'e');
+  return n;
 };
 
 export const getClassConfig = (className: string): ClassConfig | undefined => {

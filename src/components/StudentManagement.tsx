@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { Student, Payment } from '../types';
-import { CLASSES_BY_CYCLE as CLASSES } from '../types';
+import { CLASSES_BY_CYCLE as CLASSES } from '../data/classConfig';
 import { 
   getStatusPaiement, 
   getStatusLabel, 

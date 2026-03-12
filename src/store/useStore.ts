@@ -113,6 +113,26 @@ const computeStatus = (restant: number, ecolage: number) => {
   return 'Non soldé' as const;
 };
 
+// Réparation des données (cycle, écolage, restant, status)
+const repairStudent = (s: Student): Student => {
+  const correctCycle = getCycle(s.classe);
+  const correctEcolage = getEcolage(s.classe);
+  const correctRestant = Math.max(0, correctEcolage - s.dejaPaye);
+  const correctStatus = computeStatus(correctRestant, correctEcolage);
+  
+  if (s.cycle !== correctCycle || s.ecolage !== correctEcolage || s.restant !== correctRestant || s.status !== correctStatus) {
+    return {
+      ...s,
+      cycle: correctCycle,
+      ecolage: correctEcolage,
+      restant: correctRestant,
+      status: correctStatus,
+      updatedAt: new Date().toISOString()
+    };
+  }
+  return s;
+};
+
 export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
@@ -210,7 +230,7 @@ export const useStore = create<AppState>()(
 
       // ── Élèves ───────────────────────────────────────────
       students: [],
-      setStudents: (students) => set({ students }),
+      setStudents: (students) => set({ students: students.map(repairStudent) }),
       addStudent: (data) => {
         const ecolage = getEcolage((data as { classe: string }).classe);
         const restant = ecolage - ((data as { dejaPaye?: number }).dejaPaye || 0);
@@ -451,8 +471,9 @@ export const useStore = create<AppState>()(
             const hasLocalStudents = get().students.length > 0;
 
             if (hasCloudStudents || !hasLocalStudents) {
+              const repairedStudents = data.students.map(repairStudent);
               set({
-                students: data.students,
+                students: repairedStudents,
                 presences: data.presences || [],
                 activityLogs: data.activityLogs || [],
                 links: data.links || []
@@ -468,7 +489,7 @@ export const useStore = create<AppState>()(
                   messageRappel: data.appSettings.messageRappel
                 });
               }
-              console.log(`✅ Cloud data synchronized: ${data.students.length} students loaded.`);
+              console.log(`✅ Cloud data synchronized: ${repairedStudents.length} students loaded and repaired.`);
             }
           }
         } catch (err) {
@@ -570,26 +591,9 @@ export const useStore = create<AppState>()(
         receiptCounter: state.receiptCounter || 0,
       }),
       onRehydrateStorage: () => (state) => {
-        // Auto-réparation : recalcule cycle + écolage + restant + status
-        // pour corriger les données importées avec une ancienne normalisation
+        // Auto-réparation au chargement du storage local
         if (state && state.students.length > 0) {
-          const repaired = state.students.map((s) => {
-            const correctCycle = getCycle(s.classe);
-            const correctEcolage = getEcolage(s.classe);
-            const correctRestant = Math.max(0, correctEcolage - s.dejaPaye);
-            const correctStatus = computeStatus(correctRestant, correctEcolage);
-            if (s.cycle !== correctCycle || s.ecolage !== correctEcolage) {
-              return {
-                ...s,
-                cycle: correctCycle,
-                ecolage: correctEcolage,
-                restant: correctRestant,
-                status: correctStatus,
-              };
-            }
-            return s;
-          });
-          state.students = repaired;
+          state.students = state.students.map(repairStudent);
         }
         console.log('🔄 [Storage] Rehydrated. Current Logo:', state?.schoolLogo ? 'Present (Base64)' : 'None');
       },

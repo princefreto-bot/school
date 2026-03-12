@@ -1,17 +1,16 @@
-import { Student, StatusPaiement, DashboardStats, ClassStats, CLASSES_BY_CYCLE as CLASSES, ECOLAGE_PAR_CLASSE } from '../types';
+import { Student, StatusPaiement, DashboardStats, ClassStats } from '../types';
+import { getEcolage, getCycle, CLASS_CONFIG } from '../data/classConfig';
 
 export const generateId = (): string => {
   return Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
 };
 
 export const getCycleFromClasse = (classe: string): 'Primaire' | 'Collège' | 'Lycée' => {
-  if (CLASSES.Primaire.includes(classe as never)) return 'Primaire';
-  if (CLASSES.Collège.includes(classe as never)) return 'Collège';
-  return 'Lycée';
+  return getCycle(classe);
 };
 
 export const getEcolageFromClasse = (classe: string): number => {
-  return ECOLAGE_PAR_CLASSE[classe] || 50000;
+  return getEcolage(classe);
 };
 
 export const getStatusPaiement = (student: Student, seuil: number = 70): StatusPaiement => {
@@ -78,7 +77,7 @@ export const calculateDashboardStats = (students: Student[]): DashboardStats => 
 };
 
 export const calculateClassStats = (students: Student[]): ClassStats[] => {
-  const allClasses = [...CLASSES.Primaire, ...CLASSES.Collège, ...CLASSES.Lycée];
+  const allClasses = CLASS_CONFIG.map(c => c.name);
   
   return allClasses.map(classe => {
     const classStudents = students.filter(s => s.classe === classe);

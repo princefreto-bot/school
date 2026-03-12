@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
-import { Student, CLASSES } from '../types';
+import { Student } from '../types';
+import { CLASSES } from '../data/classes';
 import { generateId, getCycleFromClasse, getEcolageFromClasse } from './helpers';
 
 export const importExcel = (file: File): Promise<Student[]> => {
