@@ -113,6 +113,27 @@ const computeStatus = (restant: number, ecolage: number) => {
   return 'Non soldé' as const;
 };
 
+// Déduplication des élèves (Nom + Prénom + Classe)
+const deduplicateStudents = (list: Student[]): Student[] => {
+  const seen = new Map<string, Student>();
+  list.forEach(s => {
+    // Clé unique basée sur l'identité (normalisée)
+    const key = `${s.nom.trim()} ${s.prenom.trim()} ${s.classe.trim()}`.toUpperCase();
+    if (!seen.has(key)) {
+      seen.set(key, s);
+    } else {
+      // Si doublon, on garde celui qui a le plus de paiements ou le plus récent
+      const existing = seen.get(key)!;
+      const existingPaiements = existing.historiquesPaiements?.length || 0;
+      const currentPaiements = s.historiquesPaiements?.length || 0;
+      if (currentPaiements > existingPaiements) {
+         seen.set(key, s);
+      }
+    }
+  });
+  return Array.from(seen.values());
+};
+
 // Réparation des données (cycle, écolage, restant, status)
 const repairStudent = (s: Student): Student => {
   const correctCycle = getCycle(s.classe);
@@ -230,7 +251,7 @@ export const useStore = create<AppState>()(
 
       // ── Élèves ───────────────────────────────────────────
       students: [],
-      setStudents: (students) => set({ students: students.map(repairStudent) }),
+      setStudents: (students) => set({ students: deduplicateStudents(students.map(repairStudent)) }),
       addStudent: (data) => {
         const ecolage = getEcolage((data as { classe: string }).classe);
         const restant = ecolage - ((data as { dejaPaye?: number }).dejaPaye || 0);
@@ -471,7 +492,7 @@ export const useStore = create<AppState>()(
             const hasLocalStudents = get().students.length > 0;
 
             if (hasCloudStudents || !hasLocalStudents) {
-              const repairedStudents = data.students.map(repairStudent);
+              const repairedStudents = deduplicateStudents(data.students.map(repairStudent));
               set({
                 students: repairedStudents,
                 presences: data.presences || [],
