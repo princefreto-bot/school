@@ -15,7 +15,7 @@ import {
 
 // import { sendDirectNotification } from '../services/whatsappService'; // Non utilisé actuellement
 import { notificationService } from '../services/notificationService';
-import { playSuccessSound, playErrorSound, playWarningBeep } from '../utils/audio';
+import { playSuccessSound, playErrorSound, playWarningBeep, unlockAudio } from '../utils/audio';
 
 // ── Composant carte d'élève scanné (OVERLAY) ────────────────
 const StudentScanned: React.FC<{
@@ -166,6 +166,8 @@ export const ScanPresence: React.FC = () => {
     const startCamera = () => {
         setCameraError('');
         setCameraActive(true);
+        // Déverrouille l'AudioContext et pré-charge iph.mp3 dès le clic (interaction utilisateur)
+        unlockAudio();
 
         setTimeout(() => {
             const html5QrCode = new Html5Qrcode("reader");
