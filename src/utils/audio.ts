@@ -22,15 +22,31 @@ const getCtx = (): AudioContext => {
 export const unlockAudio = async () => {
     try {
         const ctx = getCtx();
+        
+        // ── Trick Safari : Jouer un silence immédiat sur le clic ────────────────
+        const silentOsc = ctx.createOscillator();
+        const silentGain = ctx.createGain();
+        silentGain.gain.value = 0;
+        silentOsc.connect(silentGain);
+        silentGain.connect(ctx.destination);
+        silentOsc.start(0);
+        silentOsc.stop(0.1);
+
         // Réveille le contexte suspendu par la politique autoplay
         if (ctx.state === 'suspended') {
             await ctx.resume();
         }
+        
+        console.log('🔊 AudioContext déverrouillé. État:', ctx.state);
+
         // Pré-charge le son si pas encore fait
         if (!_iphBuffer) {
+            console.log('🔄 Chargement de iph.mp3...');
             const response = await fetch('/iph.mp3');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const arrayBuffer = await response.arrayBuffer();
             _iphBuffer = await ctx.decodeAudioData(arrayBuffer);
+            console.log('✅ iph.mp3 chargé dans le buffer.');
         }
     } catch (err) {
         console.warn('Audio unlock/preload échoué:', err);
@@ -66,19 +82,26 @@ export const playBeep = () => {
 export const playSuccessSound = () => {
     try {
         const ctx = getCtx();
+        console.log('🎵 playSuccessSound() appelé. État AudioContext:', ctx.state);
+        
         if (_iphBuffer) {
-            // Lecture via BufferSourceNode — jamais bloquée par autoplay
+            console.log('🔊 Lecture via AudioBufferSourceNode (Méthode Web Audio API)');
             const source = ctx.createBufferSource();
             source.buffer = _iphBuffer;
             source.connect(ctx.destination);
             source.start(0);
         } else {
-            // Buffer pas encore chargé → tenter quand même avec <audio>
+            console.warn('⚠️ Buffer iph.mp3 non chargé, tentative via élément <audio>');
             const audio = new Audio('/iph.mp3');
-            audio.play().catch(() => playBeep());
+            audio.play()
+                .then(() => console.log('✅ Lecture via <audio> réussie'))
+                .catch((e) => {
+                    console.error('❌ Échec lecture <audio>:', e.message);
+                    playBeep();
+                });
         }
     } catch (err) {
-        console.error('Impossible de jouer le son de validation:', err);
+        console.error('❌ Erreur fatale dans playSuccessSound:', err);
         playBeep();
     }
 };

@@ -8,6 +8,9 @@ const PUBLIC_VAPID_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
  * Convertit une clé VAPID base64 en Uint8Array pour le navigateur
  */
 function urlBase64ToUint8Array(base64String: string) {
+  if (!base64String) {
+    throw new Error("La clé VAPID publique est vide ou non définie.");
+  }
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
@@ -39,6 +42,11 @@ export const webPushService = {
       }
 
       // 3. Abonnement (Subscribe)
+      if (!PUBLIC_VAPID_KEY) {
+        console.warn('⚠️ Web Push : VITE_VAPID_PUBLIC_KEY manquante. L\'abonnement est impossible.');
+        return;
+      }
+
       console.log('🔄 Abonnement aux notifications push...');
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,

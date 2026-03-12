@@ -121,13 +121,22 @@ async function updatePushToken(req, res) {
     const { push_token } = req.body;
 
     try {
+        console.log(`📲 Tentative de mise à jour du push_token pour l'utilisateur ${id}`);
+        if (!push_token) {
+            console.warn('⚠️ Aucun push_token reçu dans le corps de la requête.');
+        }
+
         const { error } = await supabase
             .from('profiles')
             .update({ push_token })
             .eq('id', id);
 
-        if (error) throw error;
+        if (error) {
+            console.error('❌ Erreur Supabase lors de updatePushToken:', error.message);
+            throw error;
+        }
 
+        console.log(`✅ Push token mis à jour avec succès pour ${id}`);
         return res.json({ success: true, message: 'Token de notification mis à jour.' });
     } catch (err) {
         console.error('Update Push Token Error:', err.message);
