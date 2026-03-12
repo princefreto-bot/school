@@ -6,16 +6,16 @@ import { useStore } from '../store/useStore';
 import { Presence } from '../types';
 import { v4 as uuid } from '../utils/uuid';
 import { createActivityLog } from '../utils/activityLogger';
-import { sendWhatsApp, messagePresenceArrivee } from '../utils/whatsappHelper';
+// import { sendWhatsApp, messagePresenceArrivee } from '../utils/whatsappHelper'; // Non utilisé actuellement
 import { Html5Qrcode } from "html5-qrcode";
 import {
     Camera, Search, CheckCircle2, AlertTriangle, UserCheck,
-    Clock, Users, X, Smartphone
+    Clock, Users, X
 } from 'lucide-react';
 
-import { sendDirectNotification } from '../services/whatsappService';
+// import { sendDirectNotification } from '../services/whatsappService'; // Non utilisé actuellement
 import { notificationService } from '../services/notificationService';
-import { playSuccessSound, playErrorSound } from '../utils/audio';
+import { playSuccessSound, playErrorSound, playWarningBeep } from '../utils/audio';
 
 // ── Composant carte d'élève scanné (OVERLAY) ────────────────
 const StudentScanned: React.FC<{
@@ -105,8 +105,14 @@ export const ScanPresence: React.FC = () => {
         const already = isAlreadyPresent(studentId);
 
         if (!already) {
-            // Confirmation sonore Premium (iph.mp3)
-            playSuccessSound();
+            // NOUVELLE LOGIQUE : Différencier si le parent est lié ou non
+            if (student.telephone) {
+                // Parent lié : Son de validation avec l'audio MP3
+                playSuccessSound();
+            } else {
+                // Parent non lié : Bip d'avertissement (tonalité descendante)
+                playWarningBeep();
+            }
             if (navigator.vibrate) navigator.vibrate(100);
 
             const presence: Presence = {
