@@ -7,7 +7,7 @@ import {
   GraduationCap, LayoutDashboard, Users, CreditCard,
   BarChart3, FileText, Settings, LogOut, Menu, X,
   Bell, ChevronRight, Target, Award, MessageSquare,
-  ScanLine, IdCard, ShieldCheck, Activity
+  ScanLine, IdCard, ShieldCheck, Activity, Database
 } from 'lucide-react';
 
 interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: number }
@@ -25,6 +25,7 @@ const NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'documents', label: 'Documents', icon: <FileText className="w-5 h-5" /> },
   { id: 'historique_activites', label: 'Historique', icon: <Activity className="w-5 h-5 text-slate-500" /> },
   { id: 'chat', label: 'Messagerie', icon: <MessageSquare className="w-5 h-5" /> },
+  { id: 'import_export', label: 'Base de données', icon: <Database className="w-5 h-5 text-amber-500" /> },
   { id: 'parametres', label: 'Paramètres', icon: <Settings className="w-5 h-5" /> },
 ];
 

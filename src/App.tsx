@@ -22,6 +22,7 @@ import { ParentRecus } from './pages/parent/ParentRecus';
 import { ParentBadges } from './pages/parent/ParentBadges';
 import { ParentMessages } from './pages/parent/ParentMessages';
 import { ParentsList } from './pages/ParentsList';
+import { ImportExport } from './components/ImportExport';
 import { ChatWindow } from './components/ChatWindow';
 import { webPushService } from './services/webPushService';
 
@@ -46,6 +47,7 @@ const PageContent: React.FC = () => {
     case 'parent_badges': return <ParentBadges />;
     case 'parent_messages': return <ParentMessages />;
     case 'parents_list': return <ParentsList />;
+    case 'import_export': return <ImportExport />;
     case 'chat': return <ChatWindow />;
     default: return <Dashboard />;
   }

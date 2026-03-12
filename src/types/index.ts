@@ -173,6 +173,7 @@ export type AppPage =
   | 'parent_badges'
   | 'parent_messages'
   | 'parents_list'
+  | 'import_export'
   | 'chat';
 
 // Re-export CLASSES from data/classes.ts

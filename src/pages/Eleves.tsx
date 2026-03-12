@@ -5,7 +5,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { Student } from '../types';
 import { CLASS_CONFIG } from '../data/classConfig';
-import { importFromExcel } from '../utils/excelImport';
+import { importExcel } from '../utils/excelService';
 import { generateRecuPDF } from '../utils/pdfGenerator';
 import {
   Search, Upload, Plus, Trash2, Edit2, FileText,
@@ -194,9 +194,45 @@ export const Eleves: React.FC = () => {
     setImporting(true);
     setImportMsg('');
     try {
-      const imported = await importFromExcel(file);
-      setStudents(imported);
-      setImportMsg(`OK ${imported.length} élèves importés avec succès.`);
+      const imported = await importExcel(file);
+      if (imported.length === 0) {
+        setImportMsg('ERR Aucun élève trouvé dans le fichier.');
+        return;
+      }
+
+      const replace = students.length === 0 || 
+        confirm(`Voulez-vous remplacer les ${students.length} élèves existants par les ${imported.length} nouveaux ? (Annuler pour fusionner)`);
+      
+      let newStudents;
+      if (replace) {
+        useStore.setState({ students: [], presences: [], activityLogs: [] });
+        newStudents = imported;
+      } else {
+        newStudents = [...students, ...imported];
+      }
+      
+      setStudents(newStudents);
+      setImportMsg('OK Import local réussi. Synchronisation cloud en cours...');
+
+      // SYNC TO CLOUD
+      const setIsSyncing = useStore.getState().setIsSyncing;
+      setIsSyncing(true);
+      const { syncToBackend } = await import('../services/backendSync');
+      const currentState = useStore.getState();
+      const syncResult = await syncToBackend({ 
+        students: newStudents,
+        parents: currentState.parents,
+        presences: replace ? [] : currentState.presences,
+        activityLogs: replace ? [] : currentState.activityLogs
+      }, replace);
+      setIsSyncing(false);
+
+      if (syncResult) {
+        useStore.getState().setLastSyncTimestamp(Date.now());
+        setImportMsg(`OK ${imported.length} élèves importés et synchronisés avec succès.`);
+      } else {
+        setImportMsg('ERR Import local ok, mais échec de la synchronisation cloud.');
+      }
     } catch {
       setImportMsg('ERR Erreur lors de l\'importation. Vérifiez le fichier Excel.');
     } finally {
