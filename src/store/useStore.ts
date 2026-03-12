@@ -108,13 +108,21 @@ export const useStore = create<AppState>()(
       // ── Identité ─────────────────────────────────────────
       appName: 'EduFinance',
       setAppName: (name) => {
+        console.log('📝 [Store] Updating appName:', name);
         set({ appName: name });
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+        import('../services/backendSync').then(({ syncToBackend }) => {
+          console.log('🚀 [Store] Triggering sync for appName');
+          syncToBackend(get());
+        });
       },
       schoolLogo: null,
       setSchoolLogo: (logo) => {
+        console.log('📝 [Store] Updating schoolLogo (base64 length):', logo?.length || 0);
         set({ schoolLogo: logo });
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+        import('../services/backendSync').then(({ syncToBackend }) => {
+          console.log('🚀 [Store] Triggering sync for schoolLogo');
+          syncToBackend(get());
+        });
       },
 
       // ── Auth ──────────────────────────────────────────────
@@ -340,23 +348,27 @@ export const useStore = create<AppState>()(
       // ── Paramètres ───────────────────────────────────────
       schoolName: 'Établissement Scolaire',
       setSchoolName: (name) => {
+        console.log('📝 [Store] Updating schoolName:', name);
         set({ schoolName: name });
         import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
       },
       schoolYear: '2024-2025',
       setSchoolYear: (year) => {
+        console.log('📝 [Store] Updating schoolYear:', year);
         set({ schoolYear: year });
         import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
       },
       messageRemerciement:
         "Nous vous remercions sincèrement pour votre ponctualité dans le règlement de la scolarité. Votre soutien contribue au bon fonctionnement de notre établissement.",
       setMessageRemerciement: (m) => {
+        console.log('📝 [Store] Updating messageRemerciement');
         set({ messageRemerciement: m });
         import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
       },
       messageRappel:
         "Nous vous rappelons cordialement que le règlement du solde de scolarité est attendu. Veuillez régulariser votre situation dans les meilleurs délais.",
       setMessageRappel: (m) => {
+        console.log('📝 [Store] Updating messageRappel');
         set({ messageRappel: m });
         import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
       },
