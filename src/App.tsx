@@ -1,30 +1,39 @@
 // ============================================================
 // APP — Point d'entrée principal
 // ============================================================
-import React from 'react';
+import { Suspense, lazy } from 'react';
 import { useStore } from './store/useStore';
 import { Login } from './components/Login';
 import { Layout } from './components/Layout';
-import { Dashboard } from './pages/Dashboard';
-import { Eleves } from './pages/Eleves';
-import { Paiements } from './pages/Paiements';
-import { Analyses } from './pages/Analyses';
-import { Documents } from './pages/Documents';
-import { Parametres } from './pages/Parametres';
-import { Recouvrement } from './pages/Recouvrement';
-import { ScanPresence } from './pages/ScanPresence';
-import { CarteScolaire } from './pages/CarteScolaire';
-import { VerificationRecu } from './pages/VerificationRecu';
-import { HistoriqueActivites } from './pages/HistoriqueActivites';
-import { ParentDashboard } from './pages/parent/ParentDashboard';
-import { ParentHistorique } from './pages/parent/ParentHistorique';
-import { ParentRecus } from './pages/parent/ParentRecus';
-import { ParentBadges } from './pages/parent/ParentBadges';
-import { ParentMessages } from './pages/parent/ParentMessages';
-import { ParentsList } from './pages/ParentsList';
-import { ImportExport } from './components/ImportExport';
-import { ChatWindow } from './components/ChatWindow';
 import { webPushService } from './services/webPushService';
+
+// Lazy loading for pages to reduce initial bundle size
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
+const Eleves = lazy(() => import('./pages/Eleves').then(m => ({ default: m.Eleves })));
+const Paiements = lazy(() => import('./pages/Paiements').then(m => ({ default: m.Paiements })));
+const Analyses = lazy(() => import('./pages/Analyses').then(m => ({ default: m.Analyses })));
+const Documents = lazy(() => import('./pages/Documents').then(m => ({ default: m.Documents })));
+const Parametres = lazy(() => import('./pages/Parametres').then(m => ({ default: m.Parametres })));
+const Recouvrement = lazy(() => import('./pages/Recouvrement').then(m => ({ default: m.Recouvrement })));
+const ScanPresence = lazy(() => import('./pages/ScanPresence').then(m => ({ default: m.ScanPresence })));
+const CarteScolaire = lazy(() => import('./pages/CarteScolaire').then(m => ({ default: m.CarteScolaire })));
+const VerificationRecu = lazy(() => import('./pages/VerificationRecu').then(m => ({ default: m.VerificationRecu })));
+const HistoriqueActivites = lazy(() => import('./pages/HistoriqueActivites').then(m => ({ default: m.HistoriqueActivites })));
+const ParentDashboard = lazy(() => import('./pages/parent/ParentDashboard').then(m => ({ default: m.ParentDashboard })));
+const ParentHistorique = lazy(() => import('./pages/parent/ParentHistorique').then(m => ({ default: m.ParentHistorique })));
+const ParentRecus = lazy(() => import('./pages/parent/ParentRecus').then(m => ({ default: m.ParentRecus })));
+const ParentBadges = lazy(() => import('./pages/parent/ParentBadges').then(m => ({ default: m.ParentBadges })));
+const ParentMessages = lazy(() => import('./pages/parent/ParentMessages').then(m => ({ default: m.ParentMessages })));
+const ParentsList = lazy(() => import('./pages/ParentsList').then(m => ({ default: m.ParentsList })));
+const ImportExport = lazy(() => import('./components/ImportExport').then(m => ({ default: m.ImportExport })));
+const ChatWindow = lazy(() => import('./components/ChatWindow').then(m => ({ default: m.ChatWindow })));
+
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center p-12">
+    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
+
 
 const PageContent: React.FC = () => {
   const currentPage = useStore((s) => s.currentPage);
@@ -91,7 +100,9 @@ export function App() {
 
   return (
     <Layout>
-      <PageContent />
+      <Suspense fallback={<LoadingSpinner />}>
+        <PageContent />
+      </Suspense>
     </Layout>
   );
 }
