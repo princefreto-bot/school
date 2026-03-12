@@ -95,6 +95,8 @@ export interface AppState {
   fetchAllFromBackend: () => Promise<void>;
   isSyncing: boolean;
   setIsSyncing: (s: boolean) => void;
+  lastSyncTimestamp: number;
+  setLastSyncTimestamp: (t: number) => void;
   clearCloudPresences: () => Promise<boolean>;
   clearCloudActivityLogs: () => Promise<boolean>;
   clearCloudStudents: () => Promise<boolean>;
@@ -238,7 +240,7 @@ export const useStore = create<AppState>()(
             students: get().students,
             presences: get().presences,
             activityLogs: get().activityLogs
-          });
+          }).then(() => set({ lastSyncTimestamp: Date.now() }));
         });
       },
       updateStudent: (id, updates) => {
@@ -270,7 +272,7 @@ export const useStore = create<AppState>()(
             students: get().students,
             presences: get().presences,
             activityLogs: get().activityLogs
-          });
+          }).then(() => set({ lastSyncTimestamp: Date.now() }));
         });
       },
       deleteStudent: (id) => {
@@ -287,7 +289,7 @@ export const useStore = create<AppState>()(
             students: get().students,
             presences: get().presences,
             activityLogs: get().activityLogs
-          });
+          }).then(() => set({ lastSyncTimestamp: Date.now() }));
         });
       },
       addPayment: (studentId, paymentData) => {
@@ -320,7 +322,7 @@ export const useStore = create<AppState>()(
             students: get().students,
             presences: get().presences,
             activityLogs: get().activityLogs
-          });
+          }).then(() => set({ lastSyncTimestamp: Date.now() }));
         });
       },
 
@@ -392,7 +394,7 @@ export const useStore = create<AppState>()(
             students: get().students,
             presences: get().presences,
             activityLogs: get().activityLogs
-          });
+          }).then(() => set({ lastSyncTimestamp: Date.now() }));
         });
       },
       getPresencesToday: () => {
@@ -423,10 +425,19 @@ export const useStore = create<AppState>()(
       setLinks: (links) => set({ links }),
       isSyncing: false,
       setIsSyncing: (s) => set({ isSyncing: s }),
+      lastSyncTimestamp: 0,
+      setLastSyncTimestamp: (t) => set({ lastSyncTimestamp: t }),
       fetchAllFromBackend: async () => {
         const user = get().user;
         if (!user || user.role === 'parent') return; 
         if (get().isSyncing) return; // Éviter les appels concurrents
+
+        // Éviter de fetch si on vient de faire une sync (cooldown 15s)
+        const now = Date.now();
+        if (now - get().lastSyncTimestamp < 15000) {
+          console.log('⏳ [Sync] Fetch skipped (cooldown active)');
+          return;
+        }
 
         set({ isSyncing: true });
         try {

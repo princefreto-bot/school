@@ -11,7 +11,7 @@ async function syncFromFrontend(req, res) {
         return res.status(401).json({ error: 'Authentification requise.' });
     }
 
-    const { students = [], presences = [], activityLogs = [], appSettings = null } = req.body;
+    const { students = [], presences = [], activityLogs = [], appSettings = null, replace = false } = req.body;
     const { role } = req.user;
 
     if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
@@ -19,6 +19,12 @@ async function syncFromFrontend(req, res) {
     }
 
     try {
+        if (replace) {
+            console.log('🧹 [Sync] Mode Remplacer activé : Nettoyage de la base...');
+            await supabase.from('parent_student').delete().neq('student_id', '0');
+            await supabase.from('payments').delete().neq('id', '0');
+            await supabase.from('students').delete().neq('id', '0');
+        }
         // --- 1. Sync Students ---
         if (students.length > 0) {
             const studentData = students.map(s => ({

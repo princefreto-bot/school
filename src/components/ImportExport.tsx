@@ -42,8 +42,6 @@ export const ImportExport = () => {
         
         let newStudents;
         if (replace) {
-          setMessage({ type: 'success', text: 'Nettoyage du cloud...' });
-          await useStore.getState().clearCloudStudents();
           newStudents = imported;
         } else {
           newStudents = [...students, ...imported];
@@ -62,10 +60,11 @@ export const ImportExport = () => {
           parents: currentState.parents,
           presences: currentState.presences,
           activityLogs: currentState.activityLogs
-        });
+        }, replace);
         setIsSyncing(false);
 
         if (syncResult) {
+          useStore.getState().setLastSyncTimestamp(Date.now());
           setMessage({ 
             type: 'success', 
             text: `${imported.length} élèves importés et synchronisés avec succès !` 
