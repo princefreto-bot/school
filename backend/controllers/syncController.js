@@ -86,31 +86,36 @@ async function syncFromFrontend(req, res) {
             await supabase.from('activity_logs').upsert(logData, { onConflict: 'id' });
         }
 
+        // --- 5. Sync App Settings ---
         if (appSettings) {
-            console.log('💾 [Sync] Saving app settings to database...', {
-                appName: appSettings.appName,
-                logoLength: appSettings.schoolLogo?.length || 0
-            });
-            const { error: setErr } = await supabase.from('app_settings').upsert({
-                id: 'global_settings',
-                app_name: appSettings.appName,
-                school_name: appSettings.schoolName,
-                school_year: appSettings.schoolYear,
-                school_logo: appSettings.schoolLogo,
-                message_remerciement: appSettings.messageRemerciement,
-                message_rappel: appSettings.messageRappel,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'id' });
-            
-            if (setErr) {
-                console.error('❌ [Sync] App Settings Error:', setErr.message);
-                throw setErr;
+            try {
+                console.log('💾 [Sync] Saving app settings to database...', { appName: appSettings.appName });
+                const { error: setErr } = await supabase.from('app_settings').upsert({
+                    id: 'global_settings',
+                    app_name: appSettings.appName,
+                    school_name: appSettings.schoolName,
+                    school_year: appSettings.schoolYear,
+                    school_logo: appSettings.schoolLogo,
+                    message_remerciement: appSettings.messageRemerciement,
+                    message_rappel: appSettings.messageRappel,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'id' });
+                
+                if (setErr) throw setErr;
+                console.log('✅ [Sync] App settings saved.');
+            } catch (settingsErr) {
+                console.warn('⚠️ [Sync] Non-fatal error saving settings:', settingsErr.message);
+                // On ne bloque pas la sync des élèves pour un problème de logo
             }
-            console.log('✅ [Sync] App settings saved.');
         }
 
         console.log(`🎉 [Sync] Completed: ${students.length} students, ${presences.length} presences, ${activityLogs.length} logs`);
-        return res.json({ message: 'Synchronisation cloud réussie.' });
+        return res.json({ 
+            message: 'Synchronisation cloud réussie.',
+            count: students.length,
+            presencesCount: presences.length,
+            logsCount: activityLogs.length
+        });
 
     } catch (err) {
         console.error('💥 [Sync] Fatal error:', err.message);
@@ -255,7 +260,7 @@ async function syncToFrontend(req, res) {
  * Vider tout l'historique des présences.
  */
 async function clearPresences(req, res) {
-    if (!req.user || !['admin', 'directeur_general'].includes(req.user.role)) {
+    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) {
         return res.status(403).json({ error: 'Action non autorisée.' });
     }
 
@@ -273,7 +278,7 @@ async function clearPresences(req, res) {
  * Vider les logs d'activité.
  */
 async function clearActivityLogs(req, res) {
-    if (!req.user || !['admin', 'directeur_general'].includes(req.user.role)) {
+    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) {
         return res.status(403).json({ error: 'Action non autorisée.' });
     }
 

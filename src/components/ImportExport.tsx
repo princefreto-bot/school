@@ -40,16 +40,37 @@ export const ImportExport = () => {
         const replace = students.length === 0 || 
           confirm(`Voulez-vous remplacer les ${students.length} élèves existants ? (Annuler pour fusionner)`);
         
+        let newStudents;
         if (replace) {
-          setStudents(imported);
+          newStudents = imported;
         } else {
-          setStudents([...students, ...imported]);
+          newStudents = [...students, ...imported];
         }
         
-        setMessage({ 
-          type: 'success', 
-          text: `${imported.length} élèves importés avec succès !` 
+        setStudents(newStudents);
+
+        // SYNC TO CLOUD
+        setMessage({ type: 'success', text: 'Importation locale réussie, synchronisation cloud...' });
+        const { syncToBackend } = await import('../services/backendSync');
+        const currentState = useStore.getState();
+        const syncResult = await syncToBackend({ 
+          students: newStudents,
+          parents: currentState.parents,
+          presences: currentState.presences,
+          activityLogs: currentState.activityLogs
         });
+
+        if (syncResult) {
+          setMessage({ 
+            type: 'success', 
+            text: `${imported.length} élèves importés et synchronisés avec succès !` 
+          });
+        } else {
+          setMessage({ 
+            type: 'error', 
+            text: 'Importés localement mais échec de la synchronisation cloud.' 
+          });
+        }
       }
     } catch (error) {
       setMessage({ 
