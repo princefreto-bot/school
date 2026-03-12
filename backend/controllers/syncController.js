@@ -291,4 +291,33 @@ async function clearActivityLogs(req, res) {
     }
 }
 
-module.exports = { syncFromFrontend, syncToFrontend, clearPresences, clearActivityLogs };
+/**
+ * DELETE /api/sync/students
+ * Vider tous les élèves et paiements.
+ */
+async function clearStudents(req, res) {
+    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Action non autorisée.' });
+    }
+
+    try {
+        // Enlever les liens parents d'abord pour éviter les conflits FK si nécessaire
+        // (En général DELETE CASCADE est mieux en SQL mais ici on fait par sécurité)
+        
+        // Supprimer les liens parents-élèves d'abord
+        await supabase.from('parent_student').delete().neq('student_id', '0');
+        
+        // Supprimer paiements
+        await supabase.from('payments').delete().neq('id', '0');
+        
+        // Puis élèves
+        const { error } = await supabase.from('students').delete().neq('id', '0');
+        
+        if (error) throw error;
+        return res.json({ message: 'Base de données des élèves vidée.' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+module.exports = { syncFromFrontend, syncToFrontend, clearPresences, clearActivityLogs, clearStudents };

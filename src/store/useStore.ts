@@ -97,6 +97,7 @@ export interface AppState {
   setIsSyncing: (s: boolean) => void;
   clearCloudPresences: () => Promise<boolean>;
   clearCloudActivityLogs: () => Promise<boolean>;
+  clearCloudStudents: () => Promise<boolean>;
   fetchPublicSettings: () => Promise<void>;
 }
 
@@ -424,7 +425,8 @@ export const useStore = create<AppState>()(
       setIsSyncing: (s) => set({ isSyncing: s }),
       fetchAllFromBackend: async () => {
         const user = get().user;
-        if (!user || user.role === 'parent') return; // parents use parentApi, not bulk sync
+        if (!user || user.role === 'parent') return; 
+        if (get().isSyncing) return; // Éviter les appels concurrents
 
         set({ isSyncing: true });
         try {
@@ -495,6 +497,23 @@ export const useStore = create<AppState>()(
           return false;
         } catch (err) {
           console.error('Failed to clear logs:', err);
+          return false;
+        }
+      },
+      clearCloudStudents: async () => {
+        try {
+          const { getAuthHeaders } = await import('../services/apiHelpers');
+          const res = await fetch(`${API_BASE_URL}/sync/students`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+          if (res.ok) {
+            set({ students: [] });
+            return true;
+          }
+          return false;
+        } catch (err) {
+          console.error('Failed to clear students:', err);
           return false;
         }
       },

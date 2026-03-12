@@ -42,6 +42,8 @@ export const ImportExport = () => {
         
         let newStudents;
         if (replace) {
+          setMessage({ type: 'success', text: 'Nettoyage du cloud...' });
+          await useStore.getState().clearCloudStudents();
           newStudents = imported;
         } else {
           newStudents = [...students, ...imported];
@@ -50,7 +52,9 @@ export const ImportExport = () => {
         setStudents(newStudents);
 
         // SYNC TO CLOUD
-        setMessage({ type: 'success', text: 'Importation locale réussie, synchronisation cloud...' });
+        const setIsSyncing = useStore.getState().setIsSyncing;
+        setIsSyncing(true);
+        setMessage({ type: 'success', text: 'Fichier chargé, synchronisation cloud...' });
         const { syncToBackend } = await import('../services/backendSync');
         const currentState = useStore.getState();
         const syncResult = await syncToBackend({ 
@@ -59,6 +63,7 @@ export const ImportExport = () => {
           presences: currentState.presences,
           activityLogs: currentState.activityLogs
         });
+        setIsSyncing(false);
 
         if (syncResult) {
           setMessage({ 
