@@ -2,7 +2,9 @@
 // AUDIO UTILS — Sons de notification
 // ============================================================
 
-import iphSound from '../assets/iph.mp3';
+// iph.mp3 est dans /public — il est servi directement par Vite à la racine (/iph.mp3)
+// On ne peut pas l'importer comme module ; on utilise le chemin public.
+const IPH_SOUND_URL = '/iph.mp3';
 
 export const playBeep = () => {
     try {
@@ -31,7 +33,7 @@ export const playBeep = () => {
  */
 export const playSuccessSound = () => {
     try {
-        const audio = new Audio(iphSound);
+        const audio = new Audio(IPH_SOUND_URL);
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.catch((err) => {
