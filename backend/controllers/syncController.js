@@ -286,7 +286,7 @@ async function clearPresences(req, res) {
     }
 
     try {
-        const { error } = await supabase.from('presences').delete().neq('id', '0'); // Supprime tout
+        const { error } = await supabase.from('presences').delete().filter('id', 'neq', '_none_'); 
         if (error) throw error;
         return res.json({ message: 'Historique des présences vidé.' });
     } catch (err) {
@@ -304,7 +304,7 @@ async function clearActivityLogs(req, res) {
     }
 
     try {
-        const { error } = await supabase.from('activity_logs').delete().neq('id', '0');
+        const { error } = await supabase.from('activity_logs').delete().filter('id', 'neq', '_none_');
         if (error) throw error;
         return res.json({ message: 'Logs d\'activité vidés.' });
     } catch (err) {
@@ -322,17 +322,14 @@ async function clearStudents(req, res) {
     }
 
     try {
-        // Enlever les liens parents d'abord pour éviter les conflits FK si nécessaire
-        // (En général DELETE CASCADE est mieux en SQL mais ici on fait par sécurité)
-        
         // Supprimer les liens parents-élèves d'abord
-        await supabase.from('parent_student').delete().neq('student_id', '0');
+        await supabase.from('parent_student').delete().filter('student_id', 'neq', '_none_');
         
         // Supprimer paiements
-        await supabase.from('payments').delete().neq('id', '0');
+        await supabase.from('payments').delete().filter('id', 'neq', '_none_');
         
         // Puis élèves
-        const { error } = await supabase.from('students').delete().neq('id', '0');
+        const { error } = await supabase.from('students').delete().filter('id', 'neq', '_none_');
         
         if (error) throw error;
         return res.json({ message: 'Base de données des élèves vidée.' });

@@ -108,7 +108,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
         )}
       </div>
       <div className="overflow-hidden">
-        <p className="text-white font-bold text-sm truncate">{appName}</p>
+        <p className="text-white font-bold text-sm truncate">{appName} v1.5</p>
         <p className="text-slate-400 text-xs truncate">{schoolName}</p>
       </div>
     </div>
