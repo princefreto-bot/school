@@ -10,7 +10,13 @@ export const importExcel = (file: File): Promise<Student[]> => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
+        
+        // On cible la DEUXIÈME feuille (index 1) car la première est souvent une page de garde
+        if (workbook.SheetNames.length < 2) {
+          throw new Error("Le fichier Excel doit contenir au moins deux feuilles. Les données doivent être sur la deuxième feuille.");
+        }
+        
+        const sheetName = workbook.SheetNames[1];
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         
@@ -31,7 +37,7 @@ export const importExcel = (file: File): Promise<Student[]> => {
           const ecoleProvenance = String(row[7] || '').trim();
           
           // Validate classe - support various naming conventions
-          const allClasses = [...CLASSES.Primaire, ...CLASSES.Collège, ...CLASSES.Lycée];
+          const allClasses = CLASSES.map(c => c.nom);
           
           // Map of common variations to standard class names
           const classeNormalized = classe.toUpperCase().trim()
@@ -63,8 +69,9 @@ export const importExcel = (file: File): Promise<Student[]> => {
           const restant = row[10] === 'SOLDE' ? 0 : (Number(row[10]) || Math.max(0, ecolage - dejaPaye));
           const recu = String(row[11] || '').trim();
           
+          const studentId = generateId();
           const student: Student = {
-            id: generateId(),
+            id: studentId,
             nom,
             prenom,
             classe: validClasse,
@@ -78,10 +85,15 @@ export const importExcel = (file: File): Promise<Student[]> => {
             recu,
             cycle: getCycleFromClasse(validClasse),
             dateInscription: new Date().toISOString(),
-            paiements: dejaPaye > 0 ? [{
+            status: 'Non soldé', // Will be recomputed by store anyway
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            historiquesPaiements: dejaPaye > 0 ? [{
               id: generateId(),
-              date: new Date().toISOString(),
+              studentId: studentId,
               montant: dejaPaye,
+              date: new Date().toISOString(),
+              recu: recu || 'Import initial',
               methode: 'Espèces',
               reference: 'Import initial'
             }] : []

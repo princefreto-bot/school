@@ -182,64 +182,10 @@ export const Eleves: React.FC = () => {
   const [modal, setModal] = useState<{ open: boolean; student?: Student | null }>({ open: false });
   const [sortKey, setSortKey] = useState<SortKey>('nom');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
-  const [importing, setImporting] = useState(false);
-  const [importMsg, setImportMsg] = useState('');
-  const fileRef = useRef<HTMLInputElement>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImporting(true);
-    setImportMsg('');
-    try {
-      const imported = await importExcel(file);
-      if (imported.length === 0) {
-        setImportMsg('ERR Aucun élève trouvé dans le fichier.');
-        return;
-      }
 
-      const replace = students.length === 0 || 
-        confirm(`Voulez-vous remplacer les ${students.length} élèves existants par les ${imported.length} nouveaux ? (Annuler pour fusionner)`);
-      
-      let newStudents;
-      if (replace) {
-        useStore.setState({ students: [], presences: [], activityLogs: [] });
-        newStudents = imported;
-      } else {
-        newStudents = [...students, ...imported];
-      }
-      
-      setStudents(newStudents);
-      setImportMsg('OK Import local réussi. Synchronisation cloud en cours...');
-
-      // SYNC TO CLOUD
-      const setIsSyncing = useStore.getState().setIsSyncing;
-      setIsSyncing(true);
-      const { syncToBackend } = await import('../services/backendSync');
-      const currentState = useStore.getState();
-      const syncResult = await syncToBackend({ 
-        students: newStudents,
-        parents: currentState.parents,
-        presences: replace ? [] : currentState.presences,
-        activityLogs: replace ? [] : currentState.activityLogs
-      }, replace);
-      setIsSyncing(false);
-
-      if (syncResult) {
-        useStore.getState().setLastSyncTimestamp(Date.now());
-        setImportMsg(`OK ${imported.length} élèves importés et synchronisés avec succès.`);
-      } else {
-        setImportMsg('ERR Import local ok, mais échec de la synchronisation cloud.');
-      }
-    } catch {
-      setImportMsg('ERR Erreur lors de l\'importation. Vérifiez le fichier Excel.');
-    } finally {
-      setImporting(false);
-      if (fileRef.current) fileRef.current.value = '';
-    }
-  };
 
   const filtered = useMemo(() => {
     let list = [...students];
@@ -303,16 +249,9 @@ export const Eleves: React.FC = () => {
           <Filter className="w-4 h-4" /> Filtres
         </button>
         {(user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') && (
-          <>
-            <button onClick={() => setModal({ open: true })} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">
-              <Plus className="w-4 h-4" /> Ajouter
-            </button>
-            <label className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm cursor-pointer">
-              <Upload className="w-4 h-4" />
-              {importing ? 'Import...' : 'Import Excel'}
-              <input type="file" accept=".xlsx,.xls" className="hidden" ref={fileRef} onChange={handleImport} />
-            </label>
-          </>
+          <button onClick={() => setModal({ open: true })} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">
+            <Plus className="w-4 h-4" /> Ajouter
+          </button>
         )}
       </div>
 
@@ -338,13 +277,7 @@ export const Eleves: React.FC = () => {
         </div>
       )}
 
-      {importMsg && (
-        <div className={`flex items-center gap-2 p-3 rounded-xl text-sm ${isOk(importMsg) ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-          {isOk(importMsg) ? <Check className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
-          {importMsg.slice(3)}
-          <button className="ml-auto" onClick={() => setImportMsg('')}><X className="w-4 h-4" /></button>
-        </div>
-      )}
+
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500">{filtered.length} élève{filtered.length > 1 ? 's' : ''} affiché{filtered.length > 1 ? 's' : ''} sur {students.length}</p>
