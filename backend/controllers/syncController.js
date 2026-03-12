@@ -22,24 +22,21 @@ async function syncFromFrontend(req, res) {
         if (replace) {
             console.log('🧹 [Sync] Mode Remplacer activé : Nettoyage universel de la base...');
             
-            // 1. Supprimer les présences (clé étrangère sur student_id)
-            const { error: err1 } = await supabase.from('presences').delete().not('id', 'is', null);
-            if (err1) throw new Error('Erreur nettoyage présences: ' + err1.message);
+            // On tente de supprimer avec des filtres qui couvrent tout le texte
+            const { error: err1 } = await supabase.from('presences').delete().filter('id', 'neq', '_none_');
+            if (err1) console.error('Erreur nettoyage présences:', err1.message);
             
-            // 2. Supprimer les liens parents (clé étrangère sur student_id)
-            const { error: err2 } = await supabase.from('parent_student').delete().not('student_id', 'is', null);
-            if (err2) {
-                // Cette table peut être vide, donc on log sans bloquer si l'erreur est juste "no rows"
-                console.warn('Note: Cleanup parent_student:', err2.message);
+            const { error: err2 } = await supabase.from('parent_student').delete().filter('student_id', 'neq', '_none_');
+            if (err2) console.warn('Note: Cleanup parent_student:', err2.message);
+            
+            const { error: err3 } = await supabase.from('payments').delete().filter('id', 'neq', '_none_');
+            if (err3) console.error('Erreur nettoyage paiements:', err3.message);
+            
+            const { error: err4 } = await supabase.from('students').delete().filter('id', 'neq', '_none_');
+            if (err4) {
+                console.error('Erreur FATALE nettoyage élèves:', err4.message);
+                throw new Error('Le serveur Supabase refuse la suppression : ' + err4.message);
             }
-            
-            // 3. Supprimer les paiements (clé étrangère sur student_id)
-            const { error: err3 } = await supabase.from('payments').delete().not('id', 'is', null);
-            if (err3) throw new Error('Erreur nettoyage paiements: ' + err3.message);
-            
-            // 4. Supprimer enfin les élèves
-            const { error: err4 } = await supabase.from('students').delete().not('id', 'is', null);
-            if (err4) throw new Error('Erreur nettoyage élèves: ' + err4.message);
             
             console.log('✨ [Sync] Base de données cloud remise à zéro.');
         }

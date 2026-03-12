@@ -36,9 +36,12 @@ export const ImportExport = () => {
       if (imported.length === 0) {
         setMessage({ type: 'error', text: 'Aucun élève trouvé dans le fichier.' });
       } else {
+        // Obtenir la liste actuelle directement du store pour être sûr
+        const currentStudents = useStore.getState().students;
+        
         // Ask if replace or merge
-        const replace = students.length === 0 || 
-          confirm(`Voulez-vous remplacer les ${students.length} élèves existants ? (Annuler pour fusionner)`);
+        const replace = currentStudents.length === 0 || 
+          confirm(`Voulez-vous remplacer les ${currentStudents.length} élèves existants par les ${imported.length} nouveaux ? (Annuler pour fusionner)`);
         
         let newStudents;
         if (replace) {
@@ -263,6 +266,31 @@ export const ImportExport = () => {
                   Exporter
                 </button>
               </div>
+            </div>
+
+            {/* Danger Zone: Manual Reset */}
+            <div className="p-3 sm:p-4 border border-red-100 bg-red-50/50 rounded-lg">
+              <p className="font-medium text-red-800 text-sm sm:text-base mb-1">Zone de danger</p>
+              <p className="text-xs text-red-600 mb-3">Videz manuellement la base de données cloud si la synchronisation est bloquée.</p>
+              <button
+                onClick={async () => {
+                  if (confirm('ÊTES-VOUS SÛR ? Cela supprimera TOUS les élèves, paiements et présences du CLOUD immédiatement.')) {
+                    setImporting(true);
+                    const success = await useStore.getState().clearCloudStudents();
+                    await useStore.getState().clearCloudPresences();
+                    setImporting(false);
+                    if (success) {
+                      setMessage({ type: 'success', text: 'Cloud vidé avec succès. Vous pouvez maintenant importer votre fichier.' });
+                    } else {
+                      setMessage({ type: 'error', text: 'Échec de la suppression cloud. Vérifiez votre connexion.' });
+                    }
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
+              >
+                <AlertCircle className="w-4 h-4" />
+                Vider tout le Cloud (RAZ)
+              </button>
             </div>
           </div>
         </div>
