@@ -42,6 +42,8 @@ export const ImportExport = () => {
         
         let newStudents;
         if (replace) {
+          // Vidage local immédiat pour éviter toute confusion
+          useStore.setState({ students: [], presences: [], activityLogs: [] });
           newStudents = imported;
         } else {
           newStudents = [...students, ...imported];
@@ -52,14 +54,14 @@ export const ImportExport = () => {
         // SYNC TO CLOUD
         const setIsSyncing = useStore.getState().setIsSyncing;
         setIsSyncing(true);
-        setMessage({ type: 'success', text: 'Fichier chargé, synchronisation cloud...' });
+        setMessage({ type: 'success', text: 'Mise à jour du serveur (Mode Remplacement)...' });
         const { syncToBackend } = await import('../services/backendSync');
         const currentState = useStore.getState();
         const syncResult = await syncToBackend({ 
           students: newStudents,
           parents: currentState.parents,
-          presences: currentState.presences,
-          activityLogs: currentState.activityLogs
+          presences: [], // On envoie vide car on vient de tout supprimer
+          activityLogs: [] // On envoie vide car on vient de tout supprimer
         }, replace);
         setIsSyncing(false);
 
