@@ -495,10 +495,12 @@ export const useStore = create<AppState>()(
         }
       },
       fetchPublicSettings: async () => {
+        console.log('🌐 [Settings] Fetching public settings...');
         try {
           const res = await fetch(`${API_BASE_URL}/settings`);
           if (res.ok) {
             const data = await res.json();
+            console.log('🌐 [Settings] Data received:', data);
             if (data) {
               set({
                 appName: data.appName || get().appName,
@@ -506,10 +508,13 @@ export const useStore = create<AppState>()(
                 schoolYear: data.schoolYear || get().schoolYear,
                 schoolLogo: data.schoolLogo || get().schoolLogo
               });
+              console.log('✅ [Settings] App state updated with cloud settings.');
             }
+          } else {
+            console.warn('⚠️ [Settings] Fetch failed with status:', res.status);
           }
         } catch (err) {
-          console.error('Failed to fetch public settings:', err);
+          console.error('❌ [Settings] Fatal error fetching settings:', err);
         }
       }
     }),
@@ -551,8 +556,8 @@ export const useStore = create<AppState>()(
             return s;
           });
           state.students = repaired;
-
         }
+        console.log('🔄 [Storage] Rehydrated. Current Logo:', state?.schoolLogo ? 'Present (Base64)' : 'None');
       },
     }
   )
