@@ -3,11 +3,21 @@ const { supabase } = require('./supabase');
 require('dotenv').config();
 
 // Configuration de web-push avec les clés VAPID
-webpush.setVapidDetails(
-    process.env.VAPID_EMAIL || 'mailto:admin@princefreto.education',
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-);
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
+const VAPID_EMAIL = process.env.VAPID_EMAIL || 'mailto:admin@princefreto.education';
+
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+    webpush.setVapidDetails(
+        VAPID_EMAIL,
+        VAPID_PUBLIC_KEY,
+        VAPID_PRIVATE_KEY
+    );
+    console.log('✅ Web Push configuré avec succès');
+} else {
+    console.warn('⚠️ Web Push non configuré: VAPID_PUBLIC_KEY ou VAPID_PRIVATE_KEY manquant.');
+}
+
 
 /**
  * Envoie une notification push à un utilisateur donné
