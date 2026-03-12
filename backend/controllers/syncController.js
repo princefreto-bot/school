@@ -20,10 +20,21 @@ async function syncFromFrontend(req, res) {
 
     try {
         if (replace) {
-            console.log('🧹 [Sync] Mode Remplacer activé : Nettoyage de la base...');
-            await supabase.from('parent_student').delete().neq('student_id', '0');
-            await supabase.from('payments').delete().neq('id', '0');
-            await supabase.from('students').delete().neq('id', '0');
+            console.log('🧹 [Sync] Mode Remplacer activé : Nettoyage total de la base...');
+            // Supprimer dans l'ordre pour respecter les clés étrangères
+            const { error: err1 } = await supabase.from('presences').delete().neq('id', '0');
+            if (err1) console.error('Error clearing presences:', err1);
+            
+            const { error: err2 } = await supabase.from('parent_student').delete().neq('student_id', '0');
+            if (err2) console.error('Error clearing links:', err2);
+            
+            const { error: err3 } = await supabase.from('payments').delete().neq('id', '0');
+            if (err3) console.error('Error clearing payments:', err3);
+            
+            const { error: err4 } = await supabase.from('students').delete().neq('id', '0');
+            if (err4) throw new Error('Impossible de vider la table élèves: ' + err4.message);
+            
+            console.log('✨ [Sync] Base de données nettoyée avec succès.');
         }
         // --- 1. Sync Students ---
         if (students.length > 0) {

@@ -65,11 +65,20 @@ export const ImportExport = () => {
 
         if (syncResult) {
           useStore.getState().setLastSyncTimestamp(Date.now());
+          
+          // Si on a remplacé, on vide aussi les présences et logs localement 
+          // car le serveur les a vidés côté cloud
+          if (replace) {
+            useStore.setState({ presences: [], activityLogs: [] });
+          }
+
+          setIsSyncing(false);
           setMessage({ 
             type: 'success', 
-            text: `${imported.length} élèves importés et synchronisés avec succès !` 
+            text: `${imported.length} élèves importés et synchronisés avec succès ! (Mode Remplacement)` 
           });
         } else {
+          setIsSyncing(false);
           setMessage({ 
             type: 'error', 
             text: 'Importés localement mais échec de la synchronisation cloud.' 
@@ -77,6 +86,7 @@ export const ImportExport = () => {
         }
       }
     } catch (error) {
+      useStore.getState().setIsSyncing(false);
       setMessage({ 
         type: 'error', 
         text: error instanceof Error ? error.message : 'Erreur lors de l\'importation' 
