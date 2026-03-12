@@ -23,6 +23,7 @@ import { ParentBadges } from './pages/parent/ParentBadges';
 import { ParentMessages } from './pages/parent/ParentMessages';
 import { ParentsList } from './pages/ParentsList';
 import { ChatWindow } from './components/ChatWindow';
+import { webPushService } from './services/webPushService';
 
 const PageContent: React.FC = () => {
   const currentPage = useStore((s) => s.currentPage);
@@ -53,6 +54,13 @@ const PageContent: React.FC = () => {
 export function App() {
   const isAuthenticated = useStore((s) => s.isAuthenticated);
   const fetchAllFromBackend = useStore((s) => s.fetchAllFromBackend);
+
+  // ── Initialisation Web Push (Uniquement pour les Parents ou Web) ──
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      webPushService.init();
+    }
+  }, [isAuthenticated]);
 
   // ── Synchronisation Automatique (Temps Réel) ──────────────────
   // Permet de garder le mobile et le PC synchro sans action manuelle

@@ -1,4 +1,5 @@
 const { supabase } = require('../utils/supabase');
+const { sendPushNotification } = require('../utils/webPush');
 
 /**
  * POST /api/notifications/send
@@ -44,9 +45,9 @@ async function sendNotification(req, res) {
                 });
             }
 
-            // 3. Ici on pourrait appeler OneSignal/FCM/Firebase pour le vrai PUSH
-            // Pour l'instant on loggue l'envoi simulé
-            console.log(`📲 Notification Push envoyée au Parent ${parentId} : ${message}`);
+            // 3. Envoi via Web Push (vraie notification OS)
+            console.log(`📲 Préparation Notification Push Web pour le Parent ${parentId} : ${message}`);
+            await sendPushNotification(parentId, "Pointage de l'élève", message);
         }
 
         return res.json({ success: true, count: parentIds.length });

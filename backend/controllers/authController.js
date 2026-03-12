@@ -115,4 +115,24 @@ async function deleteSelfAccount(req, res) {
     }
 }
 
-module.exports = { register, login, deleteSelfAccount };
+// ── Update Push Token ──────────────────────────────────────────
+async function updatePushToken(req, res) {
+    const { id } = req.user;
+    const { push_token } = req.body;
+
+    try {
+        const { error } = await supabase
+            .from('profiles')
+            .update({ push_token })
+            .eq('id', id);
+
+        if (error) throw error;
+
+        return res.json({ success: true, message: 'Token de notification mis à jour.' });
+    } catch (err) {
+        console.error('Update Push Token Error:', err.message);
+        return res.status(500).json({ error: 'Erreur lors de la mise à jour du token.' });
+    }
+}
+
+module.exports = { register, login, deleteSelfAccount, updatePushToken };
