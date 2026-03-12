@@ -55,6 +55,11 @@ export function App() {
   const isAuthenticated = useStore((s) => s.isAuthenticated);
   const fetchAllFromBackend = useStore((s) => s.fetchAllFromBackend);
 
+  // ── Chargement des paramètres publics (Logo, Nom App) ────────
+  React.useEffect(() => {
+    useStore.getState().fetchPublicSettings();
+  }, []);
+
   // ── Initialisation Web Push (Uniquement pour les Parents ou Web) ──
   React.useEffect(() => {
     if (isAuthenticated) {

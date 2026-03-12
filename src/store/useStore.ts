@@ -89,6 +89,7 @@ export interface AppState {
   setIsSyncing: (s: boolean) => void;
   clearCloudPresences: () => Promise<boolean>;
   clearCloudActivityLogs: () => Promise<boolean>;
+  fetchPublicSettings: () => Promise<void>;
 }
 
 // Authentification gérée par Supabase
@@ -106,9 +107,15 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       // ── Identité ─────────────────────────────────────────
       appName: 'EduFinance',
-      setAppName: (name) => set({ appName: name }),
+      setAppName: (name) => {
+        set({ appName: name });
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      },
       schoolLogo: null,
-      setSchoolLogo: (logo) => set({ schoolLogo: logo }),
+      setSchoolLogo: (logo) => {
+        set({ schoolLogo: logo });
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      },
 
       // ── Auth ──────────────────────────────────────────────
       user: null,
@@ -332,15 +339,27 @@ export const useStore = create<AppState>()(
 
       // ── Paramètres ───────────────────────────────────────
       schoolName: 'Établissement Scolaire',
-      setSchoolName: (name) => set({ schoolName: name }),
+      setSchoolName: (name) => {
+        set({ schoolName: name });
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      },
       schoolYear: '2024-2025',
-      setSchoolYear: (year) => set({ schoolYear: year }),
+      setSchoolYear: (year) => {
+        set({ schoolYear: year });
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      },
       messageRemerciement:
         "Nous vous remercions sincèrement pour votre ponctualité dans le règlement de la scolarité. Votre soutien contribue au bon fonctionnement de notre établissement.",
-      setMessageRemerciement: (m) => set({ messageRemerciement: m }),
+      setMessageRemerciement: (m) => {
+        set({ messageRemerciement: m });
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      },
       messageRappel:
         "Nous vous rappelons cordialement que le règlement du solde de scolarité est attendu. Veuillez régulariser votre situation dans les meilleurs délais.",
-      setMessageRappel: (m) => set({ messageRappel: m }),
+      setMessageRappel: (m) => {
+        set({ messageRappel: m });
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      },
       settings: {
         seuilDeuxiemeTranche: 70,
         schoolName: 'Établissement Scolaire',
@@ -421,6 +440,17 @@ export const useStore = create<AppState>()(
                 activityLogs: data.activityLogs || [],
                 links: data.links || []
               });
+
+              if (data.appSettings) {
+                set({
+                  appName: data.appSettings.appName,
+                  schoolName: data.appSettings.schoolName,
+                  schoolYear: data.appSettings.schoolYear,
+                  schoolLogo: data.appSettings.schoolLogo,
+                  messageRemerciement: data.appSettings.messageRemerciement,
+                  messageRappel: data.appSettings.messageRappel
+                });
+              }
               console.log(`✅ Cloud data synchronized: ${data.students.length} students loaded.`);
             }
           }
@@ -462,6 +492,24 @@ export const useStore = create<AppState>()(
         } catch (err) {
           console.error('Failed to clear logs:', err);
           return false;
+        }
+      },
+      fetchPublicSettings: async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/settings`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data) {
+              set({
+                appName: data.appName || get().appName,
+                schoolName: data.schoolName || get().schoolName,
+                schoolYear: data.schoolYear || get().schoolYear,
+                schoolLogo: data.schoolLogo || get().schoolLogo
+              });
+            }
+          }
+        } catch (err) {
+          console.error('Failed to fetch public settings:', err);
         }
       }
     }),

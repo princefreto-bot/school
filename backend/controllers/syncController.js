@@ -11,7 +11,7 @@ async function syncFromFrontend(req, res) {
         return res.status(401).json({ error: 'Authentification requise.' });
     }
 
-    const { students = [], presences = [], activityLogs = [] } = req.body;
+    const { students = [], presences = [], activityLogs = [], appSettings = null } = req.body;
     const { role } = req.user;
 
     if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
@@ -86,6 +86,19 @@ async function syncFromFrontend(req, res) {
             await supabase.from('activity_logs').upsert(logData, { onConflict: 'id' });
         }
 
+        // --- 5. Sync App Settings ---
+        if (appSettings) {
+            await supabase.from('app_settings').upsert({
+                id: 'global_settings',
+                app_name: appSettings.appName,
+                school_name: appSettings.schoolName,
+                school_year: appSettings.schoolYear,
+                school_logo: appSettings.schoolLogo,
+                message_remerciement: appSettings.messageRemerciement,
+                message_rappel: appSettings.messageRappel
+            }, { onConflict: 'id' });
+        }
+
         console.log(`🎉 [Sync] Completed: ${students.length} students, ${presences.length} presences, ${activityLogs.length} logs`);
         return res.json({ message: 'Synchronisation cloud réussie.' });
 
@@ -154,6 +167,15 @@ async function syncToFrontend(req, res) {
 
         if (psErr) throw psErr;
 
+        // Fetch app settings
+        const { data: appSettings, error: asErr } = await supabase
+            .from('app_settings')
+            .select('*')
+            .eq('id', 'global_settings')
+            .single();
+
+        // ignore error if settings don't exist yet
+
         // Group payments by student
         const studentMap = new Map();
         students.forEach(s => {
@@ -201,7 +223,15 @@ async function syncToFrontend(req, res) {
                 description: l.description,
                 dateHeure: l.date_heure
             })),
-            links: links || []
+            links: links || [],
+            appSettings: appSettings ? {
+                appName: appSettings.app_name,
+                schoolName: appSettings.school_name,
+                schoolYear: appSettings.school_year,
+                schoolLogo: appSettings.school_logo,
+                messageRemerciement: appSettings.message_remerciement,
+                messageRappel: appSettings.message_rappel
+            } : null
         });
 
     } catch (err) {

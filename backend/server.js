@@ -39,6 +39,7 @@ app.use('/api/students', require('./routes/students'));
 app.use('/api/sync', require('./routes/sync'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/settings', require('./routes/settings'));
 
 // ── Health Check ──────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
