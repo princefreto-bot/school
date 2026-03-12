@@ -47,17 +47,11 @@ const CodeBlock: React.FC<{ code: string; comment?: string }> = ({ code, comment
 export const Parametres: React.FC = () => {
   // Sélecteurs séparés (pas d'objet pour éviter re-renders infinis)
   const schoolName = useStore((s) => s.schoolName);
-  const setSchoolName = useStore((s) => s.setSchoolName);
   const schoolYear = useStore((s) => s.schoolYear);
-  const setSchoolYear = useStore((s) => s.setSchoolYear);
   const messageRemerciement = useStore((s) => s.messageRemerciement);
-  const setMessageRemerciement = useStore((s) => s.setMessageRemerciement);
   const messageRappel = useStore((s) => s.messageRappel);
-  const setMessageRappel = useStore((s) => s.setMessageRappel);
   const appName = useStore((s) => s.appName);
-  const setAppName = useStore((s) => s.setAppName);
   const schoolLogo = useStore((s) => s.schoolLogo);
-  const setSchoolLogo = useStore((s) => s.setSchoolLogo);
   const user = useStore((s) => s.user);
 
   // États locaux du formulaire
@@ -116,15 +110,19 @@ export const Parametres: React.FC = () => {
     if (fileRef.current) fileRef.current.value = '';
   };
 
+  const updateAllSettings = useStore((s) => s.updateAllSettings);
+
   // ── Sauvegarde ───────────────────────────────────────────
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSchoolName(localSchool);
-    setSchoolYear(localYear);
-    setMessageRemerciement(localRem);
-    setMessageRappel(localRap);
-    setAppName(localAppName);
-    setSchoolLogo(logoPreview);
+    await updateAllSettings({
+      schoolName: localSchool,
+      schoolYear: localYear,
+      messageRemerciement: localRem,
+      messageRappel: localRap,
+      appName: localAppName,
+      schoolLogo: logoPreview
+    });
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };

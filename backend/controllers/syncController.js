@@ -86,17 +86,27 @@ async function syncFromFrontend(req, res) {
             await supabase.from('activity_logs').upsert(logData, { onConflict: 'id' });
         }
 
-        // --- 5. Sync App Settings ---
         if (appSettings) {
-            await supabase.from('app_settings').upsert({
+            console.log('💾 [Sync] Saving app settings to database...', {
+                appName: appSettings.appName,
+                logoLength: appSettings.schoolLogo?.length || 0
+            });
+            const { error: setErr } = await supabase.from('app_settings').upsert({
                 id: 'global_settings',
                 app_name: appSettings.appName,
                 school_name: appSettings.schoolName,
                 school_year: appSettings.schoolYear,
                 school_logo: appSettings.schoolLogo,
                 message_remerciement: appSettings.messageRemerciement,
-                message_rappel: appSettings.messageRappel
+                message_rappel: appSettings.messageRappel,
+                updated_at: new Date().toISOString()
             }, { onConflict: 'id' });
+            
+            if (setErr) {
+                console.error('❌ [Sync] App Settings Error:', setErr.message);
+                throw setErr;
+            }
+            console.log('✅ [Sync] App settings saved.');
         }
 
         console.log(`🎉 [Sync] Completed: ${students.length} students, ${presences.length} presences, ${activityLogs.length} logs`);

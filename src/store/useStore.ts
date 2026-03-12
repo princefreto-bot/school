@@ -64,6 +64,14 @@ export interface AppState {
   setMessageRemerciement: (m: string) => void;
   messageRappel: string;
   setMessageRappel: (m: string) => void;
+  updateAllSettings: (settings: { 
+    appName?: string, 
+    schoolName?: string, 
+    schoolYear?: string, 
+    schoolLogo?: string | null,
+    messageRemerciement?: string,
+    messageRappel?: string
+  }) => Promise<void>;
   settings: AppSettings;
   updateSettings: (settings: AppSettings) => void;
 
@@ -107,23 +115,9 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       // ── Identité ─────────────────────────────────────────
       appName: 'EduFinance',
-      setAppName: (name) => {
-        console.log('📝 [Store] Updating appName:', name);
-        set({ appName: name });
-        import('../services/backendSync').then(({ syncToBackend }) => {
-          console.log('🚀 [Store] Triggering sync for appName');
-          syncToBackend(get());
-        });
-      },
+      setAppName: (name) => set({ appName: name }),
       schoolLogo: null,
-      setSchoolLogo: (logo) => {
-        console.log('📝 [Store] Updating schoolLogo (base64 length):', logo?.length || 0);
-        set({ schoolLogo: logo });
-        import('../services/backendSync').then(({ syncToBackend }) => {
-          console.log('🚀 [Store] Triggering sync for schoolLogo');
-          syncToBackend(get());
-        });
-      },
+      setSchoolLogo: (logo) => set({ schoolLogo: logo }),
 
       // ── Auth ──────────────────────────────────────────────
       user: null,
@@ -347,30 +341,28 @@ export const useStore = create<AppState>()(
 
       // ── Paramètres ───────────────────────────────────────
       schoolName: 'Établissement Scolaire',
-      setSchoolName: (name) => {
-        console.log('📝 [Store] Updating schoolName:', name);
-        set({ schoolName: name });
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
-      },
+      setSchoolName: (name) => set({ schoolName: name }),
       schoolYear: '2024-2025',
-      setSchoolYear: (year) => {
-        console.log('📝 [Store] Updating schoolYear:', year);
-        set({ schoolYear: year });
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
-      },
+      setSchoolYear: (year) => set({ schoolYear: year }),
       messageRemerciement:
         "Nous vous remercions sincèrement pour votre ponctualité dans le règlement de la scolarité. Votre soutien contribue au bon fonctionnement de notre établissement.",
-      setMessageRemerciement: (m) => {
-        console.log('📝 [Store] Updating messageRemerciement');
-        set({ messageRemerciement: m });
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
-      },
+      setMessageRemerciement: (m) => set({ messageRemerciement: m }),
       messageRappel:
         "Nous vous rappelons cordialement que le règlement du solde de scolarité est attendu. Veuillez régulariser votre situation dans les meilleurs délais.",
-      setMessageRappel: (m) => {
-        console.log('📝 [Store] Updating messageRappel');
-        set({ messageRappel: m });
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      setMessageRappel: (m) => set({ messageRappel: m }),
+
+      updateAllSettings: async (newSettings) => {
+        console.log('💾 [Store] Saving all settings to cloud...', Object.keys(newSettings));
+        set(newSettings);
+        try {
+          const { syncToBackend } = await import('../services/backendSync');
+          const result = await syncToBackend(get());
+          if (result) {
+            console.log('✅ [Store] All settings synced successfully!');
+          }
+        } catch (err) {
+          console.error('❌ [Store] Error syncing settings:', err);
+        }
       },
       settings: {
         seuilDeuxiemeTranche: 70,

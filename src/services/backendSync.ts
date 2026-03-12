@@ -59,7 +59,11 @@ export async function syncToBackend(store: Partial<AppState>) {
             return null;
         }
 
-        console.log('✅ Sync successful:', result.count || 0, 'students synced');
+        if (appSettings) {
+            console.log('✅ Settings Sync: SUCCESS');
+        } else {
+            console.log('✅ Data Sync successful:', result.count || 0, 'students synced');
+        }
         return result;
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);

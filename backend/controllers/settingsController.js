@@ -13,16 +13,23 @@ async function getPublicSettings(req, res) {
             .single();
 
         if (error && error.code !== 'PGRST116') { // Ignore "not found"
+            console.error('❌ [Settings] Supabase error:', error.message);
             throw error;
         }
 
         if (!data) {
+            console.log('🌐 [Settings] No database settings found, returning defaults.');
             return res.json({
                 appName: 'EduFinance',
                 schoolName: 'Établissement Scolaire',
                 schoolLogo: null
             });
         }
+
+        console.log('🌐 [Settings] Dispatching public settings:', {
+            appName: data.app_name,
+            logoPresent: !!data.school_logo
+        });
 
         return res.json({
             appName: data.app_name,
