@@ -29,7 +29,7 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
   const isSolde  = student.restant <= 0;
   const isPartiel = !isSolde && taux >= 70;
 
-  const phone  = student.telephone.replace(/\D/g, '');
+  const phone  = (student.telephone || '').replace(/\D/g, '');
   const waMsg  = isSolde
     ? `Bonjour, parent de ${student.prenom} ${student.nom} (${student.classe}). ${messageRemerciement} — ${schoolName}`
     : `Bonjour, parent de ${student.prenom} ${student.nom} (${student.classe}). Restant : ${fmtMoney(student.restant)}. ${messageRappel} — ${schoolName}`;

@@ -8,7 +8,7 @@
  */
 export const sendWhatsApp = (phone: string, message: string) => {
     // Nettoyer le numéro : garder uniquement les chiffres
-    const cleanPhone = phone.replace(/[^0-9+]/g, '').replace(/^\+/, '');
+    const cleanPhone = (phone || '').replace(/[^0-9+]/g, '').replace(/^\+/, '');
     const encoded = encodeURIComponent(message);
     window.open(`https://wa.me/${cleanPhone}?text=${encoded}`, '_blank');
 };

@@ -49,7 +49,7 @@ export const formatMontant = (montant: number): string => {
 };
 
 export const formatPhoneTogo = (phone: string): string => {
-  const cleaned = phone.replace(/\D/g, '');
+  const cleaned = (phone || '').replace(/\D/g, '');
   if (cleaned.startsWith('228')) {
     return '+' + cleaned;
   }
@@ -85,13 +85,18 @@ export const calculateClassStats = (students: Student[]): ClassStats[] => {
     const ecolageTotal = classStudents.reduce((sum, s) => sum + s.ecolage, 0);
     const paye = classStudents.reduce((sum, s) => sum + s.dejaPaye, 0);
     const restant = classStudents.reduce((sum, s) => sum + s.restant, 0);
-    
+    const effectif = classStudents.length;
+
     return {
       classe,
       cycle: getCycleFromClasse(classe),
-      effectif: classStudents.length,
+      totalEleves: effectif,
+      effectif,
+      totalEcolage: ecolageTotal,
       ecolageTotal,
+      totalPaye: paye,
       paye,
+      totalRestant: restant,
       restant,
       tauxRecouvrement: ecolageTotal > 0 ? Math.round((paye / ecolageTotal) * 100) : 0
     };

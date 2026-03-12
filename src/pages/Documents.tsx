@@ -43,7 +43,7 @@ const StudentCard: React.FC<{ student: Student; schoolName: string; schoolYear: 
   student, schoolName, schoolYear, msgRem, msgRap, schoolLogo,
 }) => {
   const taux = Math.round((student.dejaPaye / student.ecolage) * 100);
-  const phone = student.telephone.replace(/\D/g, '');
+  const phone = (student.telephone || '').replace(/\D/g, '');
   const waMsg = student.restant <= 0
     ? `Bonjour, parent de ${student.prenom} ${student.nom} (${student.classe}). ${msgRem} — ${schoolName}`
     : `Bonjour, parent de ${student.prenom} ${student.nom} (${student.classe}). Restant : ${fmtMoney(student.restant)}. ${msgRap} — ${schoolName}`;

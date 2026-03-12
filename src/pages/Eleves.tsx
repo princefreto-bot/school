@@ -139,7 +139,7 @@ const WhatsAppBtn: React.FC<{ student: Student; schoolName: string }> = ({ stude
     ? `Bonjour, parent de ${student.prenom} ${student.nom} (${student.classe}). Nous vous felicitons d'avoir solde la scolarite (${new Intl.NumberFormat('fr-FR').format(student.ecolage)} FCFA). Merci ! — ${schoolName}`
     : `Bonjour, parent de ${student.prenom} ${student.nom} (${student.classe}). Solde restant : ${new Intl.NumberFormat('fr-FR').format(student.restant)} FCFA (paye : ${taux}%). Merci de regulariser. — ${schoolName}`;
 
-  const phone = student.telephone.replace(/\D/g, '');
+  const phone = (student.telephone || '').replace(/\D/g, '');
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
 
   return (
