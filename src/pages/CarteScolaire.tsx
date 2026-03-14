@@ -1,22 +1,21 @@
 // ============================================================
-// CARTE SCOLAIRE — Génération optimisée pour impression PDF
-// QR Code haute qualité, format 85×54mm, 8 cartes/page A4
+// CARTE SCOLAIRE — Génération PDF + affichage écran
+// QR Code haute résolution, format ISO 85×54mm, 8 cartes/A4
 // ============================================================
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useStore } from '../store/useStore';
 import { QRCodeCanvas } from 'qrcode.react';
 import jsPDF from 'jspdf';
+import QRCodeLib from 'qrcode'; // import statique — fiable dans le navigateur
 import {
     CreditCard, Search, Download, Printer, X, Filter,
-    CheckCircle, Loader2, ChevronDown
+    CheckCircle, Loader2, ChevronDown, AlertCircle
 } from 'lucide-react';
 
-// ── Dimensions carte ISO 85×54mm ─────────────────────────────
-// En pixels pour l'affichage écran (ratio 1mm ≈ 3.7795px)
-const CARD_W_PX = 321; // 85mm
-const CARD_H_PX = 204; // 54mm
-
-// ── Composant Carte unitaire (affichage écran) ───────────────
+// ============================================================
+// COMPOSANT CARTE — Affichage écran
+// QR Canvas rendu en haute résolution puis réduit via CSS
+// ============================================================
 interface CarteProps {
     nom: string;
     prenom: string;
@@ -27,117 +26,93 @@ interface CarteProps {
     schoolLogo: string | null;
 }
 
-const CarteEleve: React.FC<CarteProps & { cardRef?: React.RefObject<HTMLDivElement> }> = ({
-    nom, prenom, classe, id, schoolName, schoolYear, schoolLogo, cardRef
+const CarteEleve: React.FC<CarteProps> = ({
+    nom, prenom, classe, id, schoolName, schoolYear, schoolLogo,
 }) => {
-    // Tronquer le nom pour l'affichage si trop long
     const nomComplet = `${prenom} ${nom}`.toUpperCase();
-    const nomTruncated = nomComplet.length > 28 ? nomComplet.slice(0, 28) + '...' : nomComplet;
 
     return (
-        <div
-            ref={cardRef}
-            style={{
-                width: `${CARD_W_PX}px`,
-                height: `${CARD_H_PX}px`,
-                background: 'linear-gradient(135deg, #0f2645 0%, #1e3a5f 60%, #1e40af 100%)',
-                fontFamily: 'Arial, Helvetica, sans-serif',
-                position: 'relative',
-                overflow: 'hidden',
-                borderRadius: '12px',
-                flexShrink: 0,
-            }}
-        >
-            {/* Décoration cercles */}
-            <div style={{
-                position: 'absolute', top: -24, right: -24,
-                width: 80, height: 80,
-                borderRadius: '50%', background: 'rgba(96,165,250,0.12)'
-            }} />
-            <div style={{
-                position: 'absolute', bottom: -20, left: -20,
-                width: 64, height: 64,
-                borderRadius: '50%', background: 'rgba(99,102,241,0.12)'
-            }} />
+        // Carte 321×204 px = proportions exactes 85×54mm
+        <div style={{
+            width: 321, height: 204, flexShrink: 0, position: 'relative', overflow: 'hidden',
+            borderRadius: 12,
+            background: 'linear-gradient(135deg, #0f2645 0%, #1a3a6a 55%, #1e40af 100%)',
+            fontFamily: 'Arial, Helvetica, sans-serif',
+        }}>
+            {/* Cercles déco */}
+            <div style={{ position:'absolute', top:-20, right:-20, width:72, height:72, borderRadius:'50%', background:'rgba(96,165,250,0.15)' }} />
+            <div style={{ position:'absolute', bottom:-18, left:-18, width:60, height:60, borderRadius:'50%', background:'rgba(99,102,241,0.15)' }} />
 
-            {/* Contenu principal */}
-            <div style={{
-                position: 'relative', zIndex: 10, height: '100%',
-                display: 'flex', flexDirection: 'column', padding: '10px'
-            }}>
-                {/* En-tête : Logo + Nom établissement */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            {/* Contenu */}
+            <div style={{ position:'relative', zIndex:10, height:'100%', display:'flex', flexDirection:'column', padding:10 }}>
+
+                {/* En-tête */}
+                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:5 }}>
                     {schoolLogo ? (
-                        <img
-                            src={schoolLogo}
-                            alt="Logo"
-                            style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.9)', padding: 2, objectFit: 'contain' }}
-                        />
+                        <img src={schoolLogo} alt="Logo" style={{
+                            width:28, height:28, borderRadius:6, objectFit:'contain',
+                            background:'rgba(255,255,255,0.95)', padding:2,
+                        }} />
                     ) : (
-                        <div style={{
-                            width: 28, height: 28, borderRadius: 6,
-                            background: 'rgba(255,255,255,0.2)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center'
-                        }}>
-                            <CreditCard style={{ width: 14, height: 14, color: 'white' }} />
+                        <div style={{ width:28, height:28, borderRadius:6, background:'rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                            <CreditCard style={{ width:14, height:14, color:'white' }} />
                         </div>
                     )}
-                    <div>
-                        <p style={{ color: 'white', fontSize: 8, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 0.5, margin: 0, maxWidth: 170, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                    <div style={{ flex:1, minWidth:0 }}>
+                        <p style={{ color:'white', fontSize:8, fontWeight:'bold', margin:0,
+                            textTransform:'uppercase', letterSpacing:0.4,
+                            overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis' }}>
                             {schoolName}
                         </p>
-                        <p style={{ color: '#93c5fd', fontSize: 7, margin: 0 }}>Carte scolaire {schoolYear}</p>
+                        <p style={{ color:'#93c5fd', fontSize:6.5, margin:0 }}>Carte scolaire {schoolYear}</p>
                     </div>
                 </div>
 
                 {/* Séparateur */}
-                <div style={{ height: 1, background: 'rgba(255,255,255,0.15)', marginBottom: 6 }} />
+                <div style={{ height:1, background:'rgba(255,255,255,0.12)', marginBottom:6 }} />
 
-                {/* Corps : Infos + QR Code */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-                    {/* Zone texte élève — flex:1 mais avec max-width pour ne pas empiéter sur QR */}
-                    <div style={{ flex: 1, minWidth: 0, maxWidth: 195 }}>
-                        {/* Nom élève avec gestion des noms longs */}
+                {/* Corps */}
+                <div style={{ display:'flex', alignItems:'center', gap:8, flex:1 }}>
+
+                    {/* Infos élève */}
+                    <div style={{ flex:1, minWidth:0, maxWidth:200 }}>
                         <p style={{
-                            color: 'white', fontSize: nomComplet.length > 20 ? 9 : 11,
-                            fontWeight: 'bold', margin: 0, marginBottom: 3,
-                            lineHeight: 1.2, wordBreak: 'break-word', overflowWrap: 'break-word',
-                            maxWidth: '100%'
+                            color:'white', margin:0, marginBottom:4, fontWeight:'bold', lineHeight:1.25,
+                            fontSize: nomComplet.length > 22 ? 8.5 : nomComplet.length > 16 ? 10 : 11.5,
+                            wordBreak:'break-word', overflowWrap:'break-word',
                         }}>
-                            {nomTruncated}
+                            {nomComplet}
                         </p>
-
-                        {/* Classe */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
-                            <span style={{
-                                background: 'rgba(59,130,246,0.3)', color: '#93c5fd',
-                                fontSize: 7, fontWeight: 'bold', padding: '1px 5px',
-                                borderRadius: 10, border: '1px solid rgba(147,197,253,0.3)'
-                            }}>
-                                {classe}
-                            </span>
-                        </div>
-
-                        {/* Bande inférieure */}
-                        <p style={{ color: '#60a5fa', fontSize: 6, margin: 0 }}>
-                            Scanner pour détails · YZOMACAMB
+                        <span style={{
+                            background:'rgba(59,130,246,0.35)', color:'#bfdbfe',
+                            fontSize:7, fontWeight:'bold', padding:'1px 6px',
+                            borderRadius:10, border:'1px solid rgba(147,197,253,0.25)',
+                            display:'inline-block', marginBottom:4,
+                        }}>
+                            {classe}
+                        </span>
+                        <p style={{ color:'#60a5fa', fontSize:6, margin:0 }}>
+                            Scanner le QR · YZOMACAMB
                         </p>
                     </div>
 
-                    {/* Zone QR Code — taille FIXE, ne peut jamais être masquée */}
+                    {/* QR Code — zone fixe, jamais masquée */}
+                    {/* Rendu en 256px, réduit à 72px via CSS = net sur Retina */}
                     <div style={{
-                        width: 72, height: 72, flexShrink: 0,
-                        background: 'white', borderRadius: 8,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        padding: 4, boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                        width:72, height:72, flexShrink:0,
+                        background:'white', borderRadius:8, padding:3,
+                        display:'flex', alignItems:'center', justifyContent:'center',
+                        boxShadow:'0 2px 10px rgba(0,0,0,0.4)',
+                        overflow:'hidden',
                     }}>
                         <QRCodeCanvas
                             value={id}
-                            size={64}
-                            level="H"
+                            size={256}        // rendu interne haute résolution
+                            level="H"         // correction d'erreur 30%
                             bgColor="#FFFFFF"
-                            fgColor="#0f172a"
-                            marginSize={0}
+                            fgColor="#000000" // noir pur = contraste max
+                            marginSize={2}    // quiet zone ISO
+                            style={{ width:66, height:66 }} // réduit par CSS → net
                         />
                     </div>
                 </div>
@@ -146,34 +121,30 @@ const CarteEleve: React.FC<CarteProps & { cardRef?: React.RefObject<HTMLDivEleme
     );
 };
 
-// ── Génération QR haute résolution via qrcode (canvas offscreen) ──────
-/**
- * Génère une image base64 du QR Code à la résolution maximale
- * pour garantir une parfaite scannabilité après impression.
- * - errorCorrectionLevel H : 30% correction d'erreur (max)
- * - margin 4 : zone blanche ISO recommandée (4 modules de quiet zone)
- * - Fond blanc #ffffff pur, encre noire #000000 pur — contraste optimal
- */
-const generateHighResQRDataURL = (id: string, sizePx: number): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const canvas = document.createElement('canvas');
-        import('qrcode').then(({ default: QRCode }) => {
-            QRCode.toCanvas(canvas, id, {
-                width: sizePx,
-                margin: 4,
-                color: { dark: '#000000ff', light: '#ffffffff' },
-                errorCorrectionLevel: 'H',
-            }, (err) => {
-                if (err) { reject(err); return; }
-                // qualité 1.0 = aucune compression JPEG — PNG est sans perte
-                resolve(canvas.toDataURL('image/png', 1.0));
-            });
-        }).catch(reject);
+// ============================================================
+// GÉNÉRATION QR HAUTE RÉSOLUTION POUR PDF
+// Via QRCodeLib (import statique, fiable navigateur)
+// ============================================================
+const buildQRDataURL = async (studentId: string): Promise<string> => {
+    // toDataURL retourne directement un data:image/png;base64,...
+    // Paramètres optimisés impression :
+    //   - errorCorrectionLevel H = 30% de correction
+    //   - margin 4 = quiet zone 4 modules (norme ISO 18004)
+    //   - width 400px @ 300dpi ≈ 34mm dans le PDF — ultra net
+    //   - couleurs : noir absolu sur blanc absolu
+    return QRCodeLib.toDataURL(studentId, {
+        type: 'image/png',
+        width: 400,
+        margin: 4,
+        errorCorrectionLevel: 'H',
+        color: { dark: '#000000', light: '#ffffff' },
     });
 };
 
-// ── Génération logo base64 à la bonne taille ─────────────────
-const resizeLogo = (src: string, size: number): Promise<string> => {
+// ============================================================
+// REDIMENSIONNEMENT LOGO POUR PDF
+// ============================================================
+const resizeLogoForPDF = (src: string, size: number): Promise<string> => {
     return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => {
@@ -183,7 +154,6 @@ const resizeLogo = (src: string, size: number): Promise<string> => {
             const ctx = canvas.getContext('2d')!;
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, size, size);
-            // Centrer l'image dans le carré en conservant les proportions
             const ratio = Math.min(size / img.width, size / img.height);
             const w = img.width * ratio;
             const h = img.height * ratio;
@@ -195,267 +165,220 @@ const resizeLogo = (src: string, size: number): Promise<string> => {
     });
 };
 
-// ── Génération PDF A4 — 8 cartes par page ────────────────────
-// Dimensions en mm : carte 85×54mm, marges, espacement
+// ============================================================
+// GÉNÉRATION PDF — 8 cartes par page A4 (2 colonnes × 4 lignes)
+// ============================================================
 const generateCartesPDF = async (
     students: Array<{ id: string; nom: string; prenom: string; classe: string }>,
     schoolName: string,
     schoolYear: string,
     schoolLogo: string | null,
-    onProgress?: (n: number) => void
+    onProgress: (n: number) => void,
 ): Promise<void> => {
-    if (!students.length) return;
+    if (!students.length) {
+        throw new Error('Aucun élève sélectionné');
+    }
 
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-    // A4 : 210×297mm
-    // 8 cartes (2 colonnes × 4 lignes), marges et espacement
-    const pageW = 210;
-    const cardW = 85;  // mm
-    const cardH = 54;  // mm
-    const cols = 2;
-    const rows = 4;
-    const marginX = (pageW - cols * cardW) / 2; // centrage horizontal ≈ 20mm
-    const marginTop = 10;
-    const gapX = 0; // pas d'espace entre colonnes (déjà centré)
-    const gapY = 4; // 4mm entre lignes
+    // ── Mise en page ────────────────────────────────────────
+    const cardW   = 85;   // mm (ISO 7810 ID-1)
+    const cardH   = 54;   // mm (ISO 7810 ID-1)
+    const cols    = 2;
+    const rowsMax = 4;
+    const pageW   = 210;
+    const pageH   = 297;
+    const marginX = (pageW - cols * cardW) / 2;  // centrage ≈ 20mm
+    const marginY = (pageH - rowsMax * cardH - (rowsMax - 1) * 3) / 2; // centrage vertical
+    const gapY    = 3;    // espace entre lignes
 
-    // Résolution QR en mm→px pour impression 300 DPI
-    // 25mm QR × 300dpi / 25.4 ≈ 295px
-    const QR_SIZE_PX = 300;
-    // Logo : 10mm × 300dpi/25.4 ≈ 118px
-    const LOGO_SIZE_PX = 118;
-
-    // Pré-rendre le logo redimensionné
+    // ── Logo pré-traité ─────────────────────────────────────
     let logoData = '';
     if (schoolLogo && schoolLogo.startsWith('data:image')) {
-        logoData = await resizeLogo(schoolLogo, LOGO_SIZE_PX);
+        // 120px ≈ 10mm à 300dpi — assez grand pour être net
+        logoData = await resizeLogoForPDF(schoolLogo, 120);
     }
 
-    let cardIndex = 0;
     const total = students.length;
+    let cardIndex = 0;
 
     for (const student of students) {
-        onProgress?.(Math.round((cardIndex / total) * 100));
-
-        // Calculer position sur la page
-        const posOnPage = cardIndex % (cols * rows);
+        // ── Position dans la page ──────────────────────────
+        const posOnPage = cardIndex % (cols * rowsMax);
         if (posOnPage === 0 && cardIndex > 0) {
             doc.addPage();
         }
 
-        const col = posOnPage % cols;
-        const row = Math.floor(posOnPage / cols);
-        const x = marginX + col * (cardW + gapX);
-        const y = marginTop + row * (cardH + gapY);
+        const col  = posOnPage % cols;
+        const row  = Math.floor(posOnPage / cols);
+        const x    = marginX + col * cardW;
+        const y    = marginY + row * (cardH + gapY);
 
-        // ── Fond dégradé simulé (rectangle + overlay) ──────
-        // Fond principal bleu foncé
+        // ── Fond de la carte (dégradé simulé) ─────────────
+        // Bg bleu foncé principal
         doc.setFillColor(15, 38, 69);
-        doc.roundedRect(x, y, cardW, cardH, 3, 3, 'F');
+        doc.roundedRect(x, y, cardW, cardH, 2.5, 2.5, 'F');
+        // Zone dégradée bleu roi à droite
+        doc.setFillColor(30, 64, 170);
+        doc.roundedRect(x + 50, y, cardW - 50, cardH, 2.5, 2.5, 'F');
+        // Raccord net au milieu
+        doc.setFillColor(22, 51, 115);
+        doc.rect(x + 50, y, 5, cardH, 'F');
 
-        // Accent bleu sur la partie droite
-        doc.setFillColor(30, 64, 175);
-        doc.roundedRect(x + cardW * 0.55, y, cardW * 0.45, cardH, 3, 3, 'F');
-        // Re-appliquer le fond sur le milieu pour effacer les coins ronds du bloc droit
-        doc.setFillColor(15, 38, 69);
-        doc.rect(x + cardW * 0.55, y, cardW * 0.2, cardH, 'F');
-
-        // Cercle décoratif haut-droite
+        // Cercle déco (coin haut-droit)
         doc.setFillColor(30, 58, 138);
-        doc.circle(x + cardW - 8, y + 8, 10, 'F');
+        doc.circle(x + cardW - 5, y + 5, 9, 'F');
 
-        // ── Ligne séparatrice horizontale ──────────────────
+        // ── Ligne séparatrice horizontale ─────────────────
         doc.setDrawColor(255, 255, 255);
-        doc.setLineWidth(0.15);
-        doc.setGState(doc.GState({ opacity: 0.2 }));
-        doc.line(x + 3, y + 14, x + cardW - 3, y + 14);
-        doc.setGState(doc.GState({ opacity: 1 }));
+        doc.setLineWidth(0.1);
+        doc.line(x + 2, y + 13, x + cardW - 2, y + 13);
 
-        // ── Logo établissement ─────────────────────────────
-        const logoX = x + 3;
-        const logoY = y + 3;
-        const logoMM = 8; // 8mm de côté dans le PDF
+        // ── Logo ──────────────────────────────────────────
+        const logoMM  = 8;
+        const logoX   = x + 2.5;
+        const logoY   = y + 2.5;
 
         if (logoData) {
-            // Fond blanc arrondi pour le logo
             doc.setFillColor(255, 255, 255);
-            doc.roundedRect(logoX, logoY, logoMM, logoMM, 1.5, 1.5, 'F');
+            doc.roundedRect(logoX, logoY, logoMM, logoMM, 1.2, 1.2, 'F');
             doc.addImage(logoData, 'PNG', logoX, logoY, logoMM, logoMM);
         } else {
-            // Placeholder logo
-            doc.setFillColor(30, 58, 138);
-            doc.roundedRect(logoX, logoY, logoMM, logoMM, 1.5, 1.5, 'F');
+            doc.setFillColor(37, 99, 235);
+            doc.roundedRect(logoX, logoY, logoMM, logoMM, 1.2, 1.2, 'F');
             doc.setTextColor(255, 255, 255);
-            doc.setFontSize(5);
+            doc.setFontSize(4.5);
             doc.setFont('helvetica', 'bold');
-            doc.text('EDU', logoX + logoMM / 2, logoY + logoMM / 2 + 1.5, { align: 'center' });
+            doc.text('EDU', logoX + logoMM / 2, logoY + 5, { align: 'center' });
         }
 
         // ── Nom établissement ──────────────────────────────
-        const textStartX = logoX + logoMM + 1.5;
-        const availW = cardW - logoMM - 2 - 24 - 4; // réserve la zone QR
+        const txtX      = logoX + logoMM + 1.5;
+        const maxNameW  = cardW - logoMM - 4 - 28; // réserve zone QR
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(6);
+        doc.setFontSize(5.5);
         doc.setFont('helvetica', 'bold');
-        const schoolNameStr = schoolName.toUpperCase();
-        const schoolNameTrunc = doc.splitTextToSize(schoolNameStr, availW)[0];
-        doc.text(schoolNameTrunc, textStartX, logoY + 4);
-
-        // Année scolaire
-        doc.setTextColor(147, 197, 253);
-        doc.setFontSize(5);
+        const schoolLine = doc.splitTextToSize(schoolName.toUpperCase(), maxNameW)[0];
+        doc.text(schoolLine, txtX, logoY + 3.5);
+        doc.setFontSize(4.5);
         doc.setFont('helvetica', 'normal');
-        doc.text(`Carte scolaire ${schoolYear}`, textStartX, logoY + 8.5);
+        doc.setTextColor(147, 197, 253);
+        doc.text(`Carte scolaire ${schoolYear}`, txtX, logoY + 7.5);
 
-        // ── QR CODE — Zone fixe à droite ──────────────────
-        const qrMM = 24; // 24mm de côté dans le PDF (grande taille)
-        const qrX = x + cardW - qrMM - 3;
-        const qrY = y + cardH - qrMM - 3;
+        // ── QR Code — zone fixe bas-droite ────────────────
+        const qrMM    = 22;   // 22mm dans le PDF
+        const qrX     = x + cardW - qrMM - 2.5;
+        const qrY     = y + cardH - qrMM - 2.5;
+        const qrPad   = 1.0;  // marge blanche autour du QR dans le PDF
 
-        // Fond blanc pour le QR (zone sécurisée indispensable)
-        const qrPadding = 1.2;
+        // Fond blanc (quiet zone supplémentaire)
         doc.setFillColor(255, 255, 255);
-        doc.roundedRect(qrX - qrPadding, qrY - qrPadding, qrMM + qrPadding * 2, qrMM + qrPadding * 2, 2, 2, 'F');
+        doc.roundedRect(qrX - qrPad, qrY - qrPad, qrMM + qrPad * 2, qrMM + qrPad * 2, 1.5, 1.5, 'F');
 
-        // Générer et insérer le QR haute résolution
-        const qrDataUrl = await generateHighResQRDataURL(student.id, QR_SIZE_PX);
-        doc.addImage(qrDataUrl, 'PNG', qrX, qrY, qrMM, qrMM, undefined, 'NONE'); // NONE = pas de compression
+        // QR Code haute résolution — aucune compression (NONE)
+        const qrDataURL = await buildQRDataURL(student.id);
+        doc.addImage(qrDataURL, 'PNG', qrX, qrY, qrMM, qrMM, undefined, 'NONE');
 
-        // ── Nom & Prénom élève ──────────────────────────────
-        const infoX = x + 3;
-        const infoY = y + 18;
-        const infoMaxW = cardW - qrMM - 8;
-
-        const fullName = `${prenom} ${nom}`.toUpperCase();
-        const nameLines = doc.splitTextToSize(fullName, infoMaxW);
+        // ── Nom & Prénom de l'élève ────────────────────────
+        const nameMaxW   = cardW - qrMM - 6;
+        const fullName   = `${student.prenom} ${student.nom}`.toUpperCase();
+        const nameLines  = doc.splitTextToSize(fullName, nameMaxW);
+        const nameFontSz = fullName.length > 22 ? 7 : fullName.length > 16 ? 8 : 9;
+        const nameY      = y + 17;
 
         doc.setTextColor(255, 255, 255);
         doc.setFont('helvetica', 'bold');
-
-        // Adapter la taille selon la longueur du nom
-        const nameFontSize = fullName.length > 24 ? 7 : 8.5;
-        doc.setFontSize(nameFontSize);
-
-        // Limiter à 2 lignes max
-        const displayLines = nameLines.slice(0, 2);
-        displayLines.forEach((line: string, i: number) => {
-            doc.text(line, infoX, infoY + i * (nameFontSize * 0.4));
+        doc.setFontSize(nameFontSz);
+        nameLines.slice(0, 2).forEach((line: string, i: number) => {
+            doc.text(line, x + 2.5, nameY + i * (nameFontSz * 0.38));
         });
 
         // ── Classe ────────────────────────────────────────
-        const classeY = infoY + displayLines.length * (nameFontSize * 0.4) + 3.5;
-        doc.setFontSize(6.5);
+        const classeOffsetY = nameLines.slice(0, 2).length * (nameFontSz * 0.38);
+        doc.setFontSize(6);
         doc.setFont('helvetica', 'bold');
-        doc.setFillColor(59, 130, 246);
         doc.setTextColor(147, 197, 253);
-        const classLabel = `CLASSE : ${classe}`;
-        doc.text(classLabel, infoX, classeY);
+        doc.text(`CLASSE : ${student.classe}`, x + 2.5, nameY + classeOffsetY + 3.5);
 
-        // ── Texte pied de carte ───────────────────────────
-        doc.setFontSize(4.5);
+        // ── Pied de carte ─────────────────────────────────
+        doc.setFontSize(4);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(96, 165, 250);
-        doc.text('Scanner le QR pour vérifier', infoX, y + cardH - 3);
+        doc.text('Scanner le QR pour vérifier', x + 2.5, y + cardH - 2);
 
+        // Progression
         cardIndex++;
+        onProgress(Math.round((cardIndex / total) * 100));
     }
 
-    onProgress?.(100);
-
-    // Numérotation des pages
-    const totalPages = doc.getNumberOfPages();
-    for (let p = 1; p <= totalPages; p++) {
+    // ── Pied de page (toutes les pages) ───────────────────
+    const nbPages = doc.getNumberOfPages();
+    for (let p = 1; p <= nbPages; p++) {
         doc.setPage(p);
-        doc.setFontSize(6);
+        doc.setFontSize(5.5);
         doc.setFont('helvetica', 'normal');
-        doc.setTextColor(150, 150, 150);
+        doc.setTextColor(160, 160, 160);
         doc.text(
-            `Cartes scolaires ${schoolYear} — ${schoolName} — Page ${p}/${totalPages}`,
-            105, 294, { align: 'center' }
+            `Cartes scolaires ${schoolYear} — ${schoolName} — Page ${p}/${nbPages}`,
+            105, 293, { align: 'center' }
         );
     }
 
-    doc.save(`cartes_scolaires_${schoolYear.replace('/', '-')}.pdf`);
+    doc.save(`cartes_scolaires_${schoolYear.replace(/\//g, '-')}.pdf`);
 };
 
-// ── Page principale ──────────────────────────────────────────
+// ============================================================
+// PAGE PRINCIPALE
+// ============================================================
 export const CarteScolaire: React.FC = () => {
-    const students = useStore((s) => s.students);
-    const schoolName = useStore((s) => s.schoolName);
-    const schoolYear = useStore((s) => s.schoolYear);
-    const schoolLogo = useStore((s) => s.schoolLogo);
+    const students   = useStore(s => s.students);
+    const schoolName = useStore(s => s.schoolName);
+    const schoolYear = useStore(s => s.schoolYear);
+    const schoolLogo = useStore(s => s.schoolLogo);
 
-    const [search, setSearch] = useState('');
-    const [selectedClasse, setSelectedClasse] = useState('');
+    const [search,          setSearch]          = useState('');
+    const [selectedClasse,  setSelectedClasse]  = useState('');
     const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
-    const [generating, setGenerating] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [genMode, setGenMode] = useState<'all' | 'classe' | null>(null);
+    const [generating,      setGenerating]      = useState(false);
+    const [progress,        setProgress]        = useState(0);
+    const [error,           setError]           = useState<string | null>(null);
 
     const classes = [...new Set(students.map(s => s.classe))].sort();
 
     const filtered = students.filter(s => {
-        const matchSearch = !search || `${s.prenom} ${s.nom} ${s.id} ${s.classe}`.toLowerCase().includes(search.toLowerCase());
-        const matchClasse = !selectedClasse || s.classe === selectedClasse;
+        const matchSearch  = !search || `${s.prenom} ${s.nom} ${s.id} ${s.classe}`.toLowerCase().includes(search.toLowerCase());
+        const matchClasse  = !selectedClasse || s.classe === selectedClasse;
         return matchSearch && matchClasse;
     });
 
-    // Génération PDF de toutes les cartes
-    const handleGenerateAll = useCallback(async () => {
-        if (generating) return;
+    // ── Lancer la génération PDF ─────────────────────────────
+    const startGeneration = useCallback(async (list: typeof students) => {
+        if (generating || !list.length) return;
         setGenerating(true);
         setProgress(0);
-        setGenMode('all');
+        setError(null);
         try {
-            await generateCartesPDF(
-                filtered,
-                schoolName,
-                schoolYear,
-                schoolLogo,
-                setProgress
-            );
+            await generateCartesPDF(list, schoolName, schoolYear, schoolLogo, setProgress);
+        } catch (err) {
+            console.error('[CarteScolaire] Erreur génération PDF:', err);
+            setError(err instanceof Error ? err.message : 'Erreur lors de la génération du PDF');
         } finally {
             setGenerating(false);
-            setGenMode(null);
         }
-    }, [filtered, schoolName, schoolYear, schoolLogo, generating]);
+    }, [generating, schoolName, schoolYear, schoolLogo]);
 
-    // Génération PDF d'une seule classe
-    const handleGenerateClasse = useCallback(async (classe: string) => {
-        if (generating) return;
-        const classeStudents = students.filter(s => s.classe === classe);
-        if (!classeStudents.length) return;
-        setGenerating(true);
-        setProgress(0);
-        setGenMode('classe');
-        try {
-            await generateCartesPDF(
-                classeStudents,
-                schoolName,
-                schoolYear,
-                schoolLogo,
-                setProgress
-            );
-        } finally {
-            setGenerating(false);
-            setGenMode(null);
-        }
-    }, [students, schoolName, schoolYear, schoolLogo, generating]);
+    const handleGenerateAll    = () => startGeneration(filtered);
+    const handleGenerateClasse = (c: string) => startGeneration(students.filter(s => s.classe === c));
+    const handleGenerateOne    = (id: string) => {
+        const s = students.find(st => st.id === id);
+        if (s) startGeneration([s]);
+    };
 
-    // Impression d'une carte unique
-    const handlePrintOne = useCallback((studentId: string) => {
-        const s = students.find(st => st.id === studentId);
-        if (!s) return;
-        // On génère un PDF d'une seule carte
-        setGenerating(true);
-        generateCartesPDF([s], schoolName, schoolYear, schoolLogo, setProgress)
-            .finally(() => { setGenerating(false); setGenMode(null); });
-    }, [students, schoolName, schoolYear, schoolLogo]);
-
+    // ── Rendu ────────────────────────────────────────────────
     return (
         <div className="max-w-6xl mx-auto space-y-6">
-            {/* En-tête */}
+
+            {/* ── En-tête ─────────────────────────────────── */}
             <div className="bg-gradient-to-r from-indigo-600 to-purple-700 rounded-2xl p-6 text-white">
                 <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -463,206 +386,168 @@ export const CarteScolaire: React.FC = () => {
                     </div>
                     <div>
                         <h2 className="text-xl font-bold">Cartes Scolaires</h2>
-                        <p className="text-indigo-200 text-sm">Format 85×54 mm — QR Code haute qualité — Prêt pour impression</p>
+                        <p className="text-indigo-200 text-sm">
+                            Format ISO 85×54 mm · QR Code niveau H · 8 cartes/page A4
+                        </p>
                     </div>
                 </div>
-
                 <div className="grid grid-cols-3 gap-3 mt-4">
-                    <div className="bg-white/10 rounded-xl p-3 text-center">
-                        <p className="text-2xl font-bold">{students.length}</p>
-                        <p className="text-xs text-indigo-200">Total élèves</p>
-                    </div>
-                    <div className="bg-white/10 rounded-xl p-3 text-center">
-                        <p className="text-2xl font-bold">{classes.length}</p>
-                        <p className="text-xs text-indigo-200">Classes</p>
-                    </div>
-                    <div className="bg-white/10 rounded-xl p-3 text-center">
-                        <p className="text-2xl font-bold">{Math.ceil(students.length / 8)}</p>
-                        <p className="text-xs text-indigo-200">Pages PDF</p>
-                    </div>
+                    {[
+                        { v: students.length,               l: 'Total élèves' },
+                        { v: classes.length,                l: 'Classes'      },
+                        { v: Math.ceil(students.length / 8), l: 'Pages PDF'   },
+                    ].map(({ v, l }) => (
+                        <div key={l} className="bg-white/10 rounded-xl p-3 text-center">
+                            <p className="text-2xl font-bold">{v}</p>
+                            <p className="text-xs text-indigo-200">{l}</p>
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            {/* Barre d'actions */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-                    {/* Recherche */}
+            {/* ── Filtres + bouton principal ───────────────── */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            onChange={e => setSearch(e.target.value)}
                             placeholder="Rechercher un élève..."
-                            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                         />
                     </div>
-
-                    {/* Filtre classe */}
                     <div className="relative">
                         <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                         <select
                             value={selectedClasse}
-                            onChange={(e) => setSelectedClasse(e.target.value)}
-                            className="pl-9 pr-8 py-2.5 border border-gray-200 rounded-xl text-sm bg-white appearance-none focus:ring-2 focus:ring-blue-500 outline-none sm:w-44"
+                            onChange={e => setSelectedClasse(e.target.value)}
+                            className="pl-9 pr-8 py-2.5 border border-gray-200 rounded-xl text-sm bg-white appearance-none focus:ring-2 focus:ring-indigo-500 outline-none sm:w-44"
                         >
                             <option value="">Toutes les classes</option>
                             {classes.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
-                        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                     </div>
-
-                    {/* Bouton générer toutes les cartes */}
                     <button
                         onClick={handleGenerateAll}
                         disabled={generating || filtered.length === 0}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold transition-all shadow-sm"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold transition-all shadow-md"
                     >
-                        {generating && genMode === 'all' ? (
-                            <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                {progress}%
-                            </>
-                        ) : (
-                            <>
-                                <Download className="w-4 h-4" />
-                                Générer cartes ({filtered.length})
-                            </>
-                        )}
+                        {generating
+                            ? <><Loader2 className="w-4 h-4 animate-spin" /> {progress}%</>
+                            : <><Download className="w-4 h-4" /> Générer cartes ({filtered.length})</>
+                        }
                     </button>
                 </div>
 
-                {/* Progression */}
+                {/* Barre de progression */}
                 {generating && (
-                    <div className="mt-3">
-                        <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                            <span>Génération du PDF en cours...</span>
+                    <div>
+                        <div className="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>Construction du PDF…</span>
                             <span className="font-bold text-indigo-600">{progress}%</span>
                         </div>
                         <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                             <div
-                                className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+                                className="h-full bg-indigo-500 rounded-full transition-all duration-200"
                                 style={{ width: `${progress}%` }}
                             />
                         </div>
                     </div>
                 )}
+
+                {/* Erreur */}
+                {error && (
+                    <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        {error}
+                    </div>
+                )}
             </div>
 
-            {/* Génération par classe */}
+            {/* ── Génération par classe ────────────────────── */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
                 <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                     <Filter className="w-4 h-4 text-indigo-500" />
                     Générer par classe
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                    {classes.map(classe => {
-                        const count = students.filter(s => s.classe === classe).length;
+                    {classes.map(c => {
+                        const count = students.filter(s => s.classe === c).length;
                         return (
                             <button
-                                key={classe}
-                                onClick={() => handleGenerateClasse(classe)}
+                                key={c}
+                                onClick={() => handleGenerateClasse(c)}
                                 disabled={generating}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 disabled:opacity-50 text-gray-700 hover:text-indigo-700 rounded-lg text-xs font-medium transition-all"
                             >
                                 <Download className="w-3 h-3" />
-                                {classe}
+                                {c}
                                 <span className="bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full text-[10px] font-bold">{count}</span>
                             </button>
                         );
                     })}
                 </div>
-                <p className="text-xs text-gray-400 mt-2">
-                    * 8 cartes par page A4 — Format ISO 85×54mm — QR Code niveau H (30% correction d'erreur)
+                <p className="text-[11px] text-gray-400 mt-3">
+                    Format ISO 7810 · 85×54 mm · QR niveau H (30% correction) · 8 cartes/A4 · PNG sans compression
                 </p>
             </div>
 
-            {/* Prévisualisation d'une carte sélectionnée */}
-            {selectedStudent ? (
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="font-semibold text-gray-800">Prévisualisation de la carte</h3>
-                        <button
-                            onClick={() => setSelectedStudent(null)}
-                            className="text-gray-400 hover:text-gray-600 transition p-1.5 rounded-lg hover:bg-gray-100"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-                    </div>
-                    {(() => {
-                        const s = students.find(st => st.id === selectedStudent);
-                        if (!s) return null;
-                        return (
-                            <div className="flex flex-col sm:flex-row items-start gap-6">
-                                {/* Carte prévisualisation */}
-                                <div className="flex flex-col gap-3">
-                                    <p className="text-xs text-gray-500 font-medium">Aperçu écran (proportionnel 85×54mm)</p>
-                                    <div style={{
-                                        boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-                                        borderRadius: 12,
-                                        display: 'inline-block'
-                                    }}>
-                                        <CarteEleve
-                                            nom={s.nom}
-                                            prenom={s.prenom}
-                                            classe={s.classe}
-                                            id={s.id}
-                                            schoolName={schoolName}
-                                            schoolYear={schoolYear}
-                                            schoolLogo={schoolLogo}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Infos + action */}
-                                <div className="flex-1 space-y-4">
-                                    <div>
-                                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Détails</p>
-                                        <div className="space-y-2">
-                                            {[
-                                                ['Nom', `${s.prenom} ${s.nom}`],
-                                                ['Classe', s.classe],
-                                                ['ID student', s.id.slice(0, 20) + '...'],
-                                            ].map(([k, v]) => (
-                                                <div key={k} className="flex items-center gap-2 text-sm">
-                                                    <span className="text-gray-400 w-20 shrink-0">{k}</span>
-                                                    <span className="font-medium text-gray-800 font-mono text-xs bg-gray-50 px-2 py-0.5 rounded">{v}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="pt-2 border-t border-gray-100 space-y-2">
-                                        <div className="flex items-center gap-2 text-xs text-emerald-600 bg-emerald-50 p-2 rounded-lg">
-                                            <CheckCircle className="w-3.5 h-3.5 shrink-0" />
-                                            QR Code niveau H (30% correction d'erreur) — Scannable après impression
-                                        </div>
-                                        <button
-                                            onClick={() => handlePrintOne(s.id)}
-                                            disabled={generating}
-                                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 disabled:opacity-50 transition-all w-full justify-center"
-                                        >
-                                            {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
-                                            Générer PDF (carte individuelle)
-                                        </button>
-                                    </div>
+            {/* ── Prévisualisation d'une carte ─────────────── */}
+            {selectedStudent ? (() => {
+                const s = students.find(st => st.id === selectedStudent);
+                if (!s) return null;
+                return (
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                        <div className="flex items-center justify-between mb-5">
+                            <h3 className="font-semibold text-gray-800">Prévisualisation</h3>
+                            <button
+                                onClick={() => setSelectedStudent(null)}
+                                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-6 items-start">
+                            {/* Carte */}
+                            <div>
+                                <p className="text-xs text-gray-500 mb-2 font-medium">Aperçu proportionnel 85×54 mm</p>
+                                <div style={{ boxShadow:'0 10px 40px rgba(0,0,0,0.2)', borderRadius:12, display:'inline-block' }}>
+                                    <CarteEleve
+                                        nom={s.nom} prenom={s.prenom} classe={s.classe} id={s.id}
+                                        schoolName={schoolName} schoolYear={schoolYear} schoolLogo={schoolLogo}
+                                    />
                                 </div>
                             </div>
-                        );
-                    })()}
-                </div>
-            ) : (
+                            {/* Actions */}
+                            <div className="flex-1 space-y-3 min-w-[200px]">
+                                <div className="text-xs text-green-700 bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-2">
+                                    <CheckCircle className="w-4 h-4 shrink-0" />
+                                    QR Code niveau H · Scannable après impression et plastification
+                                </div>
+                                <button
+                                    onClick={() => handleGenerateOne(s.id)}
+                                    disabled={generating}
+                                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold transition-all"
+                                >
+                                    {generating
+                                        ? <><Loader2 className="w-4 h-4 animate-spin" /> Génération…</>
+                                        : <><Printer className="w-4 h-4" /> Générer PDF (carte seule)</>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })() : (
                 /* Liste des élèves */
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                    <div className="flex items-center justify-between mb-3">
-                        <p className="text-xs text-gray-500 font-medium">
-                            {filtered.length} élève(s) — cliquer pour prévisualiser
-                        </p>
-                        {filtered.length === 0 && (
-                            <p className="text-xs text-amber-600">Aucun élève trouvé</p>
-                        )}
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[500px] overflow-y-auto">
+                    <p className="text-xs text-gray-500 font-medium mb-3">
+                        {filtered.length} élève(s) — cliquer pour prévisualiser la carte
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[520px] overflow-y-auto">
                         {filtered.map(s => (
                             <button
                                 key={s.id}
@@ -679,6 +564,11 @@ export const CarteScolaire: React.FC = () => {
                                 <CreditCard className="w-4 h-4 text-gray-300 group-hover:text-indigo-500 transition-colors shrink-0" />
                             </button>
                         ))}
+                        {filtered.length === 0 && (
+                            <p className="col-span-3 text-center text-gray-400 text-sm py-10">
+                                Aucun élève trouvé
+                            </p>
+                        )}
                     </div>
                 </div>
             )}
