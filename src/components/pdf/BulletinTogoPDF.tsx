@@ -14,7 +14,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
         <div ref={ref} className="bg-white text-black mx-auto relative z-0 flex flex-col justify-between" style={{ width: '210mm', height: '297mm', padding: '8mm 15mm', boxSizing: 'border-box', fontFamily: '"Times New Roman", Times, serif' }}>
             {/* WATERMARK LOGO */}
             {schoolLogo && (
-                <div className="absolute inset-0 flex items-center justify-center opacity-[0.05] pointer-events-none z-[-1]">
+                <div className="absolute inset-0 flex items-center justify-center opacity-[0.10] pointer-events-none z-[-1]">
                     <img src={schoolLogo} alt="Watermark" className="w-[85%] max-w-3xl object-contain grayscale" />
                 </div>
             )}
