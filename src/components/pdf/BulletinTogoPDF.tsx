@@ -11,7 +11,7 @@ interface BulletinTogoPDFProps {
 
 export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFProps>(({ data, schoolName, schoolLogo, schoolStamp, schoolYear }, ref) => {
     return (
-        <div ref={ref} className="bg-white text-black p-8 mx-auto print:p-0" style={{ width: '210mm', minHeight: '297mm', fontFamily: 'Arial, sans-serif' }}>
+        <div ref={ref} className="bg-white text-black mx-auto" style={{ width: '210mm', minHeight: '297mm', padding: '15mm', boxSizing: 'border-box', fontFamily: '"Times New Roman", Times, serif' }}>
             {/* EN-TÊTE OFFICIEL TOGOLAIS */}
             <div className="flex justify-between items-center mb-6 text-sm">
                 {/* GAUCHE : Logo de l'école agrandi */}
