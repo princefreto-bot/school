@@ -19,6 +19,9 @@ const Recouvrement = lazy(() => import('./pages/Recouvrement').then(m => ({ defa
 const ScanPresence = lazy(() => import('./pages/ScanPresence').then(m => ({ default: m.ScanPresence })));
 const ScanSortie = lazy(() => import('./pages/ScanSortie').then(m => ({ default: m.ScanSortie })));
 const CarteScolaire = lazy(() => import('./pages/CarteScolaire').then(m => ({ default: m.CarteScolaire })));
+const GestionAcademique = lazy(() => import('./pages/GestionAcademique').then(m => ({ default: m.GestionAcademique })));
+const SaisieNotes = lazy(() => import('./pages/SaisieNotes').then(m => ({ default: m.SaisieNotes })));
+const Bulletins = lazy(() => import('./pages/Bulletins').then(m => ({ default: m.Bulletins })));
 const VerificationRecu = lazy(() => import('./pages/VerificationRecu').then(m => ({ default: m.VerificationRecu })));
 const HistoriqueActivites = lazy(() => import('./pages/HistoriqueActivites').then(m => ({ default: m.HistoriqueActivites })));
 const ParentDashboard = lazy(() => import('./pages/parent/ParentDashboard').then(m => ({ default: m.ParentDashboard })));
@@ -52,6 +55,9 @@ const PageContent: React.FC = () => {
     case 'scan_presence': return <ScanPresence />;
     case 'scan_sortie': return <ScanSortie />;
     case 'carte_scolaire': return <CarteScolaire />;
+    case 'gestion_academique': return <GestionAcademique />;
+    case 'saisie_notes': return <SaisieNotes />;
+    case 'bulletins': return <Bulletins />;
     case 'verification_recu': return <VerificationRecu />;
     case 'historique_activites': return <HistoriqueActivites />;
     case 'parent_dashboard': return <ParentDashboard />;

@@ -7,7 +7,8 @@ import {
   GraduationCap, LayoutDashboard, Users, CreditCard,
   BarChart3, FileText, Settings, LogOut, Menu, X,
   Bell, ChevronRight, Target, Award, MessageSquare,
-  ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone
+  ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone,
+  BookOpen, Edit3, FileSpreadsheet
 } from 'lucide-react';
 
 interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: number }
@@ -21,6 +22,9 @@ const NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'scan_presence', label: 'Scan Présence', icon: <ScanLine className="w-5 h-5 text-cyan-500" /> },
   { id: 'scan_sortie', label: 'Scan Sortie', icon: <ScanLine className="w-5 h-5 text-orange-500" /> },
   { id: 'carte_scolaire', label: 'Cartes Scolaires', icon: <IdCard className="w-5 h-5 text-indigo-500" /> },
+  { id: 'gestion_academique', label: 'Gest. Académique', icon: <BookOpen className="w-5 h-5 text-fuchsia-500" /> },
+  { id: 'saisie_notes', label: 'Saisie Notes', icon: <Edit3 className="w-5 h-5 text-rose-500" /> },
+  { id: 'bulletins', label: 'Bulletins', icon: <FileSpreadsheet className="w-5 h-5 text-amber-600" /> },
   { id: 'verification_recu', label: 'Vérif. Reçus', icon: <ShieldCheck className="w-5 h-5 text-purple-500" /> },
   { id: 'analyses', label: 'Analyses', icon: <BarChart3 className="w-5 h-5" /> },
   { id: 'documents', label: 'Documents', icon: <FileText className="w-5 h-5" /> },

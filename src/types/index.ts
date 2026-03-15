@@ -202,6 +202,9 @@ export type AppPage =
   | 'verification_recu'
   | 'historique_activites'
   | 'annonces'
+  | 'gestion_academique'
+  | 'saisie_notes'
+  | 'bulletins'
   | 'parent_dashboard'
   | 'parent_historique'
   | 'parent_recus'
@@ -213,3 +216,33 @@ export type AppPage =
 
 // Les types de cycles existants
 export const CYCLES: Cycle[] = ['Primaire', 'Collège', 'Lycée'];
+
+// ── MODULE 2 : ACADÉMIQUE & NOTES ─────────────────────────
+
+export type MatiereCategorie = '1-MATIERES LITTERAIRES' | '2-MATIERES SCIENTIFIQUES' | '3-AUTRES MATIERES';
+export type PeriodeType = 'TRIMESTRE 1' | 'TRIMESTRE 2' | 'TRIMESTRE 3' | 'SEMESTRE 1' | 'SEMESTRE 2';
+
+export interface Matiere {
+  id: string;
+  nom: string;
+  categorie: MatiereCategorie;
+}
+
+export interface ClasseMatiere {
+  id: string;
+  classe: string; // ex: '3ème A'
+  matiereId: string;
+  professeur: string;
+  coefficient: number;
+}
+
+export interface Note {
+  id: string;
+  eleveId: string;
+  matiereId: string;
+  periode: PeriodeType;
+  noteClasse: number | null; // ex: Interrogations (sur 20)
+  noteDevoir: number | null; // ex: Devoirs surveillés
+  noteCompo: number | null;  // ex: Composition
+}
+

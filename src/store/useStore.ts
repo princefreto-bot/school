@@ -3,7 +3,7 @@
 // ============================================================
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Student, User, AppPage, Payment, Parent, AppSettings, Presence, ActivityLog, CycleSchedule, Announcement, AnnouncementRead } from '../types';
+import { Student, User, AppPage, Payment, Parent, AppSettings, Presence, ActivityLog, CycleSchedule, Announcement, AnnouncementRead, Matiere, ClasseMatiere, Note, PeriodeType } from '../types';
 import { API_BASE_URL } from '../config';
 import { getEcolage, getCycle } from '../data/classConfig';
 import { v4 as uuid } from '../utils/uuid';
@@ -117,6 +117,26 @@ export interface AppState {
   markAnnouncementRead: (announcementId: string, parentId: string) => void;
   remindAnnouncementLater: (announcementId: string, parentId: string) => void;
   getUnreadAnnouncements: (parentId: string, classes?: string[]) => Announcement[];
+
+  // ── MODULE 2 : ACADÉMIQUE & NOTES ──
+  currentPeriode: PeriodeType;
+  setCurrentPeriode: (p: PeriodeType) => void;
+  matieres: Matiere[];
+  setMatieres: (m: Matiere[]) => void;
+  addMatiere: (m: Matiere) => void;
+  updateMatiere: (id: string, m: Partial<Matiere>) => void;
+  deleteMatiere: (id: string) => void;
+
+  classeMatieres: ClasseMatiere[];
+  setClasseMatieres: (cm: ClasseMatiere[]) => void;
+  addClasseMatiere: (cm: ClasseMatiere) => void;
+  updateClasseMatiere: (id: string, cm: Partial<ClasseMatiere>) => void;
+  deleteClasseMatiere: (id: string) => void;
+
+  notes: Note[];
+  setNotes: (n: Note[]) => void;
+  upsertNote: (note: Note) => void;
+  deleteNote: (id: string) => void;
 }
 
 // Authentification gérée par Supabase
@@ -729,7 +749,36 @@ export const useStore = create<AppState>()(
         } catch (err) {
           console.error('❌ [Settings] Fatal error fetching settings:', err);
         }
-      }
+      },
+
+      // ── M2 : ACADÉMIQUE & NOTES ──
+      currentPeriode: 'TRIMESTRE 1',
+      setCurrentPeriode: (p) => set({ currentPeriode: p }),
+      matieres: [],
+      setMatieres: (m) => set({ matieres: m }),
+      addMatiere: (m) => set(s => ({ matieres: [...s.matieres, m] })),
+      updateMatiere: (id, m) => set(s => ({ matieres: s.matieres.map(x => x.id === id ? { ...x, ...m } : x) })),
+      deleteMatiere: (id) => set(s => ({ matieres: s.matieres.filter(x => x.id !== id) })),
+
+      classeMatieres: [],
+      setClasseMatieres: (cm) => set({ classeMatieres: cm }),
+      addClasseMatiere: (cm) => set(s => ({ classeMatieres: [...s.classeMatieres, cm] })),
+      updateClasseMatiere: (id, cm) => set(s => ({ classeMatieres: s.classeMatieres.map(x => x.id === id ? { ...x, ...cm } : x) })),
+      deleteClasseMatiere: (id) => set(s => ({ classeMatieres: s.classeMatieres.filter(x => x.id !== id) })),
+
+      notes: [],
+      setNotes: (n) => set({ notes: n }),
+      upsertNote: (n) => set(s => {
+        const existing = s.notes.findIndex(x => x.eleveId === n.eleveId && x.matiereId === n.matiereId && x.periode === n.periode);
+        if (existing >= 0) {
+          const newNotes = [...s.notes];
+          newNotes[existing] = n;
+          return { notes: newNotes };
+        }
+        return { notes: [...s.notes, n] };
+      }),
+      deleteNote: (id) => set(s => ({ notes: s.notes.filter(x => x.id !== id) }))
+
     }),
     {
       name: 'edufinance-storage',
@@ -750,6 +799,10 @@ export const useStore = create<AppState>()(
         cycleSchedules: state.cycleSchedules || [],
         announcements: state.announcements || [],
         announcementReads: state.announcementReads || [],
+        currentPeriode: state.currentPeriode || 'TRIMESTRE 1',
+        matieres: state.matieres || [],
+        classeMatieres: state.classeMatieres || [],
+        notes: state.notes || [],
       }),
       onRehydrateStorage: () => (state) => {
         // Auto-réparation au chargement du storage local

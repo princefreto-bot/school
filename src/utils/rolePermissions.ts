@@ -10,17 +10,20 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
     directeur_general: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'carte_scolaire',
-        'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces'
+        'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
+        'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     admin: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'carte_scolaire',
-        'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces'
+        'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
+        'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     directeur: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'carte_scolaire',
-        'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces'
+        'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
+        'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     comptable: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
@@ -30,10 +33,12 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'dashboard', 'eleves', 'scan_presence', 'scan_sortie', 'carte_scolaire', 'chat'
     ],
     proviseur: [
-        'dashboard', 'eleves', 'analyses', 'scan_presence', 'scan_sortie', 'carte_scolaire', 'chat'
+        'dashboard', 'eleves', 'analyses', 'scan_presence', 'scan_sortie', 'carte_scolaire', 'chat',
+        'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     censeur: [
-        'dashboard', 'eleves', 'analyses', 'scan_presence', 'scan_sortie', 'carte_scolaire', 'chat'
+        'dashboard', 'eleves', 'analyses', 'scan_presence', 'scan_sortie', 'carte_scolaire', 'chat',
+        'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     parent: [
         'parent_dashboard', 'parent_historique', 'parent_recus',
