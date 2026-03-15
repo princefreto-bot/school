@@ -39,10 +39,6 @@ const CarteEleve: React.FC<CarteProps> = ({
             background: 'linear-gradient(135deg, #0f2645 0%, #1a3a6a 55%, #1e40af 100%)',
             fontFamily: 'Arial, Helvetica, sans-serif',
         }}>
-            {/* Cercles déco */}
-            <div style={{ position:'absolute', top:-20, right:-20, width:72, height:72, borderRadius:'50%', background:'rgba(96,165,250,0.15)' }} />
-            <div style={{ position:'absolute', bottom:-18, left:-18, width:60, height:60, borderRadius:'50%', background:'rgba(99,102,241,0.15)' }} />
-
             {/* Contenu */}
             <div style={{ position:'relative', zIndex:10, height:'100%', display:'flex', flexDirection:'column', padding:10 }}>
 
@@ -188,9 +184,10 @@ const generateCartesPDF = async (
     const rowsMax = 4;
     const pageW   = 210;
     const pageH   = 297;
-    const marginX = (pageW - cols * cardW) / 2;  // centrage ≈ 20mm
-    const marginY = (pageH - rowsMax * cardH - (rowsMax - 1) * 3) / 2; // centrage vertical
-    const gapY    = 3;    // espace entre lignes
+    const gapX    = 6;    // 6mm entre colonnes
+    const gapY    = 8;    // 8mm entre lignes
+    const marginX = (pageW - cols * cardW - (cols - 1) * gapX) / 2;  // centrage horizontal
+    const marginY = (pageH - rowsMax * cardH - (rowsMax - 1) * gapY) / 2; // centrage vertical
 
     // ── Logo pré-traité ─────────────────────────────────────
     let logoData = '';
@@ -211,7 +208,7 @@ const generateCartesPDF = async (
 
         const col  = posOnPage % cols;
         const row  = Math.floor(posOnPage / cols);
-        const x    = marginX + col * cardW;
+        const x    = marginX + col * (cardW + gapX);
         const y    = marginY + row * (cardH + gapY);
 
         // ── Fond de la carte (dégradé simulé) ─────────────
@@ -225,9 +222,7 @@ const generateCartesPDF = async (
         doc.setFillColor(22, 51, 115);
         doc.rect(x + 50, y, 5, cardH, 'F');
 
-        // Cercle déco (coin haut-droit)
-        doc.setFillColor(30, 58, 138);
-        doc.circle(x + cardW - 5, y + 5, 9, 'F');
+
 
         // ── Ligne séparatrice horizontale ─────────────────
         doc.setDrawColor(255, 255, 255);
