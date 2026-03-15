@@ -6,6 +6,7 @@ import { useStore } from '../store/useStore';
 import { Presence } from '../types';
 import { v4 as uuid } from '../utils/uuid';
 import { createActivityLog } from '../utils/activityLogger';
+import { getCycle } from '../data/classConfig';
 // import { sendWhatsApp, messagePresenceArrivee } from '../utils/whatsappHelper'; // Non utilisé actuellement
 import { Html5Qrcode } from "html5-qrcode";
 import {
@@ -21,14 +22,18 @@ import { playSuccessSound, playErrorSound, playWarningBeep, unlockAudio } from '
 const StudentScanned: React.FC<{
     nom: string; prenom: string; classe: string; heure: string;
     dejaPresent: boolean; telephone?: string; schoolName: string;
-}> = ({ nom, prenom, classe, heure, dejaPresent }) => {
+    statut?: 'present' | 'retard';
+}> = ({ nom, prenom, classe, heure, dejaPresent, statut }) => {
+    const isRetard = statut === 'retard';
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
             <div className={`w-full max-w-sm rounded-[2.5rem] border-4 p-8 text-center shadow-2xl transition-all ${dejaPresent
                 ? 'border-amber-400 bg-white'
-                : 'border-emerald-400 bg-white'
+                : isRetard
+                  ? 'border-orange-400 bg-white'
+                  : 'border-emerald-400 bg-white'
                 }`}>
-                <div className={`w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center ${dejaPresent ? 'bg-amber-100' : 'bg-emerald-100'
+                <div className={`w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center ${dejaPresent ? 'bg-amber-100' : isRetard ? 'bg-orange-100' : 'bg-emerald-100'
                     }`}>
                     {dejaPresent ? (
                         <AlertTriangle className="w-12 h-12 text-amber-600" />
@@ -63,11 +68,12 @@ export const ScanPresence: React.FC = () => {
     const addActivityLog = useStore((s) => s.addActivityLog);
     const user = useStore((s) => s.user);
     const schoolName = useStore((s) => s.schoolName);
+    const getHeureLimite = useStore((s) => s.getHeureLimite);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [scannedStudent, setScannedStudent] = useState<{
         nom: string; prenom: string; classe: string; heure: string;
-        dejaPresent: boolean; telephone?: string;
+        dejaPresent: boolean; telephone?: string; statut?: 'present' | 'retard';
     } | null>(null);
     const [cameraActive, setCameraActive] = useState(false);
     const [cameraError, setCameraError] = useState('');
@@ -123,7 +129,15 @@ export const ScanPresence: React.FC = () => {
                 eleveClasse: student.classe,
                 date: today,
                 heure: now.toTimeString().split(' ')[0],
-                statut: 'present',
+                statut: (() => {
+                    // Déterminer si retard basé sur l'heure limite du cycle
+                    const cycle = getCycle(student.classe);
+                    const heureLimite = getHeureLimite(cycle);
+                    const [lH, lM] = heureLimite.split(':').map(Number);
+                    const limiteMinutes = lH * 60 + lM;
+                    const scanMinutes = now.getHours() * 60 + now.getMinutes();
+                    return scanMinutes > limiteMinutes ? 'retard' : 'present';
+                })(),
             };
             addPresence(presence);
 
@@ -152,6 +166,12 @@ export const ScanPresence: React.FC = () => {
             heure,
             dejaPresent: already,
             telephone: student.telephone,
+            statut: already ? undefined : (() => {
+                const cycle = getCycle(student.classe);
+                const hl = getHeureLimite(cycle);
+                const [lH, lM] = hl.split(':').map(Number);
+                return (now.getHours() * 60 + now.getMinutes()) > (lH * 60 + lM) ? 'retard' as const : 'present' as const;
+            })(),
         });
         isScanningPaused.current = true;
 

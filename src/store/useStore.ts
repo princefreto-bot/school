@@ -3,7 +3,7 @@
 // ============================================================
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Student, User, AppPage, Payment, Parent, AppSettings, Presence, ActivityLog } from '../types';
+import { Student, User, AppPage, Payment, Parent, AppSettings, Presence, ActivityLog, CycleSchedule, Announcement, AnnouncementRead } from '../types';
 import { API_BASE_URL } from '../config';
 import { getEcolage, getCycle } from '../data/classConfig';
 import { v4 as uuid } from '../utils/uuid';
@@ -101,6 +101,20 @@ export interface AppState {
   clearCloudActivityLogs: () => Promise<boolean>;
   clearCloudStudents: () => Promise<boolean>;
   fetchPublicSettings: () => Promise<void>;
+
+  // Horaires par cycle
+  cycleSchedules: CycleSchedule[];
+  setCycleSchedules: (schedules: CycleSchedule[]) => void;
+  getHeureLimite: (cycle: string) => string;
+
+  // Annonces
+  announcements: Announcement[];
+  addAnnouncement: (a: Omit<Announcement, 'id' | 'createdAt'>) => void;
+  deleteAnnouncement: (id: string) => void;
+  announcementReads: AnnouncementRead[];
+  markAnnouncementRead: (announcementId: string, parentId: string) => void;
+  remindAnnouncementLater: (announcementId: string, parentId: string) => void;
+  getUnreadAnnouncements: (parentId: string, classes?: string[]) => Announcement[];
 }
 
 // Authentification gérée par Supabase
@@ -447,6 +461,111 @@ export const useStore = create<AppState>()(
         return get().presences.some(p => p.eleveId === eleveId && p.date === today);
       },
 
+      // ── Horaires par cycle ──────────────────────────────────
+      cycleSchedules: [
+        { cycle: 'Primaire', heureLimite: '07:30' },
+        { cycle: 'Collège', heureLimite: '07:45' },
+        { cycle: 'Lycée', heureLimite: '08:00' },
+      ],
+      setCycleSchedules: (schedules) => {
+        set({ cycleSchedules: schedules });
+        // Sync to backend
+        import('../services/backendSync').then(({ syncToBackend }) => {
+          syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
+        });
+      },
+      getHeureLimite: (cycle: string) => {
+        const schedule = get().cycleSchedules.find(s => s.cycle === cycle);
+        return schedule?.heureLimite || '08:00';
+      },
+
+      // ── Annonces ────────────────────────────────────────────
+      announcements: [],
+      addAnnouncement: (data) => {
+        const announcement: Announcement = {
+          ...data,
+          id: uuid(),
+          createdAt: new Date().toISOString(),
+        };
+        set({ announcements: [announcement, ...get().announcements] });
+        // Sync
+        import('../services/backendSync').then(({ syncToBackend }) => {
+          syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
+        });
+      },
+      deleteAnnouncement: (id) => {
+        set({
+          announcements: get().announcements.filter(a => a.id !== id),
+          announcementReads: get().announcementReads.filter(r => r.announcementId !== id),
+        });
+        import('../services/backendSync').then(({ syncToBackend }) => {
+          syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
+        });
+      },
+      announcementReads: [],
+      markAnnouncementRead: (announcementId, parentId) => {
+        const existing = get().announcementReads.find(
+          r => r.announcementId === announcementId && r.parentId === parentId
+        );
+        if (existing) {
+          // Mettre à jour
+          set({
+            announcementReads: get().announcementReads.map(r =>
+              r.announcementId === announcementId && r.parentId === parentId
+                ? { ...r, readAt: new Date().toISOString(), remindAt: undefined }
+                : r
+            ),
+          });
+        } else {
+          set({
+            announcementReads: [
+              ...get().announcementReads,
+              { announcementId, parentId, readAt: new Date().toISOString() },
+            ],
+          });
+        }
+        import('../services/backendSync').then(({ syncToBackend }) => {
+          syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
+        });
+      },
+      remindAnnouncementLater: (announcementId, parentId) => {
+        const remindAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // +24h
+        const existing = get().announcementReads.find(
+          r => r.announcementId === announcementId && r.parentId === parentId
+        );
+        if (existing) {
+          set({
+            announcementReads: get().announcementReads.map(r =>
+              r.announcementId === announcementId && r.parentId === parentId
+                ? { ...r, remindAt, readAt: '' }
+                : r
+            ),
+          });
+        } else {
+          set({
+            announcementReads: [
+              ...get().announcementReads,
+              { announcementId, parentId, readAt: '', remindAt },
+            ],
+          });
+        }
+      },
+      getUnreadAnnouncements: (parentId, classes) => {
+        const now = new Date().toISOString();
+        const reads = get().announcementReads;
+        return get().announcements.filter(a => {
+          // Filtrer par cible (toutes ou classe spécifique)
+          if (a.cible !== 'all' && classes && !classes.includes(a.cible)) return false;
+          // Vérifier si lu
+          const read = reads.find(r => r.announcementId === a.id && r.parentId === parentId);
+          if (!read) return true; // jamais ouvert
+          if (read.readAt) return false; // marqué comme lu
+          // Si remindAt et que le moment n'est pas encore arrivé, ne pas afficher
+          if (read.remindAt && read.remindAt > now) return false;
+          return true; // le rappel est passé, réafficher
+        });
+      },
+
       // ── Logs d'activité ────────────────────────────────────
       activityLogs: [],
       addActivityLog: (log) => set({ activityLogs: [log, ...get().activityLogs].slice(0, 500) }),
@@ -507,8 +626,16 @@ export const useStore = create<AppState>()(
                   schoolYear: data.appSettings.schoolYear,
                   schoolLogo: data.appSettings.schoolLogo,
                   messageRemerciement: data.appSettings.messageRemerciement,
-                  messageRappel: data.appSettings.messageRappel
+                  messageRappel: data.appSettings.messageRappel,
+                  ...(data.appSettings.cycleSchedules ? { cycleSchedules: data.appSettings.cycleSchedules } : {}),
                 });
+              }
+              // Annonces et reads venant du cloud
+              if (Array.isArray(data.announcements)) {
+                set({ announcements: data.announcements });
+              }
+              if (Array.isArray(data.announcementReads)) {
+                set({ announcementReads: data.announcementReads });
               }
               console.log(`✅ Cloud data synchronized: ${repairedStudents.length} students loaded and repaired.`);
             }
@@ -610,6 +737,9 @@ export const useStore = create<AppState>()(
         presences: state.presences || [],
         activityLogs: (state.activityLogs || []).slice(0, 500),
         receiptCounter: state.receiptCounter || 0,
+        cycleSchedules: state.cycleSchedules || [],
+        announcements: state.announcements || [],
+        announcementReads: state.announcementReads || [],
       }),
       onRehydrateStorage: () => (state) => {
         // Auto-réparation au chargement du storage local

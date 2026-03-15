@@ -10,17 +10,17 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
     directeur_general: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'carte_scolaire',
-        'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat'
+        'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces'
     ],
     admin: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'carte_scolaire',
-        'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat'
+        'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces'
     ],
     directeur: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'carte_scolaire',
-        'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat'
+        'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces'
     ],
     comptable: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',

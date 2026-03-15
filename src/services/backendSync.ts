@@ -17,7 +17,7 @@ import { AppState } from '../store/useStore';
  * @returns {Promise<any>} - Résultat de la sync
  */
 export async function syncToBackend(store: Partial<AppState>, replace: boolean = false) {
-    const { students = [], parents = [], presences = [], activityLogs = [], appName, schoolName, schoolYear, messageRemerciement, messageRappel, schoolLogo } = store;
+    const { students = [], parents = [], presences = [], activityLogs = [], appName, schoolName, schoolYear, messageRemerciement, messageRappel, schoolLogo, cycleSchedules, announcements = [], announcementReads = [] } = store;
     
     const appSettings = (appName || schoolName || schoolLogo) ? {
         appName,
@@ -25,14 +25,15 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
         schoolYear,
         messageRemerciement,
         messageRappel,
-        schoolLogo
+        schoolLogo,
+        cycleSchedules
     } : null;
 
     try {
         const response = await fetch(`${BACKEND_URL}/api/sync`, {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ students, parents, presences, activityLogs, appSettings, replace }),
+            body: JSON.stringify({ students, parents, presences, activityLogs, appSettings, announcements, announcementReads, replace }),
         });
 
         // read text first so we can fall back if it's not JSON

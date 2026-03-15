@@ -131,6 +131,34 @@ export interface Presence {
   statut: 'present' | 'absent' | 'retard';
 }
 
+// ── Horaires par cycle ───────────────────────────────────
+export interface CycleSchedule {
+  cycle: Cycle;
+  heureLimite: string; // HH:mm (ex: "07:30")
+}
+
+// ── Annonces école ──────────────────────────────────────
+export type AnnouncementImportance = 'info' | 'important' | 'urgent';
+export type AnnouncementTarget = 'all' | string; // 'all' ou nom de classe
+
+export interface Announcement {
+  id: string;
+  titre: string;
+  message: string;
+  date: string;          // YYYY-MM-DD
+  cible: AnnouncementTarget;
+  importance: AnnouncementImportance;
+  createdBy: string;     // nom de l'utilisateur
+  createdAt: string;     // ISO string
+}
+
+export interface AnnouncementRead {
+  announcementId: string;
+  parentId: string;
+  readAt: string;        // ISO string
+  remindAt?: string;     // ISO string — si "rappeler dans 24h"
+}
+
 // ── Logs d'activité ──────────────────────────────────────
 export interface ActivityLog {
   id: string;
@@ -167,6 +195,7 @@ export type AppPage =
   | 'carte_scolaire'
   | 'verification_recu'
   | 'historique_activites'
+  | 'annonces'
   | 'parent_dashboard'
   | 'parent_historique'
   | 'parent_recus'

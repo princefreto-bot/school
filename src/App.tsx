@@ -5,6 +5,7 @@ import React, { Suspense, lazy } from 'react';
 import { useStore } from './store/useStore';
 import { Login } from './components/Login';
 import { Layout } from './components/Layout';
+import { AnnouncementPopup } from './components/AnnouncementPopup';
 import { webPushService } from './services/webPushService';
 
 // Lazy loading for pages to reduce initial bundle size
@@ -27,6 +28,7 @@ const ParentMessages = lazy(() => import('./pages/parent/ParentMessages').then(m
 const ParentsList = lazy(() => import('./pages/ParentsList').then(m => ({ default: m.ParentsList })));
 const ImportExport = lazy(() => import('./components/ImportExport').then(m => ({ default: m.ImportExport })));
 const ChatWindow = lazy(() => import('./components/ChatWindow').then(m => ({ default: m.ChatWindow })));
+const Annonces = lazy(() => import('./pages/Annonces').then(m => ({ default: m.Annonces })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-12">
@@ -58,6 +60,7 @@ const PageContent: React.FC = () => {
     case 'parents_list': return <ParentsList />;
     case 'import_export': return <ImportExport />;
     case 'chat': return <ChatWindow />;
+    case 'annonces': return <Annonces />;
     default: return <Dashboard />;
   }
 };
@@ -103,6 +106,7 @@ export function App() {
       <Suspense fallback={<LoadingSpinner />}>
         <PageContent />
       </Suspense>
+      <AnnouncementPopup />
     </Layout>
   );
 }

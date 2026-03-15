@@ -4,7 +4,7 @@ import {
   Save, School, MessageSquare, Shield, Info,
   Upload, X, Image, Code2, ChevronDown, ChevronRight,
   Palette, Type, FileText, Database,
-  AlertCircle
+  AlertCircle, Clock
 } from 'lucide-react';
 
 // ── Composant accordéon pour le guide développeur ───────────
@@ -64,6 +64,12 @@ export const Parametres: React.FC = () => {
   const [logoPreview, setLogoPreview] = useState<string | null>(schoolLogo);
   const [logoError, setLogoError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Horaires par cycle
+  const cycleSchedules = useStore((s) => s.cycleSchedules);
+  const setCycleSchedules = useStore((s) => s.setCycleSchedules);
+  const [localSchedules, setLocalSchedules] = useState(cycleSchedules);
+  const [scheduleSaved, setScheduleSaved] = useState(false);
 
   // ── Gestion upload logo PNG ────────────────────────────────
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -292,6 +298,58 @@ export const Parametres: React.FC = () => {
           )}
         </form>
       </div>
+
+      {/* ── HORAIRES SCOLAIRES PAR CYCLE ────────────────────── */}
+      {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-4">
+            <Clock className="w-4 h-4 text-cyan-600" />
+            Horaires scolaires — Heure limite d'arrivée par cycle
+          </h3>
+          <p className="text-xs text-gray-500 mb-4">
+            Définissez l'heure limite d'arrivée pour chaque cycle. Un élève qui scanne sa carte après cette heure sera marqué <span className="font-bold text-orange-600">en retard</span>.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            {localSchedules.map((schedule, idx) => (
+              <div key={schedule.cycle} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
+                  {schedule.cycle === 'Primaire' && '🏫 '}
+                  {schedule.cycle === 'Collège' && '📚 '}
+                  {schedule.cycle === 'Lycée' && '🎓 '}
+                  {schedule.cycle}
+                </label>
+                <input
+                  type="time"
+                  value={schedule.heureLimite}
+                  onChange={(e) => {
+                    const updated = [...localSchedules];
+                    updated[idx] = { ...schedule, heureLimite: e.target.value };
+                    setLocalSchedules(updated);
+                  }}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-lg font-mono font-bold text-center focus:ring-2 focus:ring-cyan-500 outline-none"
+                />
+                <p className="text-[10px] text-gray-400 mt-1.5 text-center">
+                  Retard si scan après {schedule.heureLimite}
+                </p>
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={() => {
+              setCycleSchedules(localSchedules);
+              setScheduleSaved(true);
+              setTimeout(() => setScheduleSaved(false), 3000);
+            }}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all ${scheduleSaved
+              ? 'bg-emerald-500 text-white'
+              : 'bg-cyan-600 text-white hover:bg-cyan-700'
+              }`}
+          >
+            <Save className="w-4 h-4" />
+            {scheduleSaved ? '✓ Horaires enregistrés !' : 'Enregistrer les horaires'}
+          </button>
+        </div>
+      )}
 
       {/* ── GUIDE DE PERSONNALISATION DU CODE ─────────────── */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
