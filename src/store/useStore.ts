@@ -659,7 +659,8 @@ export const useStore = create<AppState>()(
                   appName: data.appSettings.appName,
                   schoolName: data.appSettings.schoolName,
                   schoolYear: data.appSettings.schoolYear,
-                  schoolLogo: data.appSettings.schoolLogo,
+                  schoolLogo: data.appSettings.schoolLogo !== undefined ? data.appSettings.schoolLogo : get().schoolLogo,
+                  schoolStamp: data.appSettings.schoolStamp !== undefined ? data.appSettings.schoolStamp : get().schoolStamp,
                   messageRemerciement: data.appSettings.messageRemerciement,
                   messageRappel: data.appSettings.messageRappel,
                   ...(data.appSettings.cycleSchedules ? { cycleSchedules: data.appSettings.cycleSchedules } : {}),
@@ -744,7 +745,8 @@ export const useStore = create<AppState>()(
                 appName: data.appName || get().appName,
                 schoolName: data.schoolName || get().schoolName,
                 schoolYear: data.schoolYear || get().schoolYear,
-                schoolLogo: data.schoolLogo || get().schoolLogo
+                schoolLogo: data.schoolLogo !== undefined ? data.schoolLogo : get().schoolLogo,
+                schoolStamp: data.schoolStamp !== undefined ? data.schoolStamp : get().schoolStamp
               });
               console.log('✅ [Settings] App state updated with cloud settings.');
             }

@@ -22,7 +22,8 @@ async function getPublicSettings(req, res) {
             return res.json({
                 appName: 'EduFinance',
                 schoolName: 'Établissement Scolaire',
-                schoolLogo: null
+                schoolLogo: null,
+                schoolStamp: null
             });
         }
 
@@ -35,7 +36,8 @@ async function getPublicSettings(req, res) {
             appName: data.app_name,
             schoolName: data.school_name,
             schoolYear: data.school_year,
-            schoolLogo: data.school_logo
+            schoolLogo: data.school_logo,
+            schoolStamp: data.school_stamp
         });
     } catch (err) {
         console.error('Error fetching public settings:', err.message);
