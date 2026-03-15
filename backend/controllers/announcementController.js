@@ -159,12 +159,11 @@ async function getAnnouncements(req, res) {
 
                 const classes = students ? [...new Set(students.map(s => s.classe))] : [];
 
-                // Filtrer : annonces 'all' + annonces des classes de l'enfant
                 if (classes.length > 0) {
                     query = supabase
                         .from('announcements')
                         .select('*')
-                        .or(`cible.eq.all,${classes.map(c => `cible.eq.${c}`).join(',')}`)
+                        .in('cible', ['all', ...classes])
                         .order('created_at', { ascending: false })
                         .limit(50);
                 } else {
@@ -175,6 +174,14 @@ async function getAnnouncements(req, res) {
                         .order('created_at', { ascending: false })
                         .limit(50);
                 }
+            } else {
+                 // Si le parent n'a pas encore d'enfants liés, ou s'il y a eu erreur
+                 query = supabase
+                     .from('announcements')
+                     .select('*')
+                     .eq('cible', 'all')
+                     .order('created_at', { ascending: false })
+                     .limit(50);
             }
         }
 

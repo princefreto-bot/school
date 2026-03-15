@@ -128,8 +128,28 @@ export const ParentDashboard: React.FC = () => {
     const [pendingAnnouncements, setPendingAnnouncements] = useState<Announcement[]>([]);
     const [currentPopup, setCurrentPopup] = useState<Announcement | null>(null);
     const [showAnnouncementList, setShowAnnouncementList] = useState(false);
+    const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>('default');
     const seenIds = useRef<Set<string>>(new Set());
     const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Initialiser l'état de notification (ne bloque pas)
+    useEffect(() => {
+        if ('Notification' in window) {
+            setNotifPermission(Notification.permission);
+        } else {
+            setNotifPermission('unsupported');
+        }
+    }, []);
+
+    const handleEnableNotifications = async () => {
+        try {
+            const { requestNotificationPermission } = await import('../../utils/capacitorNotifications');
+            const granted = await requestNotificationPermission();
+            setNotifPermission(granted ? 'granted' : 'denied');
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     // ── Chargement des données élèves ────────────────────────
     const fetchData = async () => {
@@ -195,7 +215,6 @@ export const ParentDashboard: React.FC = () => {
     // ── Polling toutes les 10 secondes ─────────────────────────
     useEffect(() => {
         fetchData();
-        import('../../utils/capacitorNotifications').then(m => m.checkAndAskNotifications());
 
         // Premier chargement annonces
         fetchAnnouncements();
@@ -353,6 +372,28 @@ export const ParentDashboard: React.FC = () => {
                                 })
                             )}
                         </div>
+                    </div>
+                )}
+
+                {/* ── Bannière de Notifications Mobile/PWA ── */}
+                {notifPermission === 'default' && (
+                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-5 text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg animate-fadeIn border border-blue-500/30 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                        <div className="flex items-center gap-4 relative z-10 w-full md:w-auto">
+                            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shrink-0">
+                                <Bell className="w-6 h-6 text-white animate-bounce" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-lg md:text-xl text-white">Activer les Notifications</h3>
+                                <p className="text-blue-100 text-xs md:text-sm mt-0.5">Soyez prévenu instantanément dès que votre enfant pointe sa présence, ou dès qu'une annonce urgente est publiée !</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={handleEnableNotifications}
+                            className="w-full md:w-auto px-6 py-3 bg-white text-blue-700 hover:bg-blue-50 font-black rounded-2xl transition-all shadow-[0_4px_14px_0_rgba(255,255,255,0.39)] shrink-0 active:scale-95 text-sm"
+                        >
+                            Activer les alertes
+                        </button>
                     </div>
                 )}
 
