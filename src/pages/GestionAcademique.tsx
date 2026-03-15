@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { MatiereCategorie, Matiere, ClasseMatiere } from '../types';
+import { MatiereCategorie } from '../types';
 import { v4 as uuid } from '../utils/uuid';
 import { BookOpen, Plus, Trash2, Settings2, Users } from 'lucide-react';
 
 export const GestionAcademique: React.FC = () => {
+    // Force linter refresh
+    const _forceRefresh: boolean = true;
+
     const { 
-        matieres, setMatieres, addMatiere, deleteMatiere,
+        matieres, addMatiere, deleteMatiere,
         classeMatieres, addClasseMatiere, deleteClasseMatiere,
         students
     } = useStore();
@@ -277,3 +280,4 @@ export const GestionAcademique: React.FC = () => {
         </div>
     );
 };
+

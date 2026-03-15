@@ -1,9 +1,9 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { BulletinTogoPDF } from '../components/pdf/BulletinTogoPDF';
 import { calculerBulletinsClasse, BulletinEleveResultat } from '../utils/bulletinCalculations';
 import { useReactToPrint } from 'react-to-print';
-import { FileSpreadsheet, Printer, Users, Award, ShieldCheck, ChevronDown, Download } from 'lucide-react';
+import { FileSpreadsheet, Printer, Users, Award, ShieldCheck } from 'lucide-react';
 
 export const Bulletins: React.FC = () => {
     const { 
@@ -20,7 +20,7 @@ export const Bulletins: React.FC = () => {
 
     // Fonction d'impression
     const handlePrintAll = useReactToPrint({
-        content: () => printRef.current,
+        contentRef: printRef,
         documentTitle: `Bulletins_${selectedClasse}_${currentPeriode.replace(/ /g, '_')}`,
         pageStyle: `
           @page { size: A4 portrait; margin: 0; }
@@ -134,7 +134,7 @@ export const Bulletins: React.FC = () => {
             {/* DIV INVISIBLE CONTENANT TOUS LES BULLETINS POUR IMPRESSION */}
             <div className="hidden">
                 <div ref={printRef} className="print-container">
-                    {bulletinsCalcules.map((b, idx) => (
+                    {bulletinsCalcules.map((b) => (
                         <div key={b.eleve.id} className="page-break w-[210mm] h-[297mm] overflow-hidden bg-white mx-auto box-border" style={{ pageBreakAfter: 'always' }}>
                             <BulletinTogoPDF
                                 data={b}

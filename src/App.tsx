@@ -19,8 +19,8 @@ const Recouvrement = lazy(() => import('./pages/Recouvrement').then(m => ({ defa
 const ScanPresence = lazy(() => import('./pages/ScanPresence').then(m => ({ default: m.ScanPresence })));
 const ScanSortie = lazy(() => import('./pages/ScanSortie').then(m => ({ default: m.ScanSortie })));
 const CarteScolaire = lazy(() => import('./pages/CarteScolaire').then(m => ({ default: m.CarteScolaire })));
-const GestionAcademique = lazy(() => import('./pages/GestionAcademique').then(m => ({ default: m.GestionAcademique })));
-const SaisieNotes = lazy(() => import('./pages/SaisieNotes').then(m => ({ default: m.SaisieNotes })));
+const GestionAcademique = lazy(() => import('./pages/GestionAcademique' /* */).then(m => ({ default: m.GestionAcademique })));
+const SaisieNotes = lazy(() => import('./pages/SaisieNotes' /* */).then(m => ({ default: m.SaisieNotes })));
 const Bulletins = lazy(() => import('./pages/Bulletins').then(m => ({ default: m.Bulletins })));
 const VerificationRecu = lazy(() => import('./pages/VerificationRecu').then(m => ({ default: m.VerificationRecu })));
 const HistoriqueActivites = lazy(() => import('./pages/HistoriqueActivites').then(m => ({ default: m.HistoriqueActivites })));

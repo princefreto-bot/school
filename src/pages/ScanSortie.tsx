@@ -5,7 +5,7 @@ import { useStore } from '../store/useStore';
 import { Presence } from '../types';
 import { v4 as uuid } from '../utils/uuid';
 import { createActivityLog } from '../utils/activityLogger';
-import { getCycle } from '../data/classConfig';
+
 // import { sendWhatsApp, messagePresenceArrivee } from '../utils/whatsappHelper'; // Non utilisé actuellement
 import { Html5Qrcode } from "html5-qrcode";
 import {
@@ -55,7 +55,7 @@ const StudentScanned: React.FC<{
 // ── Page principale ──────────────────────────────────────────
 export const ScanSortie: React.FC = () => {
     const students = useStore((s) => s.students);
-    const presences = useStore((s) => s.presences);
+
     const addPresence = useStore((s) => s.addPresence);
     const hasAlreadyExited = useStore((s) => s.hasAlreadyExited);
     const addActivityLog = useStore((s) => s.addActivityLog);
