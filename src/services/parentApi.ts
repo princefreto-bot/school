@@ -169,6 +169,16 @@ export const parentApi = {
         return await res.json();
     },
 
+    // ── Annonces (temps réel) ────────────────────────────────
+    getAnnouncements: async () => {
+        const res = await fetch(`${API_URL}/announcements`, {
+            headers: getHeaders()
+        });
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data; // { announcements: [...] }
+    },
+
     logout: () => {
         localStorage.removeItem('parent_token');
     }

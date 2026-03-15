@@ -213,6 +213,16 @@ async function syncToFrontend(req, res) {
 
         // ignore error if settings don't exist yet
 
+        // Fetch announcements for Admin (no reads table needed currently, or we leave reads local for Admin)
+        const { data: announcements, error: aErr } = await supabase
+            .from('announcements')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (aErr && aErr.code !== '42P01') { 
+             console.warn('⚠️ Fetch announcements error (table may not exist):', aErr.message); 
+        }
+
         // Group payments by student
         const studentMap = new Map();
         students.forEach(s => {
@@ -269,7 +279,17 @@ async function syncToFrontend(req, res) {
                 schoolStamp: appSettings.school_stamp,
                 messageRemerciement: appSettings.message_remerciement,
                 messageRappel: appSettings.message_rappel
-            } : null
+            } : null,
+            announcements: (announcements || []).map(a => ({
+                id: a.id,
+                titre: a.titre,
+                message: a.message,
+                cible: a.cible,
+                importance: a.importance,
+                createdBy: a.created_by,
+                createdAt: a.created_at,
+                date: a.created_at ? a.created_at.split('T')[0] : new Date().toISOString().split('T')[0]
+            }))
         });
 
     } catch (err) {

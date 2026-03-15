@@ -15,6 +15,13 @@ export const requestNotificationPermission = async () => {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
             console.log('🌐 Notifications Web : Autorisation accordée.');
+            // Initialiser l'abonnement push web et l'enregistrement du Service Worker
+            try {
+                const { webPushService } = await import('../services/webPushService');
+                await webPushService.init();
+            } catch (initErr) {
+                console.error("Erreur lors de l'initialisation du service Web Push:", initErr);
+            }
             return true;
         }
         console.warn('⚠️ Notifications Web : Permission refusée.');

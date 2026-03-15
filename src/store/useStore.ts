@@ -114,8 +114,8 @@ export interface AppState {
 
   // Annonces
   announcements: Announcement[];
-  addAnnouncement: (a: Omit<Announcement, 'id' | 'createdAt'>) => void;
-  deleteAnnouncement: (id: string) => void;
+  addAnnouncement: (a: Omit<Announcement, 'id' | 'createdAt'>) => Promise<void>;
+  deleteAnnouncement: (id: string) => Promise<void>;
   announcementReads: AnnouncementRead[];
   markAnnouncementRead: (announcementId: string, parentId: string) => void;
   remindAnnouncementLater: (announcementId: string, parentId: string) => void;
@@ -516,23 +516,63 @@ export const useStore = create<AppState>()(
 
       // ── Annonces ────────────────────────────────────────────
       announcements: [],
-      addAnnouncement: (data) => {
+      addAnnouncement: async (data) => {
         const announcement: Announcement = {
           ...data,
           id: uuid(),
           createdAt: new Date().toISOString(),
         };
+        // Mise à jour locale immédiate
         set({ announcements: [announcement, ...get().announcements] });
-        // Sync
+
+        // Appel backend dédié → sauvegarde Supabase + Push à tous les parents
+        try {
+          const { BACKEND_URL } = await import('../config');
+          const { getAuthHeaders } = await import('../services/apiHelpers');
+          const res = await fetch(`${BACKEND_URL}/api/announcements`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+              id: announcement.id,
+              titre: announcement.titre,
+              message: announcement.message,
+              cible: announcement.cible,
+              importance: announcement.importance,
+              createdBy: announcement.createdBy,
+              createdAt: announcement.createdAt,
+            }),
+          });
+          const result = await res.json();
+          if (result.success) {
+            console.log(`✅ Annonce publiée : ${result.notificationsSent}/${result.totalParents} notifications push envoyées`);
+          } else {
+            console.warn('⚠️ Problème publication annonce:', result.error);
+          }
+        } catch (err) {
+          console.error('❌ Erreur envoi annonce backend:', err);
+        }
+
+        // Sync global pour garder la cohérence
         import('../services/backendSync').then(({ syncToBackend }) => {
           syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
         });
       },
-      deleteAnnouncement: (id) => {
+      deleteAnnouncement: async (id) => {
         set({
           announcements: get().announcements.filter(a => a.id !== id),
           announcementReads: get().announcementReads.filter(r => r.announcementId !== id),
         });
+        // Supprimer aussi sur le backend dédié
+        try {
+          const { BACKEND_URL } = await import('../config');
+          const { getAuthHeaders } = await import('../services/apiHelpers');
+          await fetch(`${BACKEND_URL}/api/announcements/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+          });
+        } catch (err) {
+          console.error('❌ Erreur suppression annonce backend:', err);
+        }
         import('../services/backendSync').then(({ syncToBackend }) => {
           syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
         });
