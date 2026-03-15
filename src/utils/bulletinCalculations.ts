@@ -164,7 +164,7 @@ export const calculerBulletinsClasse = (
     
     // a. Rangs Généraux
     const sortedByMoyGen = [...bulletinsBruts].sort((a,b) => b.moyenneGenerale - a.moyenneGenerale);
-    const moyennesClasses = sortedByMoyGen.map(b => b.moyenneGenerale).filter(m => m > 0);
+    const moyennesClasses = sortedByMoyGen.map(b => b.moyenneGenerale);
     const moyenneClasseTotale = moyennesClasses.length > 0 ? moyennesClasses.reduce((a,b)=>a+b, 0) / moyennesClasses.length : 0;
     const moyMin = moyennesClasses.length > 0 ? Math.min(...moyennesClasses) : 0;
     const moyMax = moyennesClasses.length > 0 ? Math.max(...moyennesClasses) : 0;
