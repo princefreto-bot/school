@@ -5,10 +5,11 @@ interface BulletinTogoPDFProps {
     data: BulletinEleveResultat;
     schoolName: string;
     schoolLogo: string | null;
+    schoolStamp?: string | null;
     schoolYear: string;
 }
 
-export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFProps>(({ data, schoolName, schoolLogo, schoolYear }, ref) => {
+export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFProps>(({ data, schoolName, schoolLogo, schoolStamp, schoolYear }, ref) => {
     return (
         <div ref={ref} className="bg-white text-black p-8 mx-auto print:p-0" style={{ width: '210mm', minHeight: '297mm', fontFamily: 'Arial, sans-serif' }}>
             {/* EN-TÊTE OFFICIEL TOGOLAIS */}
@@ -30,10 +31,16 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
 
                 {/* DROITE : Sceau de la DRE agrandi */}
                 <div className="w-1/4 flex justify-end">
-                    <div className="w-28 h-28 border-2 border-dashed border-gray-400 rounded-full flex flex-col items-center justify-center p-2">
-                        <span className="text-xs font-bold text-gray-400">SCEAU</span>
-                        <span className="text-[8px] text-gray-400 mt-1 font-bold text-center">DRE-MARITIME</span>
-                    </div>
+                    {schoolStamp ? (
+                        <div className="w-28 h-28 flex justify-center items-center">
+                            <img src={schoolStamp} alt="Sceau" className="w-full h-full object-contain" />
+                        </div>
+                    ) : (
+                        <div className="w-28 h-28 border-2 border-dashed border-gray-400 rounded-full flex flex-col items-center justify-center p-2">
+                            <span className="text-xs font-bold text-gray-400">SCEAU</span>
+                            <span className="text-[8px] text-gray-400 mt-1 font-bold text-center">DRE-MARITIME</span>
+                        </div>
+                    )}
                 </div>
             </div>
 

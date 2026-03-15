@@ -117,6 +117,7 @@ async function syncFromFrontend(req, res) {
                     school_name: appSettings.schoolName,
                     school_year: appSettings.schoolYear,
                     school_logo: appSettings.schoolLogo,
+                    school_stamp: appSettings.schoolStamp,
                     message_remerciement: appSettings.messageRemerciement,
                     message_rappel: appSettings.messageRappel,
                     updated_at: new Date().toISOString()
@@ -265,6 +266,7 @@ async function syncToFrontend(req, res) {
                 schoolName: appSettings.school_name,
                 schoolYear: appSettings.school_year,
                 schoolLogo: appSettings.school_logo,
+                schoolStamp: appSettings.school_stamp,
                 messageRemerciement: appSettings.message_remerciement,
                 messageRappel: appSettings.message_rappel
             } : null

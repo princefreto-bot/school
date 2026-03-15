@@ -15,6 +15,8 @@ export interface AppState {
   setAppName: (name: string) => void;
   schoolLogo: string | null;        // base64 de l'image PNG
   setSchoolLogo: (logo: string | null) => void;
+  schoolStamp: string | null;       // Sceau de l'école
+  setSchoolStamp: (stamp: string | null) => void;
 
   // Auth
   user: User | null;
@@ -69,6 +71,7 @@ export interface AppState {
     schoolName?: string, 
     schoolYear?: string, 
     schoolLogo?: string | null,
+    schoolStamp?: string | null,
     messageRemerciement?: string,
     messageRappel?: string
   }) => Promise<void>;
@@ -198,6 +201,8 @@ export const useStore = create<AppState>()(
       setAppName: (name) => set({ appName: name }),
       schoolLogo: null,
       setSchoolLogo: (logo) => set({ schoolLogo: logo }),
+      schoolStamp: null,
+      setSchoolStamp: (stamp) => set({ schoolStamp: stamp }),
 
       // ── Auth ──────────────────────────────────────────────
       user: null,

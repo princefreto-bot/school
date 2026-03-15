@@ -17,15 +17,16 @@ import { AppState } from '../store/useStore';
  * @returns {Promise<any>} - Résultat de la sync
  */
 export async function syncToBackend(store: Partial<AppState>, replace: boolean = false) {
-    const { students = [], parents = [], presences = [], activityLogs = [], appName, schoolName, schoolYear, messageRemerciement, messageRappel, schoolLogo, cycleSchedules, announcements = [], announcementReads = [], matieres = [], classeMatieres = [], notes = [] } = store;
+    const { students = [], parents = [], presences = [], activityLogs = [], appName, schoolName, schoolYear, messageRemerciement, messageRappel, schoolLogo, schoolStamp, cycleSchedules, announcements = [], announcementReads = [], matieres = [], classeMatieres = [], notes = [] } = store;
     
-    const appSettings = (appName || schoolName || schoolLogo) ? {
+    const appSettings = (appName || schoolName || schoolLogo || schoolStamp) ? {
         appName,
         schoolName,
         schoolYear,
         messageRemerciement,
         messageRappel,
         schoolLogo,
+        schoolStamp,
         cycleSchedules
     } : null;
 

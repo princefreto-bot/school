@@ -52,6 +52,7 @@ export const Parametres: React.FC = () => {
   const messageRappel = useStore((s) => s.messageRappel);
   const appName = useStore((s) => s.appName);
   const schoolLogo = useStore((s) => s.schoolLogo);
+  const schoolStamp = useStore((s) => s.schoolStamp);
   const user = useStore((s) => s.user);
 
   // États locaux du formulaire
@@ -61,9 +62,14 @@ export const Parametres: React.FC = () => {
   const [localRap, setLocalRap] = useState(messageRappel);
   const [localAppName, setLocalAppName] = useState(appName);
   const [saved, setSaved] = useState(false);
+  
   const [logoPreview, setLogoPreview] = useState<string | null>(schoolLogo);
   const [logoError, setLogoError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const [stampPreview, setStampPreview] = useState<string | null>(schoolStamp);
+  const [stampError, setStampError] = useState('');
+  const stampFileRef = useRef<HTMLInputElement>(null);
 
   // Horaires par cycle
   const cycleSchedules = useStore((s) => s.cycleSchedules);
@@ -116,6 +122,49 @@ export const Parametres: React.FC = () => {
     if (fileRef.current) fileRef.current.value = '';
   };
 
+  // ── Gestion upload sceau PNG ────────────────────────────────
+  const handleStampUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setStampError('');
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setStampError('Le fichier doit être une image (PNG, JPG, SVG).');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setStampError('L\'image ne doit pas dépasser 2 Mo.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const base64 = ev.target?.result as string;
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 200;
+        let w = img.width;
+        let h = img.height;
+        if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
+        else { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, w, h);
+        const resized = canvas.toDataURL('image/png', 0.9);
+        setStampPreview(resized);
+      };
+      img.src = base64;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeStamp = () => {
+    setStampPreview(null);
+    if (stampFileRef.current) stampFileRef.current.value = '';
+  };
+
   const updateAllSettings = useStore((s) => s.updateAllSettings);
 
   // ── Sauvegarde ───────────────────────────────────────────
@@ -127,7 +176,8 @@ export const Parametres: React.FC = () => {
       messageRemerciement: localRem,
       messageRappel: localRap,
       appName: localAppName,
-      schoolLogo: logoPreview
+      schoolLogo: logoPreview,
+      schoolStamp: stampPreview
     });
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -241,6 +291,63 @@ export const Parametres: React.FC = () => {
                 </div>
                 {logoError && (
                   <p className="mt-2 text-xs text-red-500 font-medium">⚠️ {logoError}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Upload Sceau */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+              Sceau de l'établissement
+            </label>
+            <div className="flex items-start gap-4">
+              {/* Prévisualisation */}
+              <div className="shrink-0 w-20 h-20 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 overflow-hidden relative group">
+                {stampPreview ? (
+                  <>
+                    <img
+                      src={stampPreview}
+                      alt="Sceau aperçu"
+                      className="w-full h-full object-contain p-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={removeStamp}
+                      className="absolute inset-0 bg-red-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl"
+                      title="Supprimer le sceau"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </>
+                ) : (
+                  <Image className="w-8 h-8 text-gray-300" />
+                )}
+              </div>
+
+              {/* Zone upload */}
+              <div className="flex-1">
+                <input
+                  ref={stampFileRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                  className="hidden"
+                  id="stamp-upload"
+                  onChange={handleStampUpload}
+                />
+                <label
+                  htmlFor="stamp-upload"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 border-2 border-blue-200 text-blue-600 rounded-xl text-sm font-medium cursor-pointer hover:bg-blue-50 transition-colors"
+                >
+                  <Upload className="w-4 h-4" />
+                  Importer un sceau PNG / JPG
+                </label>
+                <div className="mt-2 text-xs text-gray-500 space-y-0.5">
+                  <p>✅ Sceau affiché sur les bulletins PDF</p>
+                  <p>✅ Format conseillé : PNG avec fond transparent</p>
+                </div>
+                {stampError && (
+                  <p className="mt-2 text-xs text-red-500 font-medium">⚠️ {stampError}</p>
                 )}
               </div>
             </div>

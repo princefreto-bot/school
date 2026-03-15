@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import {
     Megaphone, Plus, Trash2, X, Send, Eye, EyeOff, Clock,
-    AlertCircle, Info, AlertTriangle
+    AlertCircle, Info, AlertTriangle, Filter
 } from 'lucide-react';
 import type { AnnouncementImportance, AnnouncementTarget } from '../types';
 
