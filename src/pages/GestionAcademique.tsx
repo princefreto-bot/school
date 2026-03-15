@@ -5,9 +5,6 @@ import { v4 as uuid } from '../utils/uuid';
 import { BookOpen, Plus, Trash2, Settings2, Users } from 'lucide-react';
 
 export const GestionAcademique: React.FC = () => {
-    // Force linter refresh
-    const _forceRefresh: boolean = true;
-
     const { 
         matieres, addMatiere, deleteMatiere,
         classeMatieres, addClasseMatiere, deleteClasseMatiere,
