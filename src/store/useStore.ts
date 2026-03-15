@@ -79,7 +79,9 @@ export interface AppState {
   presences: Presence[];
   addPresence: (presence: Presence) => void;
   getPresencesToday: () => Presence[];
+  getSortiesToday: () => Presence[];
   isAlreadyPresent: (eleveId: string) => boolean;
+  hasAlreadyExited: (eleveId: string) => boolean;
 
   // Logs d'activité
   activityLogs: ActivityLog[];
@@ -454,11 +456,19 @@ export const useStore = create<AppState>()(
       },
       getPresencesToday: () => {
         const today = new Date().toISOString().split('T')[0];
-        return get().presences.filter(p => p.date === today);
+        return get().presences.filter(p => p.date === today && (p.type === 'ENTREE' || !p.type));
+      },
+      getSortiesToday: () => {
+        const today = new Date().toISOString().split('T')[0];
+        return get().presences.filter(p => p.date === today && p.type === 'SORTIE');
       },
       isAlreadyPresent: (eleveId: string) => {
         const today = new Date().toISOString().split('T')[0];
-        return get().presences.some(p => p.eleveId === eleveId && p.date === today);
+        return get().presences.some(p => p.eleveId === eleveId && p.date === today && (p.type === 'ENTREE' || !p.type));
+      },
+      hasAlreadyExited: (eleveId: string) => {
+        const today = new Date().toISOString().split('T')[0];
+        return get().presences.some(p => p.eleveId === eleveId && p.date === today && p.type === 'SORTIE');
       },
 
       // ── Horaires par cycle ──────────────────────────────────

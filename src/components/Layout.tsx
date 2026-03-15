@@ -19,6 +19,7 @@ const NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'paiements', label: 'Paiements', icon: <CreditCard className="w-5 h-5" /> },
   { id: 'recouvrement', label: 'Recouvrement', icon: <Target className="w-5 h-5 text-red-500" /> },
   { id: 'scan_presence', label: 'Scan Présence', icon: <ScanLine className="w-5 h-5 text-cyan-500" /> },
+  { id: 'scan_sortie', label: 'Scan Sortie', icon: <ScanLine className="w-5 h-5 text-orange-500" /> },
   { id: 'carte_scolaire', label: 'Cartes Scolaires', icon: <IdCard className="w-5 h-5 text-indigo-500" /> },
   { id: 'verification_recu', label: 'Vérif. Reçus', icon: <ShieldCheck className="w-5 h-5 text-purple-500" /> },
   { id: 'analyses', label: 'Analyses', icon: <BarChart3 className="w-5 h-5" /> },

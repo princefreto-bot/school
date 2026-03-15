@@ -17,6 +17,7 @@ const Documents = lazy(() => import('./pages/Documents').then(m => ({ default: m
 const Parametres = lazy(() => import('./pages/Parametres').then(m => ({ default: m.Parametres })));
 const Recouvrement = lazy(() => import('./pages/Recouvrement').then(m => ({ default: m.Recouvrement })));
 const ScanPresence = lazy(() => import('./pages/ScanPresence').then(m => ({ default: m.ScanPresence })));
+const ScanSortie = lazy(() => import('./pages/ScanSortie').then(m => ({ default: m.ScanSortie })));
 const CarteScolaire = lazy(() => import('./pages/CarteScolaire').then(m => ({ default: m.CarteScolaire })));
 const VerificationRecu = lazy(() => import('./pages/VerificationRecu').then(m => ({ default: m.VerificationRecu })));
 const HistoriqueActivites = lazy(() => import('./pages/HistoriqueActivites').then(m => ({ default: m.HistoriqueActivites })));
@@ -49,6 +50,7 @@ const PageContent: React.FC = () => {
     case 'documents': return <Documents />;
     case 'parametres': return <Parametres />;
     case 'scan_presence': return <ScanPresence />;
+    case 'scan_sortie': return <ScanSortie />;
     case 'carte_scolaire': return <CarteScolaire />;
     case 'verification_recu': return <VerificationRecu />;
     case 'historique_activites': return <HistoriqueActivites />;

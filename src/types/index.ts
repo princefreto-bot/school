@@ -22,6 +22,10 @@ export interface Student {
   dejaPaye: number;
   restant: number;
   recu: string;
+  adsn?: string;
+  statutElv?: 'NOUVEAU' | 'ANCIEN' | 'REDOUBLANT';
+  dateNaissance?: string;
+  acteNaissanceUrl?: string;
   cycle: Cycle;
   status: PaymentStatus;
   historiquesPaiements: Payment[];
@@ -129,6 +133,7 @@ export interface Presence {
   date: string;      // YYYY-MM-DD
   heure: string;     // HH:mm:ss
   statut: 'present' | 'absent' | 'retard';
+  type?: 'ENTREE' | 'SORTIE';
 }
 
 // ── Horaires par cycle ───────────────────────────────────
@@ -192,6 +197,7 @@ export type AppPage =
   | 'parametres'
   | 'recouvrement'
   | 'scan_presence'
+  | 'scan_sortie'
   | 'carte_scolaire'
   | 'verification_recu'
   | 'historique_activites'

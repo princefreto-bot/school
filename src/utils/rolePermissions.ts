@@ -9,17 +9,17 @@ type Role = 'admin' | 'directeur' | 'directeur_general' | 'proviseur' | 'censeur
 const ROLE_PAGES: Record<Role, AppPage[]> = {
     directeur_general: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'parametres', 'recouvrement', 'scan_presence', 'carte_scolaire',
+        'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'carte_scolaire',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces'
     ],
     admin: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'parametres', 'recouvrement', 'scan_presence', 'carte_scolaire',
+        'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'carte_scolaire',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces'
     ],
     directeur: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'parametres', 'recouvrement', 'scan_presence', 'carte_scolaire',
+        'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'carte_scolaire',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces'
     ],
     comptable: [
@@ -27,13 +27,13 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'recouvrement', 'verification_recu', 'carte_scolaire', 'import_export', 'chat'
     ],
     superviseur: [
-        'dashboard', 'eleves', 'scan_presence', 'carte_scolaire', 'chat'
+        'dashboard', 'eleves', 'scan_presence', 'scan_sortie', 'carte_scolaire', 'chat'
     ],
     proviseur: [
-        'dashboard', 'eleves', 'analyses', 'scan_presence', 'carte_scolaire', 'chat'
+        'dashboard', 'eleves', 'analyses', 'scan_presence', 'scan_sortie', 'carte_scolaire', 'chat'
     ],
     censeur: [
-        'dashboard', 'eleves', 'analyses', 'scan_presence', 'carte_scolaire', 'chat'
+        'dashboard', 'eleves', 'analyses', 'scan_presence', 'scan_sortie', 'carte_scolaire', 'chat'
     ],
     parent: [
         'parent_dashboard', 'parent_historique', 'parent_recus',

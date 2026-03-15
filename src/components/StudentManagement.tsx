@@ -341,7 +341,10 @@ const StudentModal = ({ student, onClose, onSave }: StudentModalProps) => {
     sexe: student?.sexe || 'M',
     redoublant: student?.redoublant || false,
     ecoleProvenance: student?.ecoleProvenance || '',
-    dejaPaye: student?.dejaPaye || 0
+    dejaPaye: student?.dejaPaye || 0,
+    adsn: student?.adsn || '',
+    statutElv: student?.statutElv || 'NOUVEAU',
+    dateNaissance: student?.dateNaissance || ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -433,6 +436,40 @@ const StudentModal = ({ student, onClose, onSave }: StudentModalProps) => {
               placeholder="+228 90 00 00 00"
               className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Numéro ADSN</label>
+              <input
+                type="text"
+                value={formData.adsn}
+                onChange={(e) => setFormData({ ...formData, adsn: e.target.value })}
+                placeholder="Ex: 123456"
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date Naissance</label>
+              <input
+                type="date"
+                value={formData.dateNaissance}
+                onChange={(e) => setFormData({ ...formData, dateNaissance: e.target.value })}
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Statut Élève</label>
+              <select
+                value={formData.statutElv}
+                onChange={(e) => setFormData({ ...formData, statutElv: e.target.value as 'NOUVEAU'|'ANCIEN'|'REDOUBLANT' })}
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="NOUVEAU">Nouveau</option>
+                <option value="ANCIEN">Ancien</option>
+                <option value="REDOUBLANT">Redoublant</option>
+              </select>
+            </div>
           </div>
 
           <div>
