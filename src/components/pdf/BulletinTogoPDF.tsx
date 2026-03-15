@@ -12,25 +12,28 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
     return (
         <div ref={ref} className="bg-white text-black p-8 mx-auto print:p-0" style={{ width: '210mm', minHeight: '297mm', fontFamily: 'Arial, sans-serif' }}>
             {/* EN-TÊTE OFFICIEL TOGOLAIS */}
-            <div className="flex justify-between items-start mb-6 text-sm">
-                <div className="text-center">
-                    <h2 className="font-bold uppercase tracking-wide text-[10px]">{schoolName}</h2>
-                    <p className="text-[10px]">Tél: +228 XX XX XX</p>
-                    <p className="text-[10px]">BP: 123 Tsévié</p>
-                    {schoolLogo && <img src={schoolLogo} alt="Logo" className="h-16 mt-2 mx-auto grayscale object-contain" />}
+            <div className="flex justify-between items-center mb-6 text-sm">
+                {/* GAUCHE : Logo de l'école agrandi */}
+                <div className="w-1/4 flex justify-start">
+                    {schoolLogo && <img src={schoolLogo} alt="Logo" className="w-28 h-28 object-contain" />}
                 </div>
 
-                <div className="text-center w-32">
-                    {/* Placeholder Sceau de l'État - Représenté par un encadré ou logo république si existant */}
-                    <div className="w-16 h-16 border-2 border-dashed border-gray-400 rounded-full flex items-center justify-center mx-auto mb-2 relative">
-                        <span className="text-[6px] text-gray-400 absolute">SCEAU</span>
-                    </div>
-                    <p className="font-bold text-[8px] uppercase">DRE-MARITIME</p>
-                </div>
-
-                <div className="text-center">
-                    <h2 className="font-bold text-xs">RÉPUBLIQUE TOGOLAISE</h2>
+                {/* CENTRE : Texte regroupé */}
+                <div className="w-2/4 text-center flex flex-col items-center">
+                    <h2 className="font-black uppercase tracking-wider text-sm">{schoolName}</h2>
+                    <p className="text-[11px] mt-1 font-semibold">Tél: +228 XX XX XX</p>
+                    <p className="text-[11px] font-semibold mb-2">BP: 123 Tsévié</p>
+                    
+                    <h3 className="font-bold text-xs">RÉPUBLIQUE TOGOLAISE</h3>
                     <p className="italic text-[10px]">Travail - Liberté - Patrie</p>
+                </div>
+
+                {/* DROITE : Sceau de la DRE agrandi */}
+                <div className="w-1/4 flex justify-end">
+                    <div className="w-28 h-28 border-2 border-dashed border-gray-400 rounded-full flex flex-col items-center justify-center p-2">
+                        <span className="text-xs font-bold text-gray-400">SCEAU</span>
+                        <span className="text-[8px] text-gray-400 mt-1 font-bold text-center">DRE-MARITIME</span>
+                    </div>
                 </div>
             </div>
 
