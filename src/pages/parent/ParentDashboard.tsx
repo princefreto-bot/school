@@ -40,10 +40,10 @@ const IMP_STYLES = {
         label: 'Important',
     },
     urgent: {
-        bg: 'bg-red-50',
-        border: 'border-red-200',
+        bg: 'bg-red-50 dark:bg-red-950/20',
+        border: 'border-red-200 dark:border-red-900',
         header: 'bg-red-600',
-        badge: 'bg-red-100 text-red-700 border-red-200',
+        badge: 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 border-red-200',
         icon: <AlertTriangle className="w-5 h-5" />,
         dot: 'bg-red-500',
         label: 'URGENT',
@@ -58,9 +58,9 @@ const AnnouncementPopup: React.FC<{
     const imp = IMP_STYLES[announcement.importance] || IMP_STYLES.info;
 
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
             <div
-                className={`relative w-full max-w-md rounded-3xl shadow-2xl border-2 ${imp.border} ${imp.bg} overflow-hidden animate-slideUp`}
+                className={`relative w-full max-w-md rounded-[32px] shadow-2xl border-2 ${imp.border} ${imp.bg} overflow-hidden animate-slideUp`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="announcement-title"
@@ -90,13 +90,13 @@ const AnnouncementPopup: React.FC<{
                 </div>
 
                 {/* Corps */}
-                <div className="px-6 py-5">
-                    <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
+                <div className="px-6 py-6">
+                    <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
                         {announcement.message}
                     </p>
 
-                    <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-200">
-                        <span className="text-xs text-slate-400">
+                    <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-200 dark:border-slate-700/50">
+                        <span className="text-xs text-slate-400 dark:text-slate-500 font-bold">
                             Publié le{' '}
                             {new Date(announcement.createdAt).toLocaleDateString('fr-FR', {
                                 day: 'numeric', month: 'long', year: 'numeric',
@@ -104,9 +104,9 @@ const AnnouncementPopup: React.FC<{
                         </span>
                         <button
                             onClick={onClose}
-                            className={`px-5 py-2 ${imp.header} hover:opacity-90 text-white rounded-xl text-sm font-bold transition shadow-md`}
+                            className={`px-6 py-2.5 ${imp.header} hover:opacity-90 text-white rounded-2xl text-sm font-black transition shadow-lg shadow-black/10 active:scale-95`}
                         >
-                            J'ai lu ✓
+                            Compris ✓
                         </button>
                     </div>
                 </div>
@@ -280,8 +280,8 @@ export const ParentDashboard: React.FC = () => {
                 {/* ── Barre supérieure ── */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Bienvenue, {user?.nom}</h2>
-                        <p className="text-sm text-slate-500">Consultez et suivez la scolarité de vos enfants en temps réel.</p>
+                        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Salut, {user?.nom}</h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium italic mt-1">L'école de vos enfants dans votre poche.</p>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -290,17 +290,16 @@ export const ParentDashboard: React.FC = () => {
                             id="btn-announcements"
                             onClick={() => {
                                 setShowAnnouncementList(v => !v);
-                                // Marquer toutes comme vues quand on ouvre la liste
                                 if (!showAnnouncementList) {
                                     announcements.forEach(a => seenIds.current.add(a.id));
                                 }
                             }}
-                            className="relative flex items-center gap-2 px-4 py-3 bg-white border border-slate-200 hover:border-purple-400 hover:bg-purple-50 text-slate-600 hover:text-purple-600 rounded-2xl shadow-sm transition-all font-semibold text-sm"
+                            className="relative flex items-center gap-2 px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 text-slate-600 dark:text-slate-300 rounded-[20px] shadow-sm transition-all font-black text-sm active:scale-95"
                         >
-                            <Bell className="w-4 h-4" />
+                            <Bell className="w-5 h-5 text-blue-500" />
                             Annonces
                             {unseenCount > 0 && (
-                                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-bounce">
+                                <span className="absolute -top-1 -right-1 w-6 h-6 bg-rose-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 animate-bounce">
                                     {unseenCount > 9 ? '9+' : unseenCount}
                                 </span>
                             )}
@@ -319,16 +318,16 @@ export const ParentDashboard: React.FC = () => {
 
                 {/* ── Panneau annonces (liste déroulante) ── */}
                 {showAnnouncementList && (
-                    <div className="bg-white rounded-3xl border border-purple-100 shadow-lg overflow-hidden animate-slideDown">
-                        <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-between">
+                    <div className="bg-white dark:bg-slate-900 rounded-[32px] border border-blue-100 dark:border-slate-800 shadow-2xl overflow-hidden animate-slideDown">
+                        <div className="px-6 py-5 bg-gradient-to-r from-blue-600 to-indigo-700 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <Megaphone className="w-5 h-5 text-white" />
-                                <h3 className="font-bold text-white">Annonces de l'école</h3>
-                                <span className="px-2 py-0.5 bg-white/20 text-white text-xs font-bold rounded-full">
-                                    {announcements.length}
+                                <Megaphone className="w-6 h-6 text-white" />
+                                <h3 className="font-black text-white">École Direct Info</h3>
+                                <span className="px-3 py-1 bg-white/20 text-white text-[10px] font-black rounded-full uppercase tracking-widest">
+                                    {announcements.length} messages
                                 </span>
                             </div>
-                            <button onClick={() => setShowAnnouncementList(false)} className="text-white/70 hover:text-white transition">
+                            <button onClick={() => setShowAnnouncementList(false)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -377,91 +376,92 @@ export const ParentDashboard: React.FC = () => {
 
                 {/* ── Bannière de Notifications Mobile/PWA ── */}
                 {notifPermission === 'default' && (
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-5 text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg animate-fadeIn border border-blue-500/30 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-                        <div className="flex items-center gap-4 relative z-10 w-full md:w-auto">
-                            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shrink-0">
-                                <Bell className="w-6 h-6 text-white animate-bounce" />
+                    <div className="bg-gradient-to-br from-indigo-700 via-blue-600 to-cyan-500 rounded-[32px] p-6 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl animate-fadeIn border border-white/10 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-400/20 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none"></div>
+                        <div className="flex items-center gap-5 relative z-10 w-full md:w-auto">
+                            <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center shrink-0 border border-white/30 shadow-xl">
+                                <Bell className="w-8 h-8 text-white animate-pulse" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg md:text-xl text-white">Activer les Notifications</h3>
-                                <p className="text-blue-100 text-xs md:text-sm mt-0.5">Soyez prévenu instantanément dès que votre enfant pointe sa présence, ou dès qu'une annonce urgente est publiée !</p>
+                                <h3 className="font-black text-xl md:text-2xl text-white tracking-tight">Restez Connecté</h3>
+                                <p className="text-blue-50 text-[11px] md:text-sm mt-1 leading-snug max-w-sm font-medium">Ne ratez plus rien ! Soyez alerté dès que votre enfant rentre ou sort de l'école.</p>
                             </div>
                         </div>
                         <button 
                             onClick={handleEnableNotifications}
-                            className="w-full md:w-auto px-6 py-3 bg-white text-blue-700 hover:bg-blue-50 font-black rounded-2xl transition-all shadow-[0_4px_14px_0_rgba(255,255,255,0.39)] shrink-0 active:scale-95 text-sm"
+                            className="w-full md:w-auto px-10 py-4 bg-white text-blue-700 hover:bg-blue-50 font-black rounded-[24px] transition-all shadow-2xl active:scale-95 text-sm uppercase tracking-widest"
                         >
-                            Activer les alertes
+                            M'alerter
                         </button>
                     </div>
                 )}
 
                 {/* ── Cards financières ── */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col justify-between transition-all hover:shadow-md h-full group">
+                    <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 p-7 flex flex-col justify-between transition-all hover:shadow-2xl h-full group">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                                <Wallet className="w-6 h-6" />
+                            <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-3xl flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner">
+                                <Wallet className="w-7 h-7" />
                             </div>
-                            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest italic group-hover:text-blue-100 transition-colors">Total Scolarité</span>
+                            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:text-blue-400 transition-colors">Total Scolarité</span>
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-slate-800 mb-1 group-hover:text-blue-700 transition-colors">{totalEcolage.toLocaleString()} FCFA</p>
-                            <p className="text-xs text-slate-400 font-medium">Pour {children.length} enfant{children.length > 1 ? 's' : ''}</p>
+                            <p className="text-3xl font-black text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{totalEcolage.toLocaleString()} FCFA</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wide">Pour {children.length} enfant{children.length > 1 ? 's' : ''}</p>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col justify-between transition-all hover:shadow-md h-full group">
+                    <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 p-7 flex flex-col justify-between transition-all hover:shadow-2xl h-full group">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-all">
-                                <TrendingUp className="w-6 h-6" />
+                            <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-3xl flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-inner">
+                                <TrendingUp className="w-7 h-7" />
                             </div>
-                            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest italic group-hover:text-emerald-100 transition-colors">Déjà Payé</span>
+                            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:text-emerald-400 transition-colors">Déjà Payé</span>
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-slate-800 mb-1 group-hover:text-emerald-700 transition-colors">{totalDejaPaye.toLocaleString()} FCFA</p>
-                            <p className="text-xs text-slate-400 font-medium">{totalEcolage > 0 ? Math.round((totalDejaPaye / totalEcolage) * 100) : 0}% du total</p>
+                            <p className="text-3xl font-black text-slate-900 dark:text-white mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{totalDejaPaye.toLocaleString()} FCFA</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wide">{totalEcolage > 0 ? Math.round((totalDejaPaye / totalEcolage) * 100) : 0}% du total</p>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col justify-between transition-all hover:shadow-md h-full group">
+                    <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 p-7 flex flex-col justify-between transition-all hover:shadow-2xl h-full group">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-red-600 group-hover:text-white transition-all">
-                                <CreditCard className="w-6 h-6" />
+                            <div className="w-14 h-14 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-3xl flex items-center justify-center shrink-0 group-hover:bg-rose-600 group-hover:text-white transition-all shadow-inner">
+                                <CreditCard className="w-7 h-7" />
                             </div>
-                            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest italic group-hover:text-red-100 transition-colors">Reste à Payer</span>
+                            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:text-rose-400 transition-colors">Reste à Payer</span>
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-slate-800 mb-1 group-hover:text-red-700 transition-colors">{totalRestant.toLocaleString()} FCFA</p>
-                            <p className="text-xs text-slate-400 font-medium">À régulariser dès que possible</p>
+                            <p className="text-3xl font-black text-slate-900 dark:text-white mb-1 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">{totalRestant.toLocaleString()} FCFA</p>
+                            <p className="text-xs text-rose-400 dark:text-rose-500 font-bold uppercase tracking-wide">Délai Règlement à respecter</p>
                         </div>
                     </div>
                 </div>
 
                 {/* ── Tableau dossiers scolaires ── */}
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mt-6">
-                    <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden mt-6 pb-20">
+                    <div className="px-6 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
-                                <GraduationCap className="w-5 h-5" />
+                            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center">
+                                <GraduationCap className="w-6 h-6" />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-800">Dossiers Scolaires</h3>
+                            <h3 className="text-xl font-black text-slate-900 dark:text-white">Dossiers Scolaires</h3>
                         </div>
                         {children.length > 0 && (
-                            <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-xs font-bold uppercase tracking-wider">{children.length} élève{children.length > 1 ? 's' : ''}</span>
+                            <span className="px-4 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full text-[10px] font-black uppercase tracking-widest">{children.length} enfant{children.length > 1 ? 's' : ''}</span>
                         )}
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-slate-50/50 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                                    <th className="px-6 py-4">Élève / Identifiant</th>
-                                    <th className="px-6 py-4">Classe &amp; Cycle</th>
-                                    <th className="px-6 py-4">Scolarité Payée</th>
-                                    <th className="px-6 py-4">Reste à Payer</th>
-                                    <th className="px-6 py-4 text-center">Statut</th>
-                                    <th className="px-6 py-4 text-right">Actions</th>
+                                <tr className="bg-slate-50/50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 text-[9px] font-black uppercase tracking-[0.1em] border-b border-slate-100 dark:border-slate-800">
+                                    <th className="px-6 py-4">Fiche Élève</th>
+                                    <th className="px-6 py-4 text-center">Cursus</th>
+                                    <th className="px-6 py-4 text-right">Encaissement</th>
+                                    <th className="px-6 py-4 text-right">Reliquat</th>
+                                    <th className="px-6 py-4 text-center">Situation</th>
+                                    <th className="px-6 py-4 text-right">Gérer</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">

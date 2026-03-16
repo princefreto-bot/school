@@ -28,11 +28,11 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ title, value, sub, icon, color, trend }) => (
-  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+  <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-5 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
     <div className="flex items-start justify-between">
       <div>
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{title}</p>
-        <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{title}</p>
+        <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{value}</p>
         {sub && <p className="text-xs text-gray-500 mt-1">{sub}</p>}
         {trend && <p className="text-xs text-emerald-600 mt-1 font-medium">{trend}</p>}
       </div>
@@ -46,8 +46,8 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, sub, icon, color, tre
 const CustomTooltip: React.FC<{ active?: boolean; payload?: { name: string; value: number }[]; label?: string }> = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white shadow-xl rounded-xl border border-gray-100 p-3 text-xs">
-        <p className="font-semibold text-gray-800 mb-2">{label}</p>
+      <div className="bg-white dark:bg-slate-800 shadow-2xl rounded-2xl border border-gray-100 dark:border-slate-700 p-4 text-xs backdrop-blur-md">
+        <p className="font-bold text-slate-800 dark:text-slate-100 mb-2">{label}</p>
         {payload.map((p, i) => (
           <p key={i} style={{ color: p.name === 'Payé' ? BAR_COLORS.paye : BAR_COLORS.restant }}>
             {p.name} : {fmtMoney(p.value)} FCFA
@@ -194,17 +194,17 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+    <div className="space-y-6 pb-20 lg:pb-0">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 transition-colors">
         <div>
-          <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+          <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
             Tableau de Bord Stratégique
           </h2>
           <p className="text-sm text-gray-500">Aperçu financier et indicateurs de performance</p>
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
+          <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 px-5 py-3 rounded-2xl border border-gray-100 dark:border-slate-700">
             <div>
               <p className="text-xs text-gray-500 font-medium">Santé Financière</p>
               <p className={`text-sm font-bold ${santeFinanciere.color}`}>
@@ -222,7 +222,7 @@ export const Dashboard: React.FC = () => {
 
           <button
             onClick={handleGenerateReport}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm shadow-blue-600/20 transition-all font-medium text-sm disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-600/20 transition-all font-bold text-sm disabled:opacity-50 active:scale-95"
           >
             <FileText className="w-5 h-5" />
             Générer Rapport du Mois
@@ -276,9 +276,9 @@ export const Dashboard: React.FC = () => {
             <h3 className="font-semibold text-gray-800">Taux de recouvrement global</h3>
             <p className="text-xs text-gray-500">Progression des paiements</p>
           </div>
-          <span className="text-2xl font-bold text-blue-700">{stats.taux}%</span>
+          <span className="text-3xl font-black text-blue-600 dark:text-blue-400">{stats.taux}%</span>
         </div>
-        <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden">
+        <div className="relative h-5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
           <div
             className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600 to-emerald-500 rounded-full transition-all duration-700"
             style={{ width: `${stats.taux}%` }}
@@ -317,9 +317,9 @@ export const Dashboard: React.FC = () => {
         ] as const).map((c) => {
           const cs = stats.cycleStats[c.key];
           return (
-            <div key={c.label} className={`${c.bg} border ${c.border} rounded-2xl p-5`}>
+            <div key={c.label} className={`${c.bg} dark:bg-slate-900/40 border ${c.border} dark:border-slate-800 rounded-3xl p-6 transition-all hover:shadow-lg`}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
+                <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center shadow-lg shrink-0">
                   {c.icon}
                 </div>
                 <div>
@@ -349,11 +349,11 @@ export const Dashboard: React.FC = () => {
               </div>
 
               <div>
-                <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+                <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mb-1">
                   <span>Recouvrement</span>
-                  <span className="font-bold">{cs.taux}%</span>
+                  <span className="text-slate-600 dark:text-slate-300">{cs.taux}%</span>
                 </div>
-                <div className="h-2 bg-white rounded-full overflow-hidden shadow-inner">
+                <div className="h-2.5 bg-white dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
                   <div
                     className={`h-full ${c.bar} rounded-full transition-all duration-700`}
                     style={{ width: `${cs.taux}%` }}
@@ -365,10 +365,10 @@ export const Dashboard: React.FC = () => {
         })}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-          <h3 className="font-semibold text-gray-800 mb-1">Paiements par classe</h3>
-          <p className="text-xs text-gray-500 mb-4">Montants payés vs. restants (FCFA)</p>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
+          <h3 className="font-bold text-slate-800 dark:text-white mb-1">Paiements par classe</h3>
+          <p className="text-xs text-slate-500 mb-4">Montants payés vs. restants (FCFA)</p>
           {classData.length === 0 ? (
             <div className="h-64 flex items-center justify-center text-gray-400 text-sm">Aucune donnée</div>
           ) : (
@@ -386,9 +386,9 @@ export const Dashboard: React.FC = () => {
           )}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-          <h3 className="font-semibold text-gray-800 mb-1">Répartition par cycle</h3>
-          <p className="text-xs text-gray-500 mb-4">Distribution des élèves</p>
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
+          <h3 className="font-bold text-slate-800 dark:text-white mb-1">Répartition par cycle</h3>
+          <p className="text-xs text-slate-500 mb-4">Distribution des élèves</p>
           {cycleData.length === 0 ? (
             <div className="h-64 flex items-center justify-center text-gray-400 text-sm">Aucune donnée</div>
           ) : (
@@ -406,14 +406,14 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {students.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                <Target className="w-4 h-4 text-blue-600" />
-                Taux de recouvrement — Analyse détaillée
+              <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <Target className="w-5 h-5 text-blue-600" />
+                Analyse du Recouvrement
               </h3>
-              <p className="text-xs text-gray-500 mt-0.5">Formule : (encaissé / théorique) × 100</p>
+              <p className="text-xs text-slate-500 mt-0.5">Formule : (encaissé / théorique) × 100</p>
             </div>
             <span className={`px-3 py-1 rounded-full text-xs font-bold border ${recouvrement.badgeColor}`}>
               {recouvrement.badgeLabel}
@@ -459,12 +459,12 @@ export const Dashboard: React.FC = () => {
       )}
 
       {students.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-          <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-1">
-            <TrendingUp className="w-4 h-4 text-violet-600" />
-            Projection des revenus — Fin d'année scolaire
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
+          <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2 mb-1">
+            <TrendingUp className="w-5 h-5 text-violet-600" />
+            Projection des revenus
           </h3>
-          <p className="text-xs text-gray-500 mb-4">
+          <p className="text-xs text-slate-500 mb-4">
             Basée sur le taux actuel de {(projection.tauxActuel * 100).toFixed(1)}% · Projection = Théorique × Taux
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -476,14 +476,14 @@ export const Dashboard: React.FC = () => {
               <p className="text-xl font-bold text-red-600">{fmtMoney(projection.scenarioPessimiste)}</p>
               <p className="text-[10px] text-red-400 mt-1">Taux − 10% = {((projection.tauxActuel - 0.10) * 100).toFixed(1)}%</p>
             </div>
-            <div className="border border-violet-200 bg-violet-50 rounded-xl p-4 ring-2 ring-violet-200">
+            <div className="border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/20 rounded-2xl p-5 ring-2 ring-violet-200 dark:ring-violet-800">
               <div className="flex items-center gap-2 mb-2">
                 <Target className="w-4 h-4 text-violet-600" />
-                <p className="text-xs font-semibold text-violet-700">Projection réaliste</p>
+                <p className="text-xs font-bold text-violet-700 dark:text-violet-300">Projection réaliste</p>
               </div>
-              <p className="text-xl font-bold text-violet-700">{fmtMoney(projection.projectionFinAnnee)}</p>
+              <p className="text-2xl font-black text-violet-700 dark:text-violet-400">{fmtMoney(projection.projectionFinAnnee)}</p>
               <p className="text-[10px] text-violet-400 mt-1">Taux actuel = {(projection.tauxActuel * 100).toFixed(1)}%</p>
-              <p className="text-[10px] text-violet-500 mt-1 font-medium">
+              <p className="text-[10px] text-violet-500 mt-1 font-bold">
                 Reste à encaisser : {fmtMoney(projection.resteAEncaisser)} FCFA
               </p>
             </div>
@@ -500,12 +500,12 @@ export const Dashboard: React.FC = () => {
       )}
 
       {classComp.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-          <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-1">
-            <BarChart2 className="w-4 h-4 text-blue-600" />
-            Comparaison financière par classe
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
+          <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2 mb-1">
+            <BarChart2 className="w-5 h-5 text-blue-600" />
+            Performance par classe
           </h3>
-          <p className="text-xs text-gray-500 mb-4">Classé du meilleur taux au plus faible — Cliquez pour détails</p>
+          <p className="text-xs text-slate-500 mb-4">Classé du meilleur taux au plus faible — Cliquez pour détails</p>
 
           <ResponsiveContainer width="100%" height={220}>
             <BarChart
@@ -599,10 +599,10 @@ export const Dashboard: React.FC = () => {
       )}
 
       {topClasses.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-emerald-600" />
-            Classement des classes les plus solvables
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
+          <h3 className="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-emerald-600" />
+            Top 5 des classes solvables
           </h3>
           <div className="space-y-3">
             {topClasses.map((c, i) => (

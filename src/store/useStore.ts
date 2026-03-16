@@ -140,6 +140,11 @@ export interface AppState {
   setNotes: (n: Note[]) => void;
   upsertNote: (note: Note) => void;
   deleteNote: (id: string) => void;
+
+  // Thème
+  theme: 'light' | 'dark';
+  setTheme: (t: 'light' | 'dark') => void;
+  toggleTheme: () => void;
 }
 
 // Authentification gérée par Supabase
@@ -203,6 +208,11 @@ export const useStore = create<AppState>()(
       setSchoolLogo: (logo) => set({ schoolLogo: logo }),
       schoolStamp: null,
       setSchoolStamp: (stamp) => set({ schoolStamp: stamp }),
+
+      // ── Thème ──────────────────────────────────────────
+      theme: 'light',
+      setTheme: (t) => set({ theme: t }),
+      toggleTheme: () => set((s) => ({ theme: s.theme === 'light' ? 'dark' : 'light' })),
 
       // ── Auth ──────────────────────────────────────────────
       user: null,

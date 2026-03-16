@@ -8,7 +8,7 @@ import {
   BarChart3, FileText, Settings, LogOut, Menu, X,
   Bell, ChevronRight, Target, Award, MessageSquare,
   ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone,
-  BookOpen, Edit3, FileSpreadsheet
+  BookOpen, Edit3, FileSpreadsheet, Sun, Moon
 } from 'lucide-react';
 
 interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: number }
@@ -187,6 +187,17 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const setConnectedParentsCount = useStore((s) => s.setConnectedParentsCount);
   const unreadMessages = useStore((s) => s.unreadMessages);
   const fetchUnreadMessages = useStore((s) => s.fetchUnreadMessages);
+  const theme = useStore((s) => s.theme);
+  const toggleTheme = useStore((s) => s.toggleTheme);
+
+  // Appliquer la classe dark au document
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
   // Sync automatique et récupération du vrai compteur de parents
   useEffect(() => {
@@ -269,7 +280,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className={`min-h-screen flex transition-colors duration-300 ${theme === 'dark' ? 'dark bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`} style={{ fontFamily: 'Outfit, Inter, sans-serif' }}>
       {/* Sidebar desktop */}
       <aside className="hidden lg:flex flex-col w-64 bg-slate-900 fixed inset-y-0 left-0 z-30 print:hidden">
         <SidebarContent {...sidebarProps} />
@@ -297,10 +308,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       )}
 
       {/* Main content */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen print:ml-0 print:bg-white text-black">
+      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen print:ml-0 print:bg-white pb-16 lg:pb-0">
         {/* Topbar */}
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm print:hidden">
-          <div className="flex items-center justify-between px-4 sm:px-6 h-14">
+        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 sticky top-0 z-20 shadow-sm print:hidden transition-colors">
+          <div className="flex items-center justify-between px-4 sm:px-6 h-16">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -315,7 +326,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all hover:scale-110 active:scale-95 shadow-inner"
+              >
+                {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              </button>
               {!isParent && (
                 <>
                   <div className="hidden sm:flex items-center gap-1 text-xs text-gray-500 bg-gray-100 rounded-lg px-3 py-1.5">
@@ -335,9 +352,43 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 sm:p-6 overflow-auto print:p-0 print:overflow-visible">
+        <main className="flex-1 p-4 sm:p-6 overflow-auto print:p-0 print:overflow-visible page-enter">
           {children}
         </main>
+
+        {/* Bottom Navigation for Mobile (Native App Style) */}
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-200 dark:border-slate-800 flex items-center justify-around px-2 z-40 safe-area-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+          {[
+            { id: isParent ? 'parent_dashboard' : 'dashboard', label: 'Home', icon: <LayoutDashboard className="w-5 h-5" /> },
+            { id: isParent ? 'parent_historique' : 'eleves', label: isParent ? 'Historique' : 'Élèves', icon: isParent ? <CreditCard className="w-5 h-5" /> : <Users className="w-5 h-5" /> },
+            { id: 'chat', label: 'Chat', icon: <MessageSquare className="w-5 h-5" />, badge: unreadMessages },
+            { id: isParent ? 'parent_recus' : 'parametres', label: isParent ? 'Recus' : 'Config', icon: isParent ? <FileText className="w-5 h-5" /> : <Settings className="w-5 h-5" /> },
+          ].map((item) => {
+            const active = currentPage === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setCurrentPage(item.id as AppPage)}
+                className={`relative flex flex-col items-center justify-center w-16 h-full transition-all duration-200 ${
+                  active ? 'text-blue-600 dark:text-blue-400 font-bold scale-110' : 'text-slate-400 dark:text-slate-500'
+                }`}
+              >
+                <div className={`p-1 rounded-xl transition-all ${active ? 'bg-blue-50 dark:bg-blue-900/30' : ''}`}>
+                  {item.icon}
+                </div>
+                <span className="text-[10px] tracking-tight mt-0.5">{item.label}</span>
+                {item.badge != null && item.badge > 0 && (
+                  <span className="absolute top-2 right-3 bg-red-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900">
+                    {item.badge > 9 ? '9+' : item.badge}
+                  </span>
+                )}
+                {active && (
+                  <div className="absolute -top-1 w-1 h-1 rounded-full bg-blue-600 dark:bg-blue-400 shadow-[0_0_8px_rgba(37,99,235,0.8)]" />
+                )}
+              </button>
+            );
+          })}
+        </nav>
       </div>
     </div>
   );
