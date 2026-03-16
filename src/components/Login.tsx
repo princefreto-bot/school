@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useStore } from '../store/useStore';
 import { parentApi } from '../services/parentApi';
 import { LinkStudent } from './LinkStudent';
-import { GraduationCap, Lock, User, Phone, Facebook, Github, Chrome } from 'lucide-react';
+import { GraduationCap, Lock, User, Phone } from 'lucide-react';
 
 // ── Images de fond (Mobile uniquement) ──
 import bgImage1 from '../assets/login-bg1.jpg';
@@ -35,14 +35,8 @@ const SchoolLogo: React.FC<{ logo: string | null; schoolName: string; size?: str
 
 const BackgroundSlideshow: React.FC = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [isTransitioning, setIsTransitioning] = useState(false);
-  
     const goToNext = useCallback(() => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % BG_IMAGES.length);
-        setIsTransitioning(false);
-      }, 1000);
+      setCurrentIndex((prev) => (prev + 1) % BG_IMAGES.length);
     }, []);
   
     useEffect(() => {
@@ -111,7 +105,6 @@ export const Login: React.FC = () => {
     }
   };
 
-  const finishSetup = () => window.location.reload();
 
   if (view === 'link') {
     return (

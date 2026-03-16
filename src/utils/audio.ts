@@ -1,10 +1,7 @@
 // ============================================================
-// AUDIO UTILS — Sons de notification
+// AUDIO UTILS — Sons de notification (Optimisé Performance)
 // ============================================================
 
-// ── Contexte & buffer global pour iph.mp3 ──────────────────
-// On utilise Web Audio API (fetch → decode) pour contourner
-// la politique autoplay des navigateurs dans les callbacks QR.
 let _audioCtx: AudioContext | null = null;
 let _iphBuffer: AudioBuffer | null = null;
 
@@ -23,42 +20,48 @@ export const unlockAudio = async () => {
     try {
         const ctx = getCtx();
         
-        // ── Trick Safari : Jouer un silence immédiat sur le clic ────────────────
+        // Trick Safari/Chrome : Jouer un silence immédiat sur le clic
         const silentOsc = ctx.createOscillator();
         const silentGain = ctx.createGain();
         silentGain.gain.value = 0;
         silentOsc.connect(silentGain);
         silentGain.connect(ctx.destination);
         silentOsc.start(0);
-        silentOsc.stop(0.1);
+        silentOsc.stop(0.001);
 
-        // Réveille le contexte suspendu par la politique autoplay
         if (ctx.state === 'suspended') {
             await ctx.resume();
         }
         
-        console.log('🔊 AudioContext déverrouillé. État:', ctx.state);
-
-        // Pré-charge le son si pas encore fait
         if (!_iphBuffer) {
-            console.log('🔄 Chargement de iph.mp3...');
             const response = await fetch('/iph.mp3');
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const arrayBuffer = await response.arrayBuffer();
-            _iphBuffer = await ctx.decodeAudioData(arrayBuffer);
-            console.log('✅ iph.mp3 chargé dans le buffer.');
+            if (response.ok) {
+                const arrayBuffer = await response.arrayBuffer();
+                _iphBuffer = await ctx.decodeAudioData(arrayBuffer);
+            }
         }
     } catch (err) {
-        console.warn('Audio unlock/preload échoué:', err);
+        console.warn('Audio unlock failed:', err);
     }
 };
 
 /**
- * Fallback bip simple (Web Audio API — jamais bloqué).
+ * Assure que le contexte est actif avant de jouer quoi que ce soit.
+ * Crucial pour éliminer la latence sur mobile.
  */
-export const playBeep = () => {
+const ensureActiveCtx = async (ctx: AudioContext) => {
+    if (ctx.state === 'suspended') {
+        await ctx.resume();
+    }
+};
+
+/**
+ * Fallback bip simple (Sine wave).
+ */
+export const playBeep = async () => {
     try {
         const ctx = getCtx();
+        await ensureActiveCtx(ctx);
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain);
@@ -66,86 +69,82 @@ export const playBeep = () => {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(880, ctx.currentTime);
         gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
         osc.start();
-        osc.stop(ctx.currentTime + 0.15);
+        osc.stop(ctx.currentTime + 0.1);
     } catch (err) {
-        console.error('Audio feedback not supported:', err);
+        // Silencieux
     }
 };
 
 /**
  * Joue le son de validation spécifique (iph.mp3).
- * Utilise le buffer pré-chargé par unlockAudio() pour éviter
- * le blocage autoplay dans les callbacks QR.
+ * Priorité max sur la vitesse d'exécution.
  */
-export const playSuccessSound = () => {
+export const playSuccessSound = async () => {
     try {
         const ctx = getCtx();
-        console.log('🎵 playSuccessSound() appelé. État AudioContext:', ctx.state);
+        await ensureActiveCtx(ctx);
         
         if (_iphBuffer) {
-            console.log('🔊 Lecture via AudioBufferSourceNode (Méthode Web Audio API)');
             const source = ctx.createBufferSource();
             source.buffer = _iphBuffer;
             source.connect(ctx.destination);
             source.start(0);
         } else {
-            console.warn('⚠️ Buffer iph.mp3 non chargé, tentative via élément <audio>');
-            const audio = new Audio('/iph.mp3');
-            audio.play()
-                .then(() => console.log('✅ Lecture via <audio> réussie'))
-                .catch((e) => {
-                    console.error('❌ Échec lecture <audio>:', e.message);
-                    playBeep();
-                });
+            // Fallback vers bip si pas encore chargé
+            playBeep();
+            // Tentative asynchrone pour charger l'audio pour la prochaine fois
+            unlockAudio();
         }
     } catch (err) {
-        console.error('❌ Erreur fatale dans playSuccessSound:', err);
         playBeep();
     }
 };
 
 /**
- * Joue un son d'erreur (buzzer).
+ * Joue un son d'erreur (buzzer aggressif).
  */
-export const playErrorSound = () => {
+export const playErrorSound = async () => {
     try {
         const ctx = getCtx();
+        await ensureActiveCtx(ctx);
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(150, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.3);
+        osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.2);
         gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
         osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.3);
+        osc.stop(ctx.currentTime + 0.2);
     } catch (e) {
-        console.warn('Audio feedback not supported:', e);
+        // Silencieux
     }
 };
 
 /**
- * Bip d'avertissement (élève sans parent lié) — tonalité descendante.
+ * Bip d'avertissement tonalité descendante rapide.
  */
-export const playWarningBeep = () => {
+export const playWarningBeep = async () => {
     try {
         const ctx = getCtx();
+        await ensureActiveCtx(ctx);
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.type = 'square';
         osc.frequency.setValueAtTime(330, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.3);
+        osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.2);
         gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
         osc.start();
-        osc.stop(ctx.currentTime + 0.3);
+        osc.stop(ctx.currentTime + 0.2);
     } catch (err) {
-        console.error('Impossible de jouer le son davertissement:', err);
+        // Silencieux
     }
 };
+

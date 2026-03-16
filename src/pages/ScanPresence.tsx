@@ -96,13 +96,13 @@ export const ScanPresence: React.FC = () => {
 
         // Cas : Élève inconnu ou non lié
         if (!student || !isLinked) {
-            playErrorSound(); // Buzzer
+            playErrorSound(); // Buzzer instantané
             setFlashError("PAS LIÉE");
             isScanningPaused.current = true;
             setTimeout(() => {
                 setFlashError(null);
                 isScanningPaused.current = false;
-            }, 1000);
+            }, 600); // Réduit de 1000ms à 600ms
             return;
         }
 
@@ -111,15 +111,13 @@ export const ScanPresence: React.FC = () => {
         const already = isAlreadyPresent(studentId);
 
         if (!already) {
-            // NOUVELLE LOGIQUE : Différencier si le parent est lié ou non
+            // Déclenchement AUDIO et VIBRATION IMMÉDIAT (avant le reste de la logique)
             if (student.telephone) {
-                // Parent lié : Son de validation avec l'audio MP3
                 playSuccessSound();
             } else {
-                // Parent non lié : Bip d'avertissement (tonalité descendante)
                 playWarningBeep();
             }
-            if (navigator.vibrate) navigator.vibrate(100);
+            if (navigator.vibrate) navigator.vibrate(80);
 
             const presence: Presence = {
                 id: uuid(),
@@ -175,11 +173,11 @@ export const ScanPresence: React.FC = () => {
         });
         isScanningPaused.current = true;
 
-        // Reset automatique après 1.5s pour enchaîner
+        // Reset automatique ULTRA RAPIDE après 0.6s pour enchaîner les scans
         setTimeout(() => {
             setScannedStudent(null);
             isScanningPaused.current = false;
-        }, 1500);
+        }, 600); // Réduit de 800ms à 600ms pour une sensation de vitesse maximale
     }, [students, today, isAlreadyPresent, addPresence, addActivityLog, user]);
 
     // ── Caméra QR avec HTML5-QRCode (Optimisé Mobile) ────────────────
@@ -196,8 +194,8 @@ export const ScanPresence: React.FC = () => {
             html5QrCode.start(
                 { facingMode: "environment" }, // Caméra arrière par défaut
                 {
-                    fps: 10, // 10 images par seconde (optimise la batterie)
-                    qrbox: { width: 250, height: 250 } // Zone de scan réduite pour focaliser
+                    fps: 25, // Augmenté de 10 à 25 pour une précision et rapidité accrue
+                    qrbox: { width: 280, height: 280 } // Zone de scan légèrement élargie pour faciliter la mise au point
                 },
                 (decodedText) => {
                     // Succès du scan
