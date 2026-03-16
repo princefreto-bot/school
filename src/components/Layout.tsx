@@ -148,7 +148,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
     )}
 
     {/* Utilisateur */}
-    <div className="px-3 py-4 border-t border-slate-700/50">
+    <div className="px-3 py-4 border-t border-slate-700/50 pb-24 lg:pb-4">
       <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-700/30 mb-2">
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
           {userName.charAt(0).toUpperCase()}
@@ -160,9 +160,11 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
       </div>
       <button
         onClick={logout}
-        className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all text-sm"
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition-all text-sm font-semibold group"
       >
-        <LogOut className="w-4 h-4" />
+        <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-rose-500/20 group-hover:text-rose-400 transition-colors">
+          <LogOut className="w-4 h-4" />
+        </div>
         Déconnexion
       </button>
     </div>
@@ -282,7 +284,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className={`min-h-screen flex transition-colors duration-300 ${theme === 'dark' ? 'dark bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`} style={{ fontFamily: 'Outfit, Inter, sans-serif' }}>
       {/* Sidebar desktop */}
-      <aside className="hidden lg:flex flex-col w-64 bg-slate-900 fixed inset-y-0 left-0 z-30 print:hidden">
+      <aside className="hidden lg:flex flex-col w-64 sidebar-premium fixed inset-y-0 left-0 z-30 print:hidden border-r border-white/5">
         <SidebarContent {...sidebarProps} />
       </aside>
 
@@ -320,9 +322,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Menu className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="text-sm font-semibold text-gray-900">{currentLabel}</h1>
-                <p className="text-xs text-gray-500 hidden sm:block">
-                  Année scolaire {schoolYear}
+                <h1 className="text-base font-black text-slate-900 dark:text-white tracking-tight">{currentLabel}</h1>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">
+                    Session {schoolYear} — Management
                 </p>
               </div>
             </div>
@@ -332,6 +334,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all hover:scale-110 active:scale-95 shadow-inner"
               >
                 {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              </button>
+              <button
+                onClick={logout}
+                className="lg:hidden p-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 transition-all hover:scale-110 active:scale-95"
+                title="Déconnexion"
+              >
+                <LogOut className="w-5 h-5" />
               </button>
               {!isParent && (
                 <>
@@ -352,12 +361,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 sm:p-6 overflow-auto print:p-0 print:overflow-visible page-enter">
+        <main className="flex-1 p-4 sm:p-6 pb-24 lg:pb-6 overflow-auto print:p-0 print:overflow-visible page-enter">
           {children}
         </main>
 
         {/* Bottom Navigation for Mobile (Native App Style) */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-200 dark:border-slate-800 flex items-center justify-around px-2 z-40 safe-area-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+        <nav className={`lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-200 dark:border-slate-800 flex items-center justify-around px-2 z-40 safe-area-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.05)] ${sidebarOpen ? 'hidden' : 'flex'}`}>
           {[
             { id: isParent ? 'parent_dashboard' : 'dashboard', label: 'Home', icon: <LayoutDashboard className="w-5 h-5" /> },
             { id: isParent ? 'parent_historique' : 'eleves', label: isParent ? 'Historique' : 'Élèves', icon: isParent ? <CreditCard className="w-5 h-5" /> : <Users className="w-5 h-5" /> },

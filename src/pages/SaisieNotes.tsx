@@ -7,8 +7,7 @@ import { v4 as uuid } from '../utils/uuid';
 export const SaisieNotes: React.FC = () => {
     const { 
         currentPeriode, setCurrentPeriode,
-        students, matieres, classeMatieres, 
-        upsertNote
+        students, matieres, classeMatieres
     } = useStore();
 
 
@@ -32,19 +31,19 @@ export const SaisieNotes: React.FC = () => {
             .filter(item => item.mat !== undefined);
     }, [classeMatieres, matieres, selectedClasse]);
 
-    // Local state for grades being edited
-    const [draftNotes, setDraftNotes] = useState<Record<string, Partial<Note>>>({});
-    // Ref pour suivre la sélection précédente — on recharge uniquement quand classe/matière/période change
+    // Local state for grades being edited (stored as strings to allow typing decimals like "12.")
+    const [draftNotes, setDraftNotes] = useState<Record<string, Record<string, string>>>({});
     const prevSelectionRef = React.useRef<string>('');
 
     // Charge les notes existantes dans le brouillon UNIQUEMENT quand la sélection change
-    // ⚠️ IMPORTANT : on NE MET PAS `notes` dans les dépendances pour éviter la réinitialisation
-    //    pendant la saisie à cause des sync en arrière-plan.
     React.useEffect(() => {
         const selectionKey = `${selectedClasse}|${selectedMatiereId}|${currentPeriode}`;
 
-        // Ne rien faire si la sélection n'a pas changé (évite d'écraser ce qu'on tape)
+        // Ne rien faire si la sélection n'a pas changé
         if (selectionKey === prevSelectionRef.current) return;
+        
+        // Avant de changer, on pourrait sauvegarder les notes de la sélection précédente
+        // Mais pour simplifier, on se concentre sur le chargement ici.
         prevSelectionRef.current = selectionKey;
 
         if (!selectedClasse || !selectedMatiereId) {
@@ -52,57 +51,63 @@ export const SaisieNotes: React.FC = () => {
             return;
         }
 
-        // Relire les notes depuis le store au moment du changement de sélection
         const currentNotes = useStore.getState().notes;
-        const newDrafts: Record<string, Partial<Note>> = {};
+        const newDrafts: Record<string, Record<string, string>> = {};
+        
         classStudents.forEach(student => {
             const existing = currentNotes.find(n => n.eleveId === student.id && n.matiereId === selectedMatiereId && n.periode === currentPeriode);
-            if (existing) {
-                newDrafts[student.id] = { ...existing };
-            } else {
-                newDrafts[student.id] = { noteClasse: null, noteDevoir: null, noteCompo: null };
-            }
+            newDrafts[student.id] = {
+                noteClasse: existing?.noteClasse?.toString() || '',
+                noteDevoir: existing?.noteDevoir?.toString() || '',
+                noteCompo: existing?.noteCompo?.toString() || ''
+            };
         });
         setDraftNotes(newDrafts);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedClasse, selectedMatiereId, currentPeriode, classStudents]);
-
+    }, [selectedClasse, selectedMatiereId, currentPeriode]); // Retiré classStudents pour éviter les resets intempestifs
 
     const handleNoteChange = (studentId: string, field: 'noteClasse' | 'noteDevoir' | 'noteCompo', value: string) => {
-        let numericValue: number | null = parseFloat(value);
-        if (isNaN(numericValue) || value === '') numericValue = null;
-        if (numericValue !== null) {
-            // Clamping rules (usually out of 20)
-            if (numericValue < 0) numericValue = 0;
-            if (numericValue > 20) numericValue = 20;
-        }
+        // Validation basique (on autorise chiffres, point, virgule)
+        const cleanedValue = value.replace(',', '.');
+        if (cleanedValue !== '' && !/^\d*\.?\d*$/.test(cleanedValue)) return;
 
         setDraftNotes(prev => ({
             ...prev,
             [studentId]: {
                 ...prev[studentId],
-                [field]: numericValue
+                [field]: cleanedValue
             }
         }));
     };
 
     const handleSave = () => {
+        if (!selectedMatiereId || !selectedClasse) return;
+
+        const batch: Note[] = [];
         classStudents.forEach(student => {
             const draft = draftNotes[student.id];
             if (draft) {
-                upsertNote({
-                    id: draft.id || uuid(),
+                const nC = draft.noteClasse === '' ? null : parseFloat(draft.noteClasse);
+                const nD = draft.noteDevoir === '' ? null : parseFloat(draft.noteDevoir);
+                const nCp = draft.noteCompo === '' ? null : parseFloat(draft.noteCompo);
+
+                batch.push({
+                    id: uuid(),
                     eleveId: student.id,
                     matiereId: selectedMatiereId,
                     periode: currentPeriode,
-                    noteClasse: draft.noteClasse ?? null,
-                    noteDevoir: draft.noteDevoir ?? null,
-                    noteCompo: draft.noteCompo ?? null
+                    noteClasse: isNaN(nC as any) ? null : nC,
+                    noteDevoir: isNaN(nD as any) ? null : nD,
+                    noteCompo: isNaN(nCp as any) ? null : nCp,
                 });
             }
         });
         
-        setSaveStatus('Notes enregistrées avec succès !');
+        if (batch.length > 0) {
+            useStore.getState().upsertNotes(batch);
+        }
+        
+        setSaveStatus('Notes enregistrées et synchronisées !');
         setTimeout(() => setSaveStatus(null), 3000);
     };
 

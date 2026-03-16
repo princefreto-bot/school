@@ -139,6 +139,7 @@ export interface AppState {
   notes: Note[];
   setNotes: (n: Note[]) => void;
   upsertNote: (note: Note) => void;
+  upsertNotes: (notes: Note[]) => void;
   deleteNote: (id: string) => void;
 
   // Thème
@@ -740,16 +741,40 @@ export const useStore = create<AppState>()(
                 }
               }
               if (Array.isArray(data.notes)) {
-                const hasCloud = data.notes.length > 0;
-                const hasLocal = get().notes.length > 0;
-                if (hasCloud || !hasLocal) {
-                   // Convertit les valeurs numériques pour éviter l'avertissement "NaN"
-                   set({ notes: data.notes.map((n: Note) => ({
-                     ...n,
-                     noteClasse: n.noteClasse !== null && n.noteClasse !== undefined ? Number(n.noteClasse) : null,
-                     noteDevoir: n.noteDevoir !== null && n.noteDevoir !== undefined ? Number(n.noteDevoir) : null,
-                     noteCompo: n.noteCompo !== null && n.noteCompo !== undefined ? Number(n.noteCompo) : null,
-                   })) });
+                const cloudNotes = data.notes.map((n: Note) => ({
+                    ...n,
+                    noteClasse: n.noteClasse !== null && n.noteClasse !== undefined ? Number(n.noteClasse) : null,
+                    noteDevoir: n.noteDevoir !== null && n.noteDevoir !== undefined ? Number(n.noteDevoir) : null,
+                    noteCompo: n.noteCompo !== null && n.noteCompo !== undefined ? Number(n.noteCompo) : null,
+                }));
+
+                // Fusion intelligente : on garde les notes locales qui ne sont pas dans le cloud 
+                // (peut-être de nouvelles saisies) et on met à jour les existantes.
+                const localNotes = get().notes;
+                
+                // Si le cloud est vide et qu'on a déjà des données locales, on ne vide PAS tout
+                // sauf si c'est la première sync (isAuthenticated vient de passer à true)
+                if (cloudNotes.length > 0) {
+                    // On crée une map des notes cloud pour un accès rapide
+                    const cloudMap = new Map();
+                    cloudNotes.forEach((n: Note) => {
+                        const key = `${n.eleveId}-${n.matiereId}-${n.periode}`;
+                        cloudMap.set(key, n);
+                    });
+
+                    // On fusionne : le cloud prime pour les doublons, 
+                    // mais on garde les locales uniques (WIP)
+                    const mergedNotes = [...cloudNotes];
+                    localNotes.forEach(ln => {
+                        const key = `${ln.eleveId}-${ln.matiereId}-${ln.periode}`;
+                        if (!cloudMap.has(key)) {
+                            mergedNotes.push(ln);
+                        }
+                    });
+
+                    set({ notes: mergedNotes });
+                } else if (localNotes.length === 0) {
+                    set({ notes: cloudNotes });
                 }
               }
               console.log(`✅ Cloud data synchronized: ${repairedStudents.length} students loaded and repaired.`);
@@ -902,15 +927,19 @@ export const useStore = create<AppState>()(
 
       notes: [],
       setNotes: (n) => set({ notes: n }),
-      upsertNote: (n) => {
+      upsertNote: (n) => get().upsertNotes([n]),
+      upsertNotes: (batch) => {
         set(s => {
-          const existing = s.notes.findIndex(x => x.eleveId === n.eleveId && x.matiereId === n.matiereId && x.periode === n.periode);
-          if (existing >= 0) {
-            const newNotes = [...s.notes];
-            newNotes[existing] = n;
-            return { notes: newNotes };
-          }
-          return { notes: [...s.notes, n] };
+          let currentNotes = [...s.notes];
+          batch.forEach(n => {
+            const idx = currentNotes.findIndex(x => x.eleveId === n.eleveId && x.matiereId === n.matiereId && x.periode === n.periode);
+            if (idx >= 0) {
+              currentNotes[idx] = n;
+            } else {
+              currentNotes.push(n);
+            }
+          });
+          return { notes: currentNotes };
         });
         import('../services/backendSync').then(({ syncToBackend }) => 
           syncToBackend({ notes: get().notes }).then(() => set({ lastSyncTimestamp: Date.now() }))
