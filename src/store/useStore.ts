@@ -357,7 +357,7 @@ export const useStore = create<AppState>()(
           }).then(() => set({ lastSyncTimestamp: Date.now() }));
         });
       },
-      deleteStudent: (id) => {
+      deleteStudent: async (id) => {
         const u = get().user;
         if (u) {
           const student = get().students.find(s => s.id === id);
@@ -365,14 +365,15 @@ export const useStore = create<AppState>()(
         }
         set({ students: get().students.filter((s) => s.id !== id) });
 
-        // Background sync
-        import('../services/backendSync').then(({ syncToBackend }) => {
-          syncToBackend({
-            students: get().students,
-            presences: get().presences,
-            activityLogs: get().activityLogs
-          }).then(() => set({ lastSyncTimestamp: Date.now() }));
-        });
+        try {
+          const { getAuthHeaders } = await import('../services/apiHelpers');
+          await fetch(`${API_BASE_URL}/sync/student/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+        } catch (err) {
+          console.error('Failed to delete student from cloud:', err);
+        }
       },
       addPayment: (studentId, paymentData) => {
         const students = get().students.map((s) => {
@@ -828,9 +829,17 @@ export const useStore = create<AppState>()(
         set(s => ({ matieres: s.matieres.map(x => x.id === id ? { ...x, ...m } : x) }));
         import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
       },
-      deleteMatiere: (id) => {
+      deleteMatiere: async (id) => {
         set(s => ({ matieres: s.matieres.filter(x => x.id !== id) }));
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+        try {
+          const { getAuthHeaders } = await import('../services/apiHelpers');
+          await fetch(`${API_BASE_URL}/sync/matiere/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+        } catch (err) {
+          console.error('Failed to delete matiere from cloud:', err);
+        }
       },
 
       classeMatieres: [],
@@ -843,9 +852,17 @@ export const useStore = create<AppState>()(
         set(s => ({ classeMatieres: s.classeMatieres.map(x => x.id === id ? { ...x, ...cm } : x) }));
         import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
       },
-      deleteClasseMatiere: (id) => {
+      deleteClasseMatiere: async (id) => {
         set(s => ({ classeMatieres: s.classeMatieres.filter(x => x.id !== id) }));
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+        try {
+          const { getAuthHeaders } = await import('../services/apiHelpers');
+          await fetch(`${API_BASE_URL}/sync/classe-matiere/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+        } catch (err) {
+          console.error('Failed to delete classeMatiere from cloud:', err);
+        }
       },
 
       notes: [],
@@ -862,9 +879,17 @@ export const useStore = create<AppState>()(
         });
         import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
       },
-      deleteNote: (id) => {
+      deleteNote: async (id) => {
         set(s => ({ notes: s.notes.filter(x => x.id !== id) }));
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+        try {
+          const { getAuthHeaders } = await import('../services/apiHelpers');
+          await fetch(`${API_BASE_URL}/sync/note/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+        } catch (err) {
+          console.error('Failed to delete note from cloud:', err);
+        }
       }
 
     }),

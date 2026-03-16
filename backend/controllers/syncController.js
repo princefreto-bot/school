@@ -435,4 +435,81 @@ async function clearStudents(req, res) {
     }
 }
 
-module.exports = { syncFromFrontend, syncToFrontend, clearPresences, clearActivityLogs, clearStudents };
+
+/**
+ * DELETE /api/sync/matiere/:id
+ */
+async function deleteMatiere(req, res) {
+    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Non autorisé.' });
+    }
+    const { id } = req.params;
+    try {
+        const { error } = await supabase.from('matieres').delete().eq('id', id);
+        if (error) throw error;
+        return res.json({ success: true, message: 'Matière supprimée.' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+/**
+ * DELETE /api/sync/classe-matiere/:id
+ */
+async function deleteClasseMatiere(req, res) {
+    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Non autorisé.' });
+    }
+    const { id } = req.params;
+    try {
+        const { error } = await supabase.from('classe_matieres').delete().eq('id', id);
+        if (error) throw error;
+        return res.json({ success: true, message: 'Liaison classe-matière supprimée.' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+/**
+ * DELETE /api/sync/note/:id
+ */
+async function deleteNote(req, res) {
+    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Non autorisé.' });
+    }
+    const { id } = req.params;
+    try {
+        const { error } = await supabase.from('notes').delete().eq('id', id);
+        if (error) throw error;
+        return res.json({ success: true, message: 'Note supprimée.' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+/**
+ * DELETE /api/sync/student/:id
+ */
+async function deleteStudent(req, res) {
+    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Non autorisé.' });
+    }
+    const { id } = req.params;
+    try {
+        // Supprimer d'abord les dépendances
+        await supabase.from('parent_student').delete().eq('student_id', id);
+        await supabase.from('payments').delete().eq('student_id', id);
+        await supabase.from('presences').delete().eq('student_id', id);
+        await supabase.from('notes').delete().eq('eleve_id', id);
+        
+        const { error } = await supabase.from('students').delete().eq('id', id);
+        if (error) throw error;
+        return res.json({ success: true, message: 'Élève supprimé.' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+module.exports = { syncFromFrontend, syncToFrontend, clearPresences, clearActivityLogs, clearStudents, deleteMatiere, deleteClasseMatiere, deleteNote, deleteStudent };
+
+
