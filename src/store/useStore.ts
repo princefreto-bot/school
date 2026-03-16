@@ -165,7 +165,7 @@ const deduplicateStudents = (list: Student[]): Student[] => {
   const seen = new Map<string, Student>();
   list.forEach(s => {
     // Clé unique basée sur l'identité (normalisée)
-    const key = `${s.nom.trim()} ${s.prenom.trim()} ${s.classe.trim()}`.toUpperCase();
+    const key = `${(s.nom || '').trim()} ${(s.prenom || '').trim()} ${(s.classe || '').trim()}`.toUpperCase();
     if (!seen.has(key)) {
       seen.set(key, s);
     } else {

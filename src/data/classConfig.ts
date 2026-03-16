@@ -40,7 +40,8 @@ export const CLASS_CONFIG: ClassConfig[] = [
 
 // Normalise pour la recherche flexible (essentiel pour Excel)
 const normalize = (s: string): string => {
-  let n = s.toLowerCase().trim()
+  if (!s) return '';
+  let n = String(s).toLowerCase().trim()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // retire accents
     .replace(/[^a-z0-9]/g, '');                       // retire tout sauf alphanum
   

@@ -1,16 +1,15 @@
 // ============================================================
 // PAGE ÉLÈVES — Liste, filtres, import, ajout, CRUD
 // ============================================================
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { Student } from '../types';
 import { CLASS_CONFIG } from '../data/classConfig';
-import { importExcel } from '../utils/excelService';
 import { generateRecuPDF } from '../utils/pdfGenerator';
 import {
-  Search, Upload, Plus, Trash2, Edit2, FileText,
+  Search, Plus, Trash2, Edit2, FileText,
   MessageCircle, ChevronUp, ChevronDown, X, Check,
-  AlertTriangle, Download, Filter,
+  Download, Filter,
 } from 'lucide-react';
 import { StudentDetail } from '../components/StudentDetail';
 
@@ -162,7 +161,6 @@ type SortKey = 'nom' | 'classe' | 'dejaPaye' | 'restant' | 'status';
 export const Eleves: React.FC = () => {
   const students = useStore((s) => s.students);
   const deleteStudent = useStore((s) => s.deleteStudent);
-  const setStudents = useStore((s) => s.setStudents);
   const searchQuery = useStore((s) => s.searchQuery);
   const setSearchQuery = useStore((s) => s.setSearchQuery);
   const filterClasse = useStore((s) => s.filterClasse);
@@ -192,10 +190,10 @@ export const Eleves: React.FC = () => {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       list = list.filter((s) =>
-        s.nom.toLowerCase().includes(q) ||
-        s.prenom.toLowerCase().includes(q) ||
-        s.classe.toLowerCase().includes(q) ||
-        s.telephone.includes(q)
+        (s.nom || '').toLowerCase().includes(q) ||
+        (s.prenom || '').toLowerCase().includes(q) ||
+        (s.classe || '').toLowerCase().includes(q) ||
+        (s.telephone || '').includes(q)
       );
     }
     if (filterClasse) list = list.filter((s) => s.classe === filterClasse);
@@ -226,7 +224,6 @@ export const Eleves: React.FC = () => {
   };
 
   const classes = [...new Set(CLASS_CONFIG.map((c) => c.name))];
-  const isOk = (msg: string) => msg.startsWith('OK');
 
   return (
     <div className="space-y-4">
