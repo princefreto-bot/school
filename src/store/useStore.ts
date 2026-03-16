@@ -363,7 +363,10 @@ export const useStore = create<AppState>()(
           const student = get().students.find(s => s.id === id);
           get().addActivityLog(createActivityLog(u.nom, u.role, 'suppression', `Suppression : ${student ? student.prenom + ' ' + student.nom : id}`));
         }
-        set({ students: get().students.filter((s) => s.id !== id) });
+        set({ 
+          students: get().students.filter((s) => s.id !== id),
+          lastSyncTimestamp: Date.now() // Bloque le polling entrant pendant 60s
+        });
 
         try {
           const { getAuthHeaders } = await import('../services/apiHelpers');
@@ -563,7 +566,7 @@ export const useStore = create<AppState>()(
           announcements: get().announcements.filter(a => a.id !== id),
           announcementReads: get().announcementReads.filter(r => r.announcementId !== id),
         });
-        // Supprimer aussi sur le backend dédié
+        set({ lastSyncTimestamp: Date.now() }); // Bloque le polling entrant
         try {
           const { BACKEND_URL } = await import('../config');
           const { getAuthHeaders } = await import('../services/apiHelpers');
@@ -574,9 +577,6 @@ export const useStore = create<AppState>()(
         } catch (err) {
           console.error('❌ Erreur suppression annonce backend:', err);
         }
-        import('../services/backendSync').then(({ syncToBackend }) => {
-          syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
-        });
       },
       announcementReads: [],
       markAnnouncementRead: (announcementId, parentId) => {
@@ -601,7 +601,7 @@ export const useStore = create<AppState>()(
           });
         }
         import('../services/backendSync').then(({ syncToBackend }) => {
-          syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
+          syncToBackend({ announcementReads: get().announcementReads }).then(() => set({ lastSyncTimestamp: Date.now() }));
         });
       },
       remindAnnouncementLater: (announcementId, parentId) => {
@@ -714,22 +714,33 @@ export const useStore = create<AppState>()(
               if (Array.isArray(data.announcementReads)) {
                 set({ announcementReads: data.announcementReads });
               }
-              // Récupération des données académiques
-              // On ne remplace les données locales que si le cloud en a plus (évite d'écraser ce qu'on vient de saisir)
-              if (Array.isArray(data.matieres) && data.matieres.length >= get().matieres.length) {
-                set({ matieres: data.matieres });
+              // Récupération des données académiques (Même méthode que pour les élèves)
+              if (Array.isArray(data.matieres)) {
+                const hasCloud = data.matieres.length > 0;
+                const hasLocal = get().matieres.length > 0;
+                if (hasCloud || !hasLocal) {
+                   set({ matieres: data.matieres });
+                }
               }
-              if (Array.isArray(data.classeMatieres) && data.classeMatieres.length >= get().classeMatieres.length) {
-                set({ classeMatieres: data.classeMatieres });
+              if (Array.isArray(data.classeMatieres)) {
+                const hasCloud = data.classeMatieres.length > 0;
+                const hasLocal = get().classeMatieres.length > 0;
+                if (hasCloud || !hasLocal) {
+                   set({ classeMatieres: data.classeMatieres });
+                }
               }
-              if (Array.isArray(data.notes) && data.notes.length >= get().notes.length) {
-                // Convertit les valeurs numériques pour éviter l'avertissement "NaN"
-                set({ notes: data.notes.map((n: Note) => ({
-                  ...n,
-                  noteClasse: n.noteClasse !== null && n.noteClasse !== undefined ? Number(n.noteClasse) : null,
-                  noteDevoir: n.noteDevoir !== null && n.noteDevoir !== undefined ? Number(n.noteDevoir) : null,
-                  noteCompo: n.noteCompo !== null && n.noteCompo !== undefined ? Number(n.noteCompo) : null,
-                })) });
+              if (Array.isArray(data.notes)) {
+                const hasCloud = data.notes.length > 0;
+                const hasLocal = get().notes.length > 0;
+                if (hasCloud || !hasLocal) {
+                   // Convertit les valeurs numériques pour éviter l'avertissement "NaN"
+                   set({ notes: data.notes.map((n: Note) => ({
+                     ...n,
+                     noteClasse: n.noteClasse !== null && n.noteClasse !== undefined ? Number(n.noteClasse) : null,
+                     noteDevoir: n.noteDevoir !== null && n.noteDevoir !== undefined ? Number(n.noteDevoir) : null,
+                     noteCompo: n.noteCompo !== null && n.noteCompo !== undefined ? Number(n.noteCompo) : null,
+                   })) });
+                }
               }
               console.log(`✅ Cloud data synchronized: ${repairedStudents.length} students loaded and repaired.`);
             }
@@ -823,14 +834,21 @@ export const useStore = create<AppState>()(
       setMatieres: (m) => set({ matieres: m }),
       addMatiere: (m) => {
         set(s => ({ matieres: [...s.matieres, m] }));
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+        import('../services/backendSync').then(({ syncToBackend }) => 
+          syncToBackend({ matieres: get().matieres }).then(() => set({ lastSyncTimestamp: Date.now() }))
+        );
       },
       updateMatiere: (id, m) => {
         set(s => ({ matieres: s.matieres.map(x => x.id === id ? { ...x, ...m } : x) }));
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+        import('../services/backendSync').then(({ syncToBackend }) => 
+          syncToBackend({ matieres: get().matieres }).then(() => set({ lastSyncTimestamp: Date.now() }))
+        );
       },
       deleteMatiere: async (id) => {
-        set(s => ({ matieres: s.matieres.filter(x => x.id !== id) }));
+        set(s => ({ 
+          matieres: s.matieres.filter(x => x.id !== id),
+          lastSyncTimestamp: Date.now() 
+        }));
         try {
           const { getAuthHeaders } = await import('../services/apiHelpers');
           await fetch(`${API_BASE_URL}/sync/matiere/${id}`, {
@@ -846,14 +864,21 @@ export const useStore = create<AppState>()(
       setClasseMatieres: (cm) => set({ classeMatieres: cm }),
       addClasseMatiere: (cm) => {
         set(s => ({ classeMatieres: [...s.classeMatieres, cm] }));
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+        import('../services/backendSync').then(({ syncToBackend }) => 
+          syncToBackend({ classeMatieres: get().classeMatieres }).then(() => set({ lastSyncTimestamp: Date.now() }))
+        );
       },
       updateClasseMatiere: (id, cm) => {
         set(s => ({ classeMatieres: s.classeMatieres.map(x => x.id === id ? { ...x, ...cm } : x) }));
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+        import('../services/backendSync').then(({ syncToBackend }) => 
+          syncToBackend({ classeMatieres: get().classeMatieres }).then(() => set({ lastSyncTimestamp: Date.now() }))
+        );
       },
       deleteClasseMatiere: async (id) => {
-        set(s => ({ classeMatieres: s.classeMatieres.filter(x => x.id !== id) }));
+        set(s => ({ 
+          classeMatieres: s.classeMatieres.filter(x => x.id !== id),
+          lastSyncTimestamp: Date.now()
+        }));
         try {
           const { getAuthHeaders } = await import('../services/apiHelpers');
           await fetch(`${API_BASE_URL}/sync/classe-matiere/${id}`, {
@@ -877,10 +902,15 @@ export const useStore = create<AppState>()(
           }
           return { notes: [...s.notes, n] };
         });
-        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+        import('../services/backendSync').then(({ syncToBackend }) => 
+          syncToBackend({ notes: get().notes }).then(() => set({ lastSyncTimestamp: Date.now() }))
+        );
       },
       deleteNote: async (id) => {
-        set(s => ({ notes: s.notes.filter(x => x.id !== id) }));
+        set(s => ({ 
+          notes: s.notes.filter(x => x.id !== id),
+          lastSyncTimestamp: Date.now()
+        }));
         try {
           const { getAuthHeaders } = await import('../services/apiHelpers');
           await fetch(`${API_BASE_URL}/sync/note/${id}`, {
