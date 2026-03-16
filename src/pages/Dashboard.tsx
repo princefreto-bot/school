@@ -197,7 +197,10 @@ export const Dashboard: React.FC = () => {
   }
 
   const handleGenerateReport = () => {
-    generateRapportMensuelPDF(students, classComp);
+    generateRapportMensuelPDF(students, classComp, { 
+      name: useStore.getState().schoolName || useStore.getState().appName, 
+      logo: useStore.getState().schoolLogo 
+    });
   };
 
   return (
