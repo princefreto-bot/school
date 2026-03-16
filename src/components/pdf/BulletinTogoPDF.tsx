@@ -30,8 +30,8 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                 {/* CENTRE : Texte regroupé */}
                 <div className="w-2/4 text-center flex flex-col items-center">
                     <h2 className="font-black uppercase tracking-wider text-[13px]">{schoolName}</h2>
-                    <p className="text-[10px] mt-1 font-semibold">Tél: +228 XX XX XX</p>
-                    <p className="text-[10px] font-semibold mb-1">BP: 123 Tsévié</p>
+                    <p className="text-[10px] mt-1 font-semibold">Tél: +228 90177966</p>
+                    <p className="text-[10px] font-semibold mb-1">BP: 80159 Apéssito</p>
                     
                     <h3 className="font-bold text-[11px]">RÉPUBLIQUE TOGOLAISE</h3>
                     <p className="italic text-[9px]">Travail - Liberté - Patrie</p>

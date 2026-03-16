@@ -8,8 +8,9 @@ export const SaisieNotes: React.FC = () => {
     const { 
         currentPeriode, setCurrentPeriode,
         students, matieres, classeMatieres, 
-        notes, upsertNote
+        upsertNote
     } = useStore();
+
 
     const periods: PeriodeType[] = ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3', 'SEMESTRE 1', 'SEMESTRE 2'];
     const classesList = Array.from(new Set(students.map(s => s.classe))).sort();
@@ -33,25 +34,39 @@ export const SaisieNotes: React.FC = () => {
 
     // Local state for grades being edited
     const [draftNotes, setDraftNotes] = useState<Record<string, Partial<Note>>>({});
+    // Ref pour suivre la sélection précédente — on recharge uniquement quand classe/matière/période change
+    const prevSelectionRef = React.useRef<string>('');
 
-    // Load existing notes into draft when the selection changes
+    // Charge les notes existantes dans le brouillon UNIQUEMENT quand la sélection change
+    // ⚠️ IMPORTANT : on NE MET PAS `notes` dans les dépendances pour éviter la réinitialisation
+    //    pendant la saisie à cause des sync en arrière-plan.
     React.useEffect(() => {
+        const selectionKey = `${selectedClasse}|${selectedMatiereId}|${currentPeriode}`;
+
+        // Ne rien faire si la sélection n'a pas changé (évite d'écraser ce qu'on tape)
+        if (selectionKey === prevSelectionRef.current) return;
+        prevSelectionRef.current = selectionKey;
+
         if (!selectedClasse || !selectedMatiereId) {
             setDraftNotes({});
             return;
         }
-        
+
+        // Relire les notes depuis le store au moment du changement de sélection
+        const currentNotes = useStore.getState().notes;
         const newDrafts: Record<string, Partial<Note>> = {};
         classStudents.forEach(student => {
-            const existing = notes.find(n => n.eleveId === student.id && n.matiereId === selectedMatiereId && n.periode === currentPeriode);
+            const existing = currentNotes.find(n => n.eleveId === student.id && n.matiereId === selectedMatiereId && n.periode === currentPeriode);
             if (existing) {
-                newDrafts[student.id] = existing;
+                newDrafts[student.id] = { ...existing };
             } else {
                 newDrafts[student.id] = { noteClasse: null, noteDevoir: null, noteCompo: null };
             }
         });
         setDraftNotes(newDrafts);
-    }, [selectedClasse, selectedMatiereId, currentPeriode, classStudents, notes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedClasse, selectedMatiereId, currentPeriode, classStudents]);
+
 
     const handleNoteChange = (studentId: string, field: 'noteClasse' | 'noteDevoir' | 'noteCompo', value: string) => {
         let numericValue: number | null = parseFloat(value);
