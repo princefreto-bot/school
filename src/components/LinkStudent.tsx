@@ -70,20 +70,20 @@ export const LinkStudent: React.FC<LinkStudentProps> = ({ onComplete }) => {
     return (
         <div className="space-y-6">
             <div className="text-center">
-                <h2 className="text-xl font-bold text-white mb-2">Enregistrez vos enfants</h2>
-                <p className="text-blue-200 text-sm">
+                <h2 className="text-2xl font-black text-slate-900 mb-2 tracking-tighter">Enregistrez vos enfants</h2>
+                <p className="text-slate-500 text-sm font-medium">
                     Recherchez vos enfants par leur nom et cochez-les pour les lier à votre compte.
                 </p>
             </div>
 
             <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-300" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Entrez un nom..."
-                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-300/50 focus:outline-none focus:ring-2 focus:ring-blue-400 trasition"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all shadow-inner"
                 />
             </div>
 
@@ -101,26 +101,26 @@ export const LinkStudent: React.FC<LinkStudentProps> = ({ onComplete }) => {
                         <div
                             key={student.id}
                             onClick={() => toggleSelect(student.id, isAlreadyLinked)}
-                            className={`flex items-center justify-between p-4 border rounded-xl transition group ${isAlreadyLinked
-                                ? 'bg-slate-800/50 border-white/5 opacity-60 cursor-not-allowed'
+                            className={`flex items-center justify-between p-4 border rounded-xl transition-all group ${isAlreadyLinked
+                                ? 'bg-slate-50 border-slate-100 opacity-60 cursor-not-allowed'
                                 : isSelected
-                                    ? 'bg-blue-600/20 border-blue-500/50 cursor-pointer'
-                                    : 'bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer'
+                                    ? 'bg-blue-50 border-blue-200 cursor-pointer'
+                                    : 'bg-white border-slate-100 hover:border-blue-200 hover:shadow-md cursor-pointer'
                                 }`}
                         >
-                            <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isAlreadyLinked ? 'bg-slate-700' : isSelected ? 'bg-blue-600' : 'bg-blue-600/30'}`}>
-                                    <GraduationCap className="w-5 h-5 text-white" />
+                            <div className="flex items-center gap-3 text-left">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isAlreadyLinked ? 'bg-slate-200' : isSelected ? 'bg-blue-600' : 'bg-blue-50'}`}>
+                                    <GraduationCap className={`w-5 h-5 ${isAlreadyLinked ? 'text-slate-400' : isSelected ? 'text-white' : 'text-blue-600'}`} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-white font-medium truncate">{student.prenom} {student.nom}</p>
-                                    <p className="text-blue-300 text-xs">{student.classe} ({student.cycle})</p>
+                                    <p className="text-slate-900 font-bold truncate">{student.prenom} {student.nom}</p>
+                                    <p className="text-slate-500 text-[11px] font-medium uppercase tracking-tight">{student.classe} • {student.cycle}</p>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-3">
                                 {isAlreadyLinked ? (
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase bg-slate-800 px-2 py-1 rounded-lg">Déjà lié</span>
+                                    <span className="text-[10px] font-black text-slate-400 uppercase bg-slate-100 px-2.5 py-1.5 rounded-lg border border-slate-200">Lié</span>
                                 ) : (
                                     <div className={isSelected ? 'text-blue-400' : 'text-slate-500'}>
                                         {isSelected ? <CheckSquare className="w-6 h-6" /> : <Square className="w-6 h-6" />}
@@ -172,9 +172,9 @@ export const LinkStudent: React.FC<LinkStudentProps> = ({ onComplete }) => {
 
             <button
                 onClick={onComplete}
-                className="w-full text-blue-300 text-sm hover:text-white transition py-2"
+                className="w-full text-slate-400 text-xs font-black uppercase tracking-widest hover:text-blue-600 transition-colors py-2"
             >
-                {selectedIds.length > 0 ? 'Annuler' : 'Passer cette étape pour le moment'}
+                {selectedIds.length > 0 ? 'Annuler' : 'Plus tard'}
             </button>
         </div>
     );
