@@ -11,7 +11,7 @@ async function syncFromFrontend(req, res) {
         return res.status(401).json({ error: 'Authentification requise.' });
     }
 
-    const { students = [], presences = [], activityLogs = [], appSettings = null, replace = false } = req.body;
+    const { students = [], presences = [], activityLogs = [], appSettings = null, replace = false, matieres = [], classeMatieres = [], notes = [] } = req.body;
     const { role } = req.user;
 
     if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
@@ -131,7 +131,50 @@ async function syncFromFrontend(req, res) {
             }
         }
 
-        console.log(`🎉 [Sync] Completed: ${students.length} students, ${presences.length} presences, ${activityLogs.length} logs`);
+        // --- 6. Sync Academic Data ---
+        try {
+            if (matieres.length > 0) {
+                const matieresData = matieres.map(m => ({
+                    id: m.id,
+                    nom: m.nom,
+                    categorie: m.categorie
+                }));
+                await supabase.from('matieres').upsert(matieresData, { onConflict: 'id' });
+            }
+
+            if (classeMatieres.length > 0) {
+                const cmData = classeMatieres.map(cm => ({
+                    id: cm.id,
+                    classe: cm.classe,
+                    matiere_id: cm.matiereId,
+                    professeur: cm.professeur || '',
+                    coefficient: cm.coefficient || 1
+                }));
+                await supabase.from('classe_matieres').upsert(cmData, { onConflict: 'id' });
+            }
+
+            if (notes.length > 0) {
+                // Pour éviter d'envoyer un trop gros payload d'un coup, on va le partitionner si besoin
+                const chunkSize = 500;
+                for (let i = 0; i < notes.length; i += chunkSize) {
+                    const chunk = notes.slice(i, i + chunkSize).map(n => ({
+                        id: n.id,
+                        eleve_id: n.eleveId,
+                        matiere_id: n.matiereId,
+                        periode: n.periode,
+                        note_classe: n.noteClasse,
+                        note_devoir: n.noteDevoir,
+                        note_compo: n.noteCompo
+                    }));
+                    await supabase.from('notes').upsert(chunk, { onConflict: 'id' });
+                }
+            }
+        } catch (acadErr) {
+            console.warn('⚠️ [Sync] Non-fatal error saving academic data:', acadErr.message);
+            // La table des notes ou matières n'existe peut-être pas encore, on l'ignore pour ne pas casser la sync principale
+        }
+
+        console.log(`🎉 [Sync] Completed: ${students.length} students, ${presences.length} presences, ${activityLogs.length} logs, ${notes.length} notes`);
         return res.json({ 
             message: 'Synchronisation cloud réussie.',
             count: students.length,
@@ -223,6 +266,17 @@ async function syncToFrontend(req, res) {
              console.warn('⚠️ Fetch announcements error (table may not exist):', aErr.message); 
         }
 
+        // Fetch academic data
+        const { data: dbMatieres, error: matErr } = await supabase.from('matieres').select('*');
+        if (matErr && matErr.code !== '42P01') console.warn('⚠️ Fetch matieres error:', matErr.message);
+
+        const { data: dbClasseMatieres, error: cmErr } = await supabase.from('classe_matieres').select('*');
+        if (cmErr && cmErr.code !== '42P01') console.warn('⚠️ Fetch classe_matieres error:', cmErr.message);
+
+        const { data: dbNotes, error: notErr } = await supabase.from('notes').select('*');
+        if (notErr && notErr.code !== '42P01') console.warn('⚠️ Fetch notes error:', notErr.message);
+
+
         // Group payments by student
         const studentMap = new Map();
         students.forEach(s => {
@@ -289,6 +343,27 @@ async function syncToFrontend(req, res) {
                 createdBy: a.created_by,
                 createdAt: a.created_at,
                 date: a.created_at ? a.created_at.split('T')[0] : new Date().toISOString().split('T')[0]
+            })),
+            matieres: (dbMatieres || []).map(m => ({
+                id: m.id,
+                nom: m.nom,
+                categorie: m.categorie
+            })),
+            classeMatieres: (dbClasseMatieres || []).map(cm => ({
+                id: cm.id,
+                classe: cm.classe,
+                matiereId: cm.matiere_id,
+                professeur: cm.professeur,
+                coefficient: cm.coefficient
+            })),
+            notes: (dbNotes || []).map(n => ({
+                id: n.id,
+                eleveId: n.eleve_id,
+                matiereId: n.matiere_id,
+                periode: n.periode,
+                noteClasse: n.note_classe,
+                noteDevoir: n.note_devoir,
+                noteCompo: n.note_compo
             }))
         });
 

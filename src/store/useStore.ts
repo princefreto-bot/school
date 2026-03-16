@@ -713,6 +713,16 @@ export const useStore = create<AppState>()(
               if (Array.isArray(data.announcementReads)) {
                 set({ announcementReads: data.announcementReads });
               }
+              // Récupération des données académiques
+              if (Array.isArray(data.matieres)) {
+                set({ matieres: data.matieres });
+              }
+              if (Array.isArray(data.classeMatieres)) {
+                set({ classeMatieres: data.classeMatieres });
+              }
+              if (Array.isArray(data.notes)) {
+                set({ notes: data.notes });
+              }
               console.log(`✅ Cloud data synchronized: ${repairedStudents.length} students loaded and repaired.`);
             }
           }
