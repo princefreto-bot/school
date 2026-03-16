@@ -165,16 +165,16 @@ export const Login: React.FC = () => {
         .auth-container.right-panel-active .overlay-container { transform: translateX(-100%); }
 
         .overlay {
-          background: linear-gradient(to right, #1d4ed8, #2563eb);
+          background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
           color: #FFFFFF; position: relative; left: -100%; height: 100%; width: 200%;
-          transform: translateX(0); transition: transform 0.6s ease-in-out;
+          transform: translateX(0); transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
         }
         .auth-container.right-panel-active .overlay { transform: translateX(50%); }
 
         .overlay-panel {
           position: absolute; display: flex; align-items: center; justify-content: center;
-          flex-direction: column; padding: 0 40px; text-align: center; top: 0; height: 100%; width: 50%;
-          transform: translateX(0); transition: transform 0.6s ease-in-out;
+          flex-direction: column; padding: 0 50px; text-align: center; top: 0; height: 100%; width: 50%;
+          transform: translateX(0); transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
         }
         .overlay-left { transform: translateX(-20%); }
         .auth-container.right-panel-active .overlay-left { transform: translateX(0); }
@@ -254,14 +254,24 @@ export const Login: React.FC = () => {
           <div className="overlay-container">
             <div className="overlay">
               <div className="overlay-panel overlay-left">
-                <h1 className="text-3xl font-black tracking-tighter mb-4">Bon Retour !</h1>
-                <p className="text-sm opacity-90 leading-relaxed mb-8">Pour rester connecté avec l'établissement, identifiez-vous avec vos informations.</p>
-                <button className="auth-button ghost" onClick={() => setIsRightPanelActive(false)}>Se connecter</button>
+                <h1 className="text-4xl font-black tracking-tighter mb-4 animate-in slide-in-from-left duration-700">Content de vous revoir ! 👋</h1>
+                <p className="text-sm opacity-90 leading-relaxed mb-6 max-w-[300px]">Retrouvez tout l'univers scolaire de vos enfants en un clic. Votre tableau de bord personnalisé vous attend.</p>
+                <div className="flex flex-col gap-2 mb-8 text-left w-full max-w-[280px]">
+                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-blue-300 rounded-full"/> Accès tableau de bord</div>
+                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-blue-300 rounded-full"/> Consultation des bulletins</div>
+                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-blue-300 rounded-full"/> Alertes et annonces</div>
+                </div>
+                <button className="auth-button ghost hover:bg-white/10" onClick={() => setIsRightPanelActive(false)}>Se connecter</button>
               </div>
               <div className="overlay-panel overlay-right">
-                <h1 className="text-3xl font-black tracking-tighter mb-4">Bonjour, Parent !</h1>
-                <p className="text-sm opacity-90 leading-relaxed mb-8">Visualisez la scolarité de vos enfants. Créez votre compte pour commencer.</p>
-                <button className="auth-button ghost" onClick={() => setIsRightPanelActive(true)}>S'inscrire</button>
+                <h1 className="text-4xl font-black tracking-tighter mb-4 animate-in slide-in-from-right duration-700">Bonjour, Parent ! 🌟</h1>
+                <p className="text-sm opacity-90 leading-relaxed mb-6 max-w-[300px]">Plongez au cœur de l'éducation de votre enfant. Suivez chaque instant de sa réussite avec nous.</p>
+                <div className="flex flex-col gap-2 mb-8 text-left w-full max-w-[280px]">
+                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-blue-300 rounded-full"/> Suivi des notes en temps réel</div>
+                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-blue-300 rounded-full"/> Notifications de présence</div>
+                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-blue-300 rounded-full"/> Communication école-famille</div>
+                </div>
+                <button className="auth-button ghost hover:bg-white/10" onClick={() => setIsRightPanelActive(true)}>Créer un compte</button>
               </div>
             </div>
           </div>
@@ -275,11 +285,11 @@ export const Login: React.FC = () => {
             <div className="mobile-card">
                 <div className="flex flex-col items-center">
                     <SchoolLogo logo={schoolLogo} schoolName={schoolName} size="w-20 h-20" />
-                    <h1 className="text-2xl font-black text-slate-900 tracking-tighter text-center">
-                        {view === 'login' ? 'Bienvenue' : 'Inscription'}
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tighter text-center">
+                        {view === 'login' ? 'Bienvenue !' : 'Rejoignez-nous'}
                     </h1>
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1 mb-6">
-                        {appName} • Togo
+                    <p className="text-[10px] text-blue-600 font-extrabold uppercase tracking-[0.2em] mt-2 mb-6 bg-blue-50 px-3 py-1 rounded-full">
+                        {appName} • Excellence
                     </p>
                 </div>
 
