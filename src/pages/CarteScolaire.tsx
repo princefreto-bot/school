@@ -93,9 +93,9 @@ const CarteEleve: React.FC<CarteProps> = ({
                     </div>
 
                     {/* QR Code — zone fixe, jamais masquée */}
-                    {/* Rendu en 256px, réduit à 72px via CSS = net sur Retina */}
+                    {/* Rendu en 256px, réduit via CSS = net sur Retina */}
                     <div style={{
-                        width:72, height:72, flexShrink:0,
+                        width:82, height:82, flexShrink:0,
                         background:'white', borderRadius:8, padding:3,
                         display:'flex', alignItems:'center', justifyContent:'center',
                         boxShadow:'0 2px 10px rgba(0,0,0,0.4)',
@@ -107,8 +107,8 @@ const CarteEleve: React.FC<CarteProps> = ({
                             level="H"         // correction d'erreur 30%
                             bgColor="#FFFFFF"
                             fgColor="#000000" // noir pur = contraste max
-                            marginSize={2}    // quiet zone ISO
-                            style={{ width:66, height:66 }} // réduit par CSS → net
+                            marginSize={1}    // quiet zone réduite pour maximiser la taille
+                            style={{ width:76, height:76 }} // agrandi
                         />
                     </div>
                 </div>
@@ -131,7 +131,7 @@ const buildQRDataURL = async (studentId: string): Promise<string> => {
     return QRCodeLib.toDataURL(studentId, {
         type: 'image/png',
         width: 400,
-        margin: 4,
+        margin: 1, // Marge ISO réduite pour une plus grande zone de scan
         errorCorrectionLevel: 'H',
         color: { dark: '#000000', light: '#ffffff' },
     });
@@ -261,7 +261,7 @@ const generateCartesPDF = async (
         doc.text(`Carte scolaire ${schoolYear}`, txtX, logoY + 7.5);
 
         // ── QR Code — zone fixe bas-droite ────────────────
-        const qrMM    = 22;   // 22mm dans le PDF
+        const qrMM    = 26;   // Agrandit de 22mm à 26mm pour meilleure détection
         const qrX     = x + cardW - qrMM - 2.5;
         const qrY     = y + cardH - qrMM - 2.5;
         const qrPad   = 1.0;  // marge blanche autour du QR dans le PDF

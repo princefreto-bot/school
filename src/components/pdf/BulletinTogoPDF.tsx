@@ -22,9 +22,18 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
             <div className="flex-1">
                 {/* EN-TÊTE OFFICIEL TOGOLAIS */}
             <div className="flex justify-between items-center mb-6 text-sm">
-                {/* GAUCHE : Logo de l'école agrandi */}
+                {/* GAUCHE : Sceau de la DRE agrandi */}
                 <div className="w-1/4 flex justify-start">
-                    {schoolLogo && <img src={schoolLogo} alt="Logo" className="w-24 h-24 object-contain" />}
+                    {schoolStamp ? (
+                        <div className="w-24 h-24 flex justify-center items-center">
+                            <img src={schoolStamp} alt="Sceau" className="w-full h-full object-contain" />
+                        </div>
+                    ) : (
+                        <div className="w-24 h-24 border-2 border-dashed border-gray-400 rounded-full flex flex-col items-center justify-center p-2">
+                            <span className="text-[10px] font-bold text-gray-400">SCEAU</span>
+                            <span className="text-[8px] text-gray-400 mt-1 font-bold text-center">DRE-MARITIME</span>
+                        </div>
+                    )}
                 </div>
 
                 {/* CENTRE : Texte regroupé */}
@@ -37,18 +46,9 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                     <p className="italic text-[9px]">Travail - Liberté - Patrie</p>
                 </div>
 
-                {/* DROITE : Sceau de la DRE agrandi */}
+                {/* DROITE : Logo de l'école agrandi */}
                 <div className="w-1/4 flex justify-end">
-                    {schoolStamp ? (
-                        <div className="w-24 h-24 flex justify-center items-center">
-                            <img src={schoolStamp} alt="Sceau" className="w-full h-full object-contain" />
-                        </div>
-                    ) : (
-                        <div className="w-24 h-24 border-2 border-dashed border-gray-400 rounded-full flex flex-col items-center justify-center p-2">
-                            <span className="text-[10px] font-bold text-gray-400">SCEAU</span>
-                            <span className="text-[8px] text-gray-400 mt-1 font-bold text-center">DRE-MARITIME</span>
-                        </div>
-                    )}
+                    {schoolLogo && <img src={schoolLogo} alt="Logo" className="w-24 h-24 object-contain" />}
                 </div>
             </div>
 
@@ -76,11 +76,11 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                 <thead>
                     <tr className="bg-gray-200 font-bold text-center shadow-[inset_0_0_0_1.5px_black]">
                         <th className="border-[1.5px] border-black p-1 w-[20%]">MATIÈRES</th>
-                        <th className="border-[1.5px] border-black p-1 w-[6%]">COEF</th>
                         <th className="border-[1.5px] border-black p-1 w-[7%]">CL.<br/>(/20)</th>
                         <th className="border-[1.5px] border-black p-1 w-[7%]">DEV.<br/>(/20)</th>
                         <th className="border-[1.5px] border-black p-1 w-[7%]">COMP.<br/>(/20)</th>
                         <th className="border-[1.5px] border-black p-1 w-[8%] text-[10px]">MOY.<br/>(/20)</th>
+                        <th className="border-[1.5px] border-black p-1 w-[6%]">COEF</th>
                         <th className="border-[1.5px] border-black p-1 w-[7%]">CxF</th>
                         <th className="border-[1.5px] border-black p-1 w-[6%]">RANG</th>
                         <th className="border-[1.5px] border-black p-1 w-[10%]">PROF.</th>
@@ -97,11 +97,11 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                             {cat.lignes.map((l, lIndex) => (
                                 <tr key={lIndex} className="text-center">
                                     <td className="border-[1.5px] border-black p-1 text-left uppercase font-bold text-[10px] leading-tight">{l.matiere.nom}</td>
-                                    <td className="border-[1.5px] border-black p-1 font-bold text-[12px]">{l.coef}</td>
                                     <td className="border-[1.5px] border-black p-1 font-bold text-[12px]">{l.noteClasse !== null ? l.noteClasse : '-'}</td>
                                     <td className="border-[1.5px] border-black p-1 font-bold text-[12px]">{l.noteDevoir !== null ? l.noteDevoir : '-'}</td>
                                     <td className="border-[1.5px] border-black p-1 font-bold text-[12px]">{l.noteCompo !== null ? l.noteCompo : '-'}</td>
                                     <td className="border-[1.5px] border-black p-1 font-black text-[14px] bg-gray-50">{l.moyenneMatiere !== null ? l.moyenneMatiere : '-'}</td>
+                                    <td className="border-[1.5px] border-black p-1 font-bold text-[12px]">{l.coef}</td>
                                     <td className="border-[1.5px] border-black p-1 font-bold text-[12px] bg-gray-50">{l.totalPoints !== null ? l.totalPoints : '-'}</td>
                                     <td className="border-[1.5px] border-black p-1 font-bold text-[12px]">{l.rangMatiere}</td>
                                     <td className="border-[1.5px] border-black p-1 text-[9px] truncate max-w-[50px] leading-tight">{l.professeur}</td>
@@ -111,9 +111,8 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                             ))}
                             {/* SOUS TOTAL CATEGORIE */}
                             <tr className="bg-gray-50 font-bold border-black border-t-[1.5px]">
-                                <td className="border-[1.5px] border-black p-1 text-right italic text-[10px] font-semibold">Sous-Total {cat.categorie.split('-')[1]}</td>
+                                <td colSpan={5} className="border-[1.5px] border-black p-1 text-right italic text-[10px] font-semibold">Sous-Total {cat.categorie.split('-')[1]}</td>
                                 <td className="border-[1.5px] border-black p-1 text-center font-bold text-[12px]">{cat.totalCoefs}</td>
-                                <td colSpan={4} className="border-[1.5px] border-black p-1"></td>
                                 <td className="border-[1.5px] border-black p-1 text-center font-bold text-[12px] text-rose-700 bg-rose-50">{cat.totalPoints.toFixed(2)}</td>
                                 <td colSpan={4} className="border-[1.5px] border-black p-1"></td>
                             </tr>
@@ -121,9 +120,8 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                     ))}
                     {/* TOTAL GENERAL */}
                     <tr className="font-black bg-gray-200 border-t-[2px] border-black text-[12px] shadow-[inset_0_0_0_1.5px_black]">
-                        <td className="border-[1.5px] border-black p-1 text-right uppercase tracking-wider">TOTAL GÉNÉRAL</td>
+                        <td colSpan={5} className="border-[1.5px] border-black p-1 text-right uppercase tracking-wider">TOTAL GÉNÉRAL</td>
                         <td className="border-[1.5px] border-black p-1 text-center text-[13px] text-blue-900">{data.totalCoefsGeneral}</td>
-                        <td colSpan={4} className="border-[1.5px] border-black p-1"></td>
                         <td className="border-[1.5px] border-black p-1 text-center text-[13px] text-rose-900 bg-rose-100">{data.totalPointsGeneral.toFixed(2)}</td>
                         <td colSpan={4} className="border-[1.5px] border-black p-1"></td>
                     </tr>
@@ -150,18 +148,29 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                 
                 <div className="border-[1.5px] border-black p-2 text-[10px] leading-relaxed space-y-1.5 rounded-sm font-semibold">
                     <div className="flex justify-between border-b border-gray-400 pb-1">
-                        <span>Moyenne du premier :</span>
+                        <span>Plus forte moyenne :</span>
                         <span className="font-black text-emerald-800">{data.moyenneMax.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between border-b border-gray-400 pb-1">
-                        <span>Moyenne du dernier :</span>
+                        <span>Plus faible moyenne :</span>
                         <span className="font-black text-red-800">{data.moyenneMin.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span>Moyenne de la classe :</span>
+                        <span>Moyenne générale de la classe :</span>
                         <span className="font-black text-blue-800">{data.moyenneClasse.toFixed(2)}</span>
                     </div>
                 </div>
+            </div>
+
+            {/* APPRÉCIATIONS GLOBALES */}
+            <div className="border-[1.5px] border-black p-1.5 rounded-sm bg-gray-50/50 text-[10px] mt-2 flex items-center justify-between">
+                <span className="font-bold uppercase tracking-wider text-[9px] mr-2">APPRÉCIATION :</span>
+                {['Très Bien', 'Bien', 'Assez-Bien', 'Passable', 'Insuffisant', 'Médiocre'].map(app => (
+                    <div key={app} className="flex items-center gap-1.5">
+                        <div className="w-3 h-3 border-[1px] border-black bg-white"></div>
+                        <span className="font-bold text-[8.5px] uppercase">{app}</span>
+                    </div>
+                ))}
             </div>
 
             {/* DECISIONS & SIGNATURES */}
