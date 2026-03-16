@@ -667,9 +667,9 @@ export const useStore = create<AppState>()(
         if (!user || user.role === 'parent') return; 
         if (get().isSyncing) return; // Éviter les appels concurrents
 
-        // Éviter de fetch si on vient de faire une sync (cooldown 15s)
+        // Éviter de fetch si on vient de faire une sync (cooldown 55s)
         const now = Date.now();
-        if (now - get().lastSyncTimestamp < 15000) {
+        if (now - get().lastSyncTimestamp < 55000) {
           console.log('⏳ [Sync] Fetch skipped (cooldown active)');
           return;
         }
@@ -714,14 +714,21 @@ export const useStore = create<AppState>()(
                 set({ announcementReads: data.announcementReads });
               }
               // Récupération des données académiques
-              if (Array.isArray(data.matieres)) {
+              // On ne remplace les données locales que si le cloud en a plus (évite d'écraser ce qu'on vient de saisir)
+              if (Array.isArray(data.matieres) && data.matieres.length >= get().matieres.length) {
                 set({ matieres: data.matieres });
               }
-              if (Array.isArray(data.classeMatieres)) {
+              if (Array.isArray(data.classeMatieres) && data.classeMatieres.length >= get().classeMatieres.length) {
                 set({ classeMatieres: data.classeMatieres });
               }
-              if (Array.isArray(data.notes)) {
-                set({ notes: data.notes });
+              if (Array.isArray(data.notes) && data.notes.length >= get().notes.length) {
+                // Convertit les valeurs numériques pour éviter l'avertissement "NaN"
+                set({ notes: data.notes.map((n: Note) => ({
+                  ...n,
+                  noteClasse: n.noteClasse !== null && n.noteClasse !== undefined ? Number(n.noteClasse) : null,
+                  noteDevoir: n.noteDevoir !== null && n.noteDevoir !== undefined ? Number(n.noteDevoir) : null,
+                  noteCompo: n.noteCompo !== null && n.noteCompo !== undefined ? Number(n.noteCompo) : null,
+                })) });
               }
               console.log(`✅ Cloud data synchronized: ${repairedStudents.length} students loaded and repaired.`);
             }
@@ -813,28 +820,52 @@ export const useStore = create<AppState>()(
       setCurrentPeriode: (p) => set({ currentPeriode: p }),
       matieres: [],
       setMatieres: (m) => set({ matieres: m }),
-      addMatiere: (m) => set(s => ({ matieres: [...s.matieres, m] })),
-      updateMatiere: (id, m) => set(s => ({ matieres: s.matieres.map(x => x.id === id ? { ...x, ...m } : x) })),
-      deleteMatiere: (id) => set(s => ({ matieres: s.matieres.filter(x => x.id !== id) })),
+      addMatiere: (m) => {
+        set(s => ({ matieres: [...s.matieres, m] }));
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      },
+      updateMatiere: (id, m) => {
+        set(s => ({ matieres: s.matieres.map(x => x.id === id ? { ...x, ...m } : x) }));
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      },
+      deleteMatiere: (id) => {
+        set(s => ({ matieres: s.matieres.filter(x => x.id !== id) }));
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      },
 
       classeMatieres: [],
       setClasseMatieres: (cm) => set({ classeMatieres: cm }),
-      addClasseMatiere: (cm) => set(s => ({ classeMatieres: [...s.classeMatieres, cm] })),
-      updateClasseMatiere: (id, cm) => set(s => ({ classeMatieres: s.classeMatieres.map(x => x.id === id ? { ...x, ...cm } : x) })),
-      deleteClasseMatiere: (id) => set(s => ({ classeMatieres: s.classeMatieres.filter(x => x.id !== id) })),
+      addClasseMatiere: (cm) => {
+        set(s => ({ classeMatieres: [...s.classeMatieres, cm] }));
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      },
+      updateClasseMatiere: (id, cm) => {
+        set(s => ({ classeMatieres: s.classeMatieres.map(x => x.id === id ? { ...x, ...cm } : x) }));
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      },
+      deleteClasseMatiere: (id) => {
+        set(s => ({ classeMatieres: s.classeMatieres.filter(x => x.id !== id) }));
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      },
 
       notes: [],
       setNotes: (n) => set({ notes: n }),
-      upsertNote: (n) => set(s => {
-        const existing = s.notes.findIndex(x => x.eleveId === n.eleveId && x.matiereId === n.matiereId && x.periode === n.periode);
-        if (existing >= 0) {
-          const newNotes = [...s.notes];
-          newNotes[existing] = n;
-          return { notes: newNotes };
-        }
-        return { notes: [...s.notes, n] };
-      }),
-      deleteNote: (id) => set(s => ({ notes: s.notes.filter(x => x.id !== id) }))
+      upsertNote: (n) => {
+        set(s => {
+          const existing = s.notes.findIndex(x => x.eleveId === n.eleveId && x.matiereId === n.matiereId && x.periode === n.periode);
+          if (existing >= 0) {
+            const newNotes = [...s.notes];
+            newNotes[existing] = n;
+            return { notes: newNotes };
+          }
+          return { notes: [...s.notes, n] };
+        });
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      },
+      deleteNote: (id) => {
+        set(s => ({ notes: s.notes.filter(x => x.id !== id) }));
+        import('../services/backendSync').then(({ syncToBackend }) => syncToBackend(get()));
+      }
 
     }),
     {

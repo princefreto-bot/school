@@ -344,27 +344,27 @@ async function syncToFrontend(req, res) {
                 createdAt: a.created_at,
                 date: a.created_at ? a.created_at.split('T')[0] : new Date().toISOString().split('T')[0]
             })),
-            matieres: (dbMatieres || []).map(m => ({
+            matieres: dbMatieres ? dbMatieres.map(m => ({
                 id: m.id,
                 nom: m.nom,
                 categorie: m.categorie
-            })),
-            classeMatieres: (dbClasseMatieres || []).map(cm => ({
+            })) : undefined,
+            classeMatieres: dbClasseMatieres ? dbClasseMatieres.map(cm => ({
                 id: cm.id,
                 classe: cm.classe,
                 matiereId: cm.matiere_id,
                 professeur: cm.professeur,
                 coefficient: cm.coefficient
-            })),
-            notes: (dbNotes || []).map(n => ({
+            })) : undefined,
+            notes: dbNotes ? dbNotes.map(n => ({
                 id: n.id,
                 eleveId: n.eleve_id,
                 matiereId: n.matiere_id,
                 periode: n.periode,
-                noteClasse: n.note_classe,
-                noteDevoir: n.note_devoir,
-                noteCompo: n.note_compo
-            }))
+                noteClasse: n.note_classe !== undefined ? Number(n.note_classe) : null,
+                noteDevoir: n.note_devoir !== undefined ? Number(n.note_devoir) : null,
+                noteCompo: n.note_compo !== undefined ? Number(n.note_compo) : null
+            })) : undefined
         });
 
     } catch (err) {

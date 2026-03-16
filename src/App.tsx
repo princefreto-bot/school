@@ -97,10 +97,10 @@ export function App() {
     // Premier fetch au montage
     fetchAllFromBackend();
 
-    // Polling toutes les 10 secondes pour le "temps réel"
+    // Polling toutes les 60 secondes pour éviter d'écraser les données saisies localement
     const interval = setInterval(() => {
       fetchAllFromBackend();
-    }, 10000);
+    }, 60000);
 
     return () => clearInterval(interval);
   }, [isAuthenticated, fetchAllFromBackend]);
