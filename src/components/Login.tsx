@@ -99,8 +99,9 @@ export const Login: React.FC = () => {
             const ok = await login(username, password);
             if (!ok) setError('Identifiants incorrects.');
         } else {
+            setLoading(true);
             await parentApi.register({ nom, telephone: username, password });
-            await login(username, password);
+            // On reste en local pour l'étape de liaison avant de déclencher l'auth globale
             setView('link');
         }
     } catch (err: any) {
@@ -116,7 +117,16 @@ export const Login: React.FC = () => {
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
             <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 border border-slate-100 animate-in fade-in zoom-in duration-300">
-                <LinkStudent onComplete={finishSetup} />
+                <LinkStudent onComplete={async () => {
+                   // Une fois lié, on connecte officiellement
+                   await login(username, password);
+                }} />
+                <button 
+                  onClick={async () => await login(username, password)}
+                  className="w-full mt-4 py-3 text-slate-400 text-xs font-bold hover:text-blue-600 transition"
+                >
+                  Passer cette étape pour le moment
+                </button>
             </div>
         </div>
     );
