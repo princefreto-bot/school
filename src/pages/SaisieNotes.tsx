@@ -83,16 +83,26 @@ export const SaisieNotes: React.FC = () => {
     const handleSave = () => {
         if (!selectedMatiereId || !selectedClasse) return;
 
+        const currentNotes = useStore.getState().notes;
         const batch: Note[] = [];
+        
         classStudents.forEach(student => {
             const draft = draftNotes[student.id];
             if (draft) {
+                // Chercher si une note existe déjà pour cet élève/matière/période
+                const existingNote = currentNotes.find(n => 
+                    n.eleveId === student.id && 
+                    n.matiereId === selectedMatiereId && 
+                    n.periode === currentPeriode
+                );
+
                 const nC = draft.noteClasse === '' ? null : parseFloat(draft.noteClasse);
                 const nD = draft.noteDevoir === '' ? null : parseFloat(draft.noteDevoir);
                 const nCp = draft.noteCompo === '' ? null : parseFloat(draft.noteCompo);
 
                 batch.push({
-                    id: uuid(),
+                    // Réutiliser l'UUID existant ou en créer un nouveau seulement si nécessaire
+                    id: existingNote ? existingNote.id : uuid(),
                     eleveId: student.id,
                     matiereId: selectedMatiereId,
                     periode: currentPeriode,
