@@ -8,7 +8,7 @@ import {
   BarChart3, FileText, Settings, LogOut, Menu, X,
   Bell, ChevronRight, Target, Award, MessageSquare,
   ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone,
-  BookOpen, Edit3, FileSpreadsheet, Sun, Moon
+  BookOpen, Edit3, FileSpreadsheet, Sun, Moon, Clock
 } from 'lucide-react';
 
 interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: number }
@@ -172,9 +172,41 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
 );
 
 // ── LAYOUT PRINCIPAL ─────────────────────────────────────────
-interface LayoutProps { children: React.ReactNode }
 
-export const Layout: React.FC<LayoutProps> = ({ children }) => {
+const RealTimeClock: React.FC = () => {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const lomeTime = time.toLocaleTimeString('fr-FR', {
+    timeZone: 'Africa/Lome',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+
+  const lomeDate = time.toLocaleDateString('fr-FR', {
+    timeZone: 'Africa/Lome',
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short'
+  });
+
+  return (
+    <div className="hidden md:flex flex-col items-start px-4 border-l-2 border-blue-500/20 ml-2">
+      <div className="flex items-center gap-2 text-slate-900 dark:text-white font-black tracking-tighter tabular-nums text-sm">
+        <Clock className="w-3 h-3 text-blue-600 animate-pulse" />
+        <span>{lomeTime}</span>
+      </div>
+      <p className="text-[9px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-[0.2em]">{lomeDate} — LOMÉ</p>
+    </div>
+  );
+};
+
+export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const currentPage = useStore((s) => s.currentPage);
   const setCurrentPage = useStore((s) => s.setCurrentPage);
   const user = useStore((s) => s.user);
@@ -327,6 +359,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     Session {schoolYear} — Management
                 </p>
               </div>
+              <RealTimeClock />
             </div>
             <div className="flex items-center gap-3">
               <button

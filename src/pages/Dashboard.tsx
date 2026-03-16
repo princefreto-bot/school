@@ -8,7 +8,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
-import { Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, GraduationCap, Target, ArrowUpRight, ArrowDownRight, BarChart2, FileText, UserCheck } from 'lucide-react';
+import { Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, GraduationCap, Target, ArrowUpRight, ArrowDownRight, BarChart2, UserCheck } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import {
   computeRecouvrement,
@@ -109,6 +109,27 @@ export const Dashboard: React.FC = () => {
   const classComp = useMemo(() => computeClassComparison(students), [students]);
   const santeFinanciere = useMemo(() => computeSanteFinanciere(students), [students]);
 
+  // --- Gestion Automatique du Rapport Mensuel (Chaque 5 du mois) ---
+  useEffect(() => {
+    if (students.length === 0 || classComp.length === 0) return;
+    
+    const now = new Date();
+    const day = now.getDate();
+    const currentMonthKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
+    const lastReportMonth = useStore.getState().lastReportMonth;
+    
+    // Si on est le 5 ou plus, et qu'on n'a pas encore généré le rapport ce mois-ci
+    if (day >= 5 && lastReportMonth !== currentMonthKey) {
+      setTimeout(() => {
+        generateRapportMensuelPDF(students, classComp, { 
+          name: useStore.getState().schoolName || useStore.getState().appName, 
+          logo: useStore.getState().schoolLogo 
+        });
+        useStore.getState().setLastReportMonth(currentMonthKey);
+      }, 2000); // Petit délai pour laisser l'interface se charger
+    }
+  }, [students, classComp]);
+
   const stats = useMemo(() => {
     const primaire = students.filter((s) => s.cycle === 'Primaire');
     const college = students.filter((s) => s.cycle === 'Collège');
@@ -196,12 +217,6 @@ export const Dashboard: React.FC = () => {
     );
   }
 
-  const handleGenerateReport = () => {
-    generateRapportMensuelPDF(students, classComp, { 
-      name: useStore.getState().schoolName || useStore.getState().appName, 
-      logo: useStore.getState().schoolLogo 
-    });
-  };
 
   return (
     <div className="space-y-8 pb-10">
@@ -241,15 +256,6 @@ export const Dashboard: React.FC = () => {
                         </span>
                     </div>
                 </div>
-
-                <button
-                    onClick={handleGenerateReport}
-                    className="group border-none relative flex items-center gap-3 px-10 py-5 bg-slate-900 dark:bg-blue-600 text-white rounded-[24px] shadow-2xl overflow-hidden active:scale-95 transition-all font-black text-sm"
-                >
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <FileText className="w-5 h-5 relative z-10" />
-                    <span className="relative z-10">Rapport Mensuel</span>
-                </button>
             </div>
         </div>
       </div>
@@ -556,7 +562,7 @@ export const Dashboard: React.FC = () => {
             Top Solvabilité
           </h3>
           <div className="grid grid-cols-1 gap-4">
-            {topClasses.map((c, i) => (
+            {topClasses.map((c) => (
               <div key={c.name} className="relative pro-card p-6 bg-slate-50/30 dark:bg-slate-800/30 border-none overflow-hidden group">
                   <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-125 transition-transform duration-500">
                       <CheckCircle className="w-24 h-24 text-emerald-600" />

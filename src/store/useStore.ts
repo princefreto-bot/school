@@ -146,6 +146,8 @@ export interface AppState {
   theme: 'light' | 'dark';
   setTheme: (t: 'light' | 'dark') => void;
   toggleTheme: () => void;
+  lastReportMonth: string | null;
+  setLastReportMonth: (month: string) => void;
 }
 
 // Authentification gérée par Supabase
@@ -212,8 +214,10 @@ export const useStore = create<AppState>()(
 
       // ── Thème ──────────────────────────────────────────
       theme: 'light',
-      setTheme: (t) => set({ theme: t }),
-      toggleTheme: () => set((s) => ({ theme: s.theme === 'light' ? 'dark' : 'light' })),
+      setTheme: (theme) => set({ theme }),
+      toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
+      lastReportMonth: null,
+      setLastReportMonth: (lastReportMonth) => set({ lastReportMonth }),
 
       // ── Auth ──────────────────────────────────────────────
       user: null,
@@ -985,6 +989,7 @@ export const useStore = create<AppState>()(
         matieres: state.matieres || [],
         classeMatieres: state.classeMatieres || [],
         notes: state.notes || [],
+        lastReportMonth: state.lastReportMonth,
       }),
       onRehydrateStorage: () => (state) => {
         // Auto-réparation au chargement du storage local
