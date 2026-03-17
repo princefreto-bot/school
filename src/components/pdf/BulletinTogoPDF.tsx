@@ -14,7 +14,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
         <div ref={ref} className="bg-white text-black mx-auto relative z-0 flex flex-col justify-between" style={{ width: '210mm', height: '297mm', padding: '8mm 15mm', boxSizing: 'border-box', fontFamily: '"Times New Roman", Times, serif' }}>
             {/* WATERMARK LOGO */}
             {schoolLogo && (
-                <div className="absolute inset-0 flex items-center justify-center opacity-[0.10] pointer-events-none z-[-1]">
+                <div className="absolute inset-0 flex items-center justify-center opacity-[0.20] pointer-events-none z-[-1]">
                     <img src={schoolLogo} alt="Watermark" className="w-[85%] max-w-3xl object-contain grayscale" />
                 </div>
             )}
@@ -72,14 +72,14 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
             </div>
 
             {/* TABLEAU DES NOTES */}
-            <table className="w-full border-collapse border-[1.5px] border-black text-[9px]">
+            <table className="w-full border-collapse border-[1.5px] border-black text-[10px]">
                 <thead>
                     <tr className="bg-gray-200 font-bold text-center shadow-[inset_0_0_0_1.5px_black]">
                         <th className="border-[1.5px] border-black p-1 w-[20%]">MATIÈRES</th>
                         <th className="border-[1.5px] border-black p-1 w-[7%]">CL.<br/>(/20)</th>
                         <th className="border-[1.5px] border-black p-1 w-[7%]">DEV.<br/>(/20)</th>
                         <th className="border-[1.5px] border-black p-1 w-[7%]">COMP.<br/>(/20)</th>
-                        <th className="border-[1.5px] border-black p-1 w-[8%] text-[10px]">MOY.<br/>(/20)</th>
+                        <th className="border-[1.5px] border-black p-1 w-[8%] text-[11px]">MOY.<br/>(/20)</th>
                         <th className="border-[1.5px] border-black p-1 w-[6%]">COEF</th>
                         <th className="border-[1.5px] border-black p-1 w-[7%]">CxF</th>
                         <th className="border-[1.5px] border-black p-1 w-[6%]">RANG</th>
@@ -96,33 +96,33 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                             </tr>
                             {cat.lignes.map((l, lIndex) => (
                                 <tr key={lIndex} className="text-center">
-                                    <td className="border-[1.5px] border-black p-1 text-left uppercase font-bold text-[10px] leading-tight">{l.matiere.nom}</td>
-                                    <td className="border-[1.5px] border-black p-1 font-bold text-[12px]">{l.noteClasse !== null ? l.noteClasse : '-'}</td>
-                                    <td className="border-[1.5px] border-black p-1 font-bold text-[12px]">{l.noteDevoir !== null ? l.noteDevoir : '-'}</td>
-                                    <td className="border-[1.5px] border-black p-1 font-bold text-[12px]">{l.noteCompo !== null ? l.noteCompo : '-'}</td>
-                                    <td className="border-[1.5px] border-black p-1 font-black text-[14px] bg-gray-50">{l.moyenneMatiere !== null ? l.moyenneMatiere : '-'}</td>
-                                    <td className="border-[1.5px] border-black p-1 font-bold text-[12px]">{l.coef}</td>
-                                    <td className="border-[1.5px] border-black p-1 font-bold text-[12px] bg-gray-50">{l.totalPoints !== null ? l.totalPoints : '-'}</td>
-                                    <td className="border-[1.5px] border-black p-1 font-bold text-[12px]">{l.rangMatiere}</td>
-                                    <td className="border-[1.5px] border-black p-1 text-[9px] truncate max-w-[50px] leading-tight">{l.professeur}</td>
-                                    <td className="border-[1.5px] border-black p-1 text-[9px] italic font-semibold leading-tight">{l.appreciation}</td>
+                                    <td className="border-[1.5px] border-black p-1 text-left uppercase font-bold text-[11px] leading-tight">{l.matiere.nom}</td>
+                                    <td className="border-[1.5px] border-black p-1 font-bold text-[13px]">{l.noteClasse !== null ? l.noteClasse : '-'}</td>
+                                    <td className="border-[1.5px] border-black p-1 font-bold text-[13px]">{l.noteDevoir !== null ? l.noteDevoir : '-'}</td>
+                                    <td className="border-[1.5px] border-black p-1 font-bold text-[13px]">{l.noteCompo !== null ? l.noteCompo : '-'}</td>
+                                    <td className="border-[1.5px] border-black p-1 font-black text-[15px] bg-gray-50">{l.moyenneMatiere !== null ? l.moyenneMatiere : '-'}</td>
+                                    <td className="border-[1.5px] border-black p-1 font-bold text-[13px]">{l.coef}</td>
+                                    <td className="border-[1.5px] border-black p-1 font-bold text-[13px] bg-gray-50">{l.totalPoints !== null ? l.totalPoints : '-'}</td>
+                                    <td className="border-[1.5px] border-black p-1 font-bold text-[13px]">{l.rangMatiere}</td>
+                                    <td className="border-[1.5px] border-black p-1 text-[10px] truncate max-w-[50px] leading-tight">{l.professeur}</td>
+                                    <td className="border-[1.5px] border-black p-1 text-[10px] italic font-semibold leading-tight">{l.appreciation}</td>
                                     <td className="border-[1.5px] border-black p-1"></td>
                                 </tr>
                             ))}
                             {/* SOUS TOTAL CATEGORIE */}
                             <tr className="bg-gray-50 font-bold border-black border-t-[1.5px]">
                                 <td colSpan={5} className="border-[1.5px] border-black p-1 text-right italic text-[10px] font-semibold">Sous-Total {cat.categorie.split('-')[1]}</td>
-                                <td className="border-[1.5px] border-black p-1 text-center font-bold text-[12px]">{cat.totalCoefs}</td>
-                                <td className="border-[1.5px] border-black p-1 text-center font-bold text-[12px] text-rose-700 bg-rose-50">{cat.totalPoints.toFixed(2)}</td>
+                                <td className="border-[1.5px] border-black p-1 text-center font-bold text-[13px]">{cat.totalCoefs}</td>
+                                <td className="border-[1.5px] border-black p-1 text-center font-bold text-[13px] text-rose-700 bg-rose-50">{cat.totalPoints.toFixed(2)}</td>
                                 <td colSpan={4} className="border-[1.5px] border-black p-1"></td>
                             </tr>
                         </React.Fragment>
                     ))}
                     {/* TOTAL GENERAL */}
-                    <tr className="font-black bg-gray-200 border-t-[2px] border-black text-[12px] shadow-[inset_0_0_0_1.5px_black]">
+                    <tr className="font-black bg-gray-200 border-t-[2px] border-black text-[13px] shadow-[inset_0_0_0_1.5px_black]">
                         <td colSpan={5} className="border-[1.5px] border-black p-1 text-right uppercase tracking-wider">TOTAL GÉNÉRAL</td>
-                        <td className="border-[1.5px] border-black p-1 text-center text-[13px] text-blue-900">{data.totalCoefsGeneral}</td>
-                        <td className="border-[1.5px] border-black p-1 text-center text-[13px] text-rose-900 bg-rose-100">{data.totalPointsGeneral.toFixed(2)}</td>
+                        <td className="border-[1.5px] border-black p-1 text-center text-[14px] text-blue-900">{data.totalCoefsGeneral}</td>
+                        <td className="border-[1.5px] border-black p-1 text-center text-[14px] text-rose-900 bg-rose-100">{data.totalPointsGeneral.toFixed(2)}</td>
                         <td colSpan={4} className="border-[1.5px] border-black p-1"></td>
                     </tr>
                 </tbody>
