@@ -2,7 +2,7 @@
 // TYPES PRINCIPAUX — EduFinance
 // ============================================================
 
-import { CLASSES } from '../data/classes';
+
 
 export type Cycle = 'Primaire' | 'Collège' | 'Lycée';
 

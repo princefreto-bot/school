@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
-import { Student } from '../types';
-import { getEcolageByClass } from '../data/classes';
+import { Student, Payment } from '../types';
+import { getEcolageByClass, getCycleByClass } from '../data/classes';
 
 export const parseExcelFile = (file: File): Promise<Student[]> => {
   return new Promise((resolve, reject) => {
@@ -50,9 +50,24 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
           
           const recu = String(row[11] || '').trim();
           
+          const studentId = `student-${Date.now()}-${i}`;
+          const dateNow = new Date().toISOString();
+          const today = dateNow.split('T')[0];
+          
           if (nom || prenom) {
+            const initialPayment: Payment | null = dejaPaye > 0 ? {
+              id: `payment-initial-${i}`,
+              studentId,
+              date: today,
+              montant: dejaPaye,
+              mode: 'Espèces',
+              recu: recu || `INIT-${i}`,
+              reference: recu || `INIT-${i}`,
+              commentaire: 'Paiement initial importé'
+            } : null;
+
             students.push({
-              id: `student-${Date.now()}-${i}`,
+              id: studentId,
               nom,
               prenom,
               classe,
@@ -64,15 +79,13 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
               dejaPaye,
               restant,
               recu,
-              dateInscription: new Date().toISOString().split('T')[0],
-              paiements: dejaPaye > 0 ? [{
-                id: `payment-initial-${i}`,
-                date: new Date().toISOString().split('T')[0],
-                montant: dejaPaye,
-                mode: 'Espèces',
-                reference: recu || `INIT-${i}`,
-                commentaire: 'Paiement initial importé'
-              }] : []
+              cycle: getCycleByClass(classe),
+              status: restant === 0 ? 'Soldé' : (dejaPaye > 0 ? 'Partiel' : 'Non soldé'),
+              historiquesPaiements: initialPayment ? [initialPayment] : [],
+              paiements: initialPayment ? [initialPayment] : [],
+              dateInscription: today,
+              createdAt: dateNow,
+              updatedAt: dateNow
             });
           }
         }
