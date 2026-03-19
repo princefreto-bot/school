@@ -5,13 +5,29 @@ const { JWT_SECRET, JWT_EXPIRES } = require('../config');
 
 // ── Register (Uniquement Parents) ──────────────────────────────
 async function register(req, res) {
-    const { nom, telephone, password } = req.body;
+    const { nom, telephone, password, school_slug } = req.body;
 
     if (!nom || !telephone || !password) {
         return res.status(400).json({ error: 'Champs requis : nom, telephone, password.' });
     }
 
     try {
+        // Résoudre le school_id via le slug si fourni
+        let school_id = null;
+        if (school_slug) {
+            const { data: school } = await supabase
+                .from('schools')
+                .select('id, status')
+                .eq('slug', school_slug)
+                .single();
+            if (school) {
+                if (school.status === 'suspended') {
+                    return res.status(403).json({ error: "Le compte de cet établissement est suspendu." });
+                }
+                school_id = school.id;
+            }
+        }
+
         // Vérifier si existant
         const { data: existing } = await supabase
             .from('profiles')
@@ -31,19 +47,24 @@ async function register(req, res) {
                 nom: nom.trim(),
                 telephone: telephone.trim(),
                 password: hashed,
-                role: 'parent'
+                role: 'parent',
+                school_id
             })
             .select()
             .single();
 
         if (error) throw error;
 
-        const token = jwt.sign({ id: parent.id, nom: parent.nom, role: parent.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+        const token = jwt.sign(
+            { id: parent.id, nom: parent.nom, role: parent.role, school_id: parent.school_id },
+            JWT_SECRET,
+            { expiresIn: JWT_EXPIRES }
+        );
 
         return res.status(201).json({
             message: 'Compte créé avec succès.',
             token,
-            parent: { id: parent.id, nom: parent.nom, telephone: parent.telephone, role: parent.role },
+            parent: { id: parent.id, nom: parent.nom, telephone: parent.telephone, role: parent.role, school_id: parent.school_id },
         });
     } catch (err) {
         console.error('Register Error:', err.message);
@@ -51,7 +72,7 @@ async function register(req, res) {
     }
 }
 
-// ── Login (Tout Rôles) ──────────────────────────────────────────
+// ── Login (Tout Rôles — Multi-Tenant) ──────────────────────────
 async function login(req, res) {
     const { telephone, password } = req.body;
 
@@ -60,9 +81,10 @@ async function login(req, res) {
     }
 
     try {
+        // Jointure avec la table schools pour récupérer le statut de l'école
         const { data: user, error } = await supabase
             .from('profiles')
-            .select('*')
+            .select('*, schools(id, name, slug, status, trial_ends_at, logo_url)')
             .eq('telephone', telephone.trim())
             .single();
 
@@ -75,9 +97,35 @@ async function login(req, res) {
             return res.status(401).json({ error: 'Numéro de téléphone ou mot de passe incorrect.' });
         }
 
-        // Token inclus le rôle
+        // ── Vérification accès école (sauf SuperAdmin) ──
+        if (user.role !== 'superadmin' && user.school_id && user.schools) {
+            const school = user.schools;
+
+            // École suspendue
+            if (school.status === 'suspended') {
+                return res.status(403).json({
+                    error: "L'accès à cet établissement a été suspendu. Contactez l'administrateur SaaS."
+                });
+            }
+
+            // Période d'essai expirée — bloquer les non-superadmin
+            if (school.status === 'trial' && new Date(school.trial_ends_at) < new Date()) {
+                return res.status(402).json({
+                    error: 'trial_expired',
+                    message: "La période d'essai gratuit de 2 mois est terminée. Contactez l'administrateur de la plateforme pour régulariser l'abonnement.",
+                    school_name: school.name
+                });
+            }
+        }
+
+        // ── Création du Token (inclut school_id) ──
         const token = jwt.sign(
-            { id: user.id, nom: user.nom, role: user.role },
+            {
+                id: user.id,
+                nom: user.nom,
+                role: user.role,
+                school_id: user.school_id || null
+            },
             JWT_SECRET,
             { expiresIn: JWT_EXPIRES }
         );
@@ -85,10 +133,26 @@ async function login(req, res) {
         // Mettre à jour last_login
         await supabase.from('profiles').update({ last_login: new Date().toISOString() }).eq('id', user.id);
 
+        // Infos école à renvoyer si l'utilisateur est lié à une école
+        const schoolInfo = user.schools ? {
+            school_id: user.school_id,
+            school_name: user.schools.name,
+            school_slug: user.schools.slug,
+            school_logo: user.schools.logo_url,
+            school_status: user.schools.status,
+            trial_ends_at: user.schools.trial_ends_at
+        } : {};
+
         return res.json({
             message: 'Connexion réussie.',
             token,
-            user: { id: user.id, nom: user.nom, telephone: user.telephone, role: user.role },
+            user: {
+                id: user.id,
+                nom: user.nom,
+                telephone: user.telephone,
+                role: user.role,
+                ...schoolInfo
+            },
         });
     } catch (err) {
         console.error('Login Error:', err.message);

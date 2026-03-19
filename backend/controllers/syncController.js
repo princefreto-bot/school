@@ -3,6 +3,7 @@ const { supabase } = require('../utils/supabase');
 /**
  * POST /api/sync
  * Receives data from frontend and syncs to Supabase (Single Source of Truth).
+ * ⚡ MULTI-TENANT: Toutes les opérations sont filtrées par school_id du token JWT.
  */
 async function syncFromFrontend(req, res) {
     console.log('🔄 [Sync] Request received');
@@ -12,10 +13,15 @@ async function syncFromFrontend(req, res) {
     }
 
     const { students = [], presences = [], activityLogs = [], appSettings = null, replace = false, matieres = [], classeMatieres = [], notes = [] } = req.body;
-    const { role } = req.user;
+    const { role, school_id } = req.user;
 
     if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
+    }
+
+    // ⚡ SÉCURITÉ MULTI-TENANT : school_id obligatoire (sauf superadmin)
+    if (!school_id && role !== 'superadmin') {
+        return res.status(403).json({ error: 'Compte non associé à un établissement.' });
     }
 
     try {
@@ -32,13 +38,13 @@ async function syncFromFrontend(req, res) {
             const { error: err3 } = await supabase.from('payments').delete().filter('id', 'neq', '_none_');
             if (err3) console.error('Erreur nettoyage paiements:', err3.message);
             
-            const { error: err4 } = await supabase.from('students').delete().filter('id', 'neq', '_none_');
+            const { error: err4 } = await supabase.from('students').delete().eq('school_id', school_id);
             if (err4) {
                 console.error('Erreur FATALE nettoyage élèves:', err4.message);
                 throw new Error('Le serveur Supabase refuse la suppression : ' + err4.message);
             }
-            
-            console.log('✨ [Sync] Base de données cloud remise à zéro.');
+
+            console.log('✨ [Sync] Base de données cloud remise à zéro (école uniquement).');
         }
         // --- 1. Sync Students ---
         if (students.length > 0) {
@@ -52,7 +58,8 @@ async function syncFromFrontend(req, res) {
                 deja_paye: s.dejaPaye || 0,
                 restant: s.restant || 0,
                 status: s.status || 'Non soldé',
-                telephone_parent: s.telephone || null
+                telephone_parent: s.telephone || null,
+                school_id: school_id  // ⚡ MULTI-TENANT
             }));
 
             await supabase.from('students').upsert(studentData, { onConflict: 'id' });
@@ -68,7 +75,8 @@ async function syncFromFrontend(req, res) {
                             montant: p.montant,
                             date: p.date,
                             recu: p.recu || null,
-                            note: p.note || null
+                            note: p.note || null,
+                            school_id: school_id  // ⚡ MULTI-TENANT
                         });
                     });
                 }
@@ -89,7 +97,8 @@ async function syncFromFrontend(req, res) {
                 eleve_classe: p.eleveClasse,
                 date: p.date,
                 heure: p.heure,
-                statut: p.statut
+                statut: p.statut,
+                school_id: school_id  // ⚡ MULTI-TENANT
             }));
             await supabase.from('presences').upsert(presenceData, { onConflict: 'id' });
         }
@@ -200,80 +209,91 @@ async function syncToFrontend(req, res) {
         return res.status(401).json({ error: 'Authentification requise.' });
     }
 
-    const { role } = req.user;
+    const { role, school_id } = req.user;
     if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
     }
 
+    // ⚡ MULTI-TENANT : school_id obligatoire
+    if (!school_id) {
+        return res.status(403).json({ error: 'Compte non associé à un établissement.' });
+    }
+
     try {
-        // Fetch students
+        // Fetch students — filtrés strictement par school_id
         const { data: students, error: sErr } = await supabase
             .from('students')
             .select('*')
+            .eq('school_id', school_id)  // ⚡ ISOLATION
             .order('nom');
 
         if (sErr) throw sErr;
 
-        // Fetch payments
+        // Fetch payments — filtrés par school_id
         const { data: payments, error: pErr } = await supabase
             .from('payments')
             .select('*')
+            .eq('school_id', school_id)  // ⚡ ISOLATION
             .order('date', { ascending: false });
 
         if (pErr) throw pErr;
 
-        // Fetch presences
+        // Fetch presences — filtrées par school_id
         const { data: presences, error: prErr } = await supabase
             .from('presences')
             .select('*')
+            .eq('school_id', school_id)  // ⚡ ISOLATION
             .order('date', { ascending: false })
             .order('heure', { ascending: false });
 
         if (prErr) throw prErr;
 
-        // Fetch activity logs
+        // Fetch activity logs — filtrés par school_id
         const { data: logs, error: lErr } = await supabase
             .from('activity_logs')
             .select('*')
+            .eq('school_id', school_id)  // ⚡ ISOLATION
             .order('date_heure', { ascending: false })
             .limit(500);
 
         if (lErr) throw lErr;
 
-        // Fetch parent-student links to check if a student is linked
+        // Fetch parent-student links — filtrés par school_id
         const { data: links, error: psErr } = await supabase
             .from('parent_student')
-            .select('*');
+            .select('*')
+            .eq('school_id', school_id);  // ⚡ ISOLATION
 
         if (psErr) throw psErr;
 
-        // Fetch app settings
-        const { data: appSettings, error: asErr } = await supabase
+        // Fetch app settings — spécifique à l'école
+        const { data: appSettings } = await supabase
             .from('app_settings')
             .select('*')
-            .eq('id', 'global_settings')
+            .eq('school_id', school_id)  // ⚡ ISOLATION
             .single();
 
         // ignore error if settings don't exist yet
 
-        // Fetch announcements for Admin (no reads table needed currently, or we leave reads local for Admin)
+        // Fetch announcements — filtrées par school_id
         const { data: announcements, error: aErr } = await supabase
             .from('announcements')
             .select('*')
+            .eq('school_id', school_id)  // ⚡ ISOLATION
             .order('created_at', { ascending: false });
 
-        if (aErr && aErr.code !== '42P01') { 
-             console.warn('⚠️ Fetch announcements error (table may not exist):', aErr.message); 
+        if (aErr && aErr.code !== '42P01') {
+             console.warn('⚠️ Fetch announcements error (table may not exist):', aErr.message);
         }
 
-        // Fetch academic data
-        const { data: dbMatieres, error: matErr } = await supabase.from('matieres').select('*');
+        // Fetch academic data — filtrées par school_id
+        const { data: dbMatieres, error: matErr } = await supabase.from('matieres').select('*').eq('school_id', school_id);
         if (matErr && matErr.code !== '42P01') console.warn('⚠️ Fetch matieres error:', matErr.message);
 
-        const { data: dbClasseMatieres, error: cmErr } = await supabase.from('classe_matieres').select('*');
+        const { data: dbClasseMatieres, error: cmErr } = await supabase.from('classe_matieres').select('*').eq('school_id', school_id);
         if (cmErr && cmErr.code !== '42P01') console.warn('⚠️ Fetch classe_matieres error:', cmErr.message);
 
-        const { data: dbNotes, error: notErr } = await supabase.from('notes').select('*');
+        const { data: dbNotes, error: notErr } = await supabase.from('notes').select('*').eq('school_id', school_id);
         if (notErr && notErr.code !== '42P01') console.warn('⚠️ Fetch notes error:', notErr.message);
 
 

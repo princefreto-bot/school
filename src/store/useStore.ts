@@ -252,6 +252,14 @@ export const useStore = create<AppState>()(
             throw new Error('Réponse API invalide');
           }
 
+          // Gérer les erreurs spécifiques multi-tenant
+          if (res.status === 402 && result.error === 'trial_expired') {
+            throw new Error(`TRIAL_EXPIRED:${result.school_name || 'votre école'}`);
+          }
+          if (res.status === 403) {
+            throw new Error(result.error || 'Accès refusé.');
+          }
+
           if (res.ok && result.token) {
             localStorage.setItem('parent_token', result.token);
             const loggedUser: User = {
@@ -259,20 +267,34 @@ export const useStore = create<AppState>()(
               username: result.user.telephone,
               role: result.user.role,
               nom: result.user.nom,
-              telephone: result.user.telephone
+              telephone: result.user.telephone,
+              // ⚡ Informations multi-tenant
+              school_id: result.user.school_id || undefined,
+              schoolName: result.user.school_name || undefined,
             };
 
-            // Déterminer la page de redirection
+            // Déterminer la page de redirection selon le rôle
             let targetPage: AppPage = 'dashboard';
-            if (loggedUser.role === 'parent') targetPage = 'parent_dashboard';
-            if (loggedUser.role === 'superviseur') targetPage = 'scan_presence';
+            if (loggedUser.role === 'superadmin') targetPage = 'superadmin_dashboard';
+            else if (loggedUser.role === 'parent') targetPage = 'parent_dashboard';
+            else if (loggedUser.role === 'superviseur') targetPage = 'scan_presence';
+
+            // Si l'école est en période d'essai, stocker la date de fin
+            if (result.user.trial_ends_at) {
+              localStorage.setItem('trial_ends_at', result.user.trial_ends_at);
+              localStorage.setItem('school_status', result.user.school_status || 'trial');
+            }
 
             set({ user: loggedUser, isAuthenticated: true, currentPage: targetPage });
             get().addActivityLog(createActivityLog(loggedUser.nom, loggedUser.role, 'connexion', 'Connexion API réussie'));
-            get().fetchAllFromBackend();
+            if (loggedUser.role !== 'superadmin') get().fetchAllFromBackend();
             return true;
           }
-        } catch (err) {
+        } catch (err: any) {
+          // Re-lancer les erreurs spécifiques pour les afficher à l'utilisateur
+          if (err.message?.startsWith('TRIAL_EXPIRED:') || err.message?.includes('suspendu') || err.message?.includes('Accès')) {
+            throw err;
+          }
           console.error("Erreur login backend, essai local...", err);
         }
 
@@ -298,8 +320,14 @@ export const useStore = create<AppState>()(
       currentPage: 'dashboard',
       setCurrentPage: (page) => {
         const u = get().user;
-        // Protection : si c'est un parent ou surveillant, restriction des pages
-        if (u?.role === 'parent') {
+        // SuperAdmin : accès uniquement aux pages superadmin
+        if (u?.role === 'superadmin') {
+          const allowed: AppPage[] = ['superadmin_dashboard', 'superadmin_schools', 'superadmin_billing'];
+          if (!allowed.includes(page)) {
+            set({ currentPage: 'superadmin_dashboard' });
+            return;
+          }
+        } else if (u?.role === 'parent') {
           const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces'];
           if (!allowed.includes(page)) {
             set({ currentPage: 'parent_dashboard' });

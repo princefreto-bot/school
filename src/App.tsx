@@ -33,6 +33,7 @@ const ParentsList = lazy(() => import('./pages/ParentsList').then(m => ({ defaul
 const ImportExport = lazy(() => import('./components/ImportExport').then(m => ({ default: m.ImportExport })));
 const ChatWindow = lazy(() => import('./components/ChatWindow').then(m => ({ default: m.ChatWindow })));
 const Annonces = lazy(() => import('./pages/Annonces').then(m => ({ default: m.Annonces })));
+const SuperAdminDashboard = lazy(() => import('./pages/superadmin/SuperAdminDashboard').then(m => ({ default: m.SuperAdminDashboard })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-12">
@@ -44,6 +45,15 @@ const LoadingSpinner = () => (
 const PageContent: React.FC = () => {
   const currentPage = useStore((s) => s.currentPage);
   const user = useStore((s) => s.user);
+
+  // SuperAdmin: uniquement ses pages
+  if (user?.role === 'superadmin') {
+    return (
+      <Suspense fallback={<LoadingSpinner />}>
+        <SuperAdminDashboard />
+      </Suspense>
+    );
+  }
 
   // Sécurité — Empêcher un parent de voir une page admin même si le store est désynchronisé
   if (user?.role === 'parent') {
@@ -85,6 +95,10 @@ const PageContent: React.FC = () => {
     case 'import_export': return <ImportExport />;
     case 'chat': return <ChatWindow />;
     case 'annonces': return <Annonces />;
+    case 'superadmin_dashboard':
+    case 'superadmin_schools':
+    case 'superadmin_billing':
+      return <SuperAdminDashboard />;
     default: return user?.role === 'parent' ? <ParentDashboard /> : <Dashboard />;
   }
 };

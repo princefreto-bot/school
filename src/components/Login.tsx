@@ -75,6 +75,7 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [nom, setNom] = useState('');
   const [error, setError] = useState('');
+  const [trialExpiredSchool, setTrialExpiredSchool] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -86,6 +87,7 @@ export const Login: React.FC = () => {
   const handleAuth = async (e: React.FormEvent, type: 'login' | 'register') => {
     e.preventDefault();
     setError('');
+    setTrialExpiredSchool(null);
     setLoading(true);
 
     try {
@@ -99,7 +101,14 @@ export const Login: React.FC = () => {
             setView('link');
         }
     } catch (err: any) {
-        setError(err.error || "Une erreur est survenue.");
+        const msg: string = err?.message || err?.error || "Une erreur est survenue.";
+        // Essai expiré
+        if (msg.startsWith('TRIAL_EXPIRED:')) {
+            const schoolName = msg.split(':')[1] || '';
+            setTrialExpiredSchool(schoolName);
+        } else {
+            setError(msg);
+        }
     } finally {
         setLoading(false);
     }
@@ -246,6 +255,12 @@ export const Login: React.FC = () => {
               <input type="text" placeholder="Utilisateur / Téléphone" className="auth-input" value={username} onChange={(e) => setUsername(e.target.value)} required />
               <input type="password" placeholder="Mot de passe" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
               <a href="#" className="text-xs text-slate-400 hover:text-blue-600 mt-2">Mot de passe oublié ?</a>
+              {trialExpiredSchool && (
+                <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-left">
+                  <p className="text-amber-800 font-bold text-xs">⏰ Période d'essai expirée</p>
+                  <p className="text-amber-700 text-xs mt-1">"{trialExpiredSchool}" doit régler son abonnement. Contactez l'administrateur de la plateforme.</p>
+                </div>
+              )}
               {error && <div className="text-rose-500 text-xs mt-2 font-bold">{error}</div>}
               <button className="auth-button" type="submit" disabled={loading}>{loading ? 'Connexion...' : 'Se connecter'}</button>
             </form>
@@ -309,6 +324,12 @@ export const Login: React.FC = () => {
                         <input type="password" placeholder="Mot de passe" className="w-full pl-11 pr-4 py-3 bg-slate-100 border-none rounded-2xl text-sm" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     </div>
 
+                    {trialExpiredSchool && (
+                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-left">
+                            <p className="text-amber-800 font-bold text-xs">⏰ Période d'essai expirée</p>
+                            <p className="text-amber-700 text-xs mt-1">"{trialExpiredSchool}" — Contactez l'administrateur pour régler l'abonnement.</p>
+                        </div>
+                    )}
                     {error && <div className="text-rose-500 text-xs italic text-center font-bold px-4">{error}</div>}
 
                     <button type="submit" disabled={loading} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/30 active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4">

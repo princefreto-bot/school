@@ -3,10 +3,14 @@
 // ============================================================
 import { AppPage } from '../types';
 
-type Role = 'admin' | 'directeur' | 'directeur_general' | 'proviseur' | 'censeur' | 'superviseur' | 'comptable' | 'parent';
+type Role = 'superadmin' | 'admin' | 'directeur' | 'directeur_general' | 'proviseur' | 'censeur' | 'superviseur' | 'comptable' | 'parent';
 
 // Pages accessibles par rôle
 const ROLE_PAGES: Record<Role, AppPage[]> = {
+    // ── SuperAdmin : accès global SaaS ──
+    superadmin: [
+        'superadmin_dashboard', 'superadmin_schools', 'superadmin_billing'
+    ],
     directeur_general: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
         'parametres', 'recouvrement',
@@ -62,6 +66,7 @@ type ActionType =
     | 'supprimer_parent';
 
 const ROLE_ACTIONS: Record<Role, ActionType[]> = {
+    superadmin: [], // Le superadmin a ses propres actions API dédiées
     directeur_general: [
         'modifier_parametres', 'ajouter_eleve', 'modifier_eleve', 'supprimer_eleve',
         'ajouter_paiement', 'generer_recu', 'exporter_donnees', 'importer_donnees',
@@ -104,6 +109,14 @@ export const canPerformAction = (role: string | undefined, action: ActionType): 
 };
 
 export const isAdminRole = (role: string | undefined): boolean => {
+    return role === 'admin' || role === 'directeur' || role === 'directeur_general';
+};
+
+export const isSuperAdmin = (role: string | undefined): boolean => {
+    return role === 'superadmin';
+};
+
+export const isSchoolAdmin = (role: string | undefined): boolean => {
     return role === 'admin' || role === 'directeur' || role === 'directeur_general';
 };
 

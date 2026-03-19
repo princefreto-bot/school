@@ -107,12 +107,41 @@ export interface DashboardStats {
   elevesNonSoldes: number;
 }
 
+export type UserRole =
+  | 'superadmin'
+  | 'admin'
+  | 'directeur'
+  | 'directeur_general'
+  | 'proviseur'
+  | 'censeur'
+  | 'superviseur'
+  | 'comptable'
+  | 'parent';
+
 export interface User {
   id: string;
   username: string; // phone number for parents
-  role: 'admin' | 'directeur' | 'directeur_general' | 'proviseur' | 'censeur' | 'superviseur' | 'comptable' | 'parent';
+  role: UserRole;
   nom: string;
   telephone?: string;
+  school_id?: string; // lié à une école (null pour superadmin)
+  schoolName?: string; // nom de l'école pour affichage
+}
+
+// ── École (Multi-Tenant) ─────────────────────────────────
+export interface School {
+  id: string;
+  name: string;
+  slug: string;            // ex: 'ecole-alpha'
+  logo_url?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  trial_ends_at: string;   // ISO date
+  status: 'active' | 'suspended' | 'trial';
+  created_at: string;
+  student_count?: number;  // calculé côté serveur
+  revenue?: number;        // 2000 FCFA/élève
 }
 
 export interface Parent {
@@ -212,7 +241,11 @@ export type AppPage =
   | 'parent_messages'
   | 'parents_list'
   | 'import_export'
-  | 'chat';
+  | 'chat'
+  // ── Pages SuperAdmin (propriétaire SaaS) ──
+  | 'superadmin_dashboard'
+  | 'superadmin_schools'
+  | 'superadmin_billing';
 
 // Les types de cycles existants
 export const CYCLES: Cycle[] = ['Primaire', 'Collège', 'Lycée'];
