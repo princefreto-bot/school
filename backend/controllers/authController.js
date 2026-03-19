@@ -81,14 +81,15 @@ async function login(req, res) {
     }
 
     try {
-        // Jointure avec la table schools pour récupérer le statut de l'école
+        // ── Étape 1 : Récupérer l'utilisateur (sans JOIN pour éviter les erreurs FK) ──
         const { data: user, error } = await supabase
             .from('profiles')
-            .select('*, schools(id, name, slug, status, trial_ends_at, logo_url)')
+            .select('*')
             .eq('telephone', telephone.trim())
             .single();
 
         if (!user || error) {
+            console.log('User not found for telephone:', telephone.trim(), error?.message);
             return res.status(401).json({ error: 'Numéro de téléphone ou mot de passe incorrect.' });
         }
 
@@ -97,23 +98,31 @@ async function login(req, res) {
             return res.status(401).json({ error: 'Numéro de téléphone ou mot de passe incorrect.' });
         }
 
-        // ── Vérification accès école (sauf SuperAdmin) ──
-        if (user.role !== 'superadmin' && user.school_id && user.schools) {
-            const school = user.schools;
+        // ── Étape 2 : Récupérer les infos de l'école si l'utilisateur en a une ──
+        let schoolData = null;
+        if (user.school_id) {
+            const { data: school } = await supabase
+                .from('schools')
+                .select('id, name, slug, status, trial_ends_at, logo_url')
+                .eq('id', user.school_id)
+                .single();
+            schoolData = school;
+        }
 
+        // ── Vérification accès école (sauf SuperAdmin) ──
+        if (user.role !== 'superadmin' && schoolData) {
             // École suspendue
-            if (school.status === 'suspended') {
+            if (schoolData.status === 'suspended') {
                 return res.status(403).json({
                     error: "L'accès à cet établissement a été suspendu. Contactez l'administrateur SaaS."
                 });
             }
-
-            // Période d'essai expirée — bloquer les non-superadmin
-            if (school.status === 'trial' && new Date(school.trial_ends_at) < new Date()) {
+            // Période d'essai expirée
+            if (schoolData.status === 'trial' && new Date(schoolData.trial_ends_at) < new Date()) {
                 return res.status(402).json({
                     error: 'trial_expired',
-                    message: "La période d'essai gratuit de 2 mois est terminée. Contactez l'administrateur de la plateforme pour régulariser l'abonnement.",
-                    school_name: school.name
+                    message: "La période d'essai gratuit de 2 mois est terminée. Réglez l'abonnement.",
+                    school_name: schoolData.name
                 });
             }
         }
@@ -130,18 +139,20 @@ async function login(req, res) {
             { expiresIn: JWT_EXPIRES }
         );
 
-        // Mettre à jour last_login
-        await supabase.from('profiles').update({ last_login: new Date().toISOString() }).eq('id', user.id);
+        // Mettre à jour last_login (non bloquant)
+        supabase.from('profiles').update({ last_login: new Date().toISOString() }).eq('id', user.id).then(() => {});
 
-        // Infos école à renvoyer si l'utilisateur est lié à une école
-        const schoolInfo = user.schools ? {
+        // Infos école à renvoyer
+        const schoolInfo = schoolData ? {
             school_id: user.school_id,
-            school_name: user.schools.name,
-            school_slug: user.schools.slug,
-            school_logo: user.schools.logo_url,
-            school_status: user.schools.status,
-            trial_ends_at: user.schools.trial_ends_at
+            school_name: schoolData.name,
+            school_slug: schoolData.slug,
+            school_logo: schoolData.logo_url,
+            school_status: schoolData.status,
+            trial_ends_at: schoolData.trial_ends_at
         } : {};
+
+        console.log(`✅ Login OK: ${user.nom} (${user.role}) — school_id: ${user.school_id || 'SuperAdmin'}`);
 
         return res.json({
             message: 'Connexion réussie.',
