@@ -3,7 +3,8 @@ import { useStore } from '../store/useStore';
 import { chatApi } from '../services/chatApi';
 import {
     Send, ImageIcon, Phone, MessageCircle,
-    ChevronLeft, MoreVertical, Loader2, Check, CheckCheck
+    ChevronLeft, MoreVertical, Loader2, Check, CheckCheck,
+    Trash2
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -141,6 +142,29 @@ export const ChatWindow: React.FC = () => {
         window.open(`https://wa.me/${cleanPhone}`, '_blank');
     };
 
+    const handleDeleteMessage = async (messageId: number) => {
+        if (!window.confirm('Supprimer ce message ?')) return;
+        try {
+            await chatApi.deleteMessage(messageId);
+            setMessages(prev => prev.filter(m => m.id !== messageId));
+        } catch (err) {
+            console.error(err);
+            alert('Erreur lors de la suppression');
+        }
+    };
+
+    const handleDeleteConversation = async (convId: string) => {
+        if (!window.confirm('Supprimer toute la conversation ? Cette action est irréversible.')) return;
+        try {
+            await chatApi.deleteConversation(convId);
+            setConversations(prev => prev.filter(c => c.id !== convId));
+            if (activeConv?.id === convId) setActiveConv(null);
+        } catch (err) {
+            console.error(err);
+            alert('Erreur lors de la suppression');
+        }
+    };
+
     return (
         <div className="flex h-[calc(100vh-120px)] bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
             {/* Sidebar Conversations */}
@@ -238,6 +262,13 @@ export const ChatWindow: React.FC = () => {
                                         </button>
                                     </>
                                 )}
+                                <button 
+                                    onClick={() => handleDeleteConversation(activeConv.id)}
+                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                                    title="Supprimer la conversation"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
                                 <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full">
                                     <MoreVertical className="w-5 h-5" />
                                 </button>
@@ -250,7 +281,7 @@ export const ChatWindow: React.FC = () => {
                                 const isMe = msg.sender_id === user?.id;
                                 return (
                                     <div key={msg.id || idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`max-w-[75%] rounded-2xl p-3 shadow-sm ${isMe ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white text-slate-800 rounded-tl-none border border-slate-100'}`}>
+                                        <div className={`group relative max-w-[75%] rounded-2xl p-3 shadow-sm ${isMe ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white text-slate-800 rounded-tl-none border border-slate-100'}`}>
                                             {msg.image_url ? (
                                                 <img src={msg.image_url} alt="Image" className="rounded-lg mb-2 max-h-60 w-full object-cover" />
                                             ) : null}
@@ -263,6 +294,15 @@ export const ChatWindow: React.FC = () => {
                                                     msg.read_status ? <CheckCheck className="w-3 h-3" /> : <Check className="w-3 h-3" />
                                                 )}
                                             </div>
+
+                                            {/* Bouton de suppression au survol */}
+                                            <button
+                                                onClick={() => handleDeleteMessage(msg.id)}
+                                                className={`absolute top-1 ${isMe ? '-left-8' : '-right-8'} p-1.5 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded-lg hover:bg-white active:scale-95 shadow-sm border border-slate-100 md:border-none md:shadow-none`}
+                                                title="Supprimer"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
                                         </div>
                                     </div>
                                 );

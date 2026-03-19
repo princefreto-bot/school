@@ -21,13 +21,14 @@ interface CarteProps {
     prenom: string;
     classe: string;
     id: string;
+    telephone: string;
     schoolName: string;
     schoolYear: string;
     schoolLogo: string | null;
 }
 
 const CarteEleve: React.FC<CarteProps> = ({
-    nom, prenom, classe, id, schoolName, schoolYear, schoolLogo,
+    nom, prenom, classe, id, telephone, schoolName, schoolYear, schoolLogo,
 }) => {
     const nomComplet = `${prenom} ${nom}`.toUpperCase();
 
@@ -79,16 +80,21 @@ const CarteEleve: React.FC<CarteProps> = ({
                         }}>
                             {nomComplet}
                         </p>
-                        <span style={{
-                            background:'rgba(59,130,246,0.35)', color:'#bfdbfe',
-                            fontSize:7, fontWeight:'bold', padding:'1px 6px',
-                            borderRadius:10, border:'1px solid rgba(147,197,253,0.25)',
-                            display:'inline-block', marginBottom:4,
-                        }}>
-                            {classe}
-                        </span>
-                        <p style={{ color:'#60a5fa', fontSize:6, margin:0 }}>
-                            Scanner le QR · YZOMACAMB
+                        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
+                            <span style={{
+                                background:'rgba(59,130,246,0.35)', color:'#bfdbfe',
+                                fontSize:7, fontWeight:'bold', padding:'1px 6px',
+                                borderRadius:10, border:'1px solid rgba(147,197,253,0.25)',
+                                display:'inline-block',
+                            }}>
+                                {classe}
+                            </span>
+                            <span style={{ color:'#93c5fd', fontSize:6.5, fontWeight:'600' }}>
+                                📞 {telephone}
+                            </span>
+                        </div>
+                        <p style={{ color:'#60a5fa', fontSize:5.5, margin:0, fontStyle:'italic', lineHeight:1.1, marginTop:4 }}>
+                            Si vous trouvez cette carte, veuillez la ramener à l'administration du CS YZOMACAMB
                         </p>
                     </div>
 
@@ -165,7 +171,7 @@ const resizeLogoForPDF = (src: string, size: number): Promise<string> => {
 // GÉNÉRATION PDF — 8 cartes par page A4 (2 colonnes × 4 lignes)
 // ============================================================
 const generateCartesPDF = async (
-    students: Array<{ id: string; nom: string; prenom: string; classe: string }>,
+    students: Array<{ id: string; nom: string; prenom: string; classe: string; telephone: string }>,
     schoolName: string,
     schoolYear: string,
     schoolLogo: string | null,
@@ -288,18 +294,26 @@ const generateCartesPDF = async (
             doc.text(line, x + 2.5, nameY + i * (nameFontSz * 0.38));
         });
 
-        // ── Classe ────────────────────────────────────────
+        // ── Classe & Téléphone ──────────────────────────
         const classeOffsetY = nameLines.slice(0, 2).length * (nameFontSz * 0.38);
         doc.setFontSize(6);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(147, 197, 253);
         doc.text(`CLASSE : ${student.classe}`, x + 2.5, nameY + classeOffsetY + 3.5);
+        
+        doc.setFontSize(5.5);
+        doc.setTextColor(255, 255, 255);
+        doc.text(`Tél : ${student.telephone}`, x + 2.5, nameY + classeOffsetY + 7.5);
 
-        // ── Pied de carte ─────────────────────────────────
-        doc.setFontSize(4);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(96, 165, 250);
-        doc.text('Scanner le QR pour vérifier', x + 2.5, y + cardH - 2);
+        // ── Pied de carte (Disclaimer) ───────────────────
+        doc.setFontSize(3.8);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(150, 200, 255);
+        const disclaimer = "Si cette carte ne vous appartient pas, veuillez la ramener à l'administration du CS YZOMACAMB";
+        const disclaimerLines = doc.splitTextToSize(disclaimer, cardW - 32); // laisser de la place pour le QR
+        disclaimerLines.forEach((line: string, i: number) => {
+            doc.text(line, x + 2.5, y + cardH - 5.5 + i * 2);
+        });
 
         // Progression
         cardIndex++;
@@ -512,6 +526,7 @@ export const CarteScolaire: React.FC = () => {
                                 <div style={{ boxShadow:'0 10px 40px rgba(0,0,0,0.2)', borderRadius:12, display:'inline-block' }}>
                                     <CarteEleve
                                         nom={s.nom} prenom={s.prenom} classe={s.classe} id={s.id}
+                                        telephone={s.telephone}
                                         schoolName={schoolName} schoolYear={schoolYear} schoolLogo={schoolLogo}
                                     />
                                 </div>

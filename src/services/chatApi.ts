@@ -54,5 +54,25 @@ export const chatApi = {
         const result = await parseResponse(res);
         if (!res.ok) throw result;
         return result;
+    },
+
+    deleteMessage: async (messageId: number) => {
+        const res = await fetch(`${API_URL}/message/${messageId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
+    },
+
+    deleteConversation: async (conversationId: string) => {
+        const res = await fetch(`${API_URL}/conversation/${conversationId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
     }
 };

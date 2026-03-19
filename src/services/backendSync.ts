@@ -17,24 +17,44 @@ import { AppState } from '../store/useStore';
  * @returns {Promise<any>} - Résultat de la sync
  */
 export async function syncToBackend(store: Partial<AppState>, replace: boolean = false) {
-    const { students = [], parents = [], presences = [], activityLogs = [], appName, schoolName, schoolYear, messageRemerciement, messageRappel, schoolLogo, schoolStamp, cycleSchedules, announcements = [], announcementReads = [], matieres = [], classeMatieres = [], notes = [] } = store;
+    const payload: any = { replace };
     
-    const appSettings = (appName || schoolName || schoolLogo || schoolStamp) ? {
-        appName,
-        schoolName,
-        schoolYear,
-        messageRemerciement,
-        messageRappel,
-        schoolLogo,
-        schoolStamp,
-        cycleSchedules
-    } : null;
+    // N'inclure que les champs fournis dans l'objet store pour éviter d'envoyer des tableaux vides par erreur
+    if (store.students !== undefined) payload.students = store.students;
+    if (store.parents !== undefined) payload.parents = store.parents;
+    if (store.presences !== undefined) payload.presences = store.presences;
+    if (store.activityLogs !== undefined) payload.activityLogs = store.activityLogs;
+    if (store.announcements !== undefined) payload.announcements = store.announcements;
+    if (store.announcementReads !== undefined) payload.announcementReads = store.announcementReads;
+    if (store.matieres !== undefined) payload.matieres = store.matieres;
+    if (store.classeMatieres !== undefined) payload.classeMatieres = store.classeMatieres;
+    if (store.notes !== undefined) payload.notes = store.notes;
+
+    const { 
+        appName, schoolName, schoolYear, 
+        messageRemerciement, messageRappel, 
+        schoolLogo, schoolStamp, cycleSchedules 
+    } = store;
+    
+    // Si l'un des paramètres de configuration est fourni, on envoie appSettings
+    if (appName !== undefined || schoolName !== undefined || schoolLogo !== undefined || schoolStamp !== undefined || cycleSchedules !== undefined) {
+        payload.appSettings = {
+            appName,
+            schoolName,
+            schoolYear,
+            messageRemerciement,
+            messageRappel,
+            schoolLogo,
+            schoolStamp,
+            cycleSchedules
+        };
+    }
 
     try {
         const response = await fetch(`${BACKEND_URL}/api/sync`, {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ students, parents, presences, activityLogs, appSettings, announcements, announcementReads, replace, matieres, classeMatieres, notes }),
+            body: JSON.stringify(payload),
         });
 
         // read text first so we can fall back if it's not JSON
@@ -62,7 +82,7 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
             return null;
         }
 
-        if (appSettings) {
+        if (payload.appSettings) {
             console.log('✅ Settings Sync: SUCCESS');
         } else {
             console.log('✅ Data Sync successful:', result.count || 0, 'students synced');
