@@ -303,7 +303,18 @@ export const useStore = create<AppState>()(
 
       // ── Navigation ───────────────────────────────────────
       currentPage: 'dashboard',
-      setCurrentPage: (page) => set({ currentPage: page }),
+      setCurrentPage: (page) => {
+        const u = get().user;
+        // Protection : si c'est un parent, il ne peut naviguer que vers les pages parentales ou les pages communes
+        if (u?.role === 'parent') {
+          const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces'];
+          if (!allowed.includes(page)) {
+            set({ currentPage: 'parent_dashboard' });
+            return;
+          }
+        }
+        set({ currentPage: page });
+      },
 
       // ── Élèves ───────────────────────────────────────────
       students: [],
@@ -990,11 +1001,23 @@ export const useStore = create<AppState>()(
         classeMatieres: state.classeMatieres || [],
         notes: state.notes || [],
         lastReportMonth: state.lastReportMonth,
+        currentPage: state.currentPage,
+        theme: state.theme,
       }),
       onRehydrateStorage: () => (state) => {
         // Auto-réparation au chargement du storage local
-        if (state && state.students.length > 0) {
-          state.students = state.students.map(repairStudent);
+        if (state) {
+          if (state.students && state.students.length > 0) {
+            state.students = state.students.map(repairStudent);
+          }
+          
+          // Sécurité — Empêcher la re-connexion automatique de switcher un parent sur l'admin
+          if (state.user?.role === 'parent') {
+            const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces'];
+            if (!allowed.includes(state.currentPage)) {
+              state.currentPage = 'parent_dashboard';
+            }
+          }
         }
         console.log('🔄 [Storage] Rehydrated. Current Logo:', state?.schoolLogo ? 'Present (Base64)' : 'None');
       },

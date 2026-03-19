@@ -43,6 +43,15 @@ const LoadingSpinner = () => (
 
 const PageContent: React.FC = () => {
   const currentPage = useStore((s) => s.currentPage);
+  const user = useStore((s) => s.user);
+
+  // Sécurité — Empêcher un parent de voir une page admin même si le store est désynchronisé
+  if (user?.role === 'parent') {
+    const parentPages = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat'];
+    if (!parentPages.includes(currentPage as any)) {
+      return <ParentDashboard />;
+    }
+  }
 
   switch (currentPage) {
     case 'dashboard': return <Dashboard />;
@@ -69,7 +78,7 @@ const PageContent: React.FC = () => {
     case 'import_export': return <ImportExport />;
     case 'chat': return <ChatWindow />;
     case 'annonces': return <Annonces />;
-    default: return <Dashboard />;
+    default: return user?.role === 'parent' ? <ParentDashboard /> : <Dashboard />;
   }
 };
 
