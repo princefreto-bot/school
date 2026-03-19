@@ -30,7 +30,7 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'recouvrement', 'verification_recu', 'import_export', 'chat'
     ],
     superviseur: [
-        'dashboard', 'eleves', 'scan_presence', 'scan_sortie', 'carte_scolaire', 'chat'
+        'scan_presence', 'scan_sortie', 'carte_scolaire'
     ],
     proviseur: [
         'dashboard', 'eleves', 'analyses', 'chat',

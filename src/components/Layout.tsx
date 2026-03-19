@@ -400,12 +400,16 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
         {/* Bottom Navigation for Mobile (Native App Style) */}
         <nav className={`lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-200 dark:border-slate-800 flex items-center justify-around px-2 z-40 safe-area-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.05)] ${sidebarOpen ? 'hidden' : 'flex'}`}>
-          {[
+          {(user?.role === 'superviseur' ? [
+            { id: 'scan_presence', label: 'Entrée', icon: <ScanLine className="w-5 h-5" /> },
+            { id: 'scan_sortie', label: 'Sortie', icon: <ScanLine className="w-5 h-5" /> },
+            { id: 'carte_scolaire', label: 'Cartes', icon: <IdCard className="w-5 h-5" /> },
+          ] : [
             { id: isParent ? 'parent_dashboard' : 'dashboard', label: 'Home', icon: <LayoutDashboard className="w-5 h-5" /> },
             { id: isParent ? 'parent_historique' : 'eleves', label: isParent ? 'Historique' : 'Élèves', icon: isParent ? <CreditCard className="w-5 h-5" /> : <Users className="w-5 h-5" /> },
             { id: 'chat', label: 'Chat', icon: <MessageSquare className="w-5 h-5" />, badge: unreadMessages },
             { id: isParent ? 'parent_recus' : 'parametres', label: isParent ? 'Recus' : 'Config', icon: isParent ? <FileText className="w-5 h-5" /> : <Settings className="w-5 h-5" /> },
-          ].map((item) => {
+          ]).map((item) => {
             const active = currentPage === item.id;
             return (
               <button

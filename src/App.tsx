@@ -53,6 +53,13 @@ const PageContent: React.FC = () => {
     }
   }
 
+  if (user?.role === 'superviseur') {
+    const superviseurPages = ['scan_presence', 'scan_sortie', 'carte_scolaire'];
+    if (!superviseurPages.includes(currentPage as any)) {
+      return <ScanPresence />;
+    }
+  }
+
   switch (currentPage) {
     case 'dashboard': return <Dashboard />;
     case 'eleves': return <Eleves />;

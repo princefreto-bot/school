@@ -66,10 +66,10 @@ export interface AppState {
   setMessageRemerciement: (m: string) => void;
   messageRappel: string;
   setMessageRappel: (m: string) => void;
-  updateAllSettings: (settings: { 
-    appName?: string, 
-    schoolName?: string, 
-    schoolYear?: string, 
+  updateAllSettings: (settings: {
+    appName?: string,
+    schoolName?: string,
+    schoolYear?: string,
     schoolLogo?: string | null,
     schoolStamp?: string | null,
     messageRemerciement?: string,
@@ -174,7 +174,7 @@ const deduplicateStudents = (list: Student[]): Student[] => {
       const existingPaiements = existing.historiquesPaiements?.length || 0;
       const currentPaiements = s.historiquesPaiements?.length || 0;
       if (currentPaiements > existingPaiements) {
-         seen.set(key, s);
+        seen.set(key, s);
       }
     }
   });
@@ -187,7 +187,7 @@ const repairStudent = (s: Student): Student => {
   const correctEcolage = getEcolage(s.classe);
   const correctRestant = Math.max(0, correctEcolage - s.dejaPaye);
   const correctStatus = computeStatus(correctRestant, correctEcolage);
-  
+
   if (s.cycle !== correctCycle || s.ecolage !== correctEcolage || s.restant !== correctRestant || s.status !== correctStatus) {
     return {
       ...s,
@@ -243,7 +243,6 @@ export const useStore = create<AppState>()(
             body: JSON.stringify({ telephone: username, password })
           });
 
-          // parse with same helper as other services
           const text = await res.text();
           let result: any;
           try {
@@ -266,30 +265,24 @@ export const useStore = create<AppState>()(
             // Déterminer la page de redirection
             let targetPage: AppPage = 'dashboard';
             if (loggedUser.role === 'parent') targetPage = 'parent_dashboard';
+            if (loggedUser.role === 'superviseur') targetPage = 'scan_presence';
 
             set({ user: loggedUser, isAuthenticated: true, currentPage: targetPage });
             get().addActivityLog(createActivityLog(loggedUser.nom, loggedUser.role, 'connexion', 'Connexion API réussie'));
-
-            // Sync data immediately after login
             get().fetchAllFromBackend();
-
             return true;
           }
-
-          // if we reached this point, login failed on server
         } catch (err) {
           console.error("Erreur login backend, essai local...", err);
         }
 
-        // Fallback local pour admin classique si serveur off (debug)
+        // Fallback local
         if (username === 'admin' && password === 'admin123') {
           const loggedUser: User = { id: 'admin', username: 'admin', role: 'admin', nom: 'Admin Local' };
-          // On essaie de garder un token générique pour les appels API locaux si besoin
           set({ user: loggedUser, isAuthenticated: true, currentPage: 'dashboard' });
           get().addActivityLog(createActivityLog('Admin Local', 'admin', 'connexion', 'Connexion locale réussie'));
           return true;
         }
-
         return false;
       },
       logout: () => {
@@ -305,11 +298,17 @@ export const useStore = create<AppState>()(
       currentPage: 'dashboard',
       setCurrentPage: (page) => {
         const u = get().user;
-        // Protection : si c'est un parent, il ne peut naviguer que vers les pages parentales ou les pages communes
+        // Protection : si c'est un parent ou surveillant, restriction des pages
         if (u?.role === 'parent') {
           const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces'];
           if (!allowed.includes(page)) {
             set({ currentPage: 'parent_dashboard' });
+            return;
+          }
+        } else if (u?.role === 'superviseur') {
+          const allowed: AppPage[] = ['scan_presence', 'scan_sortie', 'carte_scolaire'];
+          if (!allowed.includes(page)) {
+            set({ currentPage: 'scan_presence' });
             return;
           }
         }
@@ -389,7 +388,7 @@ export const useStore = create<AppState>()(
           const student = get().students.find(s => s.id === id);
           get().addActivityLog(createActivityLog(u.nom, u.role, 'suppression', `Suppression : ${student ? student.prenom + ' ' + student.nom : id}`));
         }
-        set({ 
+        set({
           students: get().students.filter((s) => s.id !== id),
           lastSyncTimestamp: Date.now() // Bloque le polling entrant pendant 60s
         });
@@ -691,7 +690,7 @@ export const useStore = create<AppState>()(
       setLastSyncTimestamp: (t) => set({ lastSyncTimestamp: t }),
       fetchAllFromBackend: async () => {
         const user = get().user;
-        if (!user || user.role === 'parent') return; 
+        if (!user || user.role === 'parent') return;
         if (get().isSyncing) return; // Éviter les appels concurrents
 
         // Éviter de fetch si on vient de faire une sync (cooldown 55s)
@@ -745,51 +744,51 @@ export const useStore = create<AppState>()(
                 const hasCloud = data.matieres.length > 0;
                 const hasLocal = get().matieres.length > 0;
                 if (hasCloud || !hasLocal) {
-                   set({ matieres: data.matieres });
+                  set({ matieres: data.matieres });
                 }
               }
               if (Array.isArray(data.classeMatieres)) {
                 const hasCloud = data.classeMatieres.length > 0;
                 const hasLocal = get().classeMatieres.length > 0;
                 if (hasCloud || !hasLocal) {
-                   set({ classeMatieres: data.classeMatieres });
+                  set({ classeMatieres: data.classeMatieres });
                 }
               }
               if (Array.isArray(data.notes)) {
                 const cloudNotes = data.notes.map((n: Note) => ({
-                    ...n,
-                    noteClasse: n.noteClasse !== null && n.noteClasse !== undefined ? Number(n.noteClasse) : null,
-                    noteDevoir: n.noteDevoir !== null && n.noteDevoir !== undefined ? Number(n.noteDevoir) : null,
-                    noteCompo: n.noteCompo !== null && n.noteCompo !== undefined ? Number(n.noteCompo) : null,
+                  ...n,
+                  noteClasse: n.noteClasse !== null && n.noteClasse !== undefined ? Number(n.noteClasse) : null,
+                  noteDevoir: n.noteDevoir !== null && n.noteDevoir !== undefined ? Number(n.noteDevoir) : null,
+                  noteCompo: n.noteCompo !== null && n.noteCompo !== undefined ? Number(n.noteCompo) : null,
                 }));
 
                 // Fusion intelligente : on garde les notes locales qui ne sont pas dans le cloud 
                 // (peut-être de nouvelles saisies) et on met à jour les existantes.
                 const localNotes = get().notes;
-                
+
                 // Si le cloud est vide et qu'on a déjà des données locales, on ne vide PAS tout
                 // sauf si c'est la première sync (isAuthenticated vient de passer à true)
                 if (cloudNotes.length > 0) {
-                    // On crée une map des notes cloud pour un accès rapide
-                    const cloudMap = new Map();
-                    cloudNotes.forEach((n: Note) => {
-                        const key = `${n.eleveId}-${n.matiereId}-${n.periode}`;
-                        cloudMap.set(key, n);
-                    });
+                  // On crée une map des notes cloud pour un accès rapide
+                  const cloudMap = new Map();
+                  cloudNotes.forEach((n: Note) => {
+                    const key = `${n.eleveId}-${n.matiereId}-${n.periode}`;
+                    cloudMap.set(key, n);
+                  });
 
-                    // On fusionne : le cloud prime pour les doublons, 
-                    // mais on garde les locales uniques (WIP)
-                    const mergedNotes = [...cloudNotes];
-                    localNotes.forEach(ln => {
-                        const key = `${ln.eleveId}-${ln.matiereId}-${ln.periode}`;
-                        if (!cloudMap.has(key)) {
-                            mergedNotes.push(ln);
-                        }
-                    });
+                  // On fusionne : le cloud prime pour les doublons, 
+                  // mais on garde les locales uniques (WIP)
+                  const mergedNotes = [...cloudNotes];
+                  localNotes.forEach(ln => {
+                    const key = `${ln.eleveId}-${ln.matiereId}-${ln.periode}`;
+                    if (!cloudMap.has(key)) {
+                      mergedNotes.push(ln);
+                    }
+                  });
 
-                    set({ notes: mergedNotes });
+                  set({ notes: mergedNotes });
                 } else if (localNotes.length === 0) {
-                    set({ notes: cloudNotes });
+                  set({ notes: cloudNotes });
                 }
               }
               console.log(`✅ Cloud data synchronized: ${repairedStudents.length} students loaded and repaired.`);
@@ -884,20 +883,20 @@ export const useStore = create<AppState>()(
       setMatieres: (m) => set({ matieres: m }),
       addMatiere: (m) => {
         set(s => ({ matieres: [...s.matieres, m] }));
-        import('../services/backendSync').then(({ syncToBackend }) => 
+        import('../services/backendSync').then(({ syncToBackend }) =>
           syncToBackend({ matieres: get().matieres }).then(() => set({ lastSyncTimestamp: Date.now() }))
         );
       },
       updateMatiere: (id, m) => {
         set(s => ({ matieres: s.matieres.map(x => x.id === id ? { ...x, ...m } : x) }));
-        import('../services/backendSync').then(({ syncToBackend }) => 
+        import('../services/backendSync').then(({ syncToBackend }) =>
           syncToBackend({ matieres: get().matieres }).then(() => set({ lastSyncTimestamp: Date.now() }))
         );
       },
       deleteMatiere: async (id) => {
-        set(s => ({ 
+        set(s => ({
           matieres: s.matieres.filter(x => x.id !== id),
-          lastSyncTimestamp: Date.now() 
+          lastSyncTimestamp: Date.now()
         }));
         try {
           const { getAuthHeaders } = await import('../services/apiHelpers');
@@ -914,18 +913,18 @@ export const useStore = create<AppState>()(
       setClasseMatieres: (cm) => set({ classeMatieres: cm }),
       addClasseMatiere: (cm) => {
         set(s => ({ classeMatieres: [...s.classeMatieres, cm] }));
-        import('../services/backendSync').then(({ syncToBackend }) => 
+        import('../services/backendSync').then(({ syncToBackend }) =>
           syncToBackend({ classeMatieres: get().classeMatieres }).then(() => set({ lastSyncTimestamp: Date.now() }))
         );
       },
       updateClasseMatiere: (id, cm) => {
         set(s => ({ classeMatieres: s.classeMatieres.map(x => x.id === id ? { ...x, ...cm } : x) }));
-        import('../services/backendSync').then(({ syncToBackend }) => 
+        import('../services/backendSync').then(({ syncToBackend }) =>
           syncToBackend({ classeMatieres: get().classeMatieres }).then(() => set({ lastSyncTimestamp: Date.now() }))
         );
       },
       deleteClasseMatiere: async (id) => {
-        set(s => ({ 
+        set(s => ({
           classeMatieres: s.classeMatieres.filter(x => x.id !== id),
           lastSyncTimestamp: Date.now()
         }));
@@ -956,12 +955,12 @@ export const useStore = create<AppState>()(
           });
           return { notes: currentNotes };
         });
-        import('../services/backendSync').then(({ syncToBackend }) => 
+        import('../services/backendSync').then(({ syncToBackend }) =>
           syncToBackend({ notes: get().notes }).then(() => set({ lastSyncTimestamp: Date.now() }))
         );
       },
       deleteNote: async (id) => {
-        set(s => ({ 
+        set(s => ({
           notes: s.notes.filter(x => x.id !== id),
           lastSyncTimestamp: Date.now()
         }));
@@ -1010,12 +1009,17 @@ export const useStore = create<AppState>()(
           if (state.students && state.students.length > 0) {
             state.students = state.students.map(repairStudent);
           }
-          
+
           // Sécurité — Empêcher la re-connexion automatique de switcher un parent sur l'admin
           if (state.user?.role === 'parent') {
             const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces'];
             if (!allowed.includes(state.currentPage)) {
               state.currentPage = 'parent_dashboard';
+            }
+          } else if (state.user?.role === 'superviseur') {
+            const allowed: AppPage[] = ['scan_presence', 'scan_sortie', 'carte_scolaire'];
+            if (!allowed.includes(state.currentPage)) {
+              state.currentPage = 'scan_presence';
             }
           }
         }
