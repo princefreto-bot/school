@@ -9,35 +9,35 @@ type Role = 'admin' | 'directeur' | 'directeur_general' | 'proviseur' | 'censeur
 const ROLE_PAGES: Record<Role, AppPage[]> = {
     directeur_general: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'carte_scolaire',
+        'parametres', 'recouvrement',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     admin: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'carte_scolaire',
+        'parametres', 'recouvrement',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     directeur: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'carte_scolaire',
+        'parametres', 'recouvrement',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     comptable: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'recouvrement', 'verification_recu', 'carte_scolaire', 'import_export', 'chat'
+        'recouvrement', 'verification_recu', 'import_export', 'chat'
     ],
     superviseur: [
         'dashboard', 'eleves', 'scan_presence', 'scan_sortie', 'carte_scolaire', 'chat'
     ],
     proviseur: [
-        'dashboard', 'eleves', 'analyses', 'scan_presence', 'scan_sortie', 'carte_scolaire', 'chat',
+        'dashboard', 'eleves', 'analyses', 'chat',
         'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     censeur: [
-        'dashboard', 'eleves', 'analyses', 'scan_presence', 'scan_sortie', 'carte_scolaire', 'chat',
+        'dashboard', 'eleves', 'analyses', 'chat',
         'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     parent: [
@@ -65,17 +65,17 @@ const ROLE_ACTIONS: Record<Role, ActionType[]> = {
     directeur_general: [
         'modifier_parametres', 'ajouter_eleve', 'modifier_eleve', 'supprimer_eleve',
         'ajouter_paiement', 'generer_recu', 'exporter_donnees', 'importer_donnees',
-        'voir_historique', 'scan_presence', 'generer_carte', 'supprimer_parent'
+        'voir_historique', 'supprimer_parent'
     ],
     admin: [
         'modifier_parametres', 'ajouter_eleve', 'modifier_eleve', 'supprimer_eleve',
         'ajouter_paiement', 'generer_recu', 'exporter_donnees', 'importer_donnees',
-        'voir_historique', 'scan_presence', 'generer_carte', 'supprimer_parent'
+        'voir_historique', 'supprimer_parent'
     ],
     directeur: [
         'modifier_parametres', 'ajouter_eleve', 'modifier_eleve', 'supprimer_eleve',
         'ajouter_paiement', 'generer_recu', 'exporter_donnees', 'importer_donnees',
-        'voir_historique', 'scan_presence', 'generer_carte', 'supprimer_parent'
+        'voir_historique', 'supprimer_parent'
     ],
     comptable: [
         'ajouter_paiement', 'generer_recu', 'exporter_donnees', 'ajouter_eleve',
@@ -85,11 +85,9 @@ const ROLE_ACTIONS: Record<Role, ActionType[]> = {
         'scan_presence', 'generer_carte'
     ],
     proviseur: [
-        'scan_presence', 'generer_carte', 'voir_historique'
+        'voir_historique'
     ],
-    censeur: [
-        'scan_presence', 'generer_carte'
-    ],
+    censeur: [],
     parent: [],
 };
 

@@ -14,7 +14,7 @@ async function syncFromFrontend(req, res) {
     const { students = [], presences = [], activityLogs = [], appSettings = null, replace = false, matieres = [], classeMatieres = [], notes = [] } = req.body;
     const { role } = req.user;
 
-    if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
+    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
     }
 
@@ -201,7 +201,7 @@ async function syncToFrontend(req, res) {
     }
 
     const { role } = req.user;
-    if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
+    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
     }
 

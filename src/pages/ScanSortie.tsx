@@ -19,9 +19,9 @@ import { playSuccessSound, playErrorSound, playWarningBeep, unlockAudio } from '
 
 // ── Composant carte d'élève scanné (OVERLAY) ────────────────
 const StudentScanned: React.FC<{
-    nom: string; prenom: string; classe: string; heure: string;
+    nom: string; prenom: string; classe: string; heure: string; date: string;
     dejaSorti: boolean; telephone?: string; schoolName: string;
-}> = ({ nom, prenom, classe, heure, dejaSorti }) => {
+}> = ({ nom, prenom, classe, heure, date, dejaSorti }) => {
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
             <div className={`w-full max-w-sm rounded-[2.5rem] border-4 p-8 text-center shadow-2xl transition-all ${dejaSorti
@@ -45,7 +45,7 @@ const StudentScanned: React.FC<{
                 <p className="text-lg text-gray-500 font-bold mb-6">{classe}</p>
 
                 <div className={`py-3 px-6 rounded-2xl font-black text-lg ${dejaSorti ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                    {dejaSorti ? 'DÉJÀ SORTI' : `SORTI À ${heure}`}
+                    {dejaSorti ? 'DÉJÀ SORTI' : `SORTI LE ${date} À ${heure}`}
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@ export const ScanSortie: React.FC = () => {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [scannedStudent, setScannedStudent] = useState<{
-        nom: string; prenom: string; classe: string; heure: string;
+        nom: string; prenom: string; classe: string; heure: string; date: string;
         dejaSorti: boolean; telephone?: string;
     } | null>(null);
     const [cameraActive, setCameraActive] = useState(false);
@@ -99,6 +99,7 @@ export const ScanSortie: React.FC = () => {
 
         const now = new Date();
         const heure = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        const dateAffichage = now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
         const already = hasAlreadyExited(studentId);
 
         if (!already) {
@@ -127,10 +128,10 @@ export const ScanSortie: React.FC = () => {
                 user?.nom || 'Système',
                 user?.role || 'système',
                 'presence',
-                `Sortie enregistrée : ${student.prenom} ${student.nom} (${student.classe}) à ${heure}`
+                `Sortie enregistrée : ${student.prenom} ${student.nom} (${student.classe}) le ${dateAffichage} à ${heure}`
             ));
 
-            const msg = `🏫 Sortie validée : ${student.prenom} ${student.nom} a quitté l'établissement à ${heure}.`;
+            const msg = `🏫 Sortie validée : ${student.prenom} ${student.nom} a quitté l'établissement le ${dateAffichage} à ${heure}.`;
             notificationService.notifyParents(student.id, msg);
         } else {
             playErrorSound();
@@ -142,6 +143,7 @@ export const ScanSortie: React.FC = () => {
             prenom: student.prenom,
             classe: student.classe,
             heure,
+            date: dateAffichage,
             dejaSorti: already,
             telephone: student.telephone,
         });

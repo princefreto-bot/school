@@ -20,10 +20,10 @@ import { playSuccessSound, playErrorSound, playWarningBeep, unlockAudio } from '
 
 // ── Composant carte d'élève scanné (OVERLAY) ────────────────
 const StudentScanned: React.FC<{
-    nom: string; prenom: string; classe: string; heure: string;
+    nom: string; prenom: string; classe: string; heure: string; date: string;
     dejaPresent: boolean; telephone?: string; schoolName: string;
     statut?: 'present' | 'retard';
-}> = ({ nom, prenom, classe, heure, dejaPresent, statut }) => {
+}> = ({ nom, prenom, classe, heure, date, dejaPresent, statut }) => {
     const isRetard = statut === 'retard';
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
@@ -50,7 +50,7 @@ const StudentScanned: React.FC<{
                 <p className="text-lg text-gray-500 font-bold mb-6">{classe}</p>
 
                 <div className={`py-3 px-6 rounded-2xl font-black text-lg ${dejaPresent ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                    {dejaPresent ? 'DÉJÀ POINTÉ' : `PRÉSENT À ${heure}`}
+                    {dejaPresent ? 'DÉJÀ POINTÉ' : `PRÉSENT LE ${date} À ${heure}`}
                 </div>
             </div>
         </div>
@@ -72,7 +72,7 @@ export const ScanPresence: React.FC = () => {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [scannedStudent, setScannedStudent] = useState<{
-        nom: string; prenom: string; classe: string; heure: string;
+        nom: string; prenom: string; classe: string; heure: string; date: string;
         dejaPresent: boolean; telephone?: string; statut?: 'present' | 'retard';
     } | null>(null);
     const [cameraActive, setCameraActive] = useState(false);
@@ -108,6 +108,7 @@ export const ScanPresence: React.FC = () => {
 
         const now = new Date();
         const heure = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        const dateAffichage = now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
         const already = isAlreadyPresent(studentId);
 
         if (!already) {
@@ -144,11 +145,11 @@ export const ScanPresence: React.FC = () => {
                 user?.nom || 'Système',
                 user?.role || 'système',
                 'presence',
-                `Présence enregistrée : ${student.prenom} ${student.nom} (${student.classe}) à ${heure}`
+                `Présence enregistrée : ${student.prenom} ${student.nom} (${student.classe}) le ${dateAffichage} à ${heure}`
             ));
 
             // Notification Push instantanée aux parents
-            const msg = `✅ Présence validée : ${student.prenom} ${student.nom} est arrivé(e) à l'école à ${heure}.`;
+            const msg = `✅ Présence validée : ${student.prenom} ${student.nom} est arrivé(e) à l'école le ${dateAffichage} à ${heure}.`;
             notificationService.notifyParents(student.id, msg);
         } else {
             // Son d'erreur (buzzer) si déjà présent
@@ -162,6 +163,7 @@ export const ScanPresence: React.FC = () => {
             prenom: student.prenom,
             classe: student.classe,
             heure,
+            date: dateAffichage,
             dejaPresent: already,
             telephone: student.telephone,
             statut: already ? undefined : (() => {
