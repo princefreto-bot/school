@@ -81,17 +81,26 @@ async function login(req, res) {
     }
 
     try {
-        // ── Étape 1 : Récupérer l'utilisateur (sans JOIN pour éviter les erreurs FK) ──
+        console.log(`🔍 [Auth] Tentative login pour: ${telephone.trim()}`);
+        
+        // ── Étape 1 : Récupérer l'utilisateur ──
         const { data: user, error } = await supabase
             .from('profiles')
             .select('*')
             .eq('telephone', telephone.trim())
             .single();
 
-        if (!user || error) {
-            console.log('User not found for telephone:', telephone.trim(), error?.message);
+        if (error) {
+            console.error('❌ [Supabase Error]:', error.message);
+            if (error.code === 'PGRST116') console.warn('⚠️ Aucun utilisateur trouvé avec ce numéro.');
+        }
+
+        if (!user) {
+            console.log('🚫 [Auth] Utilisateur inexistant dans Supabase.');
             return res.status(401).json({ error: 'Numéro de téléphone ou mot de passe incorrect.' });
         }
+
+        console.log(`✅ [Auth] Utilisateur trouvé: ${user.nom} (Rôle: ${user.role})`);
 
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) {
