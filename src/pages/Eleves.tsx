@@ -323,12 +323,12 @@ export const Eleves: React.FC = () => {
                 filtered.map((s) => (
                   <tr key={s.id} className="hover:bg-amber-50/30 transition-colors">
                     <td className="px-4 py-3">
-                      <p className="font-medium text-gray-900">{s.prenom} {s.nom}</p>
-                      <p className="text-xs text-gray-400">{s.sexe === 'M' ? '♂' : '♀'}{s.redoublant ? ' · Redoublant' : ''}</p>
+                      <p className="font-bold text-gray-950 dark:text-white">{s.prenom} {s.nom}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">{s.sexe === 'M' ? '♂' : '♀'}{s.redoublant ? ' · Redoublant' : ''}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="font-medium text-gray-800">{s.classe}</span>
-                      <p className="text-xs text-gray-400">{s.cycle}</p>
+                      <span className="font-bold text-gray-900 dark:text-gray-100">{s.classe}</span>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">{s.cycle}</p>
                     </td>
                     <td className="px-4 py-3 text-gray-600 font-mono text-xs">{s.telephone}</td>
                     <td className="px-4 py-3 font-medium text-emerald-700 whitespace-nowrap">{fmtMoney(s.dejaPaye)}</td>

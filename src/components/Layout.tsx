@@ -62,7 +62,7 @@ const SidebarItems: React.FC<SidebarItemsProps> = ({
           onClick={() => { setCurrentPage(item.id); setSidebarOpen(false); }}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group ${active
             ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
-            : 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
+            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'
             }`}
         >
           <span className={active ? 'text-white' : 'text-slate-500 group-hover:text-white transition-colors'}>
@@ -114,8 +114,8 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
         )}
       </div>
       <div className="overflow-hidden">
-        <p className="text-white font-bold text-sm truncate">{appName} v1.5</p>
-        <p className="text-slate-400 text-xs truncate">{schoolName}</p>
+        <p className="text-slate-900 dark:text-white font-bold text-sm truncate">{appName} v1.5</p>
+        <p className="text-slate-500 dark:text-slate-400 text-xs truncate">{schoolName}</p>
       </div>
     </div>
 
@@ -154,8 +154,8 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
           {userName.charAt(0).toUpperCase()}
         </div>
         <div className="overflow-hidden flex-1">
-          <p className="text-slate-900 text-xs font-bold truncate">{userName}</p>
-          <p className="text-slate-400 text-[10px] capitalize font-bold">{userRole}</p>
+          <p className="text-slate-900 dark:text-white text-xs font-bold truncate">{userName}</p>
+          <p className="text-slate-600 dark:text-slate-400 text-[10px] capitalize font-bold">{userRole}</p>
         </div>
       </div>
       <button
@@ -355,7 +355,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </button>
               <div>
                 <h1 className="text-base font-black text-slate-900 dark:text-white tracking-tight">{currentLabel}</h1>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">
+                <p className="text-[10px] text-slate-600 dark:text-slate-400 font-bold uppercase tracking-widest mt-0.5">
                     Session {schoolYear} — Management
                 </p>
               </div>

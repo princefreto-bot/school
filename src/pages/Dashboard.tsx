@@ -31,10 +31,10 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, sub, icon, color, tre
   <div className="pro-card p-6">
     <div className="flex items-start justify-between">
       <div className="space-y-2">
-        <p className="text-[10px] font-black text-slate-500 dark:text-slate-400 border-l-2 border-amber-500 pl-2 uppercase tracking-[0.2em]">{title}</p>
+        <p className="text-[10px] font-black text-slate-800 dark:text-slate-300 border-l-2 border-amber-500 pl-2 uppercase tracking-[0.2em]">{title}</p>
         <div>
            <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{value}</p>
-           {sub && <p className="text-[11px] font-medium text-slate-400 mt-0.5">{sub}</p>}
+           {sub && <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400 mt-0.5">{sub}</p>}
         </div>
         {trend && (
            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 w-fit">
@@ -234,7 +234,7 @@ export const Dashboard: React.FC = () => {
                 <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-2">
                     Analyse & <span className="text-amber-500">Performance</span>
                 </h2>
-                <p className="text-slate-500 dark:text-slate-400 text-base leading-relaxed">
+                <p className="text-slate-700 dark:text-slate-300 text-base leading-relaxed font-medium">
                     Visualisation en temps réel de la santé financière globale, incluant le recouvrement, les projections et les statistiques par cycle.
                 </p>
             </div>
@@ -303,8 +303,8 @@ export const Dashboard: React.FC = () => {
       <div className="pro-card p-8">
         <div className="flex items-center justify-between mb-6">
           <div className="space-y-1">
-            <h3 className="font-extrabold text-slate-800 dark:text-white text-lg tracking-tight">Recouvrement Global</h3>
-            <p className="text-xs text-slate-400 font-medium uppercase tracking-widest">Progression des encaissements périodiques</p>
+            <h3 className="font-extrabold text-slate-900 dark:text-white text-lg tracking-tight">Recouvrement Global</h3>
+            <p className="text-xs text-slate-700 dark:text-slate-400 font-bold uppercase tracking-widest">Progression des encaissements périodiques</p>
           </div>
           <div className="text-4xl font-black text-amber-500 dark:text-amber-400 tracking-tighter">{stats.taux}%</div>
         </div>
@@ -354,7 +354,7 @@ export const Dashboard: React.FC = () => {
                 </div>
                 <div className="flex-1 overflow-hidden">
                   <p className={`text-base font-black tracking-tight ${c.text}`}>{c.label}</p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase truncate">{c.sub}</p>
+                  <p className="text-[10px] text-slate-700 dark:text-slate-400 font-bold uppercase truncate">{c.sub}</p>
                 </div>
                 <span className={`text-3xl font-black ${c.text}`}>{cs.count}</span>
               </div>
@@ -435,11 +435,11 @@ export const Dashboard: React.FC = () => {
         <div className="pro-card p-8">
           <div className="flex items-center justify-between mb-8">
             <div className="space-y-1">
-              <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2 tracking-tight">
+              <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 tracking-tight">
                 <Target className="w-6 h-6 text-amber-500" />
                 Analyse du Recouvrement
               </h3>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Formule : (encaissé / théorique) × 100</p>
+              <p className="text-[10px] text-slate-700 dark:text-slate-400 font-bold uppercase tracking-[0.2em]">Formule : (encaissé / théorique) × 100</p>
             </div>
             <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${recouvrement.badgeColor}`}>
               {recouvrement.badgeLabel}
@@ -482,11 +482,11 @@ export const Dashboard: React.FC = () => {
       {students.length > 0 && (
         <div className="pro-card p-8">
           <div className="mb-8">
-            <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2 tracking-tight">
+            <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 tracking-tight">
               <TrendingUp className="w-6 h-6 text-violet-600" />
               Intelligence Prédictive
             </h3>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Projection basée sur le cycle actuel de {(projection.tauxActuel * 100).toFixed(1)}%</p>
+            <p className="text-[10px] text-slate-700 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Projection basée sur le cycle actuel de {(projection.tauxActuel * 100).toFixed(1)}%</p>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -531,9 +531,9 @@ export const Dashboard: React.FC = () => {
             {classComp.slice(0, 8).map((row, i) => (
               <div key={row.classe} className="group flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-sm ${
-                    i === 0 ? 'bg-yellow-100 text-yellow-700' :
-                    i === 1 ? 'bg-slate-100 text-slate-600' :
-                    i === 2 ? 'bg-amber-50 text-amber-700' : 'bg-slate-50 text-slate-400'
+                    i === 0 ? 'bg-amber-400 text-black' :
+                    i === 1 ? 'bg-slate-200 text-slate-900' :
+                    i === 2 ? 'bg-orange-200 text-orange-900' : 'bg-slate-100 text-slate-600'
                 }`}>
                   {i + 1}
                 </div>
