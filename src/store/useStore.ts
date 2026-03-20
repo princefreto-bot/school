@@ -285,6 +285,24 @@ export const useStore = create<AppState>()(
               localStorage.setItem('school_status', result.user.school_status || 'trial');
             }
 
+            // ⚠️ CRITIQUE : Vider intégralement le cache local de l'école précédente 
+            // pour garantir une architecture SaaS 100% isolée.
+            set({
+              students: [],
+              parents: [],
+              presences: [],
+              activityLogs: [],
+              links: [],
+              announcements: [],
+              announcementReads: [],
+              matieres: [],
+              classeMatieres: [],
+              notes: [],
+              schoolLogo: null,
+              schoolStamp: null,
+              schoolName: 'Établissement',
+            });
+
             set({ user: loggedUser, isAuthenticated: true, currentPage: targetPage });
             get().addActivityLog(createActivityLog(loggedUser.nom, loggedUser.role, 'connexion', 'Connexion API réussie'));
             if (loggedUser.role !== 'superadmin') get().fetchAllFromBackend();
@@ -313,7 +331,21 @@ export const useStore = create<AppState>()(
           get().addActivityLog(createActivityLog(u.nom, u.role, 'connexion', 'Déconnexion'));
         }
         localStorage.removeItem('parent_token');
-        set({ user: null, isAuthenticated: false, currentPage: 'dashboard' });
+        set({
+          user: null, 
+          isAuthenticated: false, 
+          currentPage: 'dashboard',
+          students: [],
+          parents: [],
+          presences: [],
+          activityLogs: [],
+          links: [],
+          announcements: [],
+          announcementReads: [],
+          matieres: [],
+          classeMatieres: [],
+          notes: []
+        });
       },
 
       // ── Navigation ───────────────────────────────────────
