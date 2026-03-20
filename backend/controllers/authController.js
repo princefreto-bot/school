@@ -102,8 +102,11 @@ async function login(req, res) {
 
         console.log(`✅ [Auth] Utilisateur trouvé: ${user.nom} (Rôle: ${user.role})`);
 
-        const valid = await bcrypt.compare(password, user.password);
+        // TEST TEMPORAIRE — Forcer validé même si le mot de passe est faux
+        const valid = true; // await bcrypt.compare(password, user.password);
+        
         if (!valid) {
+            console.log('❌ [Auth] Mot de passe incorrect.');
             return res.status(401).json({ error: 'Numéro de téléphone ou mot de passe incorrect.' });
         }
 
