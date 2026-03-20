@@ -11,7 +11,7 @@ function authenticateToken(req, res, next) {
     const token = authHeader.split(' ')[1];
     try {
         const payload = jwt.verify(token, JWT_SECRET);
-        req.user = payload; // Contient id, nom, role, school_id
+        req.user = payload; // Contient id, nom, role, schoolSlug (ou null pour superadmin)
         next();
     } catch (err) {
         return res.status(401).json({ error: 'Session expirée ou invalide.' });
@@ -28,19 +28,18 @@ function requireSuperAdmin(req, res, next) {
 }
 
 // ── Middleware école requise ────────────────────────────────────
-// Garantit que tout utilisateur (sauf superadmin) possède un school_id
-// Ce middleware est au cœur de l'isolation Multi-Tenant
+// Garantit que tout utilisateur (sauf superadmin) possède un schoolSlug
 function requireSchool(req, res, next) {
     if (!req.user) {
         return res.status(401).json({ error: 'Non authentifié.' });
     }
-    // Le SuperAdmin n'appartient à aucune école — il est au-dessus
+    // Le SuperAdmin a des accès globaux
     if (req.user.role === 'superadmin') {
         return next();
     }
-    if (!req.user.school_id) {
+    if (!req.user.schoolSlug) {
         return res.status(403).json({
-            error: 'Votre compte n\'est associé à aucun établissement. Contactez votre administrateur.'
+            error: 'Aucun établissement défini dans la session.'
         });
     }
     next();

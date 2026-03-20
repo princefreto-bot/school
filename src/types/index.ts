@@ -124,7 +124,7 @@ export interface User {
   role: UserRole;
   nom: string;
   telephone?: string;
-  school_id?: string; // lié à une école (null pour superadmin)
+  schoolSlug?: string; // lié à une école (null pour superadmin)
   schoolName?: string; // nom de l'école pour affichage
 }
 

@@ -5,7 +5,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useStore } from '../store/useStore';
 import { parentApi } from '../services/parentApi';
 import { LinkStudent } from './LinkStudent';
-import { GraduationCap, Lock, User, Phone } from 'lucide-react';
+import { GraduationCap, Lock, User, Phone, CheckCircle, Store } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 // ── Images de fond (Mobile uniquement) ──
 import bgImage1 from '../assets/login-bg1.jpg';
@@ -77,8 +78,20 @@ export const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [trialExpiredSchool, setTrialExpiredSchool] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  // NOUVEAU : Sélection Établissement
+  const [schools, setSchools] = useState<{slug: string, name: string, logo_url: string}[]>([]);
+  const [selectedSchool, setSelectedSchool] = useState('');
 
   useEffect(() => {
+    // Récupérer la liste des écoles
+    fetch(`${API_BASE_URL}/schools`)
+      .then(res => res.json())
+      .then(data => {
+         if (Array.isArray(data)) setSchools(data);
+      })
+      .catch(console.error);
+
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -92,11 +105,11 @@ export const Login: React.FC = () => {
 
     try {
         if (type === 'login') {
-            const ok = await login(username, password);
+            const ok = await login(username, password, selectedSchool);
             if (!ok) setError('Identifiants incorrects.');
         } else {
             setLoading(true);
-            await parentApi.register({ nom, telephone: username, password });
+            await parentApi.register({ nom, telephone: username, password, school_slug: selectedSchool });
             // On reste en local pour l'étape de liaison avant de déclencher l'auth globale
             setView('link');
         }
@@ -121,10 +134,10 @@ export const Login: React.FC = () => {
             <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 border border-slate-100 animate-in fade-in zoom-in duration-300">
                 <LinkStudent onComplete={async () => {
                    // Une fois lié, on connecte officiellement
-                   await login(username, password);
+                   await login(username, password, selectedSchool);
                 }} />
                 <button 
-                  onClick={async () => await login(username, password)}
+                  onClick={async () => await login(username, password, selectedSchool)}
                   className="w-full mt-4 py-3 text-slate-400 text-xs font-bold hover:text-blue-600 transition"
                 >
                   Passer cette étape pour le moment
@@ -238,6 +251,12 @@ export const Login: React.FC = () => {
               <SchoolLogo logo={schoolLogo} schoolName={schoolName} />
               <h1 className="text-2xl font-black text-slate-900 tracking-tighter">Créer un compte</h1>
               <div className="social-container text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-2">Inscription Parent</div>
+              
+              <select className="auth-input mb-4 font-bold text-slate-600 border border-slate-200" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required>
+                  <option value="" disabled>-- Sélectionnez votre établissement --</option>
+                  {schools.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+              </select>
+
               <input type="text" placeholder="Nom complet" className="auth-input" value={nom} onChange={(e) => setNom(e.target.value)} required />
               <input type="tel" placeholder="Téléphone" className="auth-input" value={username} onChange={(e) => setUsername(e.target.value)} required />
               <input type="password" placeholder="Mot de passe" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
@@ -252,6 +271,13 @@ export const Login: React.FC = () => {
               <SchoolLogo logo={schoolLogo} schoolName={schoolName} />
               <h1 className="text-2xl font-black text-slate-900 tracking-tighter">Se connecter</h1>
               <div className="social-container text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-2">Gestion {appName}</div>
+              
+              <select className="auth-input mb-4 font-bold text-slate-600 border border-slate-200" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)}>
+                  <option value="">Accès SuperAdmin Global</option>
+                  <option disabled>────── Établissements ──────</option>
+                  {schools.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+              </select>
+
               <input type="text" placeholder="Utilisateur / Téléphone" className="auth-input" value={username} onChange={(e) => setUsername(e.target.value)} required />
               <input type="password" placeholder="Mot de passe" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
               <a href="#" className="text-xs text-slate-400 hover:text-blue-600 mt-2">Mot de passe oublié ?</a>
@@ -309,6 +335,16 @@ export const Login: React.FC = () => {
                 </div>
 
                 <form onSubmit={(e) => handleAuth(e, view === 'login' ? 'login' : 'register')} className="space-y-4">
+                    <div className="relative mb-2">
+                        <Store className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
+                        <select className="w-full pl-11 pr-4 py-3 bg-slate-100 border-none rounded-2xl text-sm font-bold text-slate-700 appearance-none" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required={view === 'register'}>
+                            {view !== 'register' && <option value="">Accès SuperAdmin Global</option>}
+                            {view !== 'register' && <option disabled>────── Établissements ──────</option>}
+                            {view === 'register' && <option value="" disabled>-- Sélectionnez votre école --</option>}
+                            {schools.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+                        </select>
+                    </div>
+
                     {view === 'register' && (
                         <div className="relative">
                             <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />

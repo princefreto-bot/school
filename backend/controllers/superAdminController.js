@@ -17,18 +17,23 @@ async function getAllSchools(req, res) {
 
         if (error) throw error;
 
-        // Pour chaque école, compter le nombre d'élèves
-        const schoolsWithStats = await Promise.all(
-            schools.map(async (school) => {
-                const { count: studentCount } = await supabase
-                    .from('students')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('school_id', school.id);
-
-                const { count: userCount } = await supabase
-                    .from('profiles')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('school_id', school.id);
+                // Pour chaque école, compter le nombre d'élèves dans sa propre table !
+                let studentCount = 0;
+                let userCount = 0;
+                
+                try {
+                    const { count: sCount } = await supabase
+                        .from(`students_${school.slug}`)
+                        .select('*', { count: 'exact', head: true });
+                    studentCount = sCount || 0;
+                    
+                    const { count: uCount } = await supabase
+                        .from(`profiles_${school.slug}`)
+                        .select('*', { count: 'exact', head: true });
+                    userCount = uCount || 0;
+                } catch (e) {
+                    console.warn(`Table manquante pour ${school.slug}`);
+                }
 
                 return {
                     ...school,
@@ -104,18 +109,24 @@ async function createSchool(req, res) {
 
         if (schoolErr) throw schoolErr;
 
-        // 2. Créer le compte SchoolAdmin (directeur)
+        // 2. Créer le jeu de tables avec l'appel RPC
+        const { error: rpcErr } = await supabase.rpc('create_school_tables', { school_slug: slug.toLowerCase().trim() });
+        if (rpcErr) throw rpcErr;
+
+        // Attendre que la base recharge son schéma (1s par sécurité)
+        await new Promise(r => setTimeout(r, 1000));
+
+        // 3. Créer le compte SchoolAdmin (directeur) dans SA NOUVELLE TABLE
         const bcrypt = require('bcryptjs');
         const hashed = await bcrypt.hash(admin_password, 10);
 
         const { data: adminUser, error: adminErr } = await supabase
-            .from('profiles')
+            .from(`profiles_${school.slug}`)
             .insert({
                 nom: admin_nom.trim(),
                 telephone: admin_telephone.trim(),
                 password: hashed,
-                role: 'directeur',
-                school_id: school.id
+                role: 'directeur'
             })
             .select()
             .single();
@@ -206,14 +217,22 @@ async function getGlobalStats(req, res) {
         const { count: totalSchools } = await supabase
             .from('schools').select('*', { count: 'exact', head: true });
 
-        const { count: totalStudents } = await supabase
-            .from('students').select('*', { count: 'exact', head: true });
-
-        const { count: totalUsers } = await supabase
-            .from('profiles').select('*', { count: 'exact', head: true });
-
         const { data: schools } = await supabase
-            .from('schools').select('status, trial_ends_at');
+            .from('schools').select('slug, status, trial_ends_at');
+
+        let totalStudents = 0;
+        let totalUsers = 0;
+
+        if (schools) {
+            for (let s of schools) {
+                try {
+                    const { count: sCount } = await supabase.from(`students_${s.slug}`).select('*', { count: 'exact', head: true });
+                    const { count: uCount } = await supabase.from(`profiles_${s.slug}`).select('*', { count: 'exact', head: true });
+                    totalStudents += (sCount || 0);
+                    totalUsers += (uCount || 0);
+                } catch(e) {}
+            }
+        }
 
         const activeCount = schools?.filter(s => s.status === 'active').length || 0;
         const trialCount = schools?.filter(s => s.status === 'trial').length || 0;

@@ -26,7 +26,7 @@ export interface AppState {
   unreadMessages: number;
   setUnreadMessages: (count: number) => void;
   fetchUnreadMessages: () => Promise<void>;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string, schoolSlug?: string) => Promise<boolean>;
   logout: () => void;
 
   // Navigation
@@ -235,12 +235,12 @@ export const useStore = create<AppState>()(
           console.error('Failed to fetch unread messages:', err);
         }
       },
-      login: async (username, password) => {
+      login: async (username, password, schoolSlug) => {
         try {
           const res = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ telephone: username, password })
+            body: JSON.stringify({ telephone: username, password, schoolSlug })
           });
 
           const text = await res.text();
@@ -269,7 +269,7 @@ export const useStore = create<AppState>()(
               nom: result.user.nom,
               telephone: result.user.telephone,
               // ⚡ Informations multi-tenant
-              school_id: result.user.school_id || undefined,
+              schoolSlug: result.user.school_slug || undefined,
               schoolName: result.user.school_name || undefined,
             };
 

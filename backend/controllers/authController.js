@@ -7,30 +7,27 @@ const { JWT_SECRET, JWT_EXPIRES } = require('../config');
 async function register(req, res) {
     const { nom, telephone, password, school_slug } = req.body;
 
-    if (!nom || !telephone || !password) {
-        return res.status(400).json({ error: 'Champs requis : nom, telephone, password.' });
+    if (!nom || !telephone || !password || !school_slug) {
+        return res.status(400).json({ error: 'Champs requis : nom, telephone, password, school_slug.' });
     }
 
     try {
-        // Résoudre le school_id via le slug si fourni
-        let school_id = null;
-        if (school_slug) {
-            const { data: school } = await supabase
-                .from('schools')
-                .select('id, status')
-                .eq('slug', school_slug)
-                .single();
-            if (school) {
-                if (school.status === 'suspended') {
-                    return res.status(403).json({ error: "Le compte de cet établissement est suspendu." });
-                }
-                school_id = school.id;
-            }
+        const { data: school } = await supabase
+            .from('schools')
+            .select('status')
+            .eq('slug', school_slug)
+            .single();
+            
+        if (!school) {
+            return res.status(404).json({ error: "Établissement inconnu." });
+        }
+        if (school.status === 'suspended') {
+            return res.status(403).json({ error: "L'établissement est suspendu." });
         }
 
         // Vérifier si existant
         const { data: existing } = await supabase
-            .from('profiles')
+            .from(`profiles_${school_slug}`)
             .select('id')
             .eq('telephone', telephone.trim())
             .single();
@@ -42,13 +39,12 @@ async function register(req, res) {
         const hashed = await bcrypt.hash(password, 10);
 
         const { data: parent, error } = await supabase
-            .from('profiles')
+            .from(`profiles_${school_slug}`)
             .insert({
                 nom: nom.trim(),
                 telephone: telephone.trim(),
                 password: hashed,
-                role: 'parent',
-                school_id
+                role: 'parent'
             })
             .select()
             .single();
@@ -56,7 +52,7 @@ async function register(req, res) {
         if (error) throw error;
 
         const token = jwt.sign(
-            { id: parent.id, nom: parent.nom, role: parent.role, school_id: parent.school_id },
+            { id: parent.id, nom: parent.nom, role: parent.role, schoolSlug: school_slug },
             JWT_SECRET,
             { expiresIn: JWT_EXPIRES }
         );
@@ -64,7 +60,7 @@ async function register(req, res) {
         return res.status(201).json({
             message: 'Compte créé avec succès.',
             token,
-            parent: { id: parent.id, nom: parent.nom, telephone: parent.telephone, role: parent.role, school_id: parent.school_id },
+            parent: { id: parent.id, nom: parent.nom, telephone: parent.telephone, role: parent.role, schoolSlug: school_slug },
         });
     } catch (err) {
         console.error('Register Error:', err.message);
@@ -72,9 +68,9 @@ async function register(req, res) {
     }
 }
 
-// ── Login (Tout Rôles — Multi-Tenant) ──────────────────────────
+// ── Login (Tout Rôles) ──────────────────────────
 async function login(req, res) {
-    const { telephone, password } = req.body;
+    const { telephone, password, schoolSlug } = req.body;
 
     if (!telephone || !password) {
         return res.status(400).json({ error: 'Champs requis : telephone, password.' });
@@ -82,89 +78,80 @@ async function login(req, res) {
 
     try {
         console.log(`🔍 [Auth] Tentative login pour: ${telephone.trim()}`);
-        
-        // ── Étape 1 : Récupérer l'utilisateur ──
-        const { data: user, error } = await supabase
-            .from('profiles')
+
+        // ── 1. Vérifier si c'est le SuperAdmin ──
+        const { data: superadmin } = await supabase
+            .from('superadmins')
             .select('*')
             .eq('telephone', telephone.trim())
             .single();
 
-        if (error) {
-            console.error('❌ [Supabase Error]:', error.message);
-            if (error.code === 'PGRST116') console.warn('⚠️ Aucun utilisateur trouvé avec ce numéro.');
+        if (superadmin) {
+            const valid = await bcrypt.compare(password, superadmin.password);
+            if (valid) {
+                console.log(`✅ [Auth] SuperAdmin identifié !`);
+                const token = jwt.sign(
+                    { id: superadmin.id, nom: superadmin.nom, role: 'superadmin', schoolSlug: null },
+                    JWT_SECRET,
+                    { expiresIn: JWT_EXPIRES }
+                );
+                return res.json({
+                    message: 'Connexion globale réussie.',
+                    token,
+                    user: { id: superadmin.id, nom: superadmin.nom, telephone: superadmin.telephone, role: 'superadmin' }
+                });
+            }
         }
-
-        if (!user) {
-            console.log('🚫 [Auth] Utilisateur inexistant dans Supabase.');
-            return res.status(401).json({ error: 'Numéro de téléphone ou mot de passe incorrect.' });
-        }
-
-        console.log(`✅ [Auth] Utilisateur trouvé: ${user.nom} (Rôle: ${user.role})`);
-
-        // TEST TEMPORAIRE — Forcer validé même si le mot de passe est faux
-        const valid = true; // await bcrypt.compare(password, user.password);
         
-        if (!valid) {
-            console.log('❌ [Auth] Mot de passe incorrect.');
+        // ── 2. Sinon, l'utilisateur DOIT avoir sélectionné une école ──
+        if (!schoolSlug) {
+            return res.status(400).json({ error: 'Veuillez sélectionner votre établissement pour vous connecter.' });
+        }
+
+        // Vérification accès école
+        const { data: school, error: schoolErr } = await supabase
+            .from('schools')
+            .select('id, name, slug, status, trial_ends_at, logo_url')
+            .eq('slug', schoolSlug)
+            .single();
+
+        if (schoolErr || !school) {
+            return res.status(404).json({ error: 'Établissement introuvable.' });
+        }
+
+        if (school.status === 'suspended') {
+            return res.status(403).json({ error: "L'accès à cet établissement est suspendu." });
+        }
+        if (school.status === 'trial' && new Date(school.trial_ends_at) < new Date()) {
+            return res.status(402).json({ error: 'trial_expired', message: "La période d'essai est terminée." });
+        }
+
+        // ── 3. Chercher l'utilisateur dans la table de l'établissement ──
+        const { data: user, error } = await supabase
+            .from(`profiles_${schoolSlug}`)
+            .select('*')
+            .eq('telephone', telephone.trim())
+            .single();
+
+        if (error || !user) {
             return res.status(401).json({ error: 'Numéro de téléphone ou mot de passe incorrect.' });
         }
 
-        // ── Étape 2 : Récupérer les infos de l'école si l'utilisateur en a une ──
-        let schoolData = null;
-        if (user.school_id) {
-            const { data: school } = await supabase
-                .from('schools')
-                .select('id, name, slug, status, trial_ends_at, logo_url')
-                .eq('id', user.school_id)
-                .single();
-            schoolData = school;
+        const valid = await bcrypt.compare(password, user.password);
+        if (!valid) {
+            return res.status(401).json({ error: 'Numéro de téléphone ou mot de passe incorrect.' });
         }
 
-        // ── Vérification accès école (sauf SuperAdmin) ──
-        if (user.role !== 'superadmin' && schoolData) {
-            // École suspendue
-            if (schoolData.status === 'suspended') {
-                return res.status(403).json({
-                    error: "L'accès à cet établissement a été suspendu. Contactez l'administrateur SaaS."
-                });
-            }
-            // Période d'essai expirée
-            if (schoolData.status === 'trial' && new Date(schoolData.trial_ends_at) < new Date()) {
-                return res.status(402).json({
-                    error: 'trial_expired',
-                    message: "La période d'essai gratuit de 2 mois est terminée. Réglez l'abonnement.",
-                    school_name: schoolData.name
-                });
-            }
-        }
+        console.log(`✅ [Auth] Utilisateur trouvé: ${user.nom} (Rôle: ${user.role}) - École: ${schoolSlug}`);
 
-        // ── Création du Token (inclut school_id) ──
         const token = jwt.sign(
-            {
-                id: user.id,
-                nom: user.nom,
-                role: user.role,
-                school_id: user.school_id || null
-            },
+            { id: user.id, nom: user.nom, role: user.role, schoolSlug },
             JWT_SECRET,
             { expiresIn: JWT_EXPIRES }
         );
 
-        // Mettre à jour last_login (non bloquant)
-        supabase.from('profiles').update({ last_login: new Date().toISOString() }).eq('id', user.id).then(() => {});
-
-        // Infos école à renvoyer
-        const schoolInfo = schoolData ? {
-            school_id: user.school_id,
-            school_name: schoolData.name,
-            school_slug: schoolData.slug,
-            school_logo: schoolData.logo_url,
-            school_status: schoolData.status,
-            trial_ends_at: schoolData.trial_ends_at
-        } : {};
-
-        console.log(`✅ Login OK: ${user.nom} (${user.role}) — school_id: ${user.school_id || 'SuperAdmin'}`);
+        // Update last login de façon asynchrone
+        supabase.from(`profiles_${schoolSlug}`).update({ last_login: new Date().toISOString() }).eq('id', user.id).then(() => {});
 
         return res.json({
             message: 'Connexion réussie.',
@@ -174,7 +161,9 @@ async function login(req, res) {
                 nom: user.nom,
                 telephone: user.telephone,
                 role: user.role,
-                ...schoolInfo
+                school_name: school.name,
+                school_slug: school.slug,
+                school_logo: school.logo_url
             },
         });
     } catch (err) {
@@ -185,16 +174,19 @@ async function login(req, res) {
 
 // ── Delete Account (Self) ─────────────────────────────────────
 async function deleteSelfAccount(req, res) {
-    const { id } = req.user;
+    const { id, role, schoolSlug } = req.user;
+
+    if (role === 'superadmin') {
+        return res.status(403).json({ error: "Le compte superadmin ne peut être supprimé ici." });
+    }
 
     try {
         const { error } = await supabase
-            .from('profiles')
+            .from(`profiles_${schoolSlug}`)
             .delete()
             .eq('id', id);
 
         if (error) throw error;
-
         return res.json({ message: 'Compte supprimé avec succès.' });
     } catch (err) {
         console.error('Delete Error:', err.message);
@@ -204,26 +196,20 @@ async function deleteSelfAccount(req, res) {
 
 // ── Update Push Token ──────────────────────────────────────────
 async function updatePushToken(req, res) {
-    const { id } = req.user;
+    const { id, role, schoolSlug } = req.user;
     const { push_token } = req.body;
+    
+    const table = role === 'superadmin' ? 'superadmins' : `profiles_${schoolSlug}`;
 
     try {
         console.log(`📲 Tentative de mise à jour du push_token pour l'utilisateur ${id}`);
-        if (!push_token) {
-            console.warn('⚠️ Aucun push_token reçu dans le corps de la requête.');
-        }
 
         const { error } = await supabase
-            .from('profiles')
+            .from(table)
             .update({ push_token })
             .eq('id', id);
 
-        if (error) {
-            console.error('❌ Erreur Supabase lors de updatePushToken:', error.message);
-            throw error;
-        }
-
-        console.log(`✅ Push token mis à jour avec succès pour ${id}`);
+        if (error) throw error;
         return res.json({ success: true, message: 'Token de notification mis à jour.' });
     } catch (err) {
         console.error('Update Push Token Error:', err.message);

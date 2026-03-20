@@ -43,6 +43,21 @@ app.use('/api/settings', require('./routes/settings'));
 app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/superadmin', require('./routes/superAdmin')); // 👑 Routes propriétaire SaaS
 
+// Route publique pour lister les écoles dans le login
+app.get('/api/schools', async (req, res) => {
+    try {
+        const { data: schools, error } = await supabase
+            .from('schools')
+            .select('slug, name, logo_url')
+            .in('status', ['active', 'trial'])
+            .order('name');
+        if (error) throw error;
+        res.json(schools);
+    } catch (err) {
+        res.status(500).json({ error: 'Erreur récupération écoles' });
+    }
+});
+
 // ── Health Check ──────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
     res.json({
