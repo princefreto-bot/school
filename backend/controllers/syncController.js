@@ -31,11 +31,11 @@ async function syncFromFrontend(req, res) {
         if (replace) {
             console.log('🧹 [Sync] Mode Remplacer activé : Nettoyage universel de la base locale...');
             
-            await supabase.from(tbl('presences')).delete().filter('id', 'neq', '_none_');
-            await supabase.from(tbl('parent_student')).delete().filter('student_id', 'neq', '_none_');
-            await supabase.from(tbl('payments')).delete().filter('id', 'neq', '_none_');
+            await supabase.from(tbl('presences')).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            await supabase.from(tbl('parent_student')).delete().neq('student_id', '00000000-0000-0000-0000-000000000000');
+            await supabase.from(tbl('payments')).delete().neq('id', '00000000-0000-0000-0000-000000000000');
             
-            const { error: err4 } = await supabase.from(tbl('students')).delete().filter('id', 'neq', '_none_');
+            const { error: err4 } = await supabase.from(tbl('students')).delete().neq('id', '00000000-0000-0000-0000-000000000000');
             if (err4) throw new Error('Le serveur Supabase refuse la suppression : ' + err4.message);
 
             console.log('✨ [Sync] Base de données cloud remise à zéro (école uniquement).');
@@ -338,7 +338,7 @@ async function syncToFrontend(req, res) {
 async function clearPresences(req, res) {
     if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) return res.status(403).json({ error: 'Action non autorisée.' });
     try {
-        const { error } = await supabase.from(`presences_${req.user.schoolSlug}`).delete().filter('id', 'neq', '_none_'); 
+        const { error } = await supabase.from(`presences_${req.user.schoolSlug}`).delete().neq('id', '00000000-0000-0000-0000-000000000000'); 
         if (error) throw error;
         return res.json({ message: 'Historique des présences vidé.' });
     } catch (err) {
@@ -349,7 +349,7 @@ async function clearPresences(req, res) {
 async function clearActivityLogs(req, res) {
     if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) return res.status(403).json({ error: 'Action non autorisée.' });
     try {
-        const { error } = await supabase.from(`activity_logs_${req.user.schoolSlug}`).delete().filter('id', 'neq', '_none_');
+        const { error } = await supabase.from(`activity_logs_${req.user.schoolSlug}`).delete().neq('id', '00000000-0000-0000-0000-000000000000');
         if (error) throw error;
         return res.json({ message: 'Logs d\'activité vidés.' });
     } catch (err) {
@@ -360,9 +360,9 @@ async function clearActivityLogs(req, res) {
 async function clearStudents(req, res) {
     if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) return res.status(403).json({ error: 'Action non autorisée.' });
     try {
-        await supabase.from(`parent_student_${req.user.schoolSlug}`).delete().filter('student_id', 'neq', '_none_');
-        await supabase.from(`payments_${req.user.schoolSlug}`).delete().filter('id', 'neq', '_none_');
-        const { error } = await supabase.from(`students_${req.user.schoolSlug}`).delete().filter('id', 'neq', '_none_');
+        await supabase.from(`parent_student_${req.user.schoolSlug}`).delete().neq('student_id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from(`payments_${req.user.schoolSlug}`).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        const { error } = await supabase.from(`students_${req.user.schoolSlug}`).delete().neq('id', '00000000-0000-0000-0000-000000000000');
         if (error) throw error;
         return res.json({ message: 'Base de données des élèves vidée.' });
     } catch (err) {
