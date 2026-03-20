@@ -98,24 +98,22 @@ async function linkStudentToParent(req, res) {
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
-        // Dans Supabase, on utilise une table de liaison parent_student { parent_id, student_id }
-        const { error } = await supabase
-            .from(`parent_student_${schoolSlug}`)
-            .upsert(
-                idsToLink.map(sId => ({ parent_id: parentId, student_id: sId })),
-                { onConflict: 'parent_id, student_id' }
-            );
-
-        if (error) {
-            console.error('❌ Link Error (Supabase):', error.message);
-            // Si onConflict échoue à cause de l'index manquant, on tente un insert simple (ignorant les doublons)
-            if (error.message.includes('unique constraint') || error.message.includes('on conflict')) {
-                for (const sId of idsToLink) {
-                    await supabase.from(`parent_student_${schoolSlug}`).insert({ parent_id: parentId, student_id: sId }).select();
-                }
-            } else {
-                throw error;
+        // En l'absence d'index unique composite (parent_id, student_id) sur la table parent_student, 
+        // l'upsert onConflict échoue. On utilise donc des inserts individuels.
+        const errors = [];
+        for (const sId of idsToLink) {
+            const { error } = await supabase
+                .from(`parent_student_${schoolSlug}`)
+                .insert({ parent_id: parentId, student_id: sId });
+            
+            // On ignore l'erreur si le lien existe déjà (code 23505 = duplicate key)
+            if (error && error.code !== '23505') {
+                errors.push(`${sId}: ${error.message}`);
             }
+        }
+
+        if (errors.length > 0 && errors.length === idsToLink.length) {
+            throw new Error("Toutes les liaisons ont échoué : " + errors.join(', '));
         }
 
         // Auto-assignation des badges de base
