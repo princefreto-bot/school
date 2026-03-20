@@ -8,9 +8,12 @@ async function listStudents(req, res) {
     const { nom, prenom, classe, search } = req.query;
     const parentId = req.user ? req.user.id : null;
 
+    const schoolSlug = req.user ? req.user.schoolSlug : null;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+
     try {
         let query = supabase
-            .from('students')
+            .from(`students_${schoolSlug}`)
             .select('*');
 
         if (search || nom) {
@@ -37,7 +40,7 @@ async function listStudents(req, res) {
         let linkedIds = [];
         if (parentId) {
             const { data: links } = await supabase
-                .from('parent_student')
+                .from(`parent_student_${schoolSlug}`)
                 .select('student_id')
                 .eq('parent_id', parentId);
             if (links) linkedIds = links.map(l => l.student_id);
@@ -60,9 +63,12 @@ async function listStudents(req, res) {
  * Compte le nombre total d'élèves dans la base
  */
 async function countStudents(req, res) {
+    const schoolSlug = req.user ? req.user.schoolSlug : null;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+
     try {
         const { count, error } = await supabase
-            .from('students')
+            .from(`students_${schoolSlug}`)
             .select('*', { count: 'exact', head: true });
 
         if (error) throw error;
@@ -88,10 +94,13 @@ async function linkStudentToParent(req, res) {
         return res.status(400).json({ error: "Au moins un studentId est requis." });
     }
 
+    const schoolSlug = req.user ? req.user.schoolSlug : null;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+
     try {
         // Dans Supabase, on utilise une table de liaison parent_student { parent_id, student_id }
         const { error } = await supabase
-            .from('parent_student')
+            .from(`parent_student_${schoolSlug}`)
             .upsert(
                 idsToLink.map(sId => ({ parent_id: parentId, student_id: sId })),
                 { onConflict: 'parent_id, student_id' }
@@ -101,7 +110,7 @@ async function linkStudentToParent(req, res) {
 
         // Auto-assignation des badges de base
         for (const sId of idsToLink) {
-            await _autoAssignBadges(parentId, sId);
+            await _autoAssignBadges(parentId, sId, schoolSlug);
         }
 
         return res.status(201).json({
@@ -113,10 +122,10 @@ async function linkStudentToParent(req, res) {
     }
 }
 
-async function _autoAssignBadges(parentId, studentId) {
+async function _autoAssignBadges(parentId, studentId, schoolSlug) {
     try {
         const { data: student } = await supabase
-            .from('students')
+            .from(`students_${schoolSlug}`)
             .select('*')
             .eq('id', studentId)
             .single();
@@ -125,7 +134,7 @@ async function _autoAssignBadges(parentId, studentId) {
 
         const addBadge = async (code, label, description, icon) => {
             const { data: exists } = await supabase
-                .from('badges')
+                .from(`badges_${schoolSlug}`)
                 .select('id')
                 .eq('parent_id', parentId)
                 .eq('student_id', studentId)
@@ -133,7 +142,7 @@ async function _autoAssignBadges(parentId, studentId) {
                 .single();
 
             if (!exists) {
-                await supabase.from('badges').insert({
+                await supabase.from(`badges_${schoolSlug}`).insert({
                     parent_id: parentId,
                     student_id: studentId,
                     code,
@@ -163,6 +172,8 @@ async function _autoAssignBadges(parentId, studentId) {
 async function unlinkStudentFromParent(req, res) {
     const { id: parentId } = req.user;
     const { studentId } = req.params;
+    const schoolSlug = req.user ? req.user.schoolSlug : null;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     if (!studentId) {
         return res.status(400).json({ error: "studentId est requis." });
@@ -170,7 +181,7 @@ async function unlinkStudentFromParent(req, res) {
 
     try {
         const { error } = await supabase
-            .from('parent_student')
+            .from(`parent_student_${schoolSlug}`)
             .delete()
             .eq('parent_id', parentId)
             .eq('student_id', studentId);

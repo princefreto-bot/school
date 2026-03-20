@@ -10,7 +10,8 @@ const { sendPushNotification } = require('../utils/webPush');
  * Seul un admin/directeur/comptable peut publier des annonces.
  */
 async function createAnnouncement(req, res) {
-    const { role, id: adminId } = req.user;
+    const { role, id: adminId, schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
@@ -26,7 +27,7 @@ async function createAnnouncement(req, res) {
         // 1. Sauvegarder l'annonce dans Supabase
         const announcementId = id || require('crypto').randomUUID();
         const { data: announcement, error: aErr } = await supabase
-            .from('announcements')
+            .from(`announcements_${schoolSlug}`)
             .upsert({
                 id: announcementId,
                 titre,
@@ -48,21 +49,21 @@ async function createAnnouncement(req, res) {
 
         // 2. Récupérer tous les parents ayant au moins un enfant lié
         let parentQuery = supabase
-            .from('parent_student')
+            .from(`parent_student_${schoolSlug}`)
             .select('parent_id');
 
         // Si la cible est une classe spécifique, filtrer
         if (cible && cible !== 'all') {
             // Récupérer les élèves de la classe ciblée
             const { data: classStudents, error: csErr } = await supabase
-                .from('students')
+                .from(`students_${schoolSlug}`)
                 .select('id')
                 .eq('classe', cible);
 
             if (!csErr && classStudents && classStudents.length > 0) {
                 const classStudentIds = classStudents.map(s => s.id);
                 parentQuery = supabase
-                    .from('parent_student')
+                    .from(`parent_student_${schoolSlug}`)
                     .select('parent_id')
                     .in('student_id', classStudentIds);
             }
@@ -133,11 +134,12 @@ async function createAnnouncement(req, res) {
  * - Admin : toutes les annonces
  */
 async function getAnnouncements(req, res) {
-    const { role, id: userId } = req.user;
+    const { role, id: userId, schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
         let query = supabase
-            .from('announcements')
+            .from(`announcements_${schoolSlug}`)
             .select('*')
             .order('created_at', { ascending: false })
             .limit(50);
@@ -146,14 +148,14 @@ async function getAnnouncements(req, res) {
         if (role === 'parent') {
             // Récupérer les classes des enfants liés
             const { data: links, error: lErr } = await supabase
-                .from('parent_student')
+                .from(`parent_student_${schoolSlug}`)
                 .select('student_id')
                 .eq('parent_id', userId);
 
             if (!lErr && links && links.length > 0) {
                 const studentIds = links.map(l => l.student_id);
                 const { data: students } = await supabase
-                    .from('students')
+                    .from(`students_${schoolSlug}`)
                     .select('classe')
                     .in('id', studentIds);
 
@@ -161,14 +163,14 @@ async function getAnnouncements(req, res) {
 
                 if (classes.length > 0) {
                     query = supabase
-                        .from('announcements')
+                        .from(`announcements_${schoolSlug}`)
                         .select('*')
                         .in('cible', ['all', ...classes])
                         .order('created_at', { ascending: false })
                         .limit(50);
                 } else {
                     query = supabase
-                        .from('announcements')
+                        .from(`announcements_${schoolSlug}`)
                         .select('*')
                         .eq('cible', 'all')
                         .order('created_at', { ascending: false })
@@ -177,7 +179,7 @@ async function getAnnouncements(req, res) {
             } else {
                  // Si le parent n'a pas encore d'enfants liés, ou s'il y a eu erreur
                  query = supabase
-                     .from('announcements')
+                     .from(`announcements_${schoolSlug}`)
                      .select('*')
                      .eq('cible', 'all')
                      .order('created_at', { ascending: false })
@@ -217,8 +219,9 @@ async function getAnnouncements(req, res) {
  * Supprime une annonce (admin seulement).
  */
 async function deleteAnnouncement(req, res) {
-    const { role } = req.user;
+    const { role, schoolSlug } = req.user;
     const { id } = req.params;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
@@ -226,7 +229,7 @@ async function deleteAnnouncement(req, res) {
 
     try {
         const { error } = await supabase
-            .from('announcements')
+            .from(`announcements_${schoolSlug}`)
             .delete()
             .eq('id', id);
 

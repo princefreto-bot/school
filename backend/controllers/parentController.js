@@ -4,13 +4,14 @@ const { supabase } = require('../utils/supabase');
  * GET /api/parent/dashboard
  */
 async function getDashboard(req, res) {
-    const { id: parentId } = req.user;
+    const { id: parentId, schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
     console.log('🔍 [Dashboard] Parent ID:', parentId);
 
     try {
         // Récupérer les ids des élèves liés via la table parent_student
         const { data: links, error: lErr } = await supabase
-            .from('parent_student')
+            .from(`parent_student_${schoolSlug}`)
             .select('student_id')
             .eq('parent_id', parentId);
 
@@ -30,7 +31,7 @@ async function getDashboard(req, res) {
         }
 
         const { data: students, error: sErr } = await supabase
-            .from('students')
+            .from(`students_${schoolSlug}`)
             .select('*')
             .in('id', studentIds)
             .order('nom', { ascending: true });
@@ -52,13 +53,14 @@ async function getDashboard(req, res) {
  * GET /api/parent/payments/:studentId
  */
 async function getPayments(req, res) {
-    const { id: parentId } = req.user;
+    const { id: parentId, schoolSlug } = req.user;
     const { studentId } = req.params;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
         // Vérifier lien dans la table parent_student
         const { data: isLinked, error: lErr } = await supabase
-            .from('parent_student')
+            .from(`parent_student_${schoolSlug}`)
             .select('student_id')
             .eq('parent_id', parentId)
             .eq('student_id', studentId)
@@ -69,7 +71,7 @@ async function getPayments(req, res) {
         }
 
         const { data: student, error: sErr } = await supabase
-            .from('students')
+            .from(`students_${schoolSlug}`)
             .select('*')
             .eq('id', studentId)
             .single();
@@ -77,7 +79,7 @@ async function getPayments(req, res) {
         if (sErr) throw sErr;
 
         const { data: payments, error: pErr } = await supabase
-            .from('payments')
+            .from(`payments_${schoolSlug}`)
             .select('*')
             .eq('student_id', studentId)
             .order('date', { ascending: false });
@@ -94,11 +96,12 @@ async function getPayments(req, res) {
  * GET /api/parent/badges
  */
 async function getBadges(req, res) {
-    const { id: parentId } = req.user;
+    const { id: parentId, schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
         const { data: badges, error } = await supabase
-            .from('badges')
+            .from(`badges_${schoolSlug}`)
             .select(`
                 *,
                 student:student_id (nom, prenom, classe)
@@ -128,8 +131,11 @@ async function getBadges(req, res) {
 async function getActiveParentsCount(req, res) {
     try {
         console.log('🔍 [ActiveCount] start');
+        const schoolSlug = req.user ? req.user.schoolSlug : null;
+        if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+
         const { count, error } = await supabase
-            .from('profiles')
+            .from(`profiles_${schoolSlug}`)
             .select('*', { count: 'exact', head: true })
             .eq('role', 'parent');
 
@@ -148,8 +154,11 @@ async function getActiveParentsCount(req, res) {
 async function getAllParents(req, res) {
     try {
         console.log('🔍 [ParentList] fetching all parents');
+        const schoolSlug = req.user ? req.user.schoolSlug : null;
+        if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+
         const { data, error } = await supabase
-            .from('profiles')
+            .from(`profiles_${schoolSlug}`)
             .select('id, nom, telephone, created_at, role')
             .eq('role', 'parent')
             .order('nom', { ascending: true });
@@ -172,7 +181,7 @@ async function getAllParents(req, res) {
  */
 async function getParentById(req, res) {
     const { id } = req.params;
-    const { role } = req.user;
+    const { role, schoolSlug } = req.user;
 
     // Only admin can access this
     if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
@@ -182,7 +191,7 @@ async function getParentById(req, res) {
     try {
         console.log(`🔍 [ParentById] fetching parent ${id}`);
         const { data, error } = await supabase
-            .from('profiles')
+            .from(`profiles_${schoolSlug}`)
             .select('id, nom, telephone, created_at, role')
             .eq('id', id)
             .eq('role', 'parent')
@@ -206,7 +215,7 @@ async function getParentById(req, res) {
 
 async function adminDeleteAccount(req, res) {
     const { parentId } = req.params;
-    const { role } = req.user;
+    const { role, schoolSlug } = req.user;
 
     console.log(`🗑️ [AdminDelete] Attempting to delete parent ${parentId} by role ${role}`);
 
@@ -219,7 +228,7 @@ async function adminDeleteAccount(req, res) {
     try {
         console.log(`🗑️ [AdminDelete] Deleting parent ${parentId} from profiles`);
         const { error } = await supabase
-            .from('profiles')
+            .from(`profiles_${schoolSlug}`)
             .delete()
             .eq('id', parentId)
             .neq('role', 'directeur') // Sécurité : ne peut pas s'auto-supprimer via cette route
@@ -242,13 +251,14 @@ async function adminDeleteAccount(req, res) {
  * GET /api/parent/presences/:studentId
  */
 async function getPresences(req, res) {
-    const { id: parentId } = req.user;
+    const { id: parentId, schoolSlug } = req.user;
     const { studentId } = req.params;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
         // Vérifier lien dans la table parent_student
         const { data: isLinked, error: lErr } = await supabase
-            .from('parent_student')
+            .from(`parent_student_${schoolSlug}`)
             .select('student_id')
             .eq('parent_id', parentId)
             .eq('student_id', studentId)
@@ -259,7 +269,7 @@ async function getPresences(req, res) {
         }
 
         const { data: presences, error: pErr } = await supabase
-            .from('presences')
+            .from(`presences_${schoolSlug}`)
             .select('*')
             .eq('eleve_id', studentId)
             .order('date', { ascending: false })

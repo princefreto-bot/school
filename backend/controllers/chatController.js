@@ -4,10 +4,11 @@ const { supabase } = require('../utils/supabase');
  * Récupère les conversations pour l'utilisateur connecté
  */
 async function getConversations(req, res) {
-    const { id, role } = req.user;
+    const { id, role, schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
-        let query = supabase.from('conversations').select(`
+        let query = supabase.from(`conversations_${schoolSlug}`).select(`
             *,
             parent:parent_id (id, nom, telephone)
         `);
@@ -35,10 +36,12 @@ async function getConversations(req, res) {
  */
 async function getMessages(req, res) {
     const { conversationId } = req.params;
+    const { schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
         const { data, error } = await supabase
-            .from('messages')
+            .from(`messages_${schoolSlug}`)
             .select('*')
             .eq('conversation_id', conversationId)
             .order('created_at', { ascending: true });
@@ -47,7 +50,7 @@ async function getMessages(req, res) {
 
         // Marquer comme lu pour le récepteur
         await supabase
-            .from('messages')
+            .from(`messages_${schoolSlug}`)
             .update({ read_status: true })
             .eq('conversation_id', conversationId)
             .neq('sender_id', req.user.id);
@@ -63,7 +66,8 @@ async function getMessages(req, res) {
  */
 async function sendMessage(req, res) {
     const { conversationId, text, imageUrl, targetRole } = req.body;
-    const { id, role } = req.user;
+    const { id, role, schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
         let convId = conversationId;
@@ -71,7 +75,7 @@ async function sendMessage(req, res) {
         // Si parent initie sans conversationId
         if (!convId && role === 'parent') {
             const { data: conv, error: convErr } = await supabase
-                .from('conversations')
+                .from(`conversations_${schoolSlug}`)
                 .upsert({
                     parent_id: id,
                     admin_role: targetRole || 'administration',
@@ -95,7 +99,7 @@ async function sendMessage(req, res) {
             if (!parentId) return res.status(400).json({ error: "parentId manquant pour l'initiation." });
 
             const { data: conv, error: convErr } = await supabase
-                .from('conversations')
+                .from(`conversations_${schoolSlug}`)
                 .upsert({
                     parent_id: parentId,
                     admin_role: adminRole || (role === 'comptable' ? 'comptabilite' : 'administration'),
@@ -109,7 +113,7 @@ async function sendMessage(req, res) {
         }
 
         const { data: message, error } = await supabase
-            .from('messages')
+            .from(`messages_${schoolSlug}`)
             .insert({
                 conversation_id: convId,
                 sender_id: id,
@@ -122,7 +126,7 @@ async function sendMessage(req, res) {
         if (error) throw error;
 
         // Update conversation
-        await supabase.from('conversations').update({
+        await supabase.from(`conversations_${schoolSlug}`).update({
             last_message: text || 'Photo',
             updated_at: new Date().toISOString()
         }).eq('id', convId);
@@ -137,11 +141,12 @@ async function sendMessage(req, res) {
  * Récupère le nombre de messages non lus pour l'utilisateur
  */
 async function getUnreadCount(req, res) {
-    const { id, role } = req.user;
+    const { id, role, schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
         let query = supabase
-            .from('messages')
+            .from(`messages_${schoolSlug}`)
             .select('*, conversations!inner(parent_id)', { count: 'exact', head: true })
             .neq('sender_id', id)
             .eq('read_status', false);

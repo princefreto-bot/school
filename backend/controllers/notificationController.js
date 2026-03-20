@@ -7,11 +7,13 @@ const { sendPushNotification } = require('../utils/webPush');
  */
 async function sendNotification(req, res) {
     const { studentId, message } = req.body;
+    const { schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
         // 1. Trouver tous les parents liés à cet élève
         const { data: links, error: lErr } = await supabase
-            .from('parent_student')
+            .from(`parent_student_${schoolSlug}`)
             .select('parent_id')
             .eq('student_id', studentId);
 
@@ -27,7 +29,7 @@ async function sendNotification(req, res) {
             // 2. Enregistrer le message dans la messagerie (si conversation existe)
             // On cherche ou crée une conversation 'administration'
             const { data: conv, error: cErr } = await supabase
-                .from('conversations')
+                .from(`conversations_${schoolSlug}`)
                 .upsert({
                     parent_id: parentId,
                     admin_role: 'administration',
@@ -37,7 +39,7 @@ async function sendNotification(req, res) {
                 .single();
 
             if (!cErr && conv) {
-                await supabase.from('messages').insert({
+                await supabase.from(`messages_${schoolSlug}`).insert({
                     conversation_id: conv.id,
                     sender_id: req.user.id, // L'admin qui scanne
                     message_text: message,
