@@ -263,4 +263,48 @@ async function getGlobalStats(req, res) {
     }
 }
 
-module.exports = { getAllSchools, createSchool, updateSchoolStatus, updateSchool, getGlobalStats };
+// ── DELETE /api/superadmin/schools/:id ──────────────────────────
+// Supprimer une école et TOUTES ses tables
+async function deleteSchool(req, res) {
+    const { id } = req.params;
+
+    try {
+        // Optionnel : s'assurer qu'on ne supprime pas si l'id n'est pas fourni
+        if (!id) return res.status(400).json({ error: 'ID manquant.' });
+
+        // 1. Récupérer le slug de l'école
+        const { data: school, error: fetchErr } = await supabase
+            .from('schools')
+            .select('slug, name')
+            .eq('id', id)
+            .single();
+
+        if (fetchErr || !school) {
+            return res.status(404).json({ error: 'École introuvable.' });
+        }
+
+        // 2. Exécuter la routine Supabase RPC pour dropper toutes les tables associées à ce slug
+        console.log(`🗑️ Tentative de suppression des tables pour le slug : ${school.slug}`);
+        const { error: rpcErr } = await supabase.rpc('drop_school_tables', { school_slug: school.slug });
+        if (rpcErr) {
+            console.error('Erreur RPC Drop Tables:', rpcErr.message);
+            // On continue quand même pour la supprimer du catalogue, on nettoiera les bases manuellement si besoin
+        }
+
+        // 3. Supprimer du catalogue (Table schools)
+        const { error: deleteErr } = await supabase
+            .from('schools')
+            .delete()
+            .eq('id', id);
+
+        if (deleteErr) throw deleteErr;
+
+        console.log(`🗑️ L'école ${school.name} a été complétement supprimée du système.`);
+        return res.json({ message: `L'établissement ${school.name} a été supprimé sans retour possible.` });
+    } catch (err) {
+        console.error('SuperAdmin deleteSchool Error:', err.message);
+        return res.status(500).json({ error: 'Erreur suppression école: ' + err.message });
+    }
+}
+
+module.exports = { getAllSchools, createSchool, updateSchoolStatus, updateSchool, deleteSchool, getGlobalStats };

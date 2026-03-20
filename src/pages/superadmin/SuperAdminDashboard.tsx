@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Building2, Users, TrendingUp, ShieldCheck, AlertTriangle,
   Plus, Check, X, Clock, RefreshCw, ToggleLeft, ToggleRight,
-  Globe, Phone, Mail, MapPin, Edit, ChevronDown, Wallet, Star
+  Globe, Phone, Mail, MapPin, Edit, ChevronDown, Wallet, Star, Trash2
 } from 'lucide-react';
 import { School } from '../../types';
 import { API_BASE_URL } from '../../config';
@@ -256,6 +256,31 @@ export const SuperAdminDashboard: React.FC = () => {
     }
   };
 
+  const handleDeleteSchool = async (school: SchoolWithStats) => {
+    // Double confirmation pour la suppression définitive
+    if (!confirm(`⚠️ ATTENTION ⚠️\nSupprimer DÉFINITIVEMENT "${school.name}" ?\n\nCette action va détruire toutes les bases de données (élèves, paiements, profils) associées. Cette action est IRREVERSIBLE.`)) return;
+    if (prompt(`Pour confirmer, tapez exactement le nom de l'école : "${school.name}"`) !== school.name) {
+      alert("La saisie ne correspond pas, suppression annulée.");
+      return;
+    }
+
+    setActionLoading(school.id);
+    try {
+      const res = await fetch(`${API_BASE_URL}/superadmin/schools/${school.id}`, {
+         method: 'DELETE',
+         headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      alert(data.message);
+      await load();
+    } catch (err: any) {
+      alert(err.message || 'Erreur lors de la suppression');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -269,13 +294,13 @@ export const SuperAdminDashboard: React.FC = () => {
       {/* En-tête */}
       <div className="flex items-start justify-between">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shrink-0">
               <Star className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-white">SuperAdmin Dashboard</h1>
-              <p className="text-slate-400 text-sm">Plateforme SaaS — Vue globale de tous les établissements</p>
+              <h1 className="text-xl sm:text-2xl font-black text-white tracking-wide">SuperAdmin Global</h1>
+              <p className="text-slate-200 text-sm sm:text-base font-semibold mt-0.5">Plateforme SaaS — Gestion centralisée</p>
             </div>
           </div>
         </div>
@@ -405,11 +430,7 @@ export const SuperAdminDashboard: React.FC = () => {
                       <div className="flex flex-wrap gap-4">
                         <div className="text-center">
                           <p className="text-white font-bold text-lg">{school.student_count}</p>
-                          <p className="text-slate-500 text-xs">Élèves</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-white font-bold text-lg">{school.user_count}</p>
-                          <p className="text-slate-500 text-xs">Utilisateurs</p>
+                          <p className="text-slate-500 text-xs">Élèves actuels</p>
                         </div>
                         <div className="text-center">
                           <p className="text-emerald-400 font-bold text-lg">{formatFCFA(school.revenue)}</p>
@@ -426,25 +447,35 @@ export const SuperAdminDashboard: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 shrink-0">
+                    {/* Actions dynamiques */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 border-t sm:border-t-0 sm:border-l border-slate-700/50 pt-3 sm:pt-0 sm:pl-4 mt-3 sm:mt-0">
                       <button
                         onClick={() => handleStatusToggle(school)}
                         disabled={actionLoading === school.id}
                         title={school.status === 'suspended' ? 'Activer' : 'Suspendre'}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                        className={`flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md ${
                           school.status === 'suspended'
-                            ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/30'
-                            : 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30'
+                            ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-400/10 text-emerald-400 hover:from-emerald-500/30 hover:to-emerald-400/20 border border-emerald-500/40'
+                            : 'bg-gradient-to-r from-amber-500/20 to-amber-400/10 text-amber-400 hover:from-amber-500/30 hover:to-amber-400/20 border border-amber-500/40'
                         } disabled:opacity-50`}
                       >
                         {actionLoading === school.id
-                          ? <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          ? <RefreshCw className="w-4 h-4 animate-spin" />
                           : school.status === 'suspended'
-                            ? <ToggleLeft className="w-3.5 h-3.5" />
-                            : <ToggleRight className="w-3.5 h-3.5" />
+                            ? <ToggleLeft className="w-5 h-5" />
+                            : <ToggleRight className="w-5 h-5" />
                         }
-                        {school.status === 'suspended' ? 'Activer' : 'Suspendre'}
+                        {school.status === 'suspended' ? 'RÉACTIVER' : 'SUSPENDRE'}
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteSchool(school)}
+                        disabled={actionLoading === school.id}
+                        title="Détruire cette école"
+                        className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-red-600/20 to-red-500/10 text-red-500 hover:from-red-600/30 hover:to-red-500/20 border border-red-600/40 shadow-md transition-all disabled:opacity-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        SUPPRIMER
                       </button>
                     </div>
                   </div>
