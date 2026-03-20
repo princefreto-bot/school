@@ -9,7 +9,8 @@ const {
     updateSchoolStatus,
     updateSchool,
     deleteSchool,
-    getGlobalStats
+    getGlobalStats,
+    impersonateSchool
 } = require('../controllers/superAdminController');
 
 // Toutes ces routes sont protégées par le double middleware :
@@ -22,5 +23,6 @@ router.post('/schools', authenticateToken, requireSuperAdmin, createSchool);
 router.put('/schools/:id', authenticateToken, requireSuperAdmin, updateSchool);
 router.patch('/schools/:id/status', authenticateToken, requireSuperAdmin, updateSchoolStatus);
 router.delete('/schools/:id', authenticateToken, requireSuperAdmin, deleteSchool);
+router.post('/schools/:id/impersonate', authenticateToken, requireSuperAdmin, impersonateSchool);
 
 module.exports = router;

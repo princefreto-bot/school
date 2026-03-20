@@ -3,12 +3,13 @@
 // ============================================================
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Building2, Users, TrendingUp, ShieldCheck, AlertTriangle,
+  Building2, Users, AlertTriangle,
   Plus, Check, X, Clock, RefreshCw, ToggleLeft, ToggleRight,
-  Globe, Phone, Mail, MapPin, Edit, ChevronDown, Wallet, Star, Trash2
+  Globe, Phone, Mail, MapPin, Wallet, Star, Trash2, ExternalLink
 } from 'lucide-react';
 import { School } from '../../types';
 import { API_BASE_URL } from '../../config';
+import { useStore } from '../../store/useStore';
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -281,6 +282,40 @@ export const SuperAdminDashboard: React.FC = () => {
     }
   };
 
+  const handleImpersonate = async (school: SchoolWithStats) => {
+    setActionLoading(school.id);
+    try {
+      const res = await fetch(`${API_BASE_URL}/superadmin/schools/${school.id}/impersonate`, {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur lors de la connexion');
+      
+      // Stocker le token
+      localStorage.setItem('parent_token', data.token);
+      
+      // Vider le cache de l'école précédente et appliquer les nouvelles infos de l'école
+      useStore.setState({
+        students: [], parents: [], presences: [], activityLogs: [], links: [],
+        announcements: [], announcementReads: [], matieres: [], classeMatieres: [],
+        notes: [],
+        schoolLogo: data.user.school_logo || null,
+        schoolName: data.user.school_name || 'Établissement',
+        user: data.user,
+        isAuthenticated: true,
+        currentPage: 'dashboard'
+      });
+
+      // Lancer la synchro pour la nouvelle école
+      useStore.getState().fetchAllFromBackend();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -449,6 +484,16 @@ export const SuperAdminDashboard: React.FC = () => {
 
                     {/* Actions dynamiques */}
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 border-t sm:border-t-0 sm:border-l border-slate-700/50 pt-3 sm:pt-0 sm:pl-4 mt-3 sm:mt-0">
+                      <button
+                        onClick={() => handleImpersonate(school)}
+                        disabled={actionLoading === school.id}
+                        title="Gérer cet établissement"
+                        className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-blue-600/20 to-blue-500/10 text-blue-400 hover:from-blue-600/30 hover:to-blue-500/20 border border-blue-600/40 shadow-md transition-all disabled:opacity-50"
+                      >
+                        {actionLoading === school.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
+                        GÉRER
+                      </button>
+
                       <button
                         onClick={() => handleStatusToggle(school)}
                         disabled={actionLoading === school.id}

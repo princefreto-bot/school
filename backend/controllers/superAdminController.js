@@ -307,4 +307,53 @@ async function deleteSchool(req, res) {
     }
 }
 
-module.exports = { getAllSchools, createSchool, updateSchoolStatus, updateSchool, deleteSchool, getGlobalStats };
+// ── POST /api/superadmin/schools/:id/impersonate ────────────────
+// Connecter le superadmin à une école spécifique
+async function impersonateSchool(req, res) {
+    const { id } = req.params;
+
+    try {
+        const { data: school, error } = await supabase
+            .from('schools')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error || !school) {
+            return res.status(404).json({ error: 'École introuvable.' });
+        }
+
+        const jwt = require('jsonwebtoken');
+        const { JWT_SECRET, JWT_EXPIRES } = require('../config');
+
+        const userName = `SuperAdmin (${school.name})`;
+        const userId = req.user.id || 'superadmin_impersonate';
+        
+        const token = jwt.sign(
+            { id: userId, nom: userName, role: 'admin', schoolSlug: school.slug },
+            JWT_SECRET,
+            { expiresIn: JWT_EXPIRES }
+        );
+
+        console.log(`🦸‍♂️ SuperAdmin Impersonate: Accès à l'école ${school.slug}`);
+
+        return res.json({
+            message: `Connexion à ${school.name} réussie.`,
+            token,
+            user: {
+                id: userId,
+                nom: userName,
+                telephone: 'SuperAdmin',
+                role: 'admin',
+                school_name: school.name,
+                school_slug: school.slug,
+                school_logo: school.logo_url
+            }
+        });
+    } catch (err) {
+        console.error('SuperAdmin impersonate Error:', err.message);
+        return res.status(500).json({ error: 'Erreur connexion école: ' + err.message });
+    }
+}
+
+module.exports = { getAllSchools, createSchool, updateSchoolStatus, updateSchool, deleteSchool, getGlobalStats, impersonateSchool };

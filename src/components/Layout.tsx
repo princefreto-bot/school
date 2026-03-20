@@ -128,7 +128,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
     />
 
     {/* Section Parents Connectés (pour Admin) */}
-    {userRole !== 'parent' && (
+    {userRole !== 'parent' && userRole !== 'superadmin' && (
       <div className="px-5 py-4 border-t border-slate-700/30">
         <div className="flex items-center justify-between mb-2">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Live</p>
