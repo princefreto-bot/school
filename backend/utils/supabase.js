@@ -2,16 +2,14 @@ const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+// Utiliser la clé SERVICE_ROLE si elle existe pour bypasser RLS, sinon fallback sur Anon
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
 console.log('[Supabase] URL:', supabaseUrl ? '✓ Configurée' : '❌ MANQUANTE');
-console.log('[Supabase] Clé Anon:', supabaseKey ? '✓ Configurée' : '❌ MANQUANTE');
+console.log('[Supabase] Clé Backend:', process.env.SUPABASE_SERVICE_ROLE_KEY ? '✓ SERVICE_ROLE (RLS Bypass)' : '⚠️ ANON_KEY (Sujet à RLS)');
 
 if (!supabaseUrl || !supabaseKey) {
     console.error('❌ ERREUR: Clés Supabase manquantes dans le fichier .env');
-    console.error('Créez un fichier .env à la racine avec:');
-    console.error('  SUPABASE_URL=https://votre-project.supabase.co');
-    console.error('  SUPABASE_ANON_KEY=votre-clé-anon');
     process.exit(1);
 }
 
