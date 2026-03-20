@@ -381,9 +381,7 @@ export const useStore = create<AppState>()(
       addStudent: (data) => {
         const ecolage = getEcolage((data as { classe: string }).classe);
         const restant = ecolage - ((data as { dejaPaye?: number }).dejaPaye || 0);
-        const studentId = `${data.nom}_${data.prenom}_${data.classe}`.toLowerCase()
-          .replace(/[^a-z0-9]/g, '_')
-          .replace(/_+/g, '_');
+        const studentId = uuid();
 
         const student: Student = {
           ...data,

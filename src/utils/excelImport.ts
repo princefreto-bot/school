@@ -74,10 +74,12 @@ export const importFromExcel = async (file: File): Promise<Student[]> => {
             if (restant <= 0) status = 'Soldé';
             else if (dejaPaye / ecolage >= 0.7) status = 'Partiel';
 
-            // ID DÉTERMINISTE pour éviter les doublons lors des ré-imports
-            const studentId = `${nom}_${prenom}_${classe}`.toLowerCase()
-              .replace(/[^a-z0-9]/g, '_')
-              .replace(/_+/g, '_');
+            // Generate a valid UUID to avoid Supabase syntax errors
+            const studentId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+              const r = (Math.random() * 16) | 0;
+              const v = c === 'x' ? r : (r & 0x3) | 0x8;
+              return v.toString(16);
+            });
 
             return {
               id: studentId,

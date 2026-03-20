@@ -2,7 +2,12 @@ import { Student, StatusPaiement, DashboardStats, ClassStats } from '../types';
 import { getEcolage, getCycle, CLASS_CONFIG } from '../data/classConfig';
 
 export const generateId = (): string => {
-  return Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+  // Use a proper UUID v4 format to avoid "invalid input syntax for type uuid" error in Supabase
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 };
 
 export const getCycleFromClasse = (classe: string): 'Primaire' | 'Collège' | 'Lycée' => {

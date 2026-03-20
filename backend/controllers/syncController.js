@@ -213,34 +213,25 @@ async function syncToFrontend(req, res) {
     const tbl = (name) => `${name}_${schoolSlug}`;
 
     try {
-        const { data: students, error: sErr } = await supabase.from(tbl('students')).select('*').order('nom');
-        if (sErr) throw sErr;
+        const fetchTable = async (name, orderField = null, ascending = false) => {
+            let q = supabase.from(tbl(name)).select('*');
+            if (orderField) q = q.order(orderField, { ascending });
+            const { data, error } = await q;
+            if (error && error.code !== '42P01') throw error;
+            return data || [];
+        };
 
-        const { data: payments, error: pErr } = await supabase.from(tbl('payments')).select('*').order('date', { ascending: false });
-        if (pErr) throw pErr;
-
-        const { data: presences, error: prErr } = await supabase.from(tbl('presences')).select('*').order('date', { ascending: false }).order('heure', { ascending: false });
-        if (prErr) throw prErr;
-
-        const { data: logs, error: lErr } = await supabase.from(tbl('activity_logs')).select('*').order('date_heure', { ascending: false }).limit(500);
-        if (lErr) throw lErr;
-
-        const { data: links, error: psErr } = await supabase.from(tbl('parent_student')).select('*');
-        if (psErr) throw psErr;
-
+        const students = await fetchTable('students', 'nom');
+        const payments = await fetchTable('payments', 'date');
+        const presences = await fetchTable('presences', 'date');
+        const logs = await fetchTable('activity_logs', 'date_heure');
+        const links = await fetchTable('parent_student');
+        const announcements = await fetchTable('announcements', 'created_at');
+        const dbMatieres = await fetchTable('matieres');
+        const dbClasseMatieres = await fetchTable('classe_matieres');
+        const dbNotes = await fetchTable('notes');
+        
         const { data: appSettings } = await supabase.from(tbl('app_settings')).select('*').single();
-
-        const { data: announcements, error: aErr } = await supabase.from(tbl('announcements')).select('*').order('created_at', { ascending: false });
-        if (aErr && aErr.code !== '42P01') console.warn('⚠️ Fetch announcements error:', aErr.message);
-
-        const { data: dbMatieres, error: matErr } = await supabase.from(tbl('matieres')).select('*');
-        if (matErr && matErr.code !== '42P01') console.warn('⚠️ Fetch matieres error:', matErr.message);
-
-        const { data: dbClasseMatieres, error: cmErr } = await supabase.from(tbl('classe_matieres')).select('*');
-        if (cmErr && cmErr.code !== '42P01') console.warn('⚠️ Fetch classe_matieres error:', cmErr.message);
-
-        const { data: dbNotes, error: notErr } = await supabase.from(tbl('notes')).select('*');
-        if (notErr && notErr.code !== '42P01') console.warn('⚠️ Fetch notes error:', notErr.message);
 
         const studentMap = new Map();
         students.forEach(s => {
