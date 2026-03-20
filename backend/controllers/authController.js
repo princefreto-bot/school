@@ -100,6 +100,8 @@ async function login(req, res) {
                     token,
                     user: { id: superadmin.id, nom: superadmin.nom, telephone: superadmin.telephone, role: 'superadmin' }
                 });
+            } else {
+                return res.status(401).json({ error: 'Mot de passe SuperAdmin incorrect.' });
             }
         }
         
