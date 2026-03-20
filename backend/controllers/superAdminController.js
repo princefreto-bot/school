@@ -17,7 +17,9 @@ async function getAllSchools(req, res) {
 
         if (error) throw error;
 
-                // Pour chaque école, compter le nombre d'élèves dans sa propre table !
+        // Pour chaque école, compter le nombre d'élèves dans sa propre table !
+        const schoolsWithStats = await Promise.all(
+            schools.map(async (school) => {
                 let studentCount = 0;
                 let userCount = 0;
                 
