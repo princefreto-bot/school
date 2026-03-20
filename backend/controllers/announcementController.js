@@ -191,6 +191,7 @@ async function getAnnouncements(req, res) {
 
         if (error) {
             console.error('❌ [GetAnnouncements] Erreur:', error.message);
+            if (error.code === '42P01') return res.json({ announcements: [] });
             throw error;
         }
 

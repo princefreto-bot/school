@@ -350,11 +350,17 @@ async function clearActivityLogs(req, res) {
 
 async function clearStudents(req, res) {
     if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) return res.status(403).json({ error: 'Action non autorisée.' });
+    const schoolSlug = req.user.schoolSlug;
     try {
-        await supabase.from(`parent_student_${req.user.schoolSlug}`).delete().neq('student_id', '00000000-0000-0000-0000-000000000000');
-        await supabase.from(`payments_${req.user.schoolSlug}`).delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        const { error } = await supabase.from(`students_${req.user.schoolSlug}`).delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        if (error) throw error;
+        const safeDelete = async (table, filterCol, filterVal) => {
+            const { error } = await supabase.from(`${table}_${schoolSlug}`).delete().neq(filterCol, filterVal);
+            if (error && error.code !== '42P01') throw error;
+        };
+
+        await safeDelete('parent_student', 'student_id', '00000000-0000-0000-0000-000000000000');
+        await safeDelete('payments', 'id', '00000000-0000-0000-0000-000000000000');
+        await safeDelete('students', 'id', '00000000-0000-0000-0000-000000000000');
+        
         return res.json({ message: 'Base de données des élèves vidée.' });
     } catch (err) {
         return res.status(500).json({ error: err.message });

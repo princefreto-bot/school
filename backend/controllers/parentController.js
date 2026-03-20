@@ -17,6 +17,7 @@ async function getDashboard(req, res) {
 
         if (lErr) {
             console.error('❌ [Dashboard] Erreur récupération liens:', lErr);
+            if (lErr.code === '42P01') return res.json({ students: [] });
             throw lErr;
         }
 
@@ -271,7 +272,7 @@ async function getPresences(req, res) {
         const { data: presences, error: pErr } = await supabase
             .from(`presences_${schoolSlug}`)
             .select('*')
-            .eq('eleve_id', studentId)
+            .eq('student_id', studentId)
             .order('date', { ascending: false })
             .order('heure', { ascending: false });
 

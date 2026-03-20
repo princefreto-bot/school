@@ -106,7 +106,17 @@ async function linkStudentToParent(req, res) {
                 { onConflict: 'parent_id, student_id' }
             );
 
-        if (error) throw error;
+        if (error) {
+            console.error('❌ Link Error (Supabase):', error.message);
+            // Si onConflict échoue à cause de l'index manquant, on tente un insert simple (ignorant les doublons)
+            if (error.message.includes('unique constraint') || error.message.includes('on conflict')) {
+                for (const sId of idsToLink) {
+                    await supabase.from(`parent_student_${schoolSlug}`).insert({ parent_id: parentId, student_id: sId }).select();
+                }
+            } else {
+                throw error;
+            }
+        }
 
         // Auto-assignation des badges de base
         for (const sId of idsToLink) {
@@ -118,7 +128,7 @@ async function linkStudentToParent(req, res) {
         });
     } catch (err) {
         console.error('Link Error:', err.message);
-        return res.status(500).json({ error: 'Erreur lors de la liaison des élèves.' });
+        return res.status(500).json({ error: 'Erreur lors de la liaison des élèves : ' + err.message });
     }
 }
 
@@ -133,7 +143,7 @@ async function _autoAssignBadges(parentId, studentId, schoolSlug) {
         if (!student) return;
 
         const addBadge = async (code, label, description, icon) => {
-            const { data: exists } = await supabase
+            const { data: exists, error } = await supabase
                 .from(`badges_${schoolSlug}`)
                 .select('id')
                 .eq('parent_id', parentId)
@@ -141,8 +151,15 @@ async function _autoAssignBadges(parentId, studentId, schoolSlug) {
                 .eq('code', code)
                 .single();
 
+            // Ignore PGRST116 (No rows found) which is expected, 
+            // and 42P01 (Table missing) to be resilient
+            if (error && !['PGRST116', '42P01'].includes(error.code)) {
+                console.warn(`⚠️ Badge error [${code}]:`, error.message);
+                return;
+            }
+
             if (!exists) {
-                await supabase.from(`badges_${schoolSlug}`).insert({
+                const { error: insErr } = await supabase.from(`badges_${schoolSlug}`).insert({
                     parent_id: parentId,
                     student_id: studentId,
                     code,
@@ -151,6 +168,7 @@ async function _autoAssignBadges(parentId, studentId, schoolSlug) {
                     icon,
                     earned_at: new Date().toISOString()
                 });
+                if (insErr && insErr.code !== '42P01') console.warn(`⚠️ Badge insert error:`, insErr.message);
             }
         };
 
