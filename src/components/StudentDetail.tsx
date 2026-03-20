@@ -59,7 +59,7 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
               <CheckCircle className="w-3.5 h-3.5" /> Parent Responsable · Élève Soldé
             </span>
           ) : isPartiel ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold border border-blue-300">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-800 rounded-full text-xs font-bold border border-amber-300">
               ✓ 2ᵉ Tranche Validée (≥70%)
             </span>
           ) : (
@@ -75,7 +75,7 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
                 className="h-full rounded-full transition-all"
                 style={{
                   width: `${taux}%`,
-                  background: isSolde ? '#16a34a' : isPartiel ? '#2563eb' : taux >= 30 ? '#f59e0b' : '#ef4444',
+                  background: isSolde ? '#16a34a' : isPartiel ? '#f59e0b' : taux >= 30 ? '#f59e0b' : '#ef4444',
                 }}
               />
             </div>
@@ -91,7 +91,7 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
               onClick={() => setTab(t)}
               className={`flex-1 py-3 text-sm font-medium transition-colors ${
                 tab === t
-                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  ? 'text-amber-500 border-b-2 border-amber-500'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -186,12 +186,12 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
                 </div>
 
                 {/* Prévision */}
-                <div className="mt-3 bg-blue-50 rounded-xl p-3 flex items-center gap-3">
-                  <TrendingUp className="w-4 h-4 text-blue-500 shrink-0" />
-                  <div className="text-xs text-blue-700">
+                <div className="mt-3 bg-amber-50 rounded-xl p-3 flex items-center gap-3">
+                  <TrendingUp className="w-4 h-4 text-amber-500 shrink-0" />
+                  <div className="text-xs text-amber-700">
                     <span className="font-semibold">Taux de paiement : {taux}%</span>
                     {!isSolde && (
-                      <span className="ml-2 text-blue-500">
+                      <span className="ml-2 text-amber-500">
                         · Manque {fmtMoney(student.restant)} pour solder
                       </span>
                     )}
@@ -253,7 +253,7 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
         <div className="border-t border-gray-100 p-4 flex flex-wrap gap-2 bg-gray-50 rounded-b-2xl">
           <button
             onClick={() => generateRecuPDF(student, schoolName, schoolYear, messageRemerciement, messageRappel, schoolLogo ?? undefined)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-colors shadow-sm"
           >
             <Download className="w-4 h-4" /> Reçu PDF
           </button>

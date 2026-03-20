@@ -4,14 +4,14 @@
    GLOBAL THEME VARIABLES
    ======================================== */
 :root {
-  --bg-primary: #f8fafc;
+  --bg-primary: #ffffff;
   --bg-secondary: #ffffff;
   --bg-card: #ffffff;
   --bg-sidebar: #0f172a;
   --text-primary: #0f172a;
   --text-secondary: #475569;
-  --border-color: #e2e8f0;
-  --accent-color: #2563eb;
+  --border-color: #f1f5f9;
+  --accent-color: #eab308; /* Amber-500 */
   --sidebar-gradient: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
 }
 
@@ -23,7 +23,7 @@
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --border-color: #334155;
-  --accent-color: #3b82f6;
+  --accent-color: #facc15; /* Amber-400 */
   --sidebar-gradient: linear-gradient(180deg, #0f172a 0%, #020617 100%);
 }
 
@@ -116,14 +116,14 @@ textarea {
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1), 0 0 20px rgba(37, 99, 235, 0.1);
+  border-color: #eab308;
+  box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.1), 0 0 20px rgba(234, 179, 8, 0.1);
 }
 
 /* Buttons */
 .btn-primary {
   padding: 0.75rem 1.5rem;
-  background-color: #2563eb;
+  background-color: #eab308;
   color: white;
   border-radius: 1rem;
   font-weight: 700;

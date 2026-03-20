@@ -61,7 +61,7 @@ const SidebarItems: React.FC<SidebarItemsProps> = ({
           key={item.id}
           onClick={() => { setCurrentPage(item.id); setSidebarOpen(false); }}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group ${active
-            ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+            ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
             : 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
             }`}
         >
@@ -102,7 +102,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
   <div className="flex flex-col h-full">
     {/* Logo + Nom app */}
     <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-700/50">
-      <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 flex items-center justify-center bg-blue-600">
+      <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 flex items-center justify-center bg-amber-500">
         {schoolLogo ? (
           <img
             src={schoolLogo}
@@ -129,9 +129,9 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
 
     {/* Section Parents Connectés (pour Admin) */}
     {userRole !== 'parent' && userRole !== 'superadmin' && (
-      <div className="px-5 py-4 border-t border-slate-700/30">
+      <div className="px-5 py-4 border-t border-slate-100">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Live</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live</p>
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[10px] text-emerald-500 font-bold">{connectedParentsCount} Parents</span>
@@ -139,30 +139,30 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
         </div>
         <button
           onClick={() => { setCurrentPage('parents_list'); setSidebarOpen(false); }}
-          className="w-full text-left p-2 rounded-lg bg-slate-800/50 hover:bg-slate-800 text-xs text-slate-300 transition-colors flex items-center justify-between group"
+          className="w-full text-left p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-xs text-slate-600 transition-colors flex items-center justify-between group"
         >
           Voir les comptes
-          <ChevronRight className="w-3 h-3 text-slate-500 group-hover:text-blue-400" />
+          <ChevronRight className="w-3 h-3 text-slate-400 group-hover:text-amber-500" />
         </button>
       </div>
     )}
 
     {/* Utilisateur */}
-    <div className="px-3 py-4 border-t border-slate-700/50 pb-24 lg:pb-4">
-      <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-700/30 mb-2">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+    <div className="px-3 py-4 border-t border-slate-100 pb-24 lg:pb-4">
+      <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-50 mb-2">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
           {userName.charAt(0).toUpperCase()}
         </div>
         <div className="overflow-hidden flex-1">
-          <p className="text-white text-xs font-medium truncate">{userName}</p>
-          <p className="text-slate-400 text-xs capitalize">{userRole}</p>
+          <p className="text-slate-900 text-xs font-bold truncate">{userName}</p>
+          <p className="text-slate-400 text-[10px] capitalize font-bold">{userRole}</p>
         </div>
       </div>
       <button
         onClick={logout}
-        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition-all text-sm font-semibold group"
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all text-sm font-semibold group"
       >
-        <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-rose-500/20 group-hover:text-rose-400 transition-colors">
+        <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-rose-100 group-hover:text-rose-500 transition-colors">
           <LogOut className="w-4 h-4" />
         </div>
         Déconnexion
@@ -196,9 +196,9 @@ const RealTimeClock: React.FC = () => {
   });
 
   return (
-    <div className="hidden md:flex flex-col items-start px-4 border-l-2 border-blue-500/20 ml-2">
+    <div className="hidden md:flex flex-col items-start px-4 border-l-2 border-amber-500/20 ml-2">
       <div className="flex items-center gap-2 text-slate-900 dark:text-white font-black tracking-tighter tabular-nums text-sm">
-        <Clock className="w-3 h-3 text-blue-600 animate-pulse" />
+        <Clock className="w-3 h-3 text-amber-600 animate-pulse" />
         <span>{lomeTime}</span>
       </div>
       <p className="text-[9px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-[0.2em]">{lomeDate} — LOMÉ</p>
@@ -316,7 +316,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   return (
     <div className={`min-h-screen flex transition-colors duration-300 ${theme === 'dark' ? 'dark bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`} style={{ fontFamily: 'Outfit, Inter, sans-serif' }}>
       {/* Sidebar desktop */}
-      <aside className="hidden lg:flex flex-col w-64 sidebar-premium fixed inset-y-0 left-0 z-30 print:hidden border-r border-white/5">
+      <aside className="hidden lg:flex flex-col w-64 bg-white fixed inset-y-0 left-0 z-30 print:hidden border-r border-slate-100">
         <SidebarContent {...sidebarProps} />
       </aside>
 
@@ -324,10 +324,10 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div
-            className="absolute inset-0 bg-black/60"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-slate-900 z-50">
+          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white z-50">
             <div className="absolute top-4 right-4">
               <button
                 onClick={() => setSidebarOpen(false)}
@@ -416,10 +416,10 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 key={item.id}
                 onClick={() => setCurrentPage(item.id as AppPage)}
                 className={`relative flex flex-col items-center justify-center w-16 h-full transition-all duration-200 ${
-                  active ? 'text-blue-600 dark:text-blue-400 font-bold scale-110' : 'text-slate-400 dark:text-slate-500'
+                  active ? 'text-amber-600 dark:text-amber-400 font-bold scale-110' : 'text-slate-400 dark:text-slate-500'
                 }`}
               >
-                <div className={`p-1 rounded-xl transition-all ${active ? 'bg-blue-50 dark:bg-blue-900/30' : ''}`}>
+                <div className={`p-1 rounded-xl transition-all ${active ? 'bg-amber-50 dark:bg-amber-900/30' : ''}`}>
                   {item.icon}
                 </div>
                 <span className="text-[10px] tracking-tight mt-0.5">{item.label}</span>
@@ -429,7 +429,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   </span>
                 )}
                 {active && (
-                  <div className="absolute -top-1 w-1 h-1 rounded-full bg-blue-600 dark:bg-blue-400 shadow-[0_0_8px_rgba(37,99,235,0.8)]" />
+                  <div className="absolute -top-1 w-1 h-1 rounded-full bg-amber-600 dark:bg-amber-400 shadow-[0_0_8px_rgba(234,179,8,0.8)]" />
                 )}
               </button>
             );

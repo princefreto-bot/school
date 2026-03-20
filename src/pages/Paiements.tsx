@@ -46,9 +46,9 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
           <h2 className="text-lg font-bold text-gray-900">Enregistrer un paiement</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl"><X className="w-4 h-4" /></button>
         </div>
-        <div className="px-5 pt-4 pb-2 bg-blue-50 mx-5 mt-4 rounded-xl">
-          <p className="text-sm font-semibold text-blue-900">{student.prenom} {student.nom} — {student.classe}</p>
-          <div className="flex gap-4 mt-2 text-xs text-blue-700">
+        <div className="px-5 pt-4 pb-2 bg-amber-50 mx-5 mt-4 rounded-xl">
+          <p className="text-sm font-semibold text-amber-900">{student.prenom} {student.nom} — {student.classe}</p>
+          <div className="flex gap-4 mt-2 text-xs text-amber-700">
             <span>Écolage : <strong>{fmtMoney(student.ecolage)}</strong></span>
             <span>Déjà payé : <strong>{fmtMoney(student.dejaPaye)}</strong></span>
             <span>Restant : <strong className="text-red-600">{fmtMoney(student.restant)}</strong></span>
@@ -59,7 +59,7 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
             <label className="block text-xs font-medium text-gray-600 mb-1">Montant (FCFA) *</label>
             <input
               type="number" min={1} max={maxPay} required
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
               placeholder={`Max : ${fmtMoney(maxPay)}`}
               value={form.montant}
               onChange={(e) => { setForm({ ...form, montant: e.target.value }); setError(''); }}
@@ -68,21 +68,21 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
-              <input type="date" className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+              <input type="date" className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">N° Reçu</label>
-              <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={form.recu} onChange={(e) => setForm({ ...form, recu: e.target.value })} />
+              <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={form.recu} onChange={(e) => setForm({ ...form, recu: e.target.value })} />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Note (optionnel)</label>
-            <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Ex : 1ère tranche" />
+            <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Ex : 1ère tranche" />
           </div>
           {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
           <div className="flex gap-3 pt-1">
             <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Annuler</button>
-            <button type="submit" className="flex-1 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+            <button type="submit" className="flex-1 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-colors flex items-center justify-center gap-2">
               <Check className="w-4 h-4" /> Valider
             </button>
           </div>
@@ -115,7 +115,7 @@ const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => voi
           </div>
           <div className="flex items-center gap-2 mt-1">
             <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden max-w-32">
-              <div className="h-full rounded-full bg-blue-500" style={{ width: `${taux}%` }} />
+              <div className="h-full rounded-full bg-amber-500" style={{ width: `${taux}%` }} />
             </div>
             <span className="text-xs text-gray-500">{taux}%</span>
             <span className="text-xs text-gray-400">·</span>
@@ -129,7 +129,7 @@ const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => voi
         {student.restant > 0 && (user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') && (
           <button
             onClick={(e) => { e.stopPropagation(); onPay(student); }}
-            className="shrink-0 flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"
+            className="shrink-0 flex items-center gap-1 px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-medium hover:bg-amber-600 transition-colors"
           >
             <Plus className="w-3 h-3" /> Payer
           </button>
@@ -175,7 +175,7 @@ export const Paiements: React.FC = () => {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-        <Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" />
+        <Loader2 className="w-10 h-10 animate-spin text-amber-500 mb-4" />
         <p>Chargement des informations utilisateur...</p>
       </div>
     );
@@ -270,7 +270,7 @@ export const Paiements: React.FC = () => {
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
           <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">Paiements enregistrés</p>
-          <p className="text-2xl font-bold text-blue-700 mt-1">{totalPayements}</p>
+          <p className="text-2xl font-bold text-amber-700 mt-1">{totalPayements}</p>
           <p className="text-xs text-gray-400 mt-1">Transactions manuelles</p>
         </div>
       </div>
@@ -280,17 +280,17 @@ export const Paiements: React.FC = () => {
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none"
             placeholder="Rechercher un élève..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <select className="border border-gray-200 bg-white rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={filterClasse} onChange={(e) => setFilterClasse(e.target.value)}>
+        <select className="border border-gray-200 bg-white rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={filterClasse} onChange={(e) => setFilterClasse(e.target.value)}>
           <option value="">Toutes les classes</option>
           {classes.map((c) => <option key={c}>{c}</option>)}
         </select>
-        <select className="border border-gray-200 bg-white rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+        <select className="border border-gray-200 bg-white rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
           <option value="">Tous les statuts</option>
           <option>Soldé</option><option>Partiel</option><option>Non soldé</option>
         </select>

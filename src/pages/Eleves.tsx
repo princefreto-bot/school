@@ -75,23 +75,23 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Nom *</label>
-              <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} />
+              <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Prénom *</label>
-              <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" required value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />
+              <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" required value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Classe *</label>
-              <select className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={form.classe} onChange={(e) => setForm({ ...form, classe: e.target.value })}>
+              <select className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={form.classe} onChange={(e) => setForm({ ...form, classe: e.target.value })}>
                 {CLASS_CONFIG.map((c) => <option key={c.name} value={c.name}>{c.name} — {c.cycle} ({new Intl.NumberFormat('fr-FR').format(c.ecolage)} F)</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Sexe</label>
-              <select className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={form.sexe} onChange={(e) => setForm({ ...form, sexe: e.target.value as 'M' | 'F' })}>
+              <select className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={form.sexe} onChange={(e) => setForm({ ...form, sexe: e.target.value as 'M' | 'F' })}>
                 <option value="M">Masculin</option>
                 <option value="F">Féminin</option>
               </select>
@@ -99,20 +99,20 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Téléphone parent</label>
-            <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} placeholder="+228XXXXXXXX" />
+            <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} placeholder="+228XXXXXXXX" />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">École de provenance</label>
-            <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={form.ecoleProvenance} onChange={(e) => setForm({ ...form, ecoleProvenance: e.target.value })} />
+            <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={form.ecoleProvenance} onChange={(e) => setForm({ ...form, ecoleProvenance: e.target.value })} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Montant payé (FCFA)</label>
-              <input type="number" min={0} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={form.dejaPaye} onChange={(e) => setForm({ ...form, dejaPaye: Number(e.target.value) })} />
+              <input type="number" min={0} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={form.dejaPaye} onChange={(e) => setForm({ ...form, dejaPaye: Number(e.target.value) })} />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">N° Reçu</label>
-              <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={form.recu} onChange={(e) => setForm({ ...form, recu: e.target.value })} />
+              <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={form.recu} onChange={(e) => setForm({ ...form, recu: e.target.value })} />
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -121,7 +121,7 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
           </div>
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Annuler</button>
-            <button type="submit" className="flex-1 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
+            <button type="submit" className="flex-1 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-colors">
               {student ? 'Enregistrer' : 'Ajouter'}
             </button>
           </div>
@@ -231,7 +231,7 @@ export const Eleves: React.FC = () => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none"
             placeholder="Rechercher un élève, classe, téléphone..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -242,11 +242,11 @@ export const Eleves: React.FC = () => {
             </button>
           )}
         </div>
-        <button onClick={() => setShowFilters((f) => !f)} className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-medium transition-colors ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
+        <button onClick={() => setShowFilters((f) => !f)} className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-medium transition-colors ${showFilters ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
           <Filter className="w-4 h-4" /> Filtres
         </button>
         {(user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') && (
-          <button onClick={() => setModal({ open: true })} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">
+          <button onClick={() => setModal({ open: true })} className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-colors shadow-sm">
             <Plus className="w-4 h-4" /> Ajouter
           </button>
         )}
@@ -254,15 +254,15 @@ export const Eleves: React.FC = () => {
 
       {showFilters && (
         <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-wrap gap-3">
-          <select className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={filterCycle} onChange={(e) => setFilterCycle(e.target.value)}>
+          <select className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={filterCycle} onChange={(e) => setFilterCycle(e.target.value)}>
             <option value="">Tous les cycles</option>
             <option>Primaire</option><option>Collège</option><option>Lycée</option>
           </select>
-          <select className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={filterClasse} onChange={(e) => setFilterClasse(e.target.value)}>
+          <select className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={filterClasse} onChange={(e) => setFilterClasse(e.target.value)}>
             <option value="">Toutes les classes</option>
             {classes.map((c) => <option key={c}>{c}</option>)}
           </select>
-          <select className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+          <select className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
             <option value="">Tous les statuts</option>
             <option>Soldé</option><option>Partiel</option><option>Non soldé</option>
           </select>
@@ -321,7 +321,7 @@ export const Eleves: React.FC = () => {
                 </tr>
               ) : (
                 filtered.map((s) => (
-                  <tr key={s.id} className="hover:bg-blue-50/30 transition-colors">
+                  <tr key={s.id} className="hover:bg-amber-50/30 transition-colors">
                     <td className="px-4 py-3">
                       <p className="font-medium text-gray-900">{s.prenom} {s.nom}</p>
                       <p className="text-xs text-gray-400">{s.sexe === 'M' ? '♂' : '♀'}{s.redoublant ? ' · Redoublant' : ''}</p>
@@ -338,7 +338,7 @@ export const Eleves: React.FC = () => {
                     <td className="px-4 py-3"><StatusBadge status={s.status} /></td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
-                        <button onClick={() => setSelectedStudent(s)} className="p-1.5 hover:bg-blue-100 rounded-lg text-blue-600 transition-colors" title="Fiche détaillée">
+                        <button onClick={() => setSelectedStudent(s)} className="p-1.5 hover:bg-amber-100 rounded-lg text-amber-600 transition-colors" title="Fiche détaillée">
                           <FileText className="w-3.5 h-3.5" />
                         </button>
                         <button onClick={() => generateRecuPDF(s, schoolName, schoolYear, messageRemerciement, messageRappel)} className="p-1.5 hover:bg-violet-100 rounded-lg text-violet-600 transition-colors" title="Reçu PDF">

@@ -19,16 +19,9 @@ const SLIDE_DURATION = 5000;
 
 // ── COMPOSANTS PARTAGÉS ──────────────────────────────────────
 
-const SchoolLogo: React.FC<{ logo: string | null; schoolName: string; size?: string }> = ({ logo, schoolName, size = "w-16 h-16" }) => {
-  if (logo) {
-    return (
-      <div className={`${size} mb-4 flex items-center justify-center`}>
-        <img src={logo} alt={`Logo ${schoolName}`} className="w-full h-full object-contain" />
-      </div>
-    );
-  }
+const SchoolLogo: React.FC<{ size?: string }> = ({ size = "w-16 h-16" }) => {
   return (
-    <div className={`${size} bg-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20`}>
+    <div className={`${size} bg-amber-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-amber-500/20`}>
       <GraduationCap className="w-1/2 h-1/2 text-white" />
     </div>
   );
@@ -54,7 +47,7 @@ const BackgroundSlideshow: React.FC = () => {
             style={{ backgroundImage: `url(${img})` }}
           />
         ))}
-        <div className="absolute inset-0 z-[1] bg-slate-900/70 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 z-[1] bg-slate-900/40 backdrop-blur-[2px]" />
       </div>
     );
 };
@@ -63,9 +56,7 @@ const BackgroundSlideshow: React.FC = () => {
 
 export const Login: React.FC = () => {
   const login = useStore((s) => s.login);
-  const schoolLogo = useStore((s) => s.schoolLogo);
-  const schoolName = useStore((s) => s.schoolName);
-  const appName = useStore((s) => s.appName);
+  const appName = "GestioSchool";
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [view, setView] = useState<'login' | 'register' | 'link'>('login');
@@ -130,7 +121,7 @@ export const Login: React.FC = () => {
 
   if (view === 'link') {
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-white flex items-center justify-center p-4">
             <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 border border-slate-100 animate-in fade-in zoom-in duration-300">
                 <LinkStudent onComplete={async () => {
                    // Une fois lié, on connecte officiellement
@@ -138,7 +129,7 @@ export const Login: React.FC = () => {
                 }} />
                 <button 
                   onClick={async () => await login(username, password, selectedSchool)}
-                  className="w-full mt-4 py-3 text-slate-400 text-xs font-bold hover:text-blue-600 transition"
+                  className="w-full mt-4 py-3 text-slate-400 text-xs font-bold hover:text-amber-600 transition"
                 >
                   Passer cette étape pour le moment
                 </button>
@@ -148,7 +139,7 @@ export const Login: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center font-['Poppins'] overflow-hidden bg-slate-100 relative">
+    <div className="min-h-screen flex items-center justify-center font-['Poppins'] overflow-hidden bg-white relative">
       <style>{`
         /* ──── DESKTOP SLIDING OVERLAY ──── */
         .auth-container {
@@ -187,7 +178,7 @@ export const Login: React.FC = () => {
         .auth-container.right-panel-active .overlay-container { transform: translateX(-100%); }
 
         .overlay {
-          background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+          background: linear-gradient(135deg, #fbbf24 0%, #eab308 100%);
           color: #FFFFFF; position: relative; left: -100%; height: 100%; width: 200%;
           transform: translateX(0); transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
         }
@@ -209,12 +200,12 @@ export const Login: React.FC = () => {
         }
 
         .auth-input {
-          background-color: #f1f5f9; border: none; padding: 12px 15px; margin: 8px 0;
-          width: 100%; border-radius: 12px; font-size: 14px; focus:outline-none focus:ring-2 focus:ring-blue-400;
+          background-color: #f8fafc; border: 1px solid #f1f5f9; padding: 12px 15px; margin: 8px 0;
+          width: 100%; border-radius: 12px; font-size: 14px; focus:outline-none focus:ring-2 focus:ring-amber-400;
         }
 
         .auth-button {
-          border-radius: 12px; border: 1px solid #2563eb; background-color: #2563eb; color: #FFFFFF;
+          border-radius: 12px; border: 1px solid #eab308; background-color: #eab308; color: #FFFFFF;
           font-size: 12px; font-weight: bold; padding: 12px 45px; letter-spacing: 1px;
           text-transform: uppercase; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; margin-top: 15px;
         }
@@ -226,7 +217,7 @@ export const Login: React.FC = () => {
           border: 1px solid #e2e8f0; border-radius: 50%; display: inline-flex; justify-content: center;
           align-items: center; margin: 0 5px; height: 38px; width: 38px; color: #1e293b; transition: all 0.3s;
         }
-        .social-container a:hover { background: #f1f5f9; border-color: #2563eb; color: #2563eb; }
+        .social-container a:hover { background: #f1f5f9; border-color: #eab308; color: #eab308; }
 
         /* ──── MOBILE CARDS ──── */
         .mobile-card {
@@ -236,7 +227,7 @@ export const Login: React.FC = () => {
             width: 90%;
             max-width: 400px;
             padding: 32px 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
             z-index: 10;
         }
       `}</style>
@@ -248,7 +239,7 @@ export const Login: React.FC = () => {
           {/* Register Panel */}
           <div className="form-container sign-up-container">
             <form className="auth-form" onSubmit={(e) => handleAuth(e, 'register')}>
-              <SchoolLogo logo={schoolLogo} schoolName={schoolName} />
+              <SchoolLogo />
               <h1 className="text-2xl font-black text-slate-900 tracking-tighter">Créer un compte</h1>
               <div className="social-container text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-2">Inscription Parent</div>
               
@@ -268,9 +259,9 @@ export const Login: React.FC = () => {
           {/* Login Panel */}
           <div className="form-container sign-in-container">
             <form className="auth-form" onSubmit={(e) => handleAuth(e, 'login')}>
-              <SchoolLogo logo={schoolLogo} schoolName={schoolName} />
+              <SchoolLogo />
               <h1 className="text-2xl font-black text-slate-900 tracking-tighter">Se connecter</h1>
-              <div className="social-container text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-2">Gestion {appName}</div>
+              <div className="social-container text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-2">Accès {appName}</div>
               
               <select className="auth-input mb-4 font-bold text-slate-600 border border-slate-200" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)}>
                   <option value="">Accès SuperAdmin Global</option>
@@ -280,7 +271,7 @@ export const Login: React.FC = () => {
 
               <input type="text" placeholder="Utilisateur / Téléphone" className="auth-input" value={username} onChange={(e) => setUsername(e.target.value)} required />
               <input type="password" placeholder="Mot de passe" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              <a href="#" className="text-xs text-slate-400 hover:text-blue-600 mt-2">Mot de passe oublié ?</a>
+              <a href="#" className="text-xs text-slate-400 hover:text-amber-600 mt-2">Mot de passe oublié ?</a>
               {trialExpiredSchool && (
                 <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-left">
                   <p className="text-amber-800 font-bold text-xs">⏰ Période d'essai expirée</p>
@@ -298,9 +289,9 @@ export const Login: React.FC = () => {
                 <h1 className="text-4xl font-black tracking-tighter mb-4 animate-in slide-in-from-left duration-700">Content de vous revoir ! 👋</h1>
                 <p className="text-sm opacity-90 leading-relaxed mb-6 max-w-[300px]">Retrouvez tout l'univers scolaire de vos enfants en un clic. Votre tableau de bord personnalisé vous attend.</p>
                 <div className="flex flex-col gap-2 mb-8 text-left w-full max-w-[280px]">
-                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-blue-300 rounded-full"/> Accès tableau de bord</div>
-                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-blue-300 rounded-full"/> Consultation des bulletins</div>
-                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-blue-300 rounded-full"/> Alertes et annonces</div>
+                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-amber-200 rounded-full"/> Accès tableau de bord</div>
+                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-amber-200 rounded-full"/> Consultation des bulletins</div>
+                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-amber-200 rounded-full"/> Alertes et annonces</div>
                 </div>
                 <button className="auth-button ghost hover:bg-white/10" onClick={() => setIsRightPanelActive(false)}>Se connecter</button>
               </div>
@@ -308,9 +299,9 @@ export const Login: React.FC = () => {
                 <h1 className="text-4xl font-black tracking-tighter mb-4 animate-in slide-in-from-right duration-700">Bonjour, Parent ! 🌟</h1>
                 <p className="text-sm opacity-90 leading-relaxed mb-6 max-w-[300px]">Plongez au cœur de l'éducation de votre enfant. Suivez chaque instant de sa réussite avec nous.</p>
                 <div className="flex flex-col gap-2 mb-8 text-left w-full max-w-[280px]">
-                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-blue-300 rounded-full"/> Suivi des notes en temps réel</div>
-                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-blue-300 rounded-full"/> Notifications de présence</div>
-                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-blue-300 rounded-full"/> Communication école-famille</div>
+                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-white rounded-full"/> Suivi des notes en temps réel</div>
+                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-white rounded-full"/> Notifications de présence</div>
+                  <div className="flex items-center gap-2 text-xs font-bold"><div className="w-1.5 h-1.5 bg-white rounded-full"/> Communication école-famille</div>
                 </div>
                 <button className="auth-button ghost hover:bg-white/10" onClick={() => setIsRightPanelActive(true)}>Créer un compte</button>
               </div>
@@ -325,19 +316,19 @@ export const Login: React.FC = () => {
             <BackgroundSlideshow />
             <div className="mobile-card">
                 <div className="flex flex-col items-center">
-                    <SchoolLogo logo={schoolLogo} schoolName={schoolName} size="w-20 h-20" />
+                    <SchoolLogo size="w-20 h-20" />
                     <h1 className="text-3xl font-black text-slate-900 tracking-tighter text-center">
                         {view === 'login' ? 'Bienvenue !' : 'Rejoignez-nous'}
                     </h1>
-                    <p className="text-[10px] text-blue-600 font-extrabold uppercase tracking-[0.2em] mt-2 mb-6 bg-blue-50 px-3 py-1 rounded-full">
+                    <p className="text-[10px] text-amber-600 font-extrabold uppercase tracking-[0.2em] mt-2 mb-6 bg-amber-50 px-3 py-1 rounded-full">
                         {appName} • Excellence
                     </p>
                 </div>
 
                 <form onSubmit={(e) => handleAuth(e, view === 'login' ? 'login' : 'register')} className="space-y-4">
                     <div className="relative mb-2">
-                        <Store className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
-                        <select className="w-full pl-11 pr-4 py-3 bg-slate-100 border-none rounded-2xl text-sm font-bold text-slate-700 appearance-none" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required={view === 'register'}>
+                        <Store className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
+                        <select className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-700 appearance-none" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required={view === 'register'}>
                             {view !== 'register' && <option value="">Accès SuperAdmin Global</option>}
                             {view !== 'register' && <option disabled>────── Établissements ──────</option>}
                             {view === 'register' && <option value="" disabled>-- Sélectionnez votre école --</option>}
@@ -347,17 +338,17 @@ export const Login: React.FC = () => {
 
                     {view === 'register' && (
                         <div className="relative">
-                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
-                            <input type="text" placeholder="Nom complet" className="w-full pl-11 pr-4 py-3 bg-slate-100 border-none rounded-2xl text-sm" value={nom} onChange={(e) => setNom(e.target.value)} required />
+                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
+                            <input type="text" placeholder="Nom complet" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" value={nom} onChange={(e) => setNom(e.target.value)} required />
                         </div>
                     )}
                     <div className="relative">
-                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
-                        <input type="tel" placeholder="Téléphone" className="w-full pl-11 pr-4 py-3 bg-slate-100 border-none rounded-2xl text-sm" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
+                        <input type="tel" placeholder="Téléphone" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" value={username} onChange={(e) => setUsername(e.target.value)} required />
                     </div>
                     <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
-                        <input type="password" placeholder="Mot de passe" className="w-full pl-11 pr-4 py-3 bg-slate-100 border-none rounded-2xl text-sm" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
+                        <input type="password" placeholder="Mot de passe" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     </div>
 
                     {trialExpiredSchool && (
@@ -368,11 +359,11 @@ export const Login: React.FC = () => {
                     )}
                     {error && <div className="text-rose-500 text-xs italic text-center font-bold px-4">{error}</div>}
 
-                    <button type="submit" disabled={loading} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/30 active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4">
+                    <button type="submit" disabled={loading} className="w-full py-4 bg-amber-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-amber-500/30 active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4">
                         {loading ? 'Traitement...' : (view === 'login' ? 'Décollage' : 'Inscrire')}
                     </button>
                     
-                    <button type="button" onClick={() => setView(view === 'login' ? 'register' : 'login')} className="w-full py-2 text-blue-600 text-[10px] font-black uppercase tracking-widest mt-2">
+                    <button type="button" onClick={() => setView(view === 'login' ? 'register' : 'login')} className="w-full py-2 text-amber-600 text-[10px] font-black uppercase tracking-widest mt-2">
                         {view === 'login' ? "Nouveau ? Créer un compte" : "Déjà un compte ? Se connecter"}
                     </button>
                 </form>

@@ -41,6 +41,8 @@ async function syncFromFrontend(req, res) {
             console.log('✨ [Sync] Base de données cloud remise à zéro (école uniquement).');
         }
 
+        const CHUNK_SIZE = 500;
+
         // --- 1. Sync Students ---
         if (students.length > 0) {
             const studentData = students.map(s => ({
@@ -56,7 +58,10 @@ async function syncFromFrontend(req, res) {
                 telephone_parent: s.telephone || null
             }));
 
-            await supabase.from(tbl('students')).upsert(studentData, { onConflict: 'id' });
+            for (let i = 0; i < studentData.length; i += CHUNK_SIZE) {
+                const chunk = studentData.slice(i, i + CHUNK_SIZE);
+                await supabase.from(tbl('students')).upsert(chunk, { onConflict: 'id' });
+            }
 
             // --- 2. Sync Payments ---
             const allPayments = [];
@@ -76,7 +81,10 @@ async function syncFromFrontend(req, res) {
             });
 
             if (allPayments.length > 0) {
-                await supabase.from(tbl('payments')).upsert(allPayments, { onConflict: 'id' });
+                for (let i = 0; i < allPayments.length; i += CHUNK_SIZE) {
+                    const chunk = allPayments.slice(i, i + CHUNK_SIZE);
+                    await supabase.from(tbl('payments')).upsert(chunk, { onConflict: 'id' });
+                }
             }
         }
 
@@ -92,7 +100,10 @@ async function syncFromFrontend(req, res) {
                 heure: p.heure,
                 statut: p.statut
             }));
-            await supabase.from(tbl('presences')).upsert(presenceData, { onConflict: 'id' });
+            for (let i = 0; i < presenceData.length; i += CHUNK_SIZE) {
+                const chunk = presenceData.slice(i, i + CHUNK_SIZE);
+                await supabase.from(tbl('presences')).upsert(chunk, { onConflict: 'id' });
+            }
         }
 
         // --- 4. Sync Activity Logs ---
@@ -105,7 +116,10 @@ async function syncFromFrontend(req, res) {
                 description: l.description,
                 date_heure: l.dateHeure
             }));
-            await supabase.from(tbl('activity_logs')).upsert(logData, { onConflict: 'id' });
+            for (let i = 0; i < logData.length; i += CHUNK_SIZE) {
+                const chunk = logData.slice(i, i + CHUNK_SIZE);
+                await supabase.from(tbl('activity_logs')).upsert(chunk, { onConflict: 'id' });
+            }
         }
 
         // --- 5. Sync App Settings ---

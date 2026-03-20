@@ -19,7 +19,7 @@ import {
 import { generateRapportMensuelPDF } from '@/utils/reportGenerator';
 
 const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n);
-const PIE_COLORS = ['#1e40af', '#16a34a', '#ea580c'];
+const PIE_COLORS = ['#eab308', '#16a34a', '#ea580c'];
 const BAR_COLORS = { paye: '#16a34a', restant: '#ef4444' };
 
 interface StatCardProps {
@@ -31,7 +31,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, sub, icon, color, tre
   <div className="pro-card p-6">
     <div className="flex items-start justify-between">
       <div className="space-y-2">
-        <p className="text-[10px] font-black text-slate-500 dark:text-slate-400 border-l-2 border-blue-500 pl-2 uppercase tracking-[0.2em]">{title}</p>
+        <p className="text-[10px] font-black text-slate-500 dark:text-slate-400 border-l-2 border-amber-500 pl-2 uppercase tracking-[0.2em]">{title}</p>
         <div>
            <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{value}</p>
            {sub && <p className="text-[11px] font-medium text-slate-400 mt-0.5">{sub}</p>}
@@ -195,7 +195,7 @@ export const Dashboard: React.FC = () => {
   if (isSyncing && students.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
+        <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4" />
         <h2 className="text-lg font-bold text-gray-800 mb-1">Synchronisation Cloud...</h2>
         <p className="text-gray-500 text-sm">Récupération de vos données depuis le serveur sécurisé.</p>
       </div>
@@ -205,8 +205,8 @@ export const Dashboard: React.FC = () => {
   if (students.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-          <GraduationCap className="w-10 h-10 text-blue-400" />
+        <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mb-4">
+          <GraduationCap className="w-10 h-10 text-amber-500" />
         </div>
         <h2 className="text-xl font-bold text-gray-800 mb-2">Aucune donnée trouvée</h2>
         <p className="text-gray-500 max-w-md mx-auto px-4">
@@ -223,16 +223,16 @@ export const Dashboard: React.FC = () => {
       {/* Strategic Header */}
       <div className="relative pro-card p-8 overflow-hidden group">
         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-            <TrendingUp className="w-48 h-48 text-blue-600" />
+            <TrendingUp className="w-48 h-48 text-amber-500" />
         </div>
         
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             <div className="max-w-xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-600 text-[10px] font-black text-white uppercase tracking-[0.2em] mb-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500 text-[10px] font-black text-white uppercase tracking-[0.2em] mb-4">
                     <Target className="w-3 h-3" /> Dashboard Stratégique
                 </div>
                 <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-2">
-                    Analyse & <span className="text-blue-600">Performance</span>
+                    Analyse & <span className="text-amber-500">Performance</span>
                 </h2>
                 <p className="text-slate-500 dark:text-slate-400 text-base leading-relaxed">
                     Visualisation en temps réel de la santé financière globale, incluant le recouvrement, les projections et les statistiques par cycle.
@@ -265,8 +265,8 @@ export const Dashboard: React.FC = () => {
           title="Total Élèves"
           value={students.length}
           sub={`${stats.soldes} soldés / ${stats.nonSoldes} non soldés`}
-          icon={<Users className="w-5 h-5 text-blue-600" />}
-          color="bg-blue-50"
+          icon={<Users className="w-5 h-5 text-amber-500" />}
+          color="bg-amber-50"
         />
         <StatCard
           title="Écolage Attendu"
@@ -306,11 +306,11 @@ export const Dashboard: React.FC = () => {
             <h3 className="font-extrabold text-slate-800 dark:text-white text-lg tracking-tight">Recouvrement Global</h3>
             <p className="text-xs text-slate-400 font-medium uppercase tracking-widest">Progression des encaissements périodiques</p>
           </div>
-          <div className="text-4xl font-black text-blue-600 dark:text-blue-400 tracking-tighter">{stats.taux}%</div>
+          <div className="text-4xl font-black text-amber-500 dark:text-amber-400 tracking-tighter">{stats.taux}%</div>
         </div>
         <div className="relative h-6 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner p-1">
           <div
-            className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 rounded-full transition-all duration-1000 ease-out shadow-lg"
+            className="h-full bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-500 rounded-full transition-all duration-1000 ease-out shadow-lg"
             style={{ width: `${stats.taux}%` }}
           />
         </div>
@@ -436,7 +436,7 @@ export const Dashboard: React.FC = () => {
           <div className="flex items-center justify-between mb-8">
             <div className="space-y-1">
               <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2 tracking-tight">
-                <Target className="w-6 h-6 text-blue-600" />
+                <Target className="w-6 h-6 text-amber-500" />
                 Analyse du Recouvrement
               </h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Formule : (encaissé / théorique) × 100</p>
@@ -498,13 +498,13 @@ export const Dashboard: React.FC = () => {
               <p className="text-2xl font-black text-rose-700 dark:text-rose-400 tracking-tighter">{fmtMoney(projection.scenarioPessimiste)} F</p>
             </div>
             
-            <div className="pro-card p-6 bg-blue-600 shadow-2xl shadow-blue-600/20 -translate-y-2">
+            <div className="pro-card p-6 bg-amber-500 shadow-2xl shadow-amber-500/20 -translate-y-2">
               <div className="flex items-center gap-2 mb-4">
                 <Target className="w-5 h-5 text-white" />
-                <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest">Projection Réaliste</p>
+                <p className="text-[10px] font-black text-amber-50 uppercase tracking-widest">Projection Réaliste</p>
               </div>
               <p className="text-3xl font-black text-white tracking-tighter">{fmtMoney(projection.projectionFinAnnee)} F</p>
-              <div className="mt-4 pt-4 border-t border-white/10 text-blue-100 text-[10px] font-bold space-y-1">
+              <div className="mt-4 pt-4 border-t border-white/10 text-amber-50 text-[10px] font-bold space-y-1">
                   <p>Encaissement Restant : {fmtMoney(projection.resteAEncaisser)} F</p>
               </div>
             </div>
@@ -523,7 +523,7 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="pro-card p-8">
           <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2 mb-8 tracking-tight">
-            <BarChart2 className="w-6 h-6 text-blue-600" />
+            <BarChart2 className="w-6 h-6 text-amber-500" />
             Performance des Classes
           </h3>
 
@@ -546,7 +546,7 @@ export const Dashboard: React.FC = () => {
                   </div>
                   <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-blue-600 rounded-full transition-all duration-1000 group-hover:shadow-[0_0_12px_rgba(37,99,235,0.4)]"
+                      className="h-full bg-amber-500 rounded-full transition-all duration-1000 group-hover:shadow-[0_0_12px_rgba(245,158,11,0.4)]"
                       style={{ width: `${row.taux}%` }}
                     />
                   </div>
