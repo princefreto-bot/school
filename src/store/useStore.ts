@@ -56,6 +56,8 @@ export interface AppState {
   setFilterCycle: (c: string) => void;
   filterStatus: string;
   setFilterStatus: (s: string) => void;
+  chatRecipientId: string | null;
+  setChatRecipientId: (id: string | null) => void;
 
   // Paramètres
   schoolName: string;
@@ -510,6 +512,8 @@ export const useStore = create<AppState>()(
       setFilterCycle: (c) => set({ filterCycle: c }),
       filterStatus: '',
       setFilterStatus: (s) => set({ filterStatus: s }),
+      chatRecipientId: null,
+      setChatRecipientId: (id) => set({ chatRecipientId: id }),
 
       // ── Paramètres ───────────────────────────────────────
       schoolName: 'Établissement Scolaire',
@@ -1060,6 +1064,7 @@ export const useStore = create<AppState>()(
         lastReportMonth: state.lastReportMonth,
         currentPage: state.currentPage,
         theme: state.theme,
+        chatRecipientId: state.chatRecipientId,
       }),
       onRehydrateStorage: () => (state) => {
         // Auto-réparation au chargement du storage local

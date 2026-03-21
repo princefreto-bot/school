@@ -28,6 +28,9 @@ interface Conversation {
 
 export const ChatWindow: React.FC = () => {
     const user = useStore((s) => s.user);
+    const chatRecipientId = useStore((s) => s.chatRecipientId);
+    const setChatRecipientId = useStore((s) => s.setChatRecipientId);
+    const parents = useStore((s) => s.parents);
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [activeConv, setActiveConv] = useState<Conversation | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -63,6 +66,27 @@ export const ChatWindow: React.FC = () => {
         try {
             const data = await chatApi.getConversations();
             setConversations(data);
+
+            // Gérer le cas où un admin clique sur "Contacter" depuis la liste des parents
+            if (chatRecipientId) {
+                const existing = data.find((c: any) => c.parent_id === chatRecipientId);
+                if (existing) {
+                    setActiveConv(existing);
+                } else {
+                    // Créer une discussion virtuelle pour initiation
+                    const parentData = parents.find(p => p.id === chatRecipientId);
+                    setActiveConv({
+                        id: '', // Nouveau
+                        parent_id: chatRecipientId,
+                        admin_role: user?.role === 'comptable' ? 'comptabilite' : 'administration',
+                        last_message: '',
+                        updated_at: new Date().toISOString(),
+                        parent: parentData ? { nom: parentData.nom, telephone: parentData.telephone } : undefined
+                    } as any);
+                }
+                // Nettoyer après usage
+                setChatRecipientId(null);
+            }
         } catch (err) {
             console.error(err);
         }
@@ -86,13 +110,17 @@ export const ChatWindow: React.FC = () => {
         setSending(true);
         try {
             await chatApi.sendMessage({
-                conversationId: activeConv?.id,
+                conversationId: activeConv?.id || undefined,
+                parentId: activeConv?.id ? undefined : activeConv?.parent_id,
                 text: inputText,
-                targetRole: activeConv ? undefined : 'administration' // Par défaut
+                targetRole: activeConv?.id ? undefined : (user?.role === 'comptable' ? 'comptabilite' : 'administration')
             });
             setInputText('');
-            if (activeConv) loadMessages(activeConv.id);
-            else loadConversations();
+            if (activeConv?.id) loadMessages(activeConv.id);
+            else {
+                // Si c'était une initiation, on recharge tout pour récupérer le vrai ID
+                loadConversations();
+            }
         } catch (err) {
             console.error(err);
         } finally {
@@ -108,11 +136,12 @@ export const ChatWindow: React.FC = () => {
         try {
             const { imageUrl } = await chatApi.uploadImage(file);
             await chatApi.sendMessage({
-                conversationId: activeConv?.id,
+                conversationId: activeConv?.id || undefined,
+                parentId: activeConv?.id ? undefined : activeConv?.parent_id,
                 imageUrl,
-                targetRole: activeConv ? undefined : 'administration'
+                targetRole: activeConv?.id ? undefined : (user?.role === 'comptable' ? 'comptabilite' : 'administration')
             });
-            if (activeConv) loadMessages(activeConv.id);
+            if (activeConv?.id) loadMessages(activeConv.id);
             else loadConversations();
         } catch (err) {
             console.error(err);

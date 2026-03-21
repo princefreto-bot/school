@@ -150,6 +150,7 @@ export interface Parent {
   telephone: string; // serves as username
   password?: string;
   createdAt: string;
+  created_at?: string;
 }
 
 // ── Présences (pointage QR) ──────────────────────────────

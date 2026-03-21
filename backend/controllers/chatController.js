@@ -90,8 +90,9 @@ async function sendMessage(req, res) {
 
         // Si admin initie sans conversationId (via bouton Contacter)
         if (!convId && role !== 'parent') {
-            // Seuls le directeur et le comptable peuvent initier pro-activement
-            if (role !== 'directeur' && role !== 'comptable') {
+            // Autoriser Admin, Directeur, DG et Comptable à initier
+            const allowedRoles = ['admin', 'directeur', 'directeur_general', 'comptable'];
+            if (!allowedRoles.includes(role)) {
                 return res.status(403).json({ error: "Action restreinte. Seul le Directeur ou le Comptable peut initier un contact." });
             }
 

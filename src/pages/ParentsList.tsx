@@ -5,7 +5,8 @@ import { Users, Phone, Calendar, MessageSquare, Search, Loader2, UserCheck, Tras
 import { format } from 'date-fns';
 
 export const ParentsList: React.FC = () => {
-    const [parents, setParents] = useState<any[]>([]);
+    const parents = useStore((s) => s.parents);
+    const setParents = useStore((s) => s.setParents);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export const ParentsList: React.FC = () => {
 
         try {
             await parentApi.adminDeleteParent(parentId);
-            setParents(prev => prev.filter(p => p.id !== parentId));
+            setParents(parents.filter(p => p.id !== parentId));
             setDeleteConfirm(null);
         } catch (err) {
             alert("Erreur lors de la suppression. Seul le Directeur Général peut le faire.");
@@ -113,10 +114,13 @@ export const ParentsList: React.FC = () => {
                             <div className="pt-4 border-t border-slate-50 flex items-center justify-between text-xs text-slate-400">
                                 <div className="flex items-center gap-1.5">
                                     <Calendar className="w-3.5 h-3.5" />
-                                    <span>Inscrit le {format(new Date(parent.created_at), 'dd/MM/yyyy')}</span>
+                                    <span>Inscrit le {format(new Date(parent.createdAt || parent.created_at || Date.now()), 'dd/MM/yyyy')}</span>
                                 </div>
                                 <button
-                                    onClick={() => setCurrentPage('chat')}
+                                    onClick={() => {
+                                        useStore.getState().setChatRecipientId(parent.id);
+                                        setCurrentPage('chat');
+                                    }}
                                     className="flex items-center gap-1.5 text-blue-600 font-bold hover:underline"
                                 >
                                     <MessageSquare className="w-3.5 h-3.5" />

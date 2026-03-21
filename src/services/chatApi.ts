@@ -31,7 +31,7 @@ export const chatApi = {
         return data;
     },
 
-    sendMessage: async (data: { conversationId?: string; text?: string; imageUrl?: string; targetRole?: string }) => {
+    sendMessage: async (data: { conversationId?: string; text?: string; imageUrl?: string; targetRole?: string; parentId?: string }) => {
         const res = await fetch(`${API_URL}/send`, {
             method: 'POST',
             headers: getAuthHeaders(),
