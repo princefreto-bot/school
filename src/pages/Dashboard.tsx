@@ -8,11 +8,10 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
-import { Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, GraduationCap, Target, ArrowUpRight, ArrowDownRight, BarChart2, UserCheck } from 'lucide-react';
+import { Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import {
   computeRecouvrement,
-  computeProjection,
   computeClassComparison,
   computeSanteFinanciere
 } from '../services/analyticsService';
@@ -106,7 +105,6 @@ export const Dashboard: React.FC = () => {
 
   // ── Indicateurs financiers avancés ──
   const recouvrement = useMemo(() => computeRecouvrement(students), [students]);
-  const projection = useMemo(() => computeProjection(students), [students]);
   const classComp = useMemo(() => computeClassComparison(students), [students]);
   const santeFinanciere = useMemo(() => computeSanteFinanciere(students), [students]);
 
@@ -469,47 +467,6 @@ export const Dashboard: React.FC = () => {
                 className="h-full rounded-full transition-all duration-1000 ease-out shadow-lg"
                 style={{ width: `${Math.min(recouvrement.taux, 100)}%`, backgroundColor: recouvrement.barColor }}
               />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {students.length > 0 && (
-        <div className="pro-card p-8">
-          <div className="mb-8">
-            <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 tracking-tight">
-              <TrendingUp className="w-6 h-6 text-violet-600" />
-              Intelligence Prédictive
-            </h3>
-            <p className="text-[10px] text-slate-700 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Projection basée sur le cycle actuel de {(projection.tauxActuel * 100).toFixed(1)}%</p>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="pro-card p-6 bg-rose-50/20 border-rose-100 dark:bg-rose-950/10 dark:border-rose-900/30">
-              <div className="flex items-center gap-2 mb-4">
-                <ArrowDownRight className="w-5 h-5 text-rose-500" />
-                <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest">Pessimiste (-10%)</p>
-              </div>
-              <p className="text-2xl font-black text-rose-700 dark:text-rose-400 tracking-tighter">{fmtMoney(projection.scenarioPessimiste)} F</p>
-            </div>
-            
-            <div className="pro-card p-6 bg-amber-500 shadow-2xl shadow-amber-500/20 -translate-y-2">
-              <div className="flex items-center gap-2 mb-4">
-                <Target className="w-5 h-5 text-white" />
-                <p className="text-[10px] font-black text-amber-50 uppercase tracking-widest">Projection Réaliste</p>
-              </div>
-              <p className="text-3xl font-black text-white tracking-tighter">{fmtMoney(projection.projectionFinAnnee)} F</p>
-              <div className="mt-4 pt-4 border-t border-white/10 text-amber-50 text-[10px] font-bold space-y-1">
-                  <p>Encaissement Restant : {fmtMoney(projection.resteAEncaisser)} F</p>
-              </div>
-            </div>
-
-            <div className="pro-card p-6 bg-emerald-50/20 border-emerald-100 dark:bg-emerald-950/10 dark:border-emerald-900/30">
-              <div className="flex items-center gap-2 mb-4">
-                <ArrowUpRight className="w-5 h-5 text-emerald-500" />
-                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Optimiste (+10%)</p>
-              </div>
-              <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 tracking-tighter">{fmtMoney(projection.scenarioOptimiste)} F</p>
             </div>
           </div>
         </div>

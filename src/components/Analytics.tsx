@@ -88,36 +88,13 @@ export const Analytics = () => {
       .sort((a, b) => a.tauxRecouvrement - b.tauxRecouvrement);
   }, [classStats]);
 
-  // Prévision de trésorerie
-  const previsionTresorerie = useMemo(() => {
+  // Statistiques globales
+  const globalStats = useMemo(() => {
     const totalAttendu = students.reduce((sum, s) => sum + s.ecolage, 0);
     const totalPaye = students.reduce((sum, s) => sum + s.dejaPaye, 0);
     const totalRestant = students.reduce((sum, s) => sum + s.restant, 0);
     const tauxActuel = totalAttendu > 0 ? (totalPaye / totalAttendu) * 100 : 0;
-    
-    // Simulation optimiste (80% de recouvrement du reste)
-    const optimiste = totalPaye + (totalRestant * 0.8);
-    // Simulation réaliste (60% de recouvrement)
-    const realiste = totalPaye + (totalRestant * 0.6);
-    // Simulation pessimiste (30% de recouvrement)
-    const pessimiste = totalPaye + (totalRestant * 0.3);
-    
-    return {
-      totalAttendu,
-      totalPaye,
-      totalRestant,
-      tauxActuel,
-      optimiste,
-      realiste,
-      pessimiste,
-      previsionData: [
-        { scenario: 'Actuel', montant: totalPaye },
-        { scenario: 'Pessimiste', montant: pessimiste },
-        { scenario: 'Réaliste', montant: realiste },
-        { scenario: 'Optimiste', montant: optimiste },
-        { scenario: 'Total attendu', montant: totalAttendu }
-      ]
-    };
+    return { totalAttendu, totalPaye, totalRestant, tauxActuel };
   }, [students]);
 
   // Données comparatives par classe
@@ -152,19 +129,19 @@ export const Analytics = () => {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 sm:p-5 text-white shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
             <div className="flex-1">
               <p className="text-xs sm:text-sm opacity-80 font-medium">Taux de recouvrement</p>
-              <p className="text-2xl sm:text-3xl font-bold mt-1">{Math.round(previsionTresorerie.tauxActuel)}%</p>
+              <p className="text-2xl sm:text-3xl font-bold mt-1">{Math.round(globalStats.tauxActuel)}%</p>
             </div>
             <Target className="w-8 sm:w-10 h-8 sm:h-10 opacity-40 flex-shrink-0" />
           </div>
           <div className="mt-2 h-2 bg-blue-400 rounded-full overflow-hidden">
             <div 
               className="h-full bg-white rounded-full"
-              style={{ width: `${previsionTresorerie.tauxActuel}%` }}
+              style={{ width: `${globalStats.tauxActuel}%` }}
             />
           </div>
         </div>
@@ -173,13 +150,13 @@ export const Analytics = () => {
           <div className="flex items-center justify-between mb-3">
             <div className="flex-1">
               <p className="text-xs sm:text-sm opacity-80 font-medium">Montant encaissé</p>
-              <p className="text-xl sm:text-2xl font-bold mt-1">{formatMontant(previsionTresorerie.totalPaye)}</p>
+              <p className="text-xl sm:text-2xl font-bold mt-1">{formatMontant(globalStats.totalPaye)}</p>
             </div>
             <DollarSign className="w-8 sm:w-10 h-8 sm:h-10 opacity-40 flex-shrink-0" />
           </div>
           <p className="mt-2 text-xs sm:text-sm opacity-80 flex items-center gap-1">
             <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
-            sur {formatMontant(previsionTresorerie.totalAttendu)} attendus
+            sur {formatMontant(globalStats.totalAttendu)} attendus
           </p>
         </div>
 
@@ -187,25 +164,12 @@ export const Analytics = () => {
           <div className="flex items-center justify-between mb-3">
             <div className="flex-1">
               <p className="text-xs sm:text-sm opacity-80 font-medium">Reste à recouvrer</p>
-              <p className="text-xl sm:text-2xl font-bold mt-1">{formatMontant(previsionTresorerie.totalRestant)}</p>
+              <p className="text-xl sm:text-2xl font-bold mt-1">{formatMontant(globalStats.totalRestant)}</p>
             </div>
             <AlertTriangle className="w-8 sm:w-10 h-8 sm:h-10 opacity-40 flex-shrink-0" />
           </div>
           <p className="mt-2 text-xs sm:text-sm opacity-80">
             {students.filter(s => s.restant > 0).length} élèves concernés
-          </p>
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-4 sm:p-5 text-white shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex-1">
-              <p className="text-xs sm:text-sm opacity-80 font-medium">Prévision réaliste</p>
-              <p className="text-xl sm:text-2xl font-bold mt-1">{formatMontant(previsionTresorerie.realiste)}</p>
-            </div>
-            <TrendingUp className="w-8 sm:w-10 h-8 sm:h-10 opacity-40 flex-shrink-0" />
-          </div>
-          <p className="mt-2 text-xs sm:text-sm opacity-80">
-            ~60% de recouvrement restant
           </p>
         </div>
       </div>
@@ -297,37 +261,7 @@ export const Analytics = () => {
         </div>
       </div>
 
-      {/* Prévision de trésorerie */}
-      <div className="card">
-        <div className="card-header">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-800 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-orange-600" />
-            Prévision de trésorerie
-          </h3>
-        </div>
-        <div className="card-body p-3 sm:p-6">
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={previsionTresorerie.previsionData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="scenario" />
-              <YAxis tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`} />
-              <Tooltip 
-                formatter={(value) => formatMontant(Number(value) || 0)}
-                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="montant" 
-                stroke="#3b82f6" 
-                strokeWidth={3}
-                dot={{ fill: '#3b82f6', strokeWidth: 2, r: 6 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
 
-      {/* Tableaux */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Top classes */}
         <div className="card">
