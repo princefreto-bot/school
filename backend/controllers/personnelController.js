@@ -13,8 +13,7 @@ async function getPersonnel(req, res) {
         const { data: personnel, error } = await supabase
             .from(`profiles_${schoolSlug}`)
             .select('*')
-            .in('role', ['admin', 'superviseur', 'comptable', 'censeur'])
-            .order('created_at', { ascending: false });
+            .in('role', ['admin', 'superviseur', 'surveillant', 'comptable', 'censeur']);
 
         if (error) throw error;
         return res.json(personnel);

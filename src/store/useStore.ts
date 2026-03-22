@@ -300,9 +300,9 @@ export const useStore = create<AppState>()(
               matieres: [],
               classeMatieres: [],
               notes: [],
-              schoolLogo: null,
+              schoolLogo: result.user.school_logo || null,
               schoolStamp: null,
-              schoolName: 'Établissement',
+              schoolName: result.user.school_name || 'Établissement',
             });
 
             set({ user: loggedUser, isAuthenticated: true, currentPage: targetPage });
