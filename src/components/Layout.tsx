@@ -14,75 +14,123 @@ import {
 interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: number }
 
 const NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
-  { id: 'dashboard', label: 'Tableau de bord', icon: <LayoutDashboard className="w-5 h-5" /> },
-  { id: 'eleves', label: 'Élèves', icon: <Users className="w-5 h-5" /> },
-  { id: 'parents_list', label: 'Parents', icon: <Users className="w-5 h-5 text-emerald-500" /> },
-  { id: 'paiements', label: 'Paiements', icon: <CreditCard className="w-5 h-5" /> },
-  { id: 'recouvrement', label: 'Recouvrement', icon: <Target className="w-5 h-5 text-red-500" /> },
-  { id: 'scan_presence', label: 'Scan Présence', icon: <ScanLine className="w-5 h-5 text-cyan-500" /> },
-  { id: 'scan_sortie', label: 'Scan Sortie', icon: <ScanLine className="w-5 h-5 text-orange-500" /> },
-  { id: 'carte_scolaire', label: 'Cartes Scolaires', icon: <IdCard className="w-5 h-5 text-indigo-500" /> },
-  { id: 'gestion_academique', label: 'Gest. Académique', icon: <BookOpen className="w-5 h-5 text-fuchsia-500" /> },
-  { id: 'saisie_notes', label: 'Saisie Notes', icon: <Edit3 className="w-5 h-5 text-rose-500" /> },
-  { id: 'bulletins', label: 'Bulletins', icon: <FileSpreadsheet className="w-5 h-5 text-amber-600" /> },
-  { id: 'verification_recu', label: 'Vérif. Reçus', icon: <ShieldCheck className="w-5 h-5 text-purple-500" /> },
-  { id: 'analyses', label: 'Analyses', icon: <BarChart3 className="w-5 h-5" /> },
-  { id: 'documents', label: 'Documents', icon: <FileText className="w-5 h-5" /> },
-  { id: 'historique_activites', label: 'Historique', icon: <Activity className="w-5 h-5 text-slate-500" /> },
-  { id: 'chat', label: 'Messagerie', icon: <MessageSquare className="w-5 h-5" /> },
-  { id: 'annonces', label: 'Annonces', icon: <Megaphone className="w-5 h-5 text-purple-500" /> },
-  { id: 'import_export', label: 'Base de données', icon: <Database className="w-5 h-5 text-amber-500" /> },
-  { id: 'parametres', label: 'Paramètres', icon: <Settings className="w-5 h-5" /> },
+  { id: 'dashboard',           label: 'Tableau de bord',    icon: <LayoutDashboard className="w-[18px] h-[18px]" /> },
+  { id: 'eleves',              label: 'Élèves',             icon: <Users className="w-[18px] h-[18px]" /> },
+  { id: 'parents_list',        label: 'Parents',            icon: <Users className="w-[18px] h-[18px]" /> },
+  { id: 'paiements',           label: 'Paiements',          icon: <CreditCard className="w-[18px] h-[18px]" /> },
+  { id: 'recouvrement',        label: 'Recouvrement',       icon: <Target className="w-[18px] h-[18px]" /> },
+  { id: 'scan_presence',       label: 'Scan Présence',      icon: <ScanLine className="w-[18px] h-[18px]" /> },
+  { id: 'scan_sortie',         label: 'Scan Sortie',        icon: <ScanLine className="w-[18px] h-[18px]" /> },
+  { id: 'carte_scolaire',      label: 'Cartes Scolaires',   icon: <IdCard className="w-[18px] h-[18px]" /> },
+  { id: 'gestion_academique',  label: 'Académique',         icon: <BookOpen className="w-[18px] h-[18px]" /> },
+  { id: 'saisie_notes',        label: 'Saisie Notes',       icon: <Edit3 className="w-[18px] h-[18px]" /> },
+  { id: 'bulletins',           label: 'Bulletins',          icon: <FileSpreadsheet className="w-[18px] h-[18px]" /> },
+  { id: 'verification_recu',   label: 'Vérif. Reçus',       icon: <ShieldCheck className="w-[18px] h-[18px]" /> },
+  { id: 'analyses',            label: 'Analyses',           icon: <BarChart3 className="w-[18px] h-[18px]" /> },
+  { id: 'documents',           label: 'Documents',          icon: <FileText className="w-[18px] h-[18px]" /> },
+  { id: 'historique_activites',label: 'Historique',         icon: <Activity className="w-[18px] h-[18px]" /> },
+  { id: 'chat',                label: 'Messagerie',         icon: <MessageSquare className="w-[18px] h-[18px]" /> },
+  { id: 'annonces',            label: 'Annonces',           icon: <Megaphone className="w-[18px] h-[18px]" /> },
+  { id: 'gestion_personnel',   label: 'Personnel',          icon: <Users className="w-[18px] h-[18px]" /> },
+  { id: 'import_export',       label: 'Base de données',    icon: <Database className="w-[18px] h-[18px]" /> },
+  { id: 'parametres',          label: 'Paramètres',         icon: <Settings className="w-[18px] h-[18px]" /> },
 ];
 
 const PARENT_NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
-  { id: 'parent_dashboard', label: 'Dashboard Parent', icon: <LayoutDashboard className="w-5 h-5" /> },
-  { id: 'parent_historique', label: 'Historique paiements', icon: <CreditCard className="w-5 h-5" /> },
-  { id: 'parent_recus', label: 'Mes reçus', icon: <FileText className="w-5 h-5" /> },
-  { id: 'parent_badges', label: 'Mes badges', icon: <Award className="w-5 h-5" /> },
-  { id: 'chat', label: 'Messagerie', icon: <MessageSquare className="w-5 h-5" /> },
+  { id: 'parent_dashboard',  label: 'Mon Tableau de bord', icon: <LayoutDashboard className="w-[18px] h-[18px]" /> },
+  { id: 'parent_historique', label: 'Paiements',           icon: <CreditCard className="w-[18px] h-[18px]" /> },
+  { id: 'parent_recus',      label: 'Mes reçus',           icon: <FileText className="w-[18px] h-[18px]" /> },
+  { id: 'parent_badges',     label: 'Mes badges',          icon: <Award className="w-[18px] h-[18px]" /> },
+  { id: 'chat',              label: 'Messagerie',          icon: <MessageSquare className="w-[18px] h-[18px]" /> },
+  { id: 'annonces',          label: 'Annonces',            icon: <Megaphone className="w-[18px] h-[18px]" /> },
 ];
 
-// ── Sidebar Items (component défini hors Layout pour éviter remontage) ──────
-interface SidebarItemsProps {
+// Nav group labels for visual grouping
+const NAV_GROUPS: Record<string, string> = {
+  dashboard: 'Principal',
+  eleves: 'Gestion',
+  parents_list: 'Gestion',
+  paiements: 'Finance',
+  recouvrement: 'Finance',
+  scan_presence: 'Présences',
+  scan_sortie: 'Présences',
+  carte_scolaire: 'Présences',
+  gestion_academique: 'Académique',
+  saisie_notes: 'Académique',
+  bulletins: 'Académique',
+  verification_recu: 'Outils',
+  analyses: 'Outils',
+  documents: 'Outils',
+  historique_activites: 'Outils',
+  chat: 'Communication',
+  annonces: 'Communication',
+  gestion_personnel: 'Administration',
+  import_export: 'Administration',
+  parametres: 'Administration',
+};
+
+// Real-time clock
+const RealTimeClock: React.FC = () => {
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const lomeTime = time.toLocaleTimeString('fr-FR', { timeZone: 'Africa/Lome', hour: '2-digit', minute: '2-digit' });
+  const lomeDate = time.toLocaleDateString('fr-FR', { timeZone: 'Africa/Lome', weekday: 'short', day: 'numeric', month: 'short' });
+  return (
+    <div className="hidden md:flex flex-col items-start gap-0">
+      <div className="flex items-center gap-1.5 text-sm font-bold tabular-nums" style={{ color: 'var(--txt-primary)' }}>
+        <Clock className="w-3.5 h-3.5" style={{ color: 'var(--brand)' }} />
+        {lomeTime}
+      </div>
+      <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--txt-muted)' }}>{lomeDate} — GMT</p>
+    </div>
+  );
+};
+
+// Sidebar nav items renderer
+const SidebarNav: React.FC<{
+  navItems: NavItem[];
   currentPage: AppPage;
   setCurrentPage: (p: AppPage) => void;
   setSidebarOpen: (v: boolean) => void;
-  navItems: NavItem[];
-}
-const SidebarItems: React.FC<SidebarItemsProps> = ({
-  currentPage, setCurrentPage, setSidebarOpen, navItems,
-}) => (
-  <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-    {navItems.map((item) => {
-      const active = currentPage === item.id;
-      return (
-        <button
-          key={item.id}
-          onClick={() => { setCurrentPage(item.id); setSidebarOpen(false); }}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group ${active
-            ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
-            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'
-            }`}
-        >
-          <span className={active ? 'text-white' : 'text-slate-500 group-hover:text-white transition-colors'}>
-            {item.icon}
-          </span>
-          <span className="flex-1 text-left">{item.label}</span>
-          {item.badge != null && item.badge > 0 && (
-            <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shrink-0">
-              {item.badge > 99 ? '99+' : item.badge}
-            </span>
-          )}
-          {active && <ChevronRight className="w-3 h-3 ml-auto" />}
-        </button>
-      );
-    })}
-  </nav>
-);
+}> = ({ navItems, currentPage, setCurrentPage, setSidebarOpen }) => {
+  let lastGroup = '';
 
-// ── Sidebar Content complet (défini hors Layout) ─────────────
-interface SidebarContentProps {
+  return (
+    <nav className="sidebar-nav">
+      {navItems.map((item) => {
+        const active = currentPage === item.id;
+        const group = NAV_GROUPS[item.id] || '';
+        const showGroupLabel = group && group !== lastGroup;
+        if (showGroupLabel) lastGroup = group;
+
+        return (
+          <React.Fragment key={item.id}>
+            {showGroupLabel && (
+              <div className="sidebar-section-label">{group}</div>
+            )}
+            <button
+              onClick={() => { setCurrentPage(item.id); setSidebarOpen(false); }}
+              className={`nav-item ${active ? 'active' : ''}`}
+              title={item.label}
+            >
+              <span className="nav-item-icon">{item.icon}</span>
+              <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>
+              {item.badge != null && item.badge > 0 && (
+                <span className="nav-badge">{item.badge > 99 ? '99+' : item.badge}</span>
+              )}
+            </button>
+          </React.Fragment>
+        );
+      })}
+    </nav>
+  );
+};
+
+// Full sidebar component
+const SidebarContent: React.FC<{
   currentPage: AppPage;
   setCurrentPage: (p: AppPage) => void;
   setSidebarOpen: (v: boolean) => void;
@@ -94,118 +142,93 @@ interface SidebarContentProps {
   userRole: string;
   connectedParentsCount: number;
   logout: () => void;
-}
-const SidebarContent: React.FC<SidebarContentProps> = ({
-  currentPage, setCurrentPage, setSidebarOpen, navItems,
-  schoolName, appName, schoolLogo, userName, userRole, connectedParentsCount, logout,
-}) => (
-  <div className="flex flex-col h-full">
-    {/* Logo + Nom app */}
-    <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-700/50">
-      <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 flex items-center justify-center bg-amber-500">
+}> = ({ currentPage, setCurrentPage, setSidebarOpen, navItems, schoolName, appName, schoolLogo, userName, userRole, connectedParentsCount, logout }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--sidebar-bg)' }}>
+    {/* Brand */}
+    <div className="sidebar-logo">
+      <div className="sidebar-brand-icon">
         {schoolLogo ? (
-          <img
-            src={schoolLogo}
-            alt="Logo"
-            className="w-full h-full object-cover"
-          />
+          <img src={schoolLogo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--r-md)' }} />
         ) : (
-          <GraduationCap className="w-5 h-5 text-white" />
+          <GraduationCap style={{ width: 20, height: 20, color: '#1A0E00' }} />
         )}
       </div>
-      <div className="overflow-hidden">
-        <p className="text-slate-900 dark:text-white font-bold text-sm truncate">{appName} v1.5</p>
-        <p className="text-slate-500 dark:text-slate-400 text-xs truncate">{schoolName}</p>
+      <div style={{ overflow: 'hidden', flex: 1 }}>
+        <p className="sidebar-brand-text" style={{ fontSize: '0.875rem' }}>{appName}</p>
+        <p style={{ fontSize: '0.6875rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {schoolName}
+        </p>
       </div>
     </div>
 
     {/* Navigation */}
-    <SidebarItems
+    <SidebarNav
+      navItems={navItems}
       currentPage={currentPage}
       setCurrentPage={setCurrentPage}
       setSidebarOpen={setSidebarOpen}
-      navItems={navItems}
     />
 
-    {/* Section Parents Connectés (pour Admin) */}
+    {/* Live parents count (admin only) */}
     {isAdminRole(userRole) && (
-      <div className="px-5 py-4 border-t border-slate-100">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live</p>
-          <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] text-emerald-500 font-bold">{connectedParentsCount} Parents</span>
-          </div>
-        </div>
+      <div style={{ padding: '12px 8px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
         <button
           onClick={() => { setCurrentPage('parents_list'); setSidebarOpen(false); }}
-          className="w-full text-left p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-xs text-slate-600 transition-colors flex items-center justify-between group"
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
+            borderRadius: 'var(--r-md)', background: 'rgba(34,197,94,0.08)', border: 'none',
+            cursor: 'pointer', transition: 'background 80ms ease-out',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(34,197,94,0.14)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'rgba(34,197,94,0.08)')}
         >
-          Voir les comptes
-          <ChevronRight className="w-3 h-3 text-slate-400 group-hover:text-amber-500" />
+          <div className="pulse-dot" />
+          <span style={{ flex: 1, fontSize: '0.8125rem', color: '#4ADE80', fontWeight: 600, textAlign: 'left' }}>
+            {connectedParentsCount} parent{connectedParentsCount !== 1 ? 's' : ''} inscrits
+          </span>
+          <ChevronRight style={{ width: 14, height: 14, color: 'rgba(74,222,128,0.5)' }} />
         </button>
       </div>
     )}
 
-    {/* Utilisateur */}
-    <div className="px-3 py-4 border-t border-slate-100 pb-24 lg:pb-4">
-      <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-50 mb-2">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-          {userName.charAt(0).toUpperCase()}
-        </div>
-        <div className="overflow-hidden flex-1">
-          <p className="text-slate-900 dark:text-white text-xs font-bold truncate">{userName}</p>
-          <p className="text-slate-600 dark:text-slate-400 text-[10px] capitalize font-bold">{userRole}</p>
+    {/* User footer */}
+    <div className="sidebar-footer" style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
+      <div className="user-chip" style={{ marginBottom: 4 }}>
+        <div className="user-avatar">{userName.charAt(0).toUpperCase()}</div>
+        <div style={{ overflow: 'hidden', flex: 1 }}>
+          <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'rgba(255,255,255,0.9)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {userName}
+          </p>
+          <p style={{ fontSize: '0.6875rem', color: 'rgba(255,255,255,0.35)', textTransform: 'capitalize', fontWeight: 500 }}>
+            {userRole}
+          </p>
         </div>
       </div>
       <button
         onClick={logout}
-        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all text-sm font-semibold group"
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
+          borderRadius: 'var(--r-md)', background: 'none', border: 'none', cursor: 'pointer',
+          color: 'rgba(255,255,255,0.35)', fontSize: '0.875rem', fontWeight: 500,
+          transition: 'all 80ms ease-out',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.background = 'rgba(239,68,68,0.1)';
+          e.currentTarget.style.color = '#F87171';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = 'none';
+          e.currentTarget.style.color = 'rgba(255,255,255,0.35)';
+        }}
       >
-        <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-rose-100 group-hover:text-rose-500 transition-colors">
-          <LogOut className="w-4 h-4" />
-        </div>
+        <LogOut style={{ width: 16, height: 16 }} />
         Déconnexion
       </button>
     </div>
   </div>
 );
 
-// ── LAYOUT PRINCIPAL ─────────────────────────────────────────
-
-const RealTimeClock: React.FC = () => {
-  const [time, setTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const lomeTime = time.toLocaleTimeString('fr-FR', {
-    timeZone: 'Africa/Lome',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  });
-
-  const lomeDate = time.toLocaleDateString('fr-FR', {
-    timeZone: 'Africa/Lome',
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short'
-  });
-
-  return (
-    <div className="hidden md:flex flex-col items-start px-4 border-l-2 border-amber-500/20 ml-2">
-      <div className="flex items-center gap-2 text-slate-900 dark:text-white font-black tracking-tighter tabular-nums text-sm">
-        <Clock className="w-3 h-3 text-amber-600 animate-pulse" />
-        <span>{lomeTime}</span>
-      </div>
-      <p className="text-[9px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-[0.2em]">{lomeDate} — LOMÉ</p>
-    </div>
-  );
-};
-
+// ── LAYOUT PRINCIPAL ──────────────────────────────────────────
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const currentPage = useStore((s) => s.currentPage);
   const setCurrentPage = useStore((s) => s.setCurrentPage);
@@ -224,72 +247,49 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const theme = useStore((s) => s.theme);
   const toggleTheme = useStore((s) => s.toggleTheme);
 
-  // Appliquer la classe dark au document
+  // Dark mode class
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    if (theme === 'dark') document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
   }, [theme]);
 
-  // Sync automatique et récupération du vrai compteur de parents
+  // Admin: sync + parent count polling
   useEffect(() => {
     if (user?.role !== 'parent') {
-      // 1. Sync students (non-bloquant, avec timeout court)
       if (students.length > 0) {
         import('../services/backendSync').then(({ syncToBackend }) => {
-          const timer = setTimeout(() => {
-            syncToBackend({ students, parents }).catch(() => {
-              // Fail silently, backend peut être down
-            });
-          }, 100);
-          return () => clearTimeout(timer);
+          const t = setTimeout(() => syncToBackend({ students, parents }).catch(() => {}), 100);
+          return () => clearTimeout(t);
         });
       }
-
-      // 2. Récupérer le vrai nombre de parents inscrits (Polling toutes les 30s)
-      const fetchActiveCount = async () => {
+      const fetchCount = async () => {
         try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-          const res = await fetch(`/api/parent/active-count`, {
-            signal: controller.signal,
-            headers: getAuthHeaders()
-          }).finally(() => clearTimeout(timeoutId));
-          if (res.ok) {
-            const data = await parseResponse(res);
-            setConnectedParentsCount(data.count || 0);
-          }
-        } catch (err) {
-          // Backend indisponible - pas grave, on continue
-        }
+          const ctrl = new AbortController();
+          const tid = setTimeout(() => ctrl.abort(), 3000);
+          const res = await fetch('/api/parent/active-count', { signal: ctrl.signal, headers: getAuthHeaders() }).finally(() => clearTimeout(tid));
+          if (res.ok) { const d = await parseResponse(res); setConnectedParentsCount(d.count || 0); }
+        } catch {}
       };
-
-      fetchActiveCount();
-      const interval = setInterval(fetchActiveCount, 30000);
-      return () => clearInterval(interval);
+      fetchCount();
+      const iv = setInterval(fetchCount, 30000);
+      return () => clearInterval(iv);
     }
   }, [students, parents, user?.role, setConnectedParentsCount]);
 
-  // Fetch unread messages for parents
+  // Parent: unread messages polling
   useEffect(() => {
     if (user?.role === 'parent') {
       fetchUnreadMessages();
-      const interval = setInterval(fetchUnreadMessages, 30000);
-      return () => clearInterval(interval);
+      const iv = setInterval(fetchUnreadMessages, 30000);
+      return () => clearInterval(iv);
     }
   }, [user?.role, fetchUnreadMessages]);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const nonSoldes = students.filter((s) => s.status !== 'Soldé').length;
-
   const isParent = user?.role === 'parent';
   const baseNavItems = isParent ? PARENT_NAV_ITEMS : NAV_ITEMS;
-
-  // Filtrer les items par rôle
   const filteredItems = getFilteredNavItems(user?.role, baseNavItems) as Omit<NavItem, 'badge'>[];
 
   const navItems: NavItem[] = filteredItems.map((item) => ({
@@ -299,138 +299,228 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   const currentLabel = [...NAV_ITEMS, ...PARENT_NAV_ITEMS].find((n) => n.id === currentPage)?.label ?? '';
 
-  const sidebarProps: SidebarContentProps = {
-    currentPage,
-    setCurrentPage,
-    setSidebarOpen,
-    navItems,
-    schoolName,
-    appName,
-    schoolLogo,
-    userName: user?.nom ?? '',
-    userRole: user?.role ?? '',
-    connectedParentsCount,
-    logout,
+  const sidebarProps = {
+    currentPage, setCurrentPage, setSidebarOpen, navItems,
+    schoolName, appName, schoolLogo, userName: user?.nom ?? '',
+    userRole: user?.role ?? '', connectedParentsCount, logout,
   };
 
+  // Bottom nav items
+  const bottomNavItems = (user?.role === 'superviseur' || user?.role === 'surveillant') ? [
+    { id: 'scan_presence' as AppPage, label: 'Entrée', icon: <ScanLine className="w-5 h-5" /> },
+    { id: 'scan_sortie'   as AppPage, label: 'Sortie', icon: <ScanLine className="w-5 h-5" /> },
+    { id: 'carte_scolaire'as AppPage, label: 'Cartes', icon: <IdCard className="w-5 h-5" /> },
+  ] : [
+    { id: (isParent ? 'parent_dashboard' : 'dashboard') as AppPage, label: 'Accueil', icon: <LayoutDashboard className="w-5 h-5" /> },
+    { id: (isParent ? 'parent_historique' : 'eleves') as AppPage,   label: isParent ? 'Paiements' : 'Élèves', icon: isParent ? <CreditCard className="w-5 h-5" /> : <Users className="w-5 h-5" /> },
+    { id: 'chat' as AppPage, label: 'Chat', icon: <MessageSquare className="w-5 h-5" />, badge: unreadMessages },
+    { id: (isParent ? 'annonces' : 'parametres') as AppPage, label: isParent ? 'Annonces' : 'Config', icon: isParent ? <Megaphone className="w-5 h-5" /> : <Settings className="w-5 h-5" /> },
+  ];
+
   return (
-    <div className={`min-h-screen flex transition-colors duration-300 ${theme === 'dark' ? 'dark bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`} style={{ fontFamily: 'Outfit, Inter, sans-serif' }}>
-      {/* Sidebar desktop */}
-      <aside className="hidden lg:flex flex-col w-64 bg-white fixed inset-y-0 left-0 z-30 print:hidden border-r border-slate-100">
+    <div
+      className={`min-h-screen flex ${theme === 'dark' ? 'dark' : ''}`}
+      style={{ fontFamily: "'Inter', 'Plus Jakarta Sans', system-ui, sans-serif", background: 'var(--bg)', color: 'var(--txt-primary)' }}
+    >
+      {/* ── Sidebar Desktop ── */}
+      <aside
+        className="hidden lg:flex print:hidden"
+        style={{
+          width: 'var(--sidebar-w)', height: '100dvh', position: 'fixed', top: 0, left: 0,
+          zIndex: 50, flexDirection: 'column', background: 'var(--sidebar-bg)',
+          borderRight: '1px solid rgba(255,255,255,0.05)',
+          boxShadow: '4px 0 32px rgba(0,0,0,0.15)',
+        }}
+      >
         <SidebarContent {...sidebarProps} />
       </aside>
 
-      {/* Sidebar mobile overlay */}
+      {/* ── Sidebar Mobile Overlay ── */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
+        <div style={{ position: 'fixed', inset: 0, zIndex: 60 }} className="lg:hidden">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            style={{ position: 'absolute', inset: 0, background: 'rgba(5,8,20,0.7)', backdropFilter: 'blur(4px)' }}
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white z-50">
-            <div className="absolute top-4 right-4">
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="text-slate-400 hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+          <aside style={{
+            position: 'absolute', left: 0, top: 0, bottom: 0, width: 'var(--sidebar-w)',
+            zIndex: 61, display: 'flex', flexDirection: 'column',
+            animation: 'slide-in-left 0.28s cubic-bezier(0.16,1,0.3,1)',
+          }}>
+            <style>{`@keyframes slide-in-left { from { transform: translateX(-100%) } to { transform: translateX(0) } }`}</style>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              style={{
+                position: 'absolute', top: 16, right: 16, zIndex: 62,
+                width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 'var(--r-md)', background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer',
+                color: 'rgba(255,255,255,0.6)',
+              }}
+            >
+              <X size={16} />
+            </button>
             <SidebarContent {...sidebarProps} />
           </aside>
         </div>
       )}
 
-      {/* Main content */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen print:ml-0 print:bg-white pb-16 lg:pb-0">
-        {/* Topbar */}
-        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 sticky top-0 z-20 shadow-sm print:hidden transition-colors">
-          <div className="flex items-center justify-between px-4 sm:px-6 h-16">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+      {/* ── Main Content ── */}
+      <div
+        style={{
+          flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0,
+          marginLeft: 0, // mobile default
+        }}
+        className="lg:ml-[264px] print:ml-0"
+      >
+        {/* ── Topbar ── */}
+        <header
+          className="print:hidden"
+          style={{
+            height: 'var(--header-h)', display: 'flex', alignItems: 'center', gap: 12,
+            padding: '0 20px', background: 'var(--surface)', borderBottom: '1px solid var(--border-light)',
+            position: 'sticky', top: 0, zIndex: 40,
+            backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+            transition: 'background var(--t-slow), border-color var(--t-slow)',
+            boxShadow: '0 1px 0 var(--border-light)',
+          }}
+        >
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden btn-icon"
+            style={{ border: '1px solid var(--border)', background: 'var(--surface-2)', borderRadius: 'var(--r-sm)', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
+          >
+            <Menu style={{ width: 16, height: 16, color: 'var(--txt-secondary)' }} />
+          </button>
+
+          {/* Page title */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h1 style={{ fontSize: '0.9375rem', fontWeight: 700, letterSpacing: '-0.015em', color: 'var(--txt-primary)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {currentLabel}
+            </h1>
+            {!isParent && (
+              <p style={{ fontSize: '0.6875rem', fontWeight: 500, color: 'var(--txt-muted)', marginTop: 1 }}>
+                Session {schoolYear}
+              </p>
+            )}
+          </div>
+
+          {/* Clock */}
+          <RealTimeClock />
+
+          {/* Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            {/* Non-soldés badge */}
+            {!isParent && nonSoldes > 0 && (
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 'var(--r-full)', cursor: 'pointer', transition: 'all var(--t-fast)' }}
+                onClick={() => setCurrentPage('eleves')}
               >
-                <Menu className="w-5 h-5" />
-              </button>
-              <div>
-                <h1 className="text-base font-black text-slate-900 dark:text-white tracking-tight">{currentLabel}</h1>
-                <p className="text-[10px] text-slate-600 dark:text-slate-400 font-bold uppercase tracking-widest mt-0.5">
-                    Session {schoolYear} — Management
-                </p>
+                <Bell style={{ width: 13, height: 13, color: '#EF4444' }} />
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#EF4444' }}>{nonSoldes}</span>
               </div>
-              <RealTimeClock />
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all hover:scale-110 active:scale-95 shadow-inner"
-              >
-                {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-              </button>
-              <button
-                onClick={logout}
-                className="lg:hidden p-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 transition-all hover:scale-110 active:scale-95"
-                title="Déconnexion"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
-              {!isParent && (
-                <>
-                  <div className="hidden sm:flex items-center gap-1 text-xs text-gray-500 bg-gray-100 rounded-lg px-3 py-1.5">
-                    <Users className="w-3 h-3" />
-                    <span>{students.length} élève{students.length !== 1 ? 's' : ''}</span>
-                  </div>
-                  {nonSoldes > 0 && (
-                    <div className="flex items-center gap-1 text-xs text-red-600 bg-red-50 rounded-lg px-3 py-1.5">
-                      <Bell className="w-3 h-3" />
-                      <span className="hidden sm:inline">{nonSoldes} non soldé{nonSoldes !== 1 ? 's' : ''}</span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
+            )}
+
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              style={{
+                width: 36, height: 36, borderRadius: 'var(--r-md)', border: '1px solid var(--border)',
+                background: 'var(--surface-2)', cursor: 'pointer', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', color: 'var(--txt-secondary)',
+                transition: 'all var(--t-fast)',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--brand)'; e.currentTarget.style.color = 'var(--brand)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--txt-secondary)'; }}
+              title={theme === 'light' ? 'Mode nuit' : 'Mode jour'}
+            >
+              {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
+            </button>
+
+            {/* Mobile logout */}
+            <button
+              onClick={logout}
+              className="lg:hidden"
+              style={{
+                width: 36, height: 36, borderRadius: 'var(--r-md)', border: '1px solid rgba(239,68,68,0.2)',
+                background: 'rgba(239,68,68,0.06)', cursor: 'pointer', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', color: '#EF4444', transition: 'all var(--t-fast)',
+              }}
+            >
+              <LogOut size={15} />
+            </button>
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 p-4 sm:p-6 pb-24 lg:pb-6 overflow-auto print:p-0 print:overflow-visible page-enter">
-          {children}
+        {/* ── Page content ── */}
+        <main
+          className="page-enter print:p-0 print:overflow-visible"
+          style={{ flex: 1, padding: '24px', paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))', overflowX: 'hidden' }}
+        >
+          <div style={{ maxWidth: 1400, margin: '0 auto', width: '100%' }}>
+            {children}
+          </div>
         </main>
 
-        {/* Bottom Navigation for Mobile (Native App Style) */}
-        <nav className={`lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-200 dark:border-slate-800 flex items-center justify-around px-2 z-40 safe-area-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.05)] ${sidebarOpen ? 'hidden' : 'flex'}`}>
-          {(user?.role === 'superviseur' || user?.role === 'surveillant' ? [
-            { id: 'scan_presence', label: 'Entrée', icon: <ScanLine className="w-5 h-5" /> },
-            { id: 'scan_sortie', label: 'Sortie', icon: <ScanLine className="w-5 h-5" /> },
-            { id: 'carte_scolaire', label: 'Cartes', icon: <IdCard className="w-5 h-5" /> },
-          ] : [
-            { id: isParent ? 'parent_dashboard' : 'dashboard', label: 'Home', icon: <LayoutDashboard className="w-5 h-5" /> },
-            { id: isParent ? 'parent_historique' : 'eleves', label: isParent ? 'Historique' : 'Élèves', icon: isParent ? <CreditCard className="w-5 h-5" /> : <Users className="w-5 h-5" /> },
-            { id: 'chat', label: 'Chat', icon: <MessageSquare className="w-5 h-5" />, badge: unreadMessages },
-            { id: isParent ? 'parent_recus' : 'parametres', label: isParent ? 'Recus' : 'Config', icon: isParent ? <FileText className="w-5 h-5" /> : <Settings className="w-5 h-5" /> },
-          ]).map((item) => {
+        {/* ── Bottom Navigation (Mobile) ── */}
+        <nav
+          className={`lg:hidden print:hidden ${sidebarOpen ? 'hidden' : 'flex'}`}
+          style={{
+            position: 'fixed', bottom: 0, left: 0, right: 0,
+            height: 'calc(64px + env(safe-area-inset-bottom, 0px))',
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+            background: 'var(--surface)',
+            borderTop: '1px solid var(--border-light)',
+            display: 'flex', alignItems: 'center', justifyContent: 'around',
+            zIndex: 40,
+            boxShadow: '0 -4px 24px rgba(0,0,0,0.06)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+          }}
+        >
+          {bottomNavItems.map((item) => {
             const active = currentPage === item.id;
             return (
               <button
                 key={item.id}
-                onClick={() => setCurrentPage(item.id as AppPage)}
-                className={`relative flex flex-col items-center justify-center w-16 h-full transition-all duration-200 ${
-                  active ? 'text-amber-600 dark:text-amber-400 font-bold scale-110' : 'text-slate-400 dark:text-slate-500'
-                }`}
+                onClick={() => setCurrentPage(item.id)}
+                style={{
+                  flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  gap: 3, padding: '8px 4px', background: 'none', border: 'none', cursor: 'pointer',
+                  color: active ? 'var(--brand)' : 'var(--txt-muted)',
+                  transition: 'color var(--t-fast), transform var(--t-fast)',
+                  position: 'relative',
+                  transform: active ? 'translateY(-2px)' : 'none',
+                }}
               >
-                <div className={`p-1 rounded-xl transition-all ${active ? 'bg-amber-50 dark:bg-amber-900/30' : ''}`}>
-                  {item.icon}
-                </div>
-                <span className="text-[10px] tracking-tight mt-0.5">{item.label}</span>
-                {item.badge != null && item.badge > 0 && (
-                  <span className="absolute top-2 right-3 bg-red-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900">
-                    {item.badge > 9 ? '9+' : item.badge}
-                  </span>
-                )}
                 {active && (
-                  <div className="absolute -top-1 w-1 h-1 rounded-full bg-amber-600 dark:bg-amber-400 shadow-[0_0_8px_rgba(234,179,8,0.8)]" />
+                  <div style={{
+                    position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+                    width: 24, height: 3, borderRadius: '0 0 var(--r-xs) var(--r-xs)',
+                    background: 'var(--brand)',
+                  }} />
                 )}
+                <div style={{
+                  padding: 6, borderRadius: 'var(--r-md)',
+                  background: active ? 'var(--brand-light)' : 'transparent',
+                  transition: 'background var(--t-fast)',
+                  position: 'relative',
+                }}>
+                  {item.icon}
+                  {(item as any).badge != null && (item as any).badge > 0 && (
+                    <span style={{
+                      position: 'absolute', top: 0, right: 0, width: 16, height: 16,
+                      background: '#EF4444', color: 'white', fontSize: '0.625rem', fontWeight: 800,
+                      borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      border: '2px solid var(--surface)',
+                    }}>
+                      {(item as any).badge > 9 ? '9+' : (item as any).badge}
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: '0.625rem', fontWeight: active ? 700 : 500, letterSpacing: '0.02em' }}>
+                  {item.label}
+                </span>
               </button>
             );
           })}

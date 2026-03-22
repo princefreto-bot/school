@@ -1,30 +1,53 @@
 /*
-* Service Worker pour les notifications Web Push
-*/
+ * Service Worker — Notifications Web Push Avancées
+ * Types supportés : message, announcement, payment, presence, general
+ */
 
 self.addEventListener('push', (event) => {
-  let data = { title: 'Notification', body: 'Vous avez un nouveau message.' };
+  let data = { title: 'Notification', body: 'Vous avez une nouvelle information.', type: 'general' };
 
   if (event.data) {
     try {
       data = event.data.json();
     } catch (e) {
-      console.log('Push event data is not JSON, treating as text', e);
-      data = { title: 'Notification', body: event.data.text() };
+      data = { title: 'Notification', body: event.data.text(), type: 'general' };
     }
+  }
+
+  // Configuration par type de notification
+  const typeConfig = {
+    message:      { tag: 'message-notif',    requireInteraction: false },
+    announcement: { tag: 'announce-notif',   requireInteraction: true  },
+    payment:      { tag: 'payment-notif',    requireInteraction: true  },
+    presence:     { tag: 'presence-notif',   requireInteraction: false },
+    general:      { tag: 'general-notif',    requireInteraction: false },
+  };
+
+  const cfg = typeConfig[data.type] || typeConfig.general;
+
+  // Actions contextuelles selon le type
+  const actions = [];
+  if (data.type === 'message') {
+    actions.push({ action: 'open_chat', title: '💬 Voir le message' });
+  } else if (data.type === 'announcement') {
+    actions.push({ action: 'open_announce', title: '📋 Voir l\'annonce' });
+  } else if (data.type === 'payment') {
+    actions.push({ action: 'open_payment', title: '💳 Voir le reçu' });
   }
 
   const options = {
     body: data.body,
-    icon: '/icon-192x192.png', // Assurez-vous que cette icône existe
+    icon: '/icon-192x192.png',
     badge: '/icon-192x192.png',
-    tag: 'presence-notification',
+    tag: cfg.tag,
     renotify: true,
-    requireInteraction: true,
-    vibrate: [100, 50, 100],
+    requireInteraction: cfg.requireInteraction,
+    vibrate: [200, 100, 200, 100, 200],
     data: {
-      url: '/'
-    }
+      url: data.url || '/',
+      type: data.type
+    },
+    actions
   };
 
   event.waitUntil(
@@ -35,19 +58,41 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  // On ramène l'app au premier plan ou on ouvre l'onglet
+  const notifType = event.notification.data?.type || 'general';
+  const action = event.action;
+
+  // Déterminer la page de destination selon le type
+  let targetPath = '/';
+  if (action === 'open_chat' || notifType === 'message') {
+    targetPath = '/?page=chat';
+  } else if (action === 'open_announce' || notifType === 'announcement') {
+    targetPath = '/?page=annonces';
+  } else if (action === 'open_payment' || notifType === 'payment') {
+    targetPath = '/?page=parent_historique';
+  } else if (notifType === 'presence') {
+    targetPath = '/?page=parent_dashboard';
+  }
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      if (clientList.length > 0) {
-        let client = clientList[0];
-        for (let i = 0; i < clientList.length; i++) {
-          if (clientList[i].focused) {
-            client = clientList[i];
-          }
+      for (const client of clientList) {
+        if ('focus' in client) {
+          client.focus();
+          // Envoyer un message au client pour naviguer vers la bonne page
+          client.postMessage({ type: 'PUSH_NAVIGATE', page: targetPath, notifType });
+          return;
         }
-        return client.focus();
       }
-      return clients.openWindow('/');
+      return clients.openWindow(targetPath);
     })
   );
+});
+
+// Activation immédiate du SW sans attendre
+self.addEventListener('install', () => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(clients.claim());
 });

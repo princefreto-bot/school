@@ -57,7 +57,7 @@ const PageContent: React.FC = () => {
 
   // Sécurité — Empêcher un parent de voir une page admin même si le store est désynchronisé
   if (user?.role === 'parent') {
-    const parentPages = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat'];
+    const parentPages = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces'];
     if (!parentPages.includes(currentPage as any)) {
       return <ParentDashboard />;
     }
@@ -120,20 +120,51 @@ export function App() {
   }, [isAuthenticated]);
 
   // ── Synchronisation Automatique (Temps Réel) ──────────────────
-  // Permet de garder le mobile et le PC synchro sans action manuelle
+  // Parents : poll toutes les 15s pour être toujours à jour
+  // Admin/Staff : poll toutes les 60s (moins critique)
   React.useEffect(() => {
     if (!isAuthenticated) return;
+    const user = useStore.getState().user;
+    const isParent = user?.role === 'parent';
 
-    // Premier fetch au montage
+    // Premier fetch immédiat
     fetchAllFromBackend();
 
-    // Polling toutes les 60 secondes pour éviter d'écraser les données saisies localement
+    const pollInterval = isParent ? 15000 : 60000;
     const interval = setInterval(() => {
       fetchAllFromBackend();
-    }, 60000);
+    }, pollInterval);
 
     return () => clearInterval(interval);
   }, [isAuthenticated, fetchAllFromBackend]);
+
+  // ── Écoute des messages du Service Worker (navigation depuis push) ──
+  React.useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+
+    const handleSWMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'PUSH_NAVIGATE') {
+        const notifType: string = event.data.notifType || 'general';
+        const store = useStore.getState();
+        const user = store.user;
+        if (!user || user.role !== 'parent') return;
+
+        const pageMap: Record<string, string> = {
+          message:      'chat',
+          announcement: 'annonces',
+          payment:      'parent_historique',
+          presence:     'parent_dashboard',
+          general:      'parent_dashboard',
+        };
+        const targetPage = pageMap[notifType] || 'parent_dashboard';
+        store.setCurrentPage(targetPage as any);
+        store.fetchAllFromBackend();
+      }
+    };
+
+    navigator.serviceWorker.addEventListener('message', handleSWMessage);
+    return () => navigator.serviceWorker.removeEventListener('message', handleSWMessage);
+  }, []);
 
   if (!isAuthenticated) {
     return <Login />;

@@ -115,6 +115,7 @@ export type UserRole =
   | 'proviseur'
   | 'censeur'
   | 'superviseur'
+  | 'surveillant'
   | 'comptable'
   | 'parent';
 
@@ -243,6 +244,7 @@ export type AppPage =
   | 'parents_list'
   | 'import_export'
   | 'chat'
+  | 'gestion_personnel'
   // ── Pages SuperAdmin (propriétaire SaaS) ──
   | 'superadmin_dashboard'
   | 'superadmin_schools'

@@ -284,6 +284,47 @@ async function getPresences(req, res) {
     }
 }
 
+/**
+ * GET /api/parent/data
+ * Retourne les données fraiches pour un parent loggé :
+ * annonces, lectures d'annonces, messages non lus
+ */
+async function getParentData(req, res) {
+    const { id: parentId, schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+
+    try {
+        // 1. Annonces de l'école
+        const { data: announcements } = await supabase
+            .from(`announcements_${schoolSlug}`)
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+        // 2. Statut de lecture des annonces pour ce parent
+        const { data: announcementReads } = await supabase
+            .from(`announcement_reads_${schoolSlug}`)
+            .select('*')
+            .eq('parent_id', parentId);
+
+        // 3. Compter les messages non lus
+        const { count: unreadMessages } = await supabase
+            .from(`messages_${schoolSlug}`)
+            .select('id', { count: 'exact', head: true })
+            .eq('read_status', false)
+            .neq('sender_id', parentId);
+
+        return res.json({
+            announcements: announcements || [],
+            announcementReads: announcementReads || [],
+            unreadMessages: unreadMessages || 0,
+        });
+    } catch (err) {
+        console.error('[getParentData] Error:', err.message);
+        return res.status(500).json({ error: err.message });
+    }
+}
+
 module.exports = {
     getDashboard,
     getPayments,
@@ -292,5 +333,6 @@ module.exports = {
     getActiveParentsCount,
     getAllParents,
     getParentById,
-    adminDeleteAccount
+    adminDeleteAccount,
+    getParentData
 };

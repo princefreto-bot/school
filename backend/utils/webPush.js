@@ -5,91 +5,129 @@ require('dotenv').config();
 // Configuration de web-push avec les clés VAPID
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
-const VAPID_EMAIL = process.env.VAPID_EMAIL || 'mailto:admin@princefreto.education';
+const VAPID_EMAIL = process.env.VAPID_EMAIL || 'mailto:admin@nomade-corp.com';
 
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-    webpush.setVapidDetails(
-        VAPID_EMAIL,
-        VAPID_PUBLIC_KEY,
-        VAPID_PRIVATE_KEY
-    );
+    webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
     console.log('✅ Web Push configuré avec succès');
 } else {
     console.warn('⚠️ Web Push non configuré: VAPID_PUBLIC_KEY ou VAPID_PRIVATE_KEY manquant.');
 }
 
-
 /**
- * Envoie une notification push à un utilisateur donné
- * @param {string} userId - ID du parent
- * @param {string} title - Titre de la notification
- * @param {string} body - Contenu de la notification
+ * Envoie une notification push enrichie à un utilisateur
+ * @param {string} userId         - ID du parent dans sa table profiles_<slug>
+ * @param {string} schoolSlug     - Slug de l'école (pour chercher dans la bonne table)
+ * @param {string} title          - Titre de la notification
+ * @param {string} body           - Corps du message
+ * @param {string} type           - Type : 'message' | 'announcement' | 'payment' | 'presence' | 'general'
+ * @param {string} url            - URL de destination optionnelle
  */
-async function sendPushNotification(userId, title, body) {
+async function sendPushNotification(userId, schoolSlug, title, body, type = 'general', url = '/') {
     try {
-        console.log(`🔍 Recherche du push_token pour l'utilisateur ${userId}`);
-        
-        // Récupérer le token Web Push de l'utilisateur
+        if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+            console.warn('⚠️ Web Push : clés VAPID non configurées. Notification ignorée.');
+            return;
+        }
+
+        console.log(`🔍 [Push] Recherche du push_token pour l'utilisateur ${userId} dans profiles_${schoolSlug}`);
+
+        // Récupérer le token Web Push depuis la table de l'école
         const { data: profile, error } = await supabase
-            .from('profiles')
+            .from(`profiles_${schoolSlug}`)
             .select('push_token')
             .eq('id', userId)
             .single();
-            
+
         if (error) {
-            console.error('❌ Erreur lors de la récupération du token:', error.message);
-            return;
+            // Fallback : essayer dans la table profiles globale
+            const { data: globalProfile } = await supabase
+                .from('profiles')
+                .select('push_token')
+                .eq('id', userId)
+                .single();
+            
+            if (!globalProfile?.push_token) {
+                console.log(`⚠️ [Push] Aucun push_token trouvé pour ${userId}`);
+                return;
+            }
+            profile = globalProfile;
         }
-        
-        if (!profile || !profile.push_token) {
-            console.log(`⚠️ Aucun push_token trouvé pour l'utilisateur ${userId}`);
+
+        if (!profile?.push_token) {
+            console.log(`⚠️ [Push] push_token vide pour ${userId}`);
             return;
         }
 
         let subscription;
-        const pushTokenStr = profile.push_token;
-
-        // Tenter de parser le push_token (s'il s'agit d'une chaîne JSON de subscription Web Push)
         try {
-            subscription = typeof pushTokenStr === 'string' 
-                ? JSON.parse(pushTokenStr) 
-                : pushTokenStr;
-                
-            // Vérification basique d'une subscription web-push
-            if (!subscription || !subscription.endpoint) {
-                console.log(`ℹ️ Le push_token pour l'utilisateur ${userId} ne ressemble pas à une subscription Web Push. Il s'agit peut-être d'un token Capacitor/FCM.`);
+            subscription = typeof profile.push_token === 'string'
+                ? JSON.parse(profile.push_token)
+                : profile.push_token;
+
+            if (!subscription?.endpoint) {
+                console.log(`⚠️ [Push] Token invalide pour ${userId} (pas de endpoint)`);
                 return;
             }
         } catch (e) {
-            console.log(`ℹ️ Le push_token pour l'utilisateur ${userId} n'est pas un JSON valide. Ce n'est pas une subscription Web Push.`);
+            console.log(`⚠️ [Push] Token non parseable pour ${userId}`);
             return;
         }
 
-        console.log(`🚀 Envoi de la notification Web Push à ${userId}`);
-        
-        const payload = JSON.stringify({
-            title: title || 'Nouvelle notification',
-            body: body || 'Vous avez un nouveau message.',
-            icon: '/icon-192x192.png',
-            badge: '/icon-192x192.png'
-        });
+        const payload = JSON.stringify({ title, body, type, url, icon: '/icon-192x192.png', badge: '/icon-192x192.png' });
 
-        // Envoi via web-push
+        console.log(`🚀 [Push] Envoi notification type="${type}" à ${userId}`);
         await webpush.sendNotification(subscription, payload);
-        console.log(`✅ Notification Web Push envoyée avec succès à l'utilisateur ${userId}`);
-        
+        console.log(`✅ [Push] Notification envoyée avec succès à ${userId}`);
+
     } catch (err) {
-        console.error(`❌ Erreur lors de l'envoi Web Push à ${userId}:`, err.message);
-        
-        // Si le token a expiré ou n'est plus valide (404 / 410)
+        console.error(`❌ [Push] Erreur Web Push pour ${userId}:`, err.message);
+
         if (err.statusCode === 404 || err.statusCode === 410) {
-            console.log(`🗑️ Suppression du push_token expiré pour l'utilisateur ${userId}`);
-            await supabase
-                .from('profiles')
-                .update({ push_token: null })
-                .eq('id', userId);
+            console.log(`🗑️ [Push] Token expiré pour ${userId}, suppression...`);
+            // Nettoyer le token expiré
+            if (schoolSlug) {
+                await supabase.from(`profiles_${schoolSlug}`).update({ push_token: null }).eq('id', userId);
+            } else {
+                await supabase.from('profiles').update({ push_token: null }).eq('id', userId);
+            }
         }
     }
 }
 
-module.exports = { sendPushNotification };
+/**
+ * Envoie une notification push à TOUS les parents d'une école
+ * @param {string} schoolSlug
+ * @param {string} title
+ * @param {string} body  
+ * @param {string} type
+ */
+async function broadcastPushToSchool(schoolSlug, title, body, type = 'announcement') {
+    try {
+        const { data: parents, error } = await supabase
+            .from(`profiles_${schoolSlug}`)
+            .select('id, push_token')
+            .eq('role', 'parent')
+            .not('push_token', 'is', null);
+
+        if (error || !parents?.length) {
+            console.log(`ℹ️ [Push Broadcast] Aucun parent avec token pour ${schoolSlug}`);
+            return 0;
+        }
+
+        let sent = 0;
+        for (const parent of parents) {
+            if (parent.push_token) {
+                await sendPushNotification(parent.id, schoolSlug, title, body, type);
+                sent++;
+            }
+        }
+        console.log(`📢 [Push Broadcast] ${sent} notifications envoyées pour l'école ${schoolSlug}`);
+        return sent;
+    } catch (err) {
+        console.error(`❌ [Push Broadcast] Erreur:`, err.message);
+        return 0;
+    }
+}
+
+module.exports = { sendPushNotification, broadcastPushToSchool };

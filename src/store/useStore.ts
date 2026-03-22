@@ -752,7 +752,31 @@ export const useStore = create<AppState>()(
       setLastSyncTimestamp: (t) => set({ lastSyncTimestamp: t }),
       fetchAllFromBackend: async () => {
         const user = get().user;
-        if (!user || user.role === 'parent') return;
+        if (!user) return;
+
+        // ── Parents : sync spécifique (annonces, paiements, messages) ──
+        if (user.role === 'parent') {
+          // Les parents ont un cooldown de 12s max (poll toutes les 15s)
+          const now = Date.now();
+          if (now - get().lastSyncTimestamp < 12000) return;
+          try {
+            const { getAuthHeaders } = await import('../services/apiHelpers');
+            const { BACKEND_URL } = await import('../config');
+            const res = await fetch(`${BACKEND_URL}/api/parent/data`, {
+              headers: getAuthHeaders()
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data.announcements) set({ announcements: data.announcements });
+            if (data.announcementReads) set({ announcementReads: data.announcementReads });
+            if (typeof data.unreadMessages === 'number') set({ unreadMessages: data.unreadMessages });
+            set({ lastSyncTimestamp: now });
+          } catch (err) {
+            console.warn('[Parent Sync] Erreur:', err);
+          }
+          return;
+        }
+
         if (get().isSyncing) return; // Éviter les appels concurrents
 
         // Éviter de fetch si on vient de faire une sync (cooldown 55s)

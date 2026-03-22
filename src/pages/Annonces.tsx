@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import {
     Megaphone, Plus, Trash2, X, Send, Eye, EyeOff, Clock,
-    AlertCircle, Info, AlertTriangle, Filter
+    AlertCircle, Info, AlertTriangle, Filter, CheckCircle
 } from 'lucide-react';
 import type { AnnouncementImportance, AnnouncementTarget } from '../types';
 
@@ -22,6 +22,21 @@ export const Annonces: React.FC = () => {
     const announcementReads = useStore(s => s.announcementReads);
     const addAnnouncement = useStore(s => s.addAnnouncement);
     const deleteAnnouncement = useStore(s => s.deleteAnnouncement);
+
+    const isParent = user?.role === 'parent';
+
+    const [hiddenAnnouncements, setHiddenAnnouncements] = useState<string[]>(() => {
+        if (isParent) return JSON.parse(localStorage.getItem(`hidden_announcements_${user?.id}`) || '[]');
+        return [];
+    });
+
+    const hideForParent = (id: string, titre: string) => {
+        if (window.confirm(`Retirer l'annonce "${titre}" de votre liste ?`)) {
+            const updated = [...hiddenAnnouncements, id];
+            setHiddenAnnouncements(updated);
+            localStorage.setItem(`hidden_announcements_${user?.id}`, JSON.stringify(updated));
+        }
+    };
 
     const [showForm, setShowForm]     = useState(false);
     const [titre, setTitre]           = useState('');
@@ -55,6 +70,12 @@ export const Annonces: React.FC = () => {
         }
     };
 
+    const displayAnnouncements = announcements.filter(a => {
+        if (isParent && hiddenAnnouncements.includes(a.id)) return false;
+        if (isParent) return a.cible === 'all' || classes.includes(a.cible);
+        return true;
+    });
+
     // Calcul stats de lecture pour chaque annonce
     const getReadStats = (annonceId: string) => {
         const reads = announcementReads.filter(r => r.announcementId === annonceId && r.readAt);
@@ -79,37 +100,41 @@ export const Annonces: React.FC = () => {
                             </p>
                         </div>
                     </div>
-                    <button
-                        onClick={() => setShowForm(!showForm)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-bold transition-all"
-                    >
-                        {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                        {showForm ? 'Annuler' : 'Créer une annonce'}
-                    </button>
+                    {!isParent && (
+                        <button
+                            onClick={() => setShowForm(!showForm)}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-bold transition-all"
+                        >
+                            {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                            {showForm ? 'Annuler' : 'Créer une annonce'}
+                        </button>
+                    )}
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 mt-4">
-                    <div className="bg-white/10 rounded-xl p-3 text-center">
-                        <p className="text-2xl font-bold">{announcements.length}</p>
-                        <p className="text-xs text-purple-200">Annonces</p>
+                {!isParent && (
+                    <div className="grid grid-cols-3 gap-3 mt-4">
+                        <div className="bg-white/10 rounded-xl p-3 text-center">
+                            <p className="text-2xl font-bold">{announcements.length}</p>
+                            <p className="text-xs text-purple-200">Annonces</p>
+                        </div>
+                        <div className="bg-white/10 rounded-xl p-3 text-center">
+                            <p className="text-2xl font-bold">
+                                {announcements.filter(a => a.importance === 'urgent').length}
+                            </p>
+                            <p className="text-xs text-purple-200">Urgentes</p>
+                        </div>
+                        <div className="bg-white/10 rounded-xl p-3 text-center">
+                            <p className="text-2xl font-bold">
+                                {announcementReads.filter(r => r.readAt).length}
+                            </p>
+                            <p className="text-xs text-purple-200">Confirmations "J'ai lu"</p>
+                        </div>
                     </div>
-                    <div className="bg-white/10 rounded-xl p-3 text-center">
-                        <p className="text-2xl font-bold">
-                            {announcements.filter(a => a.importance === 'urgent').length}
-                        </p>
-                        <p className="text-xs text-purple-200">Urgentes</p>
-                    </div>
-                    <div className="bg-white/10 rounded-xl p-3 text-center">
-                        <p className="text-2xl font-bold">
-                            {announcementReads.filter(r => r.readAt).length}
-                        </p>
-                        <p className="text-xs text-purple-200">Confirmations "J'ai lu"</p>
-                    </div>
-                </div>
+                )}
             </div>
 
             {/* Formulaire création */}
-            {showForm && (
+            {showForm && !isParent && (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 animate-slideDown">
                     <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-4">
                         <Send className="w-4 h-4 text-purple-600" />
@@ -200,19 +225,21 @@ export const Annonces: React.FC = () => {
 
             {/* Liste des annonces */}
             <div className="space-y-3">
-                {announcements.length === 0 ? (
+                {displayAnnouncements.length === 0 ? (
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
                         <Megaphone className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-                        <p className="text-gray-500 font-medium">Aucune annonce publiée</p>
+                        <p className="text-gray-500 font-medium">{isParent ? "Aucune annonce" : "Aucune annonce publiée"}</p>
                         <p className="text-xs text-gray-400 mt-1">
-                            Créez votre première annonce pour informer les parents
+                            {isParent ? "Vous n'avez aucune nouvelle annonce de l'école." : "Créez votre première annonce pour informer les parents"}
                         </p>
                     </div>
                 ) : (
-                    announcements.map(a => {
+                    displayAnnouncements.map(a => {
                         const imp = IMPORTANCE_LABELS[a.importance];
                         const stats = getReadStats(a.id);
                         const nonLus = stats.total - stats.lus;
+                        const isReadByMe = isParent && announcementReads.some(r => r.announcementId === a.id && r.parentId === user?.id && r.readAt);
+
                         return (
                             <div key={a.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-all">
                                 <div className="flex items-start justify-between gap-3">
@@ -236,27 +263,41 @@ export const Annonces: React.FC = () => {
                                         <p className="text-xs text-gray-600 leading-relaxed line-clamp-3">{a.message}</p>
 
                                         {/* Stats lecture */}
-                                        <div className="flex items-center gap-4 mt-3">
-                                            <div className="flex items-center gap-1.5 text-xs text-emerald-600">
-                                                <Eye className="w-3.5 h-3.5" />
-                                                <span className="font-bold">{stats.lus}</span>
-                                                <span className="text-gray-400">parent{stats.lus > 1 ? 's' : ''} informé{stats.lus > 1 ? 's' : ''}</span>
-                                            </div>
-                                            {nonLus > 0 && (
-                                                <div className="flex items-center gap-1.5 text-xs text-amber-600">
-                                                    <EyeOff className="w-3.5 h-3.5" />
-                                                    <span className="font-bold">{nonLus}</span>
-                                                    <span className="text-gray-400">non lu{nonLus > 1 ? 's' : ''}</span>
+                                        {!isParent ? (
+                                            <div className="flex items-center gap-4 mt-3">
+                                                <div className="flex items-center gap-1.5 text-xs text-emerald-600">
+                                                    <Eye className="w-3.5 h-3.5" />
+                                                    <span className="font-bold">{stats.lus}</span>
+                                                    <span className="text-gray-400">parent{stats.lus > 1 ? 's' : ''} informé{stats.lus > 1 ? 's' : ''}</span>
                                                 </div>
-                                            )}
-                                        </div>
+                                                {nonLus > 0 && (
+                                                    <div className="flex items-center gap-1.5 text-xs text-amber-600">
+                                                        <EyeOff className="w-3.5 h-3.5" />
+                                                        <span className="font-bold">{nonLus}</span>
+                                                        <span className="text-gray-400">non lu{nonLus > 1 ? 's' : ''}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-1.5 mt-3 text-xs text-gray-500">
+                                                {isReadByMe ? (
+                                                    <span className="flex items-center gap-1 text-emerald-600 font-medium">
+                                                        <CheckCircle className="w-3.5 h-3.5" /> Lu
+                                                    </span>
+                                                ) : (
+                                                    <span className="flex items-center gap-1 text-amber-600 font-medium">
+                                                        <Clock className="w-3.5 h-3.5" /> Non lu
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Actions */}
                                     <button
-                                        onClick={() => handleDelete(a.id, a.titre)}
+                                        onClick={() => isParent ? hideForParent(a.id, a.titre) : handleDelete(a.id, a.titre)}
                                         className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shrink-0"
-                                        title="Supprimer"
+                                        title={isParent ? "Retirer de la liste" : "Supprimer"}
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>

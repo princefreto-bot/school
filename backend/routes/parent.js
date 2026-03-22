@@ -8,12 +8,14 @@ const {
     getActiveParentsCount,
     getAllParents,
     getParentById,
-    adminDeleteAccount
+    adminDeleteAccount,
+    getParentData
 } = require('../controllers/parentController');
 
 // Routes protégées
 router.use(authenticateToken);
 
+router.get('/data', getParentData);  // Sync temps réel pour parent
 router.get('/dashboard', getDashboard);
 router.get('/payments/:studentId', getPayments);
 router.get('/presences/:studentId', getPresences);

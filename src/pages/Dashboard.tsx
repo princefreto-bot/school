@@ -17,6 +17,7 @@ import {
   computeSanteFinanciere
 } from '../services/analyticsService';
 import { generateRapportMensuelPDF } from '@/utils/reportGenerator';
+import { DashboardSkeleton } from '../components/SkeletonLoaders';
 
 const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n);
 const PIE_COLORS = ['#eab308', '#16a34a', '#ea580c'];
@@ -193,13 +194,7 @@ export const Dashboard: React.FC = () => {
   }, [students]);
 
   if (isSyncing && students.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <h2 className="text-lg font-bold text-gray-800 mb-1">Synchronisation Cloud...</h2>
-        <p className="text-gray-500 text-sm">Récupération de vos données depuis le serveur sécurisé.</p>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (students.length === 0) {
