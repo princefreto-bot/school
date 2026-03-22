@@ -31,6 +31,17 @@ export const chatApi = {
         return data;
     },
 
+    initiateConversation: async (parentId?: string, adminRole?: string) => {
+        const res = await fetch(`${API_URL}/initiate`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ parentId, adminRole })
+        });
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
+    },
+
     sendMessage: async (data: { conversationId?: string; text?: string; imageUrl?: string; targetRole?: string; parentId?: string }) => {
         const res = await fetch(`${API_URL}/send`, {
             method: 'POST',

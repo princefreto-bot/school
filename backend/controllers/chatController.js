@@ -190,4 +190,58 @@ async function uploadImage(req, res) {
     }
 }
 
-module.exports = { getConversations, getMessages, sendMessage, uploadImage, getUnreadCount };
+async function initiateConversation(req, res) {
+    const { id, role, schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+
+    let { parentId, adminRole } = req.body;
+
+    try {
+        if (role === 'parent') {
+            parentId = id;
+            if (!adminRole) adminRole = 'administration';
+        } else {
+            if (!parentId) return res.status(400).json({ error: "parentId est requis." });
+            if (!adminRole) adminRole = (role === 'comptable' ? 'comptabilite' : 'administration');
+            
+            const allowedRoles = ['admin', 'directeur', 'directeur_general', 'comptable'];
+            if (!allowedRoles.includes(role)) {
+                return res.status(403).json({ error: "Action restreinte." });
+            }
+        }
+
+        // Check if existing
+        const { data: existing, error: existErr } = await supabase
+            .from(`conversations_${schoolSlug}`)
+            .select(`*, parent:parent_id (id, nom, telephone)`)
+            .eq('parent_id', parentId)
+            .eq('admin_role', adminRole)
+            .maybeSingle();
+
+        if (existErr) {
+            throw existErr;
+        }
+
+        if (existing) {
+            return res.json(existing);
+        }
+
+        // Create new
+        const { data: inserted, error: insErr } = await supabase
+            .from(`conversations_${schoolSlug}`)
+            .insert({
+                parent_id: parentId,
+                admin_role: adminRole,
+                last_message: 'Nouvelle discussion'
+            })
+            .select(`*, parent:parent_id (id, nom, telephone)`)
+            .single();
+
+        if (insErr) throw insErr;
+        return res.json(inserted);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+module.exports = { getConversations, getMessages, sendMessage, uploadImage, getUnreadCount, initiateConversation };

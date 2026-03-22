@@ -30,7 +30,6 @@ export const ChatWindow: React.FC = () => {
     const user = useStore((s) => s.user);
     const chatRecipientId = useStore((s) => s.chatRecipientId);
     const setChatRecipientId = useStore((s) => s.setChatRecipientId);
-    const parents = useStore((s) => s.parents);
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [activeConv, setActiveConv] = useState<Conversation | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -65,27 +64,27 @@ export const ChatWindow: React.FC = () => {
     const loadConversations = async () => {
         try {
             const data = await chatApi.getConversations();
-            setConversations(data);
 
             // Gérer le cas où un admin clique sur "Contacter" depuis la liste des parents
             if (chatRecipientId) {
                 const existing = data.find((c: any) => c.parent_id === chatRecipientId);
                 if (existing) {
                     setActiveConv(existing);
+                    setConversations(data);
                 } else {
-                    // Créer une discussion virtuelle pour initiation
-                    const parentData = parents.find(p => p.id === chatRecipientId);
-                    setActiveConv({
-                        id: '', // Nouveau
-                        parent_id: chatRecipientId,
-                        admin_role: user?.role === 'comptable' ? 'comptabilite' : 'administration',
-                        last_message: '',
-                        updated_at: new Date().toISOString(),
-                        parent: parentData ? { nom: parentData.nom, telephone: parentData.telephone } : undefined
-                    } as any);
+                    try {
+                        const realConv = await chatApi.initiateConversation(chatRecipientId);
+                        setActiveConv(realConv as any);
+                        setConversations([realConv as any, ...data]);
+                    } catch (initErr) {
+                        console.error("Erreur initiation: ", initErr);
+                        setConversations(data);
+                    }
                 }
                 // Nettoyer après usage
                 setChatRecipientId(null);
+            } else {
+                setConversations(data);
             }
         } catch (err) {
             console.error(err);
@@ -150,16 +149,18 @@ export const ChatWindow: React.FC = () => {
         }
     };
 
-    const startNewConv = (role: 'administration' | 'comptabilite') => {
-        // Simuler une conversation vide
-        setActiveConv({
-            id: '',
-            parent_id: user?.id || '',
-            admin_role: role,
-            last_message: '',
-            updated_at: new Date().toISOString()
-        } as any);
-        setMessages([]);
+    const startNewConv = async (role: 'administration' | 'comptabilite') => {
+        try {
+            const realConv = await chatApi.initiateConversation(undefined, role);
+            setActiveConv(realConv as any);
+            setConversations(prev => {
+                const filtered = prev.filter(c => c.id !== realConv.id);
+                return [realConv as any, ...filtered];
+            });
+            setMessages([]);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const handleCall = (phone: string) => {

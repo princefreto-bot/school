@@ -6,42 +6,7 @@ import {
   Palette, Type, FileText, Database,
   AlertCircle, Clock
 } from 'lucide-react';
-
-// ── Composant accordéon pour le guide développeur ───────────
-const GuideSection: React.FC<{
-  icon: React.ReactNode;
-  title: string;
-  color: string;
-  children: React.ReactNode;
-}> = ({ icon, title, color, children }) => {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden">
-      <button
-        onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between px-4 py-3 text-left font-medium text-sm ${color} transition-colors`}
-      >
-        <span className="flex items-center gap-2">{icon}{title}</span>
-        {open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-      </button>
-      {open && (
-        <div className="px-4 py-4 bg-white text-sm text-gray-700 space-y-3 border-t border-gray-100">
-          {children}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ── Bloc de code affiché dans le guide ───────────────────────
-const CodeBlock: React.FC<{ code: string; comment?: string }> = ({ code, comment }) => (
-  <div className="mt-2">
-    {comment && <p className="text-xs text-gray-500 mb-1 italic">{comment}</p>}
-    <pre className="bg-slate-900 text-green-400 text-xs rounded-lg p-3 overflow-x-auto font-mono leading-relaxed">
-      {code}
-    </pre>
-  </div>
-);
+import { GestionPersonnel } from '../components/GestionPersonnel';
 
 // ── PAGE PRINCIPALE ──────────────────────────────────────────
 export const Parametres: React.FC = () => {
@@ -185,6 +150,11 @@ export const Parametres: React.FC = () => {
 
   return (
     <div className="max-w-3xl space-y-6">
+
+      {/* ── GESTION DU PERSONNEL ────────────────────────────── */}
+      {(user?.role === 'directeur' || user?.role === 'directeur_general') && (
+        <GestionPersonnel />
+      )}
 
       {/* ── IDENTITÉ DE L'APPLICATION ─────────────────────── */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -458,167 +428,6 @@ export const Parametres: React.FC = () => {
         </div>
       )}
 
-      {/* ── GUIDE DE PERSONNALISATION DU CODE ─────────────── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-2">
-          <Code2 className="w-4 h-4 text-purple-600" />
-          Guide de personnalisation du code
-        </h3>
-        <p className="text-xs text-gray-500 mb-4">
-          Cliquez sur chaque section pour voir comment modifier le code source directement.
-        </p>
-
-        <div className="space-y-3">
-
-          {/* Couleurs */}
-          <GuideSection
-            icon={<Palette className="w-4 h-4" />}
-            title="Changer les couleurs de l'interface"
-            color="bg-purple-50 text-purple-800 hover:bg-purple-100"
-          >
-            <p>Les couleurs principales sont définies via les classes Tailwind CSS dans chaque composant.</p>
-            <p className="font-medium text-gray-800">Couleur principale (bleu → vert par exemple) :</p>
-            <CodeBlock
-              comment="Dans src/components/Layout.tsx — changer bg-blue-600 partout"
-              code={`// Remplacer toutes les occurrences de :
-bg-blue-600  →  bg-emerald-600
-text-blue-600  →  text-emerald-600
-focus:ring-blue-500  →  focus:ring-emerald-500
-
-// Chercher/remplacer dans VS Code :
-// Ctrl+Shift+H → "blue-600" → "emerald-600"
-// dans les fichiers src/**/*.tsx`}
-            />
-            <p className="font-medium text-gray-800 mt-2">Couleur de fond de la sidebar :</p>
-            <CodeBlock
-              comment="Dans src/components/Layout.tsx"
-              code={`// Ligne : <aside className="... bg-slate-900 ...">
-// Remplacer bg-slate-900 par :
-bg-gray-900    // gris foncé
-bg-indigo-900  // indigo foncé
-bg-green-900   // vert foncé
-bg-zinc-900    // zinc foncé`}
-            />
-          </GuideSection>
-
-          {/* Typographie */}
-          <GuideSection
-            icon={<Type className="w-4 h-4" />}
-            title="Changer la police de caractères"
-            color="bg-blue-50 text-blue-800 hover:bg-blue-100"
-          >
-            <p>La police <strong>Inter</strong> est chargée depuis Google Fonts dans <code className="bg-gray-100 px-1 rounded">index.html</code>.</p>
-            <CodeBlock
-              comment="Dans index.html — remplacer la police"
-              code={`<!-- Remplacer cette ligne : -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-
-<!-- Par exemple pour Poppins : -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-
-<!-- Puis dans src/components/Layout.tsx, ligne style={{...}} : -->
-style={{ fontFamily: 'Poppins, sans-serif' }}`}
-            />
-          </GuideSection>
-
-          {/* Nom et titre */}
-          <GuideSection
-            icon={<Type className="w-4 h-4" />}
-            title="Changer le nom de l'onglet du navigateur"
-            color="bg-orange-50 text-orange-800 hover:bg-orange-100"
-          >
-            <p>Le titre de l'onglet du navigateur est défini dans <code className="bg-gray-100 px-1 rounded">index.html</code>.</p>
-            <CodeBlock
-              comment="Dans index.html"
-              code={`<!-- Ligne 7 environ : -->
-<title>EduFinance — Gestion Financière Scolaire</title>
-
-<!-- Remplacer par : -->
-<title>MonÉcole — Gestion Financière</title>`}
-            />
-            <p className="text-gray-600 mt-2">
-              Le nom dans la <strong>sidebar</strong> se change directement via le champ «&nbsp;Nom de l'application&nbsp;» ci-dessus — sans toucher au code.
-            </p>
-          </GuideSection>
-
-          {/* Écolages */}
-          <GuideSection
-            icon={<Database className="w-4 h-4" />}
-            title="Modifier les écolages par classe"
-            color="bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-          >
-            <p>Tous les montants d'écolage sont centralisés dans un seul fichier :</p>
-            <CodeBlock
-              comment="Dans src/data/classConfig.ts"
-              code={`export const CLASS_CONFIG: ClassConfig[] = [
-  // Primaire — 50 000 F
-  { nom: 'CP1',    cycle: 'Primaire', ecolage: 50000 },
-  { nom: 'CP2',    cycle: 'Primaire', ecolage: 50000 },
-  // ...
-  // Collège — 60 000 F
-  { nom: '6ème',   cycle: 'Collège',  ecolage: 60000 },
-  // Lycée — 75 000 F
-  { nom: '2nde S', cycle: 'Lycée',    ecolage: 75000 },
-  // ...
-];
-// Modifier uniquement la valeur "ecolage" pour chaque classe`}
-            />
-          </GuideSection>
-
-          {/* PDF */}
-          <GuideSection
-            icon={<FileText className="w-4 h-4" />}
-            title="Modifier la mise en forme des PDF"
-            color="bg-red-50 text-red-800 hover:bg-red-100"
-          >
-            <p>Toute la logique PDF est dans <code className="bg-gray-100 px-1 rounded">src/utils/pdfGenerator.ts</code>.</p>
-            <CodeBlock
-              comment="Changer les couleurs du PDF"
-              code={`// Variables de couleurs en haut du fichier :
-const BLUE  = [26, 86, 219]  as [number,number,number];
-const GREEN = [5, 150, 105]  as [number,number,number];
-const ORANGE= [234, 88, 12]  as [number,number,number];
-// Modifier les valeurs RGB selon vos besoins`}
-            />
-            <CodeBlock
-              comment="Changer les marges / taille de police"
-              code={`// Marges du document
-const MARGIN = 20;   // en mm
-
-// Tailles de police (dans chaque section)
-doc.setFontSize(22);  // titre principal
-doc.setFontSize(9);   // texte normal`}
-            />
-          </GuideSection>
-
-          {/* Comptes utilisateurs */}
-          <GuideSection
-            icon={<Shield className="w-4 h-4" />}
-            title="Changer les mots de passe des comptes"
-            color="bg-slate-50 text-slate-800 hover:bg-slate-100"
-          >
-            <p>Les comptes sont définis dans <code className="bg-gray-100 px-1 rounded">src/store/useStore.ts</code>.</p>
-            <CodeBlock
-              comment="Dans src/store/useStore.ts — tableau USERS"
-              code={`const USERS = [
-  {
-    username: 'admin',
-    password: 'admin123',   // ← changer ici
-    user: { id: '1', username: 'admin', role: 'admin', nom: 'Administrateur' },
-  },
-  {
-    username: 'comptable',
-    password: 'compta123',  // ← changer ici
-    user: { id: '2', username: 'comptable', role: 'comptable', nom: 'Comptable Principal' },
-  },
-];
-// Note : en production, utiliser JWT + bcrypt côté serveur`}
-            />
-          </GuideSection>
-
-        </div>
-      </div>
-
       {/* ── COMPTE UTILISATEUR ────────────────────────────── */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-4">
@@ -643,13 +452,7 @@ doc.setFontSize(9);   // texte normal`}
             </span>
           </div>
         </div>
-        <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
-          <p className="text-xs text-blue-700 font-medium mb-1">Comptes disponibles (démo)</p>
-          <div className="grid grid-cols-2 gap-3 text-xs text-blue-600">
-            <div><strong>Admin :</strong> admin / admin123</div>
-            <div><strong>Comptable :</strong> comptable / compta123</div>
-          </div>
-        </div>
+
       </div>
 
       {/* ── MAINTENANCE DES DONNÉES CLOUD ──────────────────── */}
@@ -697,8 +500,7 @@ doc.setFontSize(9);   // texte normal`}
         </h3>
         <div className="space-y-2 text-sm text-gray-600">
           <p><strong className="text-gray-800">{appName} v1.0</strong> — Gestion financière scolaire</p>
-          <p>Développé avec React, TypeScript, TailwindCSS, Recharts, jsPDF.</p>
-          <p>Données stockées de manière sécurisée sur le Cloud (Supabase).</p>
+          <p className="font-medium text-emerald-600">Developed by Nomade Corporation</p>
         </div>
       </div>
 
