@@ -279,7 +279,7 @@ export const useStore = create<AppState>()(
             let targetPage: AppPage = 'dashboard';
             if (loggedUser.role === 'superadmin') targetPage = 'superadmin_dashboard';
             else if (loggedUser.role === 'parent') targetPage = 'parent_dashboard';
-            else if (loggedUser.role === 'superviseur') targetPage = 'scan_presence';
+            else if (loggedUser.role === 'superviseur' || loggedUser.role === 'surveillant') targetPage = 'scan_presence';
 
             // Si l'école est en période d'essai, stocker la date de fin
             if (result.user.trial_ends_at) {
@@ -367,7 +367,7 @@ export const useStore = create<AppState>()(
             set({ currentPage: 'parent_dashboard' });
             return;
           }
-        } else if (u?.role === 'superviseur') {
+        } else if (u?.role === 'superviseur' || u?.role === 'surveillant') {
           const allowed: AppPage[] = ['scan_presence', 'scan_sortie', 'carte_scolaire'];
           if (!allowed.includes(page)) {
             set({ currentPage: 'scan_presence' });

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { parseResponse, getAuthHeaders } from '../services/apiHelpers';
 import { useStore } from '../store/useStore';
 import { AppPage } from '../types';
-import { getFilteredNavItems } from '../utils/rolePermissions';
+import { getFilteredNavItems, isAdminRole } from '../utils/rolePermissions';
 import {
   GraduationCap, LayoutDashboard, Users, CreditCard,
   BarChart3, FileText, Settings, LogOut, Menu, X,
@@ -128,7 +128,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
     />
 
     {/* Section Parents Connectés (pour Admin) */}
-    {userRole !== 'parent' && userRole !== 'superadmin' && (
+    {isAdminRole(userRole) && (
       <div className="px-5 py-4 border-t border-slate-100">
         <div className="flex items-center justify-between mb-2">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live</p>
@@ -400,7 +400,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
         {/* Bottom Navigation for Mobile (Native App Style) */}
         <nav className={`lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-200 dark:border-slate-800 flex items-center justify-around px-2 z-40 safe-area-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.05)] ${sidebarOpen ? 'hidden' : 'flex'}`}>
-          {(user?.role === 'superviseur' ? [
+          {(user?.role === 'superviseur' || user?.role === 'surveillant' ? [
             { id: 'scan_presence', label: 'Entrée', icon: <ScanLine className="w-5 h-5" /> },
             { id: 'scan_sortie', label: 'Sortie', icon: <ScanLine className="w-5 h-5" /> },
             { id: 'carte_scolaire', label: 'Cartes', icon: <IdCard className="w-5 h-5" /> },

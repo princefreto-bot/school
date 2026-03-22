@@ -8,7 +8,7 @@ export const GestionPersonnel = () => {
   const [nom, setNom] = useState('');
   const [telephone, setTelephone] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('surveillant'); // Par défaut surveillant
+  const [role, setRole] = useState('superviseur'); // Par défaut surveillant
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -65,7 +65,7 @@ export const GestionPersonnel = () => {
     switch (r) {
       case 'admin': return 'Administrateur (Complet)';
       case 'censeur': return 'Censeur';
-      case 'surveillant': return 'Surveillant (Gardien - Scan)';
+      case 'superviseur': return 'Surveillant (Gardien - Scan)';
       case 'comptable': return 'Comptable';
       default: return r;
     }
@@ -105,7 +105,7 @@ export const GestionPersonnel = () => {
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">Rôle d'accès</label>
             <select value={role} onChange={e => setRole(e.target.value)} className="w-full text-sm border-gray-200 rounded-lg focus:ring-indigo-500 bg-white">
-              <option value="surveillant">Surveillant (Scans de cartes uniquement)</option>
+              <option value="superviseur">Surveillant (Scans de cartes uniquement)</option>
               <option value="censeur">Censeur (Outils académiques)</option>
               <option value="comptable">Comptable (Finances)</option>
               <option value="admin">Administrateur (Gestion globale)</option>

@@ -3,7 +3,7 @@
 // ============================================================
 import { AppPage } from '../types';
 
-type Role = 'superadmin' | 'admin' | 'directeur' | 'directeur_general' | 'proviseur' | 'censeur' | 'superviseur' | 'comptable' | 'parent';
+type Role = 'superadmin' | 'admin' | 'directeur' | 'directeur_general' | 'proviseur' | 'censeur' | 'superviseur' | 'surveillant' | 'comptable' | 'parent';
 
 // Pages accessibles par rôle
 const ROLE_PAGES: Record<Role, AppPage[]> = {
@@ -34,6 +34,9 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'recouvrement', 'verification_recu', 'import_export', 'chat'
     ],
     superviseur: [
+        'scan_presence', 'scan_sortie', 'carte_scolaire'
+    ],
+    surveillant: [
         'scan_presence', 'scan_sortie', 'carte_scolaire'
     ],
     proviseur: [
@@ -87,6 +90,9 @@ const ROLE_ACTIONS: Record<Role, ActionType[]> = {
         'modifier_eleve', 'importer_donnees'
     ],
     superviseur: [
+        'scan_presence', 'generer_carte'
+    ],
+    surveillant: [
         'scan_presence', 'generer_carte'
     ],
     proviseur: [
