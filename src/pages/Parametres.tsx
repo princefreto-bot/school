@@ -4,7 +4,7 @@ import {
   Save, School, MessageSquare, Shield, Info,
   Upload, X, Image, Code2, ChevronDown, ChevronRight,
   Palette, Type, FileText, Database,
-  AlertCircle, Clock
+  AlertCircle, Clock, Plus, Calendar, Trash2
 } from 'lucide-react';
 import { GestionPersonnel } from '../components/GestionPersonnel';
 
@@ -41,6 +41,12 @@ export const Parametres: React.FC = () => {
   const setCycleSchedules = useStore((s) => s.setCycleSchedules);
   const [localSchedules, setLocalSchedules] = useState(cycleSchedules);
   const [scheduleSaved, setScheduleSaved] = useState(false);
+
+  // Tranches
+  const tranches = useStore((s) => s.tranches);
+  const setTranches = useStore((s) => s.setTranches);
+  const [localTranches, setLocalTranches] = useState(tranches || []);
+  const [tranchesSaved, setTranchesSaved] = useState(false);
 
   // ── Gestion upload logo PNG ────────────────────────────────
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -424,6 +430,112 @@ export const Parametres: React.FC = () => {
           >
             <Save className="w-4 h-4" />
             {scheduleSaved ? '✓ Horaires enregistrés !' : 'Enregistrer les horaires'}
+          </button>
+        </div>
+      )}
+
+      {/* ── TRANCHES DE PAIEMENT ────────────────────────────── */}
+      {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h3 className="font-semibold text-gray-800 flex items-center justify-between gap-2 mb-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-indigo-600" />
+              Paramétrage des Tranches de Paiement
+            </div>
+            <button
+              onClick={() => {
+                const updated = [...localTranches, { id: crypto.randomUUID?.() || Date.now().toString(), nom: `Tranche ${localTranches.length + 1}`, dateLimite: '', pourcentage: 0 }];
+                setLocalTranches(updated);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-bold transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Ajouter
+            </button>
+          </h3>
+          <p className="text-xs text-gray-500 mb-4">
+            Définissez les différentes tranches de paiement, leur date limite et le pourcentage de l'écolage associé. Cela permet de mieux déduire le statut des paiements et le nombre de jours de retard dans la section Recouvrement.
+          </p>
+          
+          <div className="space-y-3 mb-4">
+            {localTranches.length === 0 ? (
+              <div className="text-center py-6 bg-gray-50 rounded-xl text-gray-400 text-sm border border-dashed border-gray-200">
+                Aucune tranche paramétrée
+              </div>
+            ) : (
+              localTranches.map((t, idx) => (
+                <div key={t.id} className="flex flex-col sm:flex-row items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                  <input
+                    type="text"
+                    value={t.nom}
+                    onChange={(e) => {
+                      const updated = [...localTranches];
+                      updated[idx].nom = e.target.value;
+                      setLocalTranches(updated);
+                    }}
+                    placeholder="Nom (ex: Tranche 1)"
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none w-full"
+                  />
+                  <input
+                    type="date"
+                    value={t.dateLimite}
+                    onChange={(e) => {
+                      const updated = [...localTranches];
+                      updated[idx].dateLimite = e.target.value;
+                      setLocalTranches(updated);
+                    }}
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none w-full sm:w-auto"
+                  />
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={t.pourcentage}
+                      onChange={(e) => {
+                        const updated = [...localTranches];
+                        updated[idx].pourcentage = Number(e.target.value);
+                        setLocalTranches(updated);
+                      }}
+                      placeholder="%"
+                      className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center"
+                    />
+                    <span className="text-sm text-gray-500 font-bold">%</span>
+                    <button
+                      onClick={() => {
+                        const updated = localTranches.filter((_, i) => i !== idx);
+                        setLocalTranches(updated);
+                      }}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors ml-auto sm:ml-2"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+            {localTranches.length > 0 && (
+              <div className="flex justify-end pr-14 text-xs font-bold mt-2">
+                Total: <span className={`ml-1 ${localTranches.reduce((sum, t) => sum + (t.pourcentage || 0), 0) === 100 ? 'text-emerald-600' : 'text-orange-500'}`}>{localTranches.reduce((sum, t) => sum + (t.pourcentage || 0), 0)}%</span>
+              </div>
+            )}
+          </div>
+          
+          <button
+            onClick={() => {
+              setTranches(localTranches);
+              updateAllSettings({ tranches: localTranches });
+              setTranchesSaved(true);
+              setTimeout(() => setTranchesSaved(false), 3000);
+            }}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all ${tranchesSaved
+              ? 'bg-emerald-500 text-white'
+              : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              }`}
+          >
+            <Save className="w-4 h-4" />
+            {tranchesSaved ? '✓ Tranches enregistrées !' : 'Enregistrer les tranches'}
           </button>
         </div>
       )}

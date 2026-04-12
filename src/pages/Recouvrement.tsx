@@ -14,13 +14,14 @@ const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n) + ' FCF
 
 export const Recouvrement: React.FC = () => {
     const students = useStore(s => s.students);
+    const tranches = useStore(s => s.tranches);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterClass, setFilterClass] = useState('');
     const [filterCycle, setFilterCycle] = useState('');
 
     // 1. Calcul des données
     const classComp = useMemo(() => computeClassComparison(students), [students]);
-    const basePriorityList = useMemo(() => computePriorityList(students, classComp), [students, classComp]);
+    const basePriorityList = useMemo(() => computePriorityList(students, classComp, tranches), [students, classComp, tranches]);
 
     // 2. Filtrage
     const priorityList = useMemo(() => {
@@ -205,6 +206,9 @@ export const Recouvrement: React.FC = () => {
                                                 <span className={`px-2 py-1 rounded-full text-xs font-bold ${urgent ? 'bg-red-50 text-red-600' : moyen ? 'bg-amber-50 text-amber-600' : 'bg-gray-100 text-gray-600'}`}>
                                                     {s.joursRetard}
                                                 </span>
+                                                {s.trancheInfo && (
+                                                    <p className="text-[10px] text-red-500 mt-1">{s.trancheInfo}</p>
+                                                )}
                                             </td>
                                             <td className="p-4 text-right font-bold text-red-600">
                                                 {fmtMoney(s.restant)}

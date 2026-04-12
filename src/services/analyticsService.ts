@@ -335,24 +335,58 @@ export function computeSanteFinanciere(students: Student[]): SanteFinanciere {
 
 export interface PriorityStudent extends Student {
   scorePriorite: number;
-  joursRetard: number; // basé arbitrairement sur l'inscription
+  joursRetard: number; // basé arbitrairement sur l'inscription ou la tranche
   niveauPriorite: 'Élevé' | 'Moyen' | 'Faible';
+  trancheInfo?: string;
 }
 
 /**
  * Calcule la liste prioritaire de recouvrement.
+ * Si des tranches sont configurées, le retard en jours est calculé par rapport 
+ * à la date limite de la tranche impayée.
  */
-export function computePriorityList(students: Student[], classComparaisons: ClassFinanceRow[]): PriorityStudent[] {
+export function computePriorityList(students: Student[], classComparaisons: ClassFinanceRow[], tranches: any[] = []): PriorityStudent[] {
   const nonSoldes = students.filter(s => s.status !== 'Soldé');
   const now = new Date();
+
+  // Trier les tranches par dateLimite
+  const sortedTranches = [...tranches].filter(t => t.dateLimite).sort((a, b) => new Date(a.dateLimite).getTime() - new Date(b.dateLimite).getTime());
 
   const maxRestant = Math.max(...nonSoldes.map(s => s.restant), 1); // evite division par zero
 
   return nonSoldes.map(s => {
-    // Retard calculé
-    const regDate = new Date(s.createdAt);
-    const diffTime = Math.abs(now.getTime() - regDate.getTime());
-    const joursRetard = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    let joursRetard = 0;
+    let trancheRetardText = '';
+
+    if (sortedTranches.length > 0) {
+      // Déterminer combien l'élève a payé en %
+      const pctPaye = s.ecolage > 0 ? (s.dejaPaye / s.ecolage) * 100 : 0;
+      let cumPct = 0;
+      
+      // Chercher la première tranche non satisfaite
+      for (const t of sortedTranches) {
+        cumPct += Number(t.pourcentage || 0);
+        if (pctPaye < cumPct) {
+          // Cette tranche n'est pas complètement payée !
+          const limite = new Date(t.dateLimite);
+          
+          if (now > limite) {
+             const diffTime = now.getTime() - limite.getTime();
+             joursRetard = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+             trancheRetardText = `Retard (${t.nom})`;
+          } else {
+             // La date limite de la tranche en cours n'est pas encore dépassée
+             joursRetard = 0;
+          }
+          break; // on s'arrête à la première tranche non validée
+        }
+      }
+    } else {
+      // Retard calculé basé sur l'inscription
+      const regDate = new Date(s.createdAt);
+      const diffTime = Math.abs(now.getTime() - regDate.getTime());
+      joursRetard = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
 
     // Info classe
     const cStats = classComparaisons.find(c => c.classe === s.classe);
@@ -379,7 +413,8 @@ export function computePriorityList(students: Student[], classComparaisons: Clas
       ...s,
       scorePriorite,
       joursRetard,
-      niveauPriorite
+      niveauPriorite,
+      trancheInfo: trancheRetardText
     };
   }).sort((a, b) => b.scorePriorite - a.scorePriorite);
 }

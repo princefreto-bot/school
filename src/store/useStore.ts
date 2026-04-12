@@ -17,6 +17,8 @@ export interface AppState {
   setSchoolLogo: (logo: string | null) => void;
   schoolStamp: string | null;       // Sceau de l'école
   setSchoolStamp: (stamp: string | null) => void;
+  tranches: any[];
+  setTranches: (tranches: any[]) => void;
 
   // Auth
   user: User | null;
@@ -75,7 +77,8 @@ export interface AppState {
     schoolLogo?: string | null,
     schoolStamp?: string | null,
     messageRemerciement?: string,
-    messageRappel?: string
+    messageRappel?: string,
+    tranches?: any[]
   }) => Promise<void>;
   settings: AppSettings;
   updateSettings: (settings: AppSettings) => void;
@@ -213,6 +216,13 @@ export const useStore = create<AppState>()(
       setSchoolLogo: (logo) => set({ schoolLogo: logo }),
       schoolStamp: null,
       setSchoolStamp: (stamp) => set({ schoolStamp: stamp }),
+      tranches: [],
+      setTranches: (tranches) => {
+        set({ tranches });
+        import('../services/backendSync').then(({ syncToBackend }) => {
+          syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
+        });
+      },
 
       // ── Thème ──────────────────────────────────────────
       theme: 'light',
@@ -553,7 +563,8 @@ export const useStore = create<AppState>()(
         telephone: '+229 XX XX XX XX',
         email: 'contact@ecole.ci',
         badgeParentResponsable: 'Parent Responsable',
-        badge2emeTranche: '2ème Tranche Validée'
+        badge2emeTranche: '2ème Tranche Validée',
+        tranches: []
       },
       updateSettings: (newSettings) => set({ settings: newSettings }),
 
@@ -816,6 +827,7 @@ export const useStore = create<AppState>()(
                   messageRemerciement: data.appSettings.messageRemerciement,
                   messageRappel: data.appSettings.messageRappel,
                   ...(data.appSettings.cycleSchedules ? { cycleSchedules: data.appSettings.cycleSchedules } : {}),
+                  ...(data.appSettings.tranches ? { tranches: data.appSettings.tranches } : {}),
                 });
               }
               // Annonces et reads venant du cloud
@@ -950,7 +962,8 @@ export const useStore = create<AppState>()(
                 schoolName: data.schoolName || get().schoolName,
                 schoolYear: data.schoolYear || get().schoolYear,
                 schoolLogo: data.schoolLogo !== undefined ? data.schoolLogo : get().schoolLogo,
-                schoolStamp: data.schoolStamp !== undefined ? data.schoolStamp : get().schoolStamp
+                schoolStamp: data.schoolStamp !== undefined ? data.schoolStamp : get().schoolStamp,
+                tranches: data.tranches || get().tranches
               });
               console.log('✅ [Settings] App state updated with cloud settings.');
             }
@@ -1079,6 +1092,7 @@ export const useStore = create<AppState>()(
         activityLogs: (state.activityLogs || []).slice(0, 500),
         receiptCounter: state.receiptCounter || 0,
         cycleSchedules: state.cycleSchedules || [],
+        tranches: state.tranches || [],
         announcements: state.announcements || [],
         announcementReads: state.announcementReads || [],
         currentPeriode: state.currentPeriode || 'TRIMESTRE 1',

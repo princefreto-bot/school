@@ -78,6 +78,13 @@ export interface AdminSettings {
   messageRappel: string;
 }
 
+export interface Tranche {
+  id: string;
+  nom: string;
+  dateLimite: string; // YYYY-MM-DD
+  pourcentage: number; // 0 à 100
+}
+
 export interface AppSettings {
   seuilDeuxiemeTranche: number;
   schoolName: string;
@@ -92,6 +99,7 @@ export interface AppSettings {
   email: string;
   badgeParentResponsable: string;
   badge2emeTranche: string;
+  tranches?: Tranche[];
 }
 
 export interface DashboardStats {

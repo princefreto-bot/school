@@ -134,6 +134,7 @@ async function syncFromFrontend(req, res) {
                     school_stamp: appSettings.schoolStamp,
                     message_remerciement: appSettings.messageRemerciement,
                     message_rappel: appSettings.messageRappel,
+                    tranches: appSettings.tranches || [],
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'id' });
             } catch (settingsErr) {}
@@ -285,7 +286,8 @@ async function syncToFrontend(req, res) {
                 schoolLogo: appSettings.school_logo,
                 schoolStamp: appSettings.school_stamp,
                 messageRemerciement: appSettings.message_remerciement,
-                messageRappel: appSettings.message_rappel
+                messageRappel: appSettings.message_rappel,
+                tranches: appSettings.tranches || []
             } : null,
             announcements: (announcements || []).map(a => ({
                 id: a.id,
