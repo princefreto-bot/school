@@ -121,12 +121,19 @@ export const SaisieNotes: React.FC = () => {
             // 2. Synchroniser vers le cloud (une seule fois, après toutes les notes)
             setSaveStatus('💾 Sauvegarde en cours...');
             try {
+                const allNotes = useStore.getState().notes;
+                console.log(`📤 [Notes] Envoi de ${allNotes.length} notes vers le cloud...`);
                 const { syncToBackend } = await import('../services/backendSync');
-                await syncToBackend({ notes: useStore.getState().notes });
+                const result = await syncToBackend({ notes: allNotes });
                 // Mettre à jour le timestamp pour bloquer le polling pendant 55s
                 useStore.setState({ lastSyncTimestamp: Date.now() });
-                setSaveStatus('✅ Notes enregistrées et synchronisées !');
-                console.log('✅ [Notes] Sync cloud réussie');
+                if (result) {
+                    setSaveStatus('✅ Notes enregistrées et synchronisées !');
+                    console.log('✅ [Notes] Sync cloud réussie, résultat:', result);
+                } else {
+                    setSaveStatus('⚠️ Sauvé localement, le serveur n\'a pas répondu');
+                    console.warn('⚠️ [Notes] syncToBackend a retourné null');
+                }
             } catch (err) {
                 console.error('❌ [Notes] Erreur sync cloud:', err);
                 setSaveStatus('⚠️ Sauvé localement, sync cloud en attente');

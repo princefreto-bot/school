@@ -161,17 +161,26 @@ async function syncFromFrontend(req, res) {
         }
 
         // --- 6. Sync Academic Data ---
-        try {
-            if (matieres.length > 0) {
+        if (matieres && matieres.length > 0) {
+            try {
                 const matieresData = matieres.map(m => ({
                     id: m.id,
                     nom: m.nom,
                     categorie: m.categorie
                 }));
-                await supabase.from(tbl('matieres')).upsert(matieresData, { onConflict: 'id' });
+                const { error: matErr } = await supabase.from(tbl('matieres')).upsert(matieresData, { onConflict: 'id' });
+                if (matErr) {
+                    console.error('❌ [Sync POST] Erreur matieres:', matErr.message);
+                } else {
+                    console.log(`✅ [Sync POST] ${matieresData.length} matières sync.`);
+                }
+            } catch (matErr) {
+                console.error('❌ [Sync POST] Exception matieres:', matErr);
             }
+        }
 
-            if (classeMatieres.length > 0) {
+        if (classeMatieres && classeMatieres.length > 0) {
+            try {
                 const cmData = classeMatieres.map(cm => ({
                     id: cm.id,
                     classe: cm.classe,
@@ -179,11 +188,22 @@ async function syncFromFrontend(req, res) {
                     professeur: cm.professeur || '',
                     coefficient: cm.coefficient || 1
                 }));
-                await supabase.from(tbl('classe_matieres')).upsert(cmData, { onConflict: 'id' });
+                const { error: cmErr } = await supabase.from(tbl('classe_matieres')).upsert(cmData, { onConflict: 'id' });
+                if (cmErr) {
+                    console.error('❌ [Sync POST] Erreur classeMatieres:', cmErr.message);
+                } else {
+                    console.log(`✅ [Sync POST] ${cmData.length} classe-matières sync.`);
+                }
+            } catch (cmErr) {
+                console.error('❌ [Sync POST] Exception classeMatieres:', cmErr);
             }
+        }
 
-            if (notes.length > 0) {
+        if (notes && notes.length > 0) {
+            try {
                 const chunkSize = 500;
+                let notesOk = 0;
+                let notesErr = null;
                 for (let i = 0; i < notes.length; i += chunkSize) {
                     const chunk = notes.slice(i, i + chunkSize).map(n => ({
                         id: n.id,
@@ -194,10 +214,23 @@ async function syncFromFrontend(req, res) {
                         note_devoir: n.noteDevoir,
                         note_compo: n.noteCompo
                     }));
-                    await supabase.from(tbl('notes')).upsert(chunk, { onConflict: 'id' });
+                    const { error: chunkErr } = await supabase.from(tbl('notes')).upsert(chunk, { onConflict: 'id' });
+                    if (chunkErr) {
+                        notesErr = chunkErr;
+                        console.error(`❌ [Sync POST] Erreur notes (chunk ${i}-${i+chunk.length}):`, chunkErr.message, chunkErr.details);
+                    } else {
+                        notesOk += chunk.length;
+                    }
                 }
+                if (notesErr) {
+                    console.error(`❌ [Sync POST] ${notesOk}/${notes.length} notes sauvées, erreurs sur le reste.`);
+                } else {
+                    console.log(`✅ [Sync POST] ${notesOk} notes synchronisées avec succès !`);
+                }
+            } catch (notesException) {
+                console.error('❌ [Sync POST] Exception notes:', notesException);
             }
-        } catch (acadErr) {}
+        }
 
         console.log(`🎉 [Sync] Completed: ${students.length} students, etc.`);
         return res.json({ 
