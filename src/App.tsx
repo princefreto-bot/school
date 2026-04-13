@@ -11,6 +11,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+console.log('🔗 [Realtime] Initialisation de Supabase JS:', { url: !!supabaseUrl, key: !!supabaseAnonKey });
 const supabase = (supabaseUrl && supabaseAnonKey) ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 // Lazy loading for pages to reduce initial bundle size
@@ -143,20 +144,32 @@ export function App() {
     // Activer Supabase Realtime si configuré
     let channel: any = null;
     if (supabase && user?.schoolSlug) {
+      console.log('📡 [Realtime] Initialisation de l\'écoute pour le slug:', user.schoolSlug);
       channel = supabase
         .channel(`sync_${user.schoolSlug}`)
         .on(
           'postgres_changes',
           { event: '*', schema: 'public' },
           (payload) => {
+            console.log('🔔 [Realtime] Événement brut reçu de Supabase:', payload);
             // Filtrer uniquement les tables de cette école (ex: app_settings_myschool)
             if (payload.table && payload.table.endsWith(`_${user.schoolSlug}`)) {
-              console.log('⚡ [Realtime] Changement détecté sur', payload.table, '-> Sync immédiate');
+              console.log(`⚡ [Realtime] Changement validé sur la table [${payload.table}] -> Lancement Sync immédiate`);
               fetchAllFromBackend(true);
+            } else {
+               console.log(`⏭️ [Realtime] Ignoré (ne correspond pas à l'école actuelle):`, payload.table);
             }
           }
         )
-        .subscribe();
+        .subscribe((status, err) => {
+          console.log(`📡 [Realtime] Statut d'abonnement: ${status}`);
+          if (err) console.error(`❌ [Realtime] Erreur d'abonnement:`, err);
+        });
+    } else {
+      console.warn('⚠️ [Realtime] Supabase n\'est pas initialisé ou schoolSlug manquant.', {
+        hasSupabase: !!supabase,
+        schoolSlug: user?.schoolSlug
+      });
     }
 
     return () => {
