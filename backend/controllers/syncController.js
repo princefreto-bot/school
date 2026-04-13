@@ -55,7 +55,12 @@ async function syncFromFrontend(req, res) {
                 deja_paye: s.dejaPaye || 0,
                 restant: s.restant || 0,
                 status: s.status || 'Non soldé',
-                telephone_parent: s.telephone || null
+                telephone_parent: s.telephone || null,
+                sexe: s.sexe || 'M',
+                redoublant: s.redoublant || false,
+                ecole_provenance: s.ecoleProvenance || '',
+                date_naissance: s.dateNaissance || null,
+                adsn: s.adsn || null
             }));
 
             for (let i = 0; i < studentData.length; i += CHUNK_SIZE) {
@@ -264,6 +269,11 @@ async function syncToFrontend(req, res) {
                 ...s,
                 dejaPaye: s.deja_paye,
                 telephone: s.telephone_parent,
+                sexe: s.sexe || 'M',
+                redoublant: s.redoublant || false,
+                ecoleProvenance: s.ecole_provenance || '',
+                dateNaissance: s.date_naissance || null,
+                adsn: s.adsn || null,
                 historiquesPaiements: []
             });
         });
