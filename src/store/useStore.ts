@@ -102,7 +102,7 @@ export interface AppState {
   // Synchronisation Cloud
   links: any[];
   setLinks: (links: any[]) => void;
-  fetchAllFromBackend: () => Promise<void>;
+  fetchAllFromBackend: (force?: boolean) => Promise<void>;
   isSyncing: boolean;
   setIsSyncing: (s: boolean) => void;
   lastSyncTimestamp: number;
@@ -761,7 +761,7 @@ export const useStore = create<AppState>()(
       setIsSyncing: (s) => set({ isSyncing: s }),
       lastSyncTimestamp: 0,
       setLastSyncTimestamp: (t) => set({ lastSyncTimestamp: t }),
-      fetchAllFromBackend: async () => {
+      fetchAllFromBackend: async (force = false) => {
         const user = get().user;
         if (!user) return;
 
@@ -769,7 +769,7 @@ export const useStore = create<AppState>()(
         if (user.role === 'parent') {
           // Les parents ont un cooldown de 12s max (poll toutes les 15s)
           const now = Date.now();
-          if (now - get().lastSyncTimestamp < 12000) return;
+          if (!force && now - get().lastSyncTimestamp < 12000) return;
           try {
             const { getAuthHeaders } = await import('../services/apiHelpers');
             const { BACKEND_URL } = await import('../config');
@@ -792,7 +792,7 @@ export const useStore = create<AppState>()(
 
         // Éviter de fetch si on vient de faire une sync (cooldown 55s)
         const now = Date.now();
-        if (now - get().lastSyncTimestamp < 55000) {
+        if (!force && now - get().lastSyncTimestamp < 55000) {
           console.log('⏳ [Sync] Fetch skipped (cooldown active)');
           return;
         }

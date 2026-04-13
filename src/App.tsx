@@ -7,6 +7,11 @@ import { Login } from './components/Login';
 import { Layout } from './components/Layout';
 import { AnnouncementPopup } from './components/AnnouncementPopup';
 import { webPushService } from './services/webPushService';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = (supabaseUrl && supabaseAnonKey) ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 // Lazy loading for pages to reduce initial bundle size
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
@@ -135,7 +140,29 @@ export function App() {
       fetchAllFromBackend();
     }, pollInterval);
 
-    return () => clearInterval(interval);
+    // Activer Supabase Realtime si configuré
+    let channel: any = null;
+    if (supabase && user?.schoolSlug) {
+      channel = supabase
+        .channel(`sync_${user.schoolSlug}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public' },
+          (payload) => {
+            // Filtrer uniquement les tables de cette école (ex: app_settings_myschool)
+            if (payload.table && payload.table.endsWith(`_${user.schoolSlug}`)) {
+              console.log('⚡ [Realtime] Changement détecté sur', payload.table, '-> Sync immédiate');
+              fetchAllFromBackend(true);
+            }
+          }
+        )
+        .subscribe();
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [isAuthenticated, fetchAllFromBackend]);
 
   // ── Écoute des messages du Service Worker (navigation depuis push) ──
