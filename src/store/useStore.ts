@@ -542,7 +542,7 @@ export const useStore = create<AppState>()(
         set(newSettings);
         try {
           const { syncToBackend } = await import('../services/backendSync');
-          const result = await syncToBackend(get());
+          const result = await syncToBackend(newSettings);
           if (result) {
             console.log('✅ [Store] All settings synced successfully!');
           }
