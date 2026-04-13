@@ -155,6 +155,15 @@ export function App() {
             console.log('🔔 [Realtime] Événement brut reçu de Supabase:', payload.table);
             // Filtrer uniquement les tables de cette école (ex: app_settings_myschool)
             if (payload.table && payload.table.endsWith(`_${user.schoolSlug}`)) {
+              
+              // ⛔ IGNORER les événements de la table notes pour éviter d'écraser 
+              // les notes en cours de saisie. Les notes sont synchronisées manuellement
+              // via le bouton "Enregistrer" de la page Saisie Notes.
+              if (payload.table.startsWith('notes_')) {
+                console.log(`📝 [Realtime] Événement notes ignoré (sync manuelle uniquement)`);
+                return;
+              }
+
               console.log(`⚡ [Realtime] Changement validé sur la table [${payload.table}] -> Lancement Sync avec Debounce (1.5s)`);
               
               if (syncTimeout) clearTimeout(syncTimeout);

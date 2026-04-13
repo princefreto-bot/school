@@ -1088,9 +1088,10 @@ export const useStore = create<AppState>()(
           });
           return { notes: currentNotes };
         });
-        import('../services/backendSync').then(({ syncToBackend }) =>
-          syncToBackend({ notes: get().notes }).then(() => set({ lastSyncTimestamp: Date.now() }))
-        );
+        // ⚠️ PAS de sync automatique ici ! 
+        // La sync est déclenchée manuellement depuis SaisieNotes.tsx 
+        // pour éviter les boucles Realtime et la perte de notes pendant la saisie.
+        console.log(`📝 [Notes] ${batch.length} notes sauvegardées localement.`);
       },
       deleteNote: async (id) => {
         set(s => ({

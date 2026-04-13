@@ -80,7 +80,7 @@ export const SaisieNotes: React.FC = () => {
         }));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!selectedMatiereId || !selectedClasse) return;
 
         const currentNotes = useStore.getState().notes;
@@ -114,10 +114,26 @@ export const SaisieNotes: React.FC = () => {
         });
         
         if (batch.length > 0) {
+            // 1. Sauvegarder localement
             useStore.getState().upsertNotes(batch);
+            
+            // 2. Synchroniser vers le cloud (une seule fois, après toutes les notes)
+            setSaveStatus('💾 Sauvegarde en cours...');
+            try {
+                const { syncToBackend } = await import('../services/backendSync');
+                await syncToBackend({ notes: useStore.getState().notes });
+                // Mettre à jour le timestamp pour bloquer le polling pendant 55s
+                useStore.setState({ lastSyncTimestamp: Date.now() });
+                setSaveStatus('✅ Notes enregistrées et synchronisées !');
+                console.log('✅ [Notes] Sync cloud réussie');
+            } catch (err) {
+                console.error('❌ [Notes] Erreur sync cloud:', err);
+                setSaveStatus('⚠️ Sauvé localement, sync cloud en attente');
+            }
+        } else {
+            setSaveStatus('Aucune note à enregistrer');
         }
         
-        setSaveStatus('Notes enregistrées et synchronisées !');
         setTimeout(() => setSaveStatus(null), 3000);
     };
 
