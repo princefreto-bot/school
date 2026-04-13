@@ -231,7 +231,7 @@ export const Eleves: React.FC = () => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+            className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none text-gray-900 dark:text-white dark:placeholder-gray-500"
             placeholder="Rechercher un élève, classe, téléphone..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -242,7 +242,7 @@ export const Eleves: React.FC = () => {
             </button>
           )}
         </div>
-        <button onClick={() => setShowFilters((f) => !f)} className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-medium transition-colors ${showFilters ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
+        <button onClick={() => setShowFilters((f) => !f)} className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-medium transition-colors ${showFilters ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/20 dark:border-amber-500/30 dark:text-amber-400' : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
           <Filter className="w-4 h-4" /> Filtres
         </button>
         {(user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') && (
@@ -253,18 +253,18 @@ export const Eleves: React.FC = () => {
       </div>
 
       {showFilters && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-wrap gap-3">
-          <select className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={filterCycle} onChange={(e) => setFilterCycle(e.target.value)}>
-            <option value="">Tous les cycles</option>
-            <option>Primaire</option><option>Collège</option><option>Lycée</option>
+        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-4 flex flex-wrap gap-3">
+          <select className="bg-transparent text-gray-900 dark:text-white border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={filterCycle} onChange={(e) => setFilterCycle(e.target.value)}>
+            <option value="" className="dark:bg-slate-800 text-gray-900 dark:text-white">Tous les cycles</option>
+            <option className="dark:bg-slate-800 text-gray-900 dark:text-white">Primaire</option><option className="dark:bg-slate-800 text-gray-900 dark:text-white">Collège</option><option className="dark:bg-slate-800 text-gray-900 dark:text-white">Lycée</option>
           </select>
-          <select className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={filterClasse} onChange={(e) => setFilterClasse(e.target.value)}>
-            <option value="">Toutes les classes</option>
-            {classes.map((c) => <option key={c}>{c}</option>)}
+          <select className="bg-transparent text-gray-900 dark:text-white border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={filterClasse} onChange={(e) => setFilterClasse(e.target.value)}>
+            <option value="" className="dark:bg-slate-800 text-gray-900 dark:text-white">Toutes les classes</option>
+            {classes.map((c) => <option key={c} className="dark:bg-slate-800 text-gray-900 dark:text-white">{c}</option>)}
           </select>
-          <select className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-            <option value="">Tous les statuts</option>
-            <option>Soldé</option><option>Partiel</option><option>Non soldé</option>
+          <select className="bg-transparent text-gray-900 dark:text-white border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+            <option value="" className="dark:bg-slate-800 text-gray-900 dark:text-white">Tous les statuts</option>
+            <option className="dark:bg-slate-800 text-gray-900 dark:text-white">Soldé</option><option className="dark:bg-slate-800 text-gray-900 dark:text-white">Partiel</option><option className="dark:bg-slate-800 text-gray-900 dark:text-white">Non soldé</option>
           </select>
           {(filterClasse || filterCycle || filterStatus) && (
             <button onClick={() => { setFilterClasse(''); setFilterCycle(''); setFilterStatus(''); }} className="flex items-center gap-1 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors">
@@ -285,11 +285,11 @@ export const Eleves: React.FC = () => {
         )}
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
+              <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700/50">
                 {[
                   { key: 'nom' as SortKey, label: 'Élève' },
                   { key: 'classe' as SortKey, label: 'Classe' },
@@ -301,7 +301,7 @@ export const Eleves: React.FC = () => {
                 ].map((col) => (
                   <th
                     key={col.label}
-                    className={`px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap ${col.key ? 'cursor-pointer hover:text-gray-900 select-none' : ''}`}
+                    className={`px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap ${col.key ? 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 select-none' : ''}`}
                     onClick={() => col.key && toggleSort(col.key)}
                   >
                     <span className="flex items-center gap-1">
@@ -312,7 +312,7 @@ export const Eleves: React.FC = () => {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-gray-50 dark:divide-slate-800/50">
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-12 text-center text-gray-400">
@@ -321,7 +321,7 @@ export const Eleves: React.FC = () => {
                 </tr>
               ) : (
                 filtered.map((s) => (
-                  <tr key={s.id} className="hover:bg-amber-50/30 transition-colors">
+                  <tr key={s.id} className="hover:bg-amber-50/30 dark:hover:bg-slate-800/80 transition-colors">
                     <td className="px-4 py-3">
                       <p className="font-bold text-gray-950 dark:text-white">{s.prenom} {s.nom}</p>
                       <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">{s.sexe === 'M' ? '♂' : '♀'}{s.redoublant ? ' · Redoublant' : ''}</p>
@@ -330,7 +330,7 @@ export const Eleves: React.FC = () => {
                       <span className="font-bold text-gray-900 dark:text-gray-100">{s.classe}</span>
                       <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">{s.cycle}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-600 font-mono text-xs">{s.telephone}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400 font-mono text-xs">{s.telephone}</td>
                     <td className="px-4 py-3 font-medium text-emerald-700 whitespace-nowrap">{fmtMoney(s.dejaPaye)}</td>
                     <td className="px-4 py-3 font-medium whitespace-nowrap">
                       {s.restant <= 0 ? <span className="text-emerald-600 font-semibold">SOLDÉ</span> : <span className="text-red-600">{fmtMoney(s.restant)}</span>}
@@ -364,7 +364,7 @@ export const Eleves: React.FC = () => {
           </table>
         </div>
         {filtered.length > 0 && (
-          <div className="border-t border-gray-100 px-4 py-3 bg-gray-50 flex flex-wrap gap-4 text-xs text-gray-600">
+          <div className="border-t border-gray-100 dark:border-slate-800 px-4 py-3 bg-gray-50 dark:bg-slate-800/30 flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-400">
             <span>Écolage total : <strong>{new Intl.NumberFormat('fr-FR').format(filtered.reduce((a, s) => a + s.ecolage, 0))} FCFA</strong></span>
             <span>Payé : <strong className="text-emerald-700">{new Intl.NumberFormat('fr-FR').format(filtered.reduce((a, s) => a + s.dejaPaye, 0))} FCFA</strong></span>
             <span>Restant : <strong className="text-red-600">{new Intl.NumberFormat('fr-FR').format(filtered.reduce((a, s) => a + s.restant, 0))} FCFA</strong></span>
