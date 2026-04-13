@@ -950,6 +950,11 @@ export const useStore = create<AppState>()(
         }
       },
       fetchPublicSettings: async () => {
+        // Bloquer l'écrasement des paramètres locaux si l'utilisateur est déjà authentifié (SaaS: chaque école a ses propres données)
+        if (get().isAuthenticated) {
+          return;
+        }
+        
         console.log('🌐 [Settings] Fetching public settings...');
         try {
           const res = await fetch(`${API_BASE_URL}/settings`);
@@ -958,11 +963,12 @@ export const useStore = create<AppState>()(
             console.log('🌐 [Settings] Data received:', data);
             if (data) {
               set({
-                appName: data.appName || get().appName,
-                schoolName: data.schoolName || get().schoolName,
+                // Ne remplacer que si le champ ciblé est réellement pertinent et différent, ou si non existant
+                appName: get().appName && get().appName !== 'EduFinance' ? get().appName : (data.appName || get().appName),
+                schoolName: get().schoolName && get().schoolName !== 'Établissement Scolaire' ? get().schoolName : (data.schoolName || get().schoolName),
                 schoolYear: data.schoolYear || get().schoolYear,
-                schoolLogo: data.schoolLogo !== undefined ? data.schoolLogo : get().schoolLogo,
-                schoolStamp: data.schoolStamp !== undefined ? data.schoolStamp : get().schoolStamp,
+                schoolLogo: data.schoolLogo !== null && data.schoolLogo !== undefined ? data.schoolLogo : get().schoolLogo,
+                schoolStamp: data.schoolStamp !== null && data.schoolStamp !== undefined ? data.schoolStamp : get().schoolStamp,
                 tranches: data.tranches || get().tranches
               });
               console.log('✅ [Settings] App state updated with cloud settings.');
