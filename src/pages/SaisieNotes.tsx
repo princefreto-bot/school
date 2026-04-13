@@ -5,10 +5,11 @@ import { Note, PeriodeType } from '../types';
 import { v4 as uuid } from '../utils/uuid';
 
 export const SaisieNotes: React.FC = () => {
-    const { 
-        currentPeriode, setCurrentPeriode,
-        students, matieres, classeMatieres
-    } = useStore();
+    const currentPeriode = useStore((s) => s.currentPeriode);
+    const setCurrentPeriode = useStore((s) => s.setCurrentPeriode);
+    const students = useStore((s) => s.students);
+    const matieres = useStore((s) => s.matieres);
+    const classeMatieres = useStore((s) => s.classeMatieres);
 
 
     const periods: PeriodeType[] = ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3', 'SEMESTRE 1', 'SEMESTRE 2'];

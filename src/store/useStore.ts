@@ -897,21 +897,36 @@ export const useStore = create<AppState>()(
 
             const localNotes = get().notes;
 
-            if (cloudNotes.length > 0) {
-              const cloudMap = new Map();
-              cloudNotes.forEach((n: Note) => {
-                const key = `${n.eleveId}-${n.matiereId}-${n.periode}`;
-                cloudMap.set(key, n);
-              });
-              const mergedNotes = [...cloudNotes];
+            if (localNotes.length > 0) {
+              // ═══════════════════════════════════════════════════════
+              // 🛡 LOCAL GAGNE TOUJOURS pour les clés en commun.
+              // On ne fait qu'ajouter les notes cloud qui n'existent 
+              // PAS localement (ex: notes saisies depuis un autre ordi).
+              // ═══════════════════════════════════════════════════════
+              const localMap = new Map();
               localNotes.forEach(ln => {
                 const key = `${ln.eleveId}-${ln.matiereId}-${ln.periode}`;
-                if (!cloudMap.has(key)) {
-                  mergedNotes.push(ln);
+                localMap.set(key, ln);
+              });
+              
+              let addedFromCloud = 0;
+              cloudNotes.forEach((cn: Note) => {
+                const key = `${cn.eleveId}-${cn.matiereId}-${cn.periode}`;
+                if (!localMap.has(key)) {
+                  localMap.set(key, cn);
+                  addedFromCloud++;
                 }
               });
-              set({ notes: mergedNotes });
-            } else if (localNotes.length === 0) {
+              
+              if (addedFromCloud > 0) {
+                console.log(`📝 [Sync] Notes: ${addedFromCloud} nouvelles notes ajoutées depuis le cloud, ${localNotes.length} notes locales préservées.`);
+                set({ notes: Array.from(localMap.values()) });
+              } else {
+                console.log(`📝 [Sync] Notes: ${localNotes.length} notes locales préservées (aucune nouvelle note cloud).`);
+              }
+            } else if (cloudNotes.length > 0) {
+              // Premier chargement ou nouvel appareil : on prend tout du cloud
+              console.log(`📝 [Sync] Notes: Chargement initial de ${cloudNotes.length} notes depuis le cloud.`);
               set({ notes: cloudNotes });
             }
           }
