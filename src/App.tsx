@@ -9,8 +9,8 @@ import { AnnouncementPopup } from './components/AnnouncementPopup';
 import { webPushService } from './services/webPushService';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://mbsiocggltzdssfpsqqi.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ic2lvY2dnbHR6ZHNzZnBzcXFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MjcyMjMsImV4cCI6MjA4ODMwMzIyM30.bSIRRsJOhCKTgARqOcRPHYxtWzNAjY65JKKe8JRZUMU';
 console.log('🔗 [Realtime] Initialisation de Supabase JS:', { url: !!supabaseUrl, key: !!supabaseAnonKey });
 const supabase = (supabaseUrl && supabaseAnonKey) ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
