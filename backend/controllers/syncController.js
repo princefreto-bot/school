@@ -124,8 +124,16 @@ async function syncFromFrontend(req, res) {
 
         // --- 5. Sync App Settings ---
         if (appSettings) {
+            console.log('🎨 [Sync POST] Saving appSettings:', {
+                appName: appSettings.appName,
+                schoolName: appSettings.schoolName,
+                hasLogo: !!appSettings.schoolLogo,
+                logoLength: appSettings.schoolLogo?.length || 0,
+                hasStamp: !!appSettings.schoolStamp,
+                stampLength: appSettings.schoolStamp?.length || 0,
+            });
             try {
-                await supabase.from(tbl('app_settings')).upsert({
+                const { error: settingsErr } = await supabase.from(tbl('app_settings')).upsert({
                     id: 'global_settings',
                     app_name: appSettings.appName,
                     school_name: appSettings.schoolName,
@@ -137,7 +145,14 @@ async function syncFromFrontend(req, res) {
                     tranches: appSettings.tranches || [],
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'id' });
-            } catch (settingsErr) {}
+                if (settingsErr) {
+                    console.error('❌ [Sync POST] Erreur sauvegarde appSettings:', settingsErr.message);
+                } else {
+                    console.log('✅ [Sync POST] appSettings sauvegardés avec succès !');
+                }
+            } catch (settingsErr) {
+                console.error('❌ [Sync POST] Exception appSettings:', settingsErr);
+            }
         }
 
         // --- 6. Sync Academic Data ---
@@ -232,7 +247,16 @@ async function syncToFrontend(req, res) {
         const dbClasseMatieres = await fetchTable('classe_matieres');
         const dbNotes = await fetchTable('notes');
         
-        const { data: appSettings } = await supabase.from(tbl('app_settings')).select('*').single();
+        const { data: appSettings, error: settingsError } = await supabase.from(tbl('app_settings')).select('*').single();
+        console.log('🎨 [Sync GET] appSettings from DB:', {
+            found: !!appSettings,
+            error: settingsError?.message || null,
+            hasLogo: !!appSettings?.school_logo,
+            logoLength: appSettings?.school_logo?.length || 0,
+            hasStamp: !!appSettings?.school_stamp,
+            appName: appSettings?.app_name,
+            schoolName: appSettings?.school_name,
+        });
 
         const studentMap = new Map();
         students.forEach(s => {

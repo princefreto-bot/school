@@ -788,23 +788,68 @@ export const useStore = create<AppState>()(
           return;
         }
 
-        if (get().isSyncing) return; // Éviter les appels concurrents
+        // ── Gestion des appels concurrents ──
+        // Si un sync est déjà en cours, on attend qu'il finisse pour le forced, sinon on quitte
+        if (get().isSyncing) {
+          if (force) {
+            console.log('🔄 [Sync] Sync forcée mais un sync est en cours, retry dans 2s...');
+            setTimeout(() => get().fetchAllFromBackend(true), 2000);
+          } else {
+            console.log('⏳ [Sync] Fetch ignoré (sync en cours)');
+          }
+          return;
+        }
 
-        // Éviter de fetch si on vient de faire une sync (cooldown 55s)
+        // Éviter de fetch si on vient de faire une sync (cooldown 55s) — sauf si forcé
         const now = Date.now();
         if (!force && now - get().lastSyncTimestamp < 55000) {
           console.log('⏳ [Sync] Fetch skipped (cooldown active)');
           return;
         }
 
+        console.log(`🔄 [Sync] Démarrage du fetch cloud... (force=${force})`);
         set({ isSyncing: true });
         try {
           const { fetchFromBackend } = await import('../services/backendSync');
           const data = await fetchFromBackend();
 
-          if (data && Array.isArray(data.students)) {
-            // Priority to cloud data if it is not empty, 
-            // OR if local data is empty (new device)
+          if (!data) {
+            console.warn('⚠️ [Sync] Le backend n\'a retourné aucune donnée.');
+            return;
+          }
+
+          // ════════════════════════════════════════════════════════
+          // 🔑 PARAMÈTRES — TOUJOURS mis à jour indépendamment des élèves
+          // ════════════════════════════════════════════════════════
+          if (data.appSettings) {
+            console.log('🎨 [Sync] Mise à jour des paramètres depuis le cloud:', {
+              appName: data.appSettings.appName,
+              schoolName: data.appSettings.schoolName,
+              hasLogo: !!data.appSettings.schoolLogo,
+              logoLength: data.appSettings.schoolLogo?.length || 0,
+              hasStamp: !!data.appSettings.schoolStamp,
+              stampLength: data.appSettings.schoolStamp?.length || 0,
+            });
+            set({
+              appName: data.appSettings.appName || get().appName,
+              schoolName: data.appSettings.schoolName || get().schoolName,
+              schoolYear: data.appSettings.schoolYear || get().schoolYear,
+              schoolLogo: data.appSettings.schoolLogo !== undefined ? data.appSettings.schoolLogo : get().schoolLogo,
+              schoolStamp: data.appSettings.schoolStamp !== undefined ? data.appSettings.schoolStamp : get().schoolStamp,
+              messageRemerciement: data.appSettings.messageRemerciement || get().messageRemerciement,
+              messageRappel: data.appSettings.messageRappel || get().messageRappel,
+              ...(data.appSettings.cycleSchedules ? { cycleSchedules: data.appSettings.cycleSchedules } : {}),
+              ...(data.appSettings.tranches ? { tranches: data.appSettings.tranches } : {}),
+            });
+            console.log('✅ [Sync] Paramètres appliqués ! Logo:', !!get().schoolLogo, '| Sceau:', !!get().schoolStamp);
+          } else {
+            console.warn('⚠️ [Sync] Aucun appSettings dans la réponse du backend.');
+          }
+
+          // ════════════════════════════════════════════════════════
+          // 👨‍🎓 ÉLÈVES & DONNÉES
+          // ════════════════════════════════════════════════════════
+          if (Array.isArray(data.students)) {
             const hasCloudStudents = data.students.length > 0;
             const hasLocalStudents = get().students.length > 0;
 
@@ -816,84 +861,67 @@ export const useStore = create<AppState>()(
                 activityLogs: data.activityLogs || [],
                 links: data.links || []
               });
-
-              if (data.appSettings) {
-                set({
-                  appName: data.appSettings.appName,
-                  schoolName: data.appSettings.schoolName,
-                  schoolYear: data.appSettings.schoolYear,
-                  schoolLogo: data.appSettings.schoolLogo !== undefined ? data.appSettings.schoolLogo : get().schoolLogo,
-                  schoolStamp: data.appSettings.schoolStamp !== undefined ? data.appSettings.schoolStamp : get().schoolStamp,
-                  messageRemerciement: data.appSettings.messageRemerciement,
-                  messageRappel: data.appSettings.messageRappel,
-                  ...(data.appSettings.cycleSchedules ? { cycleSchedules: data.appSettings.cycleSchedules } : {}),
-                  ...(data.appSettings.tranches ? { tranches: data.appSettings.tranches } : {}),
-                });
-              }
-              // Annonces et reads venant du cloud
-              if (Array.isArray(data.announcements)) {
-                set({ announcements: data.announcements });
-              }
-              if (Array.isArray(data.announcementReads)) {
-                set({ announcementReads: data.announcementReads });
-              }
-              // Récupération des données académiques (Même méthode que pour les élèves)
-              if (Array.isArray(data.matieres)) {
-                const hasCloud = data.matieres.length > 0;
-                const hasLocal = get().matieres.length > 0;
-                if (hasCloud || !hasLocal) {
-                  set({ matieres: data.matieres });
-                }
-              }
-              if (Array.isArray(data.classeMatieres)) {
-                const hasCloud = data.classeMatieres.length > 0;
-                const hasLocal = get().classeMatieres.length > 0;
-                if (hasCloud || !hasLocal) {
-                  set({ classeMatieres: data.classeMatieres });
-                }
-              }
-              if (Array.isArray(data.notes)) {
-                const cloudNotes = data.notes.map((n: Note) => ({
-                  ...n,
-                  noteClasse: n.noteClasse !== null && n.noteClasse !== undefined ? Number(n.noteClasse) : null,
-                  noteDevoir: n.noteDevoir !== null && n.noteDevoir !== undefined ? Number(n.noteDevoir) : null,
-                  noteCompo: n.noteCompo !== null && n.noteCompo !== undefined ? Number(n.noteCompo) : null,
-                }));
-
-                // Fusion intelligente : on garde les notes locales qui ne sont pas dans le cloud 
-                // (peut-être de nouvelles saisies) et on met à jour les existantes.
-                const localNotes = get().notes;
-
-                // Si le cloud est vide et qu'on a déjà des données locales, on ne vide PAS tout
-                // sauf si c'est la première sync (isAuthenticated vient de passer à true)
-                if (cloudNotes.length > 0) {
-                  // On crée une map des notes cloud pour un accès rapide
-                  const cloudMap = new Map();
-                  cloudNotes.forEach((n: Note) => {
-                    const key = `${n.eleveId}-${n.matiereId}-${n.periode}`;
-                    cloudMap.set(key, n);
-                  });
-
-                  // On fusionne : le cloud prime pour les doublons, 
-                  // mais on garde les locales uniques (WIP)
-                  const mergedNotes = [...cloudNotes];
-                  localNotes.forEach(ln => {
-                    const key = `${ln.eleveId}-${ln.matiereId}-${ln.periode}`;
-                    if (!cloudMap.has(key)) {
-                      mergedNotes.push(ln);
-                    }
-                  });
-
-                  set({ notes: mergedNotes });
-                } else if (localNotes.length === 0) {
-                  set({ notes: cloudNotes });
-                }
-              }
-              console.log(`✅ Cloud data synchronized: ${repairedStudents.length} students loaded and repaired.`);
+              console.log(`✅ [Sync] ${repairedStudents.length} élèves chargés et réparés.`);
             }
           }
+
+          // Annonces et reads venant du cloud
+          if (Array.isArray(data.announcements)) {
+            set({ announcements: data.announcements });
+          }
+          if (Array.isArray(data.announcementReads)) {
+            set({ announcementReads: data.announcementReads });
+          }
+          // Récupération des données académiques
+          if (Array.isArray(data.matieres)) {
+            const hasCloud = data.matieres.length > 0;
+            const hasLocal = get().matieres.length > 0;
+            if (hasCloud || !hasLocal) {
+              set({ matieres: data.matieres });
+            }
+          }
+          if (Array.isArray(data.classeMatieres)) {
+            const hasCloud = data.classeMatieres.length > 0;
+            const hasLocal = get().classeMatieres.length > 0;
+            if (hasCloud || !hasLocal) {
+              set({ classeMatieres: data.classeMatieres });
+            }
+          }
+          if (Array.isArray(data.notes)) {
+            const cloudNotes = data.notes.map((n: Note) => ({
+              ...n,
+              noteClasse: n.noteClasse !== null && n.noteClasse !== undefined ? Number(n.noteClasse) : null,
+              noteDevoir: n.noteDevoir !== null && n.noteDevoir !== undefined ? Number(n.noteDevoir) : null,
+              noteCompo: n.noteCompo !== null && n.noteCompo !== undefined ? Number(n.noteCompo) : null,
+            }));
+
+            const localNotes = get().notes;
+
+            if (cloudNotes.length > 0) {
+              const cloudMap = new Map();
+              cloudNotes.forEach((n: Note) => {
+                const key = `${n.eleveId}-${n.matiereId}-${n.periode}`;
+                cloudMap.set(key, n);
+              });
+              const mergedNotes = [...cloudNotes];
+              localNotes.forEach(ln => {
+                const key = `${ln.eleveId}-${ln.matiereId}-${ln.periode}`;
+                if (!cloudMap.has(key)) {
+                  mergedNotes.push(ln);
+                }
+              });
+              set({ notes: mergedNotes });
+            } else if (localNotes.length === 0) {
+              set({ notes: cloudNotes });
+            }
+          }
+
+          // Mise à jour du timestamp après succès
+          set({ lastSyncTimestamp: Date.now() });
+          console.log(`🏁 [Sync] Synchronisation complète terminée avec succès.`);
+
         } catch (err) {
-          console.error('Failed to sync from cloud:', err);
+          console.error('💥 [Sync] Erreur fatale lors de la synchronisation:', err);
         } finally {
           set({ isSyncing: false });
         }
