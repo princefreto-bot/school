@@ -105,14 +105,6 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                             )}
                         </div>
                     </div>
-
-                    {/* Titre bulletin DANS le cadre (séparé par une ligne interne) */}
-                    <div className="border-t-[1.5px] border-black text-center py-0.5">
-                        <h1 className="text-[12px] font-black uppercase tracking-widest">
-                            Bulletin de Notes du {data.periode}
-                        </h1>
-                        <p className="text-[9px] font-semibold">Année Scolaire : {schoolYear}</p>
-                    </div>
                 </div>
 
                 {/* ──────────────── IDENTIFICATION ÉLÈVE (avec photo passeport) ──────────────── */}
@@ -148,7 +140,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                         </div>
 
                         {/* Ligne 3 : Sexe  |  Effectif de la classe */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', borderBottom: '1px solid black' }}>
                             <div className="text-[9.5px]" style={{ padding: '3px 6px', borderRight: '1px solid black' }}>
                                 <span className="font-bold uppercase">Sexe : </span>
                                 <span>{data.eleve.sexe === 'F' ? 'Féminin (F)' : 'Masculin (M)'}</span>
@@ -159,6 +151,15 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                             </div>
                         </div>
 
+                        {/* Ligne 4 : TITRE BULLETIN — occupe l'espace vide en face de la photo */}
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8f8', borderTop: 'none' }}>
+                            <div className="text-center py-1.5 px-3">
+                                <p className="font-black uppercase tracking-widest text-[11px] leading-tight">
+                                    Bulletin de Notes du {data.periode}
+                                </p>
+                                <p className="text-[9px] font-semibold text-gray-600 mt-0.5">Année Scolaire : {schoolYear}</p>
+                            </div>
+                        </div>
                     </div>
 
                     {/* CADRE PHOTO PASSEPORT — agrandi */}
