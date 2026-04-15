@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { Student, Payment } from '../types';
 import { CLASSES_BY_CYCLE as CLASSES } from '../data/classConfig';
@@ -13,6 +13,7 @@ import {
   getEcolageFromClasse
 } from '../utils/helpers';
 import { generateReceipt, generateStudentCard } from '../utils/pdfService';
+import { uploadStudentPhoto } from '../services/photoService';
 import { 
   Search, 
   Plus, 
@@ -23,7 +24,8 @@ import {
   X,
   ChevronDown,
   Phone,
-  History
+  History,
+  Camera
 } from 'lucide-react';
 
 export const StudentManagement = () => {
@@ -80,6 +82,53 @@ export const StudentManagement = () => {
     message += `\n\n${settings.nomEcole}`;
     
     window.open(generateWhatsAppLink(student.telephone, message), '_blank');
+  };
+
+  const handleSaveStudent = async (data: Partial<Student>) => {
+    let finalData = { ...data };
+
+    if (editingStudent) {
+      // Si la photo est un nouveau base64 (commence par data:image), on l'uploade
+      if (data.photoUrl && data.photoUrl.startsWith('data:image')) {
+        const uploadedUrl = await uploadStudentPhoto(editingStudent.id, data.photoUrl);
+        if (uploadedUrl) {
+          finalData.photoUrl = uploadedUrl;
+        }
+        // Sinon on garde le base64 en local (fallback offline)
+      }
+      updateStudent(editingStudent.id, finalData);
+    } else {
+      // Nouvel élève : on crée d'abord (pour avoir l'ID), puis on uploade la photo
+      const tempPhoto = finalData.photoUrl;
+      finalData.photoUrl = undefined; // On sauvegarde d'abord sans photo
+      addStudent({
+        ...finalData,
+        id: generateId(),
+        paiements: (finalData.dejaPaye || 0) > 0 ? [{
+          id: generateId(),
+          date: new Date().toISOString(),
+          montant: finalData.dejaPaye || 0,
+          methode: 'Espèces',
+          reference: 'Paiement initial'
+        }] : []
+      } as Student);
+
+      // Si photo base64, on la stocke localement d'abord
+      // L'upload réel se fera lors de la prochaine modification (quand l'ID est stable)
+      if (tempPhoto && tempPhoto.startsWith('data:image')) {
+        // Recéperer l'ID qui vient d'être créé — on passe par une mise à jour immédiate
+        // en gardant le base64 pour l'affichage local
+        const newStudentList = useStore.getState().students;
+        const newStudent = newStudentList.find(
+          s => s.nom === finalData.nom && s.prenom === finalData.prenom && s.classe === finalData.classe
+        );
+        if (newStudent) {
+          const uploadedUrl = await uploadStudentPhoto(newStudent.id, tempPhoto);
+          updateStudent(newStudent.id, { photoUrl: uploadedUrl || tempPhoto });
+        }
+      }
+    }
+    setShowModal(false);
   };
 
   return (
@@ -178,11 +227,19 @@ export const StudentManagement = () => {
                     <tr key={student.id} className="border-t hover:bg-gray-50">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
-                            student.sexe === 'M' ? 'bg-blue-500' : 'bg-pink-500'
-                          }`}>
-                            {student.nom.charAt(0)}
-                          </div>
+                          {student.photoUrl ? (
+                            <img
+                              src={student.photoUrl}
+                              alt={student.nom}
+                              className="w-9 h-9 rounded-full object-cover border-2 border-white shadow"
+                            />
+                          ) : (
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold ${
+                              student.sexe === 'M' ? 'bg-blue-500' : 'bg-pink-500'
+                            }`}>
+                              {student.nom.charAt(0)}{student.prenom.charAt(0)}
+                            </div>
+                          )}
                           <div>
                             <p className="font-medium text-gray-800">{student.nom} {student.prenom}</p>
                             <p className="text-xs text-gray-400">
@@ -279,24 +336,7 @@ export const StudentManagement = () => {
         <StudentModal
           student={editingStudent}
           onClose={() => setShowModal(false)}
-          onSave={(data) => {
-            if (editingStudent) {
-              updateStudent(editingStudent.id, data);
-            } else {
-              addStudent({
-                ...data,
-                id: generateId(),
-                paiements: (data.dejaPaye || 0) > 0 ? [{
-                  id: generateId(),
-                  date: new Date().toISOString(),
-                  montant: data.dejaPaye,
-                  methode: 'Espèces',
-                  reference: 'Paiement initial'
-                }] : []
-              } as Student);
-            }
-            setShowModal(false);
-          }}
+          onSave={handleSaveStudent}
         />
       )}
 
@@ -332,6 +372,7 @@ interface StudentModalProps {
 
 const StudentModal = ({ student, onClose, onSave }: StudentModalProps) => {
   const allClasses = [...CLASSES.Primaire, ...CLASSES.Collège, ...CLASSES.Lycée];
+  const photoInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
     nom: student?.nom || '',
@@ -344,8 +385,19 @@ const StudentModal = ({ student, onClose, onSave }: StudentModalProps) => {
     dejaPaye: student?.dejaPaye || 0,
     adsn: student?.adsn || '',
     statutElv: student?.statutElv || 'NOUVEAU',
-    dateNaissance: student?.dateNaissance || ''
+    dateNaissance: student?.dateNaissance || '',
+    photoUrl: student?.photoUrl || ''
   });
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setFormData(f => ({ ...f, photoUrl: ev.target?.result as string }));
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -358,7 +410,8 @@ const StudentModal = ({ student, onClose, onSave }: StudentModalProps) => {
       ecolage,
       restant,
       cycle: getCycleFromClasse(formData.classe),
-      recu: student?.recu || `REC-${Date.now()}`
+      recu: student?.recu || `REC-${Date.now()}`,
+      photoUrl: formData.photoUrl || undefined
     });
   };
 
@@ -375,6 +428,43 @@ const StudentModal = ({ student, onClose, onSave }: StudentModalProps) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+
+          {/* Photo passeport */}
+          <div className="flex items-center gap-4">
+            <div
+              className="w-20 h-24 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden flex items-center justify-center cursor-pointer hover:border-blue-400 transition bg-gray-50 flex-shrink-0"
+              onClick={() => photoInputRef.current?.click()}
+            >
+              {formData.photoUrl ? (
+                <img src={formData.photoUrl} alt="Photo" className="w-full h-full object-cover" />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-gray-400">
+                  <Camera className="w-6 h-6 mb-1" />
+                  <span className="text-[10px] text-center font-medium">Photo<br/>passeport</span>
+                </div>
+              )}
+            </div>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoChange}
+            />
+            <div className="text-xs text-gray-500 space-y-1">
+              <p className="font-semibold text-gray-700">Photo passeport (optionnel)</p>
+              <p>Format recommandé : JPG ou PNG, fond blanc.</p>
+              <p>Cette photo apparaîtra sur le bulletin et la carte scolaire.</p>
+              {formData.photoUrl && (
+                <button
+                  type="button"
+                  onClick={() => setFormData(f => ({ ...f, photoUrl: '' }))}
+                  className="text-red-500 hover:underline text-xs"
+                >Supprimer la photo</button>
+              )}
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>

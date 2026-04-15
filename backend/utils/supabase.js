@@ -13,7 +13,15 @@ if (!supabaseUrl || !supabaseKey) {
     process.exit(1);
 }
 
+// Client principal (SERVICE_ROLE ou ANON selon .env)
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Client admin explicite avec service_role (pour Storage uploads)
+const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+        auth: { autoRefreshToken: false, persistSession: false }
+      })
+    : supabase;
 
 // Test la connexion à Supabase au démarrage
 (async () => {
@@ -27,4 +35,4 @@ const supabase = createClient(supabaseUrl, supabaseKey);
     }
 })();
 
-module.exports = { supabase };
+module.exports = { supabase, supabaseAdmin };

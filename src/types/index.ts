@@ -26,6 +26,7 @@ export interface Student {
   statutElv?: 'NOUVEAU' | 'ANCIEN' | 'REDOUBLANT';
   dateNaissance?: string;
   acteNaissanceUrl?: string;
+  photoUrl?: string;  // Photo passeport de l'élève (base64 data URL)
   cycle: Cycle;
   status: PaymentStatus;
   historiquesPaiements: Payment[];

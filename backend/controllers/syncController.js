@@ -60,7 +60,8 @@ async function syncFromFrontend(req, res) {
                 redoublant: s.redoublant || false,
                 ecole_provenance: s.ecoleProvenance || '',
                 date_naissance: s.dateNaissance || null,
-                adsn: s.adsn || null
+                adsn: s.adsn || null,
+                photo_url: s.photoUrl || null
             }));
 
             for (let i = 0; i < studentData.length; i += CHUNK_SIZE) {
@@ -307,6 +308,7 @@ async function syncToFrontend(req, res) {
                 ecoleProvenance: s.ecole_provenance || '',
                 dateNaissance: s.date_naissance || null,
                 adsn: s.adsn || null,
+                photoUrl: s.photo_url || null,
                 historiquesPaiements: []
             });
         });

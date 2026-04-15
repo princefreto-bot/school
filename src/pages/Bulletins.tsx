@@ -142,6 +142,7 @@ export const Bulletins: React.FC = () => {
                                 schoolLogo={schoolLogo}
                                 schoolStamp={schoolStamp}
                                 schoolYear={schoolYear}
+                                studentPhoto={b.eleve.photoUrl || null}
                             />
                         </div>
                     ))}

@@ -25,10 +25,11 @@ interface CarteProps {
     schoolName: string;
     schoolYear: string;
     schoolLogo: string | null;
+    photoUrl?: string | null;
 }
 
 const CarteEleve: React.FC<CarteProps> = ({
-    nom, prenom, classe, id, telephone, schoolName, schoolYear, schoolLogo,
+    nom, prenom, classe, id, telephone, schoolName, schoolYear, schoolLogo, photoUrl,
 }) => {
     const nomComplet = `${prenom} ${nom}`.toUpperCase();
 
@@ -71,8 +72,20 @@ const CarteEleve: React.FC<CarteProps> = ({
                 {/* Corps */}
                 <div style={{ display:'flex', alignItems:'center', gap:8, flex:1 }}>
 
+                    {/* Photo passeport (si dispo) */}
+                    {photoUrl && (
+                        <div style={{
+                            width:48, height:58, flexShrink:0,
+                            borderRadius:5, overflow:'hidden',
+                            border:'1.5px solid rgba(255,255,255,0.5)',
+                            boxShadow:'0 2px 8px rgba(0,0,0,0.4)',
+                        }}>
+                            <img src={photoUrl} alt="Photo" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                        </div>
+                    )}
+
                     {/* Infos élève */}
-                    <div style={{ flex:1, minWidth:0, maxWidth:200 }}>
+                    <div style={{ flex:1, minWidth:0, maxWidth: photoUrl ? 150 : 200 }}>
                         <p style={{
                             color:'white', margin:0, marginBottom:4, fontWeight:'bold', lineHeight:1.25,
                             fontSize: nomComplet.length > 22 ? 8.5 : nomComplet.length > 16 ? 10 : 11.5,
@@ -99,7 +112,6 @@ const CarteEleve: React.FC<CarteProps> = ({
                     </div>
 
                     {/* QR Code — zone fixe, jamais masquée */}
-                    {/* Rendu en 256px, réduit via CSS = net sur Retina */}
                     <div style={{
                         width:82, height:82, flexShrink:0,
                         background:'white', borderRadius:8, padding:3,
@@ -109,12 +121,12 @@ const CarteEleve: React.FC<CarteProps> = ({
                     }}>
                         <QRCodeCanvas
                             value={id}
-                            size={256}        // rendu interne haute résolution
-                            level="H"         // correction d'erreur 30%
+                            size={256}
+                            level="H"
                             bgColor="#FFFFFF"
-                            fgColor="#000000" // noir pur = contraste max
-                            marginSize={1}    // quiet zone réduite pour maximiser la taille
-                            style={{ width:76, height:76 }} // agrandi
+                            fgColor="#000000"
+                            marginSize={1}
+                            style={{ width:76, height:76 }}
                         />
                     </div>
                 </div>
@@ -171,7 +183,7 @@ const resizeLogoForPDF = (src: string, size: number): Promise<string> => {
 // GÉNÉRATION PDF — 8 cartes par page A4 (2 colonnes × 4 lignes)
 // ============================================================
 const generateCartesPDF = async (
-    students: Array<{ id: string; nom: string; prenom: string; classe: string; telephone: string }>,
+    students: Array<{ id: string; nom: string; prenom: string; classe: string; telephone: string; photoUrl?: string }>,
     schoolName: string,
     schoolYear: string,
     schoolLogo: string | null,
@@ -280,8 +292,21 @@ const generateCartesPDF = async (
         const qrDataURL = await buildQRDataURL(student.id);
         doc.addImage(qrDataURL, 'PNG', qrX, qrY, qrMM, qrMM, undefined, 'NONE');
 
+        // ── Photo passeport (si disponible) ──────────────
+        const photoOffsetX = 2.5;
+        const photoW = student.photoUrl ? 12 : 0; // 12mm largeur, ~16mm hauteur
+        const photoH = 16;
+        const photoY = y + 15;
+
+        if (student.photoUrl && student.photoUrl.startsWith('data:image')) {
+            doc.setFillColor(255, 255, 255);
+            doc.rect(x + photoOffsetX - 0.5, photoY - 0.5, photoW + 1, photoH + 1, 'F');
+            doc.addImage(student.photoUrl, 'JPEG', x + photoOffsetX, photoY, photoW, photoH);
+        }
+
         // ── Nom & Prénom de l'élève ────────────────────────
-        const nameMaxW   = cardW - qrMM - 6;
+        const infoStartX = x + photoOffsetX + photoW + (photoW > 0 ? 1.5 : 0);
+        const nameMaxW   = cardW - qrMM - photoW - 8;
         const fullName   = `${student.prenom} ${student.nom}`.toUpperCase();
         const nameLines  = doc.splitTextToSize(fullName, nameMaxW);
         const nameFontSz = fullName.length > 22 ? 7 : fullName.length > 16 ? 8 : 9;
@@ -291,7 +316,7 @@ const generateCartesPDF = async (
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(nameFontSz);
         nameLines.slice(0, 2).forEach((line: string, i: number) => {
-            doc.text(line, x + 2.5, nameY + i * (nameFontSz * 0.38));
+            doc.text(line, infoStartX, nameY + i * (nameFontSz * 0.38));
         });
 
         // ── Classe & Téléphone ──────────────────────────
@@ -299,18 +324,18 @@ const generateCartesPDF = async (
         doc.setFontSize(6);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(147, 197, 253);
-        doc.text(`CLASSE : ${student.classe}`, x + 2.5, nameY + classeOffsetY + 3.5);
+        doc.text(`CLASSE : ${student.classe}`, infoStartX, nameY + classeOffsetY + 3.5);
         
         doc.setFontSize(5.5);
         doc.setTextColor(255, 255, 255);
-        doc.text(`Tél : ${student.telephone}`, x + 2.5, nameY + classeOffsetY + 7.5);
+        doc.text(`Tél : ${student.telephone}`, infoStartX, nameY + classeOffsetY + 7.5);
 
         // ── Pied de carte (Disclaimer) ───────────────────
         doc.setFontSize(3.8);
         doc.setFont('helvetica', 'italic');
         doc.setTextColor(150, 200, 255);
         const disclaimer = "Si cette carte ne vous appartient pas, veuillez la ramener à l'administration du CS YZOMACAMB";
-        const disclaimerLines = doc.splitTextToSize(disclaimer, cardW - 32); // laisser de la place pour le QR
+        const disclaimerLines = doc.splitTextToSize(disclaimer, cardW - 32);
         disclaimerLines.forEach((line: string, i: number) => {
             doc.text(line, x + 2.5, y + cardH - 5.5 + i * 2);
         });
@@ -528,6 +553,7 @@ export const CarteScolaire: React.FC = () => {
                                         nom={s.nom} prenom={s.prenom} classe={s.classe} id={s.id}
                                         telephone={s.telephone}
                                         schoolName={schoolName} schoolYear={schoolYear} schoolLogo={schoolLogo}
+                                        photoUrl={s.photoUrl}
                                     />
                                 </div>
                             </div>
