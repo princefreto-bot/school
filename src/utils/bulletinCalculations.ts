@@ -33,6 +33,11 @@ export interface BulletinEleveResultat {
     moyenneClasse: number;
     moyenneMin: number;
     moyenneMax: number;
+    // Cumul annuel (disponible à partir du 2ème trimestre/semestre)
+    moyenneAnnuelle?: number | null;
+    rangAnnuel?: string | null;
+    moyenneAnnuelleClasse?: number | null;
+    periodesIncluses?: string[]; // Ex: ['TRIMESTRE 1', 'TRIMESTRE 2']
 }
 
 const formatRang = (rank: number): string => {
@@ -52,8 +57,22 @@ const getAppreciation = (moy: number): string => {
 };
 
 /**
+ * Retourne les périodes précédentes à prendre en compte pour le cumul annuel.
+ * T1 ⇒ [] (pas de cumul), T2 ⇒ [T1], T3 ⇒ [T1, T2]
+ * S1 ⇒ [] (pas de cumul), S2 ⇒ [S1]
+ */
+const getPeriodesAntérieures = (periode: PeriodeType): PeriodeType[] => {
+    switch (periode) {
+        case 'TRIMESTRE 2': return ['TRIMESTRE 1'];
+        case 'TRIMESTRE 3': return ['TRIMESTRE 1', 'TRIMESTRE 2'];
+        case 'SEMESTRE 2':  return ['SEMESTRE 1'];
+        default:            return [];
+    }
+};
+
+/**
  * Calcule tous les bulletins pour une classe et une période donnée.
- * Permet de déterminer les rangs (Matière & Général).
+ * Permet de déterminer les rangs (Matière & Général) et les moyennes annuelles cumulées.
  */
 export const calculerBulletinsClasse = (
     classe: string, 
@@ -176,7 +195,65 @@ export const calculerBulletinsClasse = (
         b.moyenneMax = moyMax;
     });
 
-    // b. Rangs par Matières
+    // --- 3. Calcul des moyennes annuelles cumulées ---
+    const periodesAnterieures = getPeriodesAntérieures(periode);
+    const toutesLesPeriodes = [...periodesAnterieures, periode];
+
+    if (periodesAnterieures.length > 0) {
+        // Pour chaque élève, calculer la moyenne de toutes les périodes
+        bulletinsBruts.forEach(b => {
+            const eleveMoysParPeriode: number[] = [];
+
+            toutesLesPeriodes.forEach(p => {
+                if (p === periode) {
+                    // La période actuelle, on a déjà la moyenne
+                    eleveMoysParPeriode.push(b.moyenneGenerale);
+                } else {
+                    // Recalculer la moyenne pour la période antérieure
+                    let totalPts = 0;
+                    let totalCoefs = 0;
+                    configsMatiere.forEach(cm => {
+                        const n = notes.find(x =>
+                            x.eleveId === b.eleve.id &&
+                            x.matiereId === cm.matiereId &&
+                            x.periode === p
+                        );
+                        const vals = [n?.noteClasse ?? null, n?.noteDevoir ?? null, n?.noteCompo ?? null]
+                            .filter(x => x !== null) as number[];
+                        if (vals.length > 0) {
+                            const avg = vals.reduce((a, v) => a + v, 0) / vals.length;
+                            totalPts += avg * cm.coefficient;
+                            totalCoefs += cm.coefficient;
+                        }
+                    });
+                    if (totalCoefs > 0) {
+                        eleveMoysParPeriode.push(parseFloat((totalPts / totalCoefs).toFixed(2)));
+                    }
+                }
+            });
+
+            if (eleveMoysParPeriode.length > 0) {
+                const moyAnn = eleveMoysParPeriode.reduce((a, v) => a + v, 0) / eleveMoysParPeriode.length;
+                b.moyenneAnnuelle = parseFloat(moyAnn.toFixed(2));
+                b.periodesIncluses = toutesLesPeriodes;
+            }
+        });
+
+        // Calculer les rangs annuels
+        const sortedByAnn = [...bulletinsBruts]
+            .filter(b => b.moyenneAnnuelle != null)
+            .sort((a, b) => (b.moyenneAnnuelle ?? 0) - (a.moyenneAnnuelle ?? 0));
+
+        const moysAnn = sortedByAnn.map(b => b.moyenneAnnuelle ?? 0);
+        const moyAnnClasse = moysAnn.length > 0 ? moysAnn.reduce((a, v) => a + v, 0) / moysAnn.length : 0;
+
+        sortedByAnn.forEach((b, idx) => {
+            b.rangAnnuel = formatRang(idx + 1);
+            b.moyenneAnnuelleClasse = parseFloat(moyAnnClasse.toFixed(2));
+        });
+    }
+
+    // --- 4. Rangs par Matières ---
     configsMatiere.forEach(cm => {
         const matId = cm.matiereId;
         const eleveScores: { id: string, note: number }[] = [];

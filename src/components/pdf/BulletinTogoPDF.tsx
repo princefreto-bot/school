@@ -268,63 +268,122 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                     </tbody>
                 </table>
 
-                {/* RECAP RÉSULTATS */}
-                <div className="grid grid-cols-2 gap-3 mt-1.5 text-[9px]">
-                    <div className="border-[1.5px] border-black p-1.5 relative overflow-hidden bg-blue-50/20">
-                        <table className="w-full font-bold leading-none relative z-10 border-spacing-y-1 border-separate">
-                            <tbody>
-                                <tr>
-                                    <td className="uppercase text-[9px]">Moyenne Générale :</td>
-                                    <td className="text-right text-[11px] font-black text-rose-800">
-                                        {data.moyenneGenerale.toFixed(2)} <span className="text-[8px]">/ 20</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td className="uppercase text-[9px]">Rang :</td>
-                                    <td className="text-right text-[11px] font-black text-blue-800">
-                                        {data.rangGeneral} <span className="text-[8px]">/ {data.effectifClasse}</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                {/* ═══════════════ RÉSULTATS + APPRÉCIATIONS ═══════════════ */}
+                <div className="border-[1.5px] border-black mt-1" style={{ display: 'grid', gridTemplateColumns: '1fr auto' }}>
+
+                    {/* COLONNE GAUCHE : Résultats */}
+                    <div style={{ borderRight: '1.5px solid black' }}>
+
+                        {/* En-tête des colonnes résultats */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', borderBottom: '1.5px solid black', background: '#e5e5e5' }}>
+                            <div className="text-[8px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>Résultats</div>
+                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>Moy. /20</div>
+                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>Rang</div>
+                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px' }}>/ Eff.</div>
+                        </div>
+
+                        {/* Ligne — Période actuelle */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', borderBottom: data.moyenneAnnuelle != null ? '1px solid #aaa' : 'none' }}>
+                            <div className="text-[8.5px] font-bold uppercase" style={{ padding: '3px 5px', borderRight: '1px solid black' }}>
+                                {data.periode}
+                            </div>
+                            <div className="text-[10px] font-black text-center text-rose-800" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                {data.moyenneGenerale.toFixed(2)}
+                            </div>
+                            <div className="text-[10px] font-black text-center text-blue-800" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                {data.rangGeneral}
+                            </div>
+                            <div className="text-[9px] font-bold text-center text-gray-600" style={{ padding: '3px 4px' }}>
+                                {data.effectifClasse}
+                            </div>
+                        </div>
+
+                        {/* Ligne — Moyenne annuelle (T2, T3, S2 uniquement) */}
+                        {data.moyenneAnnuelle != null && (
+                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', background: '#f0f4ff', borderBottom: '1px solid #aaa' }}>
+                                <div className="text-[8.5px] font-bold uppercase" style={{ padding: '3px 5px', borderRight: '1px solid black' }}>
+                                    Moy. Annuelle
+                                    <span className="text-[7px] font-normal text-gray-500 ml-1 normal-case">
+                                        ({(data.periodesIncluses ?? []).map(p => p.replace('TRIMESTRE ', 'T').replace('SEMESTRE ', 'S')).join('+')})
+                                    </span>
+                                </div>
+                                <div className="text-[10px] font-black text-center text-indigo-800" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                    {data.moyenneAnnuelle.toFixed(2)}
+                                </div>
+                                <div className="text-[10px] font-black text-center text-indigo-700" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                    {data.rangAnnuel ?? '-'}
+                                </div>
+                                <div className="text-[9px] font-bold text-center text-gray-600" style={{ padding: '3px 4px' }}>
+                                    {data.effectifClasse}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Statistiques de la classe */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: '#f9f9f9' }}>
+                            <div className="text-center" style={{ padding: '2px 4px', borderRight: '1px solid #ccc' }}>
+                                <div className="text-[7px] text-gray-500 uppercase leading-none">Moy. Cl.</div>
+                                <div className="text-[9px] font-black text-blue-700">{data.moyenneClasse.toFixed(2)}</div>
+                            </div>
+                            <div className="text-center" style={{ padding: '2px 4px', borderRight: '1px solid #ccc' }}>
+                                <div className="text-[7px] text-gray-500 uppercase leading-none">+ Forte</div>
+                                <div className="text-[9px] font-black text-emerald-700">{data.moyenneMax.toFixed(2)}</div>
+                            </div>
+                            <div className="text-center" style={{ padding: '2px 4px' }}>
+                                <div className="text-[7px] text-gray-500 uppercase leading-none">+ Faible</div>
+                                <div className="text-[9px] font-black text-red-700">{data.moyenneMin.toFixed(2)}</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="border-[1.5px] border-black p-1.5 leading-relaxed space-y-1 font-semibold">
-                        <div className="flex justify-between border-b border-gray-400 pb-0.5">
-                            <span>Plus forte moyenne :</span>
-                            <span className="font-black text-emerald-800">{data.moyenneMax.toFixed(2)}</span>
+                    {/* COLONNE DROITE : Appréciation avec cases rondes */}
+                    <div style={{ width: '38mm', display: 'flex', flexDirection: 'column' }}>
+                        {/* En-tête */}
+                        <div className="text-[8px] font-black uppercase text-center" style={{ padding: '2px 4px', background: '#e5e5e5', borderBottom: '1.5px solid black' }}>
+                            APPRÉCIATION
                         </div>
-                        <div className="flex justify-between border-b border-gray-400 pb-0.5">
-                            <span>Plus faible moyenne :</span>
-                            <span className="font-black text-red-800">{data.moyenneMin.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span>Moy. générale de la classe :</span>
-                            <span className="font-black text-blue-800">{data.moyenneClasse.toFixed(2)}</span>
+                        {/* Cases rondes */}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', padding: '3px 6px' }}>
+                            {[
+                                { label: 'Excellent',    min: 18 },
+                                { label: 'Très Bien',    min: 16 },
+                                { label: 'Bien',         min: 14 },
+                                { label: 'Assez Bien',   min: 12 },
+                                { label: 'Passable',     min: 10 },
+                                { label: 'Insuffisant',  min: 8  },
+                                { label: 'Médiocre',     min: 0  },
+                            ].map(({ label, min }, i, arr) => {
+                                const max = arr[i - 1]?.min ?? 21;
+                                const checked = data.moyenneGenerale >= min && data.moyenneGenerale < max;
+                                return (
+                                    <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        {/* Case ronde */}
+                                        <div style={{
+                                            width: 9, height: 9, borderRadius: '50%',
+                                            border: '1.5px solid black',
+                                            background: checked ? '#1a1a1a' : 'white',
+                                            flexShrink: 0,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                        }}>
+                                            {checked && <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'white' }} />}
+                                        </div>
+                                        <span className={`text-[8px] ${checked ? 'font-black' : 'font-semibold text-gray-600'}`}>{label}</span>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
-                </div>
-
-                {/* APPRÉCIATIONS GLOBALES */}
-                <div className="border-[1.5px] border-black p-1 text-[9px] mt-1.5 flex items-center justify-between flex-wrap gap-1">
-                    <span className="font-bold uppercase tracking-wider text-[8px] mr-1">APPRÉCIATION :</span>
-                    {['Très Bien','Bien','Assez-Bien','Passable','Insuffisant','Médiocre'].map(app => (
-                        <div key={app} className="flex items-center gap-1">
-                            <div className="w-3 h-3 border border-black bg-white flex-shrink-0"></div>
-                            <span className="font-bold text-[7.5px] uppercase">{app}</span>
-                        </div>
-                    ))}
                 </div>
 
                 {/* DÉCISIONS & SIGNATURES */}
-                <div className="grid grid-cols-2 gap-6 mt-1.5 text-[9px] font-bold text-center">
-                    <div className="border-[1.5px] border-black h-16 p-1 relative">
-                        <p className="border-b-[1.5px] border-black pb-0.5 mb-1">LE TITULAIRE</p>
-                        <p className="italic text-gray-400 font-normal absolute bottom-1 w-full left-0 text-center text-[8px]">Visa ou signature</p>
+                <div className="grid grid-cols-2 gap-4 mt-1" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                    <div className="border-[1.5px] border-black relative" style={{ height: '15mm' }}>
+                        <div className="text-[8px] font-black uppercase text-center border-b-[1.5px] border-black" style={{ padding: '2px' }}>LE TITULAIRE DE CLASSE</div>
+                        <p className="italic text-gray-400 font-normal absolute bottom-1 w-full left-0 text-center text-[7.5px]">Cachet et signature</p>
                     </div>
-                    <div className="border-[1.5px] border-black h-16 p-1 relative">
-                        <p className="border-b-[1.5px] border-black pb-0.5 mb-1">LE DIRECTEUR / LE PROVISEUR</p>
-                        <p className="italic text-gray-400 font-normal absolute bottom-1 w-full left-0 text-center text-[8px]">Sceau et signature</p>
+                    <div className="border-[1.5px] border-black relative" style={{ height: '15mm' }}>
+                        <div className="text-[8px] font-black uppercase text-center border-b-[1.5px] border-black" style={{ padding: '2px' }}>LE DIRECTEUR / PROVISEUR</div>
+                        <p className="italic text-gray-400 font-normal absolute bottom-1 w-full left-0 text-center text-[7.5px]">Sceau et signature</p>
                     </div>
                 </div>
 

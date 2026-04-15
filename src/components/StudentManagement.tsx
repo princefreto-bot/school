@@ -228,19 +228,34 @@ export const StudentManagement = () => {
                     <tr key={student.id} className="border-t hover:bg-gray-50">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          {student.photoUrl ? (
-                            <img
-                              src={student.photoUrl}
-                              alt={student.nom}
-                              className="w-9 h-9 rounded-full object-cover border-2 border-white shadow"
-                            />
-                          ) : (
-                            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold ${
-                              student.sexe === 'M' ? 'bg-blue-500' : 'bg-pink-500'
-                            }`}>
-                              {student.nom.charAt(0)}{student.prenom.charAt(0)}
+                          {/* AVATAR CLIQUABLE pour assigner la photo */}
+                          <button
+                            onClick={() => { setSelectedStudent(student); setShowPhotoModal(true); }}
+                            className="relative group flex-shrink-0"
+                            title={student.photoUrl ? 'Changer la photo' : 'Assigner une photo passeport'}
+                          >
+                            {student.photoUrl ? (
+                              <img
+                                src={student.photoUrl}
+                                alt={student.nom}
+                                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow group-hover:opacity-80 transition"
+                              />
+                            ) : (
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold group-hover:opacity-70 transition ${
+                                student.sexe === 'M' ? 'bg-blue-500' : 'bg-pink-500'
+                              }`}>
+                                {student.nom.charAt(0)}{student.prenom.charAt(0)}
+                              </div>
+                            )}
+                            {/* Badge caméra au survol */}
+                            <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                              <Camera className="w-4 h-4 text-white" />
                             </div>
-                          )}
+                            {/* Point vert si photo existe */}
+                            {student.photoUrl && (
+                              <div className="absolute bottom-0 right-0 w-3 h-3 bg-teal-500 rounded-full border-2 border-white" />
+                            )}
+                          </button>
                           <div>
                             <p className="font-medium text-gray-800">{student.nom} {student.prenom}</p>
                             <p className="text-xs text-gray-400">
@@ -307,24 +322,12 @@ export const StudentManagement = () => {
                           >
                             <Phone className="w-4 h-4" />
                           </button>
-                          <button
+                           <button
                             onClick={() => { setEditingStudent(student); setShowModal(true); }}
                             className="p-1.5 text-orange-500 hover:bg-orange-50 rounded-lg transition"
                             title="Modifier"
                           >
                             <Edit2 className="w-4 h-4" />
-                          </button>
-                          {/* BOUTON PHOTO — toujours visible, couleur distincte */}
-                          <button
-                            onClick={() => { setSelectedStudent(student); setShowPhotoModal(true); }}
-                            className={`p-1.5 rounded-lg transition ${
-                              student.photoUrl
-                                ? 'text-teal-600 bg-teal-50 hover:bg-teal-100'
-                                : 'text-gray-400 hover:text-teal-600 hover:bg-teal-50 border border-dashed border-gray-300'
-                            }`}
-                            title={student.photoUrl ? 'Changer la photo' : 'Assigner une photo'}
-                          >
-                            <Camera className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(student)}
@@ -387,6 +390,10 @@ export const StudentManagement = () => {
         <HistoryModal
           student={selectedStudent}
           onClose={() => setShowHistoryModal(false)}
+          onChangePhoto={() => {
+            setShowHistoryModal(false);
+            setShowPhotoModal(true);
+          }}
         />
       )}
     </div>
@@ -752,68 +759,148 @@ const PaymentModal = ({ student, onClose, onSave }: PaymentModalProps) => {
   );
 };
 
-// History Modal
-const HistoryModal = ({ student, onClose }: { student: Student; onClose: () => void }) => {
+// ============================================================
+// FICHE DÉTAILLÉE — Historique + Photo + Infos complètes
+// ============================================================
+const HistoryModal = ({ student, onClose, onChangePhoto }: {
+  student: Student;
+  onClose: () => void;
+  onChangePhoto?: () => void;
+}) => {
+  const status = student.restant === 0 ? 'SOLDÉ' : `${((student.dejaPaye / (student.ecolage || 1)) * 100).toFixed(0)}%`;
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-lg w-full max-h-[80vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-bold">Historique des paiements</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+      <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col">
+
+        {/* En-tête */}
+        <div className="flex items-center justify-between px-6 py-4 border-b bg-gray-50">
+          <h2 className="text-lg font-bold">Fiche élève</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-lg">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6">
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <p className="font-medium">{student.nom} {student.prenom}</p>
-            <p className="text-sm text-gray-500">{student.classe}</p>
-            <div className="grid grid-cols-3 gap-4 mt-3 text-sm">
-              <div>
-                <p className="text-gray-500">Écolage</p>
-                <p className="font-bold">{formatMontant(student.ecolage)}</p>
+        <div className="overflow-y-auto flex-1">
+
+          {/* SECTION PHOTO + IDENTITÉ */}
+          <div className="p-6 pb-0 flex gap-5 items-start">
+
+            {/* Photo passeport */}
+            <button
+              onClick={onChangePhoto}
+              className="relative group flex-shrink-0"
+              title="Cliquer pour changer la photo"
+            >
+              {student.photoUrl ? (
+                <img
+                  src={student.photoUrl}
+                  alt="Photo élève"
+                  className="rounded-xl object-cover border-2 border-gray-200 shadow-md group-hover:opacity-80 transition"
+                  style={{ width: 80, height: 100 }}
+                />
+              ) : (
+                <div
+                  className="rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center gap-1 group-hover:border-teal-400 group-hover:bg-teal-50 transition"
+                  style={{ width: 80, height: 100 }}
+                >
+                  <Camera className="w-7 h-7 text-gray-300 group-hover:text-teal-400 transition" />
+                  <span className="text-[10px] text-gray-400 group-hover:text-teal-500 font-semibold text-center leading-tight px-1">Ajouter photo</span>
+                </div>
+              )}
+              {/* Overlay au survol */}
+              {student.photoUrl && (
+                <div className="absolute inset-0 rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                  <Camera className="w-6 h-6 text-white" />
+                </div>
+              )}
+              {/* Badge vert si photo */}
+              {student.photoUrl && (
+                <div className="absolute -bottom-1 -right-1 bg-teal-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow">📸</div>
+              )}
+            </button>
+
+            {/* Infos identité */}
+            <div className="flex-1">
+              <h3 className="text-xl font-black text-gray-900">{student.nom} {student.prenom}</h3>
+              <p className="text-sm text-gray-500 font-medium">{student.classe} • {student.sexe === 'M' ? 'Masculin' : 'Féminin'}{student.redoublant ? ' • Redoublant' : ''}</p>
+              {student.dateNaissance && <p className="text-xs text-gray-400 mt-0.5">Né(e) le {student.dateNaissance}</p>}
+              {student.adsn && <p className="text-xs text-gray-400">Matricule : <span className="font-bold text-gray-600">{student.adsn}</span></p>}
+              {student.telephone && <p className="text-xs text-gray-400">Tél. parent : <span className="font-bold text-gray-600">{student.telephone}</span></p>}
+              {student.ecoleProvenance && <p className="text-xs text-gray-400">Provenance : {student.ecoleProvenance}</p>}
+              {!student.photoUrl && (
+                <button
+                  onClick={onChangePhoto}
+                  className="mt-2 text-xs font-semibold text-teal-600 hover:text-teal-500 flex items-center gap-1"
+                >
+                  <Camera className="w-3 h-3" /> Assigner une photo passeport
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* SECTION SCOLARITÉ */}
+          <div className="px-6 pt-4">
+            <div className="bg-gray-50 rounded-xl p-4">
+              <p className="text-xs font-bold text-gray-400 uppercase mb-3">Scolarité</p>
+              <div className="grid grid-cols-3 gap-3 text-sm">
+                <div className="text-center">
+                  <p className="text-gray-400 text-xs">Écolage</p>
+                  <p className="font-bold text-gray-800">{formatMontant(student.ecolage)}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-gray-400 text-xs">Payé</p>
+                  <p className="font-bold text-green-600">{formatMontant(student.dejaPaye)}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-gray-400 text-xs">Restant</p>
+                  <p className={`font-bold ${student.restant === 0 ? 'text-green-600' : 'text-red-500'}`}>
+                    {student.restant === 0 ? 'SOLDÉ' : formatMontant(student.restant)}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-gray-500">Payé</p>
-                <p className="font-bold text-green-600">{formatMontant(student.dejaPaye)}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">Restant</p>
-                <p className="font-bold text-red-500">
-                  {student.restant === 0 ? 'SOLDÉ' : formatMontant(student.restant)}
-                </p>
+              {/* Barre de progression */}
+              <div className="mt-3">
+                <div className="flex justify-between text-xs text-gray-400 mb-1">
+                  <span>Progression paiement</span>
+                  <span className="font-bold">{status}</span>
+                </div>
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-green-500 rounded-full transition-all"
+                    style={{ width: `${Math.min(100, (student.dejaPaye / (student.ecolage || 1)) * 100)}%` }}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="overflow-y-auto max-h-60">
-            {!student.paiements || student.paiements.length === 0 ? (
-              <p className="text-center text-gray-400 py-8">Aucun paiement enregistré</p>
-            ) : (
-              <div className="space-y-3">
-                {student.paiements.map((p, i) => (
-                  <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          {/* SECTION HISTORIQUE */}
+          <div className="px-6 pt-4 pb-6">
+            <p className="text-xs font-bold text-gray-400 uppercase mb-3">Historique des paiements</p>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {!student.paiements || student.paiements.length === 0 ? (
+                <p className="text-center text-gray-400 py-6 text-sm">Aucun paiement enregistré</p>
+              ) : (
+                student.paiements.map((p, i) => (
+                  <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
                     <div>
-                      <p className="font-medium text-green-600">{formatMontant(p.montant)}</p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(p.date).toLocaleDateString('fr-FR')} • {p.methode}
-                      </p>
-                      {p.reference && (
-                        <p className="text-xs text-gray-400">Réf: {p.reference}</p>
-                      )}
+                      <p className="font-bold text-green-600 text-sm">{formatMontant(p.montant)}</p>
+                      <p className="text-xs text-gray-500">{new Date(p.date).toLocaleDateString('fr-FR')} • {p.methode}</p>
+                      {p.reference && <p className="text-xs text-gray-400">Réf: {p.reference}</p>}
                     </div>
-                    <span className="text-xs text-gray-400">#{i + 1}</span>
+                    <span className="text-xs text-gray-300 font-bold">#{i + 1}</span>
                   </div>
-                ))}
-              </div>
-            )}
+                ))
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="p-6 border-t">
+        <div className="p-4 border-t bg-gray-50">
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+            className="w-full px-4 py-2.5 bg-gray-800 text-white rounded-xl hover:bg-gray-900 transition font-semibold"
           >
             Fermer
           </button>
@@ -822,6 +909,7 @@ const HistoryModal = ({ student, onClose }: { student: Student; onClose: () => v
     </div>
   );
 };
+
 
 // ============================================================
 // PHOTO MODAL — Assigner / modifier la photo passeport d'un élève
