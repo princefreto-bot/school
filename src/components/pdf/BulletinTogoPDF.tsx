@@ -26,7 +26,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
             style={{
                 width: '210mm',
                 height: '297mm',
-                padding: '4mm 6mm',
+                padding: '10mm 6mm 4mm 6mm',
                 boxSizing: 'border-box',
                 fontFamily: '"Times New Roman", Times, serif'
             }}
@@ -43,12 +43,12 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                 <div className="border-[2px] border-black rounded-sm mb-2">
                     <div className="flex justify-between items-stretch text-sm px-2 py-1.5">
 
-                        {/* GAUCHE : Sceau carré (même forme que logo) */}
-                        <div className="flex items-center justify-center" style={{ width: '22mm' }}>
+                        {/* GAUCHE : Sceau carré */}
+                        <div className="flex items-center justify-center" style={{ width: '30mm' }}>
                             {schoolStamp ? (
                                 <div
                                     className="flex items-center justify-center overflow-hidden"
-                                    style={{ width: '22mm', height: '22mm', border: '1.5px solid black' }}
+                                    style={{ width: '30mm', height: '30mm', border: '1.5px solid black' }}
                                 >
                                     <img
                                         src={schoolStamp}
@@ -60,13 +60,13 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                                 <div
                                     className="flex flex-col items-center justify-center"
                                     style={{
-                                        width: '22mm', height: '22mm',
+                                        width: '30mm', height: '30mm',
                                         border: '1.5px dashed #666',
                                         background: '#fafafa'
                                     }}
                                 >
-                                    <span className="text-[9px] font-bold text-gray-500">SCEAU</span>
-                                    <span className="text-[7px] text-gray-400 font-bold text-center leading-tight mt-0.5">DRE-MARITIME</span>
+                                    <span className="text-[10px] font-bold text-gray-500">SCEAU</span>
+                                    <span className="text-[8px] text-gray-400 font-bold text-center leading-tight mt-0.5">DRE-MARITIME</span>
                                 </div>
                             )}
                         </div>
@@ -82,11 +82,11 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                         </div>
 
                         {/* DROITE : Logo carré (même dimension que sceau) */}
-                        <div className="flex items-center justify-center" style={{ width: '22mm' }}>
+                        <div className="flex items-center justify-center" style={{ width: '30mm' }}>
                             {schoolLogo ? (
                                 <div
                                     className="flex items-center justify-center overflow-hidden"
-                                    style={{ width: '22mm', height: '22mm', border: '1.5px solid black' }}
+                                    style={{ width: '30mm', height: '30mm', border: '1.5px solid black' }}
                                 >
                                     <img
                                         src={schoolLogo}
@@ -97,7 +97,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                             ) : (
                                 <div
                                     style={{
-                                        width: '22mm', height: '22mm',
+                                        width: '30mm', height: '30mm',
                                         border: '1.5px dashed #aaa',
                                         background: '#f9f9f9'
                                     }}
@@ -161,10 +161,10 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
 
                     </div>
 
-                    {/* CADRE PHOTO PASSEPORT */}
+                    {/* CADRE PHOTO PASSEPORT — agrandi */}
                     <div
                         className="border-l-[1.5px] border-black flex items-center justify-center flex-shrink-0"
-                        style={{ width: '28mm', minHeight: '26mm' }}
+                        style={{ width: '35mm', minHeight: '32mm' }}
                     >
                         {studentPhoto ? (
                             <img
@@ -175,13 +175,13 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                         ) : (
                             <div
                                 className="flex flex-col items-center justify-center w-full h-full"
-                                style={{ background: '#f4f4f4' }}
+                                style={{ background: '#f0f0f0' }}
                             >
-                                <svg viewBox="0 0 60 80" width="36" height="46" xmlns="http://www.w3.org/2000/svg" opacity={0.3}>
-                                    <circle cx="30" cy="22" r="16" fill="#888" />
-                                    <ellipse cx="30" cy="70" rx="25" ry="20" fill="#888" />
+                                <svg viewBox="0 0 60 80" width="44" height="56" xmlns="http://www.w3.org/2000/svg" opacity={0.28}>
+                                    <circle cx="30" cy="22" r="16" fill="#555" />
+                                    <ellipse cx="30" cy="70" rx="25" ry="20" fill="#555" />
                                 </svg>
-                                <span className="text-[7px] text-gray-400 font-bold mt-0.5 uppercase tracking-wide">Photo</span>
+                                <span className="text-[8px] text-gray-400 font-bold mt-1 uppercase tracking-widest">PHOTO</span>
                             </div>
                         )}
                     </div>
@@ -328,14 +328,14 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                 </div>
 
                 {/* ──────────── PIED DE PAGE ──────────── */}
-                <div className="mt-1.5 flex justify-between items-end">
+                <div className="mt-2 flex justify-between items-end">
                     {/* Mention légale */}
-                    <p className="text-[7px] italic text-gray-400 max-w-[55%]">
+                    <p className="text-[7.5px] italic text-gray-400 max-w-[55%]">
                         Ce bulletin est unique et aucune copie ne sera délivrée. À conserver précieusement par le parent ou tuteur.
                     </p>
-                    {/* Date de création */}
-                    <p className="text-[8.5px] font-semibold text-black text-right">
-                        Fait à Apessito le {getDateFr()}
+                    {/* Date de création — plus grande, en bas de page */}
+                    <p className="text-[11px] font-bold text-black text-right">
+                        Fait à Apessito, le {getDateFr()}
                     </p>
                 </div>
             </div>

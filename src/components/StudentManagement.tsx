@@ -37,6 +37,7 @@ export const StudentManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
@@ -313,6 +314,18 @@ export const StudentManagement = () => {
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
+                          {/* BOUTON PHOTO — toujours visible, couleur distincte */}
+                          <button
+                            onClick={() => { setSelectedStudent(student); setShowPhotoModal(true); }}
+                            className={`p-1.5 rounded-lg transition ${
+                              student.photoUrl
+                                ? 'text-teal-600 bg-teal-50 hover:bg-teal-100'
+                                : 'text-gray-400 hover:text-teal-600 hover:bg-teal-50 border border-dashed border-gray-300'
+                            }`}
+                            title={student.photoUrl ? 'Changer la photo' : 'Assigner une photo'}
+                          >
+                            <Camera className="w-4 h-4" />
+                          </button>
                           <button
                             onClick={() => handleDelete(student)}
                             className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"
@@ -348,6 +361,23 @@ export const StudentManagement = () => {
           onSave={(payment) => {
             addPayment(selectedStudent.id, payment);
             setShowPaymentModal(false);
+          }}
+        />
+      )}
+
+      {/* Photo Modal */}
+      {showPhotoModal && selectedStudent && (
+        <PhotoModal
+          student={selectedStudent}
+          onClose={() => setShowPhotoModal(false)}
+          onSave={async (photoBase64) => {
+            const uploadedUrl = await uploadStudentPhoto(selectedStudent.id, photoBase64);
+            updateStudent(selectedStudent.id, { photoUrl: uploadedUrl || photoBase64 });
+            setShowPhotoModal(false);
+          }}
+          onDelete={() => {
+            updateStudent(selectedStudent.id, { photoUrl: undefined });
+            setShowPhotoModal(false);
           }}
         />
       )}
@@ -792,3 +822,135 @@ const HistoryModal = ({ student, onClose }: { student: Student; onClose: () => v
     </div>
   );
 };
+
+// ============================================================
+// PHOTO MODAL — Assigner / modifier la photo passeport d'un élève
+// ============================================================
+interface PhotoModalProps {
+  student: Student;
+  onClose: () => void;
+  onSave: (photoBase64: string) => Promise<void>;
+  onDelete: () => void;
+}
+
+const PhotoModal = ({ student, onClose, onSave, onDelete }: PhotoModalProps) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string>(student.photoUrl || '');
+  const [saving, setSaving] = useState(false);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleSave = async () => {
+    if (!preview || !preview.startsWith('data:image')) return;
+    setSaving(true);
+    try { await onSave(preview); } finally { setSaving(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+
+        {/* En-tête */}
+        <div className="flex items-center justify-between px-6 py-4 border-b">
+          <div>
+            <h2 className="text-lg font-bold text-gray-800">Photo passeport</h2>
+            <p className="text-sm text-gray-500">{student.nom} {student.prenom} — {student.classe}</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+
+        {/* Corps */}
+        <div className="p-6 space-y-4">
+
+          {/* Zone prévisualisation / upload */}
+          <div
+            onClick={() => inputRef.current?.click()}
+            className="relative mx-auto cursor-pointer group"
+            style={{ width: 180, height: 210 }}
+          >
+            {preview ? (
+              <>
+                <img
+                  src={preview}
+                  alt="Aperçu"
+                  className="w-full h-full object-cover rounded-xl border-2 border-teal-400 shadow-md"
+                />
+                {/* Overlay au survol */}
+                <div className="absolute inset-0 rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-2">
+                  <Camera className="w-8 h-8 text-white" />
+                  <span className="text-white text-sm font-semibold">Changer</span>
+                </div>
+              </>
+            ) : (
+              <div className="w-full h-full rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center gap-3 hover:border-teal-400 hover:bg-teal-50 transition">
+                <Camera className="w-10 h-10 text-gray-300 group-hover:text-teal-400 transition" />
+                <div className="text-center px-4">
+                  <p className="text-sm font-semibold text-gray-500">Cliquer pour choisir</p>
+                  <p className="text-xs text-gray-400 mt-1">JPG, PNG • Fond blanc recommandé</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFile}
+          />
+
+          <p className="text-center text-xs text-gray-400">
+            La photo apparaîtra sur le bulletin scolaire et la carte d'identité scolaire.
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="px-6 pb-6 space-y-2">
+          {preview && preview.startsWith('data:image') && (
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="w-full py-2.5 bg-teal-600 hover:bg-teal-500 disabled:bg-teal-300 text-white font-semibold rounded-xl transition flex items-center justify-center gap-2"
+            >
+              {saving ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Enregistrement...
+                </>
+              ) : (
+                <>
+                  <Camera className="w-4 h-4" />
+                  Enregistrer la photo
+                </>
+              )}
+            </button>
+          )}
+          {student.photoUrl && (
+            <button
+              onClick={onDelete}
+              className="w-full py-2 text-red-500 hover:bg-red-50 font-medium text-sm rounded-xl transition"
+            >
+              Supprimer la photo
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="w-full py-2 text-gray-500 hover:bg-gray-50 text-sm rounded-xl transition"
+          >
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
