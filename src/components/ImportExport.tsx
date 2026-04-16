@@ -31,13 +31,12 @@ export const ImportExport = () => {
     setMessage(null);
 
     try {
-      const imported = await importExcel(file);
+      const currentStudents = useStore.getState().students;
+      const imported = await importExcel(file, currentStudents);
       
       if (imported.length === 0) {
         setMessage({ type: 'error', text: 'Aucun élève trouvé dans le fichier.' });
       } else {
-        // Obtenir la liste actuelle directement du store pour être sûr
-        const currentStudents = useStore.getState().students;
         
         // Ask if replace or merge
         const replace = currentStudents.length === 0 || 
@@ -45,11 +44,17 @@ export const ImportExport = () => {
         
         let newStudents;
         if (replace) {
-          // Vidage local immédiat pour éviter toute confusion
-          useStore.setState({ students: [], presences: [], activityLogs: [] });
+          // Seulement vider la liste des élèves pour render, on ne vide plus les présences et logs!
+          // Car si on garde le même élève, on veut garder ses notes et présences.
+          useStore.setState({ students: [] });
           newStudents = imported;
         } else {
-          newStudents = [...students, ...imported];
+          // Fusion intelligente par ID pour éviter les doublons
+          const studentsMap = new Map(currentStudents.map(s => [s.id, s]));
+          imported.forEach(imp => {
+            studentsMap.set(imp.id, imp);
+          });
+          newStudents = Array.from(studentsMap.values());
         }
         
         setStudents(newStudents);
@@ -57,36 +62,29 @@ export const ImportExport = () => {
         // SYNC TO CLOUD
         const setIsSyncing = useStore.getState().setIsSyncing;
         setIsSyncing(true);
-        setMessage({ type: 'success', text: 'Mise à jour du serveur (Mode Remplacement)...' });
+        setMessage({ type: 'success', text: `Mise à jour du serveur (${replace ? 'Mode Remplacement' : 'Mode Fusion'})...` });
         const { syncToBackend } = await import('../services/backendSync');
         const currentState = useStore.getState();
+        
+        // ATTENTION : On n'envoie JAMAIS replace=true au backend depuis le fichier Excel
+        // sinon le backend supprimerait la totalité des notes, présences et paiements!
         const syncResult = await syncToBackend({ 
           students: newStudents,
-          parents: currentState.parents,
-          presences: [], // On envoie vide car on vient de tout supprimer
-          activityLogs: [] // On envoie vide car on vient de tout supprimer
-        }, replace);
+          parents: currentState.parents
+        }, false);
         setIsSyncing(false);
 
         if (syncResult) {
           useStore.getState().setLastSyncTimestamp(Date.now());
           
-          // Si on a remplacé, on vide aussi les présences et logs localement 
-          // car le serveur les a vidés côté cloud
-          if (replace) {
-            useStore.setState({ presences: [], activityLogs: [] });
-          }
-
-          setIsSyncing(false);
           setMessage({ 
             type: 'success', 
-            text: `${imported.length} élèves importés et synchronisés avec succès ! (Mode Remplacement)` 
+            text: `${imported.length} élèves importés et synchronisés avec succès !` 
           });
         } else {
-          setIsSyncing(false);
           setMessage({ 
             type: 'error', 
-            text: 'Importés localement mais échec de la synchronisation cloud.' 
+            text: 'Importés localement mais échec de l\'enregistrement cloud.' 
           });
         }
       }

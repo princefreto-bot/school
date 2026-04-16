@@ -3,7 +3,7 @@ import { Student } from '../types';
 import { CLASSES } from '../data/classes';
 import { generateId, getCycleFromClasse, getEcolageFromClasse } from './helpers';
 
-export const importExcel = (file: File): Promise<Student[]> => {
+export const importExcel = (file: File, existingStudents?: Student[]): Promise<Student[]> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
@@ -70,7 +70,13 @@ export const importExcel = (file: File): Promise<Student[]> => {
           const restant = row[10] === 'SOLDE' ? 0 : (Number(row[10]) || Math.max(0, ecolage - dejaPaye));
           const recu = String(row[11] || '').trim();
           
-          const studentId = generateId();
+          const existingStudent = existingStudents?.find(s => 
+            s.nom.toLowerCase() === nom.toLowerCase() && 
+            s.prenom.toLowerCase() === prenom.toLowerCase() && 
+            s.classe.toLowerCase() === validClasse.toLowerCase()
+          );
+          
+          const studentId = existingStudent ? existingStudent.id : generateId();
           const student: Student = {
             id: studentId,
             nom,
@@ -87,9 +93,9 @@ export const importExcel = (file: File): Promise<Student[]> => {
             cycle: getCycleFromClasse(validClasse),
             dateInscription: new Date().toISOString(),
             status: 'Non soldé', // Will be recomputed by store anyway
-            createdAt: new Date().toISOString(),
+            createdAt: existingStudent ? existingStudent.createdAt : new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            historiquesPaiements: dejaPaye > 0 ? [{
+            historiquesPaiements: existingStudent ? existingStudent.historiquesPaiements : (dejaPaye > 0 ? [{
               id: generateId(),
               studentId: studentId,
               montant: dejaPaye,
@@ -97,7 +103,7 @@ export const importExcel = (file: File): Promise<Student[]> => {
               recu: recu || 'Import initial',
               methode: 'Espèces',
               reference: 'Import initial'
-            }] : []
+            }] : [])
           };
           
           students.push(student);
