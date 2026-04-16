@@ -164,19 +164,18 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
 
                     {/* CADRE PHOTO PASSEPORT — agrandi */}
                     <div
-                        className="border-l-[1.5px] border-black flex items-center justify-center flex-shrink-0"
-                        style={{ width: '35mm', minHeight: '32mm' }}
+                        className="border-l-[1.5px] border-black flex-shrink-0 relative bg-[#f8f8f8]"
+                        style={{ width: '35mm', minHeight: '35mm' }}
                     >
                         {studentPhoto ? (
                             <img
                                 src={studentPhoto}
                                 alt="Photo élève"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                         ) : (
                             <div
-                                className="flex flex-col items-center justify-center w-full h-full"
-                                style={{ background: '#f0f0f0' }}
+                                className="absolute inset-0 flex flex-col items-center justify-center w-full h-full"
                             >
                                 <svg viewBox="0 0 60 80" width="44" height="56" xmlns="http://www.w3.org/2000/svg" opacity={0.28}>
                                     <circle cx="30" cy="22" r="16" fill="#555" />
