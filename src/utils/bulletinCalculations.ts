@@ -6,6 +6,7 @@ export interface MatiereLigneResultat {
     coef: number;
     noteClasse: number | null;
     noteDevoir: number | null;
+    moyenneClasseMatiere: number | null;
     noteCompo: number | null;
     moyenneMatiere: number | null;
     totalPoints: number | null;
@@ -86,7 +87,7 @@ export const calculerBulletinsClasse = (
     // Structure: [eleveId][matiereId] = moyenne
     const matricesMoyennesMatieres: Record<string, Record<string, number>> = {};
     
-    const bulletinsBruts = elevesDeLaClasse.map(eleve => {
+    const bulletinsBruts: BulletinEleveResultat[] = elevesDeLaClasse.map(eleve => {
         matricesMoyennesMatieres[eleve.id] = {};
         
         let totalCoefsGen = 0;
@@ -114,13 +115,18 @@ export const calculerBulletinsClasse = (
             const nc_compo = n?.noteCompo ?? null;
 
             let avgMatiere: number | null = null;
+            let moyClasseMat: number | null = null;
             
-            // Logique de calcul Togolaise (Exemple standard: (Interro + Devoir + Compo) / 3 ou similaire)
-            // Pour simplifier ici: Si les 3 sont là: (NC + ND + NC_COMPO) / 3
-            // S'il manque 1: on divise par 2, etc. (ajustez selon la vraie formule DRE)
-            const notesValides = [nc, nd, nc_compo].filter(x => x !== null) as number[];
-            if (notesValides.length > 0) {
-                avgMatiere = notesValides.reduce((a,b) => a+b, 0) / notesValides.length;
+            // Calculer "Moyenne de classe" : (cl. + dev.) / 2
+            const notesEvaluations = [nc, nd].filter(x => x !== null) as number[];
+            if (notesEvaluations.length > 0) {
+                moyClasseMat = notesEvaluations.reduce((a,b) => a+b, 0) / notesEvaluations.length;
+            }
+
+            // Calculer "Moyenne Matière" : (moyClasseMat + compo) / 2
+            const paramPourMoyenne = [moyClasseMat, nc_compo].filter(x => x !== null) as number[];
+            if (paramPourMoyenne.length > 0) {
+                avgMatiere = paramPourMoyenne.reduce((a,b) => a+b, 0) / paramPourMoyenne.length;
                 matricesMoyennesMatieres[eleve.id][mat.id] = avgMatiere;
             }
 
@@ -137,6 +143,7 @@ export const calculerBulletinsClasse = (
                 coef: cm.coefficient,
                 noteClasse: nc,
                 noteDevoir: nd,
+                moyenneClasseMatiere: moyClasseMat ? parseFloat(moyClasseMat.toFixed(2)) : null,
                 noteCompo: nc_compo,
                 moyenneMatiere: avgMatiere ? parseFloat(avgMatiere.toFixed(2)) : null,
                 totalPoints: pts ? parseFloat(pts.toFixed(2)) : null,
@@ -214,10 +221,20 @@ export const calculerBulletinsClasse = (
                             x.matiereId === cm.matiereId &&
                             x.periode === p
                         );
-                        const vals = [n?.noteClasse ?? null, n?.noteDevoir ?? null, n?.noteCompo ?? null]
-                            .filter(x => x !== null) as number[];
-                        if (vals.length > 0) {
-                            const avg = vals.reduce((a, v) => a + v, 0) / vals.length;
+                        const nc = n?.noteClasse ?? null;
+                        const nd = n?.noteDevoir ?? null;
+                        const nc_compo = n?.noteCompo ?? null;
+
+                        let moyClasseMat = null;
+                        const evalNotes = [nc, nd].filter(x => x !== null) as number[];
+                        if(evalNotes.length > 0) {
+                            moyClasseMat = evalNotes.reduce((a,v) => a+v, 0) / evalNotes.length;
+                        }
+
+                        const finalNotes = [moyClasseMat, nc_compo].filter(x => x !== null) as number[];
+
+                        if (finalNotes.length > 0) {
+                            const avg = finalNotes.reduce((a, v) => a + v, 0) / finalNotes.length;
                             totalPts += avg * cm.coefficient;
                             totalCoefs += cm.coefficient;
                         }

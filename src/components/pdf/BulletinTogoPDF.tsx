@@ -190,14 +190,15 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                 {/* ──────────────── TABLEAU DES NOTES ──────────────── */}
                 <table className="w-full border-collapse border-[1.5px] border-black text-[9px]" style={{ tableLayout: 'fixed' }}>
                     <colgroup>
-                        <col style={{ width: '19%' }} />
+                        <col style={{ width: '18%' }} />
+                        <col style={{ width: '5.5%' }} />
+                        <col style={{ width: '5.5%' }} />
                         <col style={{ width: '6%' }} />
+                        <col style={{ width: '5.5%' }} />
                         <col style={{ width: '6%' }} />
-                        <col style={{ width: '6%' }} />
-                        <col style={{ width: '7%' }} />
+                        <col style={{ width: '4%' }} />
                         <col style={{ width: '5%' }} />
-                        <col style={{ width: '6%' }} />
-                        <col style={{ width: '5%' }} />
+                        <col style={{ width: '4.5%' }} />
                         <col style={{ width: '14%' }} />
                         <col style={{ width: '14%' }} />
                         <col style={{ width: '12%' }} />
@@ -207,6 +208,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                             <th className="border-[1.5px] border-black p-0.5">MATIÈRES</th>
                             <th className="border-[1.5px] border-black p-0.5">CL.<br/>(/20)</th>
                             <th className="border-[1.5px] border-black p-0.5">DEV.<br/>(/20)</th>
+                            <th className="border-[1.5px] border-black p-0.5" style={{ fontSize: '7px' }}>MOY.<br/>CL.</th>
                             <th className="border-[1.5px] border-black p-0.5">COMP.<br/>(/20)</th>
                             <th className="border-[1.5px] border-black p-0.5">MOY.<br/>(/20)</th>
                             <th className="border-[1.5px] border-black p-0.5">COEF</th>
@@ -221,7 +223,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                         {data.categories.map((cat) => (
                             <React.Fragment key={cat.categorie}>
                                 <tr className="bg-gray-100 font-bold">
-                                    <td colSpan={11} className="border-[1.5px] border-black p-0.5 pl-1.5 text-[8.5px] uppercase">
+                                    <td colSpan={12} className="border-[1.5px] border-black p-0.5 pl-1.5 text-[8.5px] uppercase">
                                         {cat.categorie}
                                     </td>
                                 </tr>
@@ -230,6 +232,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                                         <td className="border-[1.5px] border-black p-0.5 text-left uppercase font-bold text-[10px] leading-tight">{l.matiere.nom}</td>
                                         <td className="border-[1.5px] border-black p-0.5 font-bold text-[11px]">{l.noteClasse !== null ? l.noteClasse : '-'}</td>
                                         <td className="border-[1.5px] border-black p-0.5 font-bold text-[11px]">{l.noteDevoir !== null ? l.noteDevoir : '-'}</td>
+                                        <td className="border-[1.5px] border-black p-0.5 font-black text-[11px] text-blue-900 bg-blue-50">{l.moyenneClasseMatiere !== null ? l.moyenneClasseMatiere : '-'}</td>
                                         <td className="border-[1.5px] border-black p-0.5 font-bold text-[11px]">{l.noteCompo !== null ? l.noteCompo : '-'}</td>
                                         <td className="border-[1.5px] border-black p-0.5 font-black text-[12px] bg-gray-50">{l.moyenneMatiere !== null ? l.moyenneMatiere : '-'}</td>
                                         <td className="border-[1.5px] border-black p-0.5 font-bold text-[11px]">{l.coef}</td>
@@ -248,7 +251,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                                 ))}
                                 {/* SOUS TOTAL CATÉGORIE */}
                                 <tr className="bg-gray-50 font-bold border-black border-t-[1.5px]">
-                                    <td colSpan={5} className="border-[1.5px] border-black p-0.5 text-right italic text-[9.5px] font-semibold">
+                                    <td colSpan={6} className="border-[1.5px] border-black p-0.5 text-right italic text-[9.5px] font-semibold">
                                         Sous-Total {cat.categorie.split('-')[1]}
                                     </td>
                                     <td className="border-[1.5px] border-black p-0.5 text-center font-bold text-[11px]">{cat.totalCoefs}</td>
@@ -259,7 +262,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                         ))}
                         {/* TOTAL GÉNÉRAL */}
                         <tr className="font-black bg-gray-200 border-t-[2px] border-black text-[11px]">
-                            <td colSpan={5} className="border-[1.5px] border-black p-0.5 text-right uppercase tracking-wider">TOTAL GÉNÉRAL</td>
+                            <td colSpan={6} className="border-[1.5px] border-black p-0.5 text-right uppercase tracking-wider">TOTAL GÉNÉRAL</td>
                             <td className="border-[1.5px] border-black p-0.5 text-center text-[12px] text-blue-900">{data.totalCoefsGeneral}</td>
                             <td className="border-[1.5px] border-black p-0.5 text-center text-[13px] text-rose-900 bg-rose-100">{data.totalPointsGeneral.toFixed(2)}</td>
                             <td colSpan={4} className="border-[1.5px] border-black p-0.5"></td>
