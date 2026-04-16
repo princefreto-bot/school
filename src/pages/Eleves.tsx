@@ -6,7 +6,7 @@ import { useStore } from '../store/useStore';
 import { Student } from '../types';
 import { CLASS_CONFIG } from '../data/classConfig';
 import { generateRecuPDF } from '../utils/pdfGenerator';
-import { uploadStudentPhoto } from '../services/photoService';
+import { uploadStudentPhoto, deleteStudentPhoto } from '../services/photoService';
 import {
   Search, Plus, Trash2, Edit2, FileText,
   MessageCircle, ChevronUp, ChevronDown, X, Check,
@@ -157,10 +157,11 @@ const WhatsAppBtn: React.FC<{ student: Student; schoolName: string }> = ({ stude
 };
 
 // ── Photo Modal ──────────────────────────────────────────────
-const PhotoModal: React.FC<{ student: Student; onClose: () => void; onSave: (b64: string) => Promise<void>; }> = ({ student, onClose, onSave }) => {
+const PhotoModal: React.FC<{ student: Student; onClose: () => void; onSave: (b64: string) => Promise<void>; onDelete: () => Promise<void>; }> = ({ student, onClose, onSave, onDelete }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string>(student.photoUrl || '');
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -174,6 +175,13 @@ const PhotoModal: React.FC<{ student: Student; onClose: () => void; onSave: (b64
     if (!preview || !preview.startsWith('data:image')) return;
     setSaving(true);
     try { await onSave(preview); } finally { setSaving(false); onClose(); }
+  };
+
+  const handleDelete = async () => {
+    if (confirm('Voulez-vous vraiment supprimer cette photo ?')) {
+        setDeleting(true);
+        try { await onDelete(); } finally { setDeleting(false); onClose(); }
+    }
   };
 
   return (
@@ -204,9 +212,15 @@ const PhotoModal: React.FC<{ student: Student; onClose: () => void; onSave: (b64
           </div>
           <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           
-          <div className="flex gap-3 w-full mt-4">
+          {(student.photoUrl || preview) && (
+             <button onClick={handleDelete} disabled={deleting} className="text-red-500 hover:text-red-600 text-xs font-medium flex items-center gap-1 mb-2">
+                 <Trash2 className="w-3.5 h-3.5" /> {deleting ? 'Suppression...' : 'Supprimer la photo actuelle'}
+             </button>
+          )}
+
+          <div className="flex gap-3 w-full mt-2">
             <button onClick={onClose} className="flex-1 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Annuler</button>
-            <button onClick={handleSave} disabled={saving || !preview} className="flex-1 py-2.5 bg-amber-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-colors flex items-center justify-center gap-2">
+            <button onClick={handleSave} disabled={saving || !preview || preview === student.photoUrl} className="flex-1 py-2.5 bg-amber-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-colors flex items-center justify-center gap-2">
               {saving ? 'Enregistrement...' : 'Valider'}
             </button>
           </div>
@@ -472,6 +486,10 @@ export const Eleves: React.FC = () => {
           onSave={async (b64) => {
             const uploadedUrl = await uploadStudentPhoto(photoModal.student!.id, b64);
             updateStudent(photoModal.student!.id, { photoUrl: uploadedUrl || b64 });
+          }}
+          onDelete={async () => {
+            await deleteStudentPhoto(photoModal.student!.id);
+            updateStudent(photoModal.student!.id, { photoUrl: null });
           }}
         />
       )}
