@@ -364,15 +364,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Admin: sync + parent count polling
+  // Admin: parent count polling
   useEffect(() => {
     if (user?.role !== 'parent') {
-      if (students.length > 0) {
-        import('../services/backendSync').then(({ syncToBackend }) => {
-          const t = setTimeout(() => syncToBackend({ students, parents }).catch(() => {}), 100);
-          return () => clearTimeout(t);
-        });
-      }
       const fetchCount = async () => {
         try {
           const ctrl = new AbortController();
@@ -385,7 +379,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       const iv = setInterval(fetchCount, 30000);
       return () => clearInterval(iv);
     }
-  }, [students, parents, user?.role, setConnectedParentsCount]);
+  }, [user?.role, setConnectedParentsCount]);
 
   // Parent: unread messages polling
   useEffect(() => {

@@ -101,7 +101,7 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
  */
 export async function fetchFromBackend() {
     try {
-        const response = await fetch(`${BACKEND_URL}/api/sync`, {
+        const response = await fetch(`${BACKEND_URL}/api/sync?t=${Date.now()}`, {
             method: 'GET',
             headers: getAuthHeaders(),
         });

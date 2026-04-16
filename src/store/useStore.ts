@@ -196,17 +196,23 @@ const deduplicateStudents = (list: Student[]): { list: Student[]; countRemoved: 
     } else {
       removedCount++;
       const existing = seenByNameClass.get(key)!;
-      console.warn(`[Deduplicate] Doublon sémantique détecté pour ${s.prenom} ${s.nom} : Fusion des données.`);
+      
+      // On garde le plus récent ou celui qui a le plus de paiements
+      const existingUpdatedAt = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
+      const sUpdatedAt = s.updatedAt ? new Date(s.updatedAt).getTime() : 0;
       
       const shouldReplace = (s.historiquesPaiements?.length || 0) > (existing.historiquesPaiements?.length || 0) || 
-                            new Date(s.updatedAt) > new Date(existing.updatedAt);
+                            sUpdatedAt > existingUpdatedAt;
       
       if (shouldReplace) {
         const allPayments = [...(existing.historiquesPaiements || []), ...(s.historiquesPaiements || [])];
         const uniquePayments = Array.from(new Map(allPayments.map(p => [p.id, p])).values());
         const merged = { ...s, historiquesPaiements: uniquePayments };
         seenByNameClass.set(key, merged);
-        const idx = result.findIndex(r => (r.nom === s.nom && r.prenom === s.prenom && r.classe === s.classe));
+        const idx = result.findIndex(r => {
+           const rKey = `${(r.nom || '').trim().toLowerCase()}|${((r.prenom || '')).trim().toLowerCase()}|${(r.classe || '').trim().toLowerCase()}`;
+           return rKey === key;
+        });
         if (idx !== -1) result[idx] = merged;
       } else {
         const allPayments = [...(existing.historiquesPaiements || []), ...(s.historiquesPaiements || [])];
@@ -894,24 +900,25 @@ export const useStore = create<AppState>()(
           // 👨‍🎓 ÉLÈVES & DONNÉES — AUTORITÉ CLOUD
           // ════════════════════════════════════════════════════════
           if (Array.isArray(data.students)) {
+            const rawCount = data.students.length;
             const { list: repairedStudents, countRemoved } = deduplicateStudents(data.students.map(repairStudent));
             
-            // On écrase tout avec les données du Cloud pour garantir la synchronisation
             set({
               students: repairedStudents,
               presences: data.presences || [],
               activityLogs: data.activityLogs || [],
-              links: data.links || []
+              links: data.links || [],
+              lastSyncTimestamp: Date.now() // Bloque le polling et synchro sortante immédiate
             });
-            console.log(`✅ [Sync] ${repairedStudents.length} élèves chargés (Source: Cloud).`);
 
-            // 🛡 SÉCURITÉ ANTI-DOUBLONS : Si le Cloud nous a envoyé des doublons, on les éradique 
-            // immédiatement à la source pour éviter qu'ils ne reviennent lors du prochain polling.
             if (countRemoved > 0) {
-              console.warn(`🚨 [Sync] ${countRemoved} doublons détectés sur le Cloud. Lancément d'un nettoyage forcé...`);
+              console.warn(`🧹 [Sync] Déduplication effectuée : ${rawCount} reçus -> ${repairedStudents.length} uniques (${countRemoved} doublons supprimés).`);
+              console.log("🚀 Lancement du nettoyage permanent sur le Cloud...");
               import('../services/backendSync').then(({ syncToBackend }) => {
-                syncToBackend(get(), true); // true = replace mode
+                syncToBackend(get(), true); 
               });
+            } else {
+              console.log(`✅ [Sync] ${repairedStudents.length} élèves chargés (Source: Cloud).`);
             }
           }
 
