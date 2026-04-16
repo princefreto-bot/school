@@ -166,15 +166,17 @@ const computeStatus = (restant: number, ecolage: number) => {
 };
 
 // Déduplication des élèves (Autorité sur l'ID, puis sur le couple Nom+Prénom+Classe)
-const deduplicateStudents = (list: Student[]): Student[] => {
+const deduplicateStudents = (list: Student[]): { list: Student[]; countRemoved: number } => {
   const seenById = new Map<string, Student>();
   const seenByNameClass = new Map<string, Student>();
+  let removedCount = 0;
   
   // 1. Déduplication par ID (Technique)
   list.forEach(s => {
     if (!seenById.has(s.id)) {
       seenById.set(s.id, s);
     } else {
+      removedCount++;
       const existing = seenById.get(s.id)!;
       if (new Date(s.updatedAt) > new Date(existing.updatedAt)) {
         seenById.set(s.id, s);
@@ -186,33 +188,27 @@ const deduplicateStudents = (list: Student[]): Student[] => {
   const result: Student[] = [];
 
   // 2. Déduplication par Nom + Prénom + Classe (Métier)
-  // Utile si des imports ont créé des doublons avec des IDs différents
   uniqueById.forEach(s => {
-    const key = `${s.nom.trim().toLowerCase()}|${(s.prenom || '').trim().toLowerCase()}|${s.classe.trim().toLowerCase()}`;
+    const key = `${(s.nom || '').trim().toLowerCase()}|${((s.prenom || '')).trim().toLowerCase()}|${(s.classe || '').trim().toLowerCase()}`;
     if (!seenByNameClass.has(key)) {
       seenByNameClass.set(key, s);
       result.push(s);
     } else {
+      removedCount++;
       const existing = seenByNameClass.get(key)!;
-      console.warn(`[Deduplicate] Doublon détecté pour ${s.prenom} ${s.nom} : Fusion des données.`);
+      console.warn(`[Deduplicate] Doublon sémantique détecté pour ${s.prenom} ${s.nom} : Fusion des données.`);
       
-      // On garde le plus récent ou celui qui a le plus de paiements
       const shouldReplace = (s.historiquesPaiements?.length || 0) > (existing.historiquesPaiements?.length || 0) || 
                             new Date(s.updatedAt) > new Date(existing.updatedAt);
       
       if (shouldReplace) {
-        // Fusion des historiques de paiements pour ne rien perdre
         const allPayments = [...(existing.historiquesPaiements || []), ...(s.historiquesPaiements || [])];
         const uniquePayments = Array.from(new Map(allPayments.map(p => [p.id, p])).values());
-        
         const merged = { ...s, historiquesPaiements: uniquePayments };
         seenByNameClass.set(key, merged);
-        
-        // Update the result array
-        const idx = result.findIndex(r => r.id === existing.id);
+        const idx = result.findIndex(r => (r.nom === s.nom && r.prenom === s.prenom && r.classe === s.classe));
         if (idx !== -1) result[idx] = merged;
       } else {
-        // Fusion des historiques dans l'existant
         const allPayments = [...(existing.historiquesPaiements || []), ...(s.historiquesPaiements || [])];
         const uniquePayments = Array.from(new Map(allPayments.map(p => [p.id, p])).values());
         existing.historiquesPaiements = uniquePayments;
@@ -220,7 +216,7 @@ const deduplicateStudents = (list: Student[]): Student[] => {
     }
   });
 
-  return result;
+  return { list: result, countRemoved: removedCount };
 };
 
 // Réparation des données (cycle, écolage, restant, status)
@@ -426,7 +422,7 @@ export const useStore = create<AppState>()(
 
       // ── Élèves ───────────────────────────────────────────
       students: [],
-      setStudents: (students) => set({ students: deduplicateStudents(students.map(repairStudent)) }),
+      setStudents: (students) => set({ students: deduplicateStudents(students.map(repairStudent)).list }),
       addStudent: (data) => {
         const ecolage = getEcolage((data as { classe: string }).classe);
         const restant = ecolage - ((data as { dejaPaye?: number }).dejaPaye || 0);
@@ -898,7 +894,7 @@ export const useStore = create<AppState>()(
           // 👨‍🎓 ÉLÈVES & DONNÉES — AUTORITÉ CLOUD
           // ════════════════════════════════════════════════════════
           if (Array.isArray(data.students)) {
-            const repairedStudents = deduplicateStudents(data.students.map(repairStudent));
+            const { list: repairedStudents, countRemoved } = deduplicateStudents(data.students.map(repairStudent));
             
             // On écrase tout avec les données du Cloud pour garantir la synchronisation
             set({
@@ -908,6 +904,15 @@ export const useStore = create<AppState>()(
               links: data.links || []
             });
             console.log(`✅ [Sync] ${repairedStudents.length} élèves chargés (Source: Cloud).`);
+
+            // 🛡 SÉCURITÉ ANTI-DOUBLONS : Si le Cloud nous a envoyé des doublons, on les éradique 
+            // immédiatement à la source pour éviter qu'ils ne reviennent lors du prochain polling.
+            if (countRemoved > 0) {
+              console.warn(`🚨 [Sync] ${countRemoved} doublons détectés sur le Cloud. Lancément d'un nettoyage forcé...`);
+              import('../services/backendSync').then(({ syncToBackend }) => {
+                syncToBackend(get(), true); // true = replace mode
+              });
+            }
           }
 
           // Annonces et reads venant du cloud
@@ -1174,7 +1179,7 @@ export const useStore = create<AppState>()(
         if (state) {
           if (state.students && state.students.length > 0) {
             // Déduplication agressive pour éradiquer les doublons (Nom+Prénom+Classe)
-            state.students = deduplicateStudents(state.students.map(repairStudent));
+            state.students = deduplicateStudents(state.students.map(repairStudent)).list;
           }
 
           // Sécurité — Empêcher la re-connexion automatique de switcher un parent sur l'admin

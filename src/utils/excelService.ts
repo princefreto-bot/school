@@ -21,7 +21,16 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         
-        const students: Student[] = [];
+        const studentsMap = new Map<string, Student>();
+        const existingMap = new Map<string, Student>();
+        
+        // Map existing students for quick lookup
+        if (existingStudents) {
+          existingStudents.forEach(s => {
+            const key = `${(s.nom || '').trim().toLowerCase()}|${((s.prenom || '')).trim().toLowerCase()}|${(s.classe || '').trim().toLowerCase()}`;
+            existingMap.set(key, s);
+          });
+        }
         
         // Skip header row (index 0), data starts at row 2 (index 1)
         for (let i = 1; i < jsonData.length; i++) {
@@ -34,13 +43,12 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
           const classe = String(row[3] || '').trim();
           const telephone = String(row[4] || '').trim();
           const sexe = String(row[5] || 'M').trim().toUpperCase() === 'F' ? 'F' : 'M';
-          const redoublant = String(row[6] || '').toLowerCase() === 'oui';
+          const redoublant = String(row[6] || '').toLowerCase() === 'oui' || String(row[6] || '').toLowerCase() === 'yes';
           const ecoleProvenance = String(row[7] || '').trim();
           
           // Validate classe - support various naming conventions
           const allClasses = CLASSES.map(c => c.nom);
           
-          // Map of common variations to standard class names
           const classeNormalized = classe.toUpperCase().trim()
             .replace(/È/g, 'E')
             .replace(/É/g, 'E');
@@ -65,16 +73,17 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
             allClasses.find(c => c.toLowerCase() === classe.toLowerCase()) || 
             classe;
           
+          const key = `${nom.toLowerCase()}|${prenom.toLowerCase()}|${validClasse.toLowerCase()}`;
+          
+          // If we already processed this student IN THIS FILE (loop), skip to avoid internal duplicates
+          if (studentsMap.has(key)) continue;
+
           const ecolage = Number(row[8]) || getEcolageFromClasse(validClasse);
           const dejaPaye = Number(row[9]) || 0;
           const restant = row[10] === 'SOLDE' ? 0 : (Number(row[10]) || Math.max(0, ecolage - dejaPaye));
           const recu = String(row[11] || '').trim();
           
-          const existingStudent = existingStudents?.find(s => 
-            s.nom.toLowerCase() === nom.toLowerCase() && 
-            s.prenom.toLowerCase() === prenom.toLowerCase() && 
-            s.classe.toLowerCase() === validClasse.toLowerCase()
-          );
+          const existingStudent = existingMap.get(key);
           
           const studentId = existingStudent ? existingStudent.id : generateId();
           const student: Student = {
@@ -91,8 +100,8 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
             restant,
             recu,
             cycle: getCycleFromClasse(validClasse),
-            dateInscription: new Date().toISOString(),
-            status: 'Non soldé', // Will be recomputed by store anyway
+            dateInscription: existingStudent ? existingStudent.dateInscription : new Date().toISOString(),
+            status: 'Non soldé', 
             createdAt: existingStudent ? existingStudent.createdAt : new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             historiquesPaiements: existingStudent ? existingStudent.historiquesPaiements : (dejaPaye > 0 ? [{
@@ -106,10 +115,10 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
             }] : [])
           };
           
-          students.push(student);
+          studentsMap.set(key, student);
         }
         
-        resolve(students);
+        resolve(Array.from(studentsMap.values()));
       } catch (error) {
         reject(new Error('Erreur lors de la lecture du fichier Excel'));
       }

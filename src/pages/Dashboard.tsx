@@ -86,17 +86,9 @@ export const Dashboard: React.FC = () => {
           // 1. Récupérer les données fraîches du serveur (Single Source of Truth)
           const fetchAllFromBackend = useStore.getState().fetchAllFromBackend;
           await fetchAllFromBackend();
-
-          // 2. Sync background si on a des données locales 
-          const currentStudents = useStore.getState().students;
-          if (currentStudents.length > 0) {
-            syncToBackend({
-              students: currentStudents,
-              parents,
-              presences: useStore.getState().presences,
-              activityLogs: useStore.getState().activityLogs
-            });
-          }
+          
+          // La synchronisation inverse (Local -> Cloud) est désormais gérée 
+          // intelligemment dans fetchAllFromBackend si des doublons sont détectés.
         }
       };
       initSync();

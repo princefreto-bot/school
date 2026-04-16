@@ -45,7 +45,29 @@ async function syncFromFrontend(req, res) {
 
         // --- 1. Sync Students ---
         if (students.length > 0) {
-            const studentData = students.map(s => ({
+            // Déduplication SÉMANTIQUE (Métier) pour éviter que le Cloud n'accumule des doublons
+            // avec des IDs techniques différents.
+            const uniqueStudentsMap = new Map();
+            
+            // Priorité : on garde le plus récent ou celui qui a le plus d'infos si doublon
+            students.forEach(s => {
+                const key = `${(s.nom || '').trim().toLowerCase()}|${((s.prenom || '')).trim().toLowerCase()}|${(s.classe || '').trim().toLowerCase()}`;
+                if (!uniqueStudentsMap.has(key)) {
+                    uniqueStudentsMap.set(key, s);
+                } else {
+                    const existing = uniqueStudentsMap.get(key);
+                    // On garde celui qui est le plus complet ou le plus récent
+                    const sDate = s.updatedAt ? new Date(s.updatedAt).getTime() : 0;
+                    const eDate = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
+                    if (sDate > eDate || (s.historiquesPaiements?.length || 0) > (existing.historiquesPaiements?.length || 0)) {
+                        uniqueStudentsMap.set(key, s);
+                    }
+                }
+            });
+
+            const uniqueStudents = Array.from(uniqueStudentsMap.values());
+
+            const studentData = uniqueStudents.map(s => ({
                 id: s.id,
                 nom: s.nom,
                 prenom: s.prenom || '',
