@@ -46,14 +46,11 @@ const formatRang = (rank: number): string => {
 };
 
 const getAppreciation = (moy: number): string => {
-    if (moy >= 18) return 'Excellent';
-    if (moy >= 16) return 'Très Bien';
+    if (moy >= 16) return 'Excellent';
     if (moy >= 14) return 'Bien';
     if (moy >= 12) return 'Assez Bien';
     if (moy >= 10) return 'Passable';
-    if (moy >= 8) return 'Insuffisant';
-    if (moy >= 5) return 'Médiocre';
-    return 'Mauvais';
+    return 'Mal';
 };
 
 /**
@@ -63,7 +60,6 @@ const getAppreciation = (moy: number): string => {
  */
 const getPeriodesAntérieures = (periode: PeriodeType): PeriodeType[] => {
     switch (periode) {
-        case 'TRIMESTRE 2': return ['TRIMESTRE 1'];
         case 'TRIMESTRE 3': return ['TRIMESTRE 1', 'TRIMESTRE 2'];
         case 'SEMESTRE 2':  return ['SEMESTRE 1'];
         default:            return [];
