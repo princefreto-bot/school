@@ -267,28 +267,58 @@ export const ImportExport = () => {
             </div>
 
             {/* Danger Zone: Manual Reset */}
-            <div className="p-3 sm:p-4 border border-red-100 bg-red-50/50 rounded-lg">
-              <p className="font-medium text-red-800 text-sm sm:text-base mb-1">Zone de danger</p>
-              <p className="text-xs text-red-600 mb-3">Videz manuellement la base de données cloud si la synchronisation est bloquée.</p>
-              <button
-                onClick={async () => {
-                  if (confirm('ÊTES-VOUS SÛR ? Cela supprimera TOUS les élèves, paiements et présences du CLOUD immédiatement.')) {
-                    setImporting(true);
-                    const success = await useStore.getState().clearCloudStudents();
-                    await useStore.getState().clearCloudPresences();
-                    setImporting(false);
-                    if (success) {
-                      setMessage({ type: 'success', text: 'Cloud vidé avec succès. Vous pouvez maintenant importer votre fichier.' });
-                    } else {
-                      setMessage({ type: 'error', text: 'Échec de la suppression cloud. Vérifiez votre connexion.' });
+            <div className="p-3 sm:p-4 border border-amber-100 bg-amber-50/50 rounded-lg">
+              <p className="font-medium text-amber-800 text-sm sm:text-base mb-1">Maintenance & Nettoyage</p>
+              <p className="text-xs text-amber-600 mb-3">Si vous voyez des doublons (750 au lieu de 350), utilisez ce bouton pour nettoyer le Cloud et renvoyer vos données locales propres.</p>
+              
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={async () => {
+                    if (confirm('Voulez-vous Nettoyer le Cloud ? Les données du Cloud seront remplacées par vos données locales actuelles (sans doublons).')) {
+                      setImporting(true);
+                      setMessage({ type: 'success', text: 'Nettoyage du Cloud en cours...' });
+                      try {
+                        const { syncToBackend } = await import('../services/backendSync');
+                        const state = useStore.getState();
+                        const result = await syncToBackend(state, true); // true = replace
+                        if (result) {
+                          setMessage({ type: 'success', text: 'Cloud nettoyé et synchronisé avec succès !' });
+                        } else {
+                          setMessage({ type: 'error', text: 'Échec du nettoyage Cloud.' });
+                        }
+                      } catch (err) {
+                        setMessage({ type: 'error', text: 'Erreur technique pendant le nettoyage.' });
+                      } finally {
+                        setImporting(false);
+                      }
                     }
-                  }
-                }}
-                className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
-              >
-                <AlertCircle className="w-4 h-4" />
-                Vider tout le Cloud (RAZ)
-              </button>
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition text-sm font-medium"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Nettoyer le Cloud (Fix Doublons)
+                </button>
+
+                <button
+                  onClick={async () => {
+                    if (confirm('ÊTES-VOUS SÛR ? Cela supprimera TOUS les élèves, paiements et présences du CLOUD immédiatement.')) {
+                      setImporting(true);
+                      const success = await useStore.getState().clearCloudStudents();
+                      await useStore.getState().clearCloudPresences();
+                      setImporting(false);
+                      if (success) {
+                        setMessage({ type: 'success', text: 'Cloud vidé avec succès.' });
+                      } else {
+                        setMessage({ type: 'error', text: 'Échec de la suppression cloud.' });
+                      }
+                    }
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2 px-4 text-red-600 hover:bg-red-50 transition text-xs border border-red-100 rounded-lg"
+                >
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  Réinitialisation Totale (RAZ)
+                </button>
+              </div>
             </div>
           </div>
         </div>

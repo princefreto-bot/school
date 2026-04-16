@@ -165,22 +165,62 @@ const computeStatus = (restant: number, ecolage: number) => {
   return 'Non soldé' as const;
 };
 
-// DǸduplication des ?lǸves par ID (PrioritǸ à l'ID technique du Cloud)
+// Déduplication des élèves (Autorité sur l'ID, puis sur le couple Nom+Prénom+Classe)
 const deduplicateStudents = (list: Student[]): Student[] => {
-  const seen = new Map<string, Student>();
+  const seenById = new Map<string, Student>();
+  const seenByNameClass = new Map<string, Student>();
+  
+  // 1. Déduplication par ID (Technique)
   list.forEach(s => {
-    // On utilise l'ID comme clǸ unique absolue pour Ǹviter de perdre des ǸlǸves ayant le mǦme nom
-    if (!seen.has(s.id)) {
-      seen.set(s.id, s);
+    if (!seenById.has(s.id)) {
+      seenById.set(s.id, s);
     } else {
-      // Si mǦme ID (trǸs rare), on garde le plus rǸcent
-      const existing = seen.get(s.id)!;
+      const existing = seenById.get(s.id)!;
       if (new Date(s.updatedAt) > new Date(existing.updatedAt)) {
-        seen.set(s.id, s);
+        seenById.set(s.id, s);
       }
     }
   });
-  return Array.from(seen.values());
+
+  const uniqueById = Array.from(seenById.values());
+  const result: Student[] = [];
+
+  // 2. Déduplication par Nom + Prénom + Classe (Métier)
+  // Utile si des imports ont créé des doublons avec des IDs différents
+  uniqueById.forEach(s => {
+    const key = `${s.nom.trim().toLowerCase()}|${(s.prenom || '').trim().toLowerCase()}|${s.classe.trim().toLowerCase()}`;
+    if (!seenByNameClass.has(key)) {
+      seenByNameClass.set(key, s);
+      result.push(s);
+    } else {
+      const existing = seenByNameClass.get(key)!;
+      console.warn(`[Deduplicate] Doublon détecté pour ${s.prenom} ${s.nom} : Fusion des données.`);
+      
+      // On garde le plus récent ou celui qui a le plus de paiements
+      const shouldReplace = (s.historiquesPaiements?.length || 0) > (existing.historiquesPaiements?.length || 0) || 
+                            new Date(s.updatedAt) > new Date(existing.updatedAt);
+      
+      if (shouldReplace) {
+        // Fusion des historiques de paiements pour ne rien perdre
+        const allPayments = [...(existing.historiquesPaiements || []), ...(s.historiquesPaiements || [])];
+        const uniquePayments = Array.from(new Map(allPayments.map(p => [p.id, p])).values());
+        
+        const merged = { ...s, historiquesPaiements: uniquePayments };
+        seenByNameClass.set(key, merged);
+        
+        // Update the result array
+        const idx = result.findIndex(r => r.id === existing.id);
+        if (idx !== -1) result[idx] = merged;
+      } else {
+        // Fusion des historiques dans l'existant
+        const allPayments = [...(existing.historiquesPaiements || []), ...(s.historiquesPaiements || [])];
+        const uniquePayments = Array.from(new Map(allPayments.map(p => [p.id, p])).values());
+        existing.historiquesPaiements = uniquePayments;
+      }
+    }
+  });
+
+  return result;
 };
 
 // Réparation des données (cycle, écolage, restant, status)
@@ -391,6 +431,17 @@ export const useStore = create<AppState>()(
         const ecolage = getEcolage((data as { classe: string }).classe);
         const restant = ecolage - ((data as { dejaPaye?: number }).dejaPaye || 0);
         const studentId = uuid();
+        const existing = get().students.find(s => 
+          s.nom.toLowerCase() === data.nom.toLowerCase() && 
+          (s.prenom || '').toLowerCase() === (data.prenom || '').toLowerCase() && 
+          s.classe.toLowerCase() === data.classe.toLowerCase()
+        );
+
+        if (existing) {
+          console.warn(`[AddStudent] L'élève ${data.prenom} ${data.nom} existe déjà dans cette classe. Mise à jour de l'existant.`);
+          get().updateStudent(existing.id, data);
+          return;
+        }
 
         const student: Student = {
           ...data,
@@ -1122,7 +1173,8 @@ export const useStore = create<AppState>()(
         // Auto-réparation au chargement du storage local
         if (state) {
           if (state.students && state.students.length > 0) {
-            state.students = state.students.map(repairStudent);
+            // Déduplication agressive pour éradiquer les doublons (Nom+Prénom+Classe)
+            state.students = deduplicateStudents(state.students.map(repairStudent));
           }
 
           // Sécurité — Empêcher la re-connexion automatique de switcher un parent sur l'admin
