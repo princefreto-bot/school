@@ -353,10 +353,13 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                         </div>
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', padding: '3px 6px' }}>
                             {[
-                                { label: 'Excellent',    min: 16 },
+                                { label: 'Très Bien',    min: 16 },
                                 { label: 'Bien',         min: 14 },
                                 { label: 'Assez Bien',   min: 12 },
                                 { label: 'Passable',     min: 10 },
+                                { label: 'Insuffisant',  min: 8 },
+                                { label: 'Faible',       min: 5 },
+                                { label: 'Médiocre',     min: 0 },
                             ].map(({ label, min }, i, arr) => {
                                 const max = arr[i - 1]?.min ?? 21;
                                 const checked = data.moyenneGenerale >= min && data.moyenneGenerale < max;

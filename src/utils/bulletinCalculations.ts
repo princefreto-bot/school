@@ -47,11 +47,13 @@ const formatRang = (rank: number): string => {
 };
 
 const getAppreciation = (moy: number): string => {
-    if (moy >= 16) return 'Excellent';
+    if (moy >= 16) return 'Très Bien';
     if (moy >= 14) return 'Bien';
     if (moy >= 12) return 'Assez Bien';
     if (moy >= 10) return 'Passable';
-    return '';
+    if (moy >= 8) return 'Insuffisant';
+    if (moy >= 5) return 'Faible';
+    return 'Médiocre';
 };
 
 /**
