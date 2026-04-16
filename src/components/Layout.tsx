@@ -9,7 +9,7 @@ import {
   Bell, ChevronRight, ChevronLeft, Target, Award, MessageSquare,
   ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone,
   BookOpen, Edit3, FileSpreadsheet, Sun, Moon, Clock,
-  PanelLeftClose, PanelLeftOpen
+  PanelLeftClose, PanelLeftOpen, RefreshCw
 } from 'lucide-react';
 
 interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: number }
@@ -396,6 +396,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     }
   }, [user?.role, fetchUnreadMessages]);
 
+  const isSyncing = useStore((s) => s.isSyncing);
+
   const nonSoldes = students.filter((s) => s.status !== 'Soldé').length;
   const isParent = user?.role === 'parent';
   const baseNavItems = isParent ? PARENT_NAV_ITEMS : NAV_ITEMS;
@@ -580,6 +582,32 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
             {/* Actions */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              {/* Manual Sync Button */}
+              {!isParent && (
+                <button
+                  onClick={() => useStore.getState().fetchAllFromBackend(true)}
+                  disabled={isSyncing}
+                  title="Synchroniser avec le Cloud"
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '5px 12px',
+                    background: isSyncing ? 'var(--surface-3)' : 'var(--brand-light)',
+                    border: '1px solid var(--brand)',
+                    borderRadius: 10, cursor: 'pointer', transition: 'all 0.2s ease',
+                  }}
+                >
+                  <RefreshCw 
+                    className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} 
+                    style={{ color: 'var(--brand)' }} 
+                  />
+                  {!collapsed && (
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--brand)' }}>
+                      {isSyncing ? 'Sync...' : 'Sync Cloud'}
+                    </span>
+                  )}
+                </button>
+              )}
+
               {/* Non-soldés alert */}
               {!isParent && nonSoldes > 0 && (
                 <button

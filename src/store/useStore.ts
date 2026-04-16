@@ -165,21 +165,18 @@ const computeStatus = (restant: number, ecolage: number) => {
   return 'Non soldé' as const;
 };
 
-// Déduplication des élèves (Nom + Prénom + Classe)
+// DǸduplication des ?lǸves par ID (PrioritǸ à l'ID technique du Cloud)
 const deduplicateStudents = (list: Student[]): Student[] => {
   const seen = new Map<string, Student>();
   list.forEach(s => {
-    // Clé unique basée sur l'identité (normalisée)
-    const key = `${(s.nom || '').trim()} ${(s.prenom || '').trim()} ${(s.classe || '').trim()}`.toUpperCase();
-    if (!seen.has(key)) {
-      seen.set(key, s);
+    // On utilise l'ID comme clǸ unique absolue pour Ǹviter de perdre des ǸlǸves ayant le mǦme nom
+    if (!seen.has(s.id)) {
+      seen.set(s.id, s);
     } else {
-      // Si doublon, on garde celui qui a le plus de paiements ou le plus récent
-      const existing = seen.get(key)!;
-      const existingPaiements = existing.historiquesPaiements?.length || 0;
-      const currentPaiements = s.historiquesPaiements?.length || 0;
-      if (currentPaiements > existingPaiements) {
-        seen.set(key, s);
+      // Si mǦme ID (trǸs rare), on garde le plus rǸcent
+      const existing = seen.get(s.id)!;
+      if (new Date(s.updatedAt) > new Date(existing.updatedAt)) {
+        seen.set(s.id, s);
       }
     }
   });
@@ -847,22 +844,19 @@ export const useStore = create<AppState>()(
           }
 
           // ════════════════════════════════════════════════════════
-          // 👨‍🎓 ÉLÈVES & DONNÉES
+          // 👨‍🎓 ÉLÈVES & DONNÉES — AUTORITÉ CLOUD
           // ════════════════════════════════════════════════════════
           if (Array.isArray(data.students)) {
-            const hasCloudStudents = data.students.length > 0;
-            const hasLocalStudents = get().students.length > 0;
-
-            if (hasCloudStudents || !hasLocalStudents) {
-              const repairedStudents = deduplicateStudents(data.students.map(repairStudent));
-              set({
-                students: repairedStudents,
-                presences: data.presences || [],
-                activityLogs: data.activityLogs || [],
-                links: data.links || []
-              });
-              console.log(`✅ [Sync] ${repairedStudents.length} élèves chargés et réparés.`);
-            }
+            const repairedStudents = deduplicateStudents(data.students.map(repairStudent));
+            
+            // On écrase tout avec les données du Cloud pour garantir la synchronisation
+            set({
+              students: repairedStudents,
+              presences: data.presences || [],
+              activityLogs: data.activityLogs || [],
+              links: data.links || []
+            });
+            console.log(`✅ [Sync] ${repairedStudents.length} élèves chargés (Source: Cloud).`);
           }
 
           // Annonces et reads venant du cloud
@@ -895,40 +889,10 @@ export const useStore = create<AppState>()(
               noteCompo: n.noteCompo !== null && n.noteCompo !== undefined ? Number(n.noteCompo) : null,
             }));
 
-            const localNotes = get().notes;
-
-            if (localNotes.length > 0) {
-              // ═══════════════════════════════════════════════════════
-              // 🛡 LOCAL GAGNE TOUJOURS pour les clés en commun.
-              // On ne fait qu'ajouter les notes cloud qui n'existent 
-              // PAS localement (ex: notes saisies depuis un autre ordi).
-              // ═══════════════════════════════════════════════════════
-              const localMap = new Map();
-              localNotes.forEach(ln => {
-                const key = `${ln.eleveId}-${ln.matiereId}-${ln.periode}`;
-                localMap.set(key, ln);
-              });
-              
-              let addedFromCloud = 0;
-              cloudNotes.forEach((cn: Note) => {
-                const key = `${cn.eleveId}-${cn.matiereId}-${cn.periode}`;
-                if (!localMap.has(key)) {
-                  localMap.set(key, cn);
-                  addedFromCloud++;
-                }
-              });
-              
-              if (addedFromCloud > 0) {
-                console.log(`📝 [Sync] Notes: ${addedFromCloud} nouvelles notes ajoutées depuis le cloud, ${localNotes.length} notes locales préservées.`);
-                set({ notes: Array.from(localMap.values()) });
-              } else {
-                console.log(`📝 [Sync] Notes: ${localNotes.length} notes locales préservées (aucune nouvelle note cloud).`);
-              }
-            } else if (cloudNotes.length > 0) {
-              // Premier chargement ou nouvel appareil : on prend tout du cloud
-              console.log(`📝 [Sync] Notes: Chargement initial de ${cloudNotes.length} notes depuis le cloud.`);
-              set({ notes: cloudNotes });
-            }
+            // 🛡 AUTORITÉ CLOUD : On écrase les notes locales par celles du Cloud lors de la sync
+            // sauf si l'utilisateur est sur la page de saisie (sécurisé par le polling manuel)
+            set({ notes: cloudNotes });
+            console.log(`📝 [Sync] Notes: ${cloudNotes.length} notes synchronisées depuis le cloud.`);
           }
 
           // Mise à jour du timestamp après succès
