@@ -39,10 +39,19 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-start justify-between p-5 border-b border-gray-100 bg-slate-900 rounded-t-2xl">
-          <div>
-            <h2 className="text-lg font-bold text-white">{student.prenom} {student.nom}</h2>
-            <p className="text-slate-400 text-sm mt-0.5">{student.classe} · {student.cycle}</p>
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-slate-900 rounded-t-2xl">
+          <div className="flex items-center gap-4">
+            {student.photoUrl ? (
+              <img src={student.photoUrl} alt="Photo" className="w-14 h-14 rounded-full object-cover border-2 border-slate-700 shadow-sm" />
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-slate-800 border-2 border-slate-700 flex flex-col items-center justify-center text-slate-400 shrink-0">
+                <User className="w-5 h-5 opacity-50" />
+              </div>
+            )}
+            <div>
+              <h2 className="text-xl font-bold text-white">{student.prenom} {student.nom}</h2>
+              <p className="text-slate-400 text-sm mt-0.5">{student.classe} · {student.cycle}</p>
+            </div>
           </div>
           <button
             onClick={onClose}

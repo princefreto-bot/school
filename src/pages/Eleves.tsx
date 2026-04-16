@@ -1,15 +1,16 @@
 // ============================================================
 // PAGE ÉLÈVES — Liste, filtres, import, ajout, CRUD
 // ============================================================
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { Student } from '../types';
 import { CLASS_CONFIG } from '../data/classConfig';
 import { generateRecuPDF } from '../utils/pdfGenerator';
+import { uploadStudentPhoto } from '../services/photoService';
 import {
   Search, Plus, Trash2, Edit2, FileText,
   MessageCircle, ChevronUp, ChevronDown, X, Check,
-  Download, Filter,
+  Download, Filter, Camera, User
 } from 'lucide-react';
 import { StudentDetail } from '../components/StudentDetail';
 
@@ -155,6 +156,66 @@ const WhatsAppBtn: React.FC<{ student: Student; schoolName: string }> = ({ stude
   );
 };
 
+// ── Photo Modal ──────────────────────────────────────────────
+const PhotoModal: React.FC<{ student: Student; onClose: () => void; onSave: (b64: string) => Promise<void>; }> = ({ student, onClose, onSave }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string>(student.photoUrl || '');
+  const [saving, setSaving] = useState(false);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleSave = async () => {
+    if (!preview || !preview.startsWith('data:image')) return;
+    setSaving(true);
+    try { await onSave(preview); } finally { setSaving(false); onClose(); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Photo de profil</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+            <X className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+          </button>
+        </div>
+        <div className="p-6 flex flex-col items-center">
+          <div 
+            onClick={() => inputRef.current?.click()}
+            className="w-32 h-40 border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-2xl overflow-hidden mb-4 cursor-pointer hover:border-amber-400 hover:bg-amber-50/50 dark:hover:bg-amber-900/20 transition-all flex items-center justify-center relative group"
+          >
+            {preview ? (
+              <img src={preview} alt="Aperçu" className="w-full h-full object-cover" />
+            ) : (
+              <div className="flex flex-col items-center text-gray-400 dark:text-gray-500">
+                <Camera className="w-8 h-8 mb-2 opacity-50 group-hover:text-amber-500 group-hover:opacity-100 transition" />
+                <span className="text-xs font-medium text-center px-2 group-hover:text-amber-600">Ajouter une photo</span>
+              </div>
+            )}
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Camera className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+          
+          <div className="flex gap-3 w-full mt-4">
+            <button onClick={onClose} className="flex-1 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Annuler</button>
+            <button onClick={handleSave} disabled={saving || !preview} className="flex-1 py-2.5 bg-amber-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-colors flex items-center justify-center gap-2">
+              {saving ? 'Enregistrement...' : 'Valider'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ── PAGE PRINCIPALE ──────────────────────────────────────────
 type SortKey = 'nom' | 'classe' | 'dejaPaye' | 'restant' | 'status';
 
@@ -178,6 +239,8 @@ export const Eleves: React.FC = () => {
   const user = useStore((s) => s.user);
 
   const [modal, setModal] = useState<{ open: boolean; student?: Student | null }>({ open: false });
+  const [photoModal, setPhotoModal] = useState<{ open: boolean; student: Student | null }>({ open: false, student: null });
+  const updateStudent = useStore((s) => s.updateStudent);
   const [sortKey, setSortKey] = useState<SortKey>('nom');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -323,8 +386,34 @@ export const Eleves: React.FC = () => {
                 filtered.map((s) => (
                   <tr key={s.id} className="hover:bg-amber-50/30 dark:hover:bg-slate-800/80 transition-colors">
                     <td className="px-4 py-3">
-                      <p className="font-bold text-gray-950 dark:text-white">{s.prenom} {s.nom}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">{s.sexe === 'M' ? '♂' : '♀'}{s.redoublant ? ' · Redoublant' : ''}</p>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setPhotoModal({ open: true, student: s })}
+                          className="relative group shrink-0"
+                          title={s.photoUrl ? 'Modifier la photo' : 'Ajouter une photo'}
+                        >
+                          {s.photoUrl ? (
+                            <img src={s.photoUrl} alt="Photo" className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-slate-800 shadow-sm transition-opacity group-hover:opacity-75" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-700 border-2 border-dashed border-gray-300 dark:border-slate-600 flex items-center justify-center transition-all group-hover:border-amber-400 group-hover:bg-amber-50 dark:group-hover:bg-amber-900/30 text-gray-400">
+                              <User className="w-4 h-4 opacity-50 group-hover:hidden" />
+                              <Camera className="w-4 h-4 text-amber-500 hidden group-hover:block" />
+                            </div>
+                          )}
+                          {s.photoUrl && (
+                            <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Camera className="w-4 h-4 text-white" />
+                            </div>
+                          )}
+                          {s.photoUrl && (
+                            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+                          )}
+                        </button>
+                        <div>
+                          <p className="font-bold text-gray-950 dark:text-white">{s.prenom} {s.nom}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">{s.sexe === 'M' ? '♂' : '♀'}{s.redoublant ? ' · Redoublant' : ''}</p>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <span className="font-bold text-gray-900 dark:text-gray-100">{s.classe}</span>
@@ -376,6 +465,16 @@ export const Eleves: React.FC = () => {
       </div>
 
       {modal.open && <StudentModal student={modal.student} onClose={() => setModal({ open: false })} />}
+      {photoModal.open && photoModal.student && (
+        <PhotoModal 
+          student={photoModal.student} 
+          onClose={() => setPhotoModal({ open: false, student: null })} 
+          onSave={async (b64) => {
+            const uploadedUrl = await uploadStudentPhoto(photoModal.student!.id, b64);
+            updateStudent(photoModal.student!.id, { photoUrl: uploadedUrl || b64 });
+          }}
+        />
+      )}
 
       {/* Fiche détaillée */}
       {selectedStudent && (
