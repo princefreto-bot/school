@@ -50,7 +50,7 @@ const getAppreciation = (moy: number): string => {
     if (moy >= 14) return 'Bien';
     if (moy >= 12) return 'Assez Bien';
     if (moy >= 10) return 'Passable';
-    return 'Mal';
+    return '';
 };
 
 /**
