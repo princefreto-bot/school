@@ -269,52 +269,82 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                 </table>
 
                 {/* ═══════════════ RÉSULTATS + APPRÉCIATIONS ═══════════════ */}
-                <div className="border-[1.5px] border-black mt-1" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1.1fr) auto', minHeight: '30mm' }}>
+                <div className="border-[1.5px] border-black mt-1" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', minHeight: '30mm' }}>
 
-                    {/* COLONNE 1 : Moyennes de l'élève */}
-                    <div className="p-1.5 flex flex-col justify-center" style={{ borderRight: '1.5px solid black', background: '#f8f9fa' }}>
-                        <div className="flex justify-between items-end border-b border-gray-300 pb-0.5 mb-1.5">
-                            <span className="uppercase text-[8.5px] font-bold">Moyenne Générale :</span>
-                            <span className="font-black text-[12px] text-rose-800 leading-none">{data.moyenneGenerale.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between items-end mb-1">
-                            <span className="uppercase text-[8.5px] font-bold">Rang {data.periode.includes('TRIM') ? 'Trim.' : 'Sem.'} :</span>
-                            <span className="font-black text-[12px] text-blue-800 leading-none">{data.rangGeneral} <span className="text-[7.5px] font-normal text-gray-500">/ {data.effectifClasse}</span></span>
+                    {/* COLONNE GAUCHE : Résultats et Statistiques */}
+                    <div style={{ borderRight: '1.5px solid black', display: 'flex', flexDirection: 'column' }}>
+
+                        {/* 1. TABLEAU DES RÉSULTATS */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', borderBottom: '1px solid black', background: '#e5e5e5' }}>
+                            <div className="text-[8px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>Résultats</div>
+                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>Moy. /20</div>
+                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>Rang</div>
+                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px' }}>/ Eff.</div>
                         </div>
 
+                        {/* Ligne — Période actuelle */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', borderBottom: data.moyenneAnnuelle != null ? '1px solid black' : '1px solid black' }}>
+                            <div className="text-[8.5px] font-bold uppercase" style={{ padding: '3px 5px', borderRight: '1px solid black' }}>
+                                {data.periode}
+                            </div>
+                            <div className="text-[10.5px] font-black text-center text-rose-800" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                {data.moyenneGenerale.toFixed(2)}
+                            </div>
+                            <div className="text-[10.5px] font-black text-center text-blue-800" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                {data.rangGeneral}
+                            </div>
+                            <div className="text-[9px] font-bold text-center text-gray-600" style={{ padding: '3px 4px' }}>
+                                {data.effectifClasse}
+                            </div>
+                        </div>
+
+                        {/* Ligne — Moyenne annuelle (T2, T3, S2 uniquement) */}
                         {data.moyenneAnnuelle != null && (
-                            <div className="mt-1 pt-1 border-t border-dashed border-gray-400">
-                                <div className="flex justify-between items-end mb-1">
-                                    <span className="uppercase text-[8px] font-bold text-indigo-900">
-                                        Moy. Annuelle <span className="text-[7px] font-normal text-gray-500 normal-case">({(data.periodesIncluses ?? []).map(p => p.replace('TRIMESTRE ', 'T').replace('SEMESTRE ', 'S')).join('+')})</span> :
+                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', borderBottom: '1px solid black' }}>
+                                <div className="text-[8.5px] font-bold uppercase" style={{ padding: '3px 5px', borderRight: '1px solid black' }}>
+                                    Moy. Annuelle
+                                    <span className="text-[7px] font-normal text-gray-600 ml-1 normal-case">
+                                        ({(data.periodesIncluses ?? []).map(p => p.replace('TRIMESTRE ', 'T').replace('SEMESTRE ', 'S')).join('+')})
                                     </span>
-                                    <span className="font-black text-[10.5px] text-indigo-800 leading-none">{data.moyenneAnnuelle.toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between items-end">
-                                    <span className="uppercase text-[8px] font-bold text-indigo-900">Rang Annuel :</span>
-                                    <span className="font-black text-[10.5px] text-indigo-700 leading-none">{data.rangAnnuel ?? '-'} <span className="text-[7.5px] font-normal text-gray-500">/ {data.effectifClasse}</span></span>
+                                <div className="text-[10.5px] font-black text-center text-indigo-800" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                    {data.moyenneAnnuelle.toFixed(2)}
+                                </div>
+                                <div className="text-[10.5px] font-black text-center text-indigo-700" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                    {data.rangAnnuel ?? '-'}
+                                </div>
+                                <div className="text-[9px] font-bold text-center text-gray-600" style={{ padding: '3px 4px' }}>
+                                    {data.effectifClasse}
                                 </div>
                             </div>
                         )}
+
+                        {/* 2. STATISTIQUES EXPLICITES DE LA CLASSE (Les informations importantes) */}
+                        <div className="p-2 flex-col justify-center space-y-1.5 flex-1 bg-[#f8f9fa]">
+                            <div className="flex justify-between items-end border-b border-gray-200 pb-0.5">
+                                <span className="uppercase text-[8.5px] font-bold text-black">Moyenne Générale :</span>
+                                <span className="font-black text-[11px] text-rose-800 leading-none">{data.moyenneGenerale.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between items-end border-b border-gray-200 pb-0.5 mb-1.5">
+                                <span className="uppercase text-[8.5px] font-bold text-black">Rang :</span>
+                                <span className="font-black text-[11px] text-blue-800 leading-none">{data.rangGeneral} <span className="text-[8px] font-normal text-gray-500">/ {data.effectifClasse}</span></span>
+                            </div>
+                            <div className="flex justify-between items-end border-b border-gray-200 pb-0.5">
+                                <span className="text-[8px] font-semibold text-gray-700">Plus forte moyenne :</span>
+                                <span className="font-black text-[10px] text-emerald-700 leading-none">{data.moyenneMax.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between items-end border-b border-gray-200 pb-0.5">
+                                <span className="text-[8px] font-semibold text-gray-700">Plus faible moyenne :</span>
+                                <span className="font-black text-[10px] text-red-700 leading-none">{data.moyenneMin.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between items-end">
+                                <span className="text-[8px] font-semibold text-gray-700">Moyenne générale de la classe :</span>
+                                <span className="font-black text-[10px] text-blue-700 leading-none">{data.moyenneClasse.toFixed(2)}</span>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* COLONNE 2 : Statistiques de la classe */}
-                    <div className="p-1.5 flex flex-col justify-center space-y-2" style={{ borderRight: '1.5px solid black' }}>
-                        <div className="flex justify-between items-end border-b border-gray-200 pb-0.5">
-                            <span className="text-[8px] font-semibold text-gray-600">Plus forte moyenne :</span>
-                            <span className="font-black text-[10px] text-emerald-700 leading-none">{data.moyenneMax.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between items-end border-b border-gray-200 pb-0.5">
-                            <span className="text-[8px] font-semibold text-gray-600">Plus faible moyenne :</span>
-                            <span className="font-black text-[10px] text-red-700 leading-none">{data.moyenneMin.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between items-end">
-                            <span className="text-[8px] font-semibold text-gray-600">Moyenne gén. de la classe :</span>
-                            <span className="font-black text-[10px] text-blue-700 leading-none">{data.moyenneClasse.toFixed(2)}</span>
-                        </div>
-                    </div>
-
-                    {/* COLONNE 3 : Appréciation (Cases rondes) */}
+                    {/* COLONNE DROITE : Appréciation (Cases rondes) */}
                     <div style={{ width: '38mm', display: 'flex', flexDirection: 'column' }}>
                         <div className="text-[8px] font-black uppercase text-center" style={{ padding: '2px 4px', background: '#e5e5e5', borderBottom: '1.5px solid black' }}>
                             APPRÉCIATION
