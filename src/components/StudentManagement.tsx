@@ -21,12 +21,81 @@ import {
   Trash2, 
   FileText, 
   Receipt,
-  X,
   ChevronDown,
   Phone,
   History,
-  Camera
+  Camera,
+  MoreVertical,
+  X
 } from 'lucide-react';
+import { useEffect } from 'react';
+
+// ==========================================
+// COMPOSANT MENU ACTIONS
+// ==========================================
+/**
+ * Composant pour gérer le menu déroulant des actions d'un élève
+ * Permet d'alléger l'interface en gardant l'écran propre
+ */
+const StudentActionMenu = ({ 
+  student, 
+  onEdit, 
+  onDelete, 
+  onHistory,
+  onWhatsApp,
+  onReceipt,
+  onCard 
+}: any) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button 
+        onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
+        className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition border border-transparent hover:border-gray-200 shadow-sm bg-white"
+        title="Plus d'options"
+      >
+        <MoreVertical className="w-4 h-4" />
+      </button>
+      
+      {isOpen && (
+        <div className="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+          <button onClick={() => { setIsOpen(false); onEdit(student); }} className="w-full text-left px-4 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 flex items-center gap-3">
+            <Edit2 className="w-4 h-4 text-orange-500" /> Modifier l'élève
+          </button>
+          <button onClick={() => { setIsOpen(false); onHistory(student); }} className="w-full text-left px-4 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 flex items-center gap-3">
+            <History className="w-4 h-4 text-purple-500" /> Fiche complète (Hist)
+          </button>
+          <div className="h-px bg-gray-100 my-1"></div>
+          <button onClick={() => { setIsOpen(false); onReceipt(student); }} className="w-full text-left px-4 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 flex items-center gap-3">
+            <Receipt className="w-4 h-4 text-blue-500" /> Reçu de paiement PDF
+          </button>
+          <button onClick={() => { setIsOpen(false); onCard(student); }} className="w-full text-left px-4 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 flex items-center gap-3">
+            <FileText className="w-4 h-4 text-slate-500" /> Fiche Scolaire PDF
+          </button>
+          <button onClick={() => { setIsOpen(false); onWhatsApp(student); }} className="w-full text-left px-4 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 flex items-center gap-3">
+            <Phone className="w-4 h-4 text-green-500" /> Envoyer WhatsApp
+          </button>
+          <div className="h-px bg-gray-100 my-1"></div>
+          <button onClick={() => { setIsOpen(false); onDelete(student); }} className="w-full text-left px-4 py-2.5 text-[13px] text-red-600 hover:bg-red-50 flex items-center gap-3 font-medium">
+            <Trash2 className="w-4 h-4" /> Supprimer
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const StudentManagement = () => {
   const { students, settings, addStudent, updateStudent, deleteStudent, addPayment } = useStore();
@@ -286,68 +355,41 @@ export const StudentManagement = () => {
                         </span>
                       </td>
                       <td className="py-3 px-4">
-                        <div className="flex items-center justify-center gap-1">
+                        <div className="flex items-center justify-end gap-2">
+                          
+                          {/* ACTION PRIMAIRE 1 : Payer */}
                           <button
                             onClick={() => { setSelectedStudent(student); setShowPaymentModal(true); }}
-                            className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition"
+                            className="px-2.5 py-1.5 text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg transition flex items-center gap-1.5 font-semibold text-xs whitespace-nowrap shadow-sm"
                             title="Ajouter paiement"
                           >
-                            <Plus className="w-4 h-4" />
+                            <Plus className="w-3.5 h-3.5" /> Payer
                           </button>
-                          <button
-                            onClick={() => { setSelectedStudent(student); setShowHistoryModal(true); }}
-                            className="p-1.5 text-purple-600 hover:bg-purple-50 rounded-lg transition"
-                            title="Historique"
-                          >
-                            <History className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => generateReceipt(student, settings)}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                            title="Reçu PDF"
-                          >
-                            <Receipt className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => generateStudentCard(student, settings)}
-                            className="p-1.5 text-slate-600 hover:bg-slate-50 rounded-lg transition"
-                            title="Fiche complète"
-                          >
-                            <FileText className="w-4 h-4" />
-                          </button>
-                           <button
-                            onClick={() => openWhatsApp(student)}
-                            className="p-1.5 text-green-500 hover:bg-green-50 rounded-lg transition"
-                            title="Envoyer WhatsApp"
-                          >
-                            <Phone className="w-4 h-4" />
-                          </button>
-                          {/* BOUTON PHOTO EXPLICITE */}
+
+                          {/* ACTION PRIMAIRE 2 : Photo */}
                           <button
                             onClick={() => { setSelectedStudent(student); setShowPhotoModal(true); }}
-                            className={`p-1.5 rounded-lg transition ${
+                            className={`p-1.5 rounded-lg transition border shadow-sm ${
                               student.photoUrl
-                                ? 'text-teal-600 bg-teal-50 hover:bg-teal-100'
-                                : 'text-gray-400 hover:text-teal-600 hover:bg-teal-50 border border-dashed border-gray-300'
+                                ? 'text-teal-600 bg-teal-50 border-teal-200 hover:bg-teal-100'
+                                : 'text-gray-400 border-dashed border-gray-300 hover:text-teal-600 hover:bg-teal-50 hover:border-teal-300 bg-white'
                             }`}
                             title={student.photoUrl ? 'Changer la photo' : 'Assigner une photo'}
                           >
                             <Camera className="w-4 h-4" />
                           </button>
-                           <button
-                            onClick={() => { setEditingStudent(student); setShowModal(true); }}
-                            className="p-1.5 text-orange-500 hover:bg-orange-50 rounded-lg transition"
-                            title="Modifier"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(student)}
-                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"
-                            title="Supprimer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+
+                          {/* MENU DÉROULANT POUR LE RESTE (Historique, Reçu, Modifier, Supprimer...) */}
+                          <StudentActionMenu
+                            student={student}
+                            onEdit={(s: Student) => { setEditingStudent(s); setShowModal(true); }}
+                            onDelete={handleDelete}
+                            onHistory={(s: Student) => { setSelectedStudent(s); setShowHistoryModal(true); }}
+                            onWhatsApp={openWhatsApp}
+                            onReceipt={(s: Student) => generateReceipt(s, settings)}
+                            onCard={(s: Student) => generateStudentCard(s, settings)}
+                          />
+
                         </div>
                       </td>
                     </tr>
