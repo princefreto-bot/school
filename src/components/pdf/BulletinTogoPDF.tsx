@@ -154,10 +154,10 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                         {/* Ligne 4 : TITRE BULLETIN — occupe l'espace vide en face de la photo */}
                         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8f8', borderTop: 'none' }}>
                             <div className="text-center py-1.5 px-3">
-                                <p className="font-black uppercase tracking-widest text-[11px] leading-tight">
+                                <p className="font-black uppercase tracking-widest text-[16px] leading-tight text-black">
                                     Bulletin de Notes du {data.periode}
                                 </p>
-                                <p className="text-[9px] font-semibold text-gray-600 mt-0.5">Année Scolaire : {schoolYear}</p>
+                                <p className="text-[12px] font-bold text-gray-700 mt-1">Année Scolaire : {schoolYear}</p>
                             </div>
                         </div>
                     </div>
@@ -227,41 +227,41 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                                 </tr>
                                 {cat.lignes.map((l, lIndex) => (
                                     <tr key={lIndex} className="text-center">
-                                        <td className="border-[1.5px] border-black p-0.5 text-left uppercase font-bold text-[8.5px] leading-tight">{l.matiere.nom}</td>
-                                        <td className="border-[1.5px] border-black p-0.5 font-bold">{l.noteClasse !== null ? l.noteClasse : '-'}</td>
-                                        <td className="border-[1.5px] border-black p-0.5 font-bold">{l.noteDevoir !== null ? l.noteDevoir : '-'}</td>
-                                        <td className="border-[1.5px] border-black p-0.5 font-bold">{l.noteCompo !== null ? l.noteCompo : '-'}</td>
-                                        <td className="border-[1.5px] border-black p-0.5 font-black text-[10px] bg-gray-50">{l.moyenneMatiere !== null ? l.moyenneMatiere : '-'}</td>
-                                        <td className="border-[1.5px] border-black p-0.5 font-bold">{l.coef}</td>
-                                        <td className="border-[1.5px] border-black p-0.5 font-bold bg-gray-50">{l.totalPoints !== null ? l.totalPoints : '-'}</td>
-                                        <td className="border-[1.5px] border-black p-0.5 font-bold">{l.rangMatiere}</td>
+                                        <td className="border-[1.5px] border-black p-0.5 text-left uppercase font-bold text-[10px] leading-tight">{l.matiere.nom}</td>
+                                        <td className="border-[1.5px] border-black p-0.5 font-bold text-[11px]">{l.noteClasse !== null ? l.noteClasse : '-'}</td>
+                                        <td className="border-[1.5px] border-black p-0.5 font-bold text-[11px]">{l.noteDevoir !== null ? l.noteDevoir : '-'}</td>
+                                        <td className="border-[1.5px] border-black p-0.5 font-bold text-[11px]">{l.noteCompo !== null ? l.noteCompo : '-'}</td>
+                                        <td className="border-[1.5px] border-black p-0.5 font-black text-[12px] bg-gray-50">{l.moyenneMatiere !== null ? l.moyenneMatiere : '-'}</td>
+                                        <td className="border-[1.5px] border-black p-0.5 font-bold text-[11px]">{l.coef}</td>
+                                        <td className="border-[1.5px] border-black p-0.5 font-bold text-[12px] bg-gray-50">{l.totalPoints !== null ? l.totalPoints : '-'}</td>
+                                        <td className="border-[1.5px] border-black p-0.5 font-bold text-[11px]">{l.rangMatiere}</td>
                                         {/* Colonne PROF : wrapping autorisé, taille réduite pour les longs noms */}
                                         <td
-                                            className="border-[1.5px] border-black p-0.5 text-[8px] leading-tight"
+                                            className="border-[1.5px] border-black p-0.5 text-[9.5px] leading-tight"
                                             style={{ wordBreak: 'break-word', whiteSpace: 'normal', hyphens: 'auto' }}
                                         >
                                             {l.professeur}
                                         </td>
-                                        <td className="border-[1.5px] border-black p-0.5 italic font-semibold leading-tight text-[8px]">{l.appreciation}</td>
+                                        <td className="border-[1.5px] border-black p-0.5 italic font-semibold leading-tight text-[9px]">{l.appreciation}</td>
                                         <td className="border-[1.5px] border-black p-0.5"></td>
                                     </tr>
                                 ))}
                                 {/* SOUS TOTAL CATÉGORIE */}
                                 <tr className="bg-gray-50 font-bold border-black border-t-[1.5px]">
-                                    <td colSpan={5} className="border-[1.5px] border-black p-0.5 text-right italic text-[8.5px] font-semibold">
+                                    <td colSpan={5} className="border-[1.5px] border-black p-0.5 text-right italic text-[9.5px] font-semibold">
                                         Sous-Total {cat.categorie.split('-')[1]}
                                     </td>
-                                    <td className="border-[1.5px] border-black p-0.5 text-center font-bold">{cat.totalCoefs}</td>
-                                    <td className="border-[1.5px] border-black p-0.5 text-center font-bold text-rose-700 bg-rose-50">{cat.totalPoints.toFixed(2)}</td>
+                                    <td className="border-[1.5px] border-black p-0.5 text-center font-bold text-[11px]">{cat.totalCoefs}</td>
+                                    <td className="border-[1.5px] border-black p-0.5 text-center font-bold text-[12px] text-rose-700 bg-rose-50">{cat.totalPoints.toFixed(2)}</td>
                                     <td colSpan={4} className="border-[1.5px] border-black p-0.5"></td>
                                 </tr>
                             </React.Fragment>
                         ))}
                         {/* TOTAL GÉNÉRAL */}
-                        <tr className="font-black bg-gray-200 border-t-[2px] border-black text-[10px]">
+                        <tr className="font-black bg-gray-200 border-t-[2px] border-black text-[11px]">
                             <td colSpan={5} className="border-[1.5px] border-black p-0.5 text-right uppercase tracking-wider">TOTAL GÉNÉRAL</td>
-                            <td className="border-[1.5px] border-black p-0.5 text-center text-blue-900">{data.totalCoefsGeneral}</td>
-                            <td className="border-[1.5px] border-black p-0.5 text-center text-rose-900 bg-rose-100">{data.totalPointsGeneral.toFixed(2)}</td>
+                            <td className="border-[1.5px] border-black p-0.5 text-center text-[12px] text-blue-900">{data.totalCoefsGeneral}</td>
+                            <td className="border-[1.5px] border-black p-0.5 text-center text-[13px] text-rose-900 bg-rose-100">{data.totalPointsGeneral.toFixed(2)}</td>
                             <td colSpan={4} className="border-[1.5px] border-black p-0.5"></td>
                         </tr>
                     </tbody>
