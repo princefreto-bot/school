@@ -315,12 +315,24 @@ export const StudentManagement = () => {
                           >
                             <FileText className="w-4 h-4" />
                           </button>
-                          <button
+                           <button
                             onClick={() => openWhatsApp(student)}
                             className="p-1.5 text-green-500 hover:bg-green-50 rounded-lg transition"
                             title="Envoyer WhatsApp"
                           >
                             <Phone className="w-4 h-4" />
+                          </button>
+                          {/* BOUTON PHOTO EXPLICITE */}
+                          <button
+                            onClick={() => { setSelectedStudent(student); setShowPhotoModal(true); }}
+                            className={`p-1.5 rounded-lg transition ${
+                              student.photoUrl
+                                ? 'text-teal-600 bg-teal-50 hover:bg-teal-100'
+                                : 'text-gray-400 hover:text-teal-600 hover:bg-teal-50 border border-dashed border-gray-300'
+                            }`}
+                            title={student.photoUrl ? 'Changer la photo' : 'Assigner une photo'}
+                          >
+                            <Camera className="w-4 h-4" />
                           </button>
                            <button
                             onClick={() => { setEditingStudent(student); setShowModal(true); }}
