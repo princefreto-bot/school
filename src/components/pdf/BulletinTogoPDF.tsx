@@ -385,8 +385,8 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
 
                 {/* DÉCISION DU CONSEIL */}
                 <div className="mt-1.5 mb-1 px-1 flex items-end overflow-hidden">
-                    <span className="text-[10px] font-bold mr-1">Décision du conseil :</span>
-                    <span className="text-[10px] tracking-widest text-black">...................................................................................................................................................................................</span>
+                    <span className="text-[12px] font-bold mr-1">Décision du conseil :</span>
+                    <span className="text-[12px] tracking-widest text-black">...................................................................................................................................................................................</span>
                 </div>
 
                 {/* DÉCISIONS & SIGNATURES */}
