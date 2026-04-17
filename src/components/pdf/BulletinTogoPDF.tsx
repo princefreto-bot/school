@@ -383,6 +383,12 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                     </div>
                 </div>
 
+                {/* DÉCISION DU CONSEIL */}
+                <div className="mt-1.5 mb-1 px-1 flex items-end overflow-hidden">
+                    <span className="text-[10px] font-bold mr-1">Décision du conseil :</span>
+                    <span className="text-[10px] tracking-widest text-black">...................................................................................................................................................................................</span>
+                </div>
+
                 {/* DÉCISIONS & SIGNATURES */}
                 <div className="grid grid-cols-2 gap-4 mt-1" style={{ gridTemplateColumns: '1fr 1fr' }}>
                     <div className="border-[1.5px] border-black relative" style={{ height: '15mm' }}>
