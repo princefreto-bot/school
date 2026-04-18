@@ -411,7 +411,7 @@ export const useStore = create<AppState>()(
             return;
           }
         } else if (u?.role === 'parent') {
-          const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces'];
+          const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes'];
           if (!allowed.includes(page)) {
             set({ currentPage: 'parent_dashboard' });
             return;
@@ -831,6 +831,12 @@ export const useStore = create<AppState>()(
             if (data.announcements) set({ announcements: data.announcements });
             if (data.announcementReads) set({ announcementReads: data.announcementReads });
             if (typeof data.unreadMessages === 'number') set({ unreadMessages: data.unreadMessages });
+            
+            // 📝 Nouvelles données académiques pour le parent
+            if (Array.isArray(data.notes)) set({ notes: data.notes });
+            if (Array.isArray(data.matieres)) set({ matieres: data.matieres });
+            if (Array.isArray(data.classeMatieres)) set({ classeMatieres: data.classeMatieres });
+            
             set({ lastSyncTimestamp: now });
           } catch (err) {
             console.warn('[Parent Sync] Erreur:', err);
@@ -1191,7 +1197,7 @@ export const useStore = create<AppState>()(
 
           // Sécurité — Empêcher la re-connexion automatique de switcher un parent sur l'admin
           if (state.user?.role === 'parent') {
-            const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces'];
+            const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes'];
             if (!allowed.includes(state.currentPage)) {
               state.currentPage = 'parent_dashboard';
             }

@@ -397,8 +397,8 @@ export const ParentDashboard: React.FC = () => {
                     </div>
                 )}
 
-                {/* ── Cards financières ── */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* ── Cards financières & Scolaires ── */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 p-7 flex flex-col justify-between transition-all hover:shadow-2xl h-full group">
                         <div className="flex items-center justify-between mb-4">
                             <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-3xl flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner">
@@ -435,6 +435,22 @@ export const ParentDashboard: React.FC = () => {
                         <div>
                             <p className="text-3xl font-black text-slate-900 dark:text-white mb-1 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">{totalRestant.toLocaleString()} FCFA</p>
                             <p className="text-xs text-rose-400 dark:text-rose-500 font-bold uppercase tracking-wide">Délai Règlement à respecter</p>
+                        </div>
+                    </div>
+
+                    <div 
+                        onClick={() => useStore.getState().setCurrentPage('parent_notes')}
+                        className="bg-white dark:bg-slate-900 rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 p-7 flex flex-col justify-between transition-all hover:shadow-2xl h-full group cursor-pointer hover:border-amber-400"
+                    >
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="w-14 h-14 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-3xl flex items-center justify-center shrink-0 group-hover:bg-amber-600 group-hover:text-white transition-all shadow-inner">
+                                <GraduationCap className="w-7 h-7" />
+                            </div>
+                            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:text-amber-400 transition-colors">Résultats Scolaires</span>
+                        </div>
+                        <div>
+                            <p className="text-xl font-black text-slate-900 dark:text-white mb-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Consulter les Notes</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wide">Suivi des performances</p>
                         </div>
                     </div>
                 </div>

@@ -294,6 +294,14 @@ async function getParentData(req, res) {
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
+        // 0. Récupérer les IDs des enfants liés pour filtrer les notes
+        const { data: links } = await supabase
+            .from(`parent_student_${schoolSlug}`)
+            .select('student_id')
+            .eq('parent_id', parentId);
+        
+        const studentIds = (links || []).map(l => l.student_id);
+
         // 1. Annonces de l'école
         const { data: announcements } = await supabase
             .from(`announcements_${schoolSlug}`)
@@ -314,10 +322,39 @@ async function getParentData(req, res) {
             .eq('read_status', false)
             .neq('sender_id', parentId);
 
+        // 4. Données Académiques (pour le relevé de notes)
+        let notes = [];
+        let matieres = [];
+        let classeMatieres = [];
+
+        if (studentIds.length > 0) {
+            // Récupérer les notes des enfants
+            const { data: dbNotes } = await supabase
+                .from(`notes_${schoolSlug}`)
+                .select('*')
+                .in('eleve_id', studentIds);
+            notes = dbNotes || [];
+
+            // Récupérer toutes les matières
+            const { data: dbMatieres } = await supabase
+                .from(`matieres_${schoolSlug}`)
+                .select('*');
+            matieres = dbMatieres || [];
+
+            // Récupérer les configurations de classe
+            const { data: dbClasseMatieres } = await supabase
+                .from(`classe_matieres_${schoolSlug}`)
+                .select('*');
+            classeMatieres = dbClasseMatieres || [];
+        }
+
         return res.json({
             announcements: announcements || [],
             announcementReads: announcementReads || [],
             unreadMessages: unreadMessages || 0,
+            notes,
+            matieres,
+            classeMatieres
         });
     } catch (err) {
         console.error('[getParentData] Error:', err.message);

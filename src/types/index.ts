@@ -250,6 +250,7 @@ export type AppPage =
   | 'parent_recus'
   | 'parent_badges'
   | 'parent_messages'
+  | 'parent_notes'
   | 'parents_list'
   | 'import_export'
   | 'chat'
