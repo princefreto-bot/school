@@ -3,7 +3,7 @@ import { useStore } from '../../store/useStore';
 import { parentApi } from '../../services/parentApi';
 import {
     CreditCard, Wallet, TrendingUp, Loader2, AlertCircle, UserPlus,
-    Search, GraduationCap, X, Megaphone, AlertTriangle, Info, Bell
+    Search, GraduationCap, X, Megaphone, AlertTriangle, Info, Bell, MessageSquare
 } from 'lucide-react';
 import { LinkStudentModal } from '../../components/LinkStudentModal';
 import { SupportModal } from '../../components/SupportModal';
