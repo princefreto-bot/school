@@ -25,6 +25,7 @@ export interface AppState {
   isAuthenticated: boolean;
   connectedParentsCount: number;
   setConnectedParentsCount: (count: number) => void;
+  badges: any[];
   unreadMessages: number;
   setUnreadMessages: (count: number) => void;
   fetchUnreadMessages: () => Promise<void>;
@@ -275,7 +276,8 @@ export const useStore = create<AppState>()(
       isAuthenticated: false,
       connectedParentsCount: 0,
       setConnectedParentsCount: (count) => set({ connectedParentsCount: count }),
-      unreadMessages: 0,
+      badges: [],
+    unreadMessages: 0,
       setUnreadMessages: (count) => set({ unreadMessages: count }),
       fetchUnreadMessages: async () => {
         try {
@@ -862,6 +864,12 @@ export const useStore = create<AppState>()(
             }
             if (Array.isArray(data.matieres)) set({ matieres: data.matieres });
             if (Array.isArray(data.classeMatieres)) set({ classeMatieres: data.classeMatieres });
+            
+            // 🏅 Badges
+            if (Array.isArray(data.badges)) {
+              set({ badges: data.badges });
+              console.log(`🏅 [Sync Parent] ${data.badges.length} badge(s) chargé(s).`);
+            }
             
             console.log('🏁 [Sync Parent] Synchronisation complète terminée.');
             set({ lastSyncTimestamp: now });

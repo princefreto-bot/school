@@ -110,9 +110,13 @@ async function getBadges(req, res) {
             .eq('parent_id', parentId)
             .order('earned_at', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+            // Gérer le cas où la table n'existe pas encore pour cette école
+            if (error.code === '42P01') return res.json({ badges: [] });
+            throw error;
+        }
 
-        const formatted = badges.map(b => ({
+        const formatted = (badges || []).map(b => ({
             ...b,
             student_nom: b.student?.nom,
             student_prenom: b.student?.prenom,
@@ -121,6 +125,7 @@ async function getBadges(req, res) {
 
         return res.json({ badges: formatted });
     } catch (err) {
+        console.error('[getBadges] Error:', err.message);
         return res.status(500).json({ error: err.message });
     }
 }
@@ -405,6 +410,38 @@ async function getParentData(req, res) {
             }));
         }
 
+        // 7. Badges
+        let badges = [];
+        try {
+            const { data: dbBadges, error: bErr } = await supabase
+                .from(`badges_${schoolSlug}`)
+                .select(`
+                    *,
+                    student:student_id (nom, prenom, classe)
+                `)
+                .eq('parent_id', parentId)
+                .order('earned_at', { ascending: false });
+            
+            if (bErr && bErr.code !== '42P01') throw bErr;
+            
+            badges = (dbBadges || []).map(b => ({
+                ...b,
+                student_nom: b.student?.nom,
+                student_prenom: b.student?.prenom,
+                classe: b.student?.classe
+            }));
+
+            // Proactif : Si le parent a des enfants mais aucun badge, on tente une génération auto
+            if (badges.length === 0 && studentIds.length > 0) {
+                for (const sId of studentIds) {
+                    await _autoAssignBadgesSync(parentId, sId, schoolSlug);
+                }
+                // Optionnel : Re-fetch après génération (ou juste attendre la prochaine sync)
+            }
+        } catch (err) {
+            console.warn('[getParentData] Badge retrieval failed:', err.message);
+        }
+
         return res.json({
             announcements: announcements || [],
             announcementReads: announcementReads || [],
@@ -413,12 +450,41 @@ async function getParentData(req, res) {
             students,
             notes,
             matieres,
-            classeMatieres
+            classeMatieres,
+            badges
         });
     } catch (err) {
         console.error('[getParentData] Error:', err.message);
         return res.status(500).json({ error: err.message });
     }
+}
+
+/**
+ * Helper proactif pour générer les badges manquants pendant la sync
+ */
+async function _autoAssignBadgesSync(parentId, studentId, schoolSlug) {
+    try {
+        const { data: student } = await supabase.from(`students_${schoolSlug}`).select('*').eq('id', studentId).single();
+        if (!student) return;
+
+        const addBadge = async (code, label, description, icon) => {
+            const { data: exists } = await supabase.from(`badges_${schoolSlug}`).select('id').eq('parent_id', parentId).eq('student_id', studentId).eq('code', code).single();
+            if (!exists) {
+                await supabase.from(`badges_${schoolSlug}`).insert({
+                    parent_id: parentId, student_id: studentId, code, label, description, icon, earned_at: new Date().toISOString()
+                });
+            }
+        };
+
+        await addBadge('welcome', 'Parent Responsable', 'Compte créé et enfant enregistré', '⭐');
+        if (student.status === 'Soldé') {
+            await addBadge('fully_paid', 'Paiement Complet', 'Scolarité entièrement réglée', '🏆');
+        }
+        const ratio = student.ecolage > 0 ? student.deja_paye / student.ecolage : 0;
+        if (ratio >= 0.5 && student.status !== 'Soldé') {
+            await addBadge('half_paid', '2ème Tranche Validée', 'Plus de 50% de la scolarité payée', '🥈');
+        }
+    } catch (e) { /* ignore silent failure during sync */ }
 }
 
 module.exports = {

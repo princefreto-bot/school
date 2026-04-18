@@ -1,27 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { parentApi } from '../../services/parentApi';
-import { Award, ShieldCheck, Zap, Star, Loader2, AlertCircle } from 'lucide-react';
+import React from 'react';
+import { useStore } from '../../store/useStore';
+import { Award, ShieldCheck, Zap, Star } from 'lucide-react';
 
 export const ParentBadges: React.FC = () => {
-    const [badges, setBadges] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-
-    useEffect(() => {
-        const fetchBadges = async () => {
-            try {
-                const result = await parentApi.getBadges();
-                setBadges(result.badges || []);
-            } catch (err: any) {
-                setError("Impossible de charger vos badges.");
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchBadges();
-    }, []);
+    const { badges } = useStore();
+    const loading = false; // Plus besoin de loading car les données sont sync par le store
+    const error = ''; 
 
     // On garde la structure visuelle originale mais on l'alimente avec les données du backend
     const getIcon = (code: string) => {
