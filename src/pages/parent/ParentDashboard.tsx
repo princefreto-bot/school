@@ -166,13 +166,6 @@ export const ParentDashboard: React.FC = () => {
             setLoading(false);
         }
     }, [children.length]);
-        } catch (err: any) {
-            setErrorMsg(err.error || "Impossible de charger vos données. Vérifiez votre connexion.");
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     // ── Chargement & tri des annonces ─────────────────────────
     const fetchAnnouncements = useCallback(async () => {
