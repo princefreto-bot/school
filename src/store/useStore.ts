@@ -828,15 +828,42 @@ export const useStore = create<AppState>()(
             });
             if (!res.ok) return;
             const data = await res.json();
+            
+            // 🎨 Paramètres de l'école (Match logic admin)
+            if (data.appSettings) {
+              const { appSettings } = data;
+              set({
+                appName: appSettings.appName || 'YZO GESTION',
+                schoolName: appSettings.schoolName || '',
+                schoolYear: appSettings.schoolYear || '',
+                schoolLogo: appSettings.schoolLogo || null,
+                schoolStamp: appSettings.schoolStamp || null,
+                messageRemerciement: appSettings.messageRemerciement || '',
+                messageRappel: appSettings.messageRappel || '',
+                tranches: appSettings.tranches || []
+              });
+              console.log(`🎨 [Sync Parent] Paramètres appliqués ! Logo: ${!!appSettings.schoolLogo}`);
+            }
+
+            // 👨‍👩‍👧‍👦 Élèves (Enfants)
+            if (Array.isArray(data.students)) {
+              set({ students: data.students });
+              console.log(`✅ [Sync Parent] ${data.students.length} enfant(s) chargé(s).`);
+            }
+
             if (data.announcements) set({ announcements: data.announcements });
             if (data.announcementReads) set({ announcementReads: data.announcementReads });
             if (typeof data.unreadMessages === 'number') set({ unreadMessages: data.unreadMessages });
             
-            // 📝 Nouvelles données académiques pour le parent
-            if (Array.isArray(data.notes)) set({ notes: data.notes });
+            // 📝 Données académiques
+            if (Array.isArray(data.notes)) {
+              set({ notes: data.notes });
+              console.log(`📝 [Sync Parent] ${data.notes.length} notes synchronisées.`);
+            }
             if (Array.isArray(data.matieres)) set({ matieres: data.matieres });
             if (Array.isArray(data.classeMatieres)) set({ classeMatieres: data.classeMatieres });
             
+            console.log('🏁 [Sync Parent] Synchronisation complète terminée.');
             set({ lastSyncTimestamp: now });
           } catch (err) {
             console.warn('[Parent Sync] Erreur:', err);

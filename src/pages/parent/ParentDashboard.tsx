@@ -118,8 +118,8 @@ const AnnouncementPopup: React.FC<{
 // ── Composant principal ──────────────────────────────────────
 export const ParentDashboard: React.FC = () => {
     const user = useStore((s) => s.user);
-    const [children, setChildren] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const children = useStore((s) => s.students);
+    const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
 
@@ -151,13 +151,21 @@ export const ParentDashboard: React.FC = () => {
         }
     };
 
-    // ── Chargement des données élèves ────────────────────────
-    const fetchData = async () => {
+    // ── Chargement des données (Si store vide) ────────────────────────
+    const fetchData = useCallback(async () => {
+        if (children.length > 0) return; // Déjà chargé par useStore
         setLoading(true);
         setErrorMsg('');
         try {
             const data = await parentApi.getDashboard();
-            setChildren(data.students || []);
+            // On s'assure que le store est mis à jour aussi
+            useStore.setState({ students: data.students || [] });
+        } catch (err: any) {
+            setErrorMsg(err.message || "Erreur de chargement");
+        } finally {
+            setLoading(false);
+        }
+    }, [children.length]);
         } catch (err: any) {
             setErrorMsg(err.error || "Impossible de charger vos données. Vérifiez votre connexion.");
             console.error(err);

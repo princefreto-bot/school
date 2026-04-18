@@ -9,31 +9,14 @@ import {
 import { PeriodeType } from '../../types';
 
 export const ParentNotes: React.FC = () => {
-    const { notes, matieres, classeMatieres } = useStore();
-    const [children, setChildren] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [errorMsg, setErrorMsg] = useState('');
+    const { notes, matieres, classeMatieres, students: children } = useStore();
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
 
-    const periodes: PeriodeType[] = ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3', 'SEMESTRE 1', 'SEMESTRE 2'];
-
     useEffect(() => {
-        const fetchChildren = async () => {
-            setLoading(true);
-            try {
-                const data = await parentApi.getDashboard();
-                setChildren(data.students || []);
-                if (data.students && data.students.length > 0) {
-                    setSelectedChildId(data.students[0].id);
-                }
-            } catch (err) {
-                setErrorMsg("Impossible de charger la liste des enfants.");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchChildren();
-    }, []);
+        if (children.length > 0 && !selectedChildId) {
+            setSelectedChildId(children[0].id);
+        }
+    }, [children, selectedChildId]);
 
     const selectedChild = children.find(c => c.id === selectedChildId);
 

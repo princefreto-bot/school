@@ -322,7 +322,46 @@ async function getParentData(req, res) {
             .eq('read_status', false)
             .neq('sender_id', parentId);
 
-        // 4. Données Académiques (pour le relevé de notes)
+        // 4. Paramètres de l'école (Logo, Nom, etc.)
+        const { data: dbSettings } = await supabase
+            .from(`app_settings_${schoolSlug}`)
+            .select('*')
+            .single();
+        
+        const appSettings = dbSettings ? {
+            appName: dbSettings.app_name,
+            schoolName: dbSettings.school_name,
+            schoolYear: dbSettings.school_year,
+            schoolLogo: dbSettings.school_logo,
+            schoolStamp: dbSettings.school_stamp,
+            messageRemerciement: dbSettings.message_remerciement,
+            messageRappel: dbSettings.message_rappel,
+            tranches: dbSettings.tranches || []
+        } : null;
+
+        // 5. Détails des élèves (enfants)
+        let students = [];
+        if (studentIds.length > 0) {
+            const { data: dbStudents } = await supabase
+                .from(`students_${schoolSlug}`)
+                .select('*')
+                .in('id', studentIds);
+            
+            students = (dbStudents || []).map(s => ({
+                ...s,
+                dejaPaye: s.deja_paye,
+                telephone: s.telephone_parent,
+                sexe: s.sexe || 'M',
+                redoublant: s.redoublant || false,
+                ecoleProvenance: s.ecole_provenance || '',
+                dateNaissance: s.date_naissance || null,
+                adsn: s.adsn || null,
+                photoUrl: s.photo_url || null,
+                historiquesPaiements: [] // Non requis pour le dashboard simple mais bon pour la cohérence
+            }));
+        }
+
+        // 6. Données Académiques (pour le relevé de notes)
         let notes = [];
         let matieres = [];
         let classeMatieres = [];
@@ -333,25 +372,45 @@ async function getParentData(req, res) {
                 .from(`notes_${schoolSlug}`)
                 .select('*')
                 .in('eleve_id', studentIds);
-            notes = dbNotes || [];
+            notes = (dbNotes || []).map(n => ({
+                id: n.id,
+                eleveId: n.eleve_id,
+                matiereId: n.matiere_id,
+                periode: n.periode,
+                noteClasse: n.note_classe !== undefined ? Number(n.note_classe) : null,
+                noteDevoir: n.note_devoir !== undefined ? Number(n.note_devoir) : null,
+                noteCompo: n.note_compo !== undefined ? Number(n.note_compo) : null
+            }));
 
             // Récupérer toutes les matières
             const { data: dbMatieres } = await supabase
                 .from(`matieres_${schoolSlug}`)
                 .select('*');
-            matieres = dbMatieres || [];
+            matieres = (dbMatieres || []).map(m => ({
+                id: m.id,
+                nom: m.nom,
+                categorie: m.categorie
+            }));
 
             // Récupérer les configurations de classe
             const { data: dbClasseMatieres } = await supabase
                 .from(`classe_matieres_${schoolSlug}`)
                 .select('*');
-            classeMatieres = dbClasseMatieres || [];
+            classeMatieres = (dbClasseMatieres || []).map(cm => ({
+                id: cm.id,
+                classe: cm.classe,
+                matiereId: cm.matiere_id,
+                professeur: cm.professeur,
+                coefficient: cm.coefficient
+            }));
         }
 
         return res.json({
             announcements: announcements || [],
             announcementReads: announcementReads || [],
             unreadMessages: unreadMessages || 0,
+            appSettings,
+            students,
             notes,
             matieres,
             classeMatieres
