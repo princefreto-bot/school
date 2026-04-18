@@ -112,9 +112,12 @@ export const ParentNotes: React.FC = () => {
                                             const moyClasse = notesEval.length > 0 ? notesEval.reduce((a, b) => a + b, 0) / notesEval.length : null;
                                             
                                             const compo = note?.noteCompo;
-                                            const finalAvg = (moyClasse !== null && compo !== null) 
+                                            const hasMoy = typeof moyClasse === 'number';
+                                            const hasCompo = typeof compo === 'number';
+
+                                            const finalAvg = (hasMoy && hasCompo) 
                                                 ? (moyClasse + compo) / 2 
-                                                : (moyClasse !== null ? moyClasse : (compo !== null ? compo : null));
+                                                : (hasMoy ? moyClasse : (hasCompo ? compo : null));
 
                                             return (
                                                 <div key={cm.id} className="bg-white dark:bg-slate-900 rounded-[28px] border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-xl transition-all group overflow-hidden relative">
@@ -135,13 +138,13 @@ export const ParentNotes: React.FC = () => {
                                                             <div className="bg-slate-50/80 dark:bg-slate-800/50 rounded-2xl p-3 border border-slate-100/50 dark:border-slate-700/30">
                                                                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-1">Interro/Devoir</p>
                                                                 <p className="font-bold text-slate-700 dark:text-slate-300">
-                                                                    {moyClasse !== null ? `${moyClasse.toFixed(2)}` : '--'}
+                                                                    {hasMoy ? `${moyClasse.toFixed(2)}` : '--'}
                                                                 </p>
                                                             </div>
                                                             <div className="bg-slate-50/80 dark:bg-slate-800/50 rounded-2xl p-3 border border-slate-100/50 dark:border-slate-700/30">
                                                                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-1">Composition</p>
                                                                 <p className="font-bold text-slate-700 dark:text-slate-300">
-                                                                    {compo !== null ? `${compo.toFixed(2)}` : '--'}
+                                                                    {hasCompo ? `${compo.toFixed(2)}` : '--'}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -149,10 +152,10 @@ export const ParentNotes: React.FC = () => {
                                                         <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                                                             <span className="text-xs font-bold text-slate-400 uppercase italic">Moyenne</span>
                                                             <div className={`text-2xl font-black ${
-                                                                finalAvg === null ? 'text-slate-300' :
+                                                                typeof finalAvg !== 'number' ? 'text-slate-300' :
                                                                 finalAvg >= 10 ? 'text-emerald-600' : 'text-rose-600'
                                                             }`}>
-                                                                {finalAvg !== null ? finalAvg.toFixed(2) : '--'}
+                                                                {typeof finalAvg === 'number' ? finalAvg.toFixed(2) : '--'}
                                                                 <span className="text-[10px] ml-1 opacity-50">/20</span>
                                                             </div>
                                                         </div>
