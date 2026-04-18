@@ -6,6 +6,8 @@ import {
     Search, GraduationCap, X, Megaphone, AlertTriangle, Info, Bell
 } from 'lucide-react';
 import { LinkStudentModal } from '../../components/LinkStudentModal';
+import { SupportModal } from '../../components/SupportModal';
+import { chatApi } from '../../services/chatApi';
 
 // ── Types annonce ────────────────────────────────────────────
 interface Announcement {
@@ -122,6 +124,7 @@ export const ParentDashboard: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+    const [showSupportModal, setShowSupportModal] = useState(false);
 
     // État des annonces
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -242,6 +245,20 @@ export const ParentDashboard: React.FC = () => {
     const totalDejaPaye = children.reduce((acc, s) => acc + (s.deja_paye || 0), 0);
     const totalRestant = children.reduce((acc, s) => acc + s.restant, 0);
 
+    const handleStartChat = async (role: 'administration' | 'comptabilite') => {
+        try {
+            // On initialise la conversation d'abord
+            await chatApi.initiateConversation(undefined, role);
+            // Puis on navigue vers la page de chat
+            useStore.getState().setCurrentPage('chat');
+        } catch (err) {
+            console.error('Erreur initiation chat:', err);
+            alert('Impossible de lancer la discussion. Réessayez plus tard.');
+        } finally {
+            setShowSupportModal(false);
+        }
+    };
+
     // ── Nombre d'annonces non vues ───────────────────────────
     const unseenCount = announcements.filter(a => !seenIds.current.has(a.id)).length;
 
@@ -313,6 +330,14 @@ export const ParentDashboard: React.FC = () => {
                         >
                             <UserPlus className="w-5 h-5" />
                             Lier un nouvel enfant
+                        </button>
+
+                        <button
+                            onClick={() => setShowSupportModal(true)}
+                            className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl shadow-lg shadow-emerald-600/20 transition-all font-bold text-sm"
+                        >
+                            <MessageSquare className="w-5 h-5" />
+                            Assistance
                         </button>
                     </div>
                 </div>
@@ -415,7 +440,7 @@ export const ParentDashboard: React.FC = () => {
 
                     <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 p-7 flex flex-col justify-between transition-all hover:shadow-2xl h-full group">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-3xl flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-inner">
+                            <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:emerald-400 rounded-3xl flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-inner">
                                 <TrendingUp className="w-7 h-7" />
                             </div>
                             <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:text-emerald-400 transition-colors">Déjà Payé</span>
@@ -565,6 +590,12 @@ export const ParentDashboard: React.FC = () => {
                     onSuccess={() => fetchData()}
                 />
             </div>
+
+            <SupportModal 
+                isOpen={showSupportModal}
+                onClose={() => setShowSupportModal(false)}
+                onSelect={handleStartChat}
+            />
         </>
     );
 };

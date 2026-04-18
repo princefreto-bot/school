@@ -7,6 +7,7 @@ import {
     Trash2
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { SupportModal } from './SupportModal';
 
 interface Message {
     id: number;
@@ -37,6 +38,7 @@ export const ChatWindow: React.FC = () => {
     const [sending, setSending] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showSupportModal, setShowSupportModal] = useState(false);
 
     // Charger les conversations
     useEffect(() => {
@@ -158,6 +160,7 @@ export const ChatWindow: React.FC = () => {
                 return [realConv as any, ...filtered];
             });
             setMessages([]);
+            setShowSupportModal(false);
         } catch (err) {
             console.error(err);
         }
@@ -199,8 +202,17 @@ export const ChatWindow: React.FC = () => {
         <div className="flex h-[calc(100vh-120px)] bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
             {/* Sidebar Conversations */}
             <div className={`w-full md:w-80 border-r border-slate-100 flex flex-col ${activeConv ? 'hidden md:flex' : 'flex'}`}>
-                <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-                    <h3 className="font-bold text-slate-800">Messages</h3>
+                <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                    <h3 className="font-black text-slate-800 tracking-tight">Messages</h3>
+                    {user?.role === 'parent' && (
+                        <button
+                            onClick={() => setShowSupportModal(true)}
+                            className="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded-lg shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all active:scale-95"
+                            title="Nouvelle discussion"
+                        >
+                            <MessageCircle className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
 
                 <div className="flex-1 overflow-y-auto">
@@ -380,6 +392,12 @@ export const ChatWindow: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            <SupportModal 
+                isOpen={showSupportModal}
+                onClose={() => setShowSupportModal(false)}
+                onSelect={startNewConv}
+            />
         </div>
     );
 };

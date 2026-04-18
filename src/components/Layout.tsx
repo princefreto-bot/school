@@ -12,6 +12,9 @@ import {
   PanelLeftClose, PanelLeftOpen, RefreshCw
 } from 'lucide-react';
 
+import { SupportModal } from './SupportModal';
+import { chatApi } from '../services/chatApi';
+
 interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: number }
 
 const NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
@@ -96,7 +99,8 @@ const SidebarNav: React.FC<{
   setCurrentPage: (p: AppPage) => void;
   setSidebarOpen: (v: boolean) => void;
   collapsed: boolean;
-}> = ({ navItems, currentPage, setCurrentPage, setSidebarOpen, collapsed }) => {
+  onOpenSupport: () => void;
+}> = ({ navItems, currentPage, setCurrentPage, setSidebarOpen, collapsed, onOpenSupport }) => {
   let lastGroup = '';
   return (
     <nav className="sidebar-nav" style={{ overflowY: 'auto', overflowX: 'hidden' }}>
@@ -139,6 +143,28 @@ const SidebarNav: React.FC<{
           </React.Fragment>
         );
       })}
+
+      {/* Support Section for Parents */}
+      {navItems.some(i => i.id.startsWith('parent_')) && (
+        <div style={{ marginTop: 24, padding: collapsed ? '0 8px' : '0 4px' }}>
+          {!collapsed && <div className="sidebar-section-label" style={{ opacity: 0.5 }}>Assistance Rapide</div>}
+          <button
+            onClick={onOpenSupport}
+            className="nav-item"
+            style={{ 
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              background: 'rgba(52, 211, 153, 0.05)',
+              borderColor: 'rgba(52, 211, 153, 0.1)',
+              marginTop: 8
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(52, 211, 153, 0.1)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(52, 211, 153, 0.05)'}
+          >
+            <span className="nav-item-icon" style={{ color: '#34D399' }}><MessageSquare className="w-[18px] h-[18px]" /></span>
+            {!collapsed && <span style={{ color: '#34D399', fontWeight: 600 }}>Contacter l'école</span>}
+          </button>
+        </div>
+      )}
     </nav>
   );
 };
@@ -158,7 +184,8 @@ const SidebarContent: React.FC<{
   logout: () => void;
   collapsed: boolean;
   onToggleCollapse?: () => void;
-}> = ({ currentPage, setCurrentPage, setSidebarOpen, navItems, schoolName, appName, schoolLogo, userName, userRole, connectedParentsCount, logout, collapsed, onToggleCollapse }) => (
+  onOpenSupport: () => void;
+}> = ({ currentPage, setCurrentPage, setSidebarOpen, navItems, schoolName, appName, schoolLogo, userName, userRole, connectedParentsCount, logout, collapsed, onToggleCollapse, onOpenSupport }) => (
   <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--sidebar-bg)', overflow: 'hidden' }}>
 
     {/* Brand header */}
@@ -230,6 +257,7 @@ const SidebarContent: React.FC<{
       setCurrentPage={setCurrentPage}
       setSidebarOpen={setSidebarOpen}
       collapsed={collapsed}
+      onOpenSupport={onOpenSupport}
     />
 
     {/* Live parents count (admin only, hidden when collapsed) */}
@@ -363,6 +391,18 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   };
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
+
+  const handleStartChat = async (role: 'administration' | 'comptabilite') => {
+    try {
+      await chatApi.initiateConversation(undefined, role);
+      setCurrentPage('chat');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setShowSupportModal(false);
+    }
+  };
 
   // Admin: parent count polling
   useEffect(() => {
@@ -413,6 +453,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     userName: user?.nom ?? '', userRole: user?.role ?? '',
     connectedParentsCount, logout,
     collapsed,
+    onOpenSupport: () => setShowSupportModal(true),
   };
 
   // Bottom nav items (mobile)
@@ -733,6 +774,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           </nav>
         </div>
       </div>
+
+      <SupportModal 
+        isOpen={showSupportModal}
+        onClose={() => setShowSupportModal(false)}
+        onSelect={handleStartChat}
+      />
     </div>
   );
 };
