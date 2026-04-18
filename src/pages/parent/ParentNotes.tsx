@@ -11,6 +11,7 @@ import { PeriodeType } from '../../types';
 export const ParentNotes: React.FC = () => {
     const { notes, matieres, classeMatieres, students: children } = useStore();
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+    const periodes: PeriodeType[] = ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3', 'SEMESTRE 1', 'SEMESTRE 2'];
 
     useEffect(() => {
         if (children.length > 0 && !selectedChildId) {
@@ -19,24 +20,6 @@ export const ParentNotes: React.FC = () => {
     }, [children, selectedChildId]);
 
     const selectedChild = children.find(c => c.id === selectedChildId);
-
-    if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-                <Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" />
-                <p>Chargement des notes...</p>
-            </div>
-        );
-    }
-
-    if (errorMsg) {
-        return (
-            <div className="bg-red-50 border border-red-100 rounded-2xl p-8 text-center text-red-700">
-                <AlertCircle className="w-12 h-12 mx-auto mb-4" />
-                <p>{errorMsg}</p>
-            </div>
-        );
-    }
 
     if (children.length === 0) {
         return (
