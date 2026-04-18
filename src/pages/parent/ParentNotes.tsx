@@ -11,7 +11,6 @@ import { PeriodeType } from '../../types';
 export const ParentNotes: React.FC = () => {
     const { notes, matieres, classeMatieres, students: children } = useStore();
     const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
-    const periodes: PeriodeType[] = ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3', 'SEMESTRE 1', 'SEMESTRE 2'];
 
     useEffect(() => {
         if (children.length > 0 && !selectedChildId) {
@@ -73,7 +72,10 @@ export const ParentNotes: React.FC = () => {
             {/* Liste des notes par période */}
             {selectedChild && (
                 <div className="space-y-12 pb-20">
-                    {periodes.map(periode => {
+                    {(selectedChild.cycle === 'Lycée' 
+                        ? (['SEMESTRE 1', 'SEMESTRE 2'] as PeriodeType[])
+                        : (['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'] as PeriodeType[])
+                    ).map(periode => {
                         // Filtrer les matières de la classe de l'enfant
                         const childClasseMatieres = classeMatieres.filter(cm => cm.classe === selectedChild.classe);
                         // Filtrer les notes de l'enfant pour cette période
