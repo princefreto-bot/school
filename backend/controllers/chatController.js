@@ -27,6 +27,12 @@ async function getConversations(req, res) {
         if (error) throw error;
         return res.json(data);
     } catch (err) {
+        if (err.code === '42P01') {
+            return res.status(500).json({ 
+                error: 'Le service de messagerie n\'est pas encore configuré pour cet établissement.',
+                detail: 'Table conversations manquante. Contactez l\'administrateur.'
+            });
+        }
         return res.status(500).json({ error: err.message });
     }
 }
