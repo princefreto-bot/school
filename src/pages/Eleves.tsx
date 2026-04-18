@@ -489,7 +489,7 @@ export const Eleves: React.FC = () => {
           }}
           onDelete={async () => {
             await deleteStudentPhoto(photoModal.student!.id);
-            updateStudent(photoModal.student!.id, { photoUrl: null });
+            updateStudent(photoModal.student!.id, { photoUrl: undefined });
           }}
         />
       )}
