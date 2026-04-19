@@ -17,6 +17,14 @@ import { AppState } from '../store/useStore';
  * @returns {Promise<any>} - Résultat de la sync
  */
 export async function syncToBackend(store: Partial<AppState>, replace: boolean = false) {
+    // 🛡️ Sécurité SaaS : Les parents n'ont pas accès à l'API /sync (réservée admin)
+    // On vérifie le rôle pour éviter les erreurs 403 persistantes dans le dashboard parent
+    const currentUser = (store as any).user || null;
+    if (currentUser?.role === 'parent') {
+        // console.log('👤 [Sync] Skip sync for parent (restricted endpoint)');
+        return null;
+    }
+
     const payload: any = { replace };
     
     // N'inclure que les champs fournis dans l'objet store pour éviter d'envoyer des tableaux vides par erreur

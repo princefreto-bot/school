@@ -52,70 +52,6 @@ const IMP_STYLES = {
     },
 };
 
-// ── Popup Annonce ────────────────────────────────────────────
-const AnnouncementPopup: React.FC<{
-    announcement: Announcement;
-    onClose: () => void;
-}> = ({ announcement, onClose }) => {
-    const imp = IMP_STYLES[announcement.importance] || IMP_STYLES.info;
-
-    return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
-            <div
-                className={`relative w-full max-w-md rounded-[32px] shadow-2xl border-2 ${imp.border} ${imp.bg} overflow-hidden animate-slideUp`}
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="announcement-title"
-            >
-                {/* Header coloré */}
-                <div className={`${imp.header} px-6 py-4 flex items-center justify-between`}>
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-white">
-                            {imp.icon}
-                        </div>
-                        <div>
-                            <span className="text-white/80 text-[10px] font-bold uppercase tracking-widest block">
-                                {imp.label} — École
-                            </span>
-                            <h3 id="announcement-title" className="text-white font-bold text-base leading-tight">
-                                {announcement.titre}
-                            </h3>
-                        </div>
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className="w-8 h-8 flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-xl text-white transition"
-                        aria-label="Fermer"
-                    >
-                        <X className="w-4 h-4" />
-                    </button>
-                </div>
-
-                {/* Corps */}
-                <div className="px-6 py-6">
-                    <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
-                        {announcement.message}
-                    </p>
-
-                    <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-200 dark:border-slate-700/50">
-                        <span className="text-xs text-slate-400 dark:text-slate-500 font-bold">
-                            Publié le{' '}
-                            {new Date(announcement.createdAt).toLocaleDateString('fr-FR', {
-                                day: 'numeric', month: 'long', year: 'numeric',
-                            })}
-                        </span>
-                        <button
-                            onClick={onClose}
-                            className={`px-6 py-2.5 ${imp.header} hover:opacity-90 text-white rounded-2xl text-sm font-black transition shadow-lg shadow-black/10 active:scale-95`}
-                        >
-                            Compris ✓
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 // ── Composant principal ──────────────────────────────────────
 export const ParentDashboard: React.FC = () => {
@@ -128,8 +64,6 @@ export const ParentDashboard: React.FC = () => {
 
     // État des annonces
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-    const [pendingAnnouncements, setPendingAnnouncements] = useState<Announcement[]>([]);
-    const [currentPopup, setCurrentPopup] = useState<Announcement | null>(null);
     const [showAnnouncementList, setShowAnnouncementList] = useState(false);
     const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>('default');
     
@@ -174,69 +108,29 @@ export const ParentDashboard: React.FC = () => {
         }
     }, [children.length]);
 
-    // ── Chargement & tri des annonces ─────────────────────────
-    const fetchAnnouncements = useCallback(async () => {
-        try {
-            const data = await parentApi.getAnnouncements();
-            const fetched: Announcement[] = data.announcements || [];
-
-            // Marquer les nouvelles annonces (pas encore lues selon le store)
-            const newOnes = fetched.filter(a => {
-                const read = announcementReads.find(r => r.announcementId === a.id && r.parentId === user?.id);
-                return !read || !read.readAt;
-            });
-
-            if (newOnes.length > 0) {
-                // Ajouter en file de popups (les urgentes en premier)
-                const sorted = [...newOnes].sort((a, b) => {
-                    const order = { urgent: 0, important: 1, info: 2 };
-                    return (order[a.importance] ?? 2) - (order[b.importance] ?? 2);
-                });
-                setPendingAnnouncements(prev => {
-                    // Éviter les doublons dans la file d'attente
-                    const existing = new Set(prev.map(a => a.id));
-                    return [...prev, ...sorted.filter(a => !existing.has(a.id))];
-                });
-            }
-
-            setAnnouncements(fetched);
-        } catch (err) {
-            // Silencieux : le parent est peut-être déconnecté
-            console.warn('⚠️ Annonces non disponibles:', err);
-        }
-    }, []);
-
-    // ── Popup : afficher la prochaine en file ─────────────────
-    useEffect(() => {
-        if (!currentPopup && pendingAnnouncements.length > 0) {
-            const [first, ...rest] = pendingAnnouncements;
-            setCurrentPopup(first);
-            setPendingAnnouncements(rest);
-        }
-    }, [pendingAnnouncements, currentPopup]);
-
-    // ── Fermer popup et marquer comme vue ────────────────────
-    const closePopup = useCallback(() => {
-        if (currentPopup && user?.id) {
-            markAnnouncementRead(currentPopup.id, user.id);
-        }
-        setCurrentPopup(null);
-    }, [currentPopup, user?.id, markAnnouncementRead]);
-
     // ── Polling toutes les 10 secondes ─────────────────────────
     useEffect(() => {
         fetchData();
 
-        // Premier chargement annonces
-        fetchAnnouncements();
+        // Premier chargement annonces (via le store ou API locale si besoin)
+        const fetchAnnouncementsLocal = async () => {
+            try {
+                const data = await parentApi.getAnnouncements();
+                setAnnouncements(data.announcements || []);
+            } catch (err) {
+                console.warn('⚠️ Annonces non disponibles:', err);
+            }
+        };
+
+        fetchAnnouncementsLocal();
 
         // Polling temps réel : toutes les 10 s
-        pollingRef.current = setInterval(fetchAnnouncements, 10_000);
+        pollingRef.current = setInterval(fetchAnnouncementsLocal, 10_000);
 
         return () => {
             if (pollingRef.current) clearInterval(pollingRef.current);
         };
-    }, [fetchAnnouncements]);
+    }, [fetchData]);
 
     const handleUnlink = async (studentId: string, name: string) => {
         if (!window.confirm(`Voulez-vous vraiment retirer ${name} de votre compte ?`)) return;
@@ -299,10 +193,6 @@ export const ParentDashboard: React.FC = () => {
 
     return (
         <>
-            {/* ── Popup annonce ── */}
-            {currentPopup && (
-                <AnnouncementPopup announcement={currentPopup} onClose={closePopup} />
-            )}
 
             <div className="space-y-6">
                 {/* ── Barre supérieure ── */}
@@ -383,7 +273,6 @@ export const ParentDashboard: React.FC = () => {
                                             key={a.id}
                                             className="px-6 py-4 hover:bg-slate-50 transition cursor-pointer"
                                             onClick={() => {
-                                                setCurrentPopup(a);
                                                 if (user?.id) markAnnouncementRead(a.id, user.id);
                                                 setShowAnnouncementList(false);
                                             }}

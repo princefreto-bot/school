@@ -285,7 +285,8 @@ export const useStore = create<AppState>()(
           const count = await chatApi.getUnreadCount();
           set({ unreadMessages: count });
         } catch (err) {
-          console.error('Failed to fetch unread messages:', err);
+          // Silence noise for now if backend fails
+          // console.error('Failed to fetch unread messages:', err);
         }
       },
       login: async (username, password, schoolSlug) => {
@@ -730,29 +731,35 @@ export const useStore = create<AppState>()(
       },
       announcementReads: [],
       markAnnouncementRead: (announcementId, parentId) => {
-        const existing = get().announcementReads.find(
+        const reads = get().announcementReads;
+        const existing = reads.find(
           r => r.announcementId === announcementId && r.parentId === parentId
         );
+        
+        let newReads;
         if (existing) {
-          // Mettre à jour
-          set({
-            announcementReads: get().announcementReads.map(r =>
-              r.announcementId === announcementId && r.parentId === parentId
-                ? { ...r, readAt: new Date().toISOString(), remindAt: undefined }
-                : r
-            ),
-          });
+          newReads = reads.map(r =>
+            r.announcementId === announcementId && r.parentId === parentId
+              ? { ...r, readAt: new Date().toISOString(), remindAt: undefined }
+              : r
+          );
         } else {
-          set({
-            announcementReads: [
-              ...get().announcementReads,
-              { announcementId, parentId, readAt: new Date().toISOString() },
-            ],
+          newReads = [
+            ...reads,
+            { announcementId, parentId, readAt: new Date().toISOString() },
+          ];
+        }
+        
+        set({ announcementReads: newReads });
+
+        // On ne tente de sync vers le cloud que si on n'est pas un parent 
+        // car l'URL /api/sync est restreinte.
+        const user = get().user;
+        if (user && user.role !== 'parent') {
+          import('../services/backendSync').then(({ syncToBackend }) => {
+            syncToBackend({ announcementReads: newReads }).then(() => set({ lastSyncTimestamp: Date.now() }));
           });
         }
-        import('../services/backendSync').then(({ syncToBackend }) => {
-          syncToBackend({ announcementReads: get().announcementReads }).then(() => set({ lastSyncTimestamp: Date.now() }));
-        });
       },
       remindAnnouncementLater: (announcementId, parentId) => {
         const remindAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // +24h
@@ -853,8 +860,21 @@ export const useStore = create<AppState>()(
               console.log(`✅ [Sync Parent] ${data.students.length} enfant(s) chargé(s).`);
             }
 
-            if (data.announcements) set({ announcements: data.announcements });
-            if (data.announcementReads) set({ announcementReads: data.announcementReads });
+             if (data.announcements) set({ announcements: data.announcements });
+            if (data.announcementReads) {
+              // Fusionner avec les lectures locales pour ne pas perdre les "lus" récents 
+              // si le backend n'a pas pu être mis à jour (403 Forbidden)
+              const localReads = get().announcementReads;
+              const serverReads = data.announcementReads;
+              const merged = [...serverReads];
+              
+              localReads.forEach(lr => {
+                if (!merged.find(mr => mr.announcementId === lr.announcementId && mr.parentId === lr.parentId)) {
+                  merged.push(lr);
+                }
+              });
+              set({ announcementReads: merged });
+            }
             if (typeof data.unreadMessages === 'number') set({ unreadMessages: data.unreadMessages });
             
             // 📝 Données académiques
