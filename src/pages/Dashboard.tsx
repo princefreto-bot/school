@@ -6,7 +6,7 @@ import { useStore } from '../store/useStore';
 import { syncToBackend, isBackendAvailable } from '../services/backendSync';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
+  PieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
 } from 'recharts';
 import { Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck, FileText } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
@@ -435,36 +435,24 @@ export const Dashboard: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
         <h3 className="font-bold text-slate-800 dark:text-white mb-1">Solvabilité par cycle</h3>
         <p className="text-xs text-slate-500 mb-6">Taux de recouvrement par niveau scolaire (%)</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {cycleComparison.map((c) => (
-            <div key={c.cycle} className="relative p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 group hover:shadow-md transition-all">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{c.cycle}</p>
-                  <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{c.taux}%</p>
-                </div>
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                  c.taux >= 80 ? 'bg-emerald-100 text-emerald-600' : 
-                  c.taux >= 50 ? 'bg-amber-100 text-amber-600' : 'bg-rose-100 text-rose-600'
-                }`}>
-                  <Target className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-4">
-                <div 
-                  className={`h-full rounded-full transition-all duration-1000 ${
-                    c.taux >= 80 ? 'bg-emerald-500' : 
-                    c.taux >= 50 ? 'bg-amber-500' : 'bg-rose-500'
-                  }`}
-                  style={{ width: `${c.taux}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-tight">
-                <span>Encaissé: {fmtMoney(c.totalEncaisse)} F</span>
-                <span>Reste: {fmtMoney(c.totalRestant)} F</span>
-              </div>
-            </div>
-          ))}
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={cycleComparison}>
+              <PolarGrid stroke="#e5e7eb" />
+              <PolarAngleAxis dataKey="cycle" tick={{ fontSize: 10, fontStyle: 'bold', fill: '#64748b' }} />
+              <Radar
+                name="Taux"
+                dataKey="taux"
+                stroke="#f59e0b"
+                fill="#f59e0b"
+                fillOpacity={0.5}
+              />
+              <Tooltip 
+                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                formatter={(value) => [`${value}%`, 'Taux de recouvrement']}
+              />
+            </RadarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

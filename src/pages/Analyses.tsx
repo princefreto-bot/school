@@ -173,17 +173,18 @@ export const Analyses: React.FC = () => {
           </h3>
           <p className="text-xs text-gray-400 mb-4">Taux de recouvrement (%)</p>
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={radarData} layout="vertical" margin={{ left: 10, right: 30 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={true} vertical={false} />
-              <XAxis type="number" domain={[0, 100]} hide />
-              <YAxis dataKey="cycle" type="category" tick={{ fontSize: 11, fill: '#6b7280' }} width={80} />
+            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+              <PolarGrid stroke="#e5e7eb" />
+              <PolarAngleAxis dataKey="cycle" tick={{ fontSize: 10, fill: '#6b7280' }} />
+              <Radar
+                name="Taux de recouvrement"
+                dataKey="taux"
+                stroke="#1e40af"
+                fill="#1e40af"
+                fillOpacity={0.6}
+              />
               <Tooltip content={<SingleValueTooltip />} />
-              <Bar dataKey="taux" radius={[0, 4, 4, 0]} barSize={24} name="Taux de recouvrement">
-                {radarData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.taux >= 80 ? '#16a34a' : entry.taux >= 50 ? '#f59e0b' : '#ef4444'} />
-                ))}
-              </Bar>
-            </BarChart>
+            </RadarChart>
           </ResponsiveContainer>
         </div>
       </div>
