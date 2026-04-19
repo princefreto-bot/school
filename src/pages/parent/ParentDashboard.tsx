@@ -132,7 +132,11 @@ export const ParentDashboard: React.FC = () => {
     const [currentPopup, setCurrentPopup] = useState<Announcement | null>(null);
     const [showAnnouncementList, setShowAnnouncementList] = useState(false);
     const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>('default');
-    const seenIds = useRef<Set<string>>(new Set());
+    
+    // Accès au store global pour les lectures
+    const announcementReads = useStore(s => s.announcementReads);
+    const markAnnouncementRead = useStore(s => s.markAnnouncementRead);
+    
     const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Initialiser l'état de notification (ne bloque pas)
@@ -176,8 +180,11 @@ export const ParentDashboard: React.FC = () => {
             const data = await parentApi.getAnnouncements();
             const fetched: Announcement[] = data.announcements || [];
 
-            // Marquer les nouvelles annonces (pas encore vues dans cette session)
-            const newOnes = fetched.filter(a => !seenIds.current.has(a.id));
+            // Marquer les nouvelles annonces (pas encore lues selon le store)
+            const newOnes = fetched.filter(a => {
+                const read = announcementReads.find(r => r.announcementId === a.id && r.parentId === user?.id);
+                return !read || !read.readAt;
+            });
 
             if (newOnes.length > 0) {
                 // Ajouter en file de popups (les urgentes en premier)
@@ -186,7 +193,7 @@ export const ParentDashboard: React.FC = () => {
                     return (order[a.importance] ?? 2) - (order[b.importance] ?? 2);
                 });
                 setPendingAnnouncements(prev => {
-                    // Éviter les doublons
+                    // Éviter les doublons dans la file d'attente
                     const existing = new Set(prev.map(a => a.id));
                     return [...prev, ...sorted.filter(a => !existing.has(a.id))];
                 });
@@ -210,11 +217,11 @@ export const ParentDashboard: React.FC = () => {
 
     // ── Fermer popup et marquer comme vue ────────────────────
     const closePopup = useCallback(() => {
-        if (currentPopup) {
-            seenIds.current.add(currentPopup.id);
+        if (currentPopup && user?.id) {
+            markAnnouncementRead(currentPopup.id, user.id);
         }
         setCurrentPopup(null);
-    }, [currentPopup]);
+    }, [currentPopup, user?.id, markAnnouncementRead]);
 
     // ── Polling toutes les 10 secondes ─────────────────────────
     useEffect(() => {
@@ -242,7 +249,7 @@ export const ParentDashboard: React.FC = () => {
     };
 
     const totalEcolage = children.reduce((acc, s) => acc + s.ecolage, 0);
-    const totalDejaPaye = children.reduce((acc, s) => acc + (s.deja_paye || 0), 0);
+    const totalDejaPaye = children.reduce((acc, s) => acc + (s.dejaPaye || 0), 0);
     const totalRestant = children.reduce((acc, s) => acc + s.restant, 0);
 
     const handleStartChat = async (role: 'administration' | 'comptabilite') => {
@@ -260,7 +267,10 @@ export const ParentDashboard: React.FC = () => {
     };
 
     // ── Nombre d'annonces non vues ───────────────────────────
-    const unseenCount = announcements.filter(a => !seenIds.current.has(a.id)).length;
+    const unseenCount = announcements.filter(a => {
+        const read = announcementReads.find(r => r.announcementId === a.id && r.parentId === user?.id);
+        return !read || !read.readAt;
+    }).length;
 
     if (loading && children.length === 0) {
         return (
@@ -308,8 +318,9 @@ export const ParentDashboard: React.FC = () => {
                             id="btn-announcements"
                             onClick={() => {
                                 setShowAnnouncementList(v => !v);
-                                if (!showAnnouncementList) {
-                                    announcements.forEach(a => seenIds.current.add(a.id));
+                                if (!showAnnouncementList && user?.id) {
+                                    // Marquer tout comme lu quand on ouvre la liste
+                                    announcements.forEach(a => markAnnouncementRead(a.id, user.id));
                                 }
                             }}
                             className="relative flex items-center gap-2 px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 text-slate-600 dark:text-slate-300 rounded-[20px] shadow-sm transition-all font-black text-sm active:scale-95"
@@ -373,7 +384,7 @@ export const ParentDashboard: React.FC = () => {
                                             className="px-6 py-4 hover:bg-slate-50 transition cursor-pointer"
                                             onClick={() => {
                                                 setCurrentPopup(a);
-                                                seenIds.current.add(a.id);
+                                                if (user?.id) markAnnouncementRead(a.id, user.id);
                                                 setShowAnnouncementList(false);
                                             }}
                                         >
@@ -541,12 +552,12 @@ export const ParentDashboard: React.FC = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-5">
-                                                <p className="text-emerald-600 font-bold text-base">{(child.deja_paye || 0).toLocaleString()} F</p>
+                                                <p className="text-emerald-600 font-bold text-base">{(child.dejaPaye || 0).toLocaleString()} F</p>
                                                 {child.ecolage > 0 && (
                                                     <div className="w-24 h-1 bg-slate-100 rounded-full mt-2 overflow-hidden">
                                                         <div
                                                             className="h-full bg-emerald-500 rounded-full"
-                                                            style={{ width: `${Math.min(((child.deja_paye || 0) / child.ecolage) * 100, 100)}%` }}
+                                                            style={{ width: `${Math.min(((child.dejaPaye || 0) / child.ecolage) * 100, 100)}%` }}
                                                         />
                                                     </div>
                                                 )}

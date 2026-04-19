@@ -77,6 +77,12 @@ export interface AdminSettings {
   schoolYear: string;
   messageRemerciement: string;
   messageRappel: string;
+  // Champs additionnels pour la génération PDF
+  nomEcole?: string;
+  anneScolaire?: string;
+  adresse?: string;
+  telephone?: string;
+  email?: string;
 }
 
 export interface Tranche {
@@ -86,20 +92,17 @@ export interface Tranche {
   pourcentage: number; // 0 à 100
 }
 
-export interface AppSettings {
-  seuilDeuxiemeTranche: number;
-  schoolName: string;
-  schoolYear: string;
-  messageRemerciement: string;
-  messageRappel: string;
+export interface AppSettings extends AdminSettings {
   currency: string;
-  nomEcole: string;
-  anneScolaire: string;
-  adresse: string;
-  telephone: string;
-  email: string;
   badgeParentResponsable: string;
   badge2emeTranche: string;
+  messageSolde?: string; // Utilisé dans pdfUtils.ts
+  messagePartiel?: string; // Utilisé dans pdfUtils.ts
+  messageNonPaye?: string; // Utilisé dans pdfUtils.ts
+  schoolAddress?: string; // Utilisé dans pdfUtils.ts
+  schoolPhone?: string; // Utilisé dans pdfUtils.ts
+  schoolEmail?: string; // Utilisé dans pdfUtils.ts
+  academicYear?: string; // Utilisé dans pdfUtils.ts
   tranches?: Tranche[];
 }
 

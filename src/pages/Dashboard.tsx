@@ -3,7 +3,7 @@
 // ============================================================
 import React, { useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { syncToBackend, isBackendAvailable } from '../services/backendSync';
+import { isBackendAvailable } from '../services/backendSync';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
@@ -69,7 +69,6 @@ const CustomTooltip: React.FC<{ active?: boolean; payload?: { name: string; valu
 
 export const Dashboard: React.FC = () => {
   const students = useStore((s) => s.students);
-  const parents = useStore((s) => s.parents);
   const user = useStore((s) => s.user);
   const getPresencesToday = useStore((s) => s.getPresencesToday);
   const isSyncing = useStore((s) => s.isSyncing);
@@ -116,7 +115,8 @@ export const Dashboard: React.FC = () => {
       setTimeout(() => {
         generateRapportMensuelPDF(students, classComp, { 
           name: useStore.getState().schoolName || useStore.getState().appName, 
-          logo: useStore.getState().schoolLogo 
+          logo: useStore.getState().schoolLogo,
+          stamp: useStore.getState().schoolStamp
         });
         useStore.getState().setLastReportMonth(currentMonthKey);
       }, 2000); // Petit délai pour laisser l'interface se charger

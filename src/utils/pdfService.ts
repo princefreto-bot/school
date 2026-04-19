@@ -24,12 +24,12 @@ export const generateReceipt = (student: Student, settings: AdminSettings): void
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text(settings.nomEcole, 105, 18, { align: 'center' });
+  doc.text(settings.nomEcole || settings.schoolName, 105, 18, { align: 'center' });
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text(`${settings.adresse} | ${settings.telephone}`, 105, 28, { align: 'center' });
-  doc.text(`Année scolaire: ${settings.anneScolaire}`, 105, 35, { align: 'center' });
+  doc.text(`${settings.adresse || ''} | ${settings.telephone || ''}`, 105, 28, { align: 'center' });
+  doc.text(`Année scolaire: ${settings.anneScolaire || settings.schoolYear}`, 105, 35, { align: 'center' });
   
   // Title
   doc.setTextColor(0, 0, 0);
@@ -128,15 +128,16 @@ export const generateReceipt = (student: Student, settings: AdminSettings): void
   doc.text(splitMessage, 20, finalY + 25);
   
   // Payment history
-  if (student.paiements.length > 0) {
+  const history = student.paiements || student.historiquesPaiements || [];
+  if (history.length > 0) {
     autoTable(doc, {
       startY: finalY + 45,
       head: [['Date', 'Montant', 'Méthode', 'Référence']],
-      body: student.paiements.map(p => [
+      body: history.map(p => [
         format(new Date(p.date), 'dd/MM/yyyy'),
         formatMontant(p.montant),
-        p.methode,
-        p.reference
+        p.methode || p.mode || '',
+        p.reference || ''
       ]),
       styles: { fontSize: 9, cellPadding: 4 },
       headStyles: { fillColor: [100, 116, 139], fontStyle: 'bold' }
@@ -166,12 +167,12 @@ export const generateStudentCard = (student: Student, settings: AdminSettings): 
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(24);
   doc.setFont('helvetica', 'bold');
-  doc.text(settings.nomEcole, 105, 20, { align: 'center' });
+  doc.text(settings.nomEcole || settings.schoolName, 105, 20, { align: 'center' });
   
   doc.setFontSize(12);
   doc.text('FICHE FINANCIÈRE ÉLÈVE', 105, 32, { align: 'center' });
   doc.setFontSize(10);
-  doc.text(`Année scolaire: ${settings.anneScolaire}`, 105, 40, { align: 'center' });
+  doc.text(`Année scolaire: ${settings.anneScolaire || settings.schoolYear}`, 105, 40, { align: 'center' });
   
   // Student photo placeholder
   doc.setFillColor(220, 220, 220);
@@ -253,7 +254,8 @@ export const generateStudentCard = (student: Student, settings: AdminSettings): 
   doc.text(getStatusLabel(status), 105, 223, { align: 'center' });
   
   // Payment history
-  if (student.paiements.length > 0) {
+  const history = student.paiements || student.historiquesPaiements || [];
+  if (history.length > 0) {
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
@@ -262,11 +264,11 @@ export const generateStudentCard = (student: Student, settings: AdminSettings): 
     autoTable(doc, {
       startY: 245,
       head: [['Date', 'Montant', 'Méthode', 'Référence']],
-      body: student.paiements.map(p => [
+      body: history.map(p => [
         format(new Date(p.date), 'dd/MM/yyyy'),
         formatMontant(p.montant),
-        p.methode,
-        p.reference
+        p.methode || p.mode || '',
+        p.reference || ''
       ]),
       styles: { fontSize: 9, cellPadding: 4 },
       headStyles: { fillColor: [0, 51, 102], fontStyle: 'bold' },
@@ -279,7 +281,7 @@ export const generateStudentCard = (student: Student, settings: AdminSettings): 
   doc.rect(0, 280, 210, 17, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(8);
-  doc.text(`${settings.nomEcole} | ${settings.adresse} | ${settings.telephone}`, 105, 288, { align: 'center' });
+  doc.text(`${settings.nomEcole || settings.schoolName} | ${settings.adresse || ''} | ${settings.telephone || ''}`, 105, 288, { align: 'center' });
   doc.text(`Document généré le ${formatDate()}`, 105, 294, { align: 'center' });
   
   doc.save(`Fiche_${student.nom}_${student.prenom}.pdf`);
@@ -296,9 +298,9 @@ export const generateClassReport = (students: Student[], classe: string, setting
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text(settings.nomEcole, 148.5, 12, { align: 'center' });
+  doc.text(settings.nomEcole || settings.schoolName, 148.5, 12, { align: 'center' });
   doc.setFontSize(12);
-  doc.text(`Rapport Financier - Classe ${classe} - ${settings.anneScolaire}`, 148.5, 23, { align: 'center' });
+  doc.text(`Rapport Financier - Classe ${classe} - ${settings.anneScolaire || settings.schoolYear}`, 148.5, 23, { align: 'center' });
   
   // Summary
   const totalEcolage = classStudents.reduce((sum, s) => sum + s.ecolage, 0);
@@ -347,7 +349,7 @@ export const generateClassReport = (students: Student[], classe: string, setting
   // Footer
   const pageHeight = doc.internal.pageSize.height;
   doc.setFontSize(8);
-  doc.text(`Document généré le ${formatDate()} - ${settings.nomEcole}`, 148.5, pageHeight - 10, { align: 'center' });
+  doc.text(`Document généré le ${formatDate()} - ${settings.nomEcole || settings.schoolName}`, 148.5, pageHeight - 10, { align: 'center' });
   
   doc.save(`Rapport_${classe.replace(/\s/g, '_')}.pdf`);
 };
@@ -363,9 +365,9 @@ export const generateNonSoldesReport = (students: Student[], settings: AdminSett
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text(settings.nomEcole, 148.5, 12, { align: 'center' });
+  doc.text(settings.nomEcole || settings.schoolName, 148.5, 12, { align: 'center' });
   doc.setFontSize(12);
-  doc.text(`LISTE DES ÉLÈVES NON SOLDÉS - ${settings.anneScolaire}`, 148.5, 23, { align: 'center' });
+  doc.text(`LISTE DES ÉLÈVES NON SOLDÉS - ${settings.anneScolaire || settings.schoolYear}`, 148.5, 23, { align: 'center' });
   
   const totalRestant = nonSoldes.reduce((sum, s) => sum + s.restant, 0);
   doc.setTextColor(0, 0, 0);

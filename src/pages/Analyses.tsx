@@ -8,7 +8,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
 } from 'recharts';
-import { TrendingUp, AlertTriangle, Target, Award, BarChart3 } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Target, Award } from 'lucide-react';
 import { computeCycleComparison } from '../services/analyticsService';
 
 // Custom tooltips évitant les problèmes de types Recharts
@@ -34,7 +34,7 @@ const PieMoneyTooltip = ({ active, payload }: { active?: boolean; payload?: { na
   );
 };
 
-const SingleValueTooltip = ({ active, payload }: { active?: boolean; payload?: { name: string; value: number }[] }) => {
+const SingleValueTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-white shadow-xl rounded-xl border border-gray-100 p-3 text-xs">

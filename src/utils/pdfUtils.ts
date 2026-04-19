@@ -39,8 +39,8 @@ const drawHeader = (doc: jsPDF, settings: AppSettings, title: string, schoolName
   // Coordonnées
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
-  doc.text(`${settings.schoolAddress} | Tél: ${settings.schoolPhone}`, pageWidth / 2, 28, { align: 'center' });
-  doc.text(`Email: ${settings.schoolEmail} | Année scolaire: ${settings.academicYear}`, pageWidth / 2, 36, { align: 'center' });
+  doc.text(`${settings.schoolAddress || settings.adresse || ''} | Tél: ${settings.schoolPhone || settings.telephone || ''}`, pageWidth / 2, 28, { align: 'center' });
+  doc.text(`Email: ${settings.schoolEmail || settings.email || ''} | Année scolaire: ${settings.academicYear || settings.schoolYear || settings.anneScolaire || ''}`, pageWidth / 2, 36, { align: 'center' });
   
   // Titre du document
   doc.setTextColor(...COLORS.dark);
@@ -193,7 +193,7 @@ export const generateReceipt = (student: Student, settings: AppSettings): void =
     doc.setTextColor(...COLORS.success);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'italic');
-    const lines = doc.splitTextToSize(settings.messageSolde, pageWidth - 50);
+    const lines = doc.splitTextToSize(settings.messageSolde || settings.messageRemerciement, pageWidth - 50);
     doc.text(lines, 25, y + 10);
     y += 30;
   } else if (student.dejaPaye >= student.ecolage * 0.5) {
@@ -209,7 +209,7 @@ export const generateReceipt = (student: Student, settings: AppSettings): void =
     doc.setTextColor(...COLORS.primary);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'italic');
-    const lines = doc.splitTextToSize(settings.messagePartiel, pageWidth - 50);
+    const lines = doc.splitTextToSize(settings.messagePartiel || settings.messageRappel, pageWidth - 50);
     doc.text(lines, 25, y + 10);
     y += 30;
   } else {
@@ -218,7 +218,7 @@ export const generateReceipt = (student: Student, settings: AppSettings): void =
     doc.setTextColor(...COLORS.danger);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'italic');
-    const lines = doc.splitTextToSize(settings.messageNonPaye, pageWidth - 50);
+    const lines = doc.splitTextToSize(settings.messageNonPaye || settings.messageRappel, pageWidth - 50);
     doc.text(lines, 25, y + 10);
     y += 30;
   }
@@ -252,7 +252,7 @@ export const generateReceipt = (student: Student, settings: AppSettings): void =
       }
       doc.text(p.date, 30, y + 5);
       doc.text(formatMoney(p.montant, settings.currency), 70, y + 5);
-      doc.text(p.mode, 110, y + 5);
+      doc.text(p.mode || '', 110, y + 5);
       doc.text(p.reference || '-', 145, y + 5);
       y += 7;
     });
@@ -431,7 +431,7 @@ export const generateStudentCard = (student: Student, settings: AppSettings): vo
       doc.setTextColor(...COLORS.success);
       doc.text(formatMoney(p.montant, settings.currency), 65, y + 5);
       doc.setTextColor(...COLORS.dark);
-      doc.text(p.mode, 105, y + 5);
+      doc.text(p.mode || '', 105, y + 5);
       doc.text(p.reference || '-', 140, y + 5);
       doc.text((p.commentaire || '-').substring(0, 15), 175, y + 5);
       y += 7;

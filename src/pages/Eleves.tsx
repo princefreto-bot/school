@@ -446,7 +446,7 @@ export const Eleves: React.FC = () => {
                         <button onClick={() => setSelectedStudent(s)} className="p-1.5 hover:bg-amber-100 rounded-lg text-amber-600 transition-colors" title="Fiche détaillée">
                           <FileText className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => generateRecuPDF(s, schoolName, schoolYear, messageRemerciement, messageRappel, schoolLogo, schoolStamp)} className="p-1.5 hover:bg-violet-100 rounded-lg text-violet-600 transition-colors" title="Reçu PDF">
+                        <button onClick={() => generateRecuPDF(s, schoolName, schoolYear, messageRemerciement, messageRappel, schoolLogo || undefined, schoolStamp || undefined)} className="p-1.5 hover:bg-violet-100 rounded-lg text-violet-600 transition-colors" title="Reçu PDF">
                           <Download className="w-3.5 h-3.5" />
                         </button>
                         <WhatsAppBtn student={s} schoolName={schoolName} />
