@@ -1,4 +1,5 @@
 const { supabase } = require('../utils/supabase');
+const { sendPushNotification } = require('../utils/webPush');
 
 /**
  * POST /api/sync
@@ -107,13 +108,38 @@ async function syncFromFrontend(req, res) {
                     });
                 }
             });
-
             if (allPayments.length > 0) {
                 for (let i = 0; i < allPayments.length; i += CHUNK_SIZE) {
                     const chunk = allPayments.slice(i, i + CHUNK_SIZE);
                     await supabase.from(tbl('payments')).upsert(chunk, { onConflict: 'id' });
                 }
             }
+
+            // --- 2b. Notifier les parents pour les NOUVEAUX paiements ---
+            // On le fait après l'upsert pour garantir que la data est là
+            (async () => {
+                try {
+                    for (const s of students) {
+                        if (Array.isArray(s.historiquesPaiements) && s.historiquesPaiements.length > 0) {
+                            // On ne notifie que pour le DERNIER paiement reçu pour cet élève dans ce lot
+                            // (Pour éviter 10 notifs si l'admin a validé 10 mois d'un coup)
+                            const lastP = s.historiquesPaiements[s.historiquesPaiements.length - 1];
+                            const studentName = (s.prenom || s.nom || 'votre enfant').split(' ')[0];
+                            const msg = `💰 Paiement reçu : ${lastP.montant.toLocaleString()} FCFA pour ${studentName}. Nouveau reste : ${s.restant.toLocaleString()} FCFA. Merci !`;
+                            
+                            // Chercher les parents
+                            const { data: links } = await supabase.from(tbl('parent_student')).select('parent_id').eq('student_id', s.id);
+                            if (links && links.length > 0) {
+                                for (const link of links) {
+                                    sendPushNotification(link.parent_id, schoolSlug, '📦 Reçu de paiement', msg, 'payment').catch(() => {});
+                                }
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error('❌ [Sync Notif] Erreur paiements:', err.message);
+                }
+            })();
         }
 
         // --- 3. Sync Presences ---
@@ -132,6 +158,27 @@ async function syncFromFrontend(req, res) {
                 const chunk = presenceData.slice(i, i + CHUNK_SIZE);
                 await supabase.from(tbl('presences')).upsert(chunk, { onConflict: 'id' });
             }
+
+            // --- 3b. Notifier les parents pour les Pointages ---
+            (async () => {
+                try {
+                    for (const p of presences) {
+                        const studentName = (p.elevePrenom || 'votre enfant').split(' ')[0];
+                        const action = (p.statut || 'Entrée').toLowerCase() === 'entrée' ? 'est ARRIVÉ(E)' : 'est SORTI(E)';
+                        const msg = `🔔 ${studentName} ${action} de l'établissement à ${p.heure}.`;
+                        
+                        // Chercher les parents
+                        const { data: links } = await supabase.from(tbl('parent_student')).select('parent_id').eq('student_id', p.eleveId);
+                        if (links && links.length > 0) {
+                            for (const link of links) {
+                                sendPushNotification(link.parent_id, schoolSlug, '📍 Pointage École', msg, 'presence').catch(() => {});
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error('❌ [Sync Notif] Erreur pointages:', err.message);
+                }
+            })();
         }
 
         // --- 4. Sync Activity Logs ---
