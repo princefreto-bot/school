@@ -39,8 +39,8 @@ const DynamicBadge: React.FC<{ student: Student }> = ({ student }) => {
 };
 
 // Carte élève
-const StudentCard: React.FC<{ student: Student; schoolName: string; schoolYear: string; msgRem: string; msgRap: string; schoolLogo?: string }> = ({
-  student, schoolName, schoolYear, msgRem, msgRap, schoolLogo,
+const StudentCard: React.FC<{ student: Student; schoolName: string; schoolYear: string; msgRem: string; msgRap: string; schoolLogo?: string; schoolStamp?: string }> = ({
+  student, schoolName, schoolYear, msgRem, msgRap, schoolLogo, schoolStamp
 }) => {
   const taux = Math.round((student.dejaPaye / student.ecolage) * 100);
   const phone = (student.telephone || '').replace(/\D/g, '');
@@ -83,7 +83,7 @@ const StudentCard: React.FC<{ student: Student; schoolName: string; schoolYear: 
       </div>
       <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-50">
         <button
-          onClick={() => generateRecuPDF(student, schoolName, schoolYear, msgRem, msgRap, schoolLogo)}
+          onClick={() => generateRecuPDF(student, schoolName, schoolYear, msgRem, msgRap, schoolLogo, schoolStamp)}
           className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"
         >
           <Printer className="w-3 h-3" /> Reçu PDF
@@ -107,6 +107,7 @@ export const Documents: React.FC = () => {
   const messageRemerciement = useStore((s) => s.messageRemerciement);
   const messageRappel       = useStore((s) => s.messageRappel);
   const schoolLogo          = useStore((s) => s.schoolLogo);
+  const schoolStamp         = useStore((s) => s.schoolStamp);
 
   const [filterClasse, setFilterClasse] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -132,13 +133,13 @@ export const Documents: React.FC = () => {
   const handleGenereClasse = async (classe: string) => {
     setGenerating(true);
     const cls = students.filter((s) => s.classe === classe);
-    await generateClassePDF(cls, classe, schoolName, schoolYear, messageRemerciement, messageRappel, schoolLogo ?? undefined);
+    await generateClassePDF(cls, classe, schoolName, schoolYear, messageRemerciement, messageRappel, schoolLogo ?? undefined, schoolStamp ?? undefined);
     setGenerating(false);
   };
 
   const handleGenereNonSoldes = async () => {
     setGenerating(true);
-    await generateNonSoldesPDF(nonSoldes, schoolName, schoolYear, messageRappel, schoolLogo ?? undefined);
+    await generateNonSoldesPDF(nonSoldes, schoolName, schoolYear, messageRappel, schoolLogo ?? undefined, schoolStamp ?? undefined);
     setGenerating(false);
   };
 
@@ -240,6 +241,7 @@ export const Documents: React.FC = () => {
               msgRem={messageRemerciement}
               msgRap={messageRappel}
               schoolLogo={schoolLogo ?? undefined}
+              schoolStamp={schoolStamp ?? undefined}
             />
           ))}
         </div>

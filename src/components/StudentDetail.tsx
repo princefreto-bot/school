@@ -22,6 +22,7 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
   const messageRemerciement = useStore((s) => s.messageRemerciement);
   const messageRappel       = useStore((s) => s.messageRappel);
   const schoolLogo          = useStore((s) => s.schoolLogo);
+  const schoolStamp         = useStore((s) => s.schoolStamp);
 
   const [tab, setTab] = useState<'infos' | 'historique'>('infos');
 
@@ -261,7 +262,7 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
         {/* Actions footer */}
         <div className="border-t border-gray-100 p-4 flex flex-wrap gap-2 bg-gray-50 rounded-b-2xl">
           <button
-            onClick={() => generateRecuPDF(student, schoolName, schoolYear, messageRemerciement, messageRappel, schoolLogo ?? undefined)}
+            onClick={() => generateRecuPDF(student, schoolName, schoolYear, messageRemerciement, messageRappel, schoolLogo ?? undefined, schoolStamp ?? undefined)}
             className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-colors shadow-sm"
           >
             <Download className="w-4 h-4" /> Reçu PDF

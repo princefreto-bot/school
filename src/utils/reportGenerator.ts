@@ -25,7 +25,7 @@ const fmtPrice = (n: number) => {
 export const generateRapportMensuelPDF = (
     students: Student[],
     classComp: ClassFinanceRow[],
-    schoolInfo: { name: string, logo: string | null }
+    schoolInfo: { name: string, logo: string | null, stamp: string | null }
 ): void => {
     // Force standard WinAnsiEncoding by avoiding weird non-breaking spaces or rare characters
     const cleanText = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, (m) => {
@@ -52,37 +52,76 @@ export const generateRapportMensuelPDF = (
     const setPrimary = () => doc.setTextColor(0, 0, 0);
     const setSecondary = () => doc.setTextColor(60, 60, 60);
 
-    // --- 0. BRANDING & HEADER ---
+    // --- 0. BRANDING & HEADER (4-Column Layout) ---
     let y = 15;
+    doc.setTextColor(0, 0, 0);
 
-    // Logo if exists
-    if (schoolInfo.logo) {
+    // 1. SCEAU (Extrême Gauche)
+    if (schoolInfo.stamp) {
         try {
-            doc.addImage(schoolInfo.logo, 'PNG', margin, y, 25, 25);
-        } catch (e) {
-            console.error("Erreur logo PDF", e);
-        }
+            doc.addImage(schoolInfo.stamp, 'PNG', margin, y, 22, 22);
+        } catch(e) {}
     }
 
-    // Header Right
+    // 2. TEXTE CENTRAL (Ministry & School side-by-side)
+    const centerX = w / 2;
+    
+    // Bloc Ministère (Centre-Gauche)
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text('RÉPUBLIQUE TOGOLAISE', centerX - 35, y, { align: 'center' });
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(7);
+    doc.text('Travail - Liberté - Patrie', centerX - 35, y + 3.5, { align: 'center' });
+    doc.setLineWidth(0.2);
+    doc.line(centerX - 42, y + 5, centerX - 28, y + 5);
+    doc.setFont('helvetica', 'bold');
+    doc.text('MINISTERE DE L\'EDUCATION NATIONALE', centerX - 35, y + 9, { align: 'center' });
+    doc.setFontSize(7.5);
+    doc.text('DIRECTION RÉGIONALE DE L\'ÉDUCATION', centerX - 35, y + 12.5, { align: 'center' });
+    doc.text('INSPECTION DE L\'ENSEIGNEMENT GENERAL', centerX - 35, y + 16, { align: 'center' });
+
+    // Bloc Établissement (Centre-Droite)
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'black');
+    doc.text(schoolInfo.name.toUpperCase(), centerX + 35, y, { align: 'center' });
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'italic');
+    doc.text('Travail-Rigueur-Succès', centerX + 35, y + 5, { align: 'center' });
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text('Tél: +228 90 17 79 66', centerX + 35, y + 10, { align: 'center' });
+    doc.text('BP: 80159 Apéssito - TOGO', centerX + 35, y + 14, { align: 'center' });
+
+    // 3. LOGO (Extrême Droite)
+    if (schoolInfo.logo) {
+        try {
+            doc.addImage(schoolInfo.logo, 'PNG', w - margin - 22, y, 22, 22);
+        } catch(e) {}
+    }
+
+    y = y + 25;
+
+    // --- TITRE DU DOCUMENT ---
+    doc.setLineWidth(0.8);
+    doc.line(margin, y, w - margin, y);
+    y += 8;
     doc.setFontSize(22);
     doc.setFont('helvetica', 'bold');
-    setPrimary();
-    doc.text('BILAN FINANCIER', w - margin, y + 10, { align: 'right' });
+    doc.text('BILAN FINANCIER', w / 2, y, { align: 'center' });
     
-    doc.setFontSize(12);
+    y += 8;
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    doc.text(schoolInfo.name.toUpperCase(), w - margin, y + 18, { align: 'right' });
+    doc.text(`PÉRIODE : ${currentMonthName.toUpperCase()}`, w / 2, y, { align: 'center' });
     
-    doc.setFontSize(10);
+    y += 6;
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    setSecondary();
-    doc.text(`Période : ${currentMonthName.toUpperCase()}`, w - margin, y + 24, { align: 'right' });
-    doc.text(`Généré le : ${format(now, 'dd.MM.yyyy HH:mm')}`, w - margin, y + 29, { align: 'right' });
+    doc.text(`Généré le : ${format(now, 'dd.MM.yyyy HH:mm')}`, w / 2, y, { align: 'center' });
 
-    y = 50;
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.8);
+    y += 6;
+    doc.setLineWidth(0.2);
     doc.line(margin, y, w - margin, y);
 
     y += 15;

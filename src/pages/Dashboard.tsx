@@ -228,7 +228,8 @@ export const Dashboard: React.FC = () => {
                 <button 
                   onClick={() => generateRapportMensuelPDF(students, classComp, { 
                     name: useStore.getState().schoolName || useStore.getState().appName, 
-                    logo: useStore.getState().schoolLogo 
+                    logo: useStore.getState().schoolLogo,
+                    stamp: useStore.getState().schoolStamp
                   })}
                   className="flex items-center gap-3 px-6 py-4 bg-slate-900 border-2 border-slate-900 text-white rounded-[22px] hover:bg-white hover:text-slate-900 transition-all duration-300 font-black text-sm shadow-xl hover:shadow-2xl active:scale-95 group"
                 >

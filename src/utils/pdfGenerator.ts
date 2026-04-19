@@ -8,9 +8,11 @@ import autoTable from 'jspdf-autotable';
 import { Student } from '../types';
 
 // ── Utilitaires (inchangés) ──────────────────────────────────
-const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n) + ' FCFA';
-const fmtDate = (d?: string) =>
-  d ? new Date(d).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
+const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n).replace(/\s/g, '.') + ' FCFA';
+const fmtDate = (d?: string) => {
+  const date = d ? new Date(d) : new Date();
+  return date.toLocaleDateString('fr-FR').replace(/\//g, '.');
+};
 
 const getBadgeLabel = (student: Student): string => {
   if (student.restant <= 0) return '✓ ÉLÈVE SOLDÉ — Parent Responsable';
@@ -40,119 +42,82 @@ const drawOfficialHeader = (
   schoolYear: string,
   title: string,
   docNumber: string,
-  schoolLogo?: string
+  schoolLogo?: string,
+  schoolStamp?: string
 ): number => {
   const w = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
-  let y = 0;
-
-  // Bande supérieure bleu marine
-  doc.setFillColor(15, 23, 42);
-  doc.rect(0, 0, w, 6, 'F');
-
-  // Bande accent bleu roi sous la bande marine
-  doc.setFillColor(37, 99, 235);
-  doc.rect(0, 6, w, 2, 'F');
-
-  y = 18;
-
-  // ── LOGO : image uploadée OU cercle placeholder ──────────────
-  const logoSize = 22; // diamètre en mm
-  const logoX = w / 2 - logoSize / 2;
-  const logoY = y + 2;
-
-  if (schoolLogo && schoolLogo.startsWith('data:image')) {
-    // Découper le type MIME pour jsPDF (jpeg, png, webp…)
-    const mimeMatch = schoolLogo.match(/data:image\/(\w+);base64,/);
-    const format = mimeMatch ? mimeMatch[1].toUpperCase() : 'PNG';
-    const imgFormat = format === 'JPG' ? 'JPEG' : format as 'PNG' | 'JPEG' | 'WEBP';
-
-    // Cercle de fond blanc pour cadrer le logo
-    doc.setFillColor(255, 255, 255);
-    doc.circle(w / 2, logoY + logoSize / 2, logoSize / 2 + 1, 'F');
-
-    // Image logo centrée et redimensionnée
-    doc.addImage(schoolLogo, imgFormat, logoX, logoY, logoSize, logoSize);
-  } else {
-    // Fallback : cercle bleu avec texte "EDU"
-    const cx = w / 2;
-    const cy = logoY + logoSize / 2;
-    doc.setFillColor(15, 23, 42);
-    doc.circle(cx, cy, logoSize / 2, 'F');
-    doc.setFillColor(255, 255, 255);
-    doc.circle(cx, cy, logoSize / 2 - 2, 'F');
-    doc.setFillColor(37, 99, 235);
-    doc.circle(cx, cy, logoSize / 2 - 4, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(7);
-    doc.setFont('helvetica', 'bold');
-    doc.text('EDU', cx, cy + 2.5, { align: 'center' });
-  }
-
-  y = logoY + logoSize + 6;
-
-  // Nom établissement centré
-  doc.setTextColor(15, 23, 42);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text(schoolName.toUpperCase(), w / 2, y, { align: 'center' });
-
-  y += 6;
-
-  // Année scolaire
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(71, 85, 105);
-  doc.text(`Année scolaire : ${schoolYear}`, w / 2, y, { align: 'center' });
-
-  y += 7;
-
-  // Ligne séparatrice double
-  doc.setDrawColor(37, 99, 235);
-  doc.setLineWidth(0.8);
-  doc.line(14, y, w - 14, y);
-  doc.setLineWidth(0.2);
-  doc.setDrawColor(200, 210, 230);
-  doc.line(14, y + 1.5, w - 14, y + 1.5);
-
-  y += 9;
-
-  // Titre principal centré
-  doc.setFontSize(13);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(15, 23, 42);
-  doc.text(title, w / 2, y, { align: 'center' });
-
-  y += 8;
-
-  // Date et numéro document sur une ligne
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 116, 139);
-  doc.text(`Généré le : ${fmtDate()}`, 14, y);
-  doc.text(`N° Document : ${docNumber}`, w - 14, y, { align: 'right' });
-
-  y += 4;
-
-  // Ligne séparatrice fine finale
-  doc.setDrawColor(226, 232, 240);
-  doc.setLineWidth(0.3);
-  doc.line(14, y, w - 14, y);
-
-  // Watermark diagonal très discret
-  doc.saveGraphicsState();
-  doc.setTextColor(230, 234, 240);
-  doc.setFontSize(48);
-  doc.setFont('helvetica', 'bold');
-  // Rotation simulée via position décalée (jsPDF ne supporte pas rotate nativement sur text sans GState)
-  doc.text('OFFICIEL', w / 2, pageH / 2 + 10, {
-    align: 'center',
-    angle: 45,
-  });
-  doc.restoreGraphicsState();
+  let y = 15;
 
   doc.setTextColor(0, 0, 0);
-  return y + 6;
+  doc.setFont('helvetica', 'bold');
+
+  // 1. SCEAU (Extrême Gauche)
+  if (schoolStamp) {
+      try {
+          doc.addImage(schoolStamp, 'PNG', 14, y, 22, 22);
+      } catch(e) {}
+  }
+
+  // 2. TEXTE CENTRAL (Flex-like spacing)
+  const centerX = w / 2;
+  
+  // Bloc Ministère (Centre-Gauche)
+  doc.setFontSize(8);
+  doc.text('RÉPUBLIQUE TOGOLAISE', centerX - 35, y, { align: 'center' });
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(7);
+  doc.text('Travail - Liberté - Patrie', centerX - 35, y + 3.5, { align: 'center' });
+  doc.line(centerX - 42, y + 5, centerX - 28, y + 5);
+  doc.setFont('helvetica', 'bold');
+  doc.text('MINISTERE DE L\'EDUCATION NATIONALE', centerX - 35, y + 9, { align: 'center' });
+  doc.setFontSize(7.5);
+  doc.text('DIRECTION RÉGIONALE DE L\'ÉDUCATION', centerX - 35, y + 12.5, { align: 'center' });
+  doc.text('INSPECTION DE L\'ENSEIGNEMENT GENERAL', centerX - 35, y + 16, { align: 'center' });
+
+  // Bloc Établissement (Centre-Droite)
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'black');
+  doc.text(schoolName.toUpperCase(), centerX + 35, y, { align: 'center' });
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'italic');
+  doc.text('Travail-Rigueur-Succès', centerX + 35, y + 5, { align: 'center' });
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.text('Tél: +228 90 17 79 66', centerX + 35, y + 10, { align: 'center' });
+  doc.text('BP: 80159 Apéssito - TOGO', centerX + 35, y + 14, { align: 'center' });
+
+  // 3. LOGO (Extrême Droite)
+  if (schoolLogo) {
+      try {
+          doc.addImage(schoolLogo, 'PNG', w - 14 - 22, y, 22, 22);
+      } catch(e) {}
+  }
+
+  y = y + 28;
+
+  // --- TITRE DU DOCUMENT ---
+  doc.setLineWidth(0.8);
+  doc.line(14, y, w - 14, y);
+  y += 7;
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text(title, w / 2, y, { align: 'center' });
+  y += 6;
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Année scolaire : ${schoolYear}`, w / 2, y, { align: 'center' });
+  
+  y += 8;
+  doc.setFontSize(8.5);
+  doc.text(`Fait à Apéssito, le ${fmtDate()}`, 14, y);
+  doc.text(`N° : ${docNumber}`, w - 14, y, { align: 'right' });
+  
+  y += 4;
+  doc.setLineWidth(0.2);
+  doc.line(14, y, w - 14, y);
+
+  return y + 8;
 };
 
 // ── BLOC ÉLÈVE EN DEUX COLONNES ───────────────────────────────
@@ -415,7 +380,7 @@ const drawFooter = (doc: jsPDF, schoolName: string): void => {
     doc.setFont('helvetica', 'normal');
     doc.text(schoolName.toUpperCase(), 14, h - 3.5);
     doc.text(`Document généré le ${fmtDate()} — Confidentiel`, w / 2, h - 3.5, { align: 'center' });
-    doc.text(`Page ${i} / ${pages}`, w - 14, h - 3.5, { align: 'right' });
+    doc.text(`Page ${i} sur ${pages}`, w - 14, h - 3.5, { align: 'right' });
   }
   doc.setTextColor(0, 0, 0);
 };
@@ -429,14 +394,15 @@ export const generateRecuPDF = (
   schoolYear: string,
   messageRemerciement: string,
   messageRappel: string,
-  schoolLogo?: string
+  schoolLogo?: string,
+  schoolStamp?: string
 ): void => {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const docNumber = genDocNumber(student);
   const h = doc.internal.pageSize.getHeight();
 
   // En-tête officiel centré
-  let y = drawOfficialHeader(doc, schoolName, schoolYear, 'RÉCAPITULATIF FINANCIER DE SCOLARITÉ', docNumber, schoolLogo);
+  let y = drawOfficialHeader(doc, schoolName, schoolYear, 'RÉCAPITULATIF FINANCIER DE SCOLARITÉ', docNumber, schoolLogo, schoolStamp);
 
   // Bloc élève deux colonnes
   y = drawStudentBlock(doc, student, y);
@@ -471,7 +437,8 @@ export const generateClassePDF = (
   schoolYear: string,
   messageRemerciement: string,
   messageRappel: string,
-  schoolLogo?: string
+  schoolLogo?: string,
+  schoolStamp?: string
 ): void => {
   if (!students.length) return;
   void messageRemerciement;
@@ -481,7 +448,7 @@ export const generateClassePDF = (
   const w = doc.internal.pageSize.getWidth();
   const docNumber = `YZO-${new Date().getFullYear()}-CL${classe.replace(/\s/g, '').toUpperCase()}`;
 
-  let y = drawOfficialHeader(doc, schoolName, schoolYear, `LISTE FINANCIÈRE — ${classe.toUpperCase()}`, docNumber, schoolLogo);
+  let y = drawOfficialHeader(doc, schoolName, schoolYear, `LISTE FINANCIÈRE — ${classe.toUpperCase()}`, docNumber, schoolLogo, schoolStamp);
 
   // Statistiques condensées sur une ligne
   const totalEcolage = students.reduce((a, s) => a + s.ecolage, 0);
@@ -599,7 +566,8 @@ export const generateNonSoldesPDF = (
   schoolName: string,
   schoolYear: string,
   messageRappel: string,
-  schoolLogo?: string
+  schoolLogo?: string,
+  schoolStamp?: string
 ): void => {
   if (!students.length) return;
 
@@ -607,7 +575,7 @@ export const generateNonSoldesPDF = (
   const w = doc.internal.pageSize.getWidth();
   const docNumber = `YZO-${new Date().getFullYear()}-NONSOL`;
 
-  let y = drawOfficialHeader(doc, schoolName, schoolYear, 'LISTE DES ÉLÈVES NON SOLDÉS — RAPPEL DE PAIEMENT', docNumber, schoolLogo);
+  let y = drawOfficialHeader(doc, schoolName, schoolYear, 'LISTE DES ÉLÈVES NON SOLDÉS — RAPPEL DE PAIEMENT', docNumber, schoolLogo, schoolStamp);
 
   // Encadré rappel institutionnel
   doc.setFillColor(255, 241, 242);
