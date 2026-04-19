@@ -280,13 +280,17 @@ export const useStore = create<AppState>()(
     unreadMessages: 0,
       setUnreadMessages: (count) => set({ unreadMessages: count }),
       fetchUnreadMessages: async () => {
+        // Désactivé temporairement pour le compte parent car l'API retourne 500 
+        // et pollue la console.
+        const user = get().user;
+        if (user?.role === 'parent') return;
+
         try {
           const { chatApi } = await import('../services/chatApi');
           const count = await chatApi.getUnreadCount();
           set({ unreadMessages: count });
         } catch (err) {
-          // Silence noise for now if backend fails
-          // console.error('Failed to fetch unread messages:', err);
+          // Silence noise
         }
       },
       login: async (username, password, schoolSlug) => {
@@ -341,6 +345,10 @@ export const useStore = create<AppState>()(
 
             // ⚠️ CRITIQUE : Vider intégralement le cache local de l'école précédente 
             // pour garantir une architecture SaaS 100% isolée.
+            // On préserve uniquement les lectures d'annonces persistantes si besoin
+            const savedReadsStr = localStorage.getItem(`announcements_read_${result.user.id}`);
+            const savedReads = savedReadsStr ? JSON.parse(savedReadsStr) : [];
+
             set({
               students: [],
               parents: [],
@@ -348,7 +356,7 @@ export const useStore = create<AppState>()(
               activityLogs: [],
               links: [],
               announcements: [],
-              announcementReads: [],
+              announcementReads: savedReads, // Restaurer les lectures locales
               matieres: [],
               classeMatieres: [],
               notes: [],
@@ -751,6 +759,9 @@ export const useStore = create<AppState>()(
         }
         
         set({ announcementReads: newReads });
+        
+        // Persistance locale robuste pour éviter que ça revienne à la reconnexion
+        localStorage.setItem(`announcements_read_${parentId}`, JSON.stringify(newReads));
 
         // On ne tente de sync vers le cloud que si on n'est pas un parent 
         // car l'URL /api/sync est restreinte.
@@ -763,25 +774,26 @@ export const useStore = create<AppState>()(
       },
       remindAnnouncementLater: (announcementId, parentId) => {
         const remindAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // +24h
-        const existing = get().announcementReads.find(
+        const reads = get().announcementReads;
+        const existing = reads.find(
           r => r.announcementId === announcementId && r.parentId === parentId
         );
+        
+        let newReads;
         if (existing) {
-          set({
-            announcementReads: get().announcementReads.map(r =>
-              r.announcementId === announcementId && r.parentId === parentId
-                ? { ...r, remindAt, readAt: '' }
-                : r
-            ),
-          });
+          newReads = reads.map(r =>
+            r.announcementId === announcementId && r.parentId === parentId
+              ? { ...r, remindAt, readAt: '' }
+              : r
+          );
         } else {
-          set({
-            announcementReads: [
-              ...get().announcementReads,
-              { announcementId, parentId, readAt: '', remindAt },
-            ],
-          });
+          newReads = [
+            ...reads,
+            { announcementId, parentId, readAt: '', remindAt },
+          ];
         }
+        set({ announcementReads: newReads });
+        localStorage.setItem(`announcements_read_${parentId}`, JSON.stringify(newReads));
       },
       getUnreadAnnouncements: (parentId, classes) => {
         const now = new Date().toISOString();
@@ -861,19 +873,22 @@ export const useStore = create<AppState>()(
             }
 
              if (data.announcements) set({ announcements: data.announcements });
-            if (data.announcementReads) {
+            if (data.announcementReads || localStorage.getItem(`announcements_read_${user.id}`)) {
               // Fusionner avec les lectures locales pour ne pas perdre les "lus" récents 
               // si le backend n'a pas pu être mis à jour (403 Forbidden)
-              const localReads = get().announcementReads;
-              const serverReads = data.announcementReads;
+              const savedReadsStr = localStorage.getItem(`announcements_read_${user.id}`);
+              const localReads = savedReadsStr ? JSON.parse(savedReadsStr) : get().announcementReads;
+              const serverReads = data.announcementReads || [];
               const merged = [...serverReads];
               
-              localReads.forEach(lr => {
-                if (!merged.find(mr => mr.announcementId === lr.announcementId && mr.parentId === lr.parentId)) {
+              localReads.forEach((lr: any) => {
+                if (!merged.find((mr: any) => mr.announcementId === lr.announcementId && mr.parentId === lr.parentId)) {
                   merged.push(lr);
                 }
               });
               set({ announcementReads: merged });
+              // Mettre à jour le cache local avec le merge
+              localStorage.setItem(`announcements_read_${user.id}`, JSON.stringify(merged));
             }
             if (typeof data.unreadMessages === 'number') set({ unreadMessages: data.unreadMessages });
             
