@@ -418,3 +418,43 @@ export function computePriorityList(students: Student[], classComparaisons: Clas
     };
   }).sort((a, b) => b.scorePriorite - a.scorePriorite);
 }
+
+// ─────────────────────────────────────────────
+// 8. COMPARAISON FINANCIÈRE PAR CYCLE
+// ─────────────────────────────────────────────
+
+export interface CycleFinanceRow {
+  cycle: Cycle;
+  totalTheorique: number;
+  totalEncaisse: number;
+  totalRestant: number;
+  taux: number;
+  effectif: number;
+}
+
+/**
+ * Calcule les indicateurs financiers par cycle (Primaire, Collège, Lycée).
+ */
+export function computeCycleComparison(students: Student[]): CycleFinanceRow[] {
+  const cycles: Cycle[] = ['Primaire', 'Collège', 'Lycée'];
+  return cycles.map(cycle => {
+    const cycleStudents = students.filter(s => s.cycle === cycle);
+    if (cycleStudents.length === 0) return null;
+
+    const totalTheorique = cycleStudents.reduce((acc, s) => acc + s.ecolage, 0);
+    const totalEncaisse = cycleStudents.reduce((acc, s) => acc + s.dejaPaye, 0);
+    const totalRestant = cycleStudents.reduce((acc, s) => acc + s.restant, 0);
+    const taux = totalTheorique > 0
+      ? parseFloat(((totalEncaisse / totalTheorique) * 100).toFixed(2))
+      : 0;
+
+    return {
+      cycle,
+      totalTheorique,
+      totalEncaisse,
+      totalRestant,
+      taux,
+      effectif: cycleStudents.length
+    } satisfies CycleFinanceRow;
+  }).filter((r): r is CycleFinanceRow => r !== null);
+}

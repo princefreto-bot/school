@@ -8,7 +8,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
 } from 'recharts';
-import { TrendingUp, AlertTriangle, Target, Award } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Target, Award, BarChart3 } from 'lucide-react';
+import { computeCycleComparison } from '../services/analyticsService';
 
 // Custom tooltips évitant les problèmes de types Recharts
 const MoneyTooltip = ({ active, payload, label }: { active?: boolean; payload?: { name: string; value: number }[]; label?: string }) => {
@@ -33,11 +34,12 @@ const PieMoneyTooltip = ({ active, payload }: { active?: boolean; payload?: { na
   );
 };
 
-const RadarTooltip = ({ active, payload }: { active?: boolean; payload?: { value: number }[] }) => {
+const SingleValueTooltip = ({ active, payload }: { active?: boolean; payload?: { name: string; value: number }[] }) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-white shadow-xl rounded-xl border border-gray-100 p-3 text-xs">
-      <p className="text-gray-600">{payload[0].value}%</p>
+      <p className="font-semibold text-gray-800">{payload[0].payload.cycle || payload[0].name}</p>
+      <p className="text-blue-600 font-bold">{payload[0].value}%</p>
     </div>
   );
 };
@@ -76,19 +78,13 @@ export const Analyses: React.FC = () => {
     }[];
   }, [students]);
 
-  // Données par cycle
-  const cycleData = useMemo(() => {
-    const cycles = ['Primaire', 'Collège', 'Lycée'] as const;
-    return cycles.map((cycle) => {
-      const cls = students.filter((s) => s.cycle === cycle);
-      if (!cls.length) return null;
-      const ecolageTotal = cls.reduce((a, s) => a + s.ecolage, 0);
-      const paye         = cls.reduce((a, s) => a + s.dejaPaye, 0);
-      const restant      = cls.reduce((a, s) => a + s.restant, 0);
-      const taux         = ecolageTotal > 0 ? Math.round((paye / ecolageTotal) * 100) : 0;
-      return { cycle, effectif: cls.length, ecolageTotal, paye, restant, taux };
-    }).filter(Boolean) as { cycle: string; effectif: number; ecolageTotal: number; paye: number; restant: number; taux: number }[];
-  }, [students]);
+  // Données par cycle (Solvabilité)
+  const cycleComparison = useMemo(() => computeCycleComparison(students), [students]);
+
+  // Données pour le camembert (Effectifs ou Revenus - on garde revenus payés comme avant)
+  const cyclePieData = useMemo(() => {
+    return cycleComparison.map(c => ({ name: c.cycle, value: c.totalEncaisse }));
+  }, [cycleComparison]);
 
   // Classement solvabilité
   const topClasses = [...classData].sort((a, b) => b.taux - a.taux);
@@ -105,8 +101,8 @@ export const Analyses: React.FC = () => {
     return s.status !== 'Soldé' && taux < 0.3;
   });
 
-  // Radar solvabilité par cycle
-  const radarData = cycleData.map((c) => ({ cycle: c.cycle, taux: c.taux }));
+  // Radar solvabilité par cycle (On garde le nom pour la compatibilité mais on change la structure si besoin)
+  const radarData = useMemo(() => cycleComparison.map((c) => ({ cycle: c.cycle, taux: c.taux })), [cycleComparison]);
 
   if (students.length === 0) {
     return (
@@ -156,14 +152,13 @@ export const Analyses: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {/* Camembert par cycle */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <h3 className="font-semibold text-gray-800 mb-1">Répartition des revenus par cycle</h3>
-          <p className="text-xs text-gray-400 mb-4">Montants encaissés</p>
+          <p className="text-xs text-gray-400 mb-4">Montants encaissés (FCFA)</p>
           <ResponsiveContainer width="100%" height={240}>
             <PieChart>
-              <Pie data={cycleData.map((c) => ({ name: c.cycle, value: c.paye }))} cx="50%" cy="45%" outerRadius={80} innerRadius={40} dataKey="value" paddingAngle={3}>
-                {cycleData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+              <Pie data={cyclePieData} cx="50%" cy="45%" outerRadius={80} innerRadius={40} dataKey="value" paddingAngle={3}>
+                {cyclePieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
               <Legend wrapperStyle={{ fontSize: 11 }} />
               <Tooltip content={<PieMoneyTooltip />} />
@@ -171,21 +166,26 @@ export const Analyses: React.FC = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Radar solvabilité */}
-        {radarData.length >= 3 && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h3 className="font-semibold text-gray-800 mb-1">Solvabilité par cycle</h3>
-            <p className="text-xs text-gray-400 mb-4">Taux de recouvrement (%)</p>
-            <ResponsiveContainer width="100%" height={240}>
-              <RadarChart data={radarData}>
-                <PolarGrid stroke="#e5e7eb" />
-                <PolarAngleAxis dataKey="cycle" tick={{ fontSize: 11, fill: '#6b7280' }} />
-                <Radar name="Taux" dataKey="taux" stroke="#1e40af" fill="#1e40af" fillOpacity={0.15} />
-                <Tooltip content={<RadarTooltip />} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+        {/* Solvabilité par cycle */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <h3 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
+            Solvabilité par cycle
+          </h3>
+          <p className="text-xs text-gray-400 mb-4">Taux de recouvrement (%)</p>
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={radarData} layout="vertical" margin={{ left: 10, right: 30 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={true} vertical={false} />
+              <XAxis type="number" domain={[0, 100]} hide />
+              <YAxis dataKey="cycle" type="category" tick={{ fontSize: 11, fill: '#6b7280' }} width={80} />
+              <Tooltip content={<SingleValueTooltip />} />
+              <Bar dataKey="taux" radius={[0, 4, 4, 0]} barSize={24} name="Taux de recouvrement">
+                {radarData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.taux >= 80 ? '#16a34a' : entry.taux >= 50 ? '#f59e0b' : '#ef4444'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* Classement classes solvables */}
