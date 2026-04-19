@@ -52,72 +52,73 @@ export const generateRapportMensuelPDF = (
     const setPrimary = () => doc.setTextColor(0, 0, 0);
     const setSecondary = () => doc.setTextColor(60, 60, 60);
 
-    // --- 0. BRANDING & HEADER (4-Column Layout) ---
+    // --- 0. BRANDING & HEADER (4-Column Layout - SATURATED) ---
     let y = 15;
     doc.setTextColor(0, 0, 0);
+    doc.setFont('times', 'bold');
 
-    // 1. SCEAU (Extrême Gauche)
+    // 1. SCEAU (Extrême Gauche - Réduit et poussé)
     if (schoolInfo.stamp) {
         try {
-            doc.addImage(schoolInfo.stamp, 'PNG', margin, y, 22, 22);
+            doc.addImage(schoolInfo.stamp, 'PNG', margin - 10, y, 18, 18);
         } catch(e) {}
     }
 
-    // 2. TEXTE CENTRAL (Ministry & School side-by-side)
+    // 2. TEXTE CENTRAL (Saturation Max)
     const centerX = w / 2;
     
     // Bloc Ministère (Centre-Gauche)
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
+    doc.setFontSize(10);
     doc.text('RÉPUBLIQUE TOGOLAISE', centerX - 35, y, { align: 'center' });
-    doc.setFont('helvetica', 'italic');
-    doc.setFontSize(7);
-    doc.text('Travail - Liberté - Patrie', centerX - 35, y + 3.5, { align: 'center' });
-    doc.setLineWidth(0.2);
-    doc.line(centerX - 42, y + 5, centerX - 28, y + 5);
-    doc.setFont('helvetica', 'bold');
-    doc.text('MINISTERE DE L\'EDUCATION NATIONALE', centerX - 35, y + 9, { align: 'center' });
-    doc.setFontSize(7.5);
-    doc.text('DIRECTION RÉGIONALE DE L\'ÉDUCATION', centerX - 35, y + 12.5, { align: 'center' });
-    doc.text('INSPECTION DE L\'ENSEIGNEMENT GENERAL', centerX - 35, y + 16, { align: 'center' });
+    doc.setFont('times', 'italic');
+    doc.setFontSize(8);
+    doc.text('Travail - Liberté - Patrie', centerX - 35, y + 5, { align: 'center' });
+    doc.setLineWidth(0.3);
+    doc.line(centerX - 42, y + 7.5, centerX - 28, y + 7.5);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(11);
+    doc.text('MINISTERE DE L\'EDUCATION NATIONALE', centerX - 35, y + 13, { align: 'center' });
+    doc.setFontSize(9.5);
+    doc.text('DIRECTION RÉGIONALE DE L\'ÉDUCATION', centerX - 35, y + 18, { align: 'center' });
+    doc.text('INSPECTION DE L\'ENSEIGNEMENT GENERAL', centerX - 35, y + 23, { align: 'center' });
 
     // Bloc Établissement (Centre-Droite)
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'black');
+    doc.setFontSize(18);
+    doc.setFont('times', 'bold');
     doc.text(schoolInfo.name.toUpperCase(), centerX + 35, y, { align: 'center' });
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'italic');
-    doc.text('Travail-Rigueur-Succès', centerX + 35, y + 5, { align: 'center' });
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.text('Tél: +228 90 17 79 66', centerX + 35, y + 10, { align: 'center' });
-    doc.text('BP: 80159 Apéssito - TOGO', centerX + 35, y + 14, { align: 'center' });
+    doc.setFontSize(11);
+    doc.setFont('times', 'italic');
+    doc.text('Travail-Rigueur-Succès', centerX + 35, y + 7, { align: 'center' });
+    doc.setFont('times', 'bold');
+    doc.setFontSize(10);
+    doc.text('Tél: +228 90 17 79 66 / 99 00 00 00', centerX + 35, y + 14, { align: 'center' });
+    doc.text('BP: 80159 Apéssito - TOGO', centerX + 35, y + 19, { align: 'center' });
 
-    // 3. LOGO (Extrême Droite)
+    // 3. LOGO (Extrême Droite - Réduit et poussé)
     if (schoolInfo.logo) {
         try {
-            doc.addImage(schoolInfo.logo, 'PNG', w - margin - 22, y, 22, 22);
+            doc.addImage(schoolInfo.logo, 'PNG', w - margin - 8, y, 18, 18);
         } catch(e) {}
     }
 
-    y = y + 25;
+    y = y + 32;
 
     // --- TITRE DU DOCUMENT ---
     doc.setLineWidth(0.8);
     doc.line(margin, y, w - margin, y);
-    y += 8;
-    doc.setFontSize(22);
-    doc.setFont('helvetica', 'bold');
+    y += 10;
+    doc.setFontSize(24);
+    doc.setFont('times', 'bold');
     doc.text('BILAN FINANCIER', w / 2, y, { align: 'center' });
     
-    y += 8;
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
+    y += 10;
+    doc.setFontSize(13);
+    doc.setFont('times', 'bold');
     doc.text(`PÉRIODE : ${currentMonthName.toUpperCase()}`, w / 2, y, { align: 'center' });
     
-    y += 6;
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
+    y += 7;
+    doc.setFontSize(10);
+    doc.setFont('times', 'normal');
     doc.text(`Généré le : ${format(now, 'dd.MM.yyyy HH:mm')}`, w / 2, y, { align: 'center' });
 
     y += 6;
@@ -128,7 +129,7 @@ export const generateRapportMensuelPDF = (
 
     // --- 1. RÉSUMÉ STRATÉGIQUE (Tableau simple plutôt que cartes pour le côté pro) ---
     doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('times', 'bold');
     setPrimary();
     doc.text('1. RÉSUMÉ DE LA SITUATION', margin, y);
     
@@ -146,7 +147,7 @@ export const generateRapportMensuelPDF = (
         styles: { 
             fontSize: 11, 
             cellPadding: 5, 
-            font: 'helvetica',
+            font: 'times',
             textColor: [0, 0, 0],
             lineColor: [0, 0, 0],
             lineWidth: 0.1
@@ -168,7 +169,7 @@ export const generateRapportMensuelPDF = (
     if (y > h - 40) { doc.addPage(); y = 20; }
     
     doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('times', 'bold');
     setPrimary();
     doc.text('2. ÉTAT FINANCIER PAR CLASSE', margin, y);
 
@@ -187,7 +188,7 @@ export const generateRapportMensuelPDF = (
         styles: { 
             fontSize: 10, 
             cellPadding: 4, 
-            font: 'helvetica',
+            font: 'times',
             lineColor: [0, 0, 0],
             lineWidth: 0.1
         },
@@ -206,7 +207,7 @@ export const generateRapportMensuelPDF = (
     if (y > h - 60) { doc.addPage(); y = 20; }
 
     doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('times', 'bold');
     setPrimary();
     doc.text('3. FLUX MENSUELS ENCAISSÉS', margin, y);
 
@@ -231,7 +232,7 @@ export const generateRapportMensuelPDF = (
         }
 
         doc.setFontSize(7);
-        doc.setFont('helvetica', 'bold');
+        doc.setFont('times', 'bold');
         doc.text(m.mois, xPos + (barW / 2), y + chartH + 5, { align: 'center' });
     });
 
@@ -241,13 +242,13 @@ export const generateRapportMensuelPDF = (
     if (y > h - 50) { doc.addPage(); y = 20; }
 
     doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('times', 'bold');
     setPrimary();
     doc.text('OBSERVATIONS ET VALIDATION', margin, y);
 
     y += 8;
     doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('times', 'normal');
     const conclusion = `Le présent rapport certifie qu'au ${format(now, 'dd.MM.yyyy')}, le taux de recouvrement global est de ${new Intl.NumberFormat('fr-FR').format(recou.taux)}%. ` + 
         `Un montant total de ${fmtPrice(recou.totalRestant)} reste à percevoir pour clôturer l'exercice.`;
     
@@ -259,7 +260,7 @@ export const generateRapportMensuelPDF = (
     doc.setDrawColor(0, 0, 0);
     
     doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('times', 'bold');
     
     doc.text('LE COMPTABLE', margin + 30, y, { align: 'center' });
     doc.text('LA DIRECTION GÉNÉRALE', w - margin - 30, y, { align: 'center' });
@@ -273,7 +274,7 @@ export const generateRapportMensuelPDF = (
     for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
         doc.setFontSize(9);
-        doc.setFont('helvetica', 'italic');
+        doc.setFont('times', 'italic');
         doc.line(margin, h - 15, w - margin, h - 15);
         doc.text(`${schoolInfo.name.toUpperCase()} - BILAN FINANCIER - Page ${i} sur ${totalPages}`, w / 2, h - 10, { align: 'center' });
     }

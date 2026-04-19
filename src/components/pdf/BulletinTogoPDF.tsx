@@ -40,56 +40,59 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
 
             <div className="flex-1 flex flex-col">
                 {/* ───────────────────────────── EN-TÊTE SANS CADRES (4 COLONNES : SCEAU | MINISTÈRE | ÉCOLE | LOGO) ───────────────────────────── */}
-                <div className="mb-4">
-                    <div className="flex justify-between items-start text-sm py-1 gap-2">
+                <div className="mb-6">
+                    <div className="flex justify-between items-start py-1 gap-2 border-b border-black pb-4">
 
                         {/* 1. SCEAU (Extrême Gauche) */}
-                        <div className="flex-shrink-0 flex justify-center" style={{ width: '32mm' }}>
+                        <div className="flex-shrink-0 flex justify-start" style={{ width: '26mm' }}>
                             {schoolStamp ? (
                                 <img
                                     src={schoolStamp}
                                     alt="Sceau"
-                                    style={{ width: '30mm', height: '30mm', objectFit: 'contain' }}
+                                    style={{ width: '24mm', height: '24mm', objectFit: 'contain' }}
                                 />
                             ) : (
-                                <div className="w-[30mm] h-[30mm] flex flex-col items-center justify-center opacity-30 border border-dashed border-gray-300">
+                                <div className="w-[24mm] h-[24mm] flex flex-col items-center justify-center opacity-30 border border-dashed border-gray-300">
                                     <span className="text-[10px] font-bold">SCEAU</span>
                                 </div>
                             )}
                         </div>
 
-                        {/* 2. BLOC MINISTÈRE (Centre-Gauche) */}
-                        <div className="flex-1 flex flex-col items-center text-center space-y-0.5">
-                            <p className="font-bold uppercase text-[9px] tracking-widest leading-tight">République Togolaise</p>
-                            <p className="italic text-[7.5px] leading-tight">Travail – Liberté – Patrie</p>
-                            <div className="w-10 border-t border-black my-0.5"></div>
-                            <p className="font-black uppercase text-[9px] leading-tight">Ministère de l'Éducation Nationale</p>
-                            <p className="font-bold uppercase text-[8px] leading-tight mt-0.5">Direction Régionale de l'Éducation</p>
-                            <p className="font-bold uppercase text-[8px] leading-tight">Inspection de l'Enseignement Général</p>
-                        </div>
+                        {/* CONTENEUR CENTRAL SATURÉ */}
+                        <div className="flex-1 flex justify-center gap-8 items-start px-2">
+                             {/* 2. BLOC MINISTÈRE (Centre-Gauche) */}
+                            <div className="flex-1 flex flex-col items-center text-center space-y-1.5">
+                                <p className="font-bold uppercase text-[11px] tracking-widest leading-none">République Togolaise</p>
+                                <p className="italic text-[9px] leading-none">Travail – Liberté – Patrie</p>
+                                <div className="w-12 border-t border-black my-1"></div>
+                                <p className="font-black uppercase text-[11.5px] leading-tight">Ministère de l'Éducation Nationale</p>
+                                <p className="font-bold uppercase text-[10px] leading-tight">Direction Régionale de l'Éducation</p>
+                                <p className="font-bold uppercase text-[10px] leading-tight">Inspection de l'Enseignement Général</p>
+                            </div>
 
-                        {/* 3. BLOC ÉTABLISSEMENT (Centre-Droite) */}
-                        <div className="flex-1 flex flex-col items-center text-center space-y-0.5">
-                            <h2 className="font-black uppercase tracking-tight text-[13px] leading-tight mb-0.5 border-b-2 border-black pb-0.5">
-                                {schoolName}
-                            </h2>
-                            <p className="italic font-black text-[8.5px] uppercase tracking-wide">Travail-Rigueur-succès</p>
-                            <div className="flex flex-col text-[8.5px] font-bold mt-1">
-                                <p>Tél: +228 90 17 79 66</p>
-                                <p>BP: 80159 Apéssito - TOGO</p>
+                            {/* 3. BLOC ÉTABLISSEMENT (Centre-Droite) */}
+                            <div className="flex-1 flex flex-col items-center text-center space-y-1.5 pt-1">
+                                <h2 className="font-black uppercase tracking-tight text-[18px] leading-none mb-1">
+                                    {schoolName}
+                                </h2>
+                                <p className="italic font-black text-[11px] uppercase tracking-wider mb-2">Travail-Rigueur-succès</p>
+                                <div className="flex flex-col text-[10px] font-bold space-y-1">
+                                    <p>Tél: +228 90 17 79 66 / 99 00 00 00</p>
+                                    <p>BP: 80159 Apéssito - TOGO</p>
+                                </div>
                             </div>
                         </div>
 
                         {/* 4. LOGO (Extrême Droite) */}
-                        <div className="flex-shrink-0 flex justify-center" style={{ width: '32mm' }}>
+                        <div className="flex-shrink-0 flex justify-end" style={{ width: '26mm' }}>
                             {schoolLogo ? (
                                 <img
                                     src={schoolLogo}
                                     alt="Logo"
-                                    style={{ width: '30mm', height: '30mm', objectFit: 'contain' }}
+                                    style={{ width: '24mm', height: '24mm', objectFit: 'contain' }}
                                 />
                             ) : (
-                                <div className="w-[30mm] h-[30mm] flex flex-col items-center justify-center opacity-30 border border-dashed border-gray-300">
+                                <div className="w-[24mm] h-[24mm] flex flex-col items-center justify-center opacity-30 border border-dashed border-gray-300">
                                     <span className="text-[10px] font-bold">LOGO</span>
                                 </div>
                             )}

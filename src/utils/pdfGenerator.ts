@@ -46,78 +46,79 @@ const drawOfficialHeader = (
   schoolStamp?: string
 ): number => {
   const w = doc.internal.pageSize.getWidth();
-  const pageH = doc.internal.pageSize.getHeight();
-  let y = 15;
+  let y = 14;
 
   doc.setTextColor(0, 0, 0);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('times', 'bold');
 
-  // 1. SCEAU (Extrême Gauche)
+  // 1. SCEAU (Extrême Gauche - Réduit et poussé)
   if (schoolStamp) {
       try {
-          doc.addImage(schoolStamp, 'PNG', 14, y, 22, 22);
+          doc.addImage(schoolStamp, 'PNG', 8, y, 18, 18);
       } catch(e) {}
   }
 
-  // 2. TEXTE CENTRAL (Flex-like spacing)
+  // 2. TEXTE CENTRAL (Flex-like spacing - SATURÉ)
   const centerX = w / 2;
   
   // Bloc Ministère (Centre-Gauche)
-  doc.setFontSize(8);
+  doc.setFontSize(10);
   doc.text('RÉPUBLIQUE TOGOLAISE', centerX - 35, y, { align: 'center' });
-  doc.setFont('helvetica', 'italic');
-  doc.setFontSize(7);
-  doc.text('Travail - Liberté - Patrie', centerX - 35, y + 3.5, { align: 'center' });
-  doc.line(centerX - 42, y + 5, centerX - 28, y + 5);
-  doc.setFont('helvetica', 'bold');
-  doc.text('MINISTERE DE L\'EDUCATION NATIONALE', centerX - 35, y + 9, { align: 'center' });
-  doc.setFontSize(7.5);
-  doc.text('DIRECTION RÉGIONALE DE L\'ÉDUCATION', centerX - 35, y + 12.5, { align: 'center' });
-  doc.text('INSPECTION DE L\'ENSEIGNEMENT GENERAL', centerX - 35, y + 16, { align: 'center' });
+  doc.setFont('times', 'italic');
+  doc.setFontSize(8);
+  doc.text('Travail - Liberté - Patrie', centerX - 35, y + 5, { align: 'center' });
+  doc.setLineWidth(0.3);
+  doc.line(centerX - 42, y + 7, centerX - 28, y + 7);
+  doc.setFont('times', 'bold');
+  doc.setFontSize(10.5);
+  doc.text('MINISTERE DE L\'EDUCATION NATIONALE', centerX - 35, y + 13, { align: 'center' });
+  doc.setFontSize(9.5);
+  doc.text('DIRECTION RÉGIONALE DE L\'ÉDUCATION', centerX - 35, y + 18, { align: 'center' });
+  doc.text('INSPECTION DE L\'ENSEIGNEMENT GENERAL', centerX - 35, y + 23, { align: 'center' });
 
   // Bloc Établissement (Centre-Droite)
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'black');
+  doc.setFontSize(18);
+  doc.setFont('times', 'bold');
   doc.text(schoolName.toUpperCase(), centerX + 35, y, { align: 'center' });
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'italic');
-  doc.text('Travail-Rigueur-Succès', centerX + 35, y + 5, { align: 'center' });
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.text('Tél: +228 90 17 79 66', centerX + 35, y + 10, { align: 'center' });
-  doc.text('BP: 80159 Apéssito - TOGO', centerX + 35, y + 14, { align: 'center' });
+  doc.setFontSize(11);
+  doc.setFont('times', 'italic');
+  doc.text('Travail-Rigueur-Succès', centerX + 35, y + 7, { align: 'center' });
+  doc.setFont('times', 'bold');
+  doc.setFontSize(10);
+  doc.text('Tél: +228 90 17 79 66 / 99 00 00 00', centerX + 35, y + 14, { align: 'center' });
+  doc.text('BP: 80159 Apéssito - TOGO', centerX + 35, y + 19, { align: 'center' });
 
-  // 3. LOGO (Extrême Droite)
+  // 3. LOGO (Extrême Droite - Réduit et poussé)
   if (schoolLogo) {
       try {
-          doc.addImage(schoolLogo, 'PNG', w - 14 - 22, y, 22, 22);
+          doc.addImage(schoolLogo, 'PNG', w - 8 - 18, y, 18, 18);
       } catch(e) {}
   }
 
-  y = y + 28;
+  y = y + 32;
 
   // --- TITRE DU DOCUMENT ---
   doc.setLineWidth(0.8);
   doc.line(14, y, w - 14, y);
-  y += 7;
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
+  y += 8;
+  doc.setFontSize(16);
+  doc.setFont('times', 'bold');
   doc.text(title, w / 2, y, { align: 'center' });
-  y += 6;
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
+  y += 7;
+  doc.setFontSize(11);
+  doc.setFont('times', 'normal');
   doc.text(`Année scolaire : ${schoolYear}`, w / 2, y, { align: 'center' });
   
-  y += 8;
-  doc.setFontSize(8.5);
+  y += 10;
+  doc.setFontSize(10);
   doc.text(`Fait à Apéssito, le ${fmtDate()}`, 14, y);
   doc.text(`N° : ${docNumber}`, w - 14, y, { align: 'right' });
   
-  y += 4;
+  y += 5;
   doc.setLineWidth(0.2);
   doc.line(14, y, w - 14, y);
 
-  return y + 8;
+  return y + 10;
 };
 
 // ── BLOC ÉLÈVE EN DEUX COLONNES ───────────────────────────────
@@ -143,7 +144,7 @@ const drawStudentBlock = (
   doc.rect(margin, startY + 5, pageW - margin * 2, 3, 'F'); // carré bas pour coins droits
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('times', 'bold');
   doc.text('INFORMATIONS DE L\'ÉLÈVE', pageW / 2, startY + 5.5, { align: 'center' });
 
   // Contenu deux colonnes
@@ -166,11 +167,11 @@ const drawStudentBlock = (
   ];
 
   leftInfos.forEach(([label, val]) => {
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('times', 'bold');
     doc.setFontSize(7.5);
     doc.setTextColor(71, 85, 105);
     doc.text(`${label} :`, leftX, rowY);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('times', 'normal');
     doc.setTextColor(15, 23, 42);
     doc.text(val, leftX + 36, rowY);
     rowY += rowH;
@@ -178,11 +179,11 @@ const drawStudentBlock = (
 
   rowY = startY + 14;
   rightInfos.forEach(([label, val]) => {
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('times', 'bold');
     doc.setFontSize(7.5);
     doc.setTextColor(71, 85, 105);
     doc.text(`${label} :`, rightX, rowY);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('times', 'normal');
     doc.setTextColor(15, 23, 42);
     doc.text(val, rightX + 38, rowY);
     rowY += rowH;
@@ -205,7 +206,7 @@ const drawFinanceTable = (
 ): number => {
   // Titre section
   doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('times', 'bold');
   doc.setTextColor(15, 23, 42);
   doc.text('SITUATION FINANCIÈRE', 14, startY);
   doc.setDrawColor(37, 99, 235);
@@ -223,7 +224,7 @@ const drawFinanceTable = (
     styles: {
       fontSize: 10,
       cellPadding: { top: 5, bottom: 5, left: 8, right: 8 },
-      font: 'helvetica',
+      font: 'times',
       lineColor: [226, 232, 240],
       lineWidth: 0.3,
     },
@@ -273,7 +274,7 @@ const drawStatusBadge = (
   // Texte statut
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('times', 'bold');
   doc.text(label, w / 2, startY + 8.5, { align: 'center' });
 
   doc.setTextColor(0, 0, 0);
@@ -310,7 +311,7 @@ const drawMessage = (
 
   doc.setTextColor(isSolde ? 20 : 120, isSolde ? 83 : 53, isSolde ? 45 : 15);
   doc.setFontSize(8.5);
-  doc.setFont('helvetica', 'normal');
+  doc.setFont('times', 'normal');
   doc.text(lines, 22, startY + 7);
 
   doc.setTextColor(0, 0, 0);
@@ -330,12 +331,12 @@ const drawSignatureZone = (doc: jsPDF, startY: number): void => {
   doc.setLineWidth(0.3);
   doc.roundedRect(leftX, startY, sigWidth, 28, 2, 2, 'FD');
   doc.setFontSize(7.5);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('times', 'bold');
   doc.setTextColor(71, 85, 105);
   doc.text('Signature du Parent / Tuteur', leftX + sigWidth / 2, startY + 6, { align: 'center' });
   doc.setDrawColor(210, 218, 230);
   doc.line(leftX + 8, startY + 22, leftX + sigWidth - 8, startY + 22);
-  doc.setFont('helvetica', 'normal');
+  doc.setFont('times', 'normal');
   doc.setFontSize(7);
   doc.setTextColor(148, 163, 184);
   doc.text('Signature', leftX + sigWidth / 2, startY + 26, { align: 'center' });
@@ -346,7 +347,7 @@ const drawSignatureZone = (doc: jsPDF, startY: number): void => {
   doc.setLineWidth(0.3);
   doc.roundedRect(rightX, startY, sigWidth, 28, 2, 2, 'FD');
   doc.setFontSize(7.5);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('times', 'bold');
   doc.setTextColor(71, 85, 105);
   doc.text("Cachet de l'Établissement", rightX + sigWidth / 2, startY + 6, { align: 'center' });
   // Cercle cachet
@@ -377,7 +378,7 @@ const drawFooter = (doc: jsPDF, schoolName: string): void => {
 
     doc.setTextColor(148, 163, 184);
     doc.setFontSize(6.5);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('times', 'normal');
     doc.text(schoolName.toUpperCase(), 14, h - 3.5);
     doc.text(`Document généré le ${fmtDate()} — Confidentiel`, w / 2, h - 3.5, { align: 'center' });
     doc.text(`Page ${i} sur ${pages}`, w - 14, h - 3.5, { align: 'right' });
@@ -462,7 +463,7 @@ export const generateClassePDF = (
   doc.setDrawColor(226, 232, 240);
   doc.roundedRect(10, y, w - 20, 10, 2, 2, 'FD');
   doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('times', 'bold');
   doc.setTextColor(15, 23, 42);
   const summary = `Effectif: ${students.length}  |  Écolage: ${fmtMoney(totalEcolage)}  |  Perçu: ${fmtMoney(totalPaye)}  |  Restant: ${fmtMoney(totalRestant)}  |  Taux: ${taux}%  |  Soldés: ${nbSoldes}`;
   doc.text(summary, w / 2, y + 6.5, { align: 'center' });
@@ -497,7 +498,7 @@ export const generateClassePDF = (
     styles: {
       fontSize: 7.5,
       cellPadding: 2,
-      font: 'helvetica',
+      font: 'times',
       lineColor: [200, 200, 200],
       lineWidth: 0.1,
       overflow: 'linebreak',
@@ -589,9 +590,9 @@ export const generateNonSoldesPDF = (
   doc.rect(14, y, 3, boxH, 'F');
   doc.setTextColor(159, 18, 57);
   doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('times', 'bold');
   doc.text('⚠ AVIS DE RAPPEL OFFICIEL', 22, y + 7);
-  doc.setFont('helvetica', 'normal');
+  doc.setFont('times', 'normal');
   doc.setFontSize(7.5);
   doc.text(msgLines, 22, y + 13);
   doc.setTextColor(0, 0, 0);
@@ -606,7 +607,7 @@ export const generateNonSoldesPDF = (
   doc.setDrawColor(254, 205, 211);
   doc.roundedRect(14, y, w - 28, 10, 2, 2, 'FD');
   doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('times', 'bold');
   doc.setTextColor(153, 27, 27);
   doc.text(
     `${students.length} élève(s) non soldé(s)  ·  Restant total : ${fmtMoney(totalRestant)}  ·  Perçu : ${fmtMoney(totalPaye)}  ·  Attendu : ${fmtMoney(totalEcolage)}`,
@@ -642,7 +643,7 @@ export const generateNonSoldesPDF = (
     styles: {
       fontSize: 8,
       cellPadding: { top: 3.5, bottom: 3.5, left: 4, right: 4 },
-      font: 'helvetica',
+      font: 'times',
       lineColor: [254, 205, 211],
       lineWidth: 0.25,
     },
