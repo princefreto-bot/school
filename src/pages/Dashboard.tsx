@@ -8,7 +8,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
-import { Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck } from 'lucide-react';
+import { Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck, FileText } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import {
   computeRecouvrement,
@@ -225,6 +225,19 @@ export const Dashboard: React.FC = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-6">
+                <button 
+                  onClick={() => generateRapportMensuelPDF(students, classComp, { 
+                    name: useStore.getState().schoolName || useStore.getState().appName, 
+                    logo: useStore.getState().schoolLogo 
+                  })}
+                  className="flex items-center gap-3 px-6 py-4 bg-slate-900 border-2 border-slate-900 text-white rounded-[22px] hover:bg-white hover:text-slate-900 transition-all duration-300 font-black text-sm shadow-xl hover:shadow-2xl active:scale-95 group"
+                >
+                    <div className="w-8 h-8 rounded-xl bg-white/10 group-hover:bg-slate-100 flex items-center justify-center transition-colors">
+                        <FileText className="w-4 h-4" />
+                    </div>
+                    TÉLÉCHARGER LE BILAN STRATÉGIQUE
+                </button>
+
                 <div className="flex items-center gap-4 bg-slate-50/50 dark:bg-slate-800/50 px-8 py-5 rounded-[24px] border border-slate-100 dark:border-slate-700 backdrop-blur-sm self-stretch">
                     <div className="space-y-1">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Santé Financière</p>
