@@ -243,4 +243,36 @@ async function deleteAnnouncement(req, res) {
     }
 }
 
-module.exports = { createAnnouncement, getAnnouncements, deleteAnnouncement };
+/**
+ * POST /api/announcements/:id/read
+ * Marque une annonce comme lue pour le parent actuel.
+ */
+async function acknowledgeRead(req, res) {
+    const { id: announcementId } = req.params;
+    const { id: parentId, schoolSlug } = req.user;
+
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+
+    try {
+        const { error } = await supabase
+            .from(`announcement_reads_${schoolSlug}`)
+            .upsert({
+                announcement_id: announcementId,
+                parent_id: parentId,
+                read_at: new Date().toISOString()
+            }, { onConflict: 'announcement_id, parent_id' });
+
+        if (error) {
+            // Si la table n'existe pas, on tente de la créer (silencieusement ou log)
+            console.error('❌ [ReadStatus] Erreur upsert:', error.message);
+            return res.status(500).json({ error: error.message });
+        }
+
+        return res.json({ success: true, message: 'Lecture enregistrée.' });
+    } catch (err) {
+        console.error('💥 [ReadStatus] Erreur fatale:', err.message);
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+module.exports = { createAnnouncement, getAnnouncements, deleteAnnouncement, acknowledgeRead };

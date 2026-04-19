@@ -14,6 +14,9 @@ router.get('/', getAnnouncements);
 // POST /api/announcements        → Créer + notifier (admin seulement)
 router.post('/', createAnnouncement);
 
+// POST /api/announcements/:id/read → Marquer comme lu (parent seulement)
+router.post('/:id/read', acknowledgeRead);
+
 // DELETE /api/announcements/:id  → Supprimer (admin seulement)
 router.delete('/:id', deleteAnnouncement);
 

@@ -279,6 +279,21 @@ export const useStore = create<AppState>()(
       badges: [],
     unreadMessages: 0,
       setUnreadMessages: (count) => set({ unreadMessages: count }),
+
+      reportAnnouncementReadToBackend: async (announcementId: string) => {
+        try {
+          const { API_BASE_URL } = await import('../config');
+          const { getAuthHeaders } = await import('../services/apiHelpers');
+          
+          await fetch(`${API_BASE_URL}/announcements/${announcementId}/read`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+          });
+        } catch (err) {
+          console.warn('⚠️ Échec report read status sur backend:', err);
+        }
+      },
+
       fetchUnreadMessages: async () => {
         // Désactivé temporairement pour le compte parent car l'API retourne 500 
         // et pollue la console.
@@ -763,9 +778,14 @@ export const useStore = create<AppState>()(
         // Persistance locale robuste pour éviter que ça revienne à la reconnexion
         localStorage.setItem(`announcements_read_${parentId}`, JSON.stringify(newReads));
 
+        const user = get().user;
+        if (user?.role === 'parent') {
+          // Envoyer l'info au backend pour que l'admin voie les stats
+          this.reportAnnouncementReadToBackend(announcementId);
+        }
+
         // On ne tente de sync vers le cloud que si on n'est pas un parent 
         // car l'URL /api/sync est restreinte.
-        const user = get().user;
         if (user && user.role !== 'parent') {
           import('../services/backendSync').then(({ syncToBackend }) => {
             syncToBackend({ announcementReads: newReads }).then(() => set({ lastSyncTimestamp: Date.now() }));

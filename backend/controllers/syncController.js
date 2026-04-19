@@ -307,6 +307,7 @@ async function syncToFrontend(req, res) {
         const dbMatieres = await fetchTable('matieres');
         const dbClasseMatieres = await fetchTable('classe_matieres');
         const dbNotes = await fetchTable('notes');
+        const announcementReads = await fetchTable('announcement_reads');
         
         const { data: appSettings, error: settingsError } = await supabase.from(tbl('app_settings')).select('*').single();
         console.log('🎨 [Sync GET] appSettings from DB:', {
@@ -410,7 +411,13 @@ async function syncToFrontend(req, res) {
                 noteClasse: n.note_classe !== undefined ? Number(n.note_classe) : null,
                 noteDevoir: n.note_devoir !== undefined ? Number(n.note_devoir) : null,
                 noteCompo: n.note_compo !== undefined ? Number(n.note_compo) : null
-            })) : undefined
+            })) : undefined,
+            announcementReads: (announcementReads || []).map(r => ({
+                announcementId: r.announcement_id,
+                parentId: r.parent_id,
+                readAt: r.read_at,
+                remindAt: r.remind_at || null
+            }))
         });
 
     } catch (err) {

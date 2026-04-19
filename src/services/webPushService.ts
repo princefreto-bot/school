@@ -81,13 +81,16 @@ export const webPushService = {
         applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
       });
 
-      console.log('✅ [Push] Abonnement réussi.');
+      console.log('✅ [Push] Abonnement réussi:', subscription.endpoint);
 
       // 5. Sauvegarder la subscription sur le backend
       await this.saveSubscription(subscription);
 
     } catch (error) {
       console.error('❌ [Push] Erreur init:', error);
+      if (error instanceof Error && error.message.includes('VAPID')) {
+        console.warn('💡 Conseil: Vérifiez votre fichier .env pour VITE_VAPID_PUBLIC_KEY');
+      }
     }
   },
 
