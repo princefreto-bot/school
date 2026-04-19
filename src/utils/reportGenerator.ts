@@ -83,7 +83,7 @@ export const generateRapportMensuelPDF = (
     doc.text('INSPECTION DE L\'ENSEIGNEMENT GENERAL', centerX - 35, y + 23, { align: 'center' });
 
     // Bloc Établissement (Centre-Droite)
-    doc.setFontSize(18);
+    doc.setFontSize(10);
     doc.setFont('times', 'bold');
     doc.text(schoolInfo.name.toUpperCase(), centerX + 35, y, { align: 'center' });
     doc.setFontSize(11);

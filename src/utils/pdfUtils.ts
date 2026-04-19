@@ -24,7 +24,7 @@ const drawRoundedRect = (doc: jsPDF, x: number, y: number, w: number, h: number,
 };
 
 // En-tête commun pour tous les documents
-const drawHeader = (doc: jsPDF, settings: AppSettings, title: string) => {
+const drawHeader = (doc: jsPDF, settings: AppSettings, title: string, schoolNameFontSize: number = 20) => {
   const pageWidth = doc.internal.pageSize.getWidth();
   
   // Bandeau supérieur
@@ -32,7 +32,7 @@ const drawHeader = (doc: jsPDF, settings: AppSettings, title: string) => {
   
   // Nom de l'école
   doc.setTextColor(...COLORS.white);
-  doc.setFontSize(20);
+  doc.setFontSize(schoolNameFontSize);
   doc.setFont('helvetica', 'bold');
   doc.text(settings.schoolName, pageWidth / 2, 18, { align: 'center' });
   
@@ -81,7 +81,7 @@ export const generateReceipt = (student: Student, settings: AppSettings): void =
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   
-  let y = drawHeader(doc, settings, 'REÇU DE PAIEMENT');
+  let y = drawHeader(doc, settings, 'REÇU DE PAIEMENT', 10);
   
   // Numéro de reçu
   doc.setFontSize(10);

@@ -43,7 +43,8 @@ const drawOfficialHeader = (
   title: string,
   docNumber: string,
   schoolLogo?: string,
-  schoolStamp?: string
+  schoolStamp?: string,
+  schoolNameFontSize: number = 18
 ): number => {
   const w = doc.internal.pageSize.getWidth();
   let y = 14;
@@ -77,7 +78,7 @@ const drawOfficialHeader = (
   doc.text('INSPECTION DE L\'ENSEIGNEMENT GENERAL', centerX - 35, y + 23, { align: 'center' });
 
   // Bloc Établissement (Centre-Droite)
-  doc.setFontSize(18);
+  doc.setFontSize(schoolNameFontSize);
   doc.setFont('times', 'bold');
   doc.text(schoolName.toUpperCase(), centerX + 35, y, { align: 'center' });
   doc.setFontSize(11);
@@ -403,7 +404,7 @@ export const generateRecuPDF = (
   const h = doc.internal.pageSize.getHeight();
 
   // En-tête officiel centré
-  let y = drawOfficialHeader(doc, schoolName, schoolYear, 'RÉCAPITULATIF FINANCIER DE SCOLARITÉ', docNumber, schoolLogo, schoolStamp);
+  let y = drawOfficialHeader(doc, schoolName, schoolYear, 'RÉCAPITULATIF FINANCIER DE SCOLARITÉ', docNumber, schoolLogo, schoolStamp, 10);
 
   // Bloc élève deux colonnes
   y = drawStudentBlock(doc, student, y);

@@ -22,7 +22,7 @@ export const generateReceipt = (student: Student, settings: AdminSettings): void
   doc.rect(0, 0, 210, 40, 'F');
   
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.text(settings.nomEcole, 105, 18, { align: 'center' });
   
