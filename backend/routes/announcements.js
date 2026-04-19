@@ -3,7 +3,7 @@
 // ============================================================
 const router = require('express').Router();
 const { authenticateToken } = require('../middleware/auth');
-const { createAnnouncement, getAnnouncements, deleteAnnouncement } = require('../controllers/announcementController');
+const { createAnnouncement, getAnnouncements, deleteAnnouncement, acknowledgeRead } = require('../controllers/announcementController');
 
 // Toutes les routes requièrent une authentification
 router.use(authenticateToken);
