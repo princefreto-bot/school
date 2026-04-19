@@ -33,13 +33,13 @@ async function sendPushNotification(userId, schoolSlug, title, body, type = 'gen
         console.log(`🔍 [Push] Recherche du push_token pour l'utilisateur ${userId} dans profiles_${schoolSlug}`);
 
         // Récupérer le token Web Push depuis la table de l'école
-        const { data: profile, error } = await supabase
+        let { data: profile, error } = await supabase
             .from(`profiles_${schoolSlug}`)
             .select('push_token')
             .eq('id', userId)
             .single();
 
-        if (error) {
+        if (error || !profile?.push_token) {
             // Fallback : essayer dans la table profiles globale
             const { data: globalProfile } = await supabase
                 .from('profiles')
@@ -47,15 +47,13 @@ async function sendPushNotification(userId, schoolSlug, title, body, type = 'gen
                 .eq('id', userId)
                 .single();
             
-            if (!globalProfile?.push_token) {
-                console.log(`⚠️ [Push] Aucun push_token trouvé pour ${userId}`);
-                return;
+            if (globalProfile?.push_token) {
+                profile = globalProfile;
             }
-            profile = globalProfile;
         }
 
         if (!profile?.push_token) {
-            console.log(`⚠️ [Push] push_token vide pour ${userId}`);
+            console.log(`⚠️ [Push] Aucun push_token trouvé pour ${userId} dans profiles_${schoolSlug} ou profiles`);
             return;
         }
 

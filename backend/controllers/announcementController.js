@@ -92,8 +92,10 @@ async function createAnnouncement(req, res) {
             try {
                 await sendPushNotification(
                     parentId,
+                    schoolSlug,
                     `📢 ${importance === 'urgent' ? '🚨 URGENT — ' : ''}${titre}`,
-                    message
+                    message,
+                    'announcement'
                 );
                 notificationsSent++;
             } catch (pushErr) {

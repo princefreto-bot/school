@@ -61,6 +61,9 @@ export const ParentDashboard: React.FC = () => {
     const [errorMsg, setErrorMsg] = useState('');
     const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
     const [showSupportModal, setShowSupportModal] = useState(false);
+    const [notifStatus, setNotifStatus] = useState<NotificationPermission>(
+        'Notification' in window ? Notification.permission : 'denied'
+    );
 
     // État des annonces
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -77,18 +80,26 @@ export const ParentDashboard: React.FC = () => {
     useEffect(() => {
         if ('Notification' in window) {
             setNotifPermission(Notification.permission);
+            setNotifStatus(Notification.permission);
         } else {
             setNotifPermission('unsupported');
+            setNotifStatus('denied');
         }
     }, []);
 
     const handleEnableNotifications = async () => {
         try {
-            const { requestNotificationPermission } = await import('../../utils/capacitorNotifications');
-            const granted = await requestNotificationPermission();
-            setNotifPermission(granted ? 'granted' : 'denied');
+            const permission = await Notification.requestPermission();
+            setNotifPermission(permission);
+            setNotifStatus(permission);
+            
+            if (permission === 'granted') {
+                const { webPushService } = await import('../../services/webPushService');
+                await webPushService.init();
+                // console.log('🚀 Notifications activées');
+            }
         } catch (err) {
-            console.error(err);
+            console.error('Erreur activation notifs:', err);
         }
     };
 
@@ -203,6 +214,17 @@ export const ParentDashboard: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
+                        {/* Status Notifications */}
+                        {notifStatus !== 'granted' && (
+                            <button
+                                onClick={handleEnableNotifications}
+                                className="hidden md:flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-xl text-xs font-bold border border-amber-200 dark:border-amber-800/50 hover:bg-amber-200 transition-all animate-pulse"
+                            >
+                                <Bell className="w-4 h-4" />
+                                Activer Notifications
+                            </button>
+                        )}
+                        
                         {/* Bouton Annonces */}
                         <button
                             id="btn-announcements"
@@ -301,7 +323,7 @@ export const ParentDashboard: React.FC = () => {
                 )}
 
                 {/* ── Bannière de Notifications Mobile/PWA ── */}
-                {notifPermission === 'default' && (
+                {notifStatus === 'default' && (
                     <div className="bg-gradient-to-br from-indigo-700 via-blue-600 to-cyan-500 rounded-[32px] p-6 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl animate-fadeIn border border-white/10 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
                         <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-400/20 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none"></div>
