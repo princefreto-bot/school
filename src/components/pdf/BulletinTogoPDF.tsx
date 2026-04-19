@@ -71,12 +71,12 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                             </div>
 
                             {/* 3. BLOC ÉTABLISSEMENT (Centre-Droite) */}
-                            <div className="flex-1 flex flex-col items-center text-center space-y-1.5 pt-1">
+                            <div className="flex-1 flex flex-col items-center text-center space-y-1 pt-1">
                                 <h2 className="font-black uppercase tracking-tight text-[18px] leading-none mb-1">
                                     {schoolName}
                                 </h2>
-                                <p className="italic font-black text-[11px] uppercase tracking-wider mb-2">Travail-Rigueur-succès</p>
-                                <div className="flex flex-col text-[10px] font-bold space-y-1">
+                                <p className="italic font-black text-[11px] uppercase tracking-wider mb-0.5">Travail-Rigueur-succès</p>
+                                <div className="flex flex-col text-[10px] font-bold space-y-0.5">
                                     <p>Tél: +228 90 17 79 66 / 99 00 00 00</p>
                                     <p>BP: 80159 Apéssito - TOGO</p>
                                 </div>
