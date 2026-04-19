@@ -18,7 +18,9 @@ const COLORS = {
     bg: [255, 255, 255],        // White background
 };
 
-const fmtPrice = (n: number) => new Intl.NumberFormat('fr-FR').format(n) + ' FCFA';
+const fmtPrice = (n: number) => {
+    return new Intl.NumberFormat('fr-FR').format(n).replace(/\s/g, '.') + ' FCFA';
+};
 
 export const generateRapportMensuelPDF = (
     students: Student[],
@@ -76,7 +78,7 @@ export const generateRapportMensuelPDF = (
     doc.setFont('helvetica', 'normal');
     setSecondary();
     doc.text(`Période : ${currentMonthName.toUpperCase()}`, w - margin, y + 24, { align: 'right' });
-    doc.text(`Généré le : ${format(now, 'dd/MM/yyyy HH:mm')}`, w - margin, y + 29, { align: 'right' });
+    doc.text(`Généré le : ${format(now, 'dd.MM.yyyy HH:mm')}`, w - margin, y + 29, { align: 'right' });
 
     y = 50;
     doc.setDrawColor(0, 0, 0);
@@ -99,7 +101,7 @@ export const generateRapportMensuelPDF = (
             ['REVENUS THÉORIQUES ATTENDUS', fmtPrice(recou.totalTheorique)],
             ['TOTAL DES ENCAISSEMENTS RÉELS', fmtPrice(recou.totalEncaisse)],
             ['SOLDE RESTANT À RECOUVRER', fmtPrice(recou.totalRestant)],
-            ['TAUX DE RECOUVREMENT GLOBAL', `${recou.taux}%`],
+            ['TAUX DE RECOUVREMENT GLOBAL', `${new Intl.NumberFormat('fr-FR').format(recou.taux)}%`],
         ],
         theme: 'plain',
         styles: { 
@@ -141,7 +143,7 @@ export const generateRapportMensuelPDF = (
             fmtPrice(c.totalTheorique),
             fmtPrice(c.totalEncaisse),
             fmtPrice(c.totalRestant),
-            `${c.taux}%`
+            `${new Intl.NumberFormat('fr-FR').format(c.taux)}%`
         ]),
         styles: { 
             fontSize: 10, 
@@ -207,7 +209,7 @@ export const generateRapportMensuelPDF = (
     y += 8;
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
-    const conclusion = `Le présent rapport certifie qu'au ${format(now, 'dd/MM/yyyy')}, le taux de recouvrement global est de ${recou.taux}%. ` + 
+    const conclusion = `Le présent rapport certifie qu'au ${format(now, 'dd.MM.yyyy')}, le taux de recouvrement global est de ${new Intl.NumberFormat('fr-FR').format(recou.taux)}%. ` + 
         `Un montant total de ${fmtPrice(recou.totalRestant)} reste à percevoir pour clôturer l'exercice.`;
     
     doc.text(doc.splitTextToSize(conclusion, w - (margin * 2)), margin, y);
@@ -234,7 +236,7 @@ export const generateRapportMensuelPDF = (
         doc.setFontSize(9);
         doc.setFont('helvetica', 'italic');
         doc.line(margin, h - 15, w - margin, h - 15);
-        doc.text(`${schoolInfo.name.toUpperCase()} - BILAN FINANCIER - Page ${i}/${totalPages}`, w / 2, h - 10, { align: 'center' });
+        doc.text(`${schoolInfo.name.toUpperCase()} - BILAN FINANCIER - Page ${i} sur ${totalPages}`, w / 2, h - 10, { align: 'center' });
     }
 
     const fileName = `Bilan_Financier_${currentMonthName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(' ', '_')}.pdf`;
