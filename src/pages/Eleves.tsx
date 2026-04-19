@@ -210,7 +210,7 @@ const PhotoModal: React.FC<{ student: Student; onClose: () => void; onSave: (b64
               <Camera className="w-6 h-6 text-white" />
             </div>
           </div>
-          <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+          <input ref={inputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFile} />
           
           {(student.photoUrl || preview) && (
              <button onClick={handleDelete} disabled={deleting} className="text-red-500 hover:text-red-600 text-xs font-medium flex items-center gap-1 mb-2">
