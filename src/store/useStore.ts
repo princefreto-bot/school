@@ -781,7 +781,7 @@ export const useStore = create<AppState>()(
         const user = get().user;
         if (user?.role === 'parent') {
           // Envoyer l'info au backend pour que l'admin voie les stats
-          this.reportAnnouncementReadToBackend(announcementId);
+          get().reportAnnouncementReadToBackend(announcementId);
         }
 
         // On ne tente de sync vers le cloud que si on n'est pas un parent 

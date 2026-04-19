@@ -113,12 +113,12 @@ export const AnnouncementPopup: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Corps du message */}
-                <div className={`${styles.bg} px-6 py-5`}>
+                {/* Corps du message - Défilable pour les longs messages */}
+                <div className={`${styles.bg} px-6 py-5 max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300`}>
                     <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
                         {currentAnnouncement.message}
                     </p>
-                    <div className="flex items-center gap-2 mt-3 text-[11px] text-gray-500">
+                    <div className="flex items-center gap-2 mt-4 pt-3 border-t border-gray-200/50 text-[11px] text-gray-500">
                         <Clock className="w-3 h-3" />
                         {new Date(currentAnnouncement.createdAt).toLocaleDateString('fr-FR', {
                             weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
