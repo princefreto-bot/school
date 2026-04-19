@@ -8,7 +8,7 @@ import { generateRecuPDF } from '../utils/pdfGenerator';
 import {
   X, Download, MessageCircle, Clock, CheckCircle,
   AlertTriangle, User, Phone, School, CreditCard,
-  TrendingUp, FileText,
+  TrendingUp, FileText, Camera, Loader2
 } from 'lucide-react';
 
 const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n) + ' FCFA';
@@ -25,6 +25,8 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
   const schoolStamp         = useStore((s) => s.schoolStamp);
 
   const [tab, setTab] = useState<'infos' | 'historique'>('infos');
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const taux     = student.ecolage > 0 ? Math.round((student.dejaPaye / student.ecolage) * 100) : 0;
   const isSolde  = student.restant <= 0;
@@ -35,6 +37,51 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
     ? `Bonjour, parent de ${student.prenom} ${student.nom} (${student.classe}). ${messageRemerciement} — ${schoolName}`
     : `Bonjour, parent de ${student.prenom} ${student.nom} (${student.classe}). Restant : ${fmtMoney(student.restant)}. ${messageRappel} — ${schoolName}`;
 
+  const handleCameraClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePhotoCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 1. Convertir en Base64
+    const reader = new FileReader();
+    reader.onloadstart = () => setIsUploading(true);
+    reader.onload = async () => {
+      try {
+        const base64 = reader.result as string;
+        const { API_BASE_URL } = await import('../config');
+        const { getAuthHeaders } = await import('../services/apiHelpers');
+
+        const res = await fetch(`${API_BASE_URL}/students/upload-photo/${student.id}`, {
+          method: 'POST',
+          headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64: base64 })
+        });
+
+        const data = await res.json();
+        if (data.success && data.photoUrl) {
+          // Mettre à jour le store global
+          const currentStudents = useStore.getState().students;
+          const updated = currentStudents.map(s => 
+            s.id === student.id ? { ...s, photoUrl: data.photoUrl } : s
+          );
+          useStore.setState({ students: updated });
+          alert('✅ Photo mise à jour !');
+        } else {
+          alert('❌ Erreur: ' + (data.error || 'Inconnue'));
+        }
+      } catch (err) {
+        console.error('Upload Error:', err);
+        alert('❌ Erreur lors de l\'envoi de la photo.');
+      } finally {
+        setIsUploading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
@@ -42,13 +89,34 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-slate-900 rounded-t-2xl">
           <div className="flex items-center gap-4">
-            {student.photoUrl ? (
-              <img src={student.photoUrl} alt="Photo" className="w-14 h-14 rounded-full object-cover border-2 border-slate-700 shadow-sm" />
-            ) : (
-              <div className="w-14 h-14 rounded-full bg-slate-800 border-2 border-slate-700 flex flex-col items-center justify-center text-slate-400 shrink-0">
-                <User className="w-5 h-5 opacity-50" />
+            <div className="relative group cursor-pointer" onClick={handleCameraClick}>
+              {student.photoUrl ? (
+                <img src={student.photoUrl} alt="Photo" className="w-16 h-16 rounded-full object-cover border-2 border-slate-700 shadow-lg transition-all group-hover:brightness-50" />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-slate-800 border-2 border-slate-700 flex flex-col items-center justify-center text-slate-400 shrink-0 transition-all group-hover:bg-slate-700">
+                  <User className="w-6 h-6 opacity-50" />
+                </div>
+              )}
+              
+              {/* Overlay Caméra */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                {isUploading ? (
+                  <Loader2 className="w-6 h-6 text-white animate-spin" />
+                ) : (
+                  <Camera className="w-6 h-6 text-white" />
+                )}
               </div>
-            )}
+
+              {/* Input caché */}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/*" 
+                capture="environment" 
+                onChange={handlePhotoCapture}
+              />
+            </div>
             <div>
               <h2 className="text-xl font-bold text-white">{student.prenom} {student.nom}</h2>
               <p className="text-slate-400 text-sm mt-0.5">{student.classe} · {student.cycle}</p>
