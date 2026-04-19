@@ -85,7 +85,7 @@ const drawOfficialHeader = (
   doc.text('Travail-Rigueur-Succès', centerX + 35, y + 7, { align: 'center' });
   doc.setFont('times', 'bold');
   doc.setFontSize(10);
-  doc.text('Tél: +228 90 17 79 66 / 99 00 00 00', centerX + 35, y + 14, { align: 'center' });
+  doc.text('Tél: +228 90 17 79 66 / 99 41 40 47', centerX + 35, y + 14, { align: 'center' });
   doc.text('BP: 80159 Apéssito - TOGO', centerX + 35, y + 19, { align: 'center' });
 
   // 3. LOGO (Extrême Droite - Réduit et poussé)
