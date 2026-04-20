@@ -367,31 +367,31 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                         </div>
 
                         {/* 2. STATISTIQUES EXPLICITES DE LA CLASSE (Les informations importantes) */}
-                        <div className="p-2 flex-col justify-center space-y-1.5 flex-1 bg-[#f8f9fa]">
+                        <div className="p-2 flex-col justify-center space-y-2 flex-1 bg-[#f8f9fa]">
                             <div className="flex justify-between items-end border-b border-gray-200 pb-0.5">
-                                <span className="uppercase text-[8.5px] font-bold text-black">Moyenne Générale :</span>
-                                <span className="font-black text-[11px] text-rose-800 leading-none">{data.moyenneGenerale.toFixed(2)}</span>
+                                <span className="uppercase text-[11px] font-black text-black">Moyenne Générale :</span>
+                                <span className="font-black text-[14px] text-rose-800 leading-none">{data.moyenneGenerale.toFixed(2)}</span>
                             </div>
-                            <div className="flex justify-between items-end border-b border-gray-200 pb-0.5 mb-1.5">
-                                <span className="uppercase text-[8.5px] font-bold text-black">Rang :</span>
-                                <span className="font-black text-[11px] text-blue-800 leading-none">{data.rangGeneral} <span className="text-[8px] font-normal text-gray-500">/ {data.effectifClasse}</span></span>
-                            </div>
-                            <div className="flex justify-between items-end border-b border-gray-200 pb-0.5">
-                                <span className="text-[8px] font-semibold text-gray-700">Plus forte moyenne :</span>
-                                <span className="font-black text-[10px] text-emerald-700 leading-none">{data.moyenneMax.toFixed(2)}</span>
+                            <div className="flex justify-between items-end border-b border-gray-200 pb-0.5 mb-1">
+                                <span className="uppercase text-[11px] font-black text-black">Rang :</span>
+                                <span className="font-black text-[14px] text-blue-800 leading-none">{data.rangGeneral} <span className="text-[10px] font-normal text-gray-500">/ {data.effectifClasse}</span></span>
                             </div>
                             <div className="flex justify-between items-end border-b border-gray-200 pb-0.5">
-                                <span className="text-[8px] font-semibold text-gray-700">Plus faible moyenne :</span>
-                                <span className="font-black text-[10px] text-red-700 leading-none">{data.moyenneMin.toFixed(2)}</span>
+                                <span className="text-[10px] font-bold text-gray-800">Plus forte moyenne :</span>
+                                <span className="font-black text-[12.5px] text-emerald-700 leading-none">{data.moyenneMax.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between items-end border-b border-gray-200 pb-0.5">
+                                <span className="text-[10px] font-bold text-gray-800">Plus faible moyenne :</span>
+                                <span className="font-black text-[12.5px] text-red-700 leading-none">{data.moyenneMin.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between items-end">
-                                <span className="text-[8px] font-semibold text-gray-700">Moyenne générale de la classe :</span>
-                                <span className="font-black text-[10px] text-blue-700 leading-none">{data.moyenneClasse.toFixed(2)}</span>
+                                <span className="text-[10px] font-bold text-gray-800">Moyenne générale de la classe :</span>
+                                <span className="font-black text-[12.5px] text-blue-700 leading-none">{data.moyenneClasse.toFixed(2)}</span>
                             </div>
-                            <div className="flex justify-between items-end pt-1 border-t border-gray-200 mt-1">
-                                <div className="flex gap-4">
-                                    <span className="text-[8px] font-bold text-red-600 uppercase">Absences : <span className="text-[10px]">{data.absences ?? 0}</span></span>
-                                    <span className="text-[8px] font-bold text-orange-600 uppercase">Retards : <span className="text-[10px]">{data.retards ?? 0}</span></span>
+                            <div className="flex justify-between items-end pt-1 border-t border-gray-300 mt-2">
+                                <div className="flex gap-6">
+                                    <span className="text-[10px] font-bold text-red-700 uppercase">Absences : <span className="text-[13px]">{data.absences ?? 0}</span></span>
+                                    <span className="text-[10px] font-bold text-orange-700 uppercase">Retards : <span className="text-[13px]">{data.retards ?? 0}</span></span>
                                 </div>
                             </div>
                         </div>
