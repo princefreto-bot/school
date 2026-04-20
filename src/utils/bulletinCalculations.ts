@@ -39,6 +39,8 @@ export interface BulletinEleveResultat {
     rangAnnuel?: string | null;
     moyenneAnnuelleClasse?: number | null;
     periodesIncluses?: string[]; // Ex: ['TRIMESTRE 1', 'TRIMESTRE 2']
+    absences?: number;
+    retards?: number;
 }
 
 const formatRang = (rank: number): string => {
@@ -79,7 +81,8 @@ export const calculerBulletinsClasse = (
     students: Student[],
     matieres: Matiere[],
     classeMatieres: ClasseMatiere[],
-    notes: Note[]
+    notes: Note[],
+    presences: any[] = []
 ): BulletinEleveResultat[] => {
     
     const elevesDeLaClasse = students.filter(s => s.classe === classe);
@@ -180,7 +183,9 @@ export const calculerBulletinsClasse = (
             effectifClasse: elevesDeLaClasse.length,
             moyenneClasse: 0,
             moyenneMin: 0,
-            moyenneMax: 0
+            moyenneMax: 0,
+            absences: presences.filter(p => p.eleveId === eleve.id && p.statut === 'absent').length,
+            retards: presences.filter(p => p.eleveId === eleve.id && p.statut === 'retard').length
         };
     });
 

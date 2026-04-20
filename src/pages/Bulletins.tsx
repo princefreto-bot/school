@@ -39,7 +39,8 @@ export const Bulletins: React.FC = () => {
             students, 
             matieres, 
             classeMatieres, 
-            notes
+            notes,
+            useStore.getState().presences
         );
         setBulletinsCalcules(resultats);
     };
