@@ -26,7 +26,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
             style={{
                 width: '210mm',
                 height: '297mm',
-                padding: '10mm 6mm 4mm 6mm',
+                padding: '3mm 6mm 4mm 6mm',
                 boxSizing: 'border-box',
                 fontFamily: '"Times New Roman", Times, serif'
             }}
@@ -40,8 +40,8 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
 
             <div className="flex-1 flex flex-col">
                 {/* ───────────────────────────── EN-TÊTE SANS CADRES (4 COLONNES : SCEAU | MINISTÈRE | ÉCOLE | LOGO) ───────────────────────────── */}
-                <div className="mb-6">
-                    <div className="flex justify-between items-start py-1 gap-2 border-b border-black pb-4">
+                <div className="mb-2">
+                    <div className="flex justify-between items-start py-1 gap-2 border-b border-black pb-2">
 
                         {/* 1. SCEAU (Extrême Gauche) */}
                         <div className="flex-shrink-0 flex justify-start" style={{ width: '26mm' }}>
@@ -103,7 +103,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
 
                 {/* ──────────────── IDENTIFICATION ÉLÈVE (avec photo passeport) ──────────────── */}
                 <div
-                    className="border-[1.5px] border-black mb-2"
+                    className="border-[1.5px] border-black mb-1"
                     style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 0 }}
                 >
                     {/* Infos élève — lignes séparées par des bordures */}
