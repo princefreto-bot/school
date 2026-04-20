@@ -268,60 +268,80 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                 <div className="border-[1.5px] border-black mt-1" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', minHeight: '30mm' }}>
 
                     {/* COLONNE GAUCHE : Résultats et Statistiques */}
-                    <div style={{ borderRight: '1.5px solid black', display: 'flex', flexDirection: 'column' }}>
+                    {/* COLONNE GAUCHE : Résultats et Statistiques */}
+                    <div style={{ borderRight: '1.5px solid black', display: 'flex', flexDirection: 'column', flex: 1 }}>
 
-                        {/* 1. TABLEAU DES RÉSULTATS */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr', borderBottom: '1px solid black', background: '#e5e5e5' }}>
-                            <div className="text-[8px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>Résultats</div>
-                            <div className="text-[7px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>Moy. /20</div>
-                            <div className="text-[7px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>Rang</div>
-                            <div className="text-[7px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>Eff.</div>
-                            <div className="text-[7px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>Abs.</div>
-                            <div className="text-[7px] font-black uppercase text-center" style={{ padding: '2px 4px' }}>Ret.</div>
+                        {/* 1. TABLEAU DES RÉSULTATS (Modifié selon demande USER) */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr', borderBottom: '1.5px solid black', background: '#e5e5e5' }}>
+                            <div className="text-[8px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>RÉSULTATS</div>
+                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>MOY. /20</div>
+                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>RANG</div>
+                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>EFF.</div>
+                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>ABS.</div>
+                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px' }}>RET.</div>
                         </div>
 
-                        {/* Ligne — Période actuelle */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr', borderBottom: data.moyenneAnnuelle != null ? '1px solid black' : '1px solid black' }}>
-                            <div className="text-[8px] font-bold uppercase" style={{ padding: '3px 5px', borderRight: '1px solid black' }}>
-                                {data.periode}
-                            </div>
-                            <div className="text-[10px] font-black text-center text-rose-800" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
-                                {data.moyenneGenerale.toFixed(2)}
-                            </div>
-                            <div className="text-[10px] font-black text-center text-blue-800" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
-                                {data.rangGeneral}
-                            </div>
-                            <div className="text-[9px] font-bold text-center text-gray-600" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
-                                {data.effectifClasse}
-                            </div>
-                            <div className="text-[10px] font-black text-center text-red-600" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
-                                {data.absences ?? 0}
-                            </div>
-                            <div className="text-[10px] font-black text-center text-orange-600" style={{ padding: '3px 4px' }}>
-                                {data.retards ?? 0}
-                            </div>
-                        </div>
+                        {/* Lignes pour chaque période du cycle (TRIM.1, 2, 3 ou SEM.1, 2) */}
+                        {(() => {
+                            const isTrim = data.periode.includes('TRIMESTRE');
+                            const cycle = isTrim 
+                                ? ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'] 
+                                : ['SEMESTRE 1', 'SEMESTRE 2'];
 
-                        {/* Ligne — Moyenne annuelle (T2, T3, S2 uniquement) */}
+                            const abbr = (p: string) => p.replace('TRIMESTRE ', 'TRIM.').replace('SEMESTRE ', 'SEM.');
+
+                            return cycle.map((pName, idx) => {
+                                const detail = data.periodesDetails?.find(d => d.periode === pName);
+                                const isCurrent = data.periode === pName;
+                                const isFinal = idx === cycle.length - 1;
+
+                                return (
+                                    <div key={pName} style={{ 
+                                        display: 'grid', 
+                                        gridTemplateColumns: '1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr', 
+                                        borderBottom: isFinal ? '1.5px solid black' : '1px solid black',
+                                        background: isCurrent ? '#fdf2f2' : 'transparent'
+                                    }}>
+                                        <div className="text-[8.5px] font-black uppercase" style={{ padding: '3px 5px', borderRight: '1px solid black' }}>
+                                            {abbr(pName)}
+                                        </div>
+                                        <div className="text-[10px] font-black text-center text-rose-800" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                            {detail ? detail.moyenne.toFixed(2) : '-'}
+                                        </div>
+                                        <div className="text-[10px] font-black text-center text-blue-800" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                            {detail ? detail.rang : '-'}
+                                        </div>
+                                        <div className="text-[9px] font-bold text-center text-gray-600" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                            {detail ? detail.effectif : (isCurrent ? data.effectifClasse : '-')}
+                                        </div>
+                                        <div className="text-[10px] font-black text-center text-red-600" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                            {detail ? detail.absences : (isCurrent ? (data.absences ?? 0) : '-')}
+                                        </div>
+                                        <div className="text-[10px] font-black text-center text-orange-600" style={{ padding: '3px 4px' }}>
+                                            {detail ? detail.retards : (isCurrent ? (data.retards ?? 0) : '-')}
+                                        </div>
+                                    </div>
+                                );
+                            });
+                        })()}
+
+                        {/* Ligne — Moyenne annuelle (Uniquement si pertinent, fusionnée avec le style précédent) */}
                         {data.moyenneAnnuelle != null && (
-                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr', borderBottom: '1px solid black' }}>
-                                <div className="text-[8px] font-bold uppercase" style={{ padding: '3px 5px', borderRight: '1px solid black' }}>
-                                    Moy. Annuelle
-                                    <span className="text-[6.5px] font-normal text-gray-600 ml-1 normal-case">
-                                        ({(data.periodesIncluses ?? []).map(p => p.replace('TRIMESTRE ', 'T').replace('SEMESTRE ', 'S')).join('+')})
-                                    </span>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr', borderBottom: '1.5px solid black', background: '#eef2ff' }}>
+                                <div className="text-[8.5px] font-black uppercase" style={{ padding: '3px 5px', borderRight: '1px solid black' }}>
+                                    MOY. ANN.
                                 </div>
-                                <div className="text-[10px] font-black text-center text-indigo-800" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                <div className="text-[11px] font-black text-center text-indigo-900" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
                                     {data.moyenneAnnuelle.toFixed(2)}
                                 </div>
-                                <div className="text-[10px] font-black text-center text-indigo-700" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                <div className="text-[10.5px] font-bold text-center text-indigo-700" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
                                     {data.rangAnnuel ?? '-'}
                                 </div>
-                                <div className="text-[9px] font-bold text-center text-gray-600" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
+                                <div className="text-[9px] font-bold text-center text-gray-500" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
                                     {data.effectifClasse}
                                 </div>
-                                <div className="text-[10px] font-black text-center text-gray-400" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>-</div>
-                                <div className="text-[10px] font-black text-center text-gray-400" style={{ padding: '3px 4px' }}>-</div>
+                                <div className="text-[10px] font-bold text-center text-gray-400" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>-</div>
+                                <div className="text-[10px] font-bold text-center text-gray-400" style={{ padding: '3px 4px' }}>-</div>
                             </div>
                         )}
 

@@ -39,6 +39,14 @@ export interface BulletinEleveResultat {
     rangAnnuel?: string | null;
     moyenneAnnuelleClasse?: number | null;
     periodesIncluses?: string[]; // Ex: ['TRIMESTRE 1', 'TRIMESTRE 2']
+    periodesDetails?: {
+        periode: string;
+        moyenne: number;
+        rang: string;
+        absences: number;
+        retards: number;
+        effectif: number;
+    }[];
     absences?: number;
     retards?: number;
 }
@@ -205,61 +213,94 @@ export const calculerBulletinsClasse = (
         b.moyenneMax = moyMax;
     });
 
-    // --- 3. Calcul des moyennes annuelles cumulées ---
+    // --- 3. Calcul des moyennes annuelles cumulées et Historique ---
     const periodesAnterieures = getPeriodesAntérieures(periode);
     const toutesLesPeriodes = [...periodesAnterieures, periode];
 
+    // Initialiser periodesDetails pour chaque bulletin
+    bulletinsBruts.forEach(b => {
+        b.periodesDetails = [];
+    });
+
     if (periodesAnterieures.length > 0) {
-        // Pour chaque élève, calculer la moyenne de toutes les périodes
-        bulletinsBruts.forEach(b => {
-            const eleveMoysParPeriode: number[] = [];
-
-            toutesLesPeriodes.forEach(p => {
-                if (p === periode) {
-                    // La période actuelle, on a déjà la moyenne
-                    eleveMoysParPeriode.push(b.moyenneGenerale);
-                } else {
-                    // Recalculer la moyenne pour la période antérieure
-                    let totalPts = 0;
-                    let totalCoefs = 0;
-                    configsMatiere.forEach(cm => {
-                        const n = notes.find(x =>
-                            x.eleveId === b.eleve.id &&
-                            x.matiereId === cm.matiereId &&
-                            x.periode === p
-                        );
-                        const nc = n?.noteClasse ?? null;
-                        const nd = n?.noteDevoir ?? null;
-                        const nc_compo = n?.noteCompo ?? null;
-
+        // Pour chaque période antérieure, on doit calculer les moyennes et rangs de TOUTE la classe
+        // afin d'avoir le "Rang" de l'élève pour cette période passée.
+        periodesAnterieures.forEach(p => {
+            const moysElevesPeriod: { id: string, moy: number, abs: number, ret: number }[] = elevesDeLaClasse.map(e => {
+                let totalPts = 0;
+                let totalCoefs = 0;
+                configsMatiere.forEach(cm => {
+                    const n = notes.find(x => x.eleveId === e.id && x.matiereId === cm.matiereId && x.periode === p);
+                    if (n) {
+                        const nc = n.noteClasse ?? null;
+                        const nd = n.noteDevoir ?? null;
+                        const nc_compo = n.noteCompo ?? null;
+                        
                         let moyClasseMat = null;
                         const evalNotes = [nc, nd].filter(x => x !== null) as number[];
-                        if(evalNotes.length > 0) {
-                            moyClasseMat = evalNotes.reduce((a,v) => a+v, 0) / evalNotes.length;
-                        }
+                        if(evalNotes.length > 0) moyClasseMat = evalNotes.reduce((a,v) => a+v, 0) / evalNotes.length;
 
                         const finalNotes = [moyClasseMat, nc_compo].filter(x => x !== null) as number[];
-
                         if (finalNotes.length > 0) {
                             const avg = finalNotes.reduce((a, v) => a + v, 0) / finalNotes.length;
                             totalPts += avg * cm.coefficient;
                             totalCoefs += cm.coefficient;
                         }
-                    });
-                    if (totalCoefs > 0) {
-                        eleveMoysParPeriode.push(parseFloat((totalPts / totalCoefs).toFixed(2)));
                     }
-                }
+                });
+                
+                const absences = presences.filter(pr => pr.eleveId === e.id && pr.statut === 'absent' && pr.periode === p).length;
+                const retards = presences.filter(pr => pr.eleveId === e.id && pr.statut === 'retard' && pr.periode === p).length;
+
+                return { 
+                    id: e.id, 
+                    moy: totalCoefs > 0 ? parseFloat((totalPts / totalCoefs).toFixed(2)) : 0,
+                    abs: absences,
+                    ret: retards
+                };
             });
 
-            if (eleveMoysParPeriode.length > 0) {
-                const moyAnn = eleveMoysParPeriode.reduce((a, v) => a + v, 0) / eleveMoysParPeriode.length;
-                b.moyenneAnnuelle = parseFloat(moyAnn.toFixed(2));
-                b.periodesIncluses = toutesLesPeriodes;
-            }
+            // Trier pour avoir les rangs de la période p
+            const sorted = [...moysElevesPeriod].sort((a,b) => b.moy - a.moy);
+            
+            bulletinsBruts.forEach(b => {
+                const result = moysElevesPeriod.find(m => m.id === b.eleve.id);
+                if (result) {
+                    const rankIndex = sorted.findIndex(s => s.id === b.eleve.id);
+                    b.periodesDetails?.push({
+                        periode: p,
+                        moyenne: result.moy,
+                        rang: formatRang(rankIndex + 1),
+                        absences: result.abs,
+                        retards: result.ret,
+                        effectif: elevesDeLaClasse.length
+                    });
+                }
+            });
+        });
+    }
+
+    // Ajouter la période actuelle dans les détails
+    bulletinsBruts.forEach(b => {
+        b.periodesDetails?.push({
+            periode: b.periode,
+            moyenne: b.moyenneGenerale,
+            rang: b.rangGeneral,
+            absences: b.absences ?? 0,
+            retards: b.retards ?? 0,
+            effectif: b.effectifClasse
         });
 
-        // Calculer les rangs annuels
+        // Calcul de la moyenne annuelle à partir des détails
+        if (b.periodesDetails && b.periodesDetails.length > 1) {
+            const sum = b.periodesDetails.reduce((acc, curr) => acc + curr.moyenne, 0);
+            b.moyenneAnnuelle = parseFloat((sum / b.periodesDetails.length).toFixed(2));
+            b.periodesIncluses = b.periodesDetails.map(d => d.periode);
+        }
+    });
+
+    // Calculer les rangs annuels si on a plus d'une période
+    if (periodesAnterieures.length > 0) {
         const sortedByAnn = [...bulletinsBruts]
             .filter(b => b.moyenneAnnuelle != null)
             .sort((a, b) => (b.moyenneAnnuelle ?? 0) - (a.moyenneAnnuelle ?? 0));
