@@ -268,82 +268,103 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                 <div className="border-[1.5px] border-black mt-1" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', minHeight: '30mm' }}>
 
                     {/* COLONNE GAUCHE : Résultats et Statistiques */}
-                    {/* COLONNE GAUCHE : Résultats et Statistiques */}
                     <div style={{ borderRight: '1.5px solid black', display: 'flex', flexDirection: 'column', flex: 1 }}>
 
-                        {/* 1. TABLEAU DES RÉSULTATS (Modifié selon demande USER) */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr', borderBottom: '1.5px solid black', background: '#e5e5e5' }}>
-                            <div className="text-[8px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>RÉSULTATS</div>
-                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>MOY. /20</div>
-                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>RANG</div>
-                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>EFF.</div>
-                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px', borderRight: '1px solid black' }}>ABS.</div>
-                            <div className="text-[7.5px] font-black uppercase text-center" style={{ padding: '2px 4px' }}>RET.</div>
-                        </div>
-
-                        {/* Lignes pour chaque période du cycle (TRIM.1, 2, 3 ou SEM.1, 2) */}
-                        {(() => {
-                            const isTrim = data.periode.includes('TRIMESTRE');
-                            const cycle = isTrim 
-                                ? ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'] 
-                                : ['SEMESTRE 1', 'SEMESTRE 2'];
-
-                            const abbr = (p: string) => p.replace('TRIMESTRE ', 'TRIM.').replace('SEMESTRE ', 'SEM.');
-
-                            return cycle.map((pName, idx) => {
-                                const detail = data.periodesDetails?.find(d => d.periode === pName);
-                                const isCurrent = data.periode === pName;
-                                const isFinal = idx === cycle.length - 1;
-
-                                return (
-                                    <div key={pName} style={{ 
-                                        display: 'grid', 
-                                        gridTemplateColumns: '1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr', 
-                                        borderBottom: isFinal ? '1.5px solid black' : '1px solid black',
-                                        background: isCurrent ? '#fdf2f2' : 'transparent'
-                                    }}>
-                                        <div className="text-[8.5px] font-black uppercase" style={{ padding: '3px 5px', borderRight: '1px solid black' }}>
-                                            {abbr(pName)}
-                                        </div>
-                                        <div className="text-[10px] font-black text-center text-rose-800" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
-                                            {detail ? detail.moyenne.toFixed(2) : '-'}
-                                        </div>
-                                        <div className="text-[10px] font-black text-center text-blue-800" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
-                                            {detail ? detail.rang : '-'}
-                                        </div>
-                                        <div className="text-[9px] font-bold text-center text-gray-600" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
-                                            {detail ? detail.effectif : (isCurrent ? data.effectifClasse : '-')}
-                                        </div>
-                                        <div className="text-[10px] font-black text-center text-red-600" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
-                                            {detail ? detail.absences : (isCurrent ? (data.absences ?? 0) : '-')}
-                                        </div>
-                                        <div className="text-[10px] font-black text-center text-orange-600" style={{ padding: '3px 4px' }}>
-                                            {detail ? detail.retards : (isCurrent ? (data.retards ?? 0) : '-')}
-                                        </div>
-                                    </div>
-                                );
-                            });
-                        })()}
-
-                        {/* Ligne — Moyenne annuelle (Uniquement si pertinent, fusionnée avec le style précédent) */}
-                        {data.moyenneAnnuelle != null && (
-                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr', borderBottom: '1.5px solid black', background: '#eef2ff' }}>
-                                <div className="text-[8.5px] font-black uppercase" style={{ padding: '3px 5px', borderRight: '1px solid black' }}>
-                                    MOY. ANN.
-                                </div>
-                                <div className="text-[11px] font-black text-center text-indigo-900" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
-                                    {data.moyenneAnnuelle.toFixed(2)}
-                                </div>
-                                <div className="text-[10.5px] font-bold text-center text-indigo-700" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
-                                    {data.rangAnnuel ?? '-'}
-                                </div>
-                                <div className="text-[9px] font-bold text-center text-gray-500" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>
-                                    {data.effectifClasse}
-                                </div>
-                                <div className="text-[10px] font-bold text-center text-gray-400" style={{ padding: '3px 4px', borderRight: '1px solid black' }}>-</div>
-                                <div className="text-[10px] font-bold text-center text-gray-400" style={{ padding: '3px 4px' }}>-</div>
+                        {/* 1. TABLEAU DES RÉSULTATS (HORIZONTAL 6 COLONNES - Demande USER) */}
+                        <div style={{ display: 'flex', flexDirection: 'column', borderBottom: '1.5px solid black' }}>
+                            {/* LIGNE 1 : EN-TÊTES (6 COLONNES) */}
+                            <div style={{ 
+                                display: 'grid', 
+                                gridTemplateColumns: 'repeat(6, 1fr)', 
+                                background: '#e5e5e5', 
+                                borderBottom: '1.5px solid black',
+                                textAlign: 'center',
+                                fontWeight: '900',
+                                fontSize: '8px'
+                            }}>
+                                {(() => {
+                                    const isTrim = data.periode.includes('TRIMESTRE');
+                                    if (isTrim) {
+                                        return (
+                                            <>
+                                                <div style={{ padding: '2px', borderRight: '1px solid black' }}>TRIM.1</div>
+                                                <div style={{ padding: '2px', borderRight: '1px solid black' }}>RANG</div>
+                                                <div style={{ padding: '2px', borderRight: '1px solid black' }}>TRIM.2</div>
+                                                <div style={{ padding: '2px', borderRight: '1px solid black' }}>RANG</div>
+                                                <div style={{ padding: '2px', borderRight: '1px solid black' }}>TRIM.3</div>
+                                                <div style={{ padding: '2px' }}>RANG</div>
+                                            </>
+                                        );
+                                    } else {
+                                        return (
+                                            <>
+                                                <div style={{ padding: '2px', borderRight: '1px solid black' }}>SEM.1</div>
+                                                <div style={{ padding: '2px', borderRight: '1px solid black' }}>RANG</div>
+                                                <div style={{ padding: '2px', borderRight: '1px solid black' }}>SEM.2</div>
+                                                <div style={{ padding: '2px', borderRight: '1px solid black' }}>RANG</div>
+                                                <div style={{ padding: '2px', borderRight: '1px solid black' }}>MOY. ANN</div>
+                                                <div style={{ padding: '2px' }}>RANG</div>
+                                            </>
+                                        );
+                                    }
+                                })()}
                             </div>
-                        )}
+
+                            {/* LIGNE 2 : VALEURS (6 COLONNES) */}
+                            <div style={{ 
+                                display: 'grid', 
+                                gridTemplateColumns: 'repeat(6, 1fr)', 
+                                textAlign: 'center',
+                                fontWeight: '900',
+                                fontSize: '10.5px'
+                            }}>
+                                {(() => {
+                                    const isTrim = data.periode.includes('TRIMESTRE');
+                                    const cycle = isTrim 
+                                        ? ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'] 
+                                        : ['SEMESTRE 1', 'SEMESTRE 2'];
+
+                                    const nodes = [];
+                                    cycle.forEach((pName, idx) => {
+                                        const detail = data.periodesDetails?.find(d => d.periode === pName);
+                                        const isCurrent = data.periode === pName;
+                                        
+                                        nodes.push(
+                                            <div key={`${pName}-moy`} style={{ 
+                                                padding: '4px 2px', borderRight: '1px solid black', 
+                                                color: '#9f1239', background: isCurrent ? '#fff1f2' : 'transparent' 
+                                            }}>
+                                                {detail ? detail.moyenne.toFixed(2) : '-'}
+                                            </div>
+                                        );
+                                        nodes.push(
+                                            <div key={`${pName}-rang`} style={{ 
+                                                padding: '4px 2px', borderRight: idx === 2 && isTrim ? 'none' : (idx === 1 && !isTrim ? '1px solid black' : '1px solid black'), 
+                                                color: '#1e40af', background: isCurrent ? '#eff6ff' : 'transparent' 
+                                            }}>
+                                                {detail ? detail.rang : '-'}
+                                            </div>
+                                        );
+                                    });
+
+                                    // Si semestre, ajouter Moyenne Annuelle pour remplir les 6 colonnes
+                                    if (!isTrim) {
+                                        nodes.push(
+                                            <div key="moy-ann" style={{ padding: '4px 2px', borderRight: '1px solid black', color: '#4338ca', background: '#f5f3ff' }}>
+                                                {data.moyenneAnnuelle ? data.moyenneAnnuelle.toFixed(2) : '-'}
+                                            </div>
+                                        );
+                                        nodes.push(
+                                            <div key="rang-ann" style={{ padding: '4px 2px', color: '#4338ca', background: '#f5f3ff' }}>
+                                                {data.rangAnnuel || '-'}
+                                            </div>
+                                        );
+                                    }
+
+                                    return nodes;
+                                })()}
+                            </div>
+                        </div>
 
                         {/* 2. STATISTIQUES EXPLICITES DE LA CLASSE (Les informations importantes) */}
                         <div className="p-2 flex-col justify-center space-y-1.5 flex-1 bg-[#f8f9fa]">
@@ -366,6 +387,12 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                             <div className="flex justify-between items-end">
                                 <span className="text-[8px] font-semibold text-gray-700">Moyenne générale de la classe :</span>
                                 <span className="font-black text-[10px] text-blue-700 leading-none">{data.moyenneClasse.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between items-end pt-1 border-t border-gray-200 mt-1">
+                                <div className="flex gap-4">
+                                    <span className="text-[8px] font-bold text-red-600 uppercase">Absences : <span className="text-[10px]">{data.absences ?? 0}</span></span>
+                                    <span className="text-[8px] font-bold text-orange-600 uppercase">Retards : <span className="text-[10px]">{data.retards ?? 0}</span></span>
+                                </div>
                             </div>
                         </div>
                     </div>
