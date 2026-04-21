@@ -9,7 +9,7 @@ import jsPDF from 'jspdf';
 import QRCodeLib from 'qrcode'; // import statique — fiable dans le navigateur
 import {
     CreditCard, Search, Download, Printer, X, Filter,
-    CheckCircle, Loader2, ChevronDown, AlertCircle
+    CheckCircle, Loader2, ChevronDown, AlertCircle, User
 } from 'lucide-react';
 
 // ============================================================
