@@ -45,6 +45,16 @@ const CarteEleve: React.FC<CarteProps> = ({
         }}>
             {/* Guilloche effect minimalist dots */}
             <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: 'radial-gradient(#0F172A 1px, transparent 0)', backgroundSize: '10px 10px' }} />
+            
+            {/* Logo en filigrane (Watermark) */}
+            {schoolLogo && (
+                <div style={{
+                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                    width: 100, height: 100, opacity: 0.07, zIndex: 2, pointerEvents: 'none'
+                }}>
+                    <img src={schoolLogo} style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'grayscale(1)' }} />
+                </div>
+            )}
             {/* Header (Bannière économe en encre) */}
             <div style={{
                 position: 'absolute', top: 0, left: 0, width: '100%', height: 49,
@@ -269,6 +279,16 @@ const generateCartesPDF = async (
         doc.setDrawColor(234, 179, 8);
         doc.setLineWidth(0.6);
         doc.line(x, y + bannerH, x + cardW, y + bannerH);
+
+        // ── Logo filigrane (Watermark) ────────────────────────
+        if (logoData) {
+            const wmSize = 35;
+            doc.saveGraphicsState();
+            // @ts-ignore
+            doc.setGState(new doc.GState({ opacity: 0.07 }));
+            doc.addImage(logoData, 'PNG', x + (cardW - wmSize)/2, y + (cardH - wmSize)/2, wmSize, wmSize);
+            doc.restoreGraphicsState();
+        }
 
         // ── Logo Frame ────────────────────────────────────
         const logoMM  = 9;
