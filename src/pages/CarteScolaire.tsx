@@ -36,15 +36,17 @@ const CarteEleve: React.FC<CarteProps> = ({
     return (
         <div style={{
             width: 320, height: 204, // Proportions 85x54mm (approx)
-            background: 'white', borderRadius: 12, overflow: 'hidden',
+            backgroundImage: 'url(/card_bg.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            borderRadius: 12, overflow: 'hidden',
             position: 'relative', fontFamily: '"Inter", sans-serif',
             boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
             userSelect: 'none'
         }}>
-            {/* 1. Header (Bannière) est positionné en absolute 0..13mm */}
+            {/* Le fond et la barre latérale sont maintenant dans l'image de template */}
             <div style={{
-                position: 'absolute', top: 0, left: 0, width: '100%', height: 49, // ~13mm
-                background: '#0F172A', borderBottom: '2.5px solid #EAB308', 
+                position: 'absolute', top: 0, left: 0, width: '100%', height: 49,
                 display: 'flex', alignItems: 'center', padding: '0 15px', zIndex: 10
             }}>
                 <div style={{ width: 34, height: 34, background: 'white', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 3 }}>
@@ -57,12 +59,6 @@ const CarteEleve: React.FC<CarteProps> = ({
                     </p>
                 </div>
             </div>
-
-            {/* 2. Barre latérale gauche */}
-            <div style={{
-                position: 'absolute', left: 0, top: 49, width: 45, height: 133, // ~12mm width
-                background: '#0F172A', borderRight: '2.5px solid #EAB308', zIndex: 5
-            }} />
 
             {/* 3. Photo Passeport (Position fixée au mm près) */}
             <div style={{
@@ -219,6 +215,14 @@ const generateCartesPDF = async (
 
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
+    // Charger le fond template réaliste
+    let templateBase64 = '';
+    try {
+        templateBase64 = await imageUrlToBase64('/card_bg.png');
+    } catch (e) {
+        console.warn('Impossible de charger le template background');
+    }
+
     // ── Mise en page ────────────────────────────────────────
     const cardW   = 85;   // mm (ISO 7810 ID-1)
     const cardH   = 54;   // mm (ISO 7810 ID-1)
@@ -252,34 +256,13 @@ const generateCartesPDF = async (
         const x    = marginX + col * (cardW + gapX);
         const y    = marginY + row * (cardH + gapY);
 
-        // ── Fond de la carte (Elite Neutral) ─────
-        doc.setFillColor(248, 250, 252);
-        doc.roundedRect(x, y, cardW, cardH, 4, 4, 'F');
-        
-        // Bordure fine
-        doc.setDrawColor(226, 232, 240);
-        doc.setLineWidth(0.1);
-        doc.roundedRect(x, y, cardW, cardH, 4, 4, 'S');
-
-        // ── Barre latérale gauche Elite ─────────────
-        const sideW = 12;
-        doc.setFillColor(15, 23, 42); 
-        doc.rect(x, y, sideW, cardH, 'F');
-        
-        // Trim Or
-        doc.setDrawColor(234, 179, 8);
-        doc.setLineWidth(0.6);
-        doc.line(x + sideW, y, x + sideW, y + cardH);
-
-        // ── Bandeau supérieur ──────────────
-        const bannerH = 13;
-        doc.setFillColor(15, 23, 42);
-        doc.rect(x, y, cardW, bannerH, 'F');
-        
-        // Ligne dorée sous bannière
-        doc.setDrawColor(234, 179, 8);
-        doc.setLineWidth(0.6);
-        doc.line(x, y + bannerH, x + cardW, y + bannerH);
+        // ── Fond de la carte (Image Template Réaliste) ─────
+        if (templateBase64) {
+            doc.addImage(templateBase64, 'PNG', x, y, cardW, cardH);
+        } else {
+            doc.setFillColor(248, 250, 252);
+            doc.roundedRect(x, y, cardW, cardH, 4, 4, 'F');
+        }
 
         // ── Logo Frame ────────────────────────────────────
         const logoMM  = 9;
