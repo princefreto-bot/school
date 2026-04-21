@@ -476,14 +476,34 @@ async function _autoAssignBadgesSync(parentId, studentId, schoolSlug) {
             }
         };
 
-        await addBadge('welcome', 'Parent Responsable', 'Compte créé et enfant enregistré', '⭐');
+        // 1. Badge d'inscription
+        await addBadge('welcome', 'Parent Responsable', 'Compte créé et enfant enregistré pour le suivi digital.', '🛡️');
+
+        // 2. Badges financiers
         if (student.status === 'Soldé') {
-            await addBadge('fully_paid', 'Paiement Complet', 'Scolarité entièrement réglée', '🏆');
+            await addBadge('fully_paid', 'Mécène de l\'Éducation', 'Scolarité entièrement réglée pour l\'année en cours.', '🏆');
         }
         const ratio = student.ecolage > 0 ? student.deja_paye / student.ecolage : 0;
         if (ratio >= 0.5 && student.status !== 'Soldé') {
-            await addBadge('half_paid', '2ème Tranche Validée', 'Plus de 50% de la scolarité payée', '🥈');
+            await addBadge('half_paid', 'Partenaire Engagé', 'Plus de 50% de la scolarité validée avec succès.', '🥈');
         }
+
+        // 3. Badges académiques (Proactif)
+        // On récupère les notes pour voir si l'élève a une excellente moyenne
+        const { data: notes } = await supabase.from(`notes_${schoolSlug}`).select('*').eq('eleve_id', studentId);
+        if (notes && notes.length > 3) {
+            const avg = notes.reduce((acc, n) => acc + (n.note_classe || 0) + (n.note_devoir || 0), 0) / (notes.length * 2);
+            if (avg >= 15) {
+                await addBadge('excellence', 'Fierté Académique', 'Votre enfant maintient une moyenne d\'excellence dans ses résultats.', '⭐');
+            }
+        }
+
+        // 4. Badge d'assiduité
+        const { data: presences } = await supabase.from(`presences_${schoolSlug}`).select('id').eq('student_id', studentId).limit(20);
+        if (presences && presences.length >= 20) {
+            await addBadge('attendance', 'Modèle de Ponctualité', 'Assiduité exemplaire constatée au cours des dernières semaines.', '⚡');
+        }
+
     } catch (e) { /* ignore silent failure during sync */ }
 }
 

@@ -116,18 +116,22 @@ async function syncFromFrontend(req, res) {
             }
 
             // --- 2b. Notifier les parents pour les NOUVEAUX paiements ---
-            // On le fait après l'upsert pour garantir que la data est là
             (async () => {
                 try {
+                    // Récupérer les IDs des paiements déjà existants pour éviter les doublons de notif
+                    const paymentIds = allPayments.map(p => p.id);
+                    const { data: existingPayments } = await supabase.from(tbl('payments')).select('id').in('id', paymentIds);
+                    const existingIds = new Set((existingPayments || []).map(p => p.id));
+
                     for (const s of students) {
                         if (Array.isArray(s.historiquesPaiements) && s.historiquesPaiements.length > 0) {
-                            // On ne notifie que pour le DERNIER paiement reçu pour cet élève dans ce lot
-                            // (Pour éviter 10 notifs si l'admin a validé 10 mois d'un coup)
+                            // On ne notifie que si le dernier paiement est NOUVEAU
                             const lastP = s.historiquesPaiements[s.historiquesPaiements.length - 1];
+                            if (existingIds.has(lastP.id)) continue; 
+
                             const studentName = (s.prenom || s.nom || 'votre enfant').split(' ')[0];
                             const msg = `💰 Paiement reçu : ${lastP.montant.toLocaleString()} FCFA pour ${studentName}. Nouveau reste : ${s.restant.toLocaleString()} FCFA. Merci !`;
                             
-                            // Chercher les parents
                             const { data: links } = await supabase.from(tbl('parent_student')).select('parent_id').eq('student_id', s.id);
                             if (links && links.length > 0) {
                                 for (const link of links) {
@@ -159,15 +163,20 @@ async function syncFromFrontend(req, res) {
                 await supabase.from(tbl('presences')).upsert(chunk, { onConflict: 'id' });
             }
 
-            // --- 3b. Notifier les parents pour les Pointages ---
+            // --- 3b. Notifier les parents pour les Pointages NOUVEAUX ---
             (async () => {
                 try {
+                    const presenceIds = presences.map(p => p.id);
+                    const { data: existingPres } = await supabase.from(tbl('presences')).select('id').in('id', presenceIds);
+                    const existingIds = new Set((existingPres || []).map(p => p.id));
+
                     for (const p of presences) {
+                        if (existingIds.has(p.id)) continue; // Déjà notifié ou déjà en base
+
                         const studentName = (p.elevePrenom || 'votre enfant').split(' ')[0];
                         const action = (p.statut || 'Entrée').toLowerCase() === 'entrée' ? 'est ARRIVÉ(E)' : 'est SORTI(E)';
                         const msg = `🔔 ${studentName} ${action} de l'établissement à ${p.heure}.`;
                         
-                        // Chercher les parents
                         const { data: links } = await supabase.from(tbl('parent_student')).select('parent_id').eq('student_id', p.eleveId);
                         if (links && links.length > 0) {
                             for (const link of links) {

@@ -199,7 +199,7 @@ export const ChatWindow: React.FC = () => {
     };
 
     return (
-        <div className="flex h-[calc(100vh-120px)] bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        <div className="flex h-[calc(100vh-140px)] md:h-[calc(100vh-120px)] bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
             {/* Sidebar Conversations */}
             <div className={`w-full md:w-80 border-r border-slate-100 flex flex-col ${activeConv ? 'hidden md:flex' : 'flex'}`}>
                 <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
@@ -234,11 +234,10 @@ export const ChatWindow: React.FC = () => {
                         </div>
                     )}
 
-                    {conversations.map(conv => (
                         <button
                             key={conv.id}
                             onClick={() => setActiveConv(conv)}
-                            className={`w-full p-4 flex items-start gap-3 hover:bg-slate-50 transition-colors border-b border-slate-50 ${activeConv?.id === conv.id ? 'bg-blue-50/50' : ''}`}
+                            className={`w-full p-3 md:p-4 flex items-start gap-2 md:gap-3 hover:bg-slate-50 transition-colors border-b border-slate-50 ${activeConv?.id === conv.id ? 'bg-blue-50/50' : ''}`}
                         >
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center font-bold text-slate-600 shrink-0">
                                 {user?.role === 'parent'
@@ -318,12 +317,12 @@ export const ChatWindow: React.FC = () => {
                         </div>
 
                         {/* Messages Area */}
-                        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+                        <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
                             {messages.map((msg, idx) => {
                                 const isMe = msg.sender_id === user?.id;
                                 return (
                                     <div key={msg.id || idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`group relative max-w-[75%] rounded-2xl p-3 shadow-sm ${isMe ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white text-slate-800 rounded-tl-none border border-slate-100'}`}>
+                                        <div className={`group relative max-w-[85%] md:max-w-[75%] rounded-2xl p-2.5 md:p-3 shadow-sm ${isMe ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white text-slate-800 rounded-tl-none border border-slate-100'}`}>
                                             {msg.image_url ? (
                                                 <img src={msg.image_url} alt="Image" className="rounded-lg mb-2 max-h-60 w-full object-cover" />
                                             ) : null}
@@ -337,10 +336,10 @@ export const ChatWindow: React.FC = () => {
                                                 )}
                                             </div>
 
-                                            {/* Bouton de suppression au survol */}
+                                            {/* Bouton de suppression - Toujours visible sur mobile, hover sur desktop */}
                                             <button
                                                 onClick={() => handleDeleteMessage(msg.id)}
-                                                className={`absolute top-1 ${isMe ? '-left-8' : '-right-8'} p-1.5 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded-lg hover:bg-white active:scale-95 shadow-sm border border-slate-100 md:border-none md:shadow-none`}
+                                                className={`absolute top-1 ${isMe ? '-left-8' : '-right-8'} p-1.5 text-slate-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all rounded-lg hover:bg-white active:scale-95 shadow-sm border border-slate-100 md:border-none md:shadow-none`}
                                                 title="Supprimer"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />

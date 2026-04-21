@@ -34,143 +34,180 @@ const CarteEleve: React.FC<CarteProps> = ({
     const nomComplet = `${prenom} ${nom}`.toUpperCase();
 
     return (
-        // Carte 321×204 px = proportions exactes 85×54mm
+        // Format ISO 85×54mm (321×204 px)
         <div style={{
-            width: 321, height: 204, flexShrink: 0, position: 'relative', overflow: 'hidden',
-            borderRadius: 14,
-            background: '#FFFFFF',
-            fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-            boxShadow: '0 10px 30px rgba(10, 46, 115, 0.15)',
-            border: '0.5px solid rgba(10, 46, 115, 0.1)'
+            width: 321, height: 204, position: 'relative', overflow: 'hidden',
+            borderRadius: 16, background: '#F8FAFC',
+            fontFamily: "'Inter', system-ui, sans-serif",
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.15)',
+            border: '1px solid rgba(255,255,255,0.8)'
         }}>
-            {/* Motif de fond subtil */}
+            {/* 1. Motif de sécurité (Guilloche) */}
             <div style={{
-                position: 'absolute', inset: 0, opacity: 0.03, zIndex: 0,
-                backgroundImage: `radial-gradient(#0A2E73 0.5px, transparent 0.5px)`,
-                backgroundSize: '10px 10px'
+                position: 'absolute', inset: 0, opacity: 0.15, zIndex: 0,
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0c16.568 0 30 13.432 30 30s-13.432 30-30 30S0 46.568 0 30 13.432 0 30 0zm0 5C16.193 5 5 16.193 5 30s11.193 25 25 25 25-11.193 25-25S43.807 5 30 5z' fill='%230f172a' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+                backgroundSize: '30px 30px'
             }} />
 
-            {/* Courbe latérale gauche premium */}
+            {/* 2. Gradient de fond premium */}
             <div style={{
-                position: 'absolute', top: 0, left: 0, width: 40, height: '100%',
-                background: 'linear-gradient(180deg, #0A2E73 0%, #123D91 100%)',
-                clipPath: 'polygon(0 0, 100% 0, 60% 100%, 0 100%)',
-                zIndex: 1, borderRight: '1.5px solid #D4AF37'
+                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(241,245,249,0.95) 100%)',
+                zIndex: 1
             }} />
 
-            {/* Bannière supérieure horizontale */}
+            {/* 3. Bande latérale Elite avec or et bleu profond */}
             <div style={{
-                position: 'absolute', top: 0, left: 0, width: '100%', height: 42,
-                background: 'linear-gradient(90deg, #0A2E73 0%, #123D91 100%)',
-                zIndex: 2, display: 'flex', alignItems: 'center', padding: '0 12px',
-                borderBottom: '1.5px solid #D4AF37', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                position: 'absolute', top: 0, left: 0, width: 45, height: '100%',
+                background: 'linear-gradient(180deg, #0F172A 0%, #1E293B 100%)',
+                zIndex: 2, borderRight: '2px solid #EAB308'
             }}>
-                {/* Logo Badge */}
                 <div style={{
-                    width: 32, height: 32, background: 'white', borderRadius: 8,
+                    height: '100%', width: '100%', opacity: 0.1,
+                    backgroundImage: `repeating-linear-gradient(45deg, #fbbf24 0, #fbbf24 1px, transparent 0, transparent 50%)`,
+                    backgroundSize: '10px 10px'
+                }} />
+            </div>
+
+            {/* 4. En-tête Glassmorphism */}
+            <div style={{
+                position: 'absolute', top: 0, left: 0, width: '100%', height: 48,
+                background: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(10px)',
+                zIndex: 3, display: 'flex', alignItems: 'center', padding: '0 15px',
+                borderBottom: '2px solid #EAB308', boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+            }}>
+                {/* Logo haute fidélité */}
+                <div style={{
+                    width: 34, height: 34, background: 'white', borderRadius: 10,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    padding: 2, border: '1px solid #D4AF37', boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                    marginRight: 10
+                    padding: 3, border: '1.5px solid #EAB308', 
+                    boxShadow: '0 0 15px rgba(234, 179, 8, 0.3)', marginRight: 12
                 }}>
                     {schoolLogo ? (
                         <img src={schoolLogo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     ) : (
-                        <CreditCard style={{ width: 16, height: 16, color: '#0A2E73' }} />
+                        <Award style={{ width: 20, height: 20, color: '#0F172A' }} />
                     )}
                 </div>
-                {/* School Info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{
-                        color: 'white', fontSize: 9.5, fontWeight: 900, margin: 0,
-                        textTransform: 'uppercase', letterSpacing: 0.8,
+                        color: 'white', fontSize: 10, fontWeight: 900, margin: 0,
+                        textTransform: 'uppercase', letterSpacing: 1.2,
+                        textShadow: '0 1px 2px rgba(0,0,0,0.5)',
                         overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis'
                     }}>
                         {schoolName}
                     </p>
-                    <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 7, margin: 0, fontStyle: 'italic', fontWeight: 500 }}>
-                        Carte scolaire {schoolYear}
-                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <p style={{ color: '#EAB308', fontSize: 7, margin: 0, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                            Officiel {schoolYear}
+                        </p>
+                        <div style={{ width: 3, height: 3, background: 'rgba(255,255,255,0.3)', borderRadius: '50%' }} />
+                        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 7, margin: 0, fontWeight: 600 }}>IDENTITÉ SCOLAIRE</p>
+                    </div>
                 </div>
             </div>
 
-            {/* Corps de la carte */}
+            {/* 5. Contenu principal */}
             <div style={{
                 position: 'relative', zIndex: 10, height: '100%', display: 'flex',
-                padding: '52px 12px 28px 45px', // Top padding for banner, left padding for curve
-                gap: 12, alignItems: 'center'
+                padding: '60px 15px 30px 60px', gap: 15, alignItems: 'center'
             }}>
-                {/* Photo passeport (si dispo) */}
-                {photoUrl && (
-                    <div style={{
-                        width: 62, height: 74, flexShrink: 0,
-                        borderRadius: 6, overflow: 'hidden',
-                        border: '1.5px solid #0A2E73',
-                        boxShadow: '0 4px 12px rgba(10, 46, 115, 0.2)',
-                        background: '#F5F7FA'
-                    }}>
+                {/* Photo de l'élève - Effet Portrait Premium */}
+                <div style={{
+                    width: 68, height: 82, flexShrink: 0,
+                    borderRadius: 12, overflow: 'hidden',
+                    border: '2px solid #0F172A',
+                    boxShadow: '0 8px 20px rgba(15, 23, 42, 0.25)',
+                    background: '#F1F5F9', position: 'relative'
+                }}>
+                    {photoUrl ? (
                         <img src={photoUrl} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#E2E8F0' }}>
+                            <span style={{ fontSize: 24, opacity: 0.2 }}>📸</span>
+                        </div>
+                    )}
+                    {/* Sceau de sécurité sur la photo */}
+                    <div style={{
+                        position: 'absolute', bottom: 4, right: 4, width: 14, height: 14,
+                        background: 'rgba(234, 179, 8, 0.8)', borderRadius: '50%',
+                        border: '1px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}>
+                        <CheckCircle style={{ width: 8, height: 8, color: 'white' }} />
                     </div>
-                )}
+                </div>
 
-                {/* Infos élève */}
+                {/* Détails identité */}
                 <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 7, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 2, letterSpacing: 1 }}>Nom & Prénoms</p>
                     <h3 style={{
-                        color: '#0A2E73', margin: 0, marginBottom: 5, fontWeight: 900, fontSize: 13,
-                        lineHeight: 1.1, textTransform: 'uppercase', borderBottom: '1px solid #F0F0F0',
-                        paddingBottom: 4
+                        color: '#0F172A', margin: 0, marginBottom: 8, fontWeight: 900, fontSize: 14,
+                        lineHeight: 1.1, textTransform: 'uppercase', letterSpacing: -0.2
                     }}>
                         {nomComplet}
                     </h3>
-                    <div style={{ marginBottom: 6 }}>
-                        <span style={{
-                            background: 'linear-gradient(135deg, #0A2E73 0%, #123D91 100%)',
-                            color: 'white', fontSize: 8, fontWeight: 800, padding: '3px 10px',
-                            borderRadius: 20, boxShadow: '0 2px 4px rgba(10, 46, 115, 0.2)',
-                            display: 'inline-block'
-                        }}>
-                            {classe}
-                        </span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#0A2E73' }}>
-                        <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#0A2E73', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <span style={{ color: 'white', fontSize: 7 }}>☏</span>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div>
+                                <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 1 }}>Classe</p>
+                                <span style={{
+                                    background: '#0F172A',
+                                    color: 'white', fontSize: 9, fontWeight: 900, padding: '2px 10px',
+                                    borderRadius: 6, display: 'inline-block', boxShadow: '0 4px 10px rgba(15, 23, 42, 0.2)'
+                                }}>
+                                    {classe}
+                                </span>
+                            </div>
+                            <div style={{ width: 1, height: 20, background: '#E2E8F0' }} />
+                            <div>
+                                <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 1 }}>Contact</p>
+                                <span style={{ fontSize: 9, fontWeight: 900, color: '#0F172A' }}>{telephone}</span>
+                            </div>
                         </div>
-                        <span style={{ fontSize: 9, fontWeight: 700 }}>{telephone}</span>
                     </div>
                 </div>
 
-                {/* QR Code Frame */}
+                {/* QR Code - Intégration futuriste */}
                 <div style={{
-                    width: 78, height: 78, flexShrink: 0,
-                    background: 'white', borderRadius: 10, padding: 4,
+                    width: 76, height: 76, flexShrink: 0,
+                    background: 'white', borderRadius: 14, padding: 6,
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    border: '1px solid #0A2E73',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-                    position: 'relative', overflow: 'hidden'
+                    border: '1.5px solid #E2E8F0',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
+                    position: 'relative'
                 }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 2, background: '#D4AF37' }} />
                     <QRCodeCanvas
                         value={id}
-                        size={128}
+                        size={120}
                         level="H"
                         bgColor="#FFFFFF"
-                        fgColor="#000000"
-                        marginSize={1}
-                        style={{ width: 58, height: 58 }}
+                        fgColor="#0F172A"
+                        marginSize={0}
+                        style={{ width: 56, height: 56 }}
                     />
-                    <p style={{ fontSize: 4.5, color: '#0A2E73', margin: '2px 0 0 0', fontStyle: 'italic', fontWeight: 800 }}>IDENTIFICATION SÉCURISÉE</p>
+                    {/* Holographic sparkle effect */}
+                    <div style={{
+                        position: 'absolute', top: 2, right: 2, width: 8, height: 8,
+                        background: 'linear-gradient(45deg, #FFD700, #FFF, #C0C0C0)',
+                        borderRadius: '50%', opacity: 0.6
+                    }} />
+                    <p style={{ fontSize: 5, color: '#94A3B8', margin: '4px 0 0 0', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 0.5 }}>Scan Sécurisé</p>
                 </div>
             </div>
 
-            {/* Bannière inférieure fixe */}
+            {/* 6. Signature / Footer ultra-fin */}
             <div style={{
-                position: 'absolute', bottom: 0, left: 0, width: '100%', height: 20,
-                background: '#0A2E73', zIndex: 11, display: 'flex', alignItems: 'center',
-                justifyContent: 'center', borderTop: '1px solid #D4AF37'
+                position: 'absolute', bottom: 0, left: 0, width: '100%', height: 22,
+                background: 'linear-gradient(90deg, #0F172A 0%, #1E293B 100%)', zIndex: 11, 
+                display: 'flex', alignItems: 'center', px: 20, borderTop: '1.5px solid #EAB308'
             }}>
-                <p style={{ color: 'white', fontSize: 6, margin: 0, fontStyle: 'italic', opacity: 0.9 }}>
-                    Si vous trouvez cette carte, veuillez la retourner à l'administration de l'établissement.
-                </p>
+                <div style={{ width: '100%', textAlign: 'center', opacity: 0.9 }}>
+                    <p style={{ color: 'white', fontSize: 6, margin: 0, fontWeight: 600, letterSpacing: 0.2 }}>
+                        Propriété exclusive de l'établissement • Document officiel certifié par QR Code
+                    </p>
+                </div>
             </div>
         </div>
     );
@@ -269,166 +306,171 @@ const generateCartesPDF = async (
         const x    = marginX + col * (cardW + gapX);
         const y    = marginY + row * (cardH + gapY);
 
-        // ── Fond de la carte (Premium White with geometric pattern) ─────
-        doc.setFillColor(255, 255, 255);
-        doc.roundedRect(x, y, cardW, cardH, 3, 3, 'F');
+        // ── Fond de la carte (Elite Neutral) ─────
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(x, y, cardW, cardH, 4, 4, 'F');
         
         // Bordure fine
-        doc.setDrawColor(10, 46, 115);
-        doc.setLineWidth(0.05);
-        doc.roundedRect(x, y, cardW, cardH, 3, 3, 'S');
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.1);
+        doc.roundedRect(x, y, cardW, cardH, 4, 4, 'S');
 
-        // ── Courbe latérale gauche (Ornement) ─────────────
-        doc.setFillColor(10, 46, 115); // Bleu principal
-        doc.triangle(x, y, x + 10, y, x, y + cardH, 'F');
-        doc.setFillColor(18, 61, 145); // Bleu secondaire
-        doc.triangle(x + 10, y, x, y + cardH, x + 5, y + cardH, 'F');
+        // ── Barre latérale gauche Elite ─────────────
+        const sideW = 12;
+        doc.setFillColor(15, 23, 42); 
+        doc.rect(x, y, sideW, cardH, 'F');
         
-        // Ligne dorée ornementale
-        doc.setDrawColor(212, 175, 55);
-        doc.setLineWidth(0.4);
-        doc.line(x + 10.2, y, x + 5.2, y + cardH);
+        // Trim Or
+        doc.setDrawColor(234, 179, 8);
+        doc.setLineWidth(0.6);
+        doc.line(x + sideW, y, x + sideW, y + cardH);
 
-        // ── Bannière supérieure horizontale ──────────────
-        const bannerH = 11;
-        doc.setFillColor(10, 46, 115);
+        // ── Bandeau supérieur ──────────────
+        const bannerH = 13;
+        doc.setFillColor(15, 23, 42);
         doc.rect(x, y, cardW, bannerH, 'F');
         
         // Ligne dorée sous bannière
-        doc.setDrawColor(212, 175, 55);
-        doc.setLineWidth(0.35);
+        doc.setDrawColor(234, 179, 8);
+        doc.setLineWidth(0.6);
         doc.line(x, y + bannerH, x + cardW, y + bannerH);
 
-        // ── Logo Badge ────────────────────────────────────
-        const logoMM  = 8.5;
-        const logoX   = x + 3;
+        // ── Logo Frame ────────────────────────────────────
+        const logoMM  = 9;
+        const logoX   = x + 4;
         const logoY   = y + (bannerH - logoMM) / 2;
 
         doc.setFillColor(255, 255, 255);
-        doc.roundedRect(logoX - 0.5, logoY - 0.5, logoMM + 1, logoMM + 1, 1.5, 1.5, 'F');
-        doc.setDrawColor(212, 175, 55);
-        doc.setLineWidth(0.15);
-        doc.roundedRect(logoX - 0.5, logoY - 0.5, logoMM + 1, logoMM + 1, 1.5, 1.5, 'S');
+        doc.roundedRect(logoX - 0.5, logoY - 0.5, logoMM + 1, logoMM + 1, 2, 2, 'F');
+        doc.setDrawColor(234, 179, 8);
+        doc.setLineWidth(0.2);
+        doc.roundedRect(logoX - 0.5, logoY - 0.5, logoMM + 1, logoMM + 1, 2, 2, 'S');
 
         if (logoData) {
             doc.addImage(logoData, 'PNG', logoX, logoY, logoMM, logoMM);
         } else {
-            doc.setFillColor(10, 46, 115);
+            doc.setFillColor(15, 23, 42);
             doc.roundedRect(logoX, logoY, logoMM, logoMM, 1, 1, 'F');
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(4);
             doc.setFont('helvetica', 'bold');
-            doc.text('CSY', logoX + logoMM / 2, logoY + 5.5, { align: 'center' });
+            doc.text('ID', logoX + logoMM / 2, logoY + 5.5, { align: 'center' });
         }
 
         // ── Titre établissement (Sur bannière) ─────────────
-        const txtX      = logoX + logoMM + 3;
+        const txtX      = logoX + logoMM + 4;
         const maxNameW  = cardW - logoMM - 10;
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(6.5);
+        doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
-        const schoolLine = doc.splitTextToSize(schoolName.toUpperCase(), maxNameW)[0];
+        const schoolLine = (schoolName || 'ÉCOLE').toUpperCase();
         doc.text(schoolLine, txtX, y + 5);
         
         doc.setFontSize(4.5);
-        doc.setFont('helvetica', 'italic');
-        doc.setTextColor(230, 230, 230);
-        doc.text(`Carte scolaire ${schoolYear}`, txtX, y + 8.5);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(234, 179, 8);
+        doc.text(`OFFICIEL ${schoolYear}`, txtX, y + 8.5);
+        
+        doc.setTextColor(148, 163, 184);
+        doc.setFont('helvetica', 'normal');
+        doc.text(' • IDENTITÉ SCOLAIRE', txtX + doc.getTextWidth(`OFFICIEL ${schoolYear}`) + 1, y + 8.5);
 
         // ── QR Code Frame ─────────────────────────────────
-        const qrMM    = 22;
-        const qrX     = x + cardW - qrMM - 3;
+        const qrMM    = 21;
+        const qrX     = x + cardW - qrMM - 4;
         const qrY     = y + bannerH + 5;
         const qrPad   = 1.5;
 
-        // Ombre simulée QR
-        doc.setFillColor(0, 0, 0);
-        doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
-        doc.roundedRect(qrX - qrPad + 0.5, qrY - qrPad + 0.5, qrMM + qrPad * 2, qrMM + qrPad * 2, 2, 2, 'F');
-        doc.setGState(new (doc as any).GState({ opacity: 1.0 }));
-
         // Conteneur blanc
         doc.setFillColor(255, 255, 255);
-        doc.roundedRect(qrX - qrPad, qrY - qrPad, qrMM + qrPad * 2, qrMM + qrPad * 2, 2, 2, 'F');
+        doc.roundedRect(qrX - qrPad, qrY - qrPad, qrMM + qrPad * 2, qrMM + qrPad * 2, 3, 3, 'F');
         
-        // Bordures cadre QR
-        doc.setDrawColor(10, 46, 115);
+        doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.2);
-        doc.roundedRect(qrX - qrPad, qrY - qrPad, qrMM + qrPad * 2, qrMM + qrPad * 2, 2, 2, 'S');
-        doc.setDrawColor(212, 175, 55);
-        doc.setLineWidth(0.4);
-        doc.line(qrX - qrPad, qrY - qrPad, qrX + qrMM + qrPad, qrY - qrPad);
+        doc.roundedRect(qrX - qrPad, qrY - qrPad, qrMM + qrPad * 2, qrMM + qrPad * 2, 3, 3, 'S');
 
-        // Le QR Code
         const qrDataURL = await buildQRDataURL(student.id);
         doc.addImage(qrDataURL, 'PNG', qrX, qrY, qrMM, qrMM, undefined, 'NONE');
 
-        doc.setTextColor(10, 46, 115);
-        doc.setFontSize(3.8);
-        doc.setFont('helvetica', 'italic');
-        doc.text("IDENTIFICATION SÉCURISÉE", qrX + qrMM / 2, qrY + qrMM + 3, { align: 'center' });
+        doc.setTextColor(148, 163, 184);
+        doc.setFontSize(3.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text("SCAN SÉCURISÉ", qrX + qrMM / 2, qrY + qrMM + 3, { align: 'center' });
 
         // ── Photo passeport ──────────────────────────────
-        const photoOffsetX = 11; // Après l'ornement
-        const photoW = student.photoUrl ? 17 : 0;
-        const photoH = 21;
+        const photoOffsetX = 16; 
+        const photoW = 18;
+        const photoH = 22;
         const photoY = y + bannerH + 4;
 
+        // Cadre photo
+        doc.setFillColor(241, 245, 249);
+        doc.roundedRect(x + photoOffsetX, photoY, photoW, photoH, 2, 2, 'F');
+        doc.setDrawColor(15, 23, 42);
+        doc.setLineWidth(0.4);
+        doc.roundedRect(x + photoOffsetX, photoY, photoW, photoH, 2, 2, 'S');
+
         if (student.photoUrl && student.photoUrl.startsWith('data:image')) {
-            // Cadre photo
-            doc.setDrawColor(10, 46, 115);
-            doc.setLineWidth(0.3);
-            doc.roundedRect(x + photoOffsetX - 0.2, photoY - 0.2, photoW + 0.4, photoH + 0.4, 1, 1, 'S');
-            doc.addImage(student.photoUrl, 'JPEG', x + photoOffsetX, photoY, photoW, photoH);
+            doc.addImage(student.photoUrl, 'JPEG', x + photoOffsetX + 0.2, photoY + 0.2, photoW - 0.4, photoH - 0.4);
         }
+
+        // ── Sceau de sécurité photo
+        doc.setFillColor(234, 179, 8);
+        doc.circle(x + photoOffsetX + photoW - 2, photoY + photoH - 2, 1.5, 'F');
+        doc.setDrawColor(255, 255, 255);
+        doc.setLineWidth(0.1);
+        doc.circle(x + photoOffsetX + photoW - 2, photoY + photoH - 2, 1.5, 'S');
 
         // ── Infos Élève : Nom ────────────────────────────
         const infoStartX = x + photoOffsetX + photoW + 4;
-        const nameMaxW   = cardW - qrMM - photoW - 18;
+        const nameMaxW   = cardW - qrMM - photoW - 22;
         const fullName   = `${student.prenom} ${student.nom}`.toUpperCase();
-        const nameFontSz = fullName.length > 22 ? 8 : 10;
         
-        doc.setTextColor(10, 46, 115);
+        doc.setTextColor(100, 116, 139);
+        doc.setFontSize(4);
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(nameFontSz);
+        doc.text("NOM & PRÉNOMS", infoStartX, photoY + 2);
+
+        doc.setTextColor(15, 23, 42);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(fullName.length > 20 ? 8 : 9);
         const nameLines = doc.splitTextToSize(fullName, nameMaxW);
-        nameLines.forEach((line: string, i: number) => {
-            doc.text(line, infoStartX, photoY + 5 + i * 4);
-        });
+        doc.text(nameLines[0], infoStartX, photoY + 6);
 
-        // Ligne souligne nom
-        doc.setDrawColor(240, 240, 240);
-        doc.setLineWidth(0.2);
-        doc.line(infoStartX, photoY + 9, infoStartX + 25, photoY + 9);
-
-        // ── Badge Classe ─────────────────────────────────
-        const badgeY = photoY + 13;
-        doc.setFillColor(10, 46, 115);
-        doc.roundedRect(infoStartX, badgeY, 18, 5, 2.5, 2.5, 'F');
+        // ── Tags (Classe & Contact) ─────────────────────────────────
+        const tagY = photoY + 12;
+        
+        doc.setTextColor(100, 116, 139);
+        doc.setFontSize(3.5);
+        doc.text("CLASSE", infoStartX, tagY);
+        
+        doc.setFillColor(15, 23, 42);
+        doc.roundedRect(infoStartX, tagY + 1, 16, 4.5, 1.5, 1.5, 'F');
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(5.5);
+        doc.setFontSize(5);
         doc.setFont('helvetica', 'bold');
-        doc.text(student.classe, infoStartX + 9, badgeY + 3.6, { align: 'center' });
+        doc.text(student.classe, infoStartX + 8, tagY + 4.2, { align: 'center' });
 
-        // ── Téléphone ────────────────────────────────────
-        doc.setTextColor(10, 46, 115);
-        doc.setFontSize(6);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`Tél : ${student.telephone}`, infoStartX, badgeY + 9);
+        doc.setTextColor(100, 116, 139);
+        doc.setFontSize(3.5);
+        doc.text("CONTACT", infoStartX + 20, tagY);
+        doc.setTextColor(15, 23, 42);
+        doc.setFontSize(5);
+        doc.text(student.telephone, infoStartX + 20, tagY + 4.2);
 
-        // ── Bannière inférieure ──────────────────────────
-        const footerH = 5.5;
-        doc.setFillColor(10, 46, 115);
+        // ── Pied de page ──────────────────────────
+        const footerH = 6;
+        doc.setFillColor(15, 23, 42);
         doc.rect(x, y + cardH - footerH, cardW, footerH, 'F');
-        doc.setDrawColor(212, 175, 55);
-        doc.setLineWidth(0.3);
+        doc.setDrawColor(234, 179, 8);
+        doc.setLineWidth(0.4);
         doc.line(x, y + cardH - footerH, x + cardW, y + cardH - footerH);
 
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(3.5);
-        doc.setFont('helvetica', 'italic');
-        const disclaimer = "Si cette carte ne vous appartient pas, veuillez la retourner à l'administration.";
-        doc.text(disclaimer, x + cardW / 2, y + cardH - 2, { align: 'center' });
+        doc.setFont('helvetica', 'bold');
+        const disclaimer = "Document officiel certifié par QR Code • École Numérique";
+        doc.text(disclaimer, x + cardW / 2, y + cardH - 2.2, { align: 'center' });
 
         // Progression
         cardIndex++;

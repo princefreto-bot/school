@@ -41,28 +41,30 @@ async function sendNotification(req, res) {
         const notifTitle = title || (type === 'presence' ? 'Pointage élève' : type === 'payment' ? 'Nouveau paiement' : 'Notification');
 
         for (const parentId of parentIds) {
-            // 1. Créer/update la conversation + ajouter un message dans la messagerie
-            const { data: conv, error: cErr } = await supabase
-                .from(`conversations_${schoolSlug}`)
-                .upsert({
-                    parent_id: parentId,
-                    admin_role: 'administration',
-                    last_message: message,
-                    updated_at: new Date().toISOString()
-                }, { onConflict: 'parent_id, admin_role' })
-                .select()
-                .single();
+            // 1. Créer/update la conversation + ajouter un message dans la messagerie UNIQUEMENT si type === 'message'
+            if (type === 'message') {
+                const { data: conv, error: cErr } = await supabase
+                    .from(`conversations_${schoolSlug}`)
+                    .upsert({
+                        parent_id: parentId,
+                        admin_role: 'administration',
+                        last_message: message,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'parent_id, admin_role' })
+                    .select()
+                    .single();
 
-            if (!cErr && conv) {
-                await supabase.from(`messages_${schoolSlug}`).insert({
-                    conversation_id: conv.id,
-                    sender_id: senderId,
-                    message_text: message,
-                    read_status: false
-                });
+                if (!cErr && conv) {
+                    await supabase.from(`messages_${schoolSlug}`).insert({
+                        conversation_id: conv.id,
+                        sender_id: senderId,
+                        message_text: message,
+                        read_status: false
+                    });
+                }
             }
 
-            // 2. Envoi via Web Push
+            // 2. Envoi via Web Push (Toujours)
             await sendPushNotification(parentId, schoolSlug, notifTitle, message, type);
         }
 

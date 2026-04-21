@@ -17,30 +17,6 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray;
 }
 
-/** Naviguer vers la bonne page selon le type de notification */
-function navigateFromPush(notifType: string) {
-  try {
-    const { useStore } = require('../store/useStore') as any;
-    const store = useStore.getState();
-    const user = store.user;
-    if (!user || user.role !== 'parent') return;
-
-    const mapped: Record<string, string> = {
-      message:      'chat',
-      announcement: 'annonces',
-      payment:      'parent_historique',
-      presence:     'parent_dashboard',
-      general:      'parent_dashboard',
-    };
-    const page = mapped[notifType] || 'parent_dashboard';
-    store.setCurrentPage(page as any);
-
-    // Forcer un refresh des données pour mettre à jour l'interface
-    store.fetchAllFromBackend?.();
-  } catch (e) {
-    console.warn('[PushNav] Impossible de naviguer:', e);
-  }
-}
 
 export const webPushService = {
   async init() {
@@ -54,14 +30,6 @@ export const webPushService = {
       const registration = await navigator.serviceWorker.register('/sw.js');
       console.log('✅ [SW] Enregistré.');
 
-      // 2. Écouter les messages du SW (navigation après clic sur notification)
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data?.type === 'PUSH_NAVIGATE') {
-          const notifType: string = event.data.notifType || 'general';
-          console.log('[SW→App] Navigation vers:', notifType);
-          navigateFromPush(notifType);
-        }
-      });
 
       // 3. Demande de permission
       const permission = await Notification.requestPermission();
