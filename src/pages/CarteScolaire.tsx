@@ -36,26 +36,28 @@ const CarteEleve: React.FC<CarteProps> = ({
     return (
         <div style={{
             width: 320, height: 204, // Proportions 85x54mm (approx)
-            backgroundImage: 'url(/card_bg.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            background: 'white',
             borderRadius: 12, overflow: 'hidden',
             position: 'relative', fontFamily: '"Inter", sans-serif',
             boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
-            userSelect: 'none'
+            userSelect: 'none',
+            border: '1px solid #E2E8F0'
         }}>
-            {/* Le fond et la barre latérale sont maintenant dans l'image de template */}
+            {/* Guilloche effect minimalist dots */}
+            <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: 'radial-gradient(#0F172A 1px, transparent 0)', backgroundSize: '10px 10px' }} />
+            {/* Header (Bannière économe en encre) */}
             <div style={{
                 position: 'absolute', top: 0, left: 0, width: '100%', height: 49,
+                background: 'white', borderBottom: '2.5px solid #EAB308', 
                 display: 'flex', alignItems: 'center', padding: '0 15px', zIndex: 10
             }}>
-                <div style={{ width: 34, height: 34, background: 'white', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 3 }}>
-                   {schoolLogo ? <img src={schoolLogo} style={{ maxWidth:'100%', maxHeight:'100%', objectFit:'contain' }} /> : <span style={{ color:'#0F172A', fontWeight:900, fontSize:10 }}>ID</span>}
+                <div style={{ width: 34, height: 34, background: '#0F172A', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 3 }}>
+                   {schoolLogo ? <img src={schoolLogo} style={{ maxWidth:'100%', maxHeight:'100%', objectFit:'contain' }} /> : <span style={{ color:'white', fontWeight:900, fontSize:10 }}>ID</span>}
                 </div>
                 <div style={{ marginLeft: 12 }}>
-                    <h2 style={{ color: 'white', margin: 0, fontSize: 11, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1 }}>{schoolName}</h2>
+                    <h2 style={{ color: '#0F172A', margin: 0, fontSize: 11, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1 }}>{schoolName}</h2>
                     <p style={{ color: '#EAB308', margin: '2px 0 0 0', fontSize: 7, fontWeight: 700 }}>
-                        OFFICIEL {schoolYear} <span style={{ color: '#94A3B8', fontWeight: 600 }}>· CARTES Scolaire</span>
+                        OFFICIEL {schoolYear} <span style={{ color: '#64748B', fontWeight: 600 }}>· CARTES Scolaire</span>
                     </p>
                 </div>
             </div>
@@ -121,13 +123,13 @@ const CarteEleve: React.FC<CarteProps> = ({
                 <p style={{ fontSize: 5, color: '#94A3B8', marginTop: 4, fontWeight: 900, textTransform: 'uppercase' }}>Scan Sécurisé</p>
             </div>
 
-            {/* 6. Footer (Pied de page) */}
+            {/* Footer (Pied de page économe) */}
             <div style={{
                 position: 'absolute', bottom: 0, left: 0, width: '100%', height: 22,
-                background: '#0F172A', borderTop: '1.5px solid #EAB308', zIndex: 11, 
+                background: '#F8FAFC', borderTop: '1.5px solid #EAB308', zIndex: 11, 
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
-                <p style={{ color: 'white', fontSize: 6, fontWeight: 600, margin: 0 }}>
+                <p style={{ color: '#475569', fontSize: 6, fontWeight: 600, margin: 0 }}>
                     Si cette carte ne vous appartient pas, veuillez la retourner à l'administration.
                 </p>
             </div>
@@ -214,14 +216,7 @@ const generateCartesPDF = async (
     }
 
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-    // Charger le fond template réaliste
-    let templateBase64 = '';
-    try {
-        templateBase64 = await imageUrlToBase64('/card_bg.png');
-    } catch (e) {
-        console.warn('Impossible de charger le template background');
-    }
+    const bannerH = 13;
 
     // ── Mise en page ────────────────────────────────────────
     const cardW   = 85;   // mm (ISO 7810 ID-1)
@@ -256,13 +251,24 @@ const generateCartesPDF = async (
         const x    = marginX + col * (cardW + gapX);
         const y    = marginY + row * (cardH + gapY);
 
-        // ── Fond de la carte (Image Template Réaliste) ─────
-        if (templateBase64) {
-            doc.addImage(templateBase64, 'PNG', x, y, cardW, cardH);
-        } else {
-            doc.setFillColor(248, 250, 252);
-            doc.roundedRect(x, y, cardW, cardH, 4, 4, 'F');
+        // ── Fond de la carte (Économe en encre) ─────
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(x, y, cardW, cardH, 3, 3, 'F');
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.1);
+        doc.roundedRect(x, y, cardW, cardH, 3, 3, 'S');
+
+        // Guilloche subtile (Lignes en zigzag légères)
+        doc.setDrawColor(241, 245, 249);
+        doc.setLineWidth(0.05);
+        for(let i=0; i<cardH; i+=4) {
+            doc.line(x, y+i, x+cardW, y+i+2);
         }
+
+        // Ligne de bannière d'en-tête (Or)
+        doc.setDrawColor(234, 179, 8);
+        doc.setLineWidth(0.6);
+        doc.line(x, y + bannerH, x + cardW, y + bannerH);
 
         // ── Logo Frame ────────────────────────────────────
         const logoMM  = 9;
@@ -286,10 +292,10 @@ const generateCartesPDF = async (
             doc.text('ID', logoX + logoMM / 2, logoY + 5.5, { align: 'center' });
         }
 
-        // ── Titre établissement (Sur bannière) ─────────────
+        // ── Titre établissement (Texte sombre pour fond blanc) ─────────────
         const txtX      = logoX + logoMM + 4;
         const maxNameW  = cardW - logoMM - 10;
-        doc.setTextColor(255, 255, 255);
+        doc.setTextColor(15, 23, 42); // Bleu nuit (clair)
         doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
         const schoolLine = (schoolName || 'ÉCOLE').toUpperCase();
@@ -403,7 +409,7 @@ const generateCartesPDF = async (
         doc.setLineWidth(0.4);
         doc.line(x, y + cardH - footerH, x + cardW, y + cardH - footerH);
 
-        doc.setTextColor(255, 255, 255);
+        doc.setTextColor(71, 85, 105);
         doc.setFontSize(3.5);
         doc.setFont('helvetica', 'bold');
         const disclaimer = "Si cette carte ne vous appartient pas, veuillez la retourner à l'administration.";
