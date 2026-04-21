@@ -34,180 +34,106 @@ const CarteEleve: React.FC<CarteProps> = ({
     const nomComplet = `${prenom} ${nom}`.toUpperCase();
 
     return (
-        // Format ISO 85×54mm (321×204 px)
         <div style={{
-            width: 321, height: 204, position: 'relative', overflow: 'hidden',
-            borderRadius: 16, background: '#F8FAFC',
-            fontFamily: "'Inter', system-ui, sans-serif",
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.15)',
-            border: '1px solid rgba(255,255,255,0.8)'
+            width: 320, height: 204, // Proportions 85x54mm (approx)
+            background: 'white', borderRadius: 12, overflow: 'hidden',
+            position: 'relative', fontFamily: '"Inter", sans-serif',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
+            userSelect: 'none'
         }}>
-            {/* 1. Motif de sécurité (Guilloche) */}
+            {/* 1. Header (Bannière) est positionné en absolute 0..13mm */}
             <div style={{
-                position: 'absolute', inset: 0, opacity: 0.15, zIndex: 0,
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0c16.568 0 30 13.432 30 30s-13.432 30-30 30S0 46.568 0 30 13.432 0 30 0zm0 5C16.193 5 5 16.193 5 30s11.193 25 25 25 25-11.193 25-25S43.807 5 30 5z' fill='%230f172a' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
-                backgroundSize: '30px 30px'
-            }} />
-
-            {/* 2. Gradient de fond premium */}
-            <div style={{
-                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(241,245,249,0.95) 100%)',
-                zIndex: 1
-            }} />
-
-            {/* 3. Bande latérale Elite avec or et bleu profond */}
-            <div style={{
-                position: 'absolute', top: 0, left: 0, width: 45, height: '100%',
-                background: 'linear-gradient(180deg, #0F172A 0%, #1E293B 100%)',
-                zIndex: 2, borderRight: '2px solid #EAB308'
+                position: 'absolute', top: 0, left: 0, width: '100%', height: 49, // ~13mm
+                background: '#0F172A', borderBottom: '2.5px solid #EAB308', 
+                display: 'flex', alignItems: 'center', padding: '0 15px', zIndex: 10
             }}>
-                <div style={{
-                    height: '100%', width: '100%', opacity: 0.1,
-                    backgroundImage: `repeating-linear-gradient(45deg, #fbbf24 0, #fbbf24 1px, transparent 0, transparent 50%)`,
-                    backgroundSize: '10px 10px'
-                }} />
-            </div>
-
-            {/* 4. En-tête Glassmorphism */}
-            <div style={{
-                position: 'absolute', top: 0, left: 0, width: '100%', height: 48,
-                background: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(10px)',
-                zIndex: 3, display: 'flex', alignItems: 'center', padding: '0 15px',
-                borderBottom: '2px solid #EAB308', boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
-            }}>
-                {/* Logo haute fidélité */}
-                <div style={{
-                    width: 34, height: 34, background: 'white', borderRadius: 10,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    padding: 3, border: '1.5px solid #EAB308', 
-                    boxShadow: '0 0 15px rgba(234, 179, 8, 0.3)', marginRight: 12
-                }}>
-                    {schoolLogo ? (
-                        <img src={schoolLogo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                    ) : (
-                        <Award style={{ width: 20, height: 20, color: '#0F172A' }} />
-                    )}
+                <div style={{ width: 34, height: 34, background: 'white', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 3 }}>
+                   {schoolLogo ? <img src={schoolLogo} style={{ maxWidth:'100%', maxHeight:'100%', objectFit:'contain' }} /> : <span style={{ color:'#0F172A', fontWeight:900, fontSize:10 }}>ID</span>}
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{
-                        color: 'white', fontSize: 10, fontWeight: 900, margin: 0,
-                        textTransform: 'uppercase', letterSpacing: 1.2,
-                        textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-                        overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis'
-                    }}>
-                        {schoolName}
+                <div style={{ marginLeft: 12 }}>
+                    <h2 style={{ color: 'white', margin: 0, fontSize: 11, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1 }}>{schoolName}</h2>
+                    <p style={{ color: '#EAB308', margin: '2px 0 0 0', fontSize: 7, fontWeight: 700 }}>
+                        OFFICIEL {schoolYear} <span style={{ color: '#94A3B8', fontWeight: 600 }}>· CARTES Scolaire</span>
                     </p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <p style={{ color: '#EAB308', fontSize: 7, margin: 0, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                            Officiel {schoolYear}
-                        </p>
-                        <div style={{ width: 3, height: 3, background: 'rgba(255,255,255,0.3)', borderRadius: '50%' }} />
-                        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 7, margin: 0, fontWeight: 600 }}>IDENTITÉ SCOLAIRE</p>
-                    </div>
                 </div>
             </div>
 
-            {/* 5. Contenu principal */}
+            {/* 2. Barre latérale gauche */}
             <div style={{
-                position: 'relative', zIndex: 10, height: '100%', display: 'flex',
-                padding: '60px 15px 30px 60px', gap: 15, alignItems: 'center'
+                position: 'absolute', left: 0, top: 49, width: 45, height: 133, // ~12mm width
+                background: '#0F172A', borderRight: '2.5px solid #EAB308', zIndex: 5
+            }} />
+
+            {/* 3. Photo Passeport (Position fixée au mm près) */}
+            <div style={{
+                position: 'absolute', top: 64, left: 60, // PhotoX=16mm -> 59px, PhotoY=17mm -> 63px
+                width: 68, height: 82, // 18x22mm
+                borderRadius: 4, overflow: 'hidden',
+                border: '1.5px solid #0F172A',
+                background: '#F1F5F9', zIndex: 10
             }}>
-                {/* Photo de l'élève - Effet Portrait Premium */}
-                <div style={{
-                    width: 68, height: 82, flexShrink: 0,
-                    borderRadius: 12, overflow: 'hidden',
-                    border: '2px solid #0F172A',
-                    boxShadow: '0 8px 20px rgba(15, 23, 42, 0.25)',
-                    background: '#F1F5F9', position: 'relative'
-                }}>
-                    {photoUrl ? (
-                        <img src={photoUrl} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#E2E8F0' }}>
-                            <span style={{ fontSize: 24, opacity: 0.2 }}>📸</span>
-                        </div>
-                    )}
-                    {/* Sceau de sécurité sur la photo */}
-                    <div style={{
-                        position: 'absolute', bottom: 4, right: 4, width: 14, height: 14,
-                        background: 'rgba(234, 179, 8, 0.8)', borderRadius: '50%',
-                        border: '1px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}>
-                        <CheckCircle style={{ width: 8, height: 8, color: 'white' }} />
+                {photoUrl ? (
+                    <img src={photoUrl} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94A3B8' }}>
+                         <User size={24} />
                     </div>
-                </div>
+                )}
+                {/* Sceau de sécurité photo */}
+                <div style={{ position: 'absolute', bottom: 4, right: 4, width: 10, height: 10, background: '#EAB308', borderRadius: '50%', border: '1.5px solid white' }} />
+            </div>
 
-                {/* Détails identité */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 7, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 2, letterSpacing: 1 }}>Nom & Prénoms</p>
-                    <h3 style={{
-                        color: '#0F172A', margin: 0, marginBottom: 8, fontWeight: 900, fontSize: 14,
-                        lineHeight: 1.1, textTransform: 'uppercase', letterSpacing: -0.2
-                    }}>
-                        {nomComplet}
-                    </h3>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <div>
-                                <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 1 }}>Classe</p>
-                                <span style={{
-                                    background: '#0F172A',
-                                    color: 'white', fontSize: 9, fontWeight: 900, padding: '2px 10px',
-                                    borderRadius: 6, display: 'inline-block', boxShadow: '0 4px 10px rgba(15, 23, 42, 0.2)'
-                                }}>
-                                    {classe}
-                                </span>
-                            </div>
-                            <div style={{ width: 1, height: 20, background: '#E2E8F0' }} />
-                            <div>
-                                <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 1 }}>Contact</p>
-                                <span style={{ fontSize: 9, fontWeight: 900, color: '#0F172A' }}>{telephone}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* QR Code - Intégration futuriste */}
-                <div style={{
-                    width: 76, height: 76, flexShrink: 0,
-                    background: 'white', borderRadius: 14, padding: 6,
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    border: '1.5px solid #E2E8F0',
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
-                    position: 'relative'
+            {/* 4. Texte (Identité) */}
+            <div style={{
+                position: 'absolute', top: 64, left: 140, width: 85, // infoStartX=38mm -> 141px
+                display: 'flex', flexDirection: 'column', zIndex: 10
+            }}>
+                <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 2 }}>Nom & Prénoms</p>
+                <h3 style={{
+                    color: '#0F172A', margin: 0, marginBottom: 12, fontWeight: 900, 
+                    fontSize: nomComplet.length > 20 ? 11 : 13,
+                    lineHeight: 1.1, textTransform: 'uppercase'
                 }}>
-                    <QRCodeCanvas
-                        value={id}
-                        size={120}
-                        level="H"
-                        bgColor="#FFFFFF"
-                        fgColor="#0F172A"
-                        marginSize={0}
-                        style={{ width: 56, height: 56 }}
-                    />
-                    {/* Holographic sparkle effect */}
-                    <div style={{
-                        position: 'absolute', top: 2, right: 2, width: 8, height: 8,
-                        background: 'linear-gradient(45deg, #FFD700, #FFF, #C0C0C0)',
-                        borderRadius: '50%', opacity: 0.6
-                    }} />
-                    <p style={{ fontSize: 5, color: '#94A3B8', margin: '4px 0 0 0', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 0.5 }}>Scan Sécurisé</p>
+                    {nomComplet}
+                </h3>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div>
+                        <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 1 }}>Classe</p>
+                        <span style={{
+                            background: '#0F172A', color: 'white', fontSize: 9, fontWeight: 900, 
+                            padding: '2px 10px', borderRadius: 4, display: 'inline-block'
+                        }}>
+                            {classe}
+                        </span>
+                    </div>
+                    <div>
+                        <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 1 }}>Contact</p>
+                        <span style={{ fontSize: 9, fontWeight: 900, color: '#0F172A' }}>{telephone || '71517633'}</span>
+                    </div>
                 </div>
             </div>
 
-            {/* 6. Signature / Footer ultra-fin */}
+            {/* 5. QR Code (Position fixée) */}
+            <div style={{
+                position: 'absolute', top: 68, left: 226, // qrX=60mm -> 222px
+                width: 79, height: 79, background: 'white', borderRadius: 8, padding: 5,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                border: '1px solid #E2E8F0', zIndex: 10
+            }}>
+                <QRCodeCanvas value={id} size={60} level="H" bgColor="#FFFFFF" fgColor="#0F172A" />
+                <p style={{ fontSize: 5, color: '#94A3B8', marginTop: 4, fontWeight: 900, textTransform: 'uppercase' }}>Scan Sécurisé</p>
+            </div>
+
+            {/* 6. Footer (Pied de page) */}
             <div style={{
                 position: 'absolute', bottom: 0, left: 0, width: '100%', height: 22,
-                background: 'linear-gradient(90deg, #0F172A 0%, #1E293B 100%)', zIndex: 11, 
-                display: 'flex', alignItems: 'center', px: 20, borderTop: '1.5px solid #EAB308'
+                background: '#0F172A', borderTop: '1.5px solid #EAB308', zIndex: 11, 
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
-                <div style={{ width: '100%', textAlign: 'center', opacity: 0.9 }}>
-                    <p style={{ color: 'white', fontSize: 6, margin: 0, fontWeight: 600, letterSpacing: 0.2 }}>
-                        Propriété exclusive de l'établissement • Document officiel certifié par QR Code
-                    </p>
-                </div>
+                <p style={{ color: 'white', fontSize: 6, fontWeight: 600, margin: 0 }}>
+                    Si cette carte ne vous appartient pas, veuillez la retourner à l'administration.
+                </p>
             </div>
         </div>
     );
@@ -231,6 +157,26 @@ const buildQRDataURL = async (studentId: string): Promise<string> => {
         errorCorrectionLevel: 'H',
         color: { dark: '#000000', light: '#ffffff' },
     });
+};
+
+/**
+ * Charge une URL d'image et la convertit en Base64 (utile pour jsPDF avec URLs distantes)
+ */
+const imageUrlToBase64 = async (url: string): Promise<string> => {
+    if (url.startsWith('data:image')) return url;
+    try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    } catch (e) {
+        console.error('Erreur conversion image:', e);
+        return '';
+    }
 };
 
 // ============================================================
@@ -410,8 +356,15 @@ const generateCartesPDF = async (
         doc.setLineWidth(0.4);
         doc.roundedRect(x + photoOffsetX, photoY, photoW, photoH, 2, 2, 'S');
 
-        if (student.photoUrl && student.photoUrl.startsWith('data:image')) {
-            doc.addImage(student.photoUrl, 'JPEG', x + photoOffsetX + 0.2, photoY + 0.2, photoW - 0.4, photoH - 0.4);
+        if (student.photoUrl) {
+            try {
+                const b64 = await imageUrlToBase64(student.photoUrl);
+                if (b64) {
+                    doc.addImage(b64, 'JPEG', x + photoOffsetX + 0.2, photoY + 0.2, photoW - 0.4, photoH - 0.4);
+                }
+            } catch (err) {
+                console.warn('Erreur chargement photo PDF:', err);
+            }
         }
 
         // ── Sceau de sécurité photo
@@ -429,16 +382,16 @@ const generateCartesPDF = async (
         doc.setTextColor(100, 116, 139);
         doc.setFontSize(4);
         doc.setFont('helvetica', 'bold');
-        doc.text("NOM & PRÉNOMS", infoStartX, photoY + 2);
+        doc.text("NOM & PRÉNOMS", infoStartX, photoY + 1);
 
         doc.setTextColor(15, 23, 42);
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(fullName.length > 20 ? 8 : 9);
         const nameLines = doc.splitTextToSize(fullName, nameMaxW);
-        doc.text(nameLines[0], infoStartX, photoY + 6);
+        doc.text(nameLines, infoStartX, photoY + 5);
 
         // ── Tags (Classe & Contact) ─────────────────────────────────
-        const tagY = photoY + 12;
+        const tagY = photoY + 13;
         
         doc.setTextColor(100, 116, 139);
         doc.setFontSize(3.5);
@@ -451,12 +404,13 @@ const generateCartesPDF = async (
         doc.setFont('helvetica', 'bold');
         doc.text(student.classe, infoStartX + 8, tagY + 4.2, { align: 'center' });
 
+        const phoneY = tagY + 10;
         doc.setTextColor(100, 116, 139);
         doc.setFontSize(3.5);
-        doc.text("CONTACT", infoStartX + 20, tagY);
+        doc.text("CONTACT", infoStartX, phoneY);
         doc.setTextColor(15, 23, 42);
         doc.setFontSize(5);
-        doc.text(student.telephone, infoStartX + 20, tagY + 4.2);
+        doc.text(student.telephone || '71517633', infoStartX, phoneY + 4);
 
         // ── Pied de page ──────────────────────────
         const footerH = 6;
@@ -469,7 +423,7 @@ const generateCartesPDF = async (
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(3.5);
         doc.setFont('helvetica', 'bold');
-        const disclaimer = "Document officiel certifié par QR Code • École Numérique";
+        const disclaimer = "Si cette carte ne vous appartient pas, veuillez la retourner à l'administration.";
         doc.text(disclaimer, x + cardW / 2, y + cardH - 2.2, { align: 'center' });
 
         // Progression
