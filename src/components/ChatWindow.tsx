@@ -234,6 +234,7 @@ export const ChatWindow: React.FC = () => {
                         </div>
                     )}
 
+                    {conversations.map(conv => (
                         <button
                             key={conv.id}
                             onClick={() => setActiveConv(conv)}
