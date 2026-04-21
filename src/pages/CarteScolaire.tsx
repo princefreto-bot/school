@@ -37,7 +37,7 @@ const CarteEleve: React.FC<CarteProps> = ({
         <div style={{
             width: 320, height: 204, // Proportions 85x54mm (approx)
             background: 'white',
-            borderRadius: 12, overflow: 'hidden',
+            borderRadius: 0, overflow: 'hidden',
             position: 'relative', fontFamily: '"Inter", sans-serif',
             boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
             userSelect: 'none',
@@ -50,7 +50,7 @@ const CarteEleve: React.FC<CarteProps> = ({
             {schoolLogo && (
                 <div style={{
                     position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                    width: 100, height: 100, opacity: 0.07, zIndex: 2, pointerEvents: 'none'
+                    width: 100, height: 100, opacity: 0.15, zIndex: 2, pointerEvents: 'none'
                 }}>
                     <img src={schoolLogo} style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'grayscale(1)' }} />
                 </div>
@@ -61,7 +61,7 @@ const CarteEleve: React.FC<CarteProps> = ({
                 background: 'white', borderBottom: '2.5px solid #EAB308', 
                 display: 'flex', alignItems: 'center', padding: '0 15px', zIndex: 10
             }}>
-                <div style={{ width: 34, height: 34, background: '#0F172A', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 3 }}>
+            <div style={{ width: 34, height: 34, background: '#0F172A', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 3 }}>
                    {schoolLogo ? <img src={schoolLogo} style={{ maxWidth:'100%', maxHeight:'100%', objectFit:'contain' }} /> : <span style={{ color:'white', fontWeight:900, fontSize:10 }}>ID</span>}
                 </div>
                 <div style={{ marginLeft: 12 }}>
@@ -74,9 +74,9 @@ const CarteEleve: React.FC<CarteProps> = ({
 
             {/* 3. Photo Passeport (Position fixée au mm près) */}
             <div style={{
-                position: 'absolute', top: 64, left: 60, // PhotoX=16mm -> 59px, PhotoY=17mm -> 63px
+                position: 'absolute', top: 64, left: 48, // PhotoX=13mm -> 48px
                 width: 68, height: 82, // 18x22mm
-                borderRadius: 4, overflow: 'hidden',
+                borderRadius: 0, overflow: 'hidden',
                 border: '1.5px solid #0F172A',
                 background: '#F1F5F9', zIndex: 10
             }}>
@@ -93,7 +93,7 @@ const CarteEleve: React.FC<CarteProps> = ({
 
             {/* 4. Texte (Identité) */}
             <div style={{
-                position: 'absolute', top: 64, left: 140, width: 85, // infoStartX=38mm -> 141px
+                position: 'absolute', top: 64, left: 126, width: 95, // infoStartX=34mm -> 126px
                 display: 'flex', flexDirection: 'column', zIndex: 10
             }}>
                 <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 2 }}>Nom & Prénoms</p>
@@ -110,7 +110,7 @@ const CarteEleve: React.FC<CarteProps> = ({
                         <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 1 }}>Classe</p>
                         <span style={{
                             background: '#0F172A', color: 'white', fontSize: 9, fontWeight: 900, 
-                            padding: '2px 10px', borderRadius: 4, display: 'inline-block'
+                            padding: '2px 10px', borderRadius: 0, display: 'inline-block'
                         }}>
                             {classe}
                         </span>
@@ -125,7 +125,7 @@ const CarteEleve: React.FC<CarteProps> = ({
             {/* 5. QR Code (Position fixée) */}
             <div style={{
                 position: 'absolute', top: 68, left: 226, // qrX=60mm -> 222px
-                width: 79, height: 79, background: 'white', borderRadius: 8, padding: 5,
+                width: 79, height: 79, background: 'white', borderRadius: 0, padding: 5,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                 border: '1px solid #E2E8F0', zIndex: 10
             }}>
@@ -261,12 +261,12 @@ const generateCartesPDF = async (
         const x    = marginX + col * (cardW + gapX);
         const y    = marginY + row * (cardH + gapY);
 
-        // ── Fond de la carte (Économe en encre) ─────
+        // ── Fond de la carte (Économe en encre - Bords 90°) ─────
         doc.setFillColor(255, 255, 255);
-        doc.roundedRect(x, y, cardW, cardH, 3, 3, 'F');
+        doc.rect(x, y, cardW, cardH, 'F');
         doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.1);
-        doc.roundedRect(x, y, cardW, cardH, 3, 3, 'S');
+        doc.rect(x, y, cardW, cardH, 'S');
 
         // Guilloche subtile (Lignes en zigzag légères)
         doc.setDrawColor(241, 245, 249);
@@ -285,7 +285,7 @@ const generateCartesPDF = async (
             const wmSize = 35;
             doc.saveGraphicsState();
             // @ts-ignore
-            doc.setGState(new doc.GState({ opacity: 0.07 }));
+            doc.setGState(new doc.GState({ opacity: 0.15 }));
             doc.addImage(logoData, 'PNG', x + (cardW - wmSize)/2, y + (cardH - wmSize)/2, wmSize, wmSize);
             doc.restoreGraphicsState();
         }
@@ -338,11 +338,11 @@ const generateCartesPDF = async (
 
         // Conteneur blanc
         doc.setFillColor(255, 255, 255);
-        doc.roundedRect(qrX - qrPad, qrY - qrPad, qrMM + qrPad * 2, qrMM + qrPad * 2, 3, 3, 'F');
+        doc.rect(qrX - qrPad, qrY - qrPad, qrMM + qrPad * 2, qrMM + qrPad * 2, 'F');
         
         doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.2);
-        doc.roundedRect(qrX - qrPad, qrY - qrPad, qrMM + qrPad * 2, qrMM + qrPad * 2, 3, 3, 'S');
+        doc.rect(qrX - qrPad, qrY - qrPad, qrMM + qrPad * 2, qrMM + qrPad * 2, 'S');
 
         const qrDataURL = await buildQRDataURL(student.id);
         doc.addImage(qrDataURL, 'PNG', qrX, qrY, qrMM, qrMM, undefined, 'NONE');
@@ -353,17 +353,17 @@ const generateCartesPDF = async (
         doc.text("SCAN SÉCURISÉ", qrX + qrMM / 2, qrY + qrMM + 3, { align: 'center' });
 
         // ── Photo passeport ──────────────────────────────
-        const photoOffsetX = 16; 
+        const photoOffsetX = 13; 
         const photoW = 18;
         const photoH = 22;
         const photoY = y + bannerH + 4;
 
-        // Cadre photo
+        // Cadre photo (90°)
         doc.setFillColor(241, 245, 249);
-        doc.roundedRect(x + photoOffsetX, photoY, photoW, photoH, 2, 2, 'F');
+        doc.rect(x + photoOffsetX, photoY, photoW, photoH, 'F');
         doc.setDrawColor(15, 23, 42);
         doc.setLineWidth(0.4);
-        doc.roundedRect(x + photoOffsetX, photoY, photoW, photoH, 2, 2, 'S');
+        doc.rect(x + photoOffsetX, photoY, photoW, photoH, 'S');
 
         if (student.photoUrl) {
             try {
@@ -385,7 +385,7 @@ const generateCartesPDF = async (
 
         // ── Infos Élève : Nom ────────────────────────────
         const infoStartX = x + photoOffsetX + photoW + 4;
-        const nameMaxW   = cardW - qrMM - photoW - 22;
+        const nameMaxW   = cardW - qrMM - photoW - 19;
         const fullName   = `${student.prenom} ${student.nom}`.toUpperCase();
         
         doc.setTextColor(100, 116, 139);
@@ -407,7 +407,7 @@ const generateCartesPDF = async (
         doc.text("CLASSE", infoStartX, tagY);
         
         doc.setFillColor(15, 23, 42);
-        doc.roundedRect(infoStartX, tagY + 1, 16, 4.5, 1.5, 1.5, 'F');
+        doc.rect(infoStartX, tagY + 1, 16, 4.5, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(5);
         doc.setFont('helvetica', 'bold');
