@@ -41,7 +41,7 @@ const CarteEleve: React.FC<CarteProps> = ({
             position: 'relative', fontFamily: '"Inter", sans-serif',
             boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
             userSelect: 'none',
-            border: '1px solid #E2E8F0'
+            border: '1px solid #000000'
         }}>
             {/* Guilloche effect minimalist dots */}
             <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: 'radial-gradient(#0F172A 1px, transparent 0)', backgroundSize: '10px 10px' }} />
@@ -61,7 +61,7 @@ const CarteEleve: React.FC<CarteProps> = ({
                 background: 'white', borderBottom: '2.5px solid #EAB308', 
                 display: 'flex', alignItems: 'center', padding: '0 15px', zIndex: 10
             }}>
-            <div style={{ width: 34, height: 34, background: '#0F172A', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 3 }}>
+            <div style={{ width: 44, height: 38, background: '#0F172A', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 3 }}>
                    {schoolLogo ? <img src={schoolLogo} style={{ maxWidth:'100%', maxHeight:'100%', objectFit:'contain' }} /> : <span style={{ color:'white', fontWeight:900, fontSize:10 }}>ID</span>}
                 </div>
                 <div style={{ marginLeft: 12 }}>
@@ -264,8 +264,8 @@ const generateCartesPDF = async (
         // ── Fond de la carte (Économe en encre - Bords 90°) ─────
         doc.setFillColor(255, 255, 255);
         doc.rect(x, y, cardW, cardH, 'F');
-        doc.setDrawColor(226, 232, 240);
-        doc.setLineWidth(0.1);
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.2);
         doc.rect(x, y, cardW, cardH, 'S');
 
         // Guilloche subtile (Lignes en zigzag légères)
@@ -291,30 +291,31 @@ const generateCartesPDF = async (
         }
 
         // ── Logo Frame ────────────────────────────────────
-        const logoMM  = 9;
+        const logoMM_W = 12;
+        const logoMM_H = 10;
         const logoX   = x + 4;
-        const logoY   = y + (bannerH - logoMM) / 2;
+        const logoY   = y + (bannerH - logoMM_H) / 2;
 
         doc.setFillColor(255, 255, 255);
-        doc.roundedRect(logoX - 0.5, logoY - 0.5, logoMM + 1, logoMM + 1, 2, 2, 'F');
+        doc.roundedRect(logoX - 0.5, logoY - 0.5, logoMM_W + 1, logoMM_H + 1, 1, 1, 'F');
         doc.setDrawColor(234, 179, 8);
         doc.setLineWidth(0.2);
-        doc.roundedRect(logoX - 0.5, logoY - 0.5, logoMM + 1, logoMM + 1, 2, 2, 'S');
+        doc.roundedRect(logoX - 0.5, logoY - 0.5, logoMM_W + 1, logoMM_H + 1, 1, 1, 'S');
 
         if (logoData) {
-            doc.addImage(logoData, 'PNG', logoX, logoY, logoMM, logoMM);
+            doc.addImage(logoData, 'PNG', logoX, logoY, logoMM_W, logoMM_H);
         } else {
             doc.setFillColor(15, 23, 42);
-            doc.roundedRect(logoX, logoY, logoMM, logoMM, 1, 1, 'F');
+            doc.roundedRect(logoX, logoY, logoMM_W, logoMM_H, 1, 1, 'F');
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(4);
             doc.setFont('helvetica', 'bold');
-            doc.text('ID', logoX + logoMM / 2, logoY + 5.5, { align: 'center' });
+            doc.text('ID', logoX + logoMM_W / 2, logoY + 6, { align: 'center' });
         }
 
         // ── Titre établissement (Texte sombre pour fond blanc) ─────────────
-        const txtX      = logoX + logoMM + 4;
-        const maxNameW  = cardW - logoMM - 10;
+        const txtX      = logoX + logoMM_W + 4;
+        const maxNameW  = cardW - logoMM_W - 10;
         doc.setTextColor(15, 23, 42); // Bleu nuit (clair)
         doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
