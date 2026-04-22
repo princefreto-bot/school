@@ -250,4 +250,33 @@ async function initiateConversation(req, res) {
     }
 }
 
-module.exports = { getConversations, getMessages, sendMessage, uploadImage, getUnreadCount, initiateConversation };
+/**
+ * Supprime une conversation et ses messages associés
+ */
+async function deleteConversation(req, res) {
+    const { id: conversationId } = req.params;
+    const { schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+
+    try {
+        // Suppression des messages liés d'abord pour éviter les erreurs de clé étrangère
+        await supabase
+            .from(`messages_${schoolSlug}`)
+            .delete()
+            .eq('conversation_id', conversationId);
+
+        // Suppression de la conversation
+        const { error } = await supabase
+            .from(`conversations_${schoolSlug}`)
+            .delete()
+            .eq('id', conversationId);
+
+        if (error) throw error;
+        
+        return res.json({ success: true, message: 'Conversation supprimée avec succès.' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+module.exports = { getConversations, getMessages, sendMessage, uploadImage, getUnreadCount, initiateConversation, deleteConversation };
