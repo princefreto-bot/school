@@ -50,7 +50,7 @@ const CarteEleve: React.FC<CarteProps> = ({
             {schoolLogo && (
                 <div style={{
                     position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                    width: 100, height: 100, opacity: 0.15, zIndex: 2, pointerEvents: 'none'
+                    width: 140, height: 140, opacity: 0.22, zIndex: 2, pointerEvents: 'none'
                 }}>
                     <img src={schoolLogo} style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'grayscale(1)' }} />
                 </div>
@@ -109,8 +109,8 @@ const CarteEleve: React.FC<CarteProps> = ({
                     <div>
                         <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 1 }}>Classe</p>
                         <span style={{
-                            background: '#0F172A', color: 'white', fontSize: 9, fontWeight: 900, 
-                            padding: '2px 10px', borderRadius: 0, display: 'inline-block'
+                            background: '#0F172A', color: 'white', fontSize: 11, fontWeight: 900, 
+                            padding: '3px 12px', borderRadius: 0, display: 'inline-block'
                         }}>
                             {classe}
                         </span>
@@ -135,11 +135,11 @@ const CarteEleve: React.FC<CarteProps> = ({
 
             {/* Footer (Pied de page économe) */}
             <div style={{
-                position: 'absolute', bottom: 0, left: 0, width: '100%', height: 22,
-                background: '#F8FAFC', borderTop: '1.5px solid #EAB308', zIndex: 11, 
+                position: 'absolute', bottom: 0, left: 0, width: '100%', height: 26,
+                background: '#000000', borderTop: '1.5px solid #EAB308', zIndex: 11, 
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
-                <p style={{ color: '#475569', fontSize: 6, fontWeight: 600, margin: 0 }}>
+                <p style={{ color: '#FFFFFF', fontSize: 7.5, fontWeight: 700, margin: 0, textAlign: 'center', padding: '0 10px' }}>
                     Si cette carte ne vous appartient pas, veuillez la retourner à l'administration.
                 </p>
             </div>
@@ -282,10 +282,10 @@ const generateCartesPDF = async (
 
         // ── Logo filigrane (Watermark) ────────────────────────
         if (logoData) {
-            const wmSize = 35;
+            const wmSize = 45;
             doc.saveGraphicsState();
             // @ts-ignore
-            doc.setGState(new doc.GState({ opacity: 0.15 }));
+            doc.setGState(new doc.GState({ opacity: 0.22 }));
             doc.addImage(logoData, 'PNG', x + (cardW - wmSize)/2, y + (cardH - wmSize)/2, wmSize, wmSize);
             doc.restoreGraphicsState();
         }
@@ -407,11 +407,11 @@ const generateCartesPDF = async (
         doc.text("CLASSE", infoStartX, tagY);
         
         doc.setFillColor(15, 23, 42);
-        doc.rect(infoStartX, tagY + 1, 16, 4.5, 'F');
+        doc.rect(infoStartX, tagY + 1, 22, 5.5, 'F');
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(5);
+        doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
-        doc.text(student.classe, infoStartX + 8, tagY + 4.2, { align: 'center' });
+        doc.text(student.classe, infoStartX + 11, tagY + 5.1, { align: 'center' });
 
         const phoneY = tagY + 10;
         doc.setTextColor(100, 116, 139);
@@ -422,18 +422,18 @@ const generateCartesPDF = async (
         doc.text(student.telephone || '71517633', infoStartX, phoneY + 4);
 
         // ── Pied de page ──────────────────────────
-        const footerH = 6;
-        doc.setFillColor(15, 23, 42);
+        const footerH = 7;
+        doc.setFillColor(0, 0, 0);
         doc.rect(x, y + cardH - footerH, cardW, footerH, 'F');
         doc.setDrawColor(234, 179, 8);
         doc.setLineWidth(0.4);
         doc.line(x, y + cardH - footerH, x + cardW, y + cardH - footerH);
 
-        doc.setTextColor(71, 85, 105);
-        doc.setFontSize(3.5);
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(4.5);
         doc.setFont('helvetica', 'bold');
         const disclaimer = "Si cette carte ne vous appartient pas, veuillez la retourner à l'administration.";
-        doc.text(disclaimer, x + cardW / 2, y + cardH - 2.2, { align: 'center' });
+        doc.text(disclaimer, x + cardW / 2, y + cardH - 2.5, { align: 'center' });
 
         // Progression
         cardIndex++;
