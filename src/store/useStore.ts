@@ -443,7 +443,7 @@ export const useStore = create<AppState>()(
             return;
           }
         } else if (u?.role === 'superviseur' || u?.role === 'surveillant') {
-          const allowed: AppPage[] = ['scan_presence', 'scan_sortie', 'carte_scolaire'];
+          const allowed: AppPage[] = ['scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire'];
           if (!allowed.includes(page)) {
             set({ currentPage: 'scan_presence' });
             return;
