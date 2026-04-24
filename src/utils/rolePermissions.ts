@@ -13,19 +13,19 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
     ],
     directeur_general: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'parametres', 'recouvrement',
+        'parametres', 'recouvrement', 'scan_information',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     admin: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'parametres', 'recouvrement',
+        'parametres', 'recouvrement', 'scan_information',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     directeur: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'parametres', 'recouvrement',
+        'parametres', 'recouvrement', 'scan_information',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'saisie_notes', 'bulletins'
     ],
@@ -34,10 +34,10 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'recouvrement', 'verification_recu', 'import_export', 'chat'
     ],
     superviseur: [
-        'scan_presence', 'scan_sortie', 'carte_scolaire'
+        'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire'
     ],
     surveillant: [
-        'scan_presence', 'scan_sortie', 'carte_scolaire'
+        'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire'
     ],
     proviseur: [
         'dashboard', 'eleves', 'analyses', 'chat',

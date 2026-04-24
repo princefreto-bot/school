@@ -241,6 +241,7 @@ export type AppPage =
   | 'recouvrement'
   | 'scan_presence'
   | 'scan_sortie'
+  | 'scan_information'
   | 'carte_scolaire'
   | 'verification_recu'
   | 'historique_activites'

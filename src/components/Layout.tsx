@@ -25,6 +25,7 @@ const NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'recouvrement',         label: 'Recouvrement',      icon: <Target className="w-[18px] h-[18px]" /> },
   { id: 'scan_presence',        label: 'Scan Présence',     icon: <ScanLine className="w-[18px] h-[18px]" /> },
   { id: 'scan_sortie',          label: 'Scan Sortie',       icon: <ScanLine className="w-[18px] h-[18px]" /> },
+  { id: 'scan_information',     label: 'Scan Information',  icon: <ScanLine className="w-[18px] h-[18px]" /> },
   { id: 'carte_scolaire',       label: 'Cartes Scolaires',  icon: <IdCard className="w-[18px] h-[18px]" /> },
   { id: 'gestion_academique',   label: 'Académique',        icon: <BookOpen className="w-[18px] h-[18px]" /> },
   { id: 'saisie_notes',         label: 'Saisie Notes',      icon: <Edit3 className="w-[18px] h-[18px]" /> },
@@ -57,6 +58,7 @@ const NAV_GROUPS: Record<string, string> = {
   recouvrement: 'Finance',
   scan_presence: 'Présences',
   scan_sortie: 'Présences',
+  scan_information: 'Présences',
   carte_scolaire: 'Présences',
   gestion_academique: 'Académique',
   saisie_notes: 'Académique',
@@ -460,6 +462,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const bottomNavItems = (user?.role === 'superviseur' || user?.role === 'surveillant') ? [
     { id: 'scan_presence' as AppPage, label: 'Entrée', icon: <ScanLine className="w-5 h-5" /> },
     { id: 'scan_sortie'   as AppPage, label: 'Sortie', icon: <ScanLine className="w-5 h-5" /> },
+    { id: 'scan_information' as AppPage, label: 'Info', icon: <ScanLine className="w-5 h-5" /> },
     { id: 'carte_scolaire'as AppPage, label: 'Cartes', icon: <IdCard className="w-5 h-5" /> },
   ] : [
     { id: (isParent ? 'parent_dashboard' : 'dashboard') as AppPage, label: 'Accueil', icon: <LayoutDashboard className="w-5 h-5" /> },

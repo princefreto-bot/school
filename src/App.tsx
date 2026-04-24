@@ -19,6 +19,7 @@ const Parametres = lazy(() => import('./pages/Parametres').then(m => ({ default:
 const Recouvrement = lazy(() => import('./pages/Recouvrement').then(m => ({ default: m.Recouvrement })));
 const ScanPresence = lazy(() => import('./pages/ScanPresence').then(m => ({ default: m.ScanPresence })));
 const ScanSortie = lazy(() => import('./pages/ScanSortie').then(m => ({ default: m.ScanSortie })));
+const ScanInformation = lazy(() => import('./pages/ScanInformation').then(m => ({ default: m.ScanInformation })));
 const CarteScolaire = lazy(() => import('./pages/CarteScolaire').then(m => ({ default: m.CarteScolaire })));
 const GestionAcademique = lazy(() => import('./pages/GestionAcademique' /* */).then(m => ({ default: m.GestionAcademique })));
 const SaisieNotes = lazy(() => import('./pages/SaisieNotes' /* */).then(m => ({ default: m.SaisieNotes })));
@@ -66,7 +67,7 @@ const PageContent: React.FC = () => {
   }
 
   if (user?.role === 'superviseur' || user?.role === 'surveillant') {
-    const superviseurPages = ['scan_presence', 'scan_sortie', 'carte_scolaire'];
+    const superviseurPages = ['scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire'];
     if (!superviseurPages.includes(currentPage as any)) {
       return <ScanPresence />;
     }
@@ -82,6 +83,7 @@ const PageContent: React.FC = () => {
     case 'parametres': return <Parametres />;
     case 'scan_presence': return <ScanPresence />;
     case 'scan_sortie': return <ScanSortie />;
+    case 'scan_information': return <ScanInformation />;
     case 'carte_scolaire': return <CarteScolaire />;
     case 'gestion_academique': return <GestionAcademique />;
     case 'saisie_notes': return <SaisieNotes />;
