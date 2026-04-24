@@ -31,7 +31,7 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
     ],
     comptable: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'recouvrement', 'verification_recu', 'import_export', 'chat'
+        'recouvrement', 'verification_recu', 'import_export', 'chat', 'scan_information'
     ],
     superviseur: [
         'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire'
@@ -40,11 +40,11 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire'
     ],
     proviseur: [
-        'dashboard', 'eleves', 'analyses', 'chat',
+        'dashboard', 'eleves', 'analyses', 'chat', 'scan_information',
         'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     censeur: [
-        'dashboard', 'eleves', 'analyses', 'chat',
+        'dashboard', 'eleves', 'analyses', 'chat', 'scan_information',
         'gestion_academique', 'saisie_notes', 'bulletins'
     ],
     parent: [

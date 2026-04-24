@@ -312,3 +312,5 @@ export const ScanInformation: React.FC = () => {
         </div>
     );
 };
+
+export default ScanInformation;
