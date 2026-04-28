@@ -8,38 +8,41 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
 } from 'recharts';
-import { TrendingUp, AlertTriangle, Target, Award } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Target, Award, Eye, EyeOff } from 'lucide-react';
 import { computeCycleComparison } from '../services/analyticsService';
 
 // Custom tooltips évitant les problèmes de types Recharts
 const MoneyTooltip = ({ active, payload, label }: { active?: boolean; payload?: { name: string; value: number }[]; label?: string }) => {
+  const privacyMode = useStore(s => s.privacyMode);
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-white shadow-xl rounded-xl border border-gray-100 p-3 text-xs">
       <p className="font-semibold text-gray-800 mb-1">{label}</p>
       {payload.map((p, i) => (
-        <p key={i} className="text-gray-600">{p.name} : {new Intl.NumberFormat('fr-FR').format(p.value)} FCFA</p>
+        <p key={i} className="text-gray-600">{p.name} : {privacyMode ? '••••••' : new Intl.NumberFormat('fr-FR').format(p.value)} FCFA</p>
       ))}
     </div>
   );
 };
 
 const PieMoneyTooltip = ({ active, payload }: { active?: boolean; payload?: { name: string; value: number }[] }) => {
+  const privacyMode = useStore(s => s.privacyMode);
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-white shadow-xl rounded-xl border border-gray-100 p-3 text-xs">
       <p className="font-semibold text-gray-800">{payload[0].name}</p>
-      <p className="text-gray-600">{new Intl.NumberFormat('fr-FR').format(payload[0].value)} FCFA</p>
+      <p className="text-gray-600">{privacyMode ? '••••••' : new Intl.NumberFormat('fr-FR').format(payload[0].value)} FCFA</p>
     </div>
   );
 };
 
 const SingleValueTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
+  const privacyMode = useStore(s => s.privacyMode);
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-white shadow-xl rounded-xl border border-gray-100 p-3 text-xs">
       <p className="font-semibold text-gray-800">{payload[0].payload.cycle || payload[0].name}</p>
-      <p className="text-blue-600 font-bold">{payload[0].value}%</p>
+      <p className="text-blue-600 font-bold">{privacyMode ? '••••••' : `${payload[0].value}%`}</p>
     </div>
   );
 };
@@ -49,6 +52,10 @@ const COLORS = ['#1e40af', '#16a34a', '#ea580c', '#7c3aed', '#db2777', '#0891b2'
 
 export const Analyses: React.FC = () => {
   const students = useStore((s) => s.students);
+  const privacyMode = useStore((s) => s.privacyMode);
+  const setPrivacyMode = useStore((s) => s.setPrivacyMode);
+
+  const maskValue = (val: string | number) => privacyMode ? '••••••' : val;
 
   // Données par classe
   const classData = useMemo(() => {
@@ -116,13 +123,27 @@ export const Analyses: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Analyse Financière</h2>
+          <p className="text-sm text-slate-500 font-medium">Visualisation détaillée de la performance et des recouvrements</p>
+        </div>
+        <button
+          onClick={() => setPrivacyMode(!privacyMode)}
+          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-amber-500 transition-all font-bold text-xs shadow-sm active:scale-95 group"
+        >
+          {privacyMode ? <Eye className="w-4 h-4 text-amber-500" /> : <EyeOff className="w-4 h-4 text-slate-400" />}
+          <span className="dark:text-white">{privacyMode ? "AFFICHER" : "MASQUER"} LES CHIFFRES</span>
+        </button>
+      </div>
+
       {/* KPIs globaux */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Taux de recouvrement', value: `${tauxGlobal}%`, color: 'text-blue-700', bg: 'bg-blue-50', icon: <Target className="w-5 h-5 text-blue-600" /> },
-          { label: 'Revenus encaissés', value: `${fmtMoney(totalPaye)} F`, color: 'text-emerald-700', bg: 'bg-emerald-50', icon: <TrendingUp className="w-5 h-5 text-emerald-600" /> },
-          { label: 'À recouvrer', value: `${fmtMoney(totalRestant)} F`, color: 'text-red-700', bg: 'bg-red-50', icon: <AlertTriangle className="w-5 h-5 text-red-500" /> },
-          { label: 'Potentiel total', value: `${fmtMoney(totalEcolage)} F`, color: 'text-violet-700', bg: 'bg-violet-50', icon: <Award className="w-5 h-5 text-violet-600" /> },
+          { label: 'Taux de recouvrement', value: maskValue(`${tauxGlobal}%`), color: 'text-blue-700', bg: 'bg-blue-50', icon: <Target className="w-5 h-5 text-blue-600" /> },
+          { label: 'Revenus encaissés', value: maskValue(`${fmtMoney(totalPaye)} F`), color: 'text-emerald-700', bg: 'bg-emerald-50', icon: <TrendingUp className="w-5 h-5 text-emerald-600" /> },
+          { label: 'À recouvrer', value: maskValue(`${fmtMoney(totalRestant)} F`), color: 'text-red-700', bg: 'bg-red-50', icon: <AlertTriangle className="w-5 h-5 text-red-500" /> },
+          { label: 'Potentiel total', value: maskValue(`${fmtMoney(totalEcolage)} F`), color: 'text-violet-700', bg: 'bg-violet-50', icon: <Award className="w-5 h-5 text-violet-600" /> },
         ].map((k) => (
           <div key={k.label} className={`${k.bg} rounded-2xl p-4 border border-white shadow-sm`}>
             <div className="flex items-center justify-between mb-2">
@@ -225,18 +246,18 @@ export const Analyses: React.FC = () => {
                       c.cycle === 'Collège'  ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
                     }`}>{c.cycle}</span>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{c.effectif}</td>
-                  <td className="px-4 py-3 font-medium text-emerald-700">{fmtMoney(c.paye)} F</td>
-                  <td className="px-4 py-3 font-medium text-red-600">{fmtMoney(c.restant)} F</td>
+                  <td className="px-4 py-3 text-gray-600">{maskValue(c.effectif)}</td>
+                  <td className="px-4 py-3 font-medium text-emerald-700">{maskValue(fmtMoney(c.paye))} F</td>
+                  <td className="px-4 py-3 font-medium text-red-600">{maskValue(fmtMoney(c.restant))} F</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div className="h-full rounded-full" style={{ width: `${c.taux}%`, background: c.taux >= 80 ? '#16a34a' : c.taux >= 50 ? '#f59e0b' : '#ef4444' }} />
                       </div>
-                      <span className={`text-xs font-bold ${c.taux >= 80 ? 'text-emerald-700' : c.taux >= 50 ? 'text-amber-700' : 'text-red-600'}`}>{c.taux}%</span>
+                      <span className={`text-xs font-bold ${c.taux >= 80 ? 'text-emerald-700' : c.taux >= 50 ? 'text-amber-700' : 'text-red-600'}`}>{maskValue(`${c.taux}%`)}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{c.soldes}/{c.effectif}</td>
+                  <td className="px-4 py-3 text-gray-600">{privacyMode ? '••••••' : `${c.soldes}/${c.effectif}`}</td>
                 </tr>
               ))}
             </tbody>
@@ -270,10 +291,10 @@ export const Analyses: React.FC = () => {
                     <tr key={s.id}>
                       <td className="py-2 font-medium text-gray-900">{s.prenom} {s.nom}</td>
                       <td className="py-2 text-gray-600">{s.classe}</td>
-                      <td className="py-2 text-emerald-700">{fmtMoney(s.dejaPaye)} F</td>
-                      <td className="py-2 text-red-700 font-medium">{fmtMoney(s.restant)} F</td>
-                      <td className="py-2"><span className="text-red-700 font-bold text-xs">{t}%</span></td>
-                      <td className="py-2 text-gray-500 font-mono text-xs">{s.telephone}</td>
+                      <td className="py-2 text-emerald-700">{maskValue(fmtMoney(s.dejaPaye))} F</td>
+                      <td className="py-2 text-red-700 font-medium">{maskValue(fmtMoney(s.restant))} F</td>
+                      <td className="py-2"><span className="text-red-700 font-bold text-xs">{maskValue(`${t}%`)}</span></td>
+                      <td className="py-2 text-gray-500 font-mono text-xs">{maskValue(s.telephone)}</td>
                     </tr>
                   );
                 })}
@@ -292,18 +313,18 @@ export const Analyses: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-blue-50 rounded-xl p-4">
             <p className="text-xs text-blue-600 font-medium mb-1">Potentiel si 100%</p>
-            <p className="text-xl font-bold text-blue-800">{fmtMoney(totalEcolage)} F</p>
-            <p className="text-xs text-blue-500 mt-1">Manque encore : {fmtMoney(totalRestant)} F</p>
+            <p className="text-xl font-bold text-blue-800">{maskValue(fmtMoney(totalEcolage))} F</p>
+            <p className="text-xs text-blue-500 mt-1">Manque encore : {maskValue(fmtMoney(totalRestant))} F</p>
           </div>
           <div className="bg-emerald-50 rounded-xl p-4">
-            <p className="text-xs text-emerald-600 font-medium mb-1">Si taux actuel ({tauxGlobal}%) maintenu</p>
-            <p className="text-xl font-bold text-emerald-800">{fmtMoney(totalPaye)} F</p>
+            <p className="text-xs text-emerald-600 font-medium mb-1">Si taux actuel ({maskValue(tauxGlobal)}%) maintenu</p>
+            <p className="text-xl font-bold text-emerald-800">{maskValue(fmtMoney(totalPaye))} F</p>
             <p className="text-xs text-emerald-500 mt-1">Recouvert à ce jour</p>
           </div>
           <div className="bg-amber-50 rounded-xl p-4">
             <p className="text-xs text-amber-600 font-medium mb-1">Écart avec objectif</p>
-            <p className="text-xl font-bold text-amber-800">{100 - tauxGlobal}% restant</p>
-            <p className="text-xs text-amber-500 mt-1">Soit {fmtMoney(totalRestant)} FCFA</p>
+            <p className="text-xl font-bold text-amber-800">{maskValue(100 - tauxGlobal)}% restant</p>
+            <p className="text-xs text-amber-500 mt-1">Soit {maskValue(fmtMoney(totalRestant))} FCFA</p>
           </div>
         </div>
       </div>

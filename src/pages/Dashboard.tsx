@@ -8,7 +8,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
 } from 'recharts';
-import { Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck, FileText } from 'lucide-react';
+import { Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck, FileText, Eye, EyeOff } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import {
   computeRecouvrement,
@@ -52,13 +52,14 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, sub, icon, color, tre
 );
 
 const CustomTooltip: React.FC<{ active?: boolean; payload?: { name: string; value: number }[]; label?: string }> = ({ active, payload, label }) => {
+  const privacyMode = useStore(s => s.privacyMode);
   if (active && payload && payload.length) {
     return (
       <div className="bg-white dark:bg-slate-800 shadow-2xl rounded-2xl border border-gray-100 dark:border-slate-700 p-4 text-xs backdrop-blur-md">
         <p className="font-bold text-slate-800 dark:text-slate-100 mb-2">{label}</p>
         {payload.map((p, i) => (
           <p key={i} style={{ color: p.name === 'Payé' ? BAR_COLORS.paye : BAR_COLORS.restant }}>
-            {p.name} : {fmtMoney(p.value)} FCFA
+            {p.name} : {privacyMode ? '••••••' : fmtMoney(p.value)} FCFA
           </p>
         ))}
       </div>
@@ -72,6 +73,10 @@ export const Dashboard: React.FC = () => {
   const user = useStore((s) => s.user);
   const getPresencesToday = useStore((s) => s.getPresencesToday);
   const isSyncing = useStore((s) => s.isSyncing);
+  const privacyMode = useStore((s) => s.privacyMode);
+  const setPrivacyMode = useStore((s) => s.setPrivacyMode);
+
+  const maskValue = (val: string | number) => privacyMode ? '••••••' : val;
 
   const todayPresences = useMemo(() => getPresencesToday(), [getPresencesToday]);
   const tauxPresence = students.length > 0 ? Math.round((todayPresences.length / students.length) * 100) : 0;
@@ -241,11 +246,22 @@ export const Dashboard: React.FC = () => {
                     TÉLÉCHARGER LE BILAN STRATÉGIQUE
                 </button>
 
+                <button
+                  onClick={() => setPrivacyMode(!privacyMode)}
+                  className="flex items-center gap-3 px-6 py-4 bg-white border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-[22px] hover:border-amber-500 transition-all duration-300 font-black text-sm shadow-xl active:scale-95 group"
+                  title={privacyMode ? "Afficher les chiffres" : "Masquer les chiffres"}
+                >
+                  <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center group-hover:bg-amber-50 group-hover:text-amber-500 transition-colors">
+                    {privacyMode ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  </div>
+                  {privacyMode ? "AFFICHER" : "MASQUER"} LES CHIFFRES
+                </button>
+
                 <div className="flex items-center gap-4 bg-slate-50/50 dark:bg-slate-800/50 px-8 py-5 rounded-[24px] border border-slate-100 dark:border-slate-700 backdrop-blur-sm self-stretch">
                     <div className="space-y-1">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Santé Financière</p>
                         <p className={`text-xl font-black ${santeFinanciere.color}`}>
-                            {santeFinanciere.label}
+                            {maskValue(santeFinanciere.label)}
                         </p>
                     </div>
                     <div className={`w-14 h-14 rounded-full flex items-center justify-center border-4 shadow-xl ${
@@ -253,7 +269,7 @@ export const Dashboard: React.FC = () => {
                         santeFinanciere.score >= 50 ? 'border-amber-500 bg-amber-50' : 'border-rose-500 bg-rose-50'
                     }`}>
                         <span className={`text-xl font-black ${santeFinanciere.color}`}>
-                            {santeFinanciere.score}
+                            {maskValue(santeFinanciere.score)}
                         </span>
                     </div>
                 </div>
@@ -264,40 +280,40 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
         <StatCard
           title="Total Élèves"
-          value={students.length}
-          sub={`${stats.soldes} soldés / ${stats.nonSoldes} non soldés`}
+          value={maskValue(students.length)}
+          sub={privacyMode ? 'Données masquées' : `${stats.soldes} soldés / ${stats.nonSoldes} non soldés`}
           icon={<Users className="w-5 h-5 text-amber-500" />}
           color="bg-amber-50"
         />
         <StatCard
           title="Écolage Attendu"
-          value={`${fmtMoney(stats.totalEcolage)} FCFA`}
+          value={maskValue(`${fmtMoney(stats.totalEcolage)} FCFA`)}
           sub="Total annuel"
           icon={<Wallet className="w-5 h-5 text-violet-600" />}
           color="bg-violet-50"
         />
         <StatCard
           title="Déjà Perçu"
-          value={`${fmtMoney(stats.totalPaye)} FCFA`}
+          value={maskValue(`${fmtMoney(stats.totalPaye)} FCFA`)}
           sub="Paiements reçus"
           icon={<CheckCircle className="w-5 h-5 text-emerald-600" />}
           color="bg-emerald-50"
-          trend={`+${stats.taux}% recouvert`}
+          trend={privacyMode ? undefined : `+${stats.taux}% recouvert`}
         />
         <StatCard
           title="Solde Restant"
-          value={`${fmtMoney(stats.totalRestant)} FCFA`}
+          value={maskValue(`${fmtMoney(stats.totalRestant)} FCFA`)}
           sub="À recouvrer"
           icon={<AlertCircle className="w-5 h-5 text-red-500" />}
           color="bg-red-50"
         />
         <StatCard
           title="Présences Aujourd'hui"
-          value={`${todayPresences.length} / ${students.length}`}
+          value={maskValue(`${todayPresences.length} / ${students.length}`)}
           sub="Élèves pointés"
           icon={<UserCheck className="w-5 h-5 text-cyan-600" />}
           color="bg-cyan-50"
-          trend={`${tauxPresence}% de présence`}
+          trend={privacyMode ? undefined : `${tauxPresence}% de présence`}
         />
       </div>
 
@@ -307,7 +323,7 @@ export const Dashboard: React.FC = () => {
             <h3 className="font-extrabold text-slate-900 dark:text-white text-lg tracking-tight">Recouvrement Global</h3>
             <p className="text-xs text-slate-700 dark:text-slate-400 font-bold uppercase tracking-widest">Progression des encaissements périodiques</p>
           </div>
-          <div className="text-4xl font-black text-amber-500 dark:text-amber-400 tracking-tighter">{stats.taux}%</div>
+          <div className="text-4xl font-black text-amber-500 dark:text-amber-400 tracking-tighter">{maskValue(`${stats.taux}%`)}</div>
         </div>
         <div className="relative h-6 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner p-1">
           <div
@@ -357,28 +373,28 @@ export const Dashboard: React.FC = () => {
                   <p className={`text-base font-black tracking-tight ${c.text}`}>{c.label}</p>
                   <p className="text-[10px] text-slate-700 dark:text-slate-400 font-bold uppercase truncate">{c.sub}</p>
                 </div>
-                <span className={`text-3xl font-black ${c.text}`}>{cs.count}</span>
+                <span className={`text-3xl font-black ${c.text}`}>{maskValue(cs.count)}</span>
               </div>
 
               <div className="space-y-3 font-medium text-sm mb-8 border-y border-slate-50 dark:border-slate-800 py-6">
                 <div className="flex justify-between text-slate-500">
                   <span>Attendu</span>
-                  <span className="font-black text-slate-900 dark:text-white">{fmtMoney(cs.ecolage)} F</span>
+                  <span className="font-black text-slate-900 dark:text-white">{maskValue(fmtMoney(cs.ecolage))} F</span>
                 </div>
                 <div className="flex justify-between text-slate-500">
                   <span>Perçu</span>
-                  <span className="font-black text-emerald-600">{fmtMoney(cs.paye)} F</span>
+                  <span className="font-black text-emerald-600">{maskValue(fmtMoney(cs.paye))} F</span>
                 </div>
                 <div className="flex justify-between text-slate-500 font-black">
                   <span>Reste</span>
-                  <span className="text-rose-500">{fmtMoney(cs.restant)} F</span>
+                  <span className="text-rose-500">{maskValue(fmtMoney(cs.restant))} F</span>
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">
                   <span>Taux de recouvrement</span>
-                  <span className={c.text}>{cs.taux}%</span>
+                  <span className={c.text}>{maskValue(`${cs.taux}%`)}</span>
                 </div>
                 <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
                   <div
@@ -474,17 +490,17 @@ export const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
             <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-700 transition-transform hover:scale-[1.02]">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Théorique</p>
-              <p className="text-2xl font-black text-slate-800 dark:text-white tracking-tighter">{fmtMoney(recouvrement.totalTheorique)}</p>
+              <p className="text-2xl font-black text-slate-800 dark:text-white tracking-tighter">{maskValue(fmtMoney(recouvrement.totalTheorique))}</p>
               <p className="text-[10px] text-slate-400 mt-1 font-bold">FCFA ATTENDUS</p>
             </div>
             <div className="bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl p-6 border border-emerald-100 dark:border-emerald-900/30 transition-transform hover:scale-[1.02]">
               <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2">Encaissé</p>
-              <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 tracking-tighter">{fmtMoney(recouvrement.totalEncaisse)}</p>
+              <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 tracking-tighter">{maskValue(fmtMoney(recouvrement.totalEncaisse))}</p>
               <p className="text-[10px] text-emerald-500 mt-1 font-bold">REÇU À CE JOUR</p>
             </div>
             <div className="bg-rose-50 dark:bg-rose-900/10 rounded-2xl p-6 border border-rose-100 dark:border-rose-900/30 transition-transform hover:scale-[1.02]">
               <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest mb-2">Restant</p>
-              <p className="text-2xl font-black text-rose-700 dark:text-rose-400 tracking-tighter">{fmtMoney(recouvrement.totalRestant)}</p>
+              <p className="text-2xl font-black text-rose-700 dark:text-rose-400 tracking-tighter">{maskValue(fmtMoney(recouvrement.totalRestant))}</p>
               <p className="text-[10px] text-rose-500 mt-1 font-bold">EN ATTENTE</p>
             </div>
           </div>
@@ -492,7 +508,7 @@ export const Dashboard: React.FC = () => {
           <div className="relative pt-2">
             <div className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-[0.1em] mb-2">
               <span>Progression Stratégique</span>
-              <span className="text-slate-900 dark:text-white px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md shadow-sm">{recouvrement.taux}%</span>
+              <span className="text-slate-900 dark:text-white px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md shadow-sm">{maskValue(`${recouvrement.taux}%`)}</span>
             </div>
             <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner flex p-1">
               <div
@@ -526,7 +542,7 @@ export const Dashboard: React.FC = () => {
                     <span className="font-extrabold text-slate-800 dark:text-white tracking-tight">{row.classe}</span>
                     <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
                         row.taux >= 85 ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50'
-                    }`}>{row.taux}%</span>
+                    }`}>{maskValue(`${row.taux}%`)}</span>
                   </div>
                   <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div 
@@ -558,7 +574,7 @@ export const Dashboard: React.FC = () => {
                           <p className="text-xs text-slate-500 font-bold">{c.count} élèves inscrits</p>
                       </div>
                       <div className="text-right">
-                          <div className="text-3xl font-black text-emerald-600 tracking-tighter">{c.taux}%</div>
+                          <div className="text-3xl font-black text-emerald-600 tracking-tighter">{maskValue(`${c.taux}%`)}</div>
                           <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Recouvré</p>
                       </div>
                   </div>

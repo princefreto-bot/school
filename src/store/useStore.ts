@@ -154,6 +154,8 @@ export interface AppState {
   toggleTheme: () => void;
   lastReportMonth: string | null;
   setLastReportMonth: (month: string) => void;
+  privacyMode: boolean;
+  setPrivacyMode: (v: boolean) => void;
 }
 
 // Authentification gérée par Supabase
@@ -270,6 +272,8 @@ export const useStore = create<AppState>()(
       toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
       lastReportMonth: null,
       setLastReportMonth: (lastReportMonth) => set({ lastReportMonth }),
+      privacyMode: false,
+      setPrivacyMode: (privacyMode) => set({ privacyMode }),
 
       // ── Auth ──────────────────────────────────────────────
       user: null,
