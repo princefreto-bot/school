@@ -1,16 +1,12 @@
-// ============================================================
-// PAGE PAIEMENTS — Historique & enregistrement de paiements
-// ============================================================
 import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Student, Payment, User } from '../types';
-import { CreditCard, Plus, X, Check, Search, Clock, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { CreditCard, Plus, X, Check, Search, Clock, ChevronDown, ChevronUp, Loader2, Wallet, ArrowUpRight, TrendingDown } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import { API_BASE_URL } from '../config';
 import { parseResponse, getAuthHeaders } from '../services/apiHelpers';
 import { getCycle } from '../data/classConfig';
 
-// utility used when normalizing students from backend
 const computeStatus = (restant: number, ecolage: number): 'Soldé' | 'Partiel' | 'Non soldé' => {
   if (restant <= 0) return 'Soldé';
   const paye = ecolage - restant;
@@ -40,50 +36,99 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900">Enregistrer un paiement</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl"><X className="w-4 h-4" /></button>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
+      <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-lg border border-slate-200 dark:border-slate-800 animate-slideUp overflow-hidden">
+        
+        <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+          <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+            <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
+              <CreditCard className="w-5 h-5" />
+            </div>
+            Enregistrer un paiement
+          </h2>
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
         </div>
-        <div className="px-5 pt-4 pb-2 bg-amber-50 mx-5 mt-4 rounded-xl">
-          <p className="text-sm font-semibold text-amber-900">{student.prenom} {student.nom} — {student.classe}</p>
-          <div className="flex gap-4 mt-2 text-xs text-amber-700">
-            <span>Écolage : <strong>{fmtMoney(student.ecolage)}</strong></span>
-            <span>Déjà payé : <strong>{fmtMoney(student.dejaPaye)}</strong></span>
-            <span>Restant : <strong className="text-red-600">{fmtMoney(student.restant)}</strong></span>
+        
+        <div className="p-6 pb-2">
+          <div className="p-5 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/10 rounded-[1.5rem] border border-amber-100 dark:border-amber-800/30">
+            <p className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{student.prenom} {student.nom}</p>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">{student.classe}</p>
+            
+            <div className="grid grid-cols-3 gap-4 text-sm">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Écolage</p>
+                <p className="font-bold text-slate-700 dark:text-slate-300">{fmtMoney(student.ecolage)}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Déjà payé</p>
+                <p className="font-bold text-emerald-600 dark:text-emerald-400">{fmtMoney(student.dejaPaye)}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Restant</p>
+                <p className="font-black text-rose-600 dark:text-rose-400">{fmtMoney(student.restant)}</p>
+              </div>
+            </div>
           </div>
         </div>
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Montant (FCFA) *</label>
+            <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Montant perçu (FCFA) *</label>
             <input
-              type="number" min={1} max={maxPay} required
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
-              placeholder={`Max : ${fmtMoney(maxPay)}`}
+              type="number" min={1} max={maxPay} required autoFocus
+              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-lg font-black focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all dark:text-white"
+              placeholder={`Maximum : ${fmtMoney(maxPay)}`}
               value={form.montant}
               onChange={(e) => { setForm({ ...form, montant: e.target.value }); setError(''); }}
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
-              <input type="date" className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Date</label>
+              <input 
+                type="date" 
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white" 
+                value={form.date} 
+                onChange={(e) => setForm({ ...form, date: e.target.value })} 
+              />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">N° Reçu</label>
-              <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={form.recu} onChange={(e) => setForm({ ...form, recu: e.target.value })} />
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">N° Reçu</label>
+              <input 
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white uppercase placeholder:normal-case" 
+                value={form.recu} 
+                onChange={(e) => setForm({ ...form, recu: e.target.value })} 
+                placeholder="Ex: R-1024"
+              />
             </div>
           </div>
+          
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Note (optionnel)</label>
-            <input className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Ex : 1ère tranche" />
+            <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Note (optionnel)</label>
+            <input 
+              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white" 
+              value={form.note} 
+              onChange={(e) => setForm({ ...form, note: e.target.value })} 
+              placeholder="Ex : 1ère tranche espèce" 
+            />
           </div>
-          {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
-          <div className="flex gap-3 pt-1">
-            <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Annuler</button>
-            <button type="submit" className="flex-1 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-colors flex items-center justify-center gap-2">
-              <Check className="w-4 h-4" /> Valider
+          
+          {error && (
+            <div className="p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-2xl flex items-center gap-3 animate-shake">
+              <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
+              <p className="text-sm font-bold text-rose-600 dark:text-rose-400">{error}</p>
+            </div>
+          )}
+          
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose} className="flex-1 py-4 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-black text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors uppercase tracking-widest">
+              Annuler
+            </button>
+            <button type="submit" className="flex-1 py-4 bg-amber-500 text-white rounded-2xl text-[13px] font-black hover:bg-amber-600 transition-colors flex items-center justify-center gap-2 uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)]">
+              <Check className="w-5 h-5" /> Valider l'encaissement
             </button>
           </div>
         </form>
@@ -94,62 +139,84 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
 
 // ── Ligne d'historique d'un élève ─────────────────────────────
 const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => void; user: User | null }> = ({ student, onPay, user }) => {
-  if (!user) return null; // Guard against undefined user
+  if (!user) return null;
 
   const [open, setOpen] = useState(false);
   const taux = Math.round((student.dejaPaye / student.ecolage) * 100);
 
   return (
-    <div className="border border-gray-100 rounded-xl overflow-hidden bg-white">
+    <div className="group border border-slate-100 dark:border-slate-800/60 rounded-[1.5rem] overflow-hidden bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:border-slate-200 dark:hover:border-slate-700">
       <div
-        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+        className="flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 cursor-pointer hover:bg-white dark:hover:bg-slate-800/80 transition-colors"
         onClick={() => setOpen((o) => !o)}
       >
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-medium text-gray-900 text-sm">{student.prenom} {student.nom}</span>
-            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{student.classe}</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${student.status === 'Soldé' ? 'bg-emerald-100 text-emerald-700' :
-              student.status === 'Partiel' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
-              }`}>{student.status}</span>
+          <div className="flex items-center gap-3 flex-wrap mb-2">
+            <span className="font-black text-slate-900 dark:text-white text-base tracking-tight">{student.prenom} {student.nom}</span>
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">{student.classe}</span>
+            <span className={`text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-widest ${
+              student.status === 'Soldé' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
+              student.status === 'Partiel' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400'
+            }`}>{student.status}</span>
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden max-w-32">
-              <div className="h-full rounded-full bg-amber-500" style={{ width: `${taux}%` }} />
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden max-w-[200px]">
+              <div 
+                className={`h-full rounded-full transition-all duration-1000 ${student.status === 'Soldé' ? 'bg-emerald-500' : 'bg-amber-500'}`} 
+                style={{ width: `${taux}%` }} 
+              />
             </div>
-            <span className="text-xs text-gray-500">{taux}%</span>
-            <span className="text-xs text-gray-400">·</span>
-            <span className="text-xs text-gray-500">{student.historiquesPaiements.length} paiement(s)</span>
+            <span className="text-[11px] font-black text-slate-500">{taux}%</span>
+            <span className="text-slate-300 dark:text-slate-700">•</span>
+            <span className="text-[11px] font-bold text-slate-500">{student.historiquesPaiements.length} transaction(s)</span>
           </div>
         </div>
-        <div className="text-right shrink-0">
-          <p className="text-sm font-semibold text-emerald-700">{new Intl.NumberFormat('fr-FR').format(student.dejaPaye)} F</p>
-          <p className="text-xs text-red-500">{student.restant > 0 ? `- ${new Intl.NumberFormat('fr-FR').format(student.restant)} F` : 'SOLDÉ'}</p>
+        
+        <div className="flex items-center justify-between sm:justify-end gap-6 sm:w-auto">
+          <div className="text-left sm:text-right">
+            <p className="text-sm font-black text-emerald-600 dark:text-emerald-400 tracking-tight">{new Intl.NumberFormat('fr-FR').format(student.dejaPaye)} F</p>
+            <p className={`text-[11px] font-bold ${student.restant > 0 ? 'text-rose-500' : 'text-slate-400'}`}>
+              {student.restant > 0 ? `Reste : ${new Intl.NumberFormat('fr-FR').format(student.restant)} F` : 'INTÉGRALEMENT SOLDÉ'}
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            {student.restant > 0 && (user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onPay(student); }}
+                className="shrink-0 flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-amber-600 hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_20px_rgba(245,158,11,0.5)]"
+              >
+                <Plus className="w-4 h-4" /> Payer
+              </button>
+            )}
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 dark:bg-slate-800 text-slate-400 transition-transform duration-300 ${open ? 'rotate-180 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300' : ''}`}>
+              <ChevronDown className="w-5 h-5" />
+            </div>
+          </div>
         </div>
-        {student.restant > 0 && (user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onPay(student); }}
-            className="shrink-0 flex items-center gap-1 px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-medium hover:bg-amber-600 transition-colors"
-          >
-            <Plus className="w-3 h-3" /> Payer
-          </button>
-        )}
-        {open ? <ChevronUp className="w-4 h-4 text-gray-400 shrink-0" /> : <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />}
       </div>
 
       {open && (
-        <div className="border-t border-gray-100 px-4 py-3 bg-gray-50">
+        <div className="border-t border-slate-100 dark:border-slate-800/60 px-5 py-4 bg-slate-50/50 dark:bg-slate-900/30">
           {student.historiquesPaiements.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">Aucun paiement enregistré manuellement.</p>
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-400 p-2">
+              <Clock className="w-4 h-4" /> Aucun historique de transaction manuelle.
+            </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {student.historiquesPaiements.map((p: Payment) => (
-                <div key={p.id} className="flex items-center gap-3 text-xs">
-                  <Clock className="w-3 h-3 text-gray-400 shrink-0" />
-                  <span className="text-gray-500">{fmtDate(p.date)}</span>
-                  <span className="font-semibold text-emerald-700">+{new Intl.NumberFormat('fr-FR').format(p.montant)} FCFA</span>
-                  {p.recu && <span className="text-gray-400">Reçu #{p.recu}</span>}
-                  {p.note && <span className="text-gray-400 italic">{p.note}</span>}
+                <div key={p.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                  <div className="flex items-center gap-2 w-32 shrink-0 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                    <Clock className="w-3.5 h-3.5" />
+                    {fmtDate(p.date)}
+                  </div>
+                  <div className="font-black text-emerald-600 dark:text-emerald-400 text-sm shrink-0 w-32">
+                    +{new Intl.NumberFormat('fr-FR').format(p.montant)} FCFA
+                  </div>
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {p.recu && <span className="text-[10px] font-black bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-md uppercase tracking-widest shrink-0">Reçu {p.recu}</span>}
+                    {p.note && <span className="text-sm font-medium text-slate-500 dark:text-slate-400 truncate">{p.note}</span>}
+                  </div>
                 </div>
               ))}
             </div>
@@ -171,12 +238,11 @@ export const Paiements: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState('');
   const [payModal, setPayModal] = useState<Student | null>(null);
 
-  // Guard: if user is not loaded, show loading
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-        <Loader2 className="w-10 h-10 animate-spin text-amber-500 mb-4" />
-        <p>Chargement des informations utilisateur...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-12 h-12 animate-spin text-amber-500 mb-6" />
+        <p className="text-sm font-black text-slate-500 uppercase tracking-widest animate-pulse">Chargement de la session...</p>
       </div>
     );
   }
@@ -196,57 +262,36 @@ export const Paiements: React.FC = () => {
   const totalRestant = filtered.reduce((a, s) => a + s.restant, 0);
   const totalPayements = filtered.reduce((a, s) => a + s.historiquesPaiements.length, 0);
 
-  // fetch students if none are currently in store
   useEffect(() => {
     if (students.length === 0) {
       setLoading(true);
       fetch(`${API_BASE_URL}/students`, { headers: getAuthHeaders() })
         .then((res) => {
-          if (!res.ok) {
-            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-          }
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           return parseResponse(res);
         })
         .then((data) => {
           if (data && Array.isArray(data.students)) {
             const normalized: Student[] = data.students
-              .filter((s: any) => s && typeof s === 'object' && s.id) // filter invalid items
+              .filter((s: any) => s && typeof s === 'object' && s.id)
               .map((s: any) => {
                 try {
                   const ecolage = s.ecolage || 0;
                   const dejaPaye = s.deja_paye ?? 0;
                   const restantVal = typeof s.restant === 'number' ? s.restant : ecolage - dejaPaye;
                   return {
-                    id: s.id,
-                    nom: s.nom,
-                    prenom: s.prenom || '',
-                    classe: s.classe || 'Inconnue',
-                    telephone: s.telephone || s.telephone_parent || '',
-                    parentId: s.parent_id || undefined,
-                    sexe: s.sexe || 'M',
-                    redoublant: s.redoublant || false,
-                    ecoleProvenance: s.ecole_provenance || '',
-                    ecolage,
-                    dejaPaye,
-                    restant: restantVal,
-                    recu: s.recu || '',
-                    cycle: getCycle(s.classe),
-                    status: computeStatus(restantVal, ecolage),
-                    historiquesPaiements: s.historiques_paiements || [],
-                    createdAt: s.created_at || new Date().toISOString(),
-                    updatedAt: s.updated_at || new Date().toISOString(),
+                    id: s.id, nom: s.nom, prenom: s.prenom || '', classe: s.classe || 'Inconnue',
+                    telephone: s.telephone || s.telephone_parent || '', parentId: s.parent_id || undefined,
+                    sexe: s.sexe || 'M', redoublant: s.redoublant || false, ecoleProvenance: s.ecole_provenance || '',
+                    ecolage, dejaPaye, restant: restantVal, recu: s.recu || '', cycle: getCycle(s.classe),
+                    status: computeStatus(restantVal, ecolage), historiquesPaiements: s.historiques_paiements || [],
+                    createdAt: s.created_at || new Date().toISOString(), updatedAt: s.updated_at || new Date().toISOString(),
                   };
-                } catch (err) {
-                  console.warn('Failed to normalize student:', s, err);
-                  return null;
-                }
+                } catch (err) { return null; }
               })
-              .filter(Boolean); // remove nulls
+              .filter(Boolean);
             setStudents(normalized);
           }
-        })
-        .catch((err) => {
-          console.error('Failed to load students for payments page:', err);
         })
         .finally(() => setLoading(false));
     }
@@ -255,71 +300,118 @@ export const Paiements: React.FC = () => {
   const classes = [...new Set(CLASS_CONFIG.map((c) => c.name))];
 
   return (
-    <div className="space-y-4">
-      {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">Total Perçu</p>
-          <p className="text-2xl font-bold text-emerald-700 mt-1">{new Intl.NumberFormat('fr-FR').format(totalPaye)} F</p>
-          <p className="text-xs text-gray-400 mt-1">Sur la sélection actuelle</p>
+    <div className="space-y-6 pb-20 max-w-[1600px] mx-auto animate-slideUp">
+      
+      {/* ── HEADER & KPIs ── */}
+      <div className="relative pro-card p-8 overflow-hidden group bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl">
+        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.06] group-hover:scale-110 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
+            <Wallet className="w-64 h-64 text-emerald-500" />
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">Total Restant</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">{new Intl.NumberFormat('fr-FR').format(totalRestant)} F</p>
-          <p className="text-xs text-gray-400 mt-1">À recouvrer</p>
-        </div>
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">Paiements enregistrés</p>
-          <p className="text-2xl font-bold text-amber-700 mt-1">{totalPayements}</p>
-          <p className="text-xs text-gray-400 mt-1">Transactions manuelles</p>
+        
+        <div className="relative z-10 flex flex-col xl:flex-row justify-between gap-8">
+          <div className="max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500 text-[10px] font-black text-white uppercase tracking-[0.2em] mb-4 shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+                <CreditCard className="w-3.5 h-3.5" /> Finance Étudiante
+            </div>
+            <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-2">
+              Paiements & <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-emerald-600">Recouvrement</span>
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
+              Gérez les encaissements, consultez l'historique et relancez les paiements en attente.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full xl:w-auto">
+            <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-2">
+                <ArrowUpRight className="w-3 h-3 text-emerald-500" /> Total Perçu
+              </p>
+              <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{new Intl.NumberFormat('fr-FR').format(totalPaye)} <span className="text-sm font-bold text-slate-400">F</span></p>
+            </div>
+            <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-2">
+                <TrendingDown className="w-3 h-3 text-rose-500" /> Reste à recouvrer
+              </p>
+              <p className="text-2xl font-black text-rose-600 dark:text-rose-400 tracking-tight">{new Intl.NumberFormat('fr-FR').format(totalRestant)} <span className="text-sm font-bold text-rose-300">F</span></p>
+            </div>
+            <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-2">
+                <Clock className="w-3 h-3 text-amber-500" /> Transactions
+              </p>
+              <p className="text-2xl font-black text-amber-600 dark:text-amber-400 tracking-tight">{totalPayements} <span className="text-sm font-bold text-amber-300">entrées</span></p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Filtres */}
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-48">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      {/* ── FILTRES ── */}
+      <div className="flex flex-wrap gap-4 items-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-4 rounded-3xl border border-slate-200/50 dark:border-slate-800 shadow-sm">
+        <div className="relative flex-1 min-w-[280px]">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none"
-            placeholder="Rechercher un élève..."
+            className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white"
+            placeholder="Rechercher par nom, prénom ou classe..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <select className="border border-gray-200 bg-white rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={filterClasse} onChange={(e) => setFilterClasse(e.target.value)}>
+        <select 
+          className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-[13px] font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white cursor-pointer" 
+          value={filterClasse} 
+          onChange={(e) => setFilterClasse(e.target.value)}
+        >
           <option value="">Toutes les classes</option>
           {classes.map((c) => <option key={c}>{c}</option>)}
         </select>
-        <select className="border border-gray-200 bg-white rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+        <select 
+          className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-[13px] font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white cursor-pointer" 
+          value={filterStatus} 
+          onChange={(e) => setFilterStatus(e.target.value)}
+        >
           <option value="">Tous les statuts</option>
           <option>Soldé</option><option>Partiel</option><option>Non soldé</option>
         </select>
         {(search || filterClasse || filterStatus) && (
-          <button onClick={() => { setSearch(''); setFilterClasse(''); setFilterStatus(''); }} className="flex items-center gap-1 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl border border-red-100 transition-colors">
-            <X className="w-3 h-3" /> Reset
+          <button 
+            onClick={() => { setSearch(''); setFilterClasse(''); setFilterStatus(''); }} 
+            className="flex items-center gap-2 px-6 py-4 text-[12px] font-black uppercase tracking-widest text-rose-500 hover:text-white hover:bg-rose-500 rounded-2xl transition-all shadow-sm"
+          >
+            <X className="w-4 h-4" /> Réinitialiser
           </button>
         )}
       </div>
 
+      {/* ── LISTE ── */}
       {loading ? (
-        <div className="text-center py-20 text-gray-400">
-          <p>Chargement des élèves...</p>
+        <div className="flex flex-col items-center justify-center min-h-[40vh]">
+          <Loader2 className="w-10 h-10 animate-spin text-amber-500 mb-4" />
+          <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest animate-pulse">Chargement des dossiers...</p>
         </div>
       ) : students.length === 0 ? (
-        <div className="text-center py-20 text-gray-400">
-          <CreditCard className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          <p className="font-medium">Aucun élève enregistré</p>
-          <p className="text-sm mt-1">Importez un fichier Excel ou ajoutez des élèves depuis la page Élèves.</p>
+        <div className="flex flex-col items-center justify-center min-h-[50vh] text-center animate-fadeIn">
+          <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-[2rem] flex items-center justify-center mb-6">
+            <CreditCard className="w-10 h-10 text-slate-400" />
+          </div>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">Aucun dossier étudiant</h2>
+          <p className="text-slate-500 max-w-md mx-auto text-sm font-medium">Veuillez d'abord importer des élèves depuis l'onglet gestion.</p>
         </div>
       ) : (
-        <>
-          <p className="text-sm text-gray-500">{filtered.length} élève(s) — Cliquez sur une ligne pour voir l'historique</p>
-          <div className="space-y-2">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{filtered.length} élève(s) trouvé(s)</p>
+            <p className="text-[10px] font-bold text-slate-400">Cliquez sur une ligne pour le détail</p>
+          </div>
+          <div className="space-y-3">
             {filtered.map((s) => (
               <StudentPaymentRow key={s.id} student={s} onPay={setPayModal} user={user} />
             ))}
+            {filtered.length === 0 && (
+              <div className="p-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem]">
+                <p className="text-sm font-bold text-slate-500">Aucun résultat pour cette recherche.</p>
+              </div>
+            )}
           </div>
-        </>
+        </div>
       )}
 
       {payModal && <PaymentModal student={payModal} onClose={() => setPayModal(null)} />}

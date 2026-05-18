@@ -41,11 +41,11 @@
   --border-focus:   #F4B400;
 
   /* Shadows */
-  --shadow-xs:  0 1px 2px rgba(0,0,0,0.04);
-  --shadow-sm:  0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03);
-  --shadow-md:  0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
-  --shadow-lg:  0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
-  --shadow-xl:  0 24px 48px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08);
+  --shadow-xs:  0 1px 2px rgba(0,0,0,0.02);
+  --shadow-sm:  0 4px 12px rgba(0,0,0,0.03), 0 0 0 1px rgba(0,0,0,0.02);
+  --shadow-md:  0 10px 30px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.02);
+  --shadow-lg:  0 20px 40px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-xl:  0 30px 60px rgba(0,0,0,0.12), 0 10px 20px rgba(0,0,0,0.06);
   --shadow-brand: 0 4px 20px rgba(244, 180, 0, 0.35);
   --shadow-brand-lg: 0 8px 32px rgba(244, 180, 0, 0.40);
 
@@ -481,13 +481,25 @@ body {
   border: 1px solid var(--border-light);
   border-radius: var(--r-2xl);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--t-normal), transform var(--t-normal), border-color var(--t-normal);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
+  position: relative;
+}
+.pro-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+  pointer-events: none;
+}
+.dark .pro-card::after {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
 }
 .pro-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-  border-color: rgba(244,180,0,0.15);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px) scale(1.005);
+  border-color: rgba(244,180,0,0.3);
 }
 
 /* ============================================================

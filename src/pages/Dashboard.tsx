@@ -1,6 +1,3 @@
-// ============================================================
-// DASHBOARD — Tableau de bord principal
-// ============================================================
 import React, { useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { isBackendAvailable } from '../services/backendSync';
@@ -8,7 +5,10 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
 } from 'recharts';
-import { Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck, FileText, Eye, EyeOff } from 'lucide-react';
+import { 
+  Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, 
+  GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck, FileText, Eye, EyeOff 
+} from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import {
   computeRecouvrement,
@@ -20,31 +20,37 @@ import { generateRapportMensuelPDF } from '@/utils/reportGenerator';
 import { DashboardSkeleton } from '../components/SkeletonLoaders';
 
 const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n);
-const PIE_COLORS = ['#eab308', '#16a34a', '#ea580c'];
-const BAR_COLORS = { paye: '#16a34a', restant: '#ef4444' };
+const PIE_COLORS = ['#f59e0b', '#10b981', '#f43f5e'];
+const BAR_COLORS = { paye: '#10b981', restant: '#f43f5e' };
 
 interface StatCardProps {
   title: string; value: string | number; sub?: string;
-  icon: React.ReactNode; color: string; trend?: string;
+  icon: React.ReactNode; color: string; trend?: string; delay?: number;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, sub, icon, color, trend }) => (
-  <div className="pro-card p-6">
-    <div className="flex items-start justify-between">
+const StatCard: React.FC<StatCardProps> = ({ title, value, sub, icon, color, trend, delay = 0 }) => (
+  <div 
+    className="pro-card relative group p-6 overflow-hidden animate-slideUp"
+    style={{ animationDelay: `${delay}ms` }}
+  >
+    {/* Subtle gradient background for depth */}
+    <div className={`absolute -right-12 -top-12 w-32 h-32 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-700 ${color}`} />
+    
+    <div className="relative z-10 flex items-start justify-between">
       <div className="space-y-2">
-        <p className="text-[10px] font-black text-slate-800 dark:text-slate-300 border-l-2 border-amber-500 pl-2 uppercase tracking-[0.2em]">{title}</p>
+        <p className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">{title}</p>
         <div>
-           <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{value}</p>
-           {sub && <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400 mt-0.5">{sub}</p>}
+           <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">{value}</p>
+           {sub && <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 mt-1">{sub}</p>}
         </div>
         {trend && (
-           <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 w-fit">
+           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 w-fit mt-2 border border-emerald-500/10 shadow-[0_2px_10px_rgba(16,185,129,0.1)]">
               <ArrowUpRight className="w-3 h-3" />
-              <p className="text-[10px] font-black">{trend}</p>
+              <p className="text-[10px] font-black tracking-wide">{trend}</p>
            </div>
         )}
       </div>
-      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${color}`}>
+      <div className={`w-14 h-14 rounded-[1.25rem] flex items-center justify-center shadow-lg border border-white/20 backdrop-blur-md group-hover:scale-110 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${color}`}>
         {icon}
       </div>
     </div>
@@ -55,13 +61,21 @@ const CustomTooltip: React.FC<{ active?: boolean; payload?: { name: string; valu
   const privacyMode = useStore(s => s.privacyMode);
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white dark:bg-slate-800 shadow-2xl rounded-2xl border border-gray-100 dark:border-slate-700 p-4 text-xs backdrop-blur-md">
-        <p className="font-bold text-slate-800 dark:text-slate-100 mb-2">{label}</p>
-        {payload.map((p, i) => (
-          <p key={i} style={{ color: p.name === 'Payé' ? BAR_COLORS.paye : BAR_COLORS.restant }}>
-            {p.name} : {privacyMode ? '••••••' : fmtMoney(p.value)} FCFA
-          </p>
-        ))}
+      <div className="bg-white/90 dark:bg-slate-900/90 shadow-2xl rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-4 text-xs backdrop-blur-xl">
+        <p className="font-bold text-slate-800 dark:text-slate-100 mb-3">{label}</p>
+        <div className="space-y-2">
+          {payload.map((p, i) => (
+            <div key={i} className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.name === 'Payé' ? BAR_COLORS.paye : BAR_COLORS.restant }} />
+                <span className="font-bold text-slate-600 dark:text-slate-300">{p.name}</span>
+              </div>
+              <span className="font-black text-slate-900 dark:text-white">
+                {privacyMode ? '••••••' : fmtMoney(p.value)} FCFA
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -81,32 +95,25 @@ export const Dashboard: React.FC = () => {
   const todayPresences = useMemo(() => getPresencesToday(), [getPresencesToday]);
   const tauxPresence = students.length > 0 ? Math.round((todayPresences.length / students.length) * 100) : 0;
 
-  // Synchronisation Cloud au montage du dashboard
   useEffect(() => {
     const roles = ['admin', 'directeur', 'directeur_general', 'comptable'];
     if (user?.role && roles.includes(user.role)) {
       const initSync = async () => {
         const available = await isBackendAvailable();
         if (available) {
-          // 1. Récupérer les données fraîches du serveur (Single Source of Truth)
           const fetchAllFromBackend = useStore.getState().fetchAllFromBackend;
           await fetchAllFromBackend();
-          
-          // La synchronisation inverse (Local -> Cloud) est désormais gérée 
-          // intelligemment dans fetchAllFromBackend si des doublons sont détectés.
         }
       };
       initSync();
     }
   }, []);
 
-  // ── Indicateurs financiers avancés ──
   const recouvrement = useMemo(() => computeRecouvrement(students), [students]);
   const classComp = useMemo(() => computeClassComparison(students), [students]);
   const santeFinanciere = useMemo(() => computeSanteFinanciere(students), [students]);
   const cycleComparison = useMemo(() => computeCycleComparison(students), [students]);
 
-  // --- Gestion Automatique du Rapport Mensuel (Chaque 5 du mois) ---
   useEffect(() => {
     if (students.length === 0 || classComp.length === 0) return;
     
@@ -115,7 +122,6 @@ export const Dashboard: React.FC = () => {
     const currentMonthKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
     const lastReportMonth = useStore.getState().lastReportMonth;
     
-    // Si on est le 5 ou plus, et qu'on n'a pas encore généré le rapport ce mois-ci
     if (day >= 5 && lastReportMonth !== currentMonthKey) {
       setTimeout(() => {
         generateRapportMensuelPDF(students, classComp, { 
@@ -124,7 +130,7 @@ export const Dashboard: React.FC = () => {
           stamp: useStore.getState().schoolStamp
         });
         useStore.getState().setLastReportMonth(currentMonthKey);
-      }, 2000); // Petit délai pour laisser l'interface se charger
+      }, 2000);
     }
   }, [students, classComp]);
 
@@ -196,12 +202,12 @@ export const Dashboard: React.FC = () => {
 
   if (students.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mb-4">
-          <GraduationCap className="w-10 h-10 text-amber-500" />
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fadeIn">
+        <div className="w-32 h-32 bg-amber-500/10 dark:bg-amber-500/5 rounded-[2rem] flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(245,158,11,0.2)]">
+          <GraduationCap className="w-16 h-16 text-amber-500 animate-bounce" />
         </div>
-        <h2 className="text-xl font-bold text-gray-800 mb-2">Aucune donnée trouvée</h2>
-        <p className="text-gray-500 max-w-md mx-auto px-4">
+        <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">Aucune donnée trouvée</h2>
+        <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto px-4 text-base leading-relaxed">
           Importez un fichier Excel ou patientez si une synchronisation est en cours.
           Vérifiez que vous êtes bien connecté à internet.
         </p>
@@ -209,66 +215,65 @@ export const Dashboard: React.FC = () => {
     );
   }
 
-
   return (
-    <div className="space-y-8 pb-10">
-      {/* Strategic Header */}
-      <div className="relative pro-card p-8 overflow-hidden group">
-        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
-            <TrendingUp className="w-48 h-48 text-amber-500" />
+    <div className="space-y-6 pb-20 max-w-[1600px] mx-auto">
+      {/* ── HERO BANNER ── */}
+      <div className="relative pro-card p-8 lg:p-10 overflow-hidden group bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl">
+        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.06] group-hover:scale-110 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
+            <TrendingUp className="w-64 h-64 text-amber-500" />
         </div>
         
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-            <div className="max-w-xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500 text-[10px] font-black text-white uppercase tracking-[0.2em] mb-4">
-                    <Target className="w-3 h-3" /> Dashboard Stratégique
+        <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-8">
+            <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500 text-[10px] font-black text-white uppercase tracking-[0.2em] mb-6 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
+                    <Target className="w-3.5 h-3.5" /> Dashboard Stratégique
                 </div>
-                <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-2">
-                    Analyse & <span className="text-amber-500">Performance</span>
+                <h2 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tighter mb-4 leading-tight">
+                    Vision & <span className="text-transparent bg-clip-text bg-gradient-to-br from-amber-400 to-amber-600">Performance</span>
                 </h2>
-                <p className="text-slate-700 dark:text-slate-300 text-base leading-relaxed font-medium">
-                    Visualisation en temps réel de la santé financière globale, incluant le recouvrement, les projections et les statistiques par cycle.
+                <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed font-medium max-w-xl">
+                    Tableau de bord exécutif en temps réel : analysez le recouvrement, les projections financières et les performances globales par cycle.
                 </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-4 xl:gap-6">
                 <button 
                   onClick={() => generateRapportMensuelPDF(students, classComp, { 
                     name: useStore.getState().schoolName || useStore.getState().appName, 
                     logo: useStore.getState().schoolLogo,
                     stamp: useStore.getState().schoolStamp
                   })}
-                  className="flex items-center gap-3 px-6 py-4 bg-slate-900 border-2 border-slate-900 text-white rounded-[22px] hover:bg-white hover:text-slate-900 transition-all duration-300 font-black text-sm shadow-xl hover:shadow-2xl active:scale-95 group"
+                  className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl hover:scale-105 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-black text-[13px] tracking-wide shadow-xl hover:shadow-2xl active:scale-95 group"
                 >
-                    <div className="w-8 h-8 rounded-xl bg-white/10 group-hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-white/20 dark:bg-slate-900/10 flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
                         <FileText className="w-4 h-4" />
                     </div>
-                    TÉLÉCHARGER LE BILAN STRATÉGIQUE
+                    RAPPORT MENSUEL
                 </button>
 
                 <button
                   onClick={() => setPrivacyMode(!privacyMode)}
-                  className="flex items-center gap-3 px-6 py-4 bg-white border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-[22px] hover:border-amber-500 transition-all duration-300 font-black text-sm shadow-xl active:scale-95 group"
+                  className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl hover:border-amber-500 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-black text-[13px] tracking-wide shadow-md active:scale-95 hover:scale-105 group"
                   title={privacyMode ? "Afficher les chiffres" : "Masquer les chiffres"}
                 >
-                  <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center group-hover:bg-amber-50 group-hover:text-amber-500 transition-colors">
-                    {privacyMode ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${privacyMode ? 'bg-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-slate-100 dark:bg-slate-700'}`}>
+                    {privacyMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </div>
-                  {privacyMode ? "AFFICHER" : "MASQUER"} LES CHIFFRES
+                  MODE CONFIDENTIEL
                 </button>
 
-                <div className="flex items-center gap-4 bg-slate-50/50 dark:bg-slate-800/50 px-8 py-5 rounded-[24px] border border-slate-100 dark:border-slate-700 backdrop-blur-sm self-stretch">
+                <div className="w-full sm:w-auto flex items-center gap-5 bg-white/80 dark:bg-slate-800/80 px-6 py-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-xl shadow-lg">
                     <div className="space-y-1">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Santé Financière</p>
-                        <p className={`text-xl font-black ${santeFinanciere.color}`}>
+                        <p className={`text-xl font-black tracking-tight ${santeFinanciere.color}`}>
                             {maskValue(santeFinanciere.label)}
                         </p>
                     </div>
-                    <div className={`w-14 h-14 rounded-full flex items-center justify-center border-4 shadow-xl ${
-                        santeFinanciere.score >= 80 ? 'border-emerald-500 bg-emerald-50' :
-                        santeFinanciere.score >= 50 ? 'border-amber-500 bg-amber-50' : 'border-rose-500 bg-rose-50'
+                    <div className={`w-14 h-14 rounded-[1.25rem] flex items-center justify-center border-[3px] shadow-lg ${
+                        santeFinanciere.score >= 80 ? 'border-emerald-500 bg-emerald-50 text-emerald-600' :
+                        santeFinanciere.score >= 50 ? 'border-amber-500 bg-amber-50 text-amber-600' : 'border-rose-500 bg-rose-50 text-rose-600'
                     }`}>
-                        <span className={`text-xl font-black ${santeFinanciere.color}`}>
+                        <span className="text-lg font-black tracking-tighter">
                             {maskValue(santeFinanciere.score)}
                         </span>
                     </div>
@@ -277,130 +282,141 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+      {/* ── METRICS GRID ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6">
         <StatCard
+          delay={100}
           title="Total Élèves"
           value={maskValue(students.length)}
           sub={privacyMode ? 'Données masquées' : `${stats.soldes} soldés / ${stats.nonSoldes} non soldés`}
-          icon={<Users className="w-5 h-5 text-amber-500" />}
-          color="bg-amber-50"
+          icon={<Users className="w-6 h-6 text-amber-600" />}
+          color="bg-amber-50/80 dark:bg-amber-900/20 border-amber-500/20"
         />
         <StatCard
+          delay={200}
           title="Écolage Attendu"
-          value={maskValue(`${fmtMoney(stats.totalEcolage)} FCFA`)}
+          value={maskValue(`${fmtMoney(stats.totalEcolage)} F`)}
           sub="Total annuel"
-          icon={<Wallet className="w-5 h-5 text-violet-600" />}
-          color="bg-violet-50"
+          icon={<Wallet className="w-6 h-6 text-indigo-600" />}
+          color="bg-indigo-50/80 dark:bg-indigo-900/20 border-indigo-500/20"
         />
         <StatCard
+          delay={300}
           title="Déjà Perçu"
-          value={maskValue(`${fmtMoney(stats.totalPaye)} FCFA`)}
+          value={maskValue(`${fmtMoney(stats.totalPaye)} F`)}
           sub="Paiements reçus"
-          icon={<CheckCircle className="w-5 h-5 text-emerald-600" />}
-          color="bg-emerald-50"
-          trend={privacyMode ? undefined : `+${stats.taux}% recouvert`}
+          icon={<CheckCircle className="w-6 h-6 text-emerald-600" />}
+          color="bg-emerald-50/80 dark:bg-emerald-900/20 border-emerald-500/20"
+          trend={privacyMode ? undefined : `+${stats.taux}% recouvré`}
         />
         <StatCard
+          delay={400}
           title="Solde Restant"
-          value={maskValue(`${fmtMoney(stats.totalRestant)} FCFA`)}
+          value={maskValue(`${fmtMoney(stats.totalRestant)} F`)}
           sub="À recouvrer"
-          icon={<AlertCircle className="w-5 h-5 text-red-500" />}
-          color="bg-red-50"
+          icon={<AlertCircle className="w-6 h-6 text-rose-600" />}
+          color="bg-rose-50/80 dark:bg-rose-900/20 border-rose-500/20"
         />
         <StatCard
-          title="Présences Aujourd'hui"
+          delay={500}
+          title="Présences du Jour"
           value={maskValue(`${todayPresences.length} / ${students.length}`)}
           sub="Élèves pointés"
-          icon={<UserCheck className="w-5 h-5 text-cyan-600" />}
-          color="bg-cyan-50"
+          icon={<UserCheck className="w-6 h-6 text-cyan-600" />}
+          color="bg-cyan-50/80 dark:bg-cyan-900/20 border-cyan-500/20"
           trend={privacyMode ? undefined : `${tauxPresence}% de présence`}
         />
       </div>
 
-      <div className="pro-card p-8">
-        <div className="flex items-center justify-between mb-6">
+      {/* ── RECOVERY BAR ── */}
+      <div className="pro-card p-8 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
+        <div className="flex items-center justify-between mb-8">
           <div className="space-y-1">
-            <h3 className="font-extrabold text-slate-900 dark:text-white text-lg tracking-tight">Recouvrement Global</h3>
-            <p className="text-xs text-slate-700 dark:text-slate-400 font-bold uppercase tracking-widest">Progression des encaissements périodiques</p>
+            <h3 className="font-black text-slate-900 dark:text-white text-xl tracking-tight">Recouvrement Global</h3>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Progression des encaissements sur l'année</p>
           </div>
-          <div className="text-4xl font-black text-amber-500 dark:text-amber-400 tracking-tighter">{maskValue(`${stats.taux}%`)}</div>
+          <div className="text-5xl font-black text-amber-500 dark:text-amber-400 tracking-tighter drop-shadow-sm">{maskValue(`${stats.taux}%`)}</div>
         </div>
-        <div className="relative h-6 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner p-1">
+        <div className="relative h-8 bg-slate-100/50 dark:bg-slate-800/50 rounded-full overflow-hidden shadow-inner p-1.5 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50">
           <div
-            className="h-full bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-500 rounded-full transition-all duration-1000 ease-out shadow-lg"
+            className="h-full bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 rounded-full transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_0_20px_rgba(245,158,11,0.5)] relative overflow-hidden"
             style={{ width: `${stats.taux}%` }}
-          />
+          >
+            <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)50%,rgba(255,255,255,0.2)75%,transparent_75%,transparent)] bg-[length:20px_20px] animate-[slide_1s_linear_infinite]" />
+          </div>
         </div>
-        <div className="flex justify-between mt-3 text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+        <div className="flex justify-between mt-4 text-[11px] font-black text-slate-400 uppercase tracking-widest px-2">
           <span>Initial (0%)</span>
           <span className="text-slate-300">Seuil (50%)</span>
           <span>Objectif (100%)</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      {/* ── CYCLE ANALYSIS ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {([
           {
-            label: 'Cycle Primaire',
-            sub: '9 Classes (CI au CM2)',
-            icon: <School className="w-5 h-5 text-amber-600" />,
-            border: 'border-amber-100', bg: 'bg-amber-50/30', text: 'text-amber-600',
-            bar: 'bg-amber-500', key: 'Primaire' as const,
+            label: 'Primaire', sub: 'CI au CM2',
+            icon: <School className="w-6 h-6 text-amber-600" />,
+            colors: { border: 'border-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600', fill: 'bg-amber-500' },
+            key: 'Primaire' as const,
           },
           {
-            label: 'Cycle Collège',
-            sub: '4 Classes (6ème au 3ème)',
-            icon: <BookOpen className="w-5 h-5 text-blue-600" />,
-            border: 'border-blue-100', bg: 'bg-blue-50/30', text: 'text-blue-600',
-            bar: 'bg-blue-500', key: 'Collège' as const,
+            label: 'Collège', sub: '6ème au 3ème',
+            icon: <BookOpen className="w-6 h-6 text-indigo-600" />,
+            colors: { border: 'border-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-500/10', text: 'text-indigo-600', fill: 'bg-indigo-500' },
+            key: 'Collège' as const,
           },
           {
-            label: 'Cycle Lycée',
-            sub: '3 Classes (Sciences & Arts)',
-            icon: <GraduationCap className="w-5 h-5 text-purple-600" />,
-            border: 'border-purple-100', bg: 'bg-purple-50/30', text: 'text-purple-600',
-            bar: 'bg-purple-500', key: 'Lycée' as const,
+            label: 'Lycée', sub: 'Seconde à Terminale',
+            icon: <GraduationCap className="w-6 h-6 text-rose-600" />,
+            colors: { border: 'border-rose-500', bg: 'bg-rose-50 dark:bg-rose-500/10', text: 'text-rose-600', fill: 'bg-rose-500' },
+            key: 'Lycée' as const,
           },
         ] as const).map((c) => {
           const cs = stats.cycleStats[c.key];
           return (
-            <div key={c.label} className={`pro-card p-8 border-l-4 ${c.border.replace('border-', 'border-l-')}`}>
-              <div className="flex items-center gap-4 mb-8">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shrink-0 ${c.bg}`}>
+            <div key={c.label} className={`pro-card p-8 border-t-4 border-t-transparent hover:border-t-${c.colors.fill.replace('bg-','')} transition-all duration-300 group`}>
+              <div className="flex items-center gap-5 mb-8">
+                <div className={`w-14 h-14 rounded-[1.25rem] flex items-center justify-center shadow-md ${c.colors.bg} group-hover:scale-110 transition-transform duration-500 ease-out`}>
                   {c.icon}
                 </div>
                 <div className="flex-1 overflow-hidden">
-                  <p className={`text-base font-black tracking-tight ${c.text}`}>{c.label}</p>
-                  <p className="text-[10px] text-slate-700 dark:text-slate-400 font-bold uppercase truncate">{c.sub}</p>
+                  <p className={`text-2xl font-black tracking-tighter text-slate-900 dark:text-white`}>{c.label}</p>
+                  <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest truncate mt-0.5">{c.sub}</p>
                 </div>
-                <span className={`text-3xl font-black ${c.text}`}>{maskValue(cs.count)}</span>
+                <div className={`px-4 py-2 rounded-xl font-black text-xl bg-slate-50 dark:bg-slate-800 ${c.colors.text}`}>
+                  {maskValue(cs.count)}
+                </div>
               </div>
 
-              <div className="space-y-3 font-medium text-sm mb-8 border-y border-slate-50 dark:border-slate-800 py-6">
-                <div className="flex justify-between text-slate-500">
-                  <span>Attendu</span>
+              <div className="space-y-4 mb-8">
+                <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Attendu</span>
                   <span className="font-black text-slate-900 dark:text-white">{maskValue(fmtMoney(cs.ecolage))} F</span>
                 </div>
-                <div className="flex justify-between text-slate-500">
-                  <span>Perçu</span>
+                <div className="flex justify-between items-center p-3 rounded-xl bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30">
+                  <span className="text-xs font-bold text-emerald-600 uppercase tracking-wide">Perçu</span>
                   <span className="font-black text-emerald-600">{maskValue(fmtMoney(cs.paye))} F</span>
                 </div>
-                <div className="flex justify-between text-slate-500 font-black">
-                  <span>Reste</span>
-                  <span className="text-rose-500">{maskValue(fmtMoney(cs.restant))} F</span>
+                <div className="flex justify-between items-center p-3 rounded-xl bg-rose-50/50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30">
+                  <span className="text-xs font-bold text-rose-600 uppercase tracking-wide">Reste</span>
+                  <span className="font-black text-rose-600">{maskValue(fmtMoney(cs.restant))} F</span>
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">
-                  <span>Taux de recouvrement</span>
-                  <span className={c.text}>{maskValue(`${cs.taux}%`)}</span>
+                <div className="flex justify-between items-end mb-3">
+                  <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Taux de recouvrement</span>
+                  <span className={`text-xl font-black ${c.colors.text}`}>{maskValue(`${cs.taux}%`)}</span>
                 </div>
-                <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+                <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner p-0.5">
                   <div
-                    className={`h-full ${c.bar} rounded-full transition-all duration-1000`}
+                    className={`h-full ${c.colors.fill} rounded-full transition-all duration-1000 shadow-md relative overflow-hidden`}
                     style={{ width: `${cs.taux}%` }}
-                  />
+                  >
+                    <div className="absolute inset-0 bg-white/20 w-full h-full -translate-x-full animate-[shimmer_2s_infinite]" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -408,147 +424,109 @@ export const Dashboard: React.FC = () => {
         })}
       </div>
 
+      {/* ── CHARTS SECTION ── */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
-          <h3 className="font-bold text-slate-800 dark:text-white mb-1">Paiements par classe</h3>
-          <p className="text-xs text-slate-500 mb-4">Montants payés vs. restants (FCFA)</p>
+        <div className="xl:col-span-2 pro-card p-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="font-black text-slate-900 dark:text-white text-xl tracking-tight mb-1">Paiements par classe</h3>
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Distribution des montants (FCFA)</p>
+            </div>
+            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+              <BarChart2 className="w-5 h-5 text-slate-400" />
+            </div>
+          </div>
           {classData.length === 0 ? (
-            <div className="h-64 flex items-center justify-center text-gray-400 text-sm">Aucune donnée</div>
+            <div className="h-[300px] flex items-center justify-center text-slate-400 text-sm font-bold bg-slate-50 dark:bg-slate-800/50 rounded-2xl">Aucune donnée</div>
           ) : (
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={classData} barCategoryGap="25%" barGap={2}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-                <XAxis dataKey="classe" tick={{ fontSize: 10, fill: '#6b7280' }} />
-                <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 10, fill: '#6b7280' }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Bar dataKey="Payé" fill={BAR_COLORS.paye} radius={[4, 4, 0, 0]} maxBarSize={32} />
-                <Bar dataKey="Restant" fill={BAR_COLORS.restant} radius={[4, 4, 0, 0]} maxBarSize={32} />
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={classData} barCategoryGap="20%" barGap={4} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} opacity={0.5} />
+                <XAxis dataKey="classe" tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} dy={10} />
+                <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} dx={-10} />
+                <Tooltip cursor={{ fill: 'transparent' }} content={<CustomTooltip />} />
+                <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px', fontWeight: 700 }} iconType="circle" />
+                <Bar dataKey="Payé" fill={BAR_COLORS.paye} radius={[6, 6, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="Restant" fill={BAR_COLORS.restant} radius={[6, 6, 0, 0]} maxBarSize={40} />
               </BarChart>
             </ResponsiveContainer>
           )}
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
-          <h3 className="font-bold text-slate-800 dark:text-white mb-1">Répartition par cycle</h3>
-          <p className="text-xs text-slate-500 mb-4">Distribution des élèves</p>
+        <div className="pro-card p-8 flex flex-col">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="font-black text-slate-900 dark:text-white text-xl tracking-tight mb-1">Répartition</h3>
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Élèves par cycle</p>
+            </div>
+            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+              <PieChart className="w-5 h-5 text-slate-400" />
+            </div>
+          </div>
           {cycleData.length === 0 ? (
-            <div className="h-64 flex items-center justify-center text-gray-400 text-sm">Aucune donnée</div>
+            <div className="flex-1 flex items-center justify-center text-slate-400 text-sm font-bold bg-slate-50 dark:bg-slate-800/50 rounded-2xl">Aucune donnée</div>
           ) : (
-            <ResponsiveContainer width="100%" height={260}>
-              <PieChart>
-                <Pie data={cycleData} cx="50%" cy="45%" outerRadius={80} innerRadius={40} dataKey="value" paddingAngle={3}>
-                  {cycleData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
-                </Pie>
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Tooltip formatter={(value) => [`${value} élèves`]} />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="flex-1 flex items-center justify-center min-h-[320px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie 
+                    data={cycleData} 
+                    cx="50%" cy="45%" 
+                    outerRadius={110} innerRadius={70} 
+                    dataKey="value" 
+                    paddingAngle={5}
+                    stroke="none"
+                  >
+                    {cycleData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} className="hover:opacity-80 transition-opacity outline-none" />)}
+                  </Pie>
+                  <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px', fontWeight: 700 }} iconType="circle" />
+                  <Tooltip 
+                    formatter={(value) => [`${value} élèves`, 'Total']} 
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px', fontWeight: 900 }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           )}
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
-        <h3 className="font-bold text-slate-800 dark:text-white mb-1">Solvabilité par cycle</h3>
-        <p className="text-xs text-slate-500 mb-6">Taux de recouvrement par niveau scolaire (%)</p>
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={cycleComparison}>
-              <PolarGrid stroke="#e5e7eb" />
-              <PolarAngleAxis dataKey="cycle" tick={{ fontSize: 10, fontStyle: 'bold', fill: '#64748b' }} />
-              <Radar
-                name="Taux"
-                dataKey="taux"
-                stroke="#f59e0b"
-                fill="#f59e0b"
-                fillOpacity={0.5}
-              />
-              <Tooltip 
-                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                formatter={(value) => [`${value}%`, 'Taux de recouvrement']}
-              />
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {students.length > 0 && (
+      {/* ── TOP PERFORMERS & SOLVABILITY ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="pro-card p-8">
           <div className="flex items-center justify-between mb-8">
-            <div className="space-y-1">
-              <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 tracking-tight">
-                <Target className="w-6 h-6 text-amber-500" />
-                Analyse du Recouvrement
-              </h3>
-              <p className="text-[10px] text-slate-700 dark:text-slate-400 font-bold uppercase tracking-[0.2em]">Formule : (encaissé / théorique) × 100</p>
-            </div>
-            <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${recouvrement.badgeColor}`}>
-              {recouvrement.badgeLabel}
-            </span>
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+              <div className="p-3 bg-amber-50 dark:bg-amber-500/10 text-amber-500 rounded-xl">
+                <BarChart2 className="w-6 h-6" />
+              </div>
+              Top Performances
+            </h3>
           </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-700 transition-transform hover:scale-[1.02]">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Théorique</p>
-              <p className="text-2xl font-black text-slate-800 dark:text-white tracking-tighter">{maskValue(fmtMoney(recouvrement.totalTheorique))}</p>
-              <p className="text-[10px] text-slate-400 mt-1 font-bold">FCFA ATTENDUS</p>
-            </div>
-            <div className="bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl p-6 border border-emerald-100 dark:border-emerald-900/30 transition-transform hover:scale-[1.02]">
-              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2">Encaissé</p>
-              <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 tracking-tighter">{maskValue(fmtMoney(recouvrement.totalEncaisse))}</p>
-              <p className="text-[10px] text-emerald-500 mt-1 font-bold">REÇU À CE JOUR</p>
-            </div>
-            <div className="bg-rose-50 dark:bg-rose-900/10 rounded-2xl p-6 border border-rose-100 dark:border-rose-900/30 transition-transform hover:scale-[1.02]">
-              <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest mb-2">Restant</p>
-              <p className="text-2xl font-black text-rose-700 dark:text-rose-400 tracking-tighter">{maskValue(fmtMoney(recouvrement.totalRestant))}</p>
-              <p className="text-[10px] text-rose-500 mt-1 font-bold">EN ATTENTE</p>
-            </div>
-          </div>
-
-          <div className="relative pt-2">
-            <div className="flex justify-between text-[11px] font-black text-slate-500 uppercase tracking-[0.1em] mb-2">
-              <span>Progression Stratégique</span>
-              <span className="text-slate-900 dark:text-white px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md shadow-sm">{maskValue(`${recouvrement.taux}%`)}</span>
-            </div>
-            <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner flex p-1">
-              <div
-                className="h-full rounded-full transition-all duration-1000 ease-out shadow-lg"
-                style={{ width: `${Math.min(recouvrement.taux, 100)}%`, backgroundColor: recouvrement.barColor }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="pro-card p-8">
-          <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2 mb-8 tracking-tight">
-            <BarChart2 className="w-6 h-6 text-amber-500" />
-            Performance des Classes
-          </h3>
 
           <div className="space-y-4">
-            {classComp.slice(0, 8).map((row, i) => (
-              <div key={row.classe} className="group flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-sm ${
-                    i === 0 ? 'bg-amber-400 text-black' :
-                    i === 1 ? 'bg-slate-200 text-slate-900' :
-                    i === 2 ? 'bg-orange-200 text-orange-900' : 'bg-slate-100 text-slate-600'
+            {classComp.slice(0, 5).map((row, i) => (
+              <div key={row.classe} className="group flex items-center gap-5 p-4 rounded-[1.5rem] bg-slate-50/50 dark:bg-slate-800/30 hover:bg-white dark:hover:bg-slate-800 transition-all duration-300 border border-slate-100 dark:border-slate-700/50 hover:shadow-lg hover:-translate-y-1">
+                <div className={`w-12 h-12 rounded-[1rem] flex items-center justify-center font-black text-lg shadow-sm ${
+                    i === 0 ? 'bg-gradient-to-br from-amber-300 to-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.4)]' :
+                    i === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-white' :
+                    i === 2 ? 'bg-gradient-to-br from-orange-300 to-orange-400 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500'
                 }`}>
                   {i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-end mb-2">
-                    <span className="font-extrabold text-slate-800 dark:text-white tracking-tight">{row.classe}</span>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
-                        row.taux >= 85 ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50'
+                    <span className="text-lg font-black text-slate-800 dark:text-white tracking-tight">{row.classe}</span>
+                    <span className={`text-[11px] font-black px-3 py-1 rounded-lg ${
+                        row.taux >= 85 ? 'text-emerald-700 bg-emerald-100 dark:bg-emerald-500/20 dark:text-emerald-400' : 'text-amber-700 bg-amber-100 dark:bg-amber-500/20 dark:text-amber-400'
                     }`}>{maskValue(`${row.taux}%`)}</span>
                   </div>
-                  <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-amber-500 rounded-full transition-all duration-1000 group-hover:shadow-[0_0_12px_rgba(245,158,11,0.4)]"
+                      className={`h-full rounded-full transition-all duration-1000 relative overflow-hidden ${row.taux >= 85 ? 'bg-emerald-500' : 'bg-amber-500'}`}
                       style={{ width: `${row.taux}%` }}
-                    />
+                    >
+                      <div className="absolute inset-0 bg-white/20 w-full h-full -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -556,30 +534,35 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="pro-card p-8">
-          <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2 mb-8 tracking-tight">
-            <TrendingUp className="w-6 h-6 text-emerald-600" />
-            Top Solvabilité
-          </h3>
-          <div className="grid grid-cols-1 gap-4">
-            {topClasses.map((c) => (
-              <div key={c.name} className="relative pro-card p-6 bg-slate-50/30 dark:bg-slate-800/30 border-none overflow-hidden group">
-                  <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-125 transition-transform duration-500">
-                      <CheckCircle className="w-24 h-24 text-emerald-600" />
-                  </div>
-                  <div className="relative z-10 flex items-center justify-between">
-                      <div className="space-y-1">
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{c.cycle}</p>
-                          <h4 className="text-2xl font-black text-slate-800 dark:text-white tracking-tighter">{c.name}</h4>
-                          <p className="text-xs text-slate-500 font-bold">{c.count} élèves inscrits</p>
-                      </div>
-                      <div className="text-right">
-                          <div className="text-3xl font-black text-emerald-600 tracking-tighter">{maskValue(`${c.taux}%`)}</div>
-                          <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Recouvré</p>
-                      </div>
-                  </div>
+        <div className="pro-card p-8 flex flex-col">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded-xl">
+                <Target className="w-6 h-6" />
               </div>
-            ))}
+              Solvabilité / Cycle
+            </h3>
+          </div>
+          <div className="flex-1 flex items-center justify-center min-h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart cx="50%" cy="50%" outerRadius="75%" data={cycleComparison}>
+                <PolarGrid stroke="#cbd5e1" strokeDasharray="3 3" />
+                <PolarAngleAxis dataKey="cycle" tick={{ fontSize: 12, fontWeight: 900, fill: '#475569' }} />
+                <Radar
+                  name="Taux"
+                  dataKey="taux"
+                  stroke="#f59e0b"
+                  strokeWidth={3}
+                  fill="#f59e0b"
+                  fillOpacity={0.3}
+                  className="drop-shadow-lg"
+                />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '16px', fontWeight: 900 }}
+                  formatter={(value) => [`${value}%`, 'Recouvrement']}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

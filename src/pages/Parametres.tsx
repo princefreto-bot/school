@@ -2,15 +2,11 @@ import React, { useState, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import {
   Save, School, MessageSquare, Shield, Info,
-  Upload, X, Image, Code2, ChevronDown, ChevronRight,
-  Palette, Type, FileText, Database,
-  AlertCircle, Clock, Plus, Calendar, Trash2
+  Upload, X, Image, Clock, Plus, Calendar, Trash2, Database, AlertCircle, Layers
 } from 'lucide-react';
 import { GestionPersonnel } from '../components/GestionPersonnel';
 
-// ── PAGE PRINCIPALE ──────────────────────────────────────────
 export const Parametres: React.FC = () => {
-  // Sélecteurs séparés (pas d'objet pour éviter re-renders infinis)
   const schoolName = useStore((s) => s.schoolName);
   const schoolYear = useStore((s) => s.schoolYear);
   const messageRemerciement = useStore((s) => s.messageRemerciement);
@@ -20,7 +16,6 @@ export const Parametres: React.FC = () => {
   const schoolStamp = useStore((s) => s.schoolStamp);
   const user = useStore((s) => s.user);
 
-  // États locaux du formulaire
   const [localSchool, setLocalSchool] = useState(schoolName);
   const [localYear, setLocalYear] = useState(schoolYear);
   const [localRem, setLocalRem] = useState(messageRemerciement);
@@ -36,25 +31,21 @@ export const Parametres: React.FC = () => {
   const [stampError, setStampError] = useState('');
   const stampFileRef = useRef<HTMLInputElement>(null);
 
-  // Horaires par cycle
   const cycleSchedules = useStore((s) => s.cycleSchedules);
   const setCycleSchedules = useStore((s) => s.setCycleSchedules);
   const [localSchedules, setLocalSchedules] = useState(cycleSchedules);
   const [scheduleSaved, setScheduleSaved] = useState(false);
 
-  // Tranches
   const tranches = useStore((s) => s.tranches);
   const setTranches = useStore((s) => s.setTranches);
   const [localTranches, setLocalTranches] = useState(tranches || []);
   const [tranchesSaved, setTranchesSaved] = useState(false);
 
-  // ── Gestion upload logo PNG ────────────────────────────────
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLogoError('');
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Vérifications
     if (!file.type.startsWith('image/')) {
       setLogoError('Le fichier doit être une image (PNG, JPG, SVG).');
       return;
@@ -67,7 +58,6 @@ export const Parametres: React.FC = () => {
     const reader = new FileReader();
     reader.onload = (ev) => {
       const base64 = ev.target?.result as string;
-      // Redimensionnement via canvas pour forcer max 200×200px
       const img = new window.Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
@@ -93,7 +83,6 @@ export const Parametres: React.FC = () => {
     if (fileRef.current) fileRef.current.value = '';
   };
 
-  // ── Gestion upload sceau PNG ────────────────────────────────
   const handleStampUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setStampError('');
     const file = e.target.files?.[0];
@@ -138,7 +127,6 @@ export const Parametres: React.FC = () => {
 
   const updateAllSettings = useStore((s) => s.updateAllSettings);
 
-  // ── Sauvegarde ───────────────────────────────────────────
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     await updateAllSettings({
@@ -155,495 +143,418 @@ export const Parametres: React.FC = () => {
   };
 
   return (
-    <div className="max-w-3xl space-y-6">
-
-      {/* ── GESTION DU PERSONNEL ────────────────────────────── */}
-      {(user?.role === 'directeur' || user?.role === 'directeur_general') && (
-        <GestionPersonnel />
-      )}
-
-      {/* ── IDENTITÉ DE L'APPLICATION ─────────────────────── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-5">
-          <School className="w-4 h-4 text-blue-600" />
-          Identité de l'application & établissement
-        </h3>
-        <form onSubmit={handleSave} className="space-y-5">
-
-          {/* Nom de l'app */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-              Nom de l'application (affiché dans la sidebar)
-            </label>
-            <input
-              disabled={user?.role !== 'directeur' && user?.role !== 'comptable'}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium disabled:bg-gray-50 disabled:text-gray-400"
-              value={localAppName}
-              onChange={(e) => setLocalAppName(e.target.value)}
-              placeholder="Ex : EduFinance, SchoolPay, MonÉcole..."
-            />
-            <p className="text-xs text-gray-400 mt-1">
-              Remplace «&nbsp;EduFinance&nbsp;» partout dans l'interface.
+    <div className="space-y-6 pb-20 max-w-[1200px] mx-auto animate-slideUp">
+      
+      {/* ── HEADER ── */}
+      <div className="relative pro-card p-8 overflow-hidden group bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-indigo-100 dark:border-indigo-900/30">
+        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.06] group-hover:scale-110 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
+            <Layers className="w-64 h-64 text-indigo-500" />
+        </div>
+        <div className="relative z-10 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500 text-[10px] font-black text-white uppercase tracking-[0.2em] mb-4 shadow-[0_0_15px_rgba(99,102,241,0.4)]">
+                <Shield className="w-3.5 h-3.5" /> Système
+            </div>
+            <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-2">
+              Paramètres du <span className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-indigo-600">Système</span>
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
+              Gérez les informations de l'établissement, les configurations système et les équipes.
             </p>
-          </div>
-
-          {/* Nom établissement */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-              Nom de l'établissement
-            </label>
-            <input
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-              value={localSchool}
-              onChange={(e) => setLocalSchool(e.target.value)}
-              placeholder="Ex : Groupe Scolaire Excellence"
-            />
-          </div>
-
-          {/* Année scolaire */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-              Année scolaire
-            </label>
-            <input
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-              value={localYear}
-              onChange={(e) => setLocalYear(e.target.value)}
-              placeholder="Ex : 2024-2025"
-            />
-          </div>
-
-          {/* Upload logo */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
-              Logo de l'établissement
-            </label>
-            <div className="flex items-start gap-4">
-              {/* Prévisualisation */}
-              <div className="shrink-0 w-20 h-20 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 overflow-hidden relative group">
-                {logoPreview ? (
-                  <>
-                    <img
-                      src={logoPreview}
-                      alt="Logo aperçu"
-                      className="w-full h-full object-contain p-1"
-                    />
-                    <button
-                      type="button"
-                      onClick={removeLogo}
-                      className="absolute inset-0 bg-red-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl"
-                      title="Supprimer le logo"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </>
-                ) : (
-                  <Image className="w-8 h-8 text-gray-300" />
-                )}
-              </div>
-
-              {/* Zone upload */}
-              <div className="flex-1">
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/png,image/jpeg,image/svg+xml,image/webp"
-                  className="hidden"
-                  id="logo-upload"
-                  onChange={handleLogoUpload}
-                />
-                <label
-                  htmlFor="logo-upload"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 border-2 border-blue-200 text-blue-600 rounded-xl text-sm font-medium cursor-pointer hover:bg-blue-50 transition-colors"
-                >
-                  <Upload className="w-4 h-4" />
-                  Importer un logo PNG / JPG
-                </label>
-                <div className="mt-2 text-xs text-gray-500 space-y-0.5">
-                  <p>✅ Formats acceptés : PNG, JPG, SVG, WebP</p>
-                  <p>✅ Taille max : 2 Mo</p>
-                  <p>✅ Redimensionné automatiquement à 200×200 px</p>
-                  <p>✅ Affiché dans la sidebar et les PDF générés</p>
-                </div>
-                {logoError && (
-                  <p className="mt-2 text-xs text-red-500 font-medium">⚠️ {logoError}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Upload Sceau */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
-              Sceau de l'établissement
-            </label>
-            <div className="flex items-start gap-4">
-              {/* Prévisualisation */}
-              <div className="shrink-0 w-20 h-20 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 overflow-hidden relative group">
-                {stampPreview ? (
-                  <>
-                    <img
-                      src={stampPreview}
-                      alt="Sceau aperçu"
-                      className="w-full h-full object-contain p-1"
-                    />
-                    <button
-                      type="button"
-                      onClick={removeStamp}
-                      className="absolute inset-0 bg-red-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl"
-                      title="Supprimer le sceau"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </>
-                ) : (
-                  <Image className="w-8 h-8 text-gray-300" />
-                )}
-              </div>
-
-              {/* Zone upload */}
-              <div className="flex-1">
-                <input
-                  ref={stampFileRef}
-                  type="file"
-                  accept="image/png,image/jpeg,image/svg+xml,image/webp"
-                  className="hidden"
-                  id="stamp-upload"
-                  onChange={handleStampUpload}
-                />
-                <label
-                  htmlFor="stamp-upload"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 border-2 border-blue-200 text-blue-600 rounded-xl text-sm font-medium cursor-pointer hover:bg-blue-50 transition-colors"
-                >
-                  <Upload className="w-4 h-4" />
-                  Importer un sceau PNG / JPG
-                </label>
-                <div className="mt-2 text-xs text-gray-500 space-y-0.5">
-                  <p>✅ Sceau affiché sur les bulletins PDF</p>
-                  <p>✅ Format conseillé : PNG avec fond transparent</p>
-                </div>
-                {stampError && (
-                  <p className="mt-2 text-xs text-red-500 font-medium">⚠️ {stampError}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Messages personnalisables */}
-          <div className="pt-2 border-t border-gray-100">
-            <h4 className="font-semibold text-gray-700 flex items-center gap-2 mb-4 text-sm">
-              <MessageSquare className="w-4 h-4 text-blue-500" />
-              Messages personnalisables (PDF & WhatsApp)
-            </h4>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                  Message de remerciement (élève soldé)
-                </label>
-                <textarea
-                  rows={3}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                  value={localRem}
-                  onChange={(e) => setLocalRem(e.target.value)}
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  Affiché sur les reçus PDF des élèves soldés.
-                </p>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                  Message de rappel (élève non soldé)
-                </label>
-                <textarea
-                  rows={3}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                  value={localRap}
-                  onChange={(e) => setLocalRap(e.target.value)}
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  Affiché sur les reçus PDF et envoyé sur WhatsApp.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {(user?.role === 'directeur' || user?.role === 'comptable') && (
-            <button
-              type="submit"
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all ${saved
-                ? 'bg-emerald-500 text-white'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-            >
-              <Save className="w-4 h-4" />
-              {saved ? '✓ Paramètres enregistrés !' : 'Enregistrer les paramètres'}
-            </button>
-          )}
-        </form>
+        </div>
       </div>
 
-      {/* ── HORAIRES SCOLAIRES PAR CYCLE ────────────────────── */}
-      {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-4">
-            <Clock className="w-4 h-4 text-cyan-600" />
-            Horaires scolaires — Heure limite d'arrivée par cycle
-          </h3>
-          <p className="text-xs text-gray-500 mb-4">
-            Définissez l'heure limite d'arrivée pour chaque cycle. Un élève qui scanne sa carte après cette heure sera marqué <span className="font-bold text-orange-600">en retard</span>.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-            {localSchedules.map((schedule, idx) => (
-              <div key={schedule.cycle} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                  {schedule.cycle === 'Primaire' && '🏫 '}
-                  {schedule.cycle === 'Collège' && '📚 '}
-                  {schedule.cycle === 'Lycée' && '🎓 '}
-                  {schedule.cycle}
-                </label>
-                <input
-                  type="time"
-                  value={schedule.heureLimite}
-                  onChange={(e) => {
-                    const updated = [...localSchedules];
-                    updated[idx] = { ...schedule, heureLimite: e.target.value };
-                    setLocalSchedules(updated);
-                  }}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-lg font-mono font-bold text-center focus:ring-2 focus:ring-cyan-500 outline-none"
-                />
-                <p className="text-[10px] text-gray-400 mt-1.5 text-center">
-                  Retard si scan après {schedule.heureLimite}
-                </p>
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={() => {
-              setCycleSchedules(localSchedules);
-              setScheduleSaved(true);
-              setTimeout(() => setScheduleSaved(false), 3000);
-            }}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all ${scheduleSaved
-              ? 'bg-emerald-500 text-white'
-              : 'bg-cyan-600 text-white hover:bg-cyan-700'
-              }`}
-          >
-            <Save className="w-4 h-4" />
-            {scheduleSaved ? '✓ Horaires enregistrés !' : 'Enregistrer les horaires'}
-          </button>
-        </div>
-      )}
-
-      {/* ── TRANCHES DE PAIEMENT ────────────────────────────── */}
-      {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="font-semibold text-gray-800 flex items-center justify-between gap-2 mb-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-indigo-600" />
-              Paramétrage des Tranches de Paiement
-            </div>
-            <button
-              onClick={() => {
-                const updated = [...localTranches, { id: crypto.randomUUID?.() || Date.now().toString(), nom: `Tranche ${localTranches.length + 1}`, dateLimite: '', pourcentage: 0 }];
-                setLocalTranches(updated);
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-bold transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Ajouter
-            </button>
-          </h3>
-          <p className="text-xs text-gray-500 mb-4">
-            Définissez les différentes tranches de paiement, leur date limite et le pourcentage de l'écolage associé. Cela permet de mieux déduire le statut des paiements et le nombre de jours de retard dans la section Recouvrement.
-          </p>
-          
-          <div className="space-y-3 mb-4">
-            {localTranches.length === 0 ? (
-              <div className="text-center py-6 bg-gray-50 rounded-xl text-gray-400 text-sm border border-dashed border-gray-200">
-                Aucune tranche paramétrée
-              </div>
-            ) : (
-              localTranches.map((t, idx) => (
-                <div key={t.id} className="flex flex-col sm:flex-row items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
-                  <input
-                    type="text"
-                    value={t.nom}
-                    onChange={(e) => {
-                      const updated = [...localTranches];
-                      updated[idx].nom = e.target.value;
-                      setLocalTranches(updated);
-                    }}
-                    placeholder="Nom (ex: Tranche 1)"
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none w-full"
-                  />
-                  <input
-                    type="date"
-                    value={t.dateLimite}
-                    onChange={(e) => {
-                      const updated = [...localTranches];
-                      updated[idx].dateLimite = e.target.value;
-                      setLocalTranches(updated);
-                    }}
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none w-full sm:w-auto"
-                  />
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={t.pourcentage}
-                      onChange={(e) => {
-                        const updated = [...localTranches];
-                        updated[idx].pourcentage = Number(e.target.value);
-                        setLocalTranches(updated);
-                      }}
-                      placeholder="%"
-                      className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center"
-                    />
-                    <span className="text-sm text-gray-500 font-bold">%</span>
-                    <button
-                      onClick={() => {
-                        const updated = localTranches.filter((_, i) => i !== idx);
-                        setLocalTranches(updated);
-                      }}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors ml-auto sm:ml-2"
-                      title="Supprimer"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        
+        {/* COLONNE GAUCHE (Principale) */}
+        <div className="xl:col-span-2 space-y-6">
+            {/* ── IDENTITÉ DE L'APPLICATION ─────────────────────── */}
+            <div className="pro-card p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800">
+                <h3 className="font-black text-lg text-slate-900 dark:text-white flex items-center gap-3 mb-6">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl">
+                    <School className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
-              ))
+                Identité de l'Établissement
+                </h3>
+                
+                <form onSubmit={handleSave} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                            Nom de l'application
+                        </label>
+                        <input
+                            disabled={user?.role !== 'directeur' && user?.role !== 'comptable'}
+                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-60"
+                            value={localAppName}
+                            onChange={(e) => setLocalAppName(e.target.value)}
+                            placeholder="Ex : EduFinance"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                            Nom de l'établissement
+                        </label>
+                        <input
+                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                            value={localSchool}
+                            onChange={(e) => setLocalSchool(e.target.value)}
+                            placeholder="Ex : Groupe Scolaire Excellence"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                            Année scolaire
+                        </label>
+                        <input
+                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                            value={localYear}
+                            onChange={(e) => setLocalYear(e.target.value)}
+                            placeholder="Ex : 2024-2025"
+                        />
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-100 dark:border-slate-800/60">
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">
+                            Logo de l'établissement
+                        </label>
+                        <div className="flex items-center gap-4">
+                            <div className="shrink-0 w-20 h-20 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 overflow-hidden relative group">
+                                {logoPreview ? (
+                                <>
+                                    <img src={logoPreview} alt="Logo aperçu" className="w-full h-full object-contain p-2" />
+                                    <button type="button" onClick={removeLogo} className="absolute inset-0 bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                                    <X className="w-5 h-5" />
+                                    </button>
+                                </>
+                                ) : (
+                                <Image className="w-6 h-6 text-slate-300 dark:text-slate-600" />
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" className="hidden" id="logo-upload" onChange={handleLogoUpload} />
+                                <label htmlFor="logo-upload" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/10 text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 rounded-xl text-[11px] font-black uppercase tracking-widest cursor-pointer transition-colors border border-transparent hover:border-indigo-200 dark:hover:border-indigo-500/30">
+                                <Upload className="w-3.5 h-3.5" /> Modifier Logo
+                                </label>
+                                {logoError && <p className="mt-2 text-[10px] font-bold text-rose-500">{logoError}</p>}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">
+                            Sceau / Cachet
+                        </label>
+                        <div className="flex items-center gap-4">
+                            <div className="shrink-0 w-20 h-20 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 overflow-hidden relative group">
+                                {stampPreview ? (
+                                <>
+                                    <img src={stampPreview} alt="Sceau aperçu" className="w-full h-full object-contain p-2" />
+                                    <button type="button" onClick={removeStamp} className="absolute inset-0 bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                                    <X className="w-5 h-5" />
+                                    </button>
+                                </>
+                                ) : (
+                                <Image className="w-6 h-6 text-slate-300 dark:text-slate-600" />
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <input ref={stampFileRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" className="hidden" id="stamp-upload" onChange={handleStampUpload} />
+                                <label htmlFor="stamp-upload" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/10 text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 rounded-xl text-[11px] font-black uppercase tracking-widest cursor-pointer transition-colors border border-transparent hover:border-indigo-200 dark:hover:border-indigo-500/30">
+                                <Upload className="w-3.5 h-3.5" /> Modifier Sceau
+                                </label>
+                                {stampError && <p className="mt-2 text-[10px] font-bold text-rose-500">{stampError}</p>}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
+                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <MessageSquare className="w-3.5 h-3.5 text-indigo-500" /> Messages Personnalisables
+                    </h4>
+                    <div className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">Message de remerciement (Soldé)</label>
+                        <textarea
+                            rows={2}
+                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"
+                            value={localRem}
+                            onChange={(e) => setLocalRem(e.target.value)}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">Message de rappel (Non soldé)</label>
+                        <textarea
+                            rows={2}
+                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"
+                            value={localRap}
+                            onChange={(e) => setLocalRap(e.target.value)}
+                        />
+                    </div>
+                    </div>
+                </div>
+
+                {(user?.role === 'directeur' || user?.role === 'comptable') && (
+                    <div className="flex justify-end pt-4">
+                        <button
+                        type="submit"
+                        className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all ${
+                            saved
+                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20'
+                        }`}
+                        >
+                        <Save className="w-4 h-4" />
+                        {saved ? 'Enregistré' : 'Enregistrer'}
+                        </button>
+                    </div>
+                )}
+                </form>
+            </div>
+
+            {/* ── TRANCHES DE PAIEMENT ────────────────────────────── */}
+            {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
+                <div className="pro-card p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <h3 className="font-black text-lg text-slate-900 dark:text-white flex items-center gap-3">
+                            <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl">
+                                <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                            </div>
+                            Tranches de Paiement
+                        </h3>
+                        <button
+                            onClick={() => {
+                                const updated = [...localTranches, { id: crypto.randomUUID?.() || Date.now().toString(), nom: `Tranche ${localTranches.length + 1}`, dateLimite: '', pourcentage: 0 }];
+                                setLocalTranches(updated);
+                            }}
+                            className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-50 hover:bg-indigo-500 text-indigo-600 hover:text-white dark:bg-indigo-500/10 dark:hover:bg-indigo-500 dark:text-indigo-400 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all"
+                        >
+                            <Plus className="w-3.5 h-3.5" /> Ajouter
+                        </button>
+                    </div>
+
+                    <div className="space-y-3 mb-6">
+                        {localTranches.length === 0 ? (
+                        <div className="text-center py-8 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700">
+                            <p className="text-sm font-bold text-slate-500">Aucune tranche paramétrée</p>
+                        </div>
+                        ) : (
+                        localTranches.map((t, idx) => (
+                            <div key={t.id} className="flex flex-col sm:flex-row items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                <input
+                                    type="text"
+                                    value={t.nom}
+                                    onChange={(e) => {
+                                        const updated = [...localTranches];
+                                        updated[idx].nom = e.target.value;
+                                        setLocalTranches(updated);
+                                    }}
+                                    placeholder="Nom (ex: Tranche 1)"
+                                    className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none w-full"
+                                />
+                                <input
+                                    type="date"
+                                    value={t.dateLimite}
+                                    onChange={(e) => {
+                                        const updated = [...localTranches];
+                                        updated[idx].dateLimite = e.target.value;
+                                        setLocalTranches(updated);
+                                    }}
+                                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none w-full sm:w-auto"
+                                />
+                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="100"
+                                            value={t.pourcentage}
+                                            onChange={(e) => {
+                                                const updated = [...localTranches];
+                                                updated[idx].pourcentage = Number(e.target.value);
+                                                setLocalTranches(updated);
+                                            }}
+                                            className="w-24 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-8 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-right"
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400">%</span>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            const updated = localTranches.filter((_, i) => i !== idx);
+                                            setLocalTranches(updated);
+                                        }}
+                                        className="p-2.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors ml-auto sm:ml-1"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                        )}
+                        {localTranches.length > 0 && (
+                        <div className="flex justify-end pt-2">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                Total : 
+                                <span className={`ml-2 text-sm ${localTranches.reduce((sum, t) => sum + (t.pourcentage || 0), 0) === 100 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                    {localTranches.reduce((sum, t) => sum + (t.pourcentage || 0), 0)}%
+                                </span>
+                            </span>
+                        </div>
+                        )}
+                    </div>
+
+                    <div className="flex justify-end">
+                        <button
+                            onClick={() => {
+                                setTranches(localTranches);
+                                updateAllSettings({ tranches: localTranches });
+                                setTranchesSaved(true);
+                                setTimeout(() => setTranchesSaved(false), 3000);
+                            }}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all ${
+                            tranchesSaved
+                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20'
+                            }`}
+                        >
+                            <Save className="w-4 h-4" />
+                            {tranchesSaved ? 'Enregistré' : 'Enregistrer'}
+                        </button>
+                    </div>
+                </div>
             )}
-            {localTranches.length > 0 && (
-              <div className="flex justify-end pr-14 text-xs font-bold mt-2">
-                Total: <span className={`ml-1 ${localTranches.reduce((sum, t) => sum + (t.pourcentage || 0), 0) === 100 ? 'text-emerald-600' : 'text-orange-500'}`}>{localTranches.reduce((sum, t) => sum + (t.pourcentage || 0), 0)}%</span>
-              </div>
+        </div>
+
+        {/* COLONNE DROITE (Secondaire) */}
+        <div className="space-y-6">
+            
+            {/* ── GESTION DU PERSONNEL ────────────────────────────── */}
+            {(user?.role === 'directeur' || user?.role === 'directeur_general') && (
+                <div className="pro-card p-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800 overflow-hidden">
+                    <GestionPersonnel />
+                </div>
             )}
-          </div>
-          
-          <button
-            onClick={() => {
-              setTranches(localTranches);
-              updateAllSettings({ tranches: localTranches });
-              setTranchesSaved(true);
-              setTimeout(() => setTranchesSaved(false), 3000);
-            }}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all ${tranchesSaved
-              ? 'bg-emerald-500 text-white'
-              : 'bg-indigo-600 text-white hover:bg-indigo-700'
-              }`}
-          >
-            <Save className="w-4 h-4" />
-            {tranchesSaved ? '✓ Tranches enregistrées !' : 'Enregistrer les tranches'}
-          </button>
-        </div>
-      )}
 
-      {/* ── COMPTE UTILISATEUR ────────────────────────────── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-4">
-          <Shield className="w-4 h-4 text-blue-600" /> Compte & Sécurité
-        </h3>
-        <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Utilisateur connecté</span>
-            <span className="font-medium text-gray-900">{user?.nom}</span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Identifiant</span>
-            <span className="font-medium text-gray-900 font-mono">{user?.username}</span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Rôle</span>
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general'
-              ? 'bg-blue-100 text-blue-700'
-              : 'bg-emerald-100 text-emerald-700'
-              }`}>
-              {user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' ? '🛡 Admin' : '📊 Comptable'}
-            </span>
-          </div>
-        </div>
+            {/* ── HORAIRES SCOLAIRES ────────────────────── */}
+            {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
+                <div className="pro-card p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800">
+                    <h3 className="font-black text-lg text-slate-900 dark:text-white flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl">
+                            <Clock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        Horaires & Retards
+                    </h3>
+                    <div className="space-y-3 mb-6">
+                        {localSchedules.map((schedule, idx) => (
+                        <div key={schedule.cycle} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <span className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest">
+                                {schedule.cycle}
+                            </span>
+                            <input
+                                type="time"
+                                value={schedule.heureLimite}
+                                onChange={(e) => {
+                                    const updated = [...localSchedules];
+                                    updated[idx] = { ...schedule, heureLimite: e.target.value };
+                                    setLocalSchedules(updated);
+                                }}
+                                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-sm font-bold font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                            />
+                        </div>
+                        ))}
+                    </div>
+                    <button
+                        onClick={() => {
+                            setCycleSchedules(localSchedules);
+                            setScheduleSaved(true);
+                            setTimeout(() => setScheduleSaved(false), 3000);
+                        }}
+                        className={`w-full flex justify-center items-center gap-2 px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all ${
+                            scheduleSaved
+                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20'
+                        }`}
+                    >
+                        <Save className="w-4 h-4" />
+                        {scheduleSaved ? 'Enregistré' : 'Enregistrer'}
+                    </button>
+                </div>
+            )}
 
+            {/* ── COMPTE UTILISATEUR ────────────────────────────── */}
+            <div className="pro-card p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800">
+                <h3 className="font-black text-lg text-slate-900 dark:text-white flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl">
+                        <Shield className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    Mon Compte
+                </h3>
+                <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Utilisateur</span>
+                        <span className="text-sm font-bold text-slate-900 dark:text-white">{user?.nom}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Identifiant</span>
+                        <span className="text-sm font-bold font-mono text-slate-900 dark:text-white">{user?.username}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Rôle</span>
+                        <span className="px-3 py-1 bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                            {user?.role}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* ── DANGER ZONE ────────────────────────────── */}
+            {(user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general') && (
+                <div className="pro-card p-6 bg-rose-50/50 dark:bg-rose-500/5 backdrop-blur-xl border border-rose-200/50 dark:border-rose-500/20">
+                    <h3 className="font-black text-lg text-rose-700 dark:text-rose-400 flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-rose-100 dark:bg-rose-500/20 rounded-xl">
+                            <Database className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                        </div>
+                        Maintenance
+                    </h3>
+                    <div className="space-y-3">
+                        <button
+                            onClick={async () => {
+                                if (window.confirm("Voulez-vous vraiment VIDER tout l'historique des scans de présence ? Cette action est irréversible.")) {
+                                    const success = await useStore.getState().clearCloudPresences();
+                                    if (success) alert("Historique des présences vidé.");
+                                }
+                            }}
+                            className="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-rose-100 dark:border-rose-500/20 rounded-2xl hover:border-rose-300 dark:hover:border-rose-500/40 transition-colors group"
+                        >
+                            <span className="text-[11px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest group-hover:text-rose-700 dark:group-hover:text-rose-300">Purger Présences</span>
+                            <Trash2 className="w-4 h-4 text-rose-400" />
+                        </button>
+                        <button
+                            onClick={async () => {
+                                if (window.confirm("Voulez-vous vraiment VIDER tous les logs d'activité ?")) {
+                                    const success = await useStore.getState().clearCloudActivityLogs();
+                                    if (success) alert("Logs d'activité vidés.");
+                                }
+                            }}
+                            className="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-rose-100 dark:border-rose-500/20 rounded-2xl hover:border-rose-300 dark:hover:border-rose-500/40 transition-colors group"
+                        >
+                            <span className="text-[11px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest group-hover:text-rose-700 dark:group-hover:text-rose-300">Purger Logs</span>
+                            <Trash2 className="w-4 h-4 text-rose-400" />
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ── À PROPOS ──────────────────────────────────────── */}
+            <div className="flex items-center justify-center gap-2 text-slate-400 dark:text-slate-600">
+                <Info className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">{appName} v1.0 — Nomade Corp</span>
+            </div>
+
+        </div>
       </div>
-
-      {/* ── MAINTENANCE DES DONNÉES CLOUD ──────────────────── */}
-      {(user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general') && (
-        <div className="bg-amber-50 rounded-2xl border border-amber-100 p-6 mb-6">
-          <h3 className="font-bold text-amber-800 flex items-center gap-2 mb-2">
-            <Database className="w-5 h-5 text-amber-600" /> Maintenance des Données Cloud
-          </h3>
-          <p className="text-sm text-amber-700 mb-4">
-            Actions de nettoyage pour la base de données. Ces actions sont définitives.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={async () => {
-                if (window.confirm("Voulez-vous vraiment VIDER tout l'historique des scans de présence ? Cette action est irréversible.")) {
-                  const success = await useStore.getState().clearCloudPresences();
-                  if (success) alert("Historique des présences vidé avec succès.");
-                  else alert("Erreur lors du nettoyage des présences.");
-                }
-              }}
-              className="px-4 py-2 bg-white border border-amber-200 text-amber-700 hover:bg-amber-100 rounded-xl text-xs font-bold transition-all shadow-sm"
-            >
-              Vider l'Historique des Scans
-            </button>
-            <button
-              onClick={async () => {
-                if (window.confirm("Voulez-vous vraiment VIDER tous les logs d'activité ?")) {
-                  const success = await useStore.getState().clearCloudActivityLogs();
-                  if (success) alert("Logs d'activité vidés avec succès.");
-                  else alert("Erreur lors du nettoyage des logs.");
-                }
-              }}
-              className="px-4 py-2 bg-white border border-amber-200 text-amber-700 hover:bg-amber-100 rounded-xl text-xs font-bold transition-all shadow-sm"
-            >
-              Vider les Logs d'Activité
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── À PROPOS ──────────────────────────────────────── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-4">
-          <Info className="w-4 h-4 text-blue-600" /> À propos
-        </h3>
-        <div className="space-y-2 text-sm text-gray-600">
-          <p><strong className="text-gray-800">{appName} v1.0</strong> — Gestion financière scolaire</p>
-          <p className="font-medium text-emerald-600">Developed by Nomade Corporation</p>
-        </div>
-      </div>
-
-      {/* ── ZONE DE DANGER (Uniquement Parents) ───────────── */}
-      {user?.role === 'parent' && (
-        <div className="bg-red-50 rounded-2xl border border-red-100 p-6">
-          <h3 className="font-bold text-red-800 flex items-center gap-2 mb-2">
-            <AlertCircle className="w-5 h-5" /> Zone de Danger
-          </h3>
-          <p className="text-sm text-red-600 mb-4 font-medium">
-            La suppression de votre compte est irréversible. Toutes vos données personnelles et vos liaisons avec les élèves seront effacées.
-          </p>
-          <button
-            onClick={async () => {
-              if (window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.")) {
-                try {
-                  const { parentApi } = await import('../services/parentApi');
-                  await parentApi.deleteAccount();
-                  useStore.getState().logout();
-                } catch (err) {
-                  alert("Erreur lors de la suppression du compte.");
-                }
-              }
-            }}
-            className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-200 transition-all"
-          >
-            Supprimer mon compte définitivement
-          </button>
-        </div>
-      )}
-
     </div>
   );
 };
