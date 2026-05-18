@@ -10,9 +10,9 @@ import {
 import type { AnnouncementImportance, AnnouncementTarget } from '../types';
 
 const IMPORTANCE_LABELS: Record<AnnouncementImportance, { label: string; color: string; icon: React.ReactNode }> = {
-    info:      { label: 'Information',   color: 'bg-blue-100 text-blue-700 border-blue-200',    icon: <Info className="w-3.5 h-3.5" /> },
-    important: { label: 'Important',     color: 'bg-amber-100 text-amber-700 border-amber-200',  icon: <AlertCircle className="w-3.5 h-3.5" /> },
-    urgent:    { label: 'Urgent',        color: 'bg-red-100 text-red-700 border-red-200',        icon: <AlertTriangle className="w-3.5 h-3.5" /> },
+    info:      { label: 'Information',   color: 'bg-blue-500/10 text-blue-700 border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.1)]',    icon: <Info className="w-3.5 h-3.5" /> },
+    important: { label: 'Important',     color: 'bg-amber-500/10 text-amber-700 border-amber-500/20 shadow-[0_0_10px_rgba(245,158,11,0.1)]',  icon: <AlertCircle className="w-3.5 h-3.5" /> },
+    urgent:    { label: 'Urgent',        color: 'bg-rose-500/10 text-rose-700 border-rose-500/20 shadow-[0_0_10px_rgba(244,63,94,0.1)]',        icon: <AlertTriangle className="w-3.5 h-3.5" /> },
 };
 
 export const Annonces: React.FC = () => {
@@ -84,229 +84,276 @@ export const Annonces: React.FC = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
-
-            {/* En-tête */}
-            <div className="bg-gradient-to-r from-purple-600 to-indigo-700 rounded-2xl p-6 text-white">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                            <Megaphone className="w-5 h-5" />
+        <div className="max-w-4xl mx-auto space-y-8 animate-fadeIn pb-24">
+            
+            {/* Header Ultra-Premium */}
+            <div className="pro-card p-6 md:p-8 bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-950 text-white relative overflow-hidden border-indigo-500/30">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4"></div>
+                
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                            <Megaphone className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold">Annonces de l'école</h2>
-                            <p className="text-purple-200 text-sm">
-                                Communication directe avec les parents — popup obligatoire
+                            <h2 className="text-2xl font-bold tracking-tight text-white drop-shadow-md">Annonces & Communications</h2>
+                            <p className="text-indigo-200 text-sm mt-1 font-medium max-w-md">
+                                Gérez les communications avec les parents d'élèves. Les annonces importantes nécessitent une confirmation de lecture.
                             </p>
                         </div>
                     </div>
+                    
                     {!isParent && (
                         <button
                             onClick={() => setShowForm(!showForm)}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-bold transition-all"
+                            className="group flex items-center justify-center gap-2 px-6 py-3 bg-white text-indigo-900 hover:bg-indigo-50 rounded-xl text-sm font-bold transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] hover:-translate-y-0.5"
                         >
-                            {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                            {showForm ? 'Annuler' : 'Créer une annonce'}
+                            {showForm ? <X className="w-5 h-5 transition-transform group-hover:rotate-90" /> : <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />}
+                            {showForm ? 'Annuler' : 'Nouvelle Annonce'}
                         </button>
                     )}
                 </div>
 
                 {!isParent && (
-                    <div className="grid grid-cols-3 gap-3 mt-4">
-                        <div className="bg-white/10 rounded-xl p-3 text-center">
-                            <p className="text-2xl font-bold">{announcements.length}</p>
-                            <p className="text-xs text-purple-200">Annonces</p>
+                    <div className="grid grid-cols-3 gap-4 mt-8 relative z-10">
+                        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:bg-white/15 transition-colors">
+                            <p className="text-3xl font-black text-white drop-shadow-md mb-1">{announcements.length}</p>
+                            <p className="text-xs font-bold text-indigo-200 uppercase tracking-wider">Total Annonces</p>
                         </div>
-                        <div className="bg-white/10 rounded-xl p-3 text-center">
-                            <p className="text-2xl font-bold">
+                        <div className="bg-rose-500/20 backdrop-blur-md rounded-2xl p-4 border border-rose-500/30 hover:bg-rose-500/30 transition-colors">
+                            <p className="text-3xl font-black text-rose-100 drop-shadow-md mb-1">
                                 {announcements.filter(a => a.importance === 'urgent').length}
                             </p>
-                            <p className="text-xs text-purple-200">Urgentes</p>
+                            <p className="text-xs font-bold text-rose-200 uppercase tracking-wider">Urgentes</p>
                         </div>
-                        <div className="bg-white/10 rounded-xl p-3 text-center">
-                            <p className="text-2xl font-bold">
+                        <div className="bg-emerald-500/20 backdrop-blur-md rounded-2xl p-4 border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors">
+                            <p className="text-3xl font-black text-emerald-100 drop-shadow-md mb-1">
                                 {announcementReads.filter(r => r.readAt).length}
                             </p>
-                            <p className="text-xs text-purple-200">Confirmations "J'ai lu"</p>
+                            <p className="text-xs font-bold text-emerald-200 uppercase tracking-wider">Confirmations "Lues"</p>
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Formulaire création */}
+            {/* Formulaire création avec Bento Layout */}
             {showForm && !isParent && (
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 animate-slideDown">
-                    <h3 className="font-semibold text-gray-800 flex items-center gap-2 mb-4">
-                        <Send className="w-4 h-4 text-purple-600" />
-                        Nouvelle annonce
+                <div className="pro-card p-6 md:p-8 animate-slideDown border-indigo-100">
+                    <h3 className="text-lg font-black text-slate-800 flex items-center gap-2 mb-6">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600">
+                            <Send className="w-4 h-4" />
+                        </div>
+                        Rédiger une nouvelle annonce
                     </h3>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Titre */}
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                                Titre de l'annonce *
-                            </label>
-                            <input
-                                value={titre}
-                                onChange={e => setTitre(e.target.value)}
-                                placeholder="Ex: Réunion parents-professeurs"
-                                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
-                                required
-                            />
-                        </div>
+                    
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                            {/* Colonne Principale */}
+                            <div className="md:col-span-8 space-y-6">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">
+                                        Titre de l'annonce <span className="text-rose-500">*</span>
+                                    </label>
+                                    <input
+                                        value={titre}
+                                        onChange={e => setTitre(e.target.value)}
+                                        placeholder="Ex: Réunion de rentrée, Modification des horaires..."
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white outline-none transition-all placeholder-slate-400 font-medium text-slate-800"
+                                        required
+                                    />
+                                </div>
 
-                        {/* Message */}
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                                Message complet *
-                            </label>
-                            <textarea
-                                value={message}
-                                onChange={e => setMessage(e.target.value)}
-                                rows={4}
-                                placeholder="Rédigez le message qui sera affiché aux parents..."
-                                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none resize-none"
-                                required
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            {/* Cible */}
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                                    <Filter className="w-3 h-3 inline mr-1" />
-                                    Destinataires
-                                </label>
-                                <select
-                                    value={cible}
-                                    onChange={e => setCible(e.target.value as AnnouncementTarget)}
-                                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:ring-2 focus:ring-purple-500 outline-none"
-                                >
-                                    <option value="all">Toutes les classes</option>
-                                    {classes.map(c => <option key={c} value={c}>{c}</option>)}
-                                </select>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">
+                                        Contenu détaillé <span className="text-rose-500">*</span>
+                                    </label>
+                                    <textarea
+                                        value={message}
+                                        onChange={e => setMessage(e.target.value)}
+                                        rows={5}
+                                        placeholder="Rédigez le message détaillé qui sera lu par les parents..."
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white outline-none transition-all placeholder-slate-400 resize-none font-medium text-slate-800"
+                                        required
+                                    />
+                                </div>
                             </div>
 
-                            {/* Importance */}
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                                    Niveau d'importance
-                                </label>
-                                <div className="flex gap-2">
-                                    {(['info', 'important', 'urgent'] as const).map(level => (
-                                        <button
-                                            key={level}
-                                            type="button"
-                                            onClick={() => setImportance(level)}
-                                            className={`flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-xl text-xs font-bold border transition-all ${importance === level
-                                                ? IMPORTANCE_LABELS[level].color + ' ring-2 ring-offset-1'
-                                                : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
-                                                }`}
-                                        >
-                                            {IMPORTANCE_LABELS[level].icon}
-                                            {IMPORTANCE_LABELS[level].label}
-                                        </button>
-                                    ))}
+                            {/* Colonne Paramètres (Bento) */}
+                            <div className="md:col-span-4 space-y-6">
+                                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                                    <label className="flex items-center gap-2 text-xs font-bold text-slate-600 mb-3 uppercase tracking-wider">
+                                        <Filter className="w-3.5 h-3.5 text-slate-400" />
+                                        Destinataires
+                                    </label>
+                                    <select
+                                        value={cible}
+                                        onChange={e => setCible(e.target.value as AnnouncementTarget)}
+                                        className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:ring-2 focus:ring-indigo-500/50 outline-none font-medium shadow-sm cursor-pointer"
+                                    >
+                                        <option value="all">Établissement entier</option>
+                                        <optgroup label="Classes spécifiques">
+                                            {classes.map(c => <option key={c} value={c}>Classe: {c}</option>)}
+                                        </optgroup>
+                                    </select>
+                                </div>
+
+                                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                                    <label className="block text-xs font-bold text-slate-600 mb-3 uppercase tracking-wider">
+                                        Niveau de priorité
+                                    </label>
+                                    <div className="flex flex-col gap-2">
+                                        {(['info', 'important', 'urgent'] as const).map(level => {
+                                            const isSelected = importance === level;
+                                            return (
+                                                <button
+                                                    key={level}
+                                                    type="button"
+                                                    onClick={() => setImportance(level)}
+                                                    className={`flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold border transition-all ${
+                                                        isSelected
+                                                            ? IMPORTANCE_LABELS[level].color + ' ring-1 ring-black/5 scale-[1.02]'
+                                                            : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 hover:text-slate-700'
+                                                    }`}
+                                                >
+                                                    {IMPORTANCE_LABELS[level].icon}
+                                                    <span className="flex-1 text-left">{IMPORTANCE_LABELS[level].label}</span>
+                                                    {isSelected && <CheckCircle className="w-4 h-4 opacity-70" />}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={!titre.trim() || !message.trim()}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold transition-all shadow-md"
-                        >
-                            <Send className="w-4 h-4" />
-                            Publier l'annonce
-                        </button>
+                        <div className="pt-6 border-t border-slate-100 flex justify-end">
+                            <button
+                                type="submit"
+                                disabled={!titre.trim() || !message.trim()}
+                                className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5"
+                            >
+                                <Send className="w-4 h-4" />
+                                Publier l'annonce maintenant
+                            </button>
+                        </div>
                     </form>
                 </div>
             )}
 
             {/* Liste des annonces */}
-            <div className="space-y-3">
+            <div className="space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-black text-slate-800">Journal des annonces</h3>
+                    <span className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg border border-slate-200">
+                        {displayAnnouncements.length} {displayAnnouncements.length > 1 ? 'publiées' : 'publiée'}
+                    </span>
+                </div>
+
                 {displayAnnouncements.length === 0 ? (
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
-                        <Megaphone className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-                        <p className="text-gray-500 font-medium">{isParent ? "Aucune annonce" : "Aucune annonce publiée"}</p>
-                        <p className="text-xs text-gray-400 mt-1">
-                            {isParent ? "Vous n'avez aucune nouvelle annonce de l'école." : "Créez votre première annonce pour informer les parents"}
+                    <div className="pro-card p-16 text-center border-dashed border-2 border-slate-200 bg-slate-50/50">
+                        <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Megaphone className="w-10 h-10 text-slate-300" />
+                        </div>
+                        <p className="text-lg font-bold text-slate-700 mb-2">
+                            {isParent ? "Aucune annonce disponible" : "Le journal est vide"}
+                        </p>
+                        <p className="text-sm font-medium text-slate-500 max-w-sm mx-auto">
+                            {isParent 
+                                ? "L'établissement n'a publié aucune annonce vous concernant pour le moment." 
+                                : "Créez votre première annonce pour communiquer des informations importantes aux parents."}
                         </p>
                     </div>
                 ) : (
-                    displayAnnouncements.map(a => {
-                        const imp = IMPORTANCE_LABELS[a.importance];
-                        const stats = getReadStats(a.id);
-                        const nonLus = stats.total - stats.lus;
-                        const isReadByMe = isParent && announcementReads.some(r => r.announcementId === a.id && r.parentId === user?.id && r.readAt);
+                    <div className="grid grid-cols-1 gap-4">
+                        {displayAnnouncements.map(a => {
+                            const imp = IMPORTANCE_LABELS[a.importance];
+                            const stats = getReadStats(a.id);
+                            const nonLus = stats.total - stats.lus;
+                            const isReadByMe = isParent && announcementReads.some(r => r.announcementId === a.id && r.parentId === user?.id && r.readAt);
 
-                        return (
-                            <div key={a.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-all">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="flex-1 min-w-0">
-                                        {/* Badge importance + cible */}
-                                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold border ${imp.color}`}>
-                                                {imp.icon} {imp.label}
-                                            </span>
-                                            <span className="text-[10px] text-gray-400 font-medium">
-                                                {a.cible === 'all' ? 'Toutes les classes' : `Classe: ${a.cible}`}
-                                            </span>
-                                            <span className="text-[10px] text-gray-300 flex items-center gap-1">
-                                                <Clock className="w-2.5 h-2.5" />
-                                                {new Date(a.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                            </span>
-                                        </div>
-
-                                        {/* Titre + Message */}
-                                        <h4 className="font-bold text-gray-900 text-sm mb-1">{a.titre}</h4>
-                                        <p className="text-xs text-gray-600 leading-relaxed line-clamp-3">{a.message}</p>
-
-                                        {/* Stats lecture */}
-                                        {!isParent ? (
-                                            <div className="flex items-center gap-4 mt-3">
-                                                <div className="flex items-center gap-1.5 text-xs text-emerald-600">
-                                                    <Eye className="w-3.5 h-3.5" />
-                                                    <span className="font-bold">{stats.lus}</span>
-                                                    <span className="text-gray-400">parent{stats.lus > 1 ? 's' : ''} informé{stats.lus > 1 ? 's' : ''}</span>
+                            return (
+                                <div key={a.id} className="pro-card p-0 overflow-hidden group hover:border-indigo-200 transition-colors">
+                                    <div className="flex flex-col sm:flex-row">
+                                        {/* Bande de couleur latérale (Importance) */}
+                                        <div className={`w-1.5 shrink-0 ${
+                                            a.importance === 'urgent' ? 'bg-rose-500' :
+                                            a.importance === 'important' ? 'bg-amber-500' : 'bg-blue-500'
+                                        }`}></div>
+                                        
+                                        <div className="flex-1 p-5 sm:p-6 flex flex-col sm:flex-row gap-6">
+                                            <div className="flex-1 min-w-0">
+                                                {/* Meta-données */}
+                                                <div className="flex items-center gap-3 mb-3 flex-wrap">
+                                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${imp.color}`}>
+                                                        {imp.icon} {imp.label}
+                                                    </span>
+                                                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-600">
+                                                        <Filter className="w-3 h-3 text-slate-400" />
+                                                        {a.cible === 'all' ? 'Toutes les classes' : `Cible: ${a.cible}`}
+                                                    </span>
+                                                    <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1.5">
+                                                        <Clock className="w-3.5 h-3.5" />
+                                                        {new Date(a.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
                                                 </div>
-                                                {nonLus > 0 && (
-                                                    <div className="flex items-center gap-1.5 text-xs text-amber-600">
-                                                        <EyeOff className="w-3.5 h-3.5" />
-                                                        <span className="font-bold">{nonLus}</span>
-                                                        <span className="text-gray-400">non lu{nonLus > 1 ? 's' : ''}</span>
+
+                                                {/* Contenu */}
+                                                <h4 className="text-base font-bold text-slate-900 mb-2 leading-tight">{a.titre}</h4>
+                                                <p className="text-sm font-medium text-slate-600 leading-relaxed bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+                                                    {a.message}
+                                                </p>
+
+                                                {/* Footer (Stats / Status) */}
+                                                {!isParent ? (
+                                                    <div className="flex items-center gap-6 mt-4">
+                                                        <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
+                                                            <Eye className="w-4 h-4" />
+                                                            <span>{stats.lus}</span>
+                                                            <span className="font-medium text-emerald-700/70">Parent{stats.lus > 1 ? 's' : ''} touché{stats.lus > 1 ? 's' : ''}</span>
+                                                        </div>
+                                                        {nonLus > 0 && (
+                                                            <div className="flex items-center gap-2 text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-100">
+                                                                <EyeOff className="w-4 h-4" />
+                                                                <span>{nonLus}</span>
+                                                                <span className="font-medium text-rose-700/70">En attente</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="mt-4">
+                                                        {isReadByMe ? (
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100 text-xs font-bold text-emerald-700">
+                                                                <CheckCircle className="w-4 h-4 text-emerald-500" /> Confirmée lue
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-100 text-xs font-bold text-amber-700">
+                                                                <Clock className="w-4 h-4 text-amber-500" /> Lecture en attente
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
-                                        ) : (
-                                            <div className="flex items-center gap-1.5 mt-3 text-xs text-gray-500">
-                                                {isReadByMe ? (
-                                                    <span className="flex items-center gap-1 text-emerald-600 font-medium">
-                                                        <CheckCircle className="w-3.5 h-3.5" /> Lu
-                                                    </span>
-                                                ) : (
-                                                    <span className="flex items-center gap-1 text-amber-600 font-medium">
-                                                        <Clock className="w-3.5 h-3.5" /> Non lu
-                                                    </span>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
 
-                                    {/* Actions */}
-                                    <button
-                                        onClick={() => isParent ? hideForParent(a.id, a.titre) : handleDelete(a.id, a.titre)}
-                                        className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shrink-0"
-                                        title={isParent ? "Retirer de la liste" : "Supprimer"}
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                            {/* Actions */}
+                                            <div className="flex items-start shrink-0">
+                                                <button
+                                                    onClick={() => isParent ? hideForParent(a.id, a.titre) : handleDelete(a.id, a.titre)}
+                                                    className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-xl transition-all group/btn"
+                                                    title={isParent ? "Retirer de la liste" : "Supprimer définitivement"}
+                                                >
+                                                    <Trash2 className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        );
-                    })
+                            );
+                        })}
+                    </div>
                 )}
             </div>
         </div>
     );
 };
+

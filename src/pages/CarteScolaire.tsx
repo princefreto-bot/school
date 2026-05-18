@@ -9,7 +9,8 @@ import jsPDF from 'jspdf';
 import QRCodeLib from 'qrcode'; // import statique — fiable dans le navigateur
 import {
     CreditCard, Search, Download, Printer, X, Filter,
-    CheckCircle, Loader2, ChevronDown, AlertCircle, User
+    CheckCircle, Loader2, ChevronDown, AlertCircle, User,
+    Users, Info
 } from 'lucide-react';
 
 // ============================================================
@@ -506,47 +507,69 @@ export const CarteScolaire: React.FC = () => {
 
     // ── Rendu ────────────────────────────────────────────────
     return (
-        <div className="max-w-6xl mx-auto space-y-6">
+        <div className="max-w-6xl mx-auto space-y-8 animate-fadeIn pb-24">
 
-            {/* ── En-tête ─────────────────────────────────── */}
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-700 rounded-2xl p-6 text-white">
-                <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                        <CreditCard className="w-5 h-5" />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-bold">Cartes Scolaires</h2>
-                        <p className="text-indigo-200 text-sm">
-                            Format ISO 85×54 mm · QR Code niveau H · 8 cartes/page A4
-                        </p>
+            {/* ── Header Ultra-Premium ─────────────────────────────────── */}
+            <div className="pro-card p-6 md:p-8 bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-950 text-white relative overflow-hidden border-indigo-500/30">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4"></div>
+
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                            <CreditCard className="w-7 h-7 text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-bold tracking-tight text-white drop-shadow-md">Génération des Cartes Scolaires</h2>
+                            <p className="text-indigo-200 text-sm mt-1 font-medium max-w-md">
+                                Format ISO 85×54 mm · QR Code niveau H · 8 cartes par page A4
+                            </p>
+                        </div>
                     </div>
                 </div>
-                <div className="grid grid-cols-3 gap-3 mt-4">
+
+                <div className="grid grid-cols-3 gap-4 relative z-10">
                     {[
-                        { v: students.length,               l: 'Total élèves' },
-                        { v: classes.length,                l: 'Classes'      },
-                        { v: Math.ceil(students.length / 8), l: 'Pages PDF'   },
-                    ].map(({ v, l }) => (
-                        <div key={l} className="bg-white/10 rounded-xl p-3 text-center">
-                            <p className="text-2xl font-bold">{v}</p>
-                            <p className="text-xs text-indigo-200">{l}</p>
+                        { v: students.length,               l: 'Total élèves',      color: 'bg-white/10', border: 'border-white/10', text: 'text-white', sub: 'text-indigo-200' },
+                        { v: classes.length,                l: 'Classes',           color: 'bg-purple-500/20', border: 'border-purple-500/30', text: 'text-purple-100', sub: 'text-purple-200' },
+                        { v: Math.ceil(students.length / 8), l: 'Pages PDF estimées', color: 'bg-emerald-500/20', border: 'border-emerald-500/30', text: 'text-emerald-100', sub: 'text-emerald-200' },
+                    ].map(({ v, l, color, border, text, sub }) => (
+                        <div key={l} className={`${color} backdrop-blur-md rounded-2xl p-4 border ${border} hover:bg-white/15 transition-colors`}>
+                            <p className={`text-3xl font-black ${text} drop-shadow-md mb-1`}>{v}</p>
+                            <p className={`text-xs font-bold ${sub} uppercase tracking-wider`}>{l}</p>
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* ── Filtres + bouton principal ───────────────── */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
-                <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            placeholder="Rechercher un élève..."
-                            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                        />
+            {/* ── Filtres + bouton principal (Bento Layout) ───────────────── */}
+            <div className="pro-card p-6 border-indigo-100">
+                <div className="flex flex-col md:flex-row gap-4 items-end">
+                    <div className="flex-1 w-full space-y-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input
+                                    type="text"
+                                    value={search}
+                                    onChange={e => setSearch(e.target.value)}
+                                    placeholder="Rechercher un élève par nom, matricule..."
+                                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/50 focus:bg-white outline-none font-medium transition-all"
+                                />
+                            </div>
+                            <div className="relative sm:w-64">
+                                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                <select
+                                    value={selectedClasse}
+                                    onChange={e => setSelectedClasse(e.target.value)}
+                                    className="w-full pl-11 pr-10 py-3 border border-slate-200 rounded-xl text-sm bg-slate-50 focus:bg-white appearance-none focus:ring-2 focus:ring-indigo-500/50 outline-none font-medium transition-all cursor-pointer"
+                                >
+                                    <option value="">Toutes les classes</option>
+                                    {classes.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div className="relative">
                         <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -563,25 +586,25 @@ export const CarteScolaire: React.FC = () => {
                     <button
                         onClick={handleGenerateAll}
                         disabled={generating || filtered.length === 0}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold transition-all shadow-md"
+                        className="flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 w-full md:w-auto h-full"
                     >
                         {generating
-                            ? <><Loader2 className="w-4 h-4 animate-spin" /> {progress}%</>
-                            : <><Download className="w-4 h-4" /> Générer cartes ({filtered.length})</>
+                            ? <><Loader2 className="w-5 h-5 animate-spin" /> {progress}%</>
+                            : <><Download className="w-5 h-5" /> Générer lot PDF ({filtered.length})</>
                         }
                     </button>
                 </div>
 
                 {/* Barre de progression */}
                 {generating && (
-                    <div>
-                        <div className="flex justify-between text-xs text-gray-500 mb-1">
-                            <span>Construction du PDF…</span>
-                            <span className="font-bold text-indigo-600">{progress}%</span>
+                    <div className="pt-4 mt-2 border-t border-slate-100 animate-fadeIn">
+                        <div className="flex justify-between text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">
+                            <span>Construction du document PDF en cours…</span>
+                            <span className="text-indigo-600">{progress}%</span>
                         </div>
-                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                             <div
-                                className="h-full bg-indigo-500 rounded-full transition-all duration-200"
+                                className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]"
                                 style={{ width: `${progress}%` }}
                             />
                         </div>
@@ -590,18 +613,22 @@ export const CarteScolaire: React.FC = () => {
 
                 {/* Erreur */}
                 {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-                        <AlertCircle className="w-4 h-4 shrink-0" />
+                    <div className="flex items-center gap-3 p-4 mt-4 bg-rose-50 border border-rose-200 rounded-xl text-sm font-bold text-rose-700 animate-fadeIn">
+                        <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
+                            <AlertCircle className="w-4 h-4 text-rose-600" />
+                        </div>
                         {error}
                     </div>
                 )}
             </div>
 
             {/* ── Génération par classe ────────────────────── */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <Filter className="w-4 h-4 text-indigo-500" />
-                    Générer par classe
+            <div className="pro-card p-6">
+                <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wider">
+                    <div className="w-6 h-6 rounded bg-indigo-50 flex items-center justify-center">
+                        <Filter className="w-3.5 h-3.5 text-indigo-600" />
+                    </div>
+                    Générer rapidement par classe
                 </h3>
                 <div className="flex flex-wrap gap-2">
                     {classes.map(c => {
@@ -611,18 +638,21 @@ export const CarteScolaire: React.FC = () => {
                                 key={c}
                                 onClick={() => handleGenerateClasse(c)}
                                 disabled={generating}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 disabled:opacity-50 text-gray-700 hover:text-indigo-700 rounded-lg text-xs font-medium transition-all"
+                                className="group flex items-center gap-2 px-3 py-2 bg-slate-50 hover:bg-white border border-slate-200 hover:border-indigo-300 hover:shadow-[0_4px_12px_rgba(99,102,241,0.08)] disabled:opacity-50 disabled:hover:shadow-none text-slate-700 hover:text-indigo-700 rounded-xl text-xs font-bold transition-all"
                             >
-                                <Download className="w-3 h-3" />
+                                <Download className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-500 transition-colors" />
                                 {c}
-                                <span className="bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full text-[10px] font-bold">{count}</span>
+                                <span className="bg-white group-hover:bg-indigo-50 text-slate-500 group-hover:text-indigo-600 px-1.5 py-0.5 border border-slate-200 group-hover:border-indigo-200 rounded-md text-[10px] font-black transition-colors">{count}</span>
                             </button>
                         );
                     })}
                 </div>
-                <p className="text-[11px] text-gray-400 mt-3">
-                    Format ISO 7810 · 85×54 mm · QR niveau H (30% correction) · 8 cartes/A4 · PNG sans compression
-                </p>
+                <div className="mt-5 p-3 bg-indigo-50/50 rounded-xl border border-indigo-100/50 flex items-start gap-3">
+                    <Info className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                    <p className="text-xs font-medium text-indigo-700/70 leading-relaxed">
+                        Le format PDF respecte les normes ISO 7810 (85×54 mm). Le QR code est encodé avec un niveau H (30% de correction d'erreurs) garantissant une lecture fiable même après plastification et usure légère. Rendement de 8 cartes par page A4.
+                    </p>
+                </div>
             </div>
 
             {/* ── Prévisualisation d'une carte ─────────────── */}
@@ -630,76 +660,108 @@ export const CarteScolaire: React.FC = () => {
                 const s = students.find(st => st.id === selectedStudent);
                 if (!s) return null;
                 return (
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                        <div className="flex items-center justify-between mb-5">
-                            <h3 className="font-semibold text-gray-800">Prévisualisation</h3>
+                    <div className="pro-card p-6 md:p-8 animate-fadeIn border-indigo-200 shadow-xl shadow-indigo-900/5 ring-1 ring-indigo-50">
+                        <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
+                            <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                    <Search className="w-4 h-4 text-indigo-600" />
+                                </div>
+                                Prévisualisation Haute Définition
+                            </h3>
                             <button
                                 onClick={() => setSelectedStudent(null)}
-                                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"
+                                className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-800 transition-all hover:rotate-90 duration-300"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-6 items-start">
+                        <div className="flex flex-col lg:flex-row gap-10 items-start">
                             {/* Carte */}
-                            <div>
-                                <p className="text-xs text-gray-500 mb-2 font-medium">Aperçu proportionnel 85×54 mm</p>
-                                <div style={{ boxShadow:'0 10px 40px rgba(0,0,0,0.2)', borderRadius:12, display:'inline-block' }}>
-                                    <CarteEleve
-                                        nom={s.nom} prenom={s.prenom} classe={s.classe} id={s.id}
-                                        telephone={s.telephone}
-                                        schoolName={schoolName} schoolYear={schoolYear} schoolLogo={schoolLogo}
-                                        photoUrl={s.photoUrl}
-                                    />
+                            <div className="flex-shrink-0">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Aperçu ISO (85×54 mm)</p>
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                                    <div style={{ boxShadow:'0 25px 50px -12px rgba(0,0,0,0.25)', borderRadius:0, display:'inline-block' }} className="transition-transform hover:scale-[1.02] duration-500">
+                                        <CarteEleve
+                                            nom={s.nom} prenom={s.prenom} classe={s.classe} id={s.id}
+                                            telephone={s.telephone}
+                                            schoolName={schoolName} schoolYear={schoolYear} schoolLogo={schoolLogo}
+                                            photoUrl={s.photoUrl}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             {/* Actions */}
-                            <div className="flex-1 space-y-3 min-w-[200px]">
-                                <div className="text-xs text-green-700 bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-2">
-                                    <CheckCircle className="w-4 h-4 shrink-0" />
-                                    QR Code niveau H · Scannable après impression et plastification
+                            <div className="flex-1 space-y-4 min-w-[250px] w-full">
+                                <div className="text-xs text-emerald-800 bg-emerald-50/80 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+                                    <CheckCircle className="w-5 h-5 shrink-0 text-emerald-500" />
+                                    <p className="font-medium leading-relaxed">
+                                        <strong className="block mb-1 text-emerald-900">Validation technique réussie</strong>
+                                        Le QR Code généré utilise une matrice haute densité (Niveau H) offrant une résilience de 30% aux dommages. Optimal pour les scanners optiques après impression et plastification.
+                                    </p>
                                 </div>
                                 <button
                                     onClick={() => handleGenerateOne(s.id)}
                                     disabled={generating}
-                                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold transition-all"
+                                    className="flex items-center justify-center gap-3 w-full px-6 py-4 bg-slate-900 hover:bg-black disabled:opacity-50 text-white rounded-xl text-sm font-bold transition-all shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_25px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 active:scale-[0.98]"
                                 >
                                     {generating
-                                        ? <><Loader2 className="w-4 h-4 animate-spin" /> Génération…</>
-                                        : <><Printer className="w-4 h-4" /> Générer PDF (carte seule)</>
+                                        ? <><Loader2 className="w-5 h-5 animate-spin" /> Rendu PDF en cours…</>
+                                        : <><Printer className="w-5 h-5" /> Télécharger la carte seule (PDF)</>
                                     }
+                                </button>
+                                <button
+                                    onClick={() => setSelectedStudent(null)}
+                                    className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-sm font-bold transition-all"
+                                >
+                                    Retour à la liste
                                 </button>
                             </div>
                         </div>
                     </div>
                 );
             })() : (
-                /* Liste des élèves */
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                    <p className="text-xs text-gray-500 font-medium mb-3">
-                        {filtered.length} élève(s) — cliquer pour prévisualiser la carte
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[520px] overflow-y-auto">
+                /* Liste des élèves (Bento Grid) */
+                <div className="pro-card p-6 border-slate-200">
+                    <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+                        <p className="text-sm text-slate-800 font-bold flex items-center gap-2">
+                            <Users className="w-4 h-4 text-slate-400" />
+                            Répertoire des élèves
+                        </p>
+                        <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-xs font-black">
+                            {filtered.length} résultats
+                        </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[520px] overflow-y-auto pr-2 custom-scrollbar">
                         {filtered.map(s => (
                             <button
                                 key={s.id}
                                 onClick={() => setSelectedStudent(s.id)}
-                                className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-indigo-300 hover:bg-indigo-50 transition-all text-left group"
+                                className="group flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-indigo-200 hover:shadow-[0_8px_20px_rgba(99,102,241,0.08)] transition-all text-left"
                             >
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 border border-indigo-200/50 flex items-center justify-center text-indigo-700 text-sm font-black shrink-0 group-hover:scale-105 transition-transform shadow-inner">
                                     {s.prenom.charAt(0)}{s.nom.charAt(0)}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">{s.prenom} {s.nom}</p>
-                                    <p className="text-xs text-gray-500">{s.classe}</p>
+                                    <p className="text-sm font-bold text-slate-900 truncate group-hover:text-indigo-700 transition-colors">{s.prenom} {s.nom}</p>
+                                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{s.classe}</p>
                                 </div>
-                                <CreditCard className="w-4 h-4 text-gray-300 group-hover:text-indigo-500 transition-colors shrink-0" />
+                                <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-100 group-hover:bg-indigo-50 transition-colors shrink-0">
+                                    <CreditCard className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                                </div>
                             </button>
                         ))}
                         {filtered.length === 0 && (
-                            <p className="col-span-3 text-center text-gray-400 text-sm py-10">
-                                Aucun élève trouvé
-                            </p>
+                            <div className="col-span-full text-center py-12">
+                                <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                                    <Search className="w-8 h-8 text-slate-300" />
+                                </div>
+                                <p className="text-slate-500 font-bold">Aucun élève trouvé</p>
+                                <p className="text-xs text-slate-400 mt-1">Modifiez vos critères de recherche</p>
+                            </div>
                         )}
                     </div>
                 </div>
