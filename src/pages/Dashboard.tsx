@@ -50,7 +50,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, sub, icon, color, tre
            </div>
         )}
       </div>
-      <div className={`w-14 h-14 rounded-[1.25rem] flex items-center justify-center shadow-lg border border-white/20 backdrop-blur-md group-hover:scale-110 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${color}`}>
+      <div className={`w-14 h-14 rounded-[20px] flex items-center justify-center shadow-lg border border-white/20 backdrop-blur-md group-hover:scale-110 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${color}`}>
         {icon}
       </div>
     </div>
@@ -61,7 +61,7 @@ const CustomTooltip: React.FC<{ active?: boolean; payload?: { name: string; valu
   const privacyMode = useStore(s => s.privacyMode);
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/90 dark:bg-slate-900/90 shadow-2xl rounded-2xl border border-slate-200/50 dark:border-slate-700/50 p-4 text-xs backdrop-blur-xl">
+      <div className="bg-white/90 dark:bg-slate-900/90 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-[20px] border border-slate-200/50 dark:border-slate-700/50 p-4 text-xs backdrop-blur-xl">
         <p className="font-bold text-slate-800 dark:text-slate-100 mb-3">{label}</p>
         <div className="space-y-2">
           {payload.map((p, i) => (
@@ -203,7 +203,7 @@ export const Dashboard: React.FC = () => {
   if (students.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fadeIn">
-        <div className="w-32 h-32 bg-amber-500/10 dark:bg-amber-500/5 rounded-[2rem] flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(245,158,11,0.2)]">
+        <div className="w-32 h-32 bg-amber-500/10 dark:bg-amber-500/5 rounded-[32px] flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(245,158,11,0.2)]">
           <GraduationCap className="w-16 h-16 text-amber-500 animate-bounce" />
         </div>
         <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">Aucune donnée trouvée</h2>
@@ -243,7 +243,7 @@ export const Dashboard: React.FC = () => {
                     logo: useStore.getState().schoolLogo,
                     stamp: useStore.getState().schoolStamp
                   })}
-                  className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl hover:scale-105 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-black text-[13px] tracking-wide shadow-xl hover:shadow-2xl active:scale-95 group"
+                  className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[20px] hover:scale-105 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-black text-[13px] tracking-wide shadow-xl hover:shadow-2xl active:scale-[0.98] group"
                 >
                     <div className="w-8 h-8 rounded-full bg-white/20 dark:bg-slate-900/10 flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
                         <FileText className="w-4 h-4" />
@@ -253,7 +253,7 @@ export const Dashboard: React.FC = () => {
 
                 <button
                   onClick={() => setPrivacyMode(!privacyMode)}
-                  className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl hover:border-amber-500 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-black text-[13px] tracking-wide shadow-md active:scale-95 hover:scale-105 group"
+                  className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-[20px] hover:border-amber-500 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-black text-[13px] tracking-wide shadow-md active:scale-[0.98] hover:scale-105 group"
                   title={privacyMode ? "Afficher les chiffres" : "Masquer les chiffres"}
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${privacyMode ? 'bg-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-slate-100 dark:bg-slate-700'}`}>
@@ -262,14 +262,14 @@ export const Dashboard: React.FC = () => {
                   MODE CONFIDENTIEL
                 </button>
 
-                <div className="w-full sm:w-auto flex items-center gap-5 bg-white/80 dark:bg-slate-800/80 px-6 py-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-xl shadow-lg">
+                <div className="w-full sm:w-auto flex items-center gap-5 bg-white/80 dark:bg-slate-800/80 px-6 py-4 rounded-[24px] border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-xl shadow-lg">
                     <div className="space-y-1">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Santé Financière</p>
                         <p className={`text-xl font-black tracking-tight ${santeFinanciere.color}`}>
                             {maskValue(santeFinanciere.label)}
                         </p>
                     </div>
-                    <div className={`w-14 h-14 rounded-[1.25rem] flex items-center justify-center border-[3px] shadow-lg ${
+                    <div className={`w-14 h-14 rounded-[20px] flex items-center justify-center border-[3px] shadow-lg ${
                         santeFinanciere.score >= 80 ? 'border-emerald-500 bg-emerald-50 text-emerald-600' :
                         santeFinanciere.score >= 50 ? 'border-amber-500 bg-amber-50 text-amber-600' : 'border-rose-500 bg-rose-50 text-rose-600'
                     }`}>
@@ -378,7 +378,7 @@ export const Dashboard: React.FC = () => {
           return (
             <div key={c.label} className={`pro-card p-8 border-t-4 border-t-transparent hover:border-t-${c.colors.fill.replace('bg-','')} transition-all duration-300 group`}>
               <div className="flex items-center gap-5 mb-8">
-                <div className={`w-14 h-14 rounded-[1.25rem] flex items-center justify-center shadow-md ${c.colors.bg} group-hover:scale-110 transition-transform duration-500 ease-out`}>
+                <div className={`w-14 h-14 rounded-[20px] flex items-center justify-center shadow-md ${c.colors.bg} group-hover:scale-110 transition-transform duration-500 ease-out`}>
                   {c.icon}
                 </div>
                 <div className="flex-1 overflow-hidden">
@@ -432,12 +432,12 @@ export const Dashboard: React.FC = () => {
               <h3 className="font-black text-slate-900 dark:text-white text-xl tracking-tight mb-1">Paiements par classe</h3>
               <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Distribution des montants (FCFA)</p>
             </div>
-            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-[16px]">
               <BarChart2 className="w-5 h-5 text-slate-400" />
             </div>
           </div>
           {classData.length === 0 ? (
-            <div className="h-[300px] flex items-center justify-center text-slate-400 text-sm font-bold bg-slate-50 dark:bg-slate-800/50 rounded-2xl">Aucune donnée</div>
+            <div className="h-[300px] flex items-center justify-center text-slate-400 text-sm font-bold bg-slate-50 dark:bg-slate-800/50 rounded-[20px]">Aucune donnée</div>
           ) : (
             <ResponsiveContainer width="100%" height={320}>
               <BarChart data={classData} barCategoryGap="20%" barGap={4} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
@@ -459,12 +459,12 @@ export const Dashboard: React.FC = () => {
               <h3 className="font-black text-slate-900 dark:text-white text-xl tracking-tight mb-1">Répartition</h3>
               <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Élèves par cycle</p>
             </div>
-            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-[16px]">
               <PieChart className="w-5 h-5 text-slate-400" />
             </div>
           </div>
           {cycleData.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-slate-400 text-sm font-bold bg-slate-50 dark:bg-slate-800/50 rounded-2xl">Aucune donnée</div>
+            <div className="flex-1 flex items-center justify-center text-slate-400 text-sm font-bold bg-slate-50 dark:bg-slate-800/50 rounded-[20px]">Aucune donnée</div>
           ) : (
             <div className="flex-1 flex items-center justify-center min-h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -496,7 +496,7 @@ export const Dashboard: React.FC = () => {
         <div className="pro-card p-8">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-              <div className="p-3 bg-amber-50 dark:bg-amber-500/10 text-amber-500 rounded-xl">
+              <div className="p-3 bg-amber-50 dark:bg-amber-500/10 text-amber-500 rounded-[16px]">
                 <BarChart2 className="w-6 h-6" />
               </div>
               Top Performances
@@ -505,8 +505,8 @@ export const Dashboard: React.FC = () => {
 
           <div className="space-y-4">
             {classComp.slice(0, 5).map((row, i) => (
-              <div key={row.classe} className="group flex items-center gap-5 p-4 rounded-[1.5rem] bg-slate-50/50 dark:bg-slate-800/30 hover:bg-white dark:hover:bg-slate-800 transition-all duration-300 border border-slate-100 dark:border-slate-700/50 hover:shadow-lg hover:-translate-y-1">
-                <div className={`w-12 h-12 rounded-[1rem] flex items-center justify-center font-black text-lg shadow-sm ${
+              <div key={row.classe} className="group flex items-center gap-5 p-4 rounded-[24px] bg-slate-50/50 dark:bg-slate-800/30 hover:bg-white dark:hover:bg-slate-800 transition-all duration-300 border border-slate-100 dark:border-slate-700/50 hover:shadow-lg hover:-translate-y-1">
+                <div className={`w-12 h-12 rounded-[16px] flex items-center justify-center font-black text-lg shadow-sm ${
                     i === 0 ? 'bg-gradient-to-br from-amber-300 to-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.4)]' :
                     i === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-white' :
                     i === 2 ? 'bg-gradient-to-br from-orange-300 to-orange-400 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500'
@@ -537,7 +537,7 @@ export const Dashboard: React.FC = () => {
         <div className="pro-card p-8 flex flex-col">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded-xl">
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded-[16px]">
                 <Target className="w-6 h-6" />
               </div>
               Solvabilité / Cycle

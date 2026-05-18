@@ -120,14 +120,14 @@ const SidebarNav: React.FC<{
             )}
             <button
               onClick={() => { setCurrentPage(item.id); setSidebarOpen(false); }}
-              className={`group relative flex items-center w-full rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
-                ${collapsed ? 'justify-center p-3 h-12' : 'px-4 py-3'}
+              className={`group relative flex items-center w-full rounded-[20px] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98]
+                ${collapsed ? 'justify-center p-3 h-12' : 'px-4 py-3.5'}
                 ${active ? 'bg-amber-500/10 text-amber-500' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
               title={item.label}
             >
               {/* Active indicator bar */}
               {active && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-1/2 bg-amber-500 rounded-r-full shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1/2 bg-amber-500 rounded-r-full shadow-[0_0_12px_rgba(245,158,11,0.6)]" />
               )}
               
               <div className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'} ${!collapsed && 'mr-3'}`}>
@@ -162,9 +162,9 @@ const SidebarNav: React.FC<{
           {!collapsed && <div className="mb-2 ml-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500/50">Assistance</div>}
           <button
             onClick={onOpenSupport}
-            className={`group flex items-center w-full rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
+            className={`group flex items-center w-full rounded-[20px] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98]
               bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-500 border border-emerald-500/10 hover:border-emerald-500/20
-              ${collapsed ? 'justify-center p-3 h-12' : 'px-4 py-3'}`}
+              ${collapsed ? 'justify-center p-3 h-12' : 'px-4 py-3.5'}`}
           >
             <div className={`transition-transform duration-300 group-hover:scale-110 ${!collapsed && 'mr-3'}`}>
               <MessageSquare className="w-[18px] h-[18px]" />
@@ -194,14 +194,14 @@ const SidebarContent: React.FC<{
   onToggleCollapse?: () => void;
   onOpenSupport: () => void;
 }> = ({ currentPage, setCurrentPage, setSidebarOpen, navItems, schoolName, appName, schoolLogo, userName, userRole, connectedParentsCount, logout, collapsed, onToggleCollapse, onOpenSupport }) => (
-  <div className="flex flex-col h-full bg-slate-950/95 backdrop-blur-3xl overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
+  <div className="flex flex-col h-full bg-slate-950/95 backdrop-blur-3xl overflow-hidden rounded-[32px] shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
     
     {/* Brand header */}
-    <div className={`flex items-center ${collapsed ? 'justify-center' : 'px-6'} py-6 border-b border-white/5 relative`}>
-      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(245,158,11,0.3)] border border-white/10 relative overflow-hidden group">
+    <div className={`flex items-center ${collapsed ? 'justify-center' : 'px-6'} py-6 relative border-b border-white/5`}>
+      <div className="w-12 h-12 rounded-[20px] bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(245,158,11,0.3)] relative overflow-hidden group">
         <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]" />
         {schoolLogo ? (
-          <img src={schoolLogo} alt="" className="w-full h-full object-cover rounded-2xl" />
+          <img src={schoolLogo} alt="" className="w-full h-full object-cover rounded-[20px]" />
         ) : (
           <GraduationCap className="w-5 h-5 text-white relative z-10" />
         )}
@@ -234,7 +234,7 @@ const SidebarContent: React.FC<{
       <div className="px-4 py-3">
         <button
           onClick={() => { setCurrentPage('parents_list'); setSidebarOpen(false); }}
-          className="w-full flex items-center justify-between p-3 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/10 transition-all duration-300 group"
+          className="w-full flex items-center justify-between p-3.5 rounded-[20px] bg-emerald-500/10 hover:bg-emerald-500/20 transition-all duration-300 group active:scale-[0.98]"
         >
           <div className="flex items-center gap-3">
             <div className="relative flex h-3 w-3">
@@ -252,8 +252,8 @@ const SidebarContent: React.FC<{
 
     {/* User footer */}
     <div className="p-4 border-t border-white/5 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
-      <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3 px-3 py-2'} rounded-2xl mb-2`}>
-        <div className="w-9 h-9 rounded-[14px] bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center flex-shrink-0 text-black font-black text-xs shadow-lg">
+      <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3 px-3 py-2'} mb-2`}>
+        <div className="w-10 h-10 rounded-[16px] bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center flex-shrink-0 text-black font-black text-xs shadow-lg">
           {userName.charAt(0).toUpperCase()}
         </div>
         {!collapsed && (
@@ -266,7 +266,7 @@ const SidebarContent: React.FC<{
 
       <button
         onClick={logout}
-        className={`group w-full flex items-center ${collapsed ? 'justify-center p-3' : 'px-4 py-3'} gap-3 rounded-2xl text-slate-400 hover:bg-rose-500/10 hover:text-rose-500 transition-all duration-300 border border-transparent hover:border-rose-500/20`}
+        className={`group w-full flex items-center ${collapsed ? 'justify-center p-3' : 'px-4 py-3.5'} gap-3 rounded-[20px] text-slate-400 hover:bg-rose-500/10 hover:text-rose-500 transition-all duration-300 active:scale-[0.98]`}
         title="Déconnexion"
       >
         <LogOut className="w-[18px] h-[18px] group-hover:scale-110 transition-transform duration-300" />
@@ -422,19 +422,19 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         <div className="flex-1 flex flex-col min-w-0 p-2 lg:p-4 pb-24 lg:pb-4">
           
           {/* ── Premium Topbar ── */}
-          <header className="sticky top-2 lg:top-4 z-40 mb-6 px-4 lg:px-6 h-[72px] flex items-center justify-between gap-4 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/50 dark:border-slate-800/50 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
+          <header className="sticky top-2 lg:top-4 z-40 mb-6 px-4 lg:px-6 h-[72px] flex items-center justify-between gap-4 bg-white/70 dark:bg-slate-900/70 backdrop-blur-[40px] border border-white/50 dark:border-slate-800/50 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
             
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300 shadow-sm"
+                className="lg:hidden w-10 h-10 rounded-[16px] bg-white dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-300 shadow-[0_2px_10px_rgba(0,0,0,0.04)] active:scale-[0.95]"
               >
                 <Menu size={18} />
               </button>
 
               <button
                 onClick={toggleCollapse}
-                className="hidden lg:flex w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 items-center justify-center text-slate-500 hover:text-amber-500 hover:border-amber-500 transition-all duration-300 shadow-sm"
+                className="hidden lg:flex w-10 h-10 rounded-[16px] bg-white dark:bg-slate-800 items-center justify-center text-slate-500 hover:text-amber-500 hover:shadow-[0_2px_15px_rgba(245,158,11,0.15)] transition-all duration-300 shadow-[0_2px_10px_rgba(0,0,0,0.04)] active:scale-[0.95]"
               >
                 {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
               </button>
@@ -461,7 +461,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 <button
                   onClick={() => useStore.getState().fetchAllFromBackend(true)}
                   disabled={isSyncing}
-                  className="hidden md:flex items-center gap-2 px-4 h-10 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-700 dark:text-slate-300 hover:border-amber-500 hover:text-amber-500 transition-all duration-300"
+                  className="hidden md:flex items-center gap-2 px-5 h-10 bg-white dark:bg-slate-800 rounded-[16px] text-[12px] font-bold text-slate-700 dark:text-slate-300 hover:text-amber-500 shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_15px_rgba(245,158,11,0.15)] transition-all duration-300 active:scale-[0.98]"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
                   {isSyncing ? 'Synchronisation...' : 'Actualiser'}
@@ -471,7 +471,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               {!isParent && nonSoldes > 0 && (
                 <button
                   onClick={() => setCurrentPage('eleves')}
-                  className="flex items-center gap-2 px-3 h-10 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-600 hover:bg-rose-500/20 transition-all duration-300"
+                  className="flex items-center gap-2 px-3 h-10 bg-rose-500/10 rounded-[16px] text-rose-600 hover:bg-rose-500/20 transition-all duration-300 active:scale-[0.98]"
                 >
                   <Bell className="w-4 h-4 animate-bounce" />
                   <span className="text-[13px] font-black">{nonSoldes}</span>
@@ -480,7 +480,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
               <button
                 onClick={toggleTheme}
-                className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-500 hover:text-amber-500 transition-all duration-300 shadow-sm"
+                className="w-10 h-10 rounded-[16px] bg-white dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-amber-500 transition-all duration-300 shadow-[0_2px_10px_rgba(0,0,0,0.04)] active:scale-[0.95]"
               >
                 {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
               </button>
