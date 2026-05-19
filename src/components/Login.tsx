@@ -253,6 +253,16 @@ export const Login: React.FC = () => {
               <input type="text" placeholder="Nom complet" className="auth-input" value={nom} onChange={(e) => setNom(e.target.value)} required />
               <input type="tel" placeholder="Téléphone" className="auth-input" value={username} onChange={(e) => setUsername(e.target.value)} required />
               <input type="password" placeholder="Mot de passe" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <p className="text-[10px] text-slate-400 mt-2 max-w-[280px]">
+                En créant un compte, vous acceptez notre{' '}
+                <button 
+                  type="button" 
+                  onClick={() => setIsPrivacyOpen(true)}
+                  className="text-amber-500 hover:underline cursor-pointer font-bold inline"
+                >
+                  Charte de Confidentialité
+                </button>
+              </p>
               {error && <div className="text-rose-500 text-xs mt-2 font-bold">{error}</div>}
               <button className="auth-button" type="submit" disabled={loading}>{loading ? 'Chargement...' : "S'inscrire"}</button>
             </form>
@@ -273,7 +283,16 @@ export const Login: React.FC = () => {
 
               <input type="text" placeholder="Utilisateur / Téléphone" className="auth-input" value={username} onChange={(e) => setUsername(e.target.value)} required />
               <input type="password" placeholder="Mot de passe" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              <a href="#" className="text-xs text-slate-400 hover:text-amber-600 mt-2">Mot de passe oublié ?</a>
+              <div className="flex items-center justify-between w-full mt-2 text-xs px-1">
+                <a href="#" className="text-slate-400 hover:text-amber-600">Mot de passe oublié ?</a>
+                <button 
+                  type="button" 
+                  onClick={() => setIsPrivacyOpen(true)}
+                  className="text-slate-400 hover:text-amber-600 underline cursor-pointer"
+                >
+                  Confidentialité & Données
+                </button>
+              </div>
               {trialExpiredSchool && (
                 <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-left">
                   <p className="text-amber-800 font-bold text-xs">⏰ Période d'essai expirée</p>
@@ -352,6 +371,30 @@ export const Login: React.FC = () => {
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
                         <input type="password" placeholder="Mot de passe" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     </div>
+
+                    {view === 'login' ? (
+                      <div className="flex justify-between items-center px-1 text-[11px] mt-1">
+                        <a href="#" className="text-slate-400 hover:text-amber-600">Mot de passe oublié ?</a>
+                        <button 
+                          type="button" 
+                          onClick={() => setIsPrivacyOpen(true)}
+                          className="text-slate-400 hover:text-amber-600 underline cursor-pointer"
+                        >
+                          Confidentialité & Sécurité
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-slate-400 text-center px-2 mt-1">
+                        En vous inscrivant, vous acceptez notre{' '}
+                        <button 
+                          type="button" 
+                          onClick={() => setIsPrivacyOpen(true)}
+                          className="text-amber-600 hover:underline cursor-pointer font-bold inline"
+                        >
+                          Charte de Confidentialité
+                        </button>
+                      </p>
+                    )}
 
                     {trialExpiredSchool && (
                         <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-left">
