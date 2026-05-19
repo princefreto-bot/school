@@ -182,7 +182,7 @@ export const ScanPresence: React.FC = () => {
         }, 600); // Réduit de 800ms à 600ms pour une sensation de vitesse maximale
     }, [students, today, isAlreadyPresent, addPresence, addActivityLog, user]);
 
-    // ── Caméra QR avec HTML5-QRCode (Optimisé Mobile — Caméra principale) ────
+    // ── Caméra QR avec HTML5-QRCode (Optimisé Mobile — Caméra principale, évite grand-angle) ────
     const startCamera = async () => {
         setCameraError('');
         setCameraActive(true);
@@ -195,46 +195,65 @@ export const ScanPresence: React.FC = () => {
             const html5QrCode = new Html5Qrcode("reader");
             html5QrCodeRef.current = html5QrCode;
 
-            // ── Sélection intelligente de la caméra principale (évite l'ultra grand-angle) ──
-            let cameraConstraint: MediaTrackConstraints | string;
+            // ── Sélection robuste de la caméra principale (évite l'ultra grand-angle) ──
+            let chosenCameraId: string | null = null;
             try {
                 const devices = await Html5Qrcode.getCameras();
-                // On filtre les caméras arrière disponibles
-                const rearCameras = devices.filter(d =>
-                    d.label.toLowerCase().includes('back') ||
-                    d.label.toLowerCase().includes('rear') ||
-                    d.label.toLowerCase().includes('arrière') ||
-                    d.label.toLowerCase().includes('environment') ||
-                    // Sur Android, la principale porte souvent "0" ou "back 0"
-                    d.label.match(/camera\s*0|back\s*0/i)
-                );
+                console.log("[Camera] Caméras disponibles:", devices.map(d => `${d.id} — ${d.label}`));
 
-                // Préférer la caméra arrière NON ultra-grand-angle
-                // Les labels ultra-grand-angle contiennent souvent "wide" ou "ultra"
-                const mainCamera = rearCameras.find(d =>
-                    !d.label.toLowerCase().includes('wide') &&
-                    !d.label.toLowerCase().includes('ultra')
-                ) || rearCameras[0];
+                // 1. Filtrer les caméras arrière
+                const rearCameras = devices.filter(d => {
+                    const lbl = d.label.toLowerCase();
+                    return lbl.includes('back') || lbl.includes('rear') ||
+                           lbl.includes('arrière') || lbl.includes('environment') ||
+                           /facing back/i.test(d.label);
+                });
+
+                // 2. Parmi les caméras arrière, exclure ultra-grand-angle et grand-angle
+                const nonWide = rearCameras.filter(d => {
+                    const lbl = d.label.toLowerCase();
+                    return !lbl.includes('ultra') && !lbl.includes('wide') &&
+                           !lbl.includes('0.6') && !lbl.includes('0.5');
+                });
+
+                // 3. Sur Android multi-caméras, la caméra principale est souvent
+                //    à l'index 1 (index 0 = grand-angle). Préférer celle avec
+                //    les mots "main", "camera2" ou index le plus élevé non-ultra.
+                const mainCamera =
+                    nonWide.find(d => /main|camera2|camera 1|back 1/i.test(d.label)) ||
+                    // Sinon, préférer index 1+ parmi les nonWide (évite le 0 = grand-angle)
+                    (nonWide.length > 1 ? nonWide[1] : null) ||
+                    nonWide[0] ||
+                    // Dernier recours parmi toutes les caméras arrière
+                    rearCameras.find(d => !d.label.toLowerCase().includes('ultra')) ||
+                    rearCameras[0];
 
                 if (mainCamera) {
-                    // Utiliser l'ID pour forcer la caméra principale
-                    cameraConstraint = { deviceId: { exact: mainCamera.id } };
-                } else {
-                    // Fallback : caméra arrière standard avec zoom forcé à 1x
-                    cameraConstraint = {
-                        facingMode: { exact: "environment" },
-                        // Demander focus automatique proche pour les cartes
-                        // @ts-ignore — advanced constraints non-standard mais supportés sur mobile
-                        advanced: [{ zoom: 1.0, focusMode: 'continuous' }]
-                    };
+                    chosenCameraId = mainCamera.id;
+                    console.log("[Camera] Sélectionnée:", mainCamera.label);
                 }
-            } catch {
-                // Si l'énumération échoue, fallback simple
-                cameraConstraint = { facingMode: "environment" };
+            } catch (e) {
+                console.warn("[Camera] Impossible d'énumérer les caméras:", e);
+            }
+
+            // ── Contrainte finale ──
+            let cameraConstraint: any;
+            if (chosenCameraId) {
+                // Forcer par ID + demander un zoom minimum pour exclure le grand-angle
+                cameraConstraint = {
+                    deviceId: { exact: chosenCameraId },
+                    advanced: [{ zoom: 1.0, focusMode: 'continuous', focusDistance: 0.1 }]
+                };
+            } else {
+                // Fallback : demander explicitement la caméra arrière avec zoom 1x
+                cameraConstraint = {
+                    facingMode: { exact: "environment" },
+                    advanced: [{ zoom: 1.0, focusMode: 'continuous' }]
+                };
             }
 
             await html5QrCode.start(
-                cameraConstraint as any,
+                cameraConstraint,
                 {
                     fps: 25,
                     qrbox: { width: 250, height: 250 }

@@ -156,41 +156,91 @@ export const ScanSortie: React.FC = () => {
         }, 600); // Réduit de 800ms à 600ms
     }, [students, today, hasAlreadyExited, addPresence, addActivityLog, user]);
 
-    // ── Caméra QR avec HTML5-QRCode (Optimisé Mobile) ────────────────
-    const startCamera = () => {
+    // ── Caméra QR avec HTML5-QRCode (Optimisé Mobile — Caméra principale, évite grand-angle) ────
+    const startCamera = async () => {
         setCameraError('');
         setCameraActive(true);
-        // Déverrouille l'AudioContext et pré-charge iph.mp3 dès le clic (interaction utilisateur)
         unlockAudio();
 
-        setTimeout(() => {
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        try {
             const html5QrCode = new Html5Qrcode("reader");
             html5QrCodeRef.current = html5QrCode;
 
-            html5QrCode.start(
-                { facingMode: "environment" }, // Caméra arrière par défaut
+            // ── Sélection robuste de la caméra principale (évite l'ultra grand-angle) ──
+            let chosenCameraId: string | null = null;
+            try {
+                const devices = await Html5Qrcode.getCameras();
+                console.log("[Camera] Caméras disponibles:", devices.map(d => `${d.id} — ${d.label}`));
+
+                // 1. Filtrer les caméras arrière
+                const rearCameras = devices.filter(d => {
+                    const lbl = d.label.toLowerCase();
+                    return lbl.includes('back') || lbl.includes('rear') ||
+                           lbl.includes('arrière') || lbl.includes('environment') ||
+                           /facing back/i.test(d.label);
+                });
+
+                // 2. Exclure ultra-grand-angle et grand-angle
+                const nonWide = rearCameras.filter(d => {
+                    const lbl = d.label.toLowerCase();
+                    return !lbl.includes('ultra') && !lbl.includes('wide') &&
+                           !lbl.includes('0.6') && !lbl.includes('0.5');
+                });
+
+                // 3. Préférer la caméra "main" ou index 1+ (évite le 0 = grand-angle sur Android)
+                const mainCamera =
+                    nonWide.find(d => /main|camera2|camera 1|back 1/i.test(d.label)) ||
+                    (nonWide.length > 1 ? nonWide[1] : null) ||
+                    nonWide[0] ||
+                    rearCameras.find(d => !d.label.toLowerCase().includes('ultra')) ||
+                    rearCameras[0];
+
+                if (mainCamera) {
+                    chosenCameraId = mainCamera.id;
+                    console.log("[Camera] Sélectionnée:", mainCamera.label);
+                }
+            } catch (e) {
+                console.warn("[Camera] Impossible d'énumérer les caméras:", e);
+            }
+
+            // ── Contrainte finale ──
+            let cameraConstraint: any;
+            if (chosenCameraId) {
+                cameraConstraint = {
+                    deviceId: { exact: chosenCameraId },
+                    advanced: [{ zoom: 1.0, focusMode: 'continuous', focusDistance: 0.1 }]
+                };
+            } else {
+                cameraConstraint = {
+                    facingMode: { exact: "environment" },
+                    advanced: [{ zoom: 1.0, focusMode: 'continuous' }]
+                };
+            }
+
+            await html5QrCode.start(
+                cameraConstraint,
                 {
-                    fps: 25, // Augmenté de 10 à 25 pour une précision accrue
-                    qrbox: { width: 280, height: 280 } // Zone de scan légèrement élargie
+                    fps: 25,
+                    qrbox: { width: 280, height: 280 }
                 },
                 (decodedText) => {
-                    // Succès du scan
                     if (!isScanningPaused.current) {
                         registerSortie(decodedText);
                     }
                 },
                 (errorMessage) => {
-                    // Masquer l'erreur de frame sans code QR pour plus de propreté log
                     if (process.env.NODE_ENV === 'development' && !errorMessage.includes('No QR code found')) {
                         console.debug("Scan info:", errorMessage);
                     }
                 }
-            ).catch((err) => {
-                console.error("Camera Error:", err);
-                setCameraError('Erreur matérielle ou permissions refusées.');
-                setCameraActive(false);
-            });
-        }, 300); // Petit délai pour s'assurer que le DOM est prêt
+            );
+        } catch (err) {
+            console.error("Camera Error:", err);
+            setCameraError('Erreur matérielle ou permissions refusées.');
+            setCameraActive(false);
+        }
     };
 
     const stopCamera = () => {
