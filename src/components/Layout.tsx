@@ -9,11 +9,12 @@ import {
   Bell, ChevronRight, ChevronLeft, Target, Award, MessageSquare,
   ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone,
   BookOpen, Edit3, FileSpreadsheet, Sun, Moon, Clock,
-  PanelLeftClose, PanelLeftOpen, RefreshCw, Command
+  PanelLeftClose, PanelLeftOpen, RefreshCw, Command, Shield
 } from 'lucide-react';
 
 import { SupportModal } from './SupportModal';
 import { chatApi } from '../services/chatApi';
+import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 
 interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: number }
 
@@ -193,7 +194,8 @@ const SidebarContent: React.FC<{
   collapsed: boolean;
   onToggleCollapse?: () => void;
   onOpenSupport: () => void;
-}> = ({ currentPage, setCurrentPage, setSidebarOpen, navItems, schoolName, appName, schoolLogo, userName, userRole, connectedParentsCount, logout, collapsed, onToggleCollapse, onOpenSupport }) => (
+  onOpenPrivacy: () => void;
+}> = ({ currentPage, setCurrentPage, setSidebarOpen, navItems, schoolName, appName, schoolLogo, userName, userRole, connectedParentsCount, logout, collapsed, onToggleCollapse, onOpenSupport, onOpenPrivacy }) => (
   <div className="flex flex-col h-full bg-slate-950/95 backdrop-blur-3xl overflow-hidden rounded-[32px] shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
     
     {/* Brand header */}
@@ -265,6 +267,15 @@ const SidebarContent: React.FC<{
       </div>
 
       <button
+        onClick={onOpenPrivacy}
+        className={`group w-full flex items-center ${collapsed ? 'justify-center p-3' : 'px-4 py-3.5'} gap-3 rounded-[20px] text-slate-400 hover:bg-white/5 hover:text-amber-500 transition-all duration-300 active:scale-[0.98] mb-1`}
+        title="Confidentialité"
+      >
+        <Shield className="w-[18px] h-[18px] group-hover:scale-110 transition-transform duration-300 text-amber-500" />
+        {!collapsed && <span className="text-[13px] font-bold tracking-wide">Confidentialité</span>}
+      </button>
+
+      <button
         onClick={logout}
         className={`group w-full flex items-center ${collapsed ? 'justify-center p-3' : 'px-4 py-3.5'} gap-3 rounded-[20px] text-slate-400 hover:bg-rose-500/10 hover:text-rose-500 transition-all duration-300 active:scale-[0.98]`}
         title="Déconnexion"
@@ -319,6 +330,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   const handleStartChat = async (role: 'administration' | 'comptabilite') => {
     try {
@@ -373,6 +385,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     userName: user?.nom ?? '', userRole: user?.role ?? '',
     connectedParentsCount, logout, collapsed,
     onOpenSupport: () => setShowSupportModal(true),
+    onOpenPrivacy: () => setShowPrivacyModal(true),
   };
 
   const bottomNavItems = (user?.role === 'superviseur' || user?.role === 'surveillant') ? [
@@ -527,6 +540,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </nav>
 
       <SupportModal isOpen={showSupportModal} onClose={() => setShowSupportModal(false)} onSelect={handleStartChat} />
+      <PrivacyPolicyModal isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
     </div>
   );
 };

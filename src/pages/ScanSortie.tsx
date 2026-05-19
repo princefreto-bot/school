@@ -156,7 +156,7 @@ export const ScanSortie: React.FC = () => {
         }, 600); // Réduit de 800ms à 600ms
     }, [students, today, hasAlreadyExited, addPresence, addActivityLog, user]);
 
-    // ── Caméra QR avec HTML5-QRCode (Optimisé Mobile — Caméra principale, évite grand-angle) ────
+    // ── Caméra QR avec HTML5-QRCode ────────────────────────────
     const startCamera = async () => {
         setCameraError('');
         setCameraActive(true);
@@ -168,59 +168,8 @@ export const ScanSortie: React.FC = () => {
             const html5QrCode = new Html5Qrcode("reader");
             html5QrCodeRef.current = html5QrCode;
 
-            // ── Sélection robuste de la caméra principale (évite l'ultra grand-angle) ──
-            let chosenCameraId: string | null = null;
-            try {
-                const devices = await Html5Qrcode.getCameras();
-                console.log("[Camera] Caméras disponibles:", devices.map(d => `${d.id} — ${d.label}`));
-
-                // 1. Filtrer les caméras arrière
-                const rearCameras = devices.filter(d => {
-                    const lbl = d.label.toLowerCase();
-                    return lbl.includes('back') || lbl.includes('rear') ||
-                           lbl.includes('arrière') || lbl.includes('environment') ||
-                           /facing back/i.test(d.label);
-                });
-
-                // 2. Exclure ultra-grand-angle et grand-angle
-                const nonWide = rearCameras.filter(d => {
-                    const lbl = d.label.toLowerCase();
-                    return !lbl.includes('ultra') && !lbl.includes('wide') &&
-                           !lbl.includes('0.6') && !lbl.includes('0.5');
-                });
-
-                // 3. Préférer la caméra "main" ou index 1+ (évite le 0 = grand-angle sur Android)
-                const mainCamera =
-                    nonWide.find(d => /main|camera2|camera 1|back 1/i.test(d.label)) ||
-                    (nonWide.length > 1 ? nonWide[1] : null) ||
-                    nonWide[0] ||
-                    rearCameras.find(d => !d.label.toLowerCase().includes('ultra')) ||
-                    rearCameras[0];
-
-                if (mainCamera) {
-                    chosenCameraId = mainCamera.id;
-                    console.log("[Camera] Sélectionnée:", mainCamera.label);
-                }
-            } catch (e) {
-                console.warn("[Camera] Impossible d'énumérer les caméras:", e);
-            }
-
-            // ── Contrainte finale ──
-            let cameraConstraint: any;
-            if (chosenCameraId) {
-                cameraConstraint = {
-                    deviceId: { exact: chosenCameraId },
-                    advanced: [{ zoom: 1.0, focusMode: 'continuous', focusDistance: 0.1 }]
-                };
-            } else {
-                cameraConstraint = {
-                    facingMode: { exact: "environment" },
-                    advanced: [{ zoom: 1.0, focusMode: 'continuous' }]
-                };
-            }
-
             await html5QrCode.start(
-                cameraConstraint,
+                { facingMode: { exact: "environment" } },
                 {
                     fps: 25,
                     qrbox: { width: 280, height: 280 }

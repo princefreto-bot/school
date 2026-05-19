@@ -124,6 +124,7 @@ export interface AppState {
   deleteAnnouncement: (id: string) => Promise<void>;
   announcementReads: AnnouncementRead[];
   markAnnouncementRead: (announcementId: string, parentId: string) => void;
+  reportAnnouncementReadToBackend: (announcementId: string) => Promise<void>;
   remindAnnouncementLater: (announcementId: string, parentId: string) => void;
   getUnreadAnnouncements: (parentId: string, classes?: string[]) => Announcement[];
 
@@ -397,13 +398,8 @@ export const useStore = create<AppState>()(
           console.error("Erreur login backend, essai local...", err);
         }
 
-        // Fallback local
-        if (username === 'admin' && password === 'admin123') {
-          const loggedUser: User = { id: 'admin', username: 'admin', role: 'admin', nom: 'Admin Local' };
-          set({ user: loggedUser, isAuthenticated: true, currentPage: 'dashboard' });
-          get().addActivityLog(createActivityLog('Admin Local', 'admin', 'connexion', 'Connexion locale réussie'));
-          return true;
-        }
+        // ⛔ Fallback local supprimé pour la sécurité SaaS multi-tenant.
+        // Toute authentification doit passer par le backend API.
         return false;
       },
       logout: () => {

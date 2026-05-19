@@ -13,6 +13,7 @@ import bgImage1 from '../assets/login-bg1.jpg';
 import bgImage2 from '../assets/login-bg2.jpg';
 import bgImage3 from '../assets/login-bg3.jpg';
 import bgImage4 from '../assets/login-bg4.jpg';
+import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 
 const BG_IMAGES = [bgImage1, bgImage2, bgImage3, bgImage4];
 const SLIDE_DURATION = 5000;
@@ -69,6 +70,7 @@ export const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [trialExpiredSchool, setTrialExpiredSchool] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   
   // NOUVEAU : Sélection Établissement
   const [schools, setSchools] = useState<{slug: string, name: string, logo_url: string}[]>([]);
@@ -371,9 +373,18 @@ export const Login: React.FC = () => {
         </>
       )}
 
-      <p className={`fixed bottom-8 text-[10px] font-black uppercase tracking-[0.3em] z-20 ${isMobile ? 'text-white/60' : 'text-slate-400'}`}>
-        © {new Date().getFullYear()} {appName} • Éducation Connectée
-      </p>
+      <div className={`fixed bottom-8 flex flex-col sm:flex-row items-center gap-2 sm:gap-4 z-20 text-[10px] font-black uppercase tracking-[0.3em] ${isMobile ? 'text-white/60' : 'text-slate-400'}`}>
+        <span>© {new Date().getFullYear()} {appName} • Éducation Connectée</span>
+        <span className="hidden sm:inline">•</span>
+        <button 
+          onClick={() => setIsPrivacyOpen(true)}
+          className="hover:text-amber-500 transition-colors underline cursor-pointer"
+        >
+          Confidentialité
+        </button>
+      </div>
+
+      <PrivacyPolicyModal isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />
     </div>
   );
 };
