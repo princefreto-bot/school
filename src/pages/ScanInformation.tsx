@@ -187,20 +187,54 @@ export const ScanInformation: React.FC = () => {
         isScanningPaused.current = true;
     }, [students]);
 
-    const startCamera = () => {
+    const startCamera = async () => {
         setCameraError('');
         setCameraActive(true);
         unlockAudio();
 
-        setTimeout(() => {
+        // Petite attente pour que le DOM soit prêt
+        await new Promise(resolve => setTimeout(resolve, 400));
+
+        try {
             const html5QrCode = new Html5Qrcode("reader-info");
             html5QrCodeRef.current = html5QrCode;
 
-            html5QrCode.start(
-                { facingMode: "environment" },
+            // ── Sélection intelligente de la caméra principale (évite l'ultra grand-angle) ──
+            let cameraConstraint: MediaTrackConstraints | string;
+            try {
+                const devices = await Html5Qrcode.getCameras();
+                const rearCameras = devices.filter(d =>
+                    d.label.toLowerCase().includes('back') ||
+                    d.label.toLowerCase().includes('rear') ||
+                    d.label.toLowerCase().includes('arrière') ||
+                    d.label.toLowerCase().includes('environment') ||
+                    d.label.match(/camera\s*0|back\s*0/i)
+                );
+
+                // Préférer la caméra arrière NON ultra-grand-angle
+                const mainCamera = rearCameras.find(d =>
+                    !d.label.toLowerCase().includes('wide') &&
+                    !d.label.toLowerCase().includes('ultra')
+                ) || rearCameras[0];
+
+                if (mainCamera) {
+                    cameraConstraint = { deviceId: { exact: mainCamera.id } };
+                } else {
+                    cameraConstraint = {
+                        facingMode: { exact: "environment" },
+                        // @ts-ignore
+                        advanced: [{ zoom: 1.0, focusMode: 'continuous' }]
+                    };
+                }
+            } catch {
+                cameraConstraint = { facingMode: "environment" };
+            }
+
+            await html5QrCode.start(
+                cameraConstraint as any,
                 {
                     fps: 25,
-                    qrbox: { width: 280, height: 280 }
+                    qrbox: { width: 250, height: 250 }
                 },
                 (decodedText) => {
                     if (!isScanningPaused.current) {
@@ -212,12 +246,12 @@ export const ScanInformation: React.FC = () => {
                         console.debug("Scan info:", errorMessage);
                     }
                 }
-            ).catch((err) => {
-                console.error("Camera Error:", err);
-                setCameraError('Erreur matérielle ou permissions refusées.');
-                setCameraActive(false);
-            });
-        }, 400); // Slight delay for UI expansion
+            );
+        } catch (err) {
+            console.error("Camera Error:", err);
+            setCameraError('Erreur matérielle ou permissions refusées.');
+            setCameraActive(false);
+        }
     };
 
     const stopCamera = () => {
