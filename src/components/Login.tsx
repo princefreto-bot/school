@@ -373,7 +373,7 @@ export const Login: React.FC = () => {
         </>
       )}
 
-      <div className={`fixed bottom-8 flex flex-col sm:flex-row items-center gap-2 sm:gap-4 z-20 text-[10px] font-black uppercase tracking-[0.3em] ${isMobile ? 'text-white/60' : 'text-slate-400'}`}>
+      <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 flex flex-col sm:flex-row items-center gap-2 sm:gap-4 z-20 text-[10px] font-black uppercase tracking-[0.3em] ${isMobile ? 'text-white/60' : 'text-slate-400'} whitespace-nowrap`}>
         <span>© {new Date().getFullYear()} {appName} • Éducation Connectée</span>
         <span className="hidden sm:inline">•</span>
         <button 
