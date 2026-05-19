@@ -199,39 +199,8 @@ export const ScanInformation: React.FC = () => {
             const html5QrCode = new Html5Qrcode("reader-info");
             html5QrCodeRef.current = html5QrCode;
 
-            // ── Sélection intelligente de la caméra principale (évite l'ultra grand-angle) ──
-            let cameraConstraint: MediaTrackConstraints | string;
-            try {
-                const devices = await Html5Qrcode.getCameras();
-                const rearCameras = devices.filter(d =>
-                    d.label.toLowerCase().includes('back') ||
-                    d.label.toLowerCase().includes('rear') ||
-                    d.label.toLowerCase().includes('arrière') ||
-                    d.label.toLowerCase().includes('environment') ||
-                    d.label.match(/camera\s*0|back\s*0/i)
-                );
-
-                // Préférer la caméra arrière NON ultra-grand-angle
-                const mainCamera = rearCameras.find(d =>
-                    !d.label.toLowerCase().includes('wide') &&
-                    !d.label.toLowerCase().includes('ultra')
-                ) || rearCameras[0];
-
-                if (mainCamera) {
-                    cameraConstraint = { deviceId: { exact: mainCamera.id } };
-                } else {
-                    cameraConstraint = {
-                        facingMode: { exact: "environment" },
-                        // @ts-ignore
-                        advanced: [{ zoom: 1.0, focusMode: 'continuous' }]
-                    };
-                }
-            } catch {
-                cameraConstraint = { facingMode: "environment" };
-            }
-
             await html5QrCode.start(
-                cameraConstraint as any,
+                { facingMode: { exact: "environment" } },
                 {
                     fps: 25,
                     qrbox: { width: 250, height: 250 }
