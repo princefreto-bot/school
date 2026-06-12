@@ -23,17 +23,29 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',')
     : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:3001'];
 
-app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || process.env.NODE_ENV !== 'production') {
-            return callback(null, true);
+app.use(cors((req, callback) => {
+    const origin = req.header('Origin');
+    const corsOptions = { credentials: true };
+
+    if (!origin || process.env.NODE_ENV !== 'production') {
+        corsOptions.origin = true;
+    } else {
+        let isAllowed = allowedOrigins.includes(origin);
+        if (!isAllowed) {
+            try {
+                const host = req.header('Host');
+                const originUrl = new URL(origin);
+                // Si l'hôte de l'origine correspond à l'hôte de la requête, c'est la même origine
+                if (originUrl.host === host) {
+                    isAllowed = true;
+                }
+            } catch (e) {
+                isAllowed = false;
+            }
         }
-        if (allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-        return callback(new Error('Accès refusé par la politique CORS de production.'));
-    },
-    credentials: true,
+        corsOptions.origin = isAllowed;
+    }
+    callback(null, corsOptions);
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -89,6 +101,12 @@ if (fs.existsSync(frontendDir)) {
 
     // Pour toutes les autres routes, on renvoie index.html (React Router)
     app.get('*', (req, res) => {
+        // Si la requête cherche un fichier statique (qui a une extension ou est dans /assets) mais qui n'existe pas, on renvoie un 404
+        const isStaticAsset = req.path.startsWith('/assets/') || req.path.match(/\.(css|js|png|jpg|jpeg|gif|svg|ico|json|woff2?|eot|ttf|mp3)$/i);
+        if (isStaticAsset) {
+            return res.status(404).send('Not Found');
+        }
+
         if (!req.path.startsWith('/api')) {
             res.sendFile(path.join(frontendDir, 'index.html'));
         }

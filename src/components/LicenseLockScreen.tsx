@@ -85,8 +85,8 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
     const inactiveCount = childrenList.filter(c => (c.licenseStatus || 'inactive') !== 'active').length;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
-            <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 animate-scaleUp overflow-y-auto max-h-[96vh] md:max-h-[90vh]">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-md p-3 sm:p-6 flex justify-center items-start md:items-center min-h-screen">
+            <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-5 sm:p-6 md:p-8 my-auto animate-scaleUp">
                 
                 {/* Effet lumineux premium arrière plan */}
                 <div className="absolute -top-24 -left-24 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
