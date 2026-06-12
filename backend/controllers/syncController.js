@@ -13,11 +13,23 @@ async function syncFromFrontend(req, res) {
         return res.status(401).json({ error: 'Authentification requise.' });
     }
 
-    const { students = [], presences = [], activityLogs = [], appSettings = null, replace = false, matieres = [], classeMatieres = [], notes = [] } = req.body;
+    let { students = [], presences = [], activityLogs = [], appSettings = null, replace = false, matieres = [], classeMatieres = [], notes = [] } = req.body;
     const { role, schoolSlug } = req.user;
 
-    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur'].includes(role)) {
+    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur', 'enseignant'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
+    }
+
+    // Sécurité : Les enseignants ne peuvent synchroniser que les notes.
+    // On vide les autres données pour empêcher toute modification accidentelle ou malveillante.
+    if (role === 'enseignant') {
+        students = [];
+        presences = [];
+        activityLogs = [];
+        appSettings = null;
+        matieres = [];
+        classeMatieres = [];
+        replace = false;
     }
 
     // Le schoolSlug est obligatoire pour synchroniser
@@ -335,7 +347,7 @@ async function syncToFrontend(req, res) {
     }
 
     const { role, schoolSlug } = req.user;
-    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur'].includes(role)) {
+    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur', 'enseignant'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
     }
 
@@ -546,7 +558,7 @@ async function deleteClasseMatiere(req, res) {
 }
 
 async function deleteNote(req, res) {
-    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) return res.status(403).json({ error: 'Non autorisé.' });
+    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable', 'enseignant'].includes(req.user.role)) return res.status(403).json({ error: 'Non autorisé.' });
     try {
         const { error } = await supabase.from(`notes_${req.user.schoolSlug}`).delete().eq('id', req.params.id);
         if (error) throw error;

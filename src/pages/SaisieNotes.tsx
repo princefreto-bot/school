@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../store/useStore';
-import { Edit3, Save, CheckCircle2 } from 'lucide-react';
+import { Edit3, Save, CheckCircle2, User, LogOut } from 'lucide-react';
 import { Note, PeriodeType } from '../types';
 import { v4 as uuid } from '../utils/uuid';
 
@@ -10,10 +10,31 @@ export const SaisieNotes: React.FC = () => {
     const students = useStore((s) => s.students);
     const matieres = useStore((s) => s.matieres);
     const classeMatieres = useStore((s) => s.classeMatieres);
+    const user = useStore((s) => s.user);
+    const setCurrentPage = useStore((s) => s.setCurrentPage);
 
+    const selectedTeacherName = useMemo(() => {
+        return localStorage.getItem('selected_teacher_name') || '';
+    }, []);
+
+    React.useEffect(() => {
+        if (user?.role === 'enseignant' && !selectedTeacherName) {
+            setCurrentPage('selection_enseignant');
+        }
+    }, [user, selectedTeacherName, setCurrentPage]);
 
     const periods: PeriodeType[] = ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3', 'SEMESTRE 1', 'SEMESTRE 2'];
-    const classesList = Array.from(new Set(students.map(s => s.classe))).sort();
+    
+    const classesList = useMemo(() => {
+        if (user?.role === 'enseignant' && selectedTeacherName) {
+            return Array.from(new Set(
+                classeMatieres
+                    .filter(cm => cm.professeur === selectedTeacherName)
+                    .map(cm => cm.classe)
+            )).sort();
+        }
+        return Array.from(new Set(students.map(s => s.classe))).sort();
+    }, [students, classeMatieres, user, selectedTeacherName]);
 
     const [selectedClasse, setSelectedClasse] = useState('');
     const [selectedMatiereId, setSelectedMatiereId] = useState('');
@@ -26,11 +47,14 @@ export const SaisieNotes: React.FC = () => {
 
     // Matieres available for this class
     const availableMatieres = useMemo(() => {
-        return classeMatieres
-            .filter(cm => cm.classe === selectedClasse)
+        let list = classeMatieres.filter(cm => cm.classe === selectedClasse);
+        if (user?.role === 'enseignant' && selectedTeacherName) {
+            list = list.filter(cm => cm.professeur === selectedTeacherName);
+        }
+        return list
             .map(cm => ({ cm, mat: matieres.find(m => m.id === cm.matiereId) }))
             .filter(item => item.mat !== undefined);
-    }, [classeMatieres, matieres, selectedClasse]);
+    }, [classeMatieres, matieres, selectedClasse, user, selectedTeacherName]);
 
     // Local state for grades being edited (stored as strings to allow typing decimals like "12.")
     const [draftNotes, setDraftNotes] = useState<Record<string, Record<string, string>>>({});
@@ -160,6 +184,31 @@ export const SaisieNotes: React.FC = () => {
                 </div>
             </div>
 
+            {/* Teacher session banner */}
+            {user?.role === 'enseignant' && selectedTeacherName && (
+                <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm animate-fade-in">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                            <User className="w-5 h-5" />
+                        </div>
+                        <div className="text-left">
+                            <p className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">Enseignant Connecté</p>
+                            <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{selectedTeacherName}</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => {
+                            localStorage.removeItem('selected_teacher_name');
+                            setCurrentPage('selection_enseignant');
+                        }}
+                        className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 active:scale-95 shadow-md shadow-indigo-600/10 w-full sm:w-auto justify-center"
+                    >
+                        <LogOut className="w-3.5 h-3.5" />
+                        Changer d'enseignant
+                    </button>
+                </div>
+            )}
+
             {/* Filtres de sélection */}
             <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-wrap gap-4 items-end">
                 <div className="flex-1 min-w-[200px]">
@@ -223,7 +272,8 @@ export const SaisieNotes: React.FC = () => {
                         </div>
                     )}
 
-                    <div className="overflow-x-auto">
+                    {/* Desktop table layout */}
+                    <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="bg-white border-b border-gray-200 text-sm">
@@ -282,6 +332,63 @@ export const SaisieNotes: React.FC = () => {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* Mobile responsive card list layout */}
+                    <div className="md:hidden space-y-4 p-4 bg-slate-50 dark:bg-slate-900/30">
+                        {classStudents.map((student, index) => (
+                            <div key={student.id} className="bg-white dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-4 space-y-3 shadow-sm">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-black text-slate-400">Élève N° {index + 1}</span>
+                                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 bg-indigo-50 dark:bg-indigo-500/10 px-2.5 py-1 rounded-full">
+                                        {student.classe}
+                                    </span>
+                                </div>
+                                <h4 className="font-bold text-slate-900 dark:text-white text-base">
+                                    {student.nom} {student.prenom}
+                                </h4>
+                                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/60">
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">Interro</span>
+                                        <input
+                                            type="number"
+                                            min="0" max="20" step="0.5"
+                                            className="w-full px-2 py-2.5 text-center border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold bg-white dark:bg-slate-900 dark:text-white text-sm"
+                                            value={draftNotes[student.id]?.noteClasse ?? ''}
+                                            onChange={(e) => handleNoteChange(student.id, 'noteClasse', e.target.value)}
+                                            placeholder="--"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">Devoir</span>
+                                        <input
+                                            type="number"
+                                            min="0" max="20" step="0.5"
+                                            className="w-full px-2 py-2.5 text-center border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-semibold bg-white dark:bg-slate-900 dark:text-white text-sm"
+                                            value={draftNotes[student.id]?.noteDevoir ?? ''}
+                                            onChange={(e) => handleNoteChange(student.id, 'noteDevoir', e.target.value)}
+                                            placeholder="--"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[9px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">Compo</span>
+                                        <input
+                                            type="number"
+                                            min="0" max="20" step="0.5"
+                                            className="w-full px-2 py-2.5 text-center border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500 font-semibold bg-white dark:bg-slate-900 dark:text-white text-sm"
+                                            value={draftNotes[student.id]?.noteCompo ?? ''}
+                                            onChange={(e) => handleNoteChange(student.id, 'noteCompo', e.target.value)}
+                                            placeholder="--"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        {classStudents.length === 0 && (
+                            <p className="text-center py-8 text-gray-500 font-semibold">
+                                Aucun élève trouvé dans cette classe.
+                            </p>
+                        )}
                     </div>
                 </div>
             ) : (

@@ -356,6 +356,10 @@ export const useStore = create<AppState>()(
             if (loggedUser.role === 'superadmin') targetPage = 'superadmin_dashboard';
             else if (loggedUser.role === 'parent') targetPage = 'parent_dashboard';
             else if (loggedUser.role === 'superviseur' || loggedUser.role === 'surveillant') targetPage = 'scan_presence';
+            else if (loggedUser.role === 'enseignant') {
+              const selectedTeacherName = localStorage.getItem('selected_teacher_name');
+              targetPage = selectedTeacherName ? 'saisie_notes' : 'selection_enseignant';
+            }
 
             // Si l'école est en période d'essai, stocker la date de fin
             if (result.user.trial_ends_at) {
@@ -1295,6 +1299,12 @@ export const useStore = create<AppState>()(
             const allowed: AppPage[] = ['scan_presence', 'scan_sortie', 'carte_scolaire'];
             if (!allowed.includes(state.currentPage)) {
               state.currentPage = 'scan_presence';
+            }
+          } else if (state.user?.role === 'enseignant') {
+            const allowed: AppPage[] = ['saisie_notes', 'selection_enseignant'];
+            if (!allowed.includes(state.currentPage)) {
+              const selectedTeacherName = localStorage.getItem('selected_teacher_name');
+              state.currentPage = selectedTeacherName ? 'saisie_notes' : 'selection_enseignant';
             }
           }
         }

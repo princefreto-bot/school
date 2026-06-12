@@ -67,6 +67,7 @@ export const GestionPersonnel = () => {
       case 'censeur': return 'Censeur';
       case 'superviseur': return 'Surveillant (Gardien - Scan)';
       case 'comptable': return 'Comptable';
+      case 'enseignant': return 'Enseignant (Compte Partagé)';
       default: return r;
     }
   };
@@ -109,6 +110,7 @@ export const GestionPersonnel = () => {
               <option value="censeur">Censeur (Outils académiques)</option>
               <option value="comptable">Comptable (Finances)</option>
               <option value="admin">Administrateur (Gestion globale)</option>
+              <option value="enseignant">Enseignant (Compte unique partagé)</option>
             </select>
           </div>
         </div>

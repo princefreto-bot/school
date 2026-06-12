@@ -37,6 +37,7 @@ const ImportExport = lazy(() => import('./components/ImportExport').then(m => ({
 const ChatWindow = lazy(() => import('./components/ChatWindow').then(m => ({ default: m.ChatWindow })));
 const Annonces = lazy(() => import('./pages/Annonces').then(m => ({ default: m.Annonces })));
 const SuperAdminDashboard = lazy(() => import('./pages/superadmin/SuperAdminDashboard').then(m => ({ default: m.SuperAdminDashboard })));
+const SelectionEnseignant = lazy(() => import('./pages/SelectionEnseignant').then(m => ({ default: m.SelectionEnseignant })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-12">
@@ -73,6 +74,18 @@ const PageContent: React.FC = () => {
     }
   }
 
+  if (user?.role === 'enseignant') {
+    const teacherPages = ['saisie_notes', 'selection_enseignant'];
+    if (!teacherPages.includes(currentPage as any)) {
+      const selectedTeacherName = localStorage.getItem('selected_teacher_name');
+      return (
+        <Suspense fallback={<LoadingSpinner />}>
+          {selectedTeacherName ? <SaisieNotes /> : <SelectionEnseignant />}
+        </Suspense>
+      );
+    }
+  }
+
   switch (currentPage) {
     case 'dashboard': return <Dashboard />;
     case 'eleves': return <Eleves />;
@@ -87,6 +100,7 @@ const PageContent: React.FC = () => {
     case 'carte_scolaire': return <CarteScolaire />;
     case 'gestion_academique': return <GestionAcademique />;
     case 'saisie_notes': return <SaisieNotes />;
+    case 'selection_enseignant': return <SelectionEnseignant />;
     case 'bulletins': return <Bulletins />;
     case 'verification_recu': return <VerificationRecu />;
     case 'historique_activites': return <HistoriqueActivites />;
