@@ -133,7 +133,8 @@ async function linkStudentToParent(req, res) {
                 const providedKey = (licenseKey || '').trim().toUpperCase();
                 const activeKey = (student.license_key || '').trim().toUpperCase();
 
-                const isPromo = providedKey.startsWith('DGHUB-VIP') || providedKey.startsWith('DGHUB-PROMO');
+                const promoBypassKeys = (process.env.PROMO_BYPASS_KEYS || 'DGHUB-VIP,DGHUB-PROMO').split(',');
+                const isPromo = promoBypassKeys.some(k => providedKey.startsWith(k.trim().toUpperCase()));
                 const keysMatch = activeKey && providedKey === activeKey;
 
                 if (student.license_status === 'active' && (keysMatch || isPromo)) {

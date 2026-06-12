@@ -606,7 +606,8 @@ async function activateLicense(req, res) {
         const cleanKey = (licenseKey || '').trim().toUpperCase();
 
         // 2. Bypass VIP/PROMO
-        const isBypass = cleanKey.startsWith('DGHUB-VIP') || cleanKey.startsWith('DGHUB-PROMO');
+        const promoBypassKeys = (process.env.PROMO_BYPASS_KEYS || 'DGHUB-VIP,DGHUB-PROMO').split(',');
+        const isBypass = promoBypassKeys.some(k => cleanKey.startsWith(k.trim().toUpperCase()));
         let isValid = false;
         let chariowData = null;
 

@@ -19,8 +19,20 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 const app = express();
 
 // Middleware globaux
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:3001'];
+
 app.use(cors({
-    origin: '*', // Plus flexible pour le dév, à restreindre en prod
+    origin: (origin, callback) => {
+        if (!origin || process.env.NODE_ENV !== 'production') {
+            return callback(null, true);
+        }
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error('Accès refusé par la politique CORS de production.'));
+    },
     credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));

@@ -85,14 +85,14 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
     const inactiveCount = childrenList.filter(c => (c.licenseStatus || 'inactive') !== 'active').length;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
-            <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] shadow-2xl p-6 md:p-8 animate-scaleUp overflow-hidden max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+            <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 animate-scaleUp overflow-y-auto max-h-[96vh] md:max-h-[90vh]">
                 
                 {/* Effet lumineux premium arrière plan */}
                 <div className="absolute -top-24 -left-24 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
                 <div className="absolute -bottom-24 -right-24 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                <div className="flex flex-col items-center text-center mb-6">
+                <div className="flex flex-col items-center text-center mb-4 sm:mb-6">
                     <div className="w-16 h-16 bg-blue-50 dark:bg-blue-950/40 rounded-3xl flex items-center justify-center border border-blue-100 dark:border-blue-900/50 shadow-inner mb-4">
                         <Shield className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                     </div>
@@ -104,9 +104,9 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
                     {/* Liste des enfants */}
-                    <div className="bg-slate-50 dark:bg-slate-950/40 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+                    <div className="bg-slate-50 dark:bg-slate-950/40 rounded-2xl p-4 sm:p-5 border border-slate-100 dark:border-slate-800">
                         <div className="flex justify-between items-center mb-3">
                             <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Mes enfants liés</h3>
                             {onLinkClick && (
@@ -145,7 +145,7 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
                     </div>
 
                     {/* Tarification */}
-                    <div className="bg-slate-50 dark:bg-slate-950/40 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 flex flex-col justify-between">
+                    <div className="bg-slate-50 dark:bg-slate-950/40 rounded-2xl p-4 sm:p-5 border border-slate-100 dark:border-slate-800 flex flex-col justify-between">
                         <div>
                             <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Tarif & Réductions</h3>
                             {loadingPricing ? (
@@ -186,7 +186,7 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
                 </div>
 
                 {/* Formulaire d'activation */}
-                <form onSubmit={handleActivate} className="bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800 rounded-2xl p-5">
+                <form onSubmit={handleActivate} className="bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 sm:p-5">
                     <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-3 flex items-center gap-2">
                         <Key className="w-4 h-4 text-blue-500" />
                         Activer un enfant
