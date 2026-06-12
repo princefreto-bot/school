@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Sparkles, Key, CheckCircle, AlertCircle, ShoppingBag, Loader2 } from 'lucide-react';
+import { Shield, Sparkles, Key, CheckCircle, AlertCircle, ShoppingBag, Loader2, LogOut } from 'lucide-react';
 import { parentApi } from '../services/parentApi';
 import { useStore } from '../store/useStore';
 
@@ -19,6 +19,7 @@ interface LicenseLockScreenProps {
 }
 
 export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenList, onSuccess, onLinkClick }) => {
+    const logout = useStore((s) => s.logout);
     const [pricing, setPricing] = useState<any>(null);
     const [selectedChildId, setSelectedChildId] = useState<string>('');
     const [licenseKey, setLicenseKey] = useState<string>('');
@@ -88,6 +89,16 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-md p-3 sm:p-6 flex justify-center items-start md:items-center min-h-screen">
             <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-5 sm:p-6 md:p-8 my-auto animate-scaleUp">
                 
+                {/* Bouton de déconnexion dans le coin supérieur droit */}
+                <button
+                    onClick={logout}
+                    className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-rose-500/10 hover:text-rose-600 text-slate-500 rounded-xl transition duration-300 font-black text-xs cursor-pointer dark:bg-slate-800 dark:text-slate-400 dark:hover:text-rose-400"
+                    title="Déconnexion"
+                >
+                    <LogOut className="w-3.5 h-3.5" />
+                    Déconnexion
+                </button>
+
                 {/* Effet lumineux premium arrière plan */}
                 <div className="absolute -top-24 -left-24 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
                 <div className="absolute -bottom-24 -right-24 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
