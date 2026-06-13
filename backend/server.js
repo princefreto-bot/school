@@ -1,5 +1,5 @@
 // ============================================================
-// SERVEUR PRINCIPAL — EduFinance Backend (Version Supabase)
+// SERVEUR PRINCIPAL — DGhubSchool Backend (Version Supabase)
 // ============================================================
 'use strict';
 require('dotenv').config();
@@ -124,7 +124,7 @@ app.use((err, req, res, _next) => {
 // ── Démarrage ─────────────────────────────────────────────────
 const server = app.listen(PORT, () => {
     console.log(`\n${'='.repeat(60)}`);
-    console.log(`🚀 GestioSchool Backend démarré`);
+    console.log(`🚀 DGhubSchool Backend démarré`);
     console.log(`${'='.repeat(60)}`);
     console.log(`📡 Serveur: http://localhost:${PORT}`);
     console.log(`🛡️  Base de données: Supabase PostgreSQL`);

@@ -1,7 +1,7 @@
 {
-    "name": "edufinance-backend",
+    "name": "dghubschool-backend",
     "version": "1.0.0",
-    "description": "Backend Node.js pour le Portail Parent EduFinance",
+    "description": "Backend Node.js pour le Portail Parent DGhubSchool",
     "main": "server.js",
     "type": "commonjs",
     "scripts": {

@@ -57,7 +57,7 @@ const BackgroundSlideshow: React.FC = () => {
 
 export const Login: React.FC = () => {
   const login = useStore((s) => s.login);
-  const appName = "GestioSchool";
+  const appName = "DGhubSchool";
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [view, setView] = useState<'login' | 'register' | 'link'>('login');

@@ -1,5 +1,5 @@
 services:
-  - name: gestioschool
+  - name: dghubschool
     type: web
     env: node
     # ensure devDependencies (vite) are installed even in production environment

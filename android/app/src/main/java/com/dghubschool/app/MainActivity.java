@@ -1,4 +1,4 @@
-package com.gestioschool.app;
+package com.dghubschool.app;
 
 import com.getcapacitor.BridgeActivity;
 
