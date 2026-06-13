@@ -38,6 +38,7 @@ const ChatWindow = lazy(() => import('./components/ChatWindow').then(m => ({ def
 const Annonces = lazy(() => import('./pages/Annonces').then(m => ({ default: m.Annonces })));
 const SuperAdminDashboard = lazy(() => import('./pages/superadmin/SuperAdminDashboard').then(m => ({ default: m.SuperAdminDashboard })));
 const SelectionEnseignant = lazy(() => import('./pages/SelectionEnseignant').then(m => ({ default: m.SelectionEnseignant })));
+const CreatorDashboard = lazy(() => import('./pages/creator/CreatorDashboard').then(m => ({ default: m.CreatorDashboard })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-12">
@@ -55,6 +56,15 @@ const PageContent: React.FC = () => {
     return (
       <Suspense fallback={<LoadingSpinner />}>
         <SuperAdminDashboard />
+      </Suspense>
+    );
+  }
+
+  // Creator: uniquement son dashboard
+  if (user?.role === 'creator') {
+    return (
+      <Suspense fallback={<LoadingSpinner />}>
+        <CreatorDashboard />
       </Suspense>
     );
   }

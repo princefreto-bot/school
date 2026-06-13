@@ -1,5 +1,7 @@
 const webpush = require('web-push');
 const { supabase } = require('./supabase');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 // Configuration de web-push avec les clés VAPID
@@ -14,22 +16,46 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
     console.warn('⚠️ Web Push non configuré: VAPID_PUBLIC_KEY ou VAPID_PRIVATE_KEY manquant.');
 }
 
+// Initialisation de Firebase Admin SDK pour les push natives (FCM)
+let fcmReady = false;
+try {
+    const admin = require('firebase-admin');
+    const serviceAccountVar = process.env.FIREBASE_SERVICE_ACCOUNT;
+    if (serviceAccountVar) {
+        const serviceAccount = JSON.parse(serviceAccountVar);
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+        });
+        fcmReady = true;
+        console.log('✅ Firebase Admin SDK initialisé (FCM actif)');
+    } else if (fs.existsSync(path.join(__dirname, '..', 'serviceAccountKey.json'))) {
+        const serviceAccount = require('../serviceAccountKey.json');
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+        });
+        fcmReady = true;
+        console.log('✅ Firebase Admin SDK initialisé via fichier (FCM actif)');
+    } else {
+        // Fallback sur initialisation par défaut (ex: variables d'env Google Cloud standard)
+        admin.initializeApp();
+        fcmReady = true;
+        console.log('✅ Firebase Admin SDK initialisé par défaut (FCM actif)');
+    }
+} catch (e) {
+    console.warn('⚠️ Firebase Admin non initialisé, FCM natif désactivé:', e.message);
+}
+
 /**
- * Envoie une notification push enrichie à un utilisateur
+ * Envoie une notification push enrichie à un utilisateur (Web Push ou FCM natif)
  * @param {string} userId         - ID du parent dans sa table profiles_<slug>
  * @param {string} schoolSlug     - Slug de l'école (pour chercher dans la bonne table)
  * @param {string} title          - Titre de la notification
  * @param {string} body           - Corps du message
- * @param {string} type           - Type : 'message' | 'announcement' | 'payment' | 'presence' | 'general'
+ * @param {string} type           - Type : 'message' | 'announcement' | 'payment' | 'presence' | 'document' | 'general'
  * @param {string} url            - URL de destination optionnelle
  */
 async function sendPushNotification(userId, schoolSlug, title, body, type = 'general', url = '/') {
     try {
-        if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-            console.warn('⚠️ Web Push : clés VAPID non configurées. Notification ignorée.');
-            return;
-        }
-
         console.log(`🔍 [Push] Recherche du push_token pour l'utilisateur ${userId} dans profiles_${schoolSlug}`);
 
         // Récupérer le token Web Push depuis la table de l'école
@@ -57,33 +83,68 @@ async function sendPushNotification(userId, schoolSlug, title, body, type = 'gen
             return;
         }
 
+        // Déterminer s'il s'agit d'un Web Push ou d'un token FCM natif
+        let isWebPush = false;
         let subscription;
         try {
             subscription = typeof profile.push_token === 'string'
                 ? JSON.parse(profile.push_token)
                 : profile.push_token;
 
-            if (!subscription?.endpoint) {
-                console.log(`⚠️ [Push] Token invalide pour ${userId} (pas de endpoint)`);
-                return;
+            if (subscription && subscription.endpoint) {
+                isWebPush = true;
             }
         } catch (e) {
-            console.log(`⚠️ [Push] Token non parseable pour ${userId}`);
-            return;
+            // Si ce n'est pas du JSON valide, c'est un token natif (string brute)
+            isWebPush = false;
         }
 
-        const payload = JSON.stringify({ title, body, type, url, icon: '/icon-192x192.png', badge: '/icon-192x192.png' });
+        if (isWebPush) {
+            // --- Flow Web Push (PWA) ---
+            if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+                console.warn('⚠️ Web Push : clés VAPID non configurées. Notification ignorée.');
+                return;
+            }
+            const payload = JSON.stringify({ title, body, type, url, icon: '/icon-192x192.png', badge: '/icon-192x192.png' });
+            console.log(`🚀 [Push] Envoi notification Web Push type="${type}" à ${userId}`);
+            await webpush.sendNotification(subscription, payload);
+            console.log(`✅ [Push] Notification Web Push envoyée avec succès à ${userId}`);
+        } else {
+            // --- Flow FCM Natif (Android / Play Store) ---
+            const token = profile.push_token; // Le token est une string brute
+            console.log(`🚀 [Push] Envoi notification FCM Native type="${type}" à ${userId}`);
 
-        console.log(`🚀 [Push] Envoi notification type="${type}" à ${userId}`);
-        await webpush.sendNotification(subscription, payload);
-        console.log(`✅ [Push] Notification envoyée avec succès à ${userId}`);
+            if (!fcmReady) {
+                console.warn('⚠️ [Push] Impossible d\'envoyer le push FCM : Firebase Admin non configuré.');
+                return;
+            }
+
+            const message = {
+                notification: {
+                    title: title,
+                    body: body
+                },
+                data: {
+                    type: type,
+                    url: url
+                },
+                token: token
+            };
+
+            const admin = require('firebase-admin');
+            const response = await admin.messaging().send(message);
+            console.log(`✅ [Push] Notification FCM envoyée avec succès :`, response);
+        }
 
     } catch (err) {
-        console.error(`❌ [Push] Erreur Web Push pour ${userId}:`, err.message);
+        console.error(`❌ [Push] Erreur d'envoi pour ${userId}:`, err.message);
 
-        if (err.statusCode === 404 || err.statusCode === 410) {
-            console.log(`🗑️ [Push] Token expiré pour ${userId}, suppression...`);
-            // Nettoyer le token expiré
+        // Si le token est expiré ou invalide, on le supprime de la base
+        const isExpired = err.statusCode === 404 || err.statusCode === 410 || 
+                          (err.code && (err.code === 'messaging/registration-token-not-registered' || err.code === 'messaging/invalid-argument'));
+
+        if (isExpired) {
+            console.log(`🗑️ [Push] Token expiré ou invalide pour ${userId}, suppression...`);
             if (schoolSlug) {
                 await supabase.from(`profiles_${schoolSlug}`).update({ push_token: null }).eq('id', userId);
             } else {

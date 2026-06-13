@@ -133,7 +133,8 @@ export type UserRole =
   | 'surveillant'
   | 'comptable'
   | 'parent'
-  | 'enseignant';
+  | 'enseignant'
+  | 'creator';
 
 export interface User {
   id: string;
@@ -267,7 +268,8 @@ export type AppPage =
   // ── Pages SuperAdmin (propriétaire SaaS) ──
   | 'superadmin_dashboard'
   | 'superadmin_schools'
-  | 'superadmin_billing';
+  | 'superadmin_billing'
+  | 'creator_dashboard';
 
 // Les types de cycles existants
 export const CYCLES: Cycle[] = ['Primaire', 'Collège', 'Lycée'];

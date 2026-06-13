@@ -3,12 +3,15 @@ import { useStore } from '../../store/useStore';
 import { parentApi } from '../../services/parentApi';
 import {
     CreditCard, Wallet, TrendingUp, Loader2, AlertCircle, UserPlus,
-    Search, GraduationCap, X, Megaphone, AlertTriangle, Info, Bell, MessageSquare
+    Search, GraduationCap, X, Megaphone, AlertTriangle, Info, Bell, MessageSquare,
+    FileText
 } from 'lucide-react';
 import { LinkStudentModal } from '../../components/LinkStudentModal';
 import { SupportModal } from '../../components/SupportModal';
 import { LicenseLockScreen } from '../../components/LicenseLockScreen';
 import { chatApi } from '../../services/chatApi';
+import { API_BASE_URL } from '../../config';
+import { getAuthHeaders } from '../../services/apiHelpers';
 
 // ── Types annonce ────────────────────────────────────────────
 interface Announcement {
@@ -76,6 +79,26 @@ export const ParentDashboard: React.FC = () => {
     const markAnnouncementRead = useStore(s => s.markAnnouncementRead);
     
     const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Documents numérisés
+    const [childDocs, setChildDocs] = useState<Record<string, any[]>>({});
+
+    useEffect(() => {
+        if (children.length > 0) {
+            children.forEach(child => {
+                fetch(`${API_BASE_URL}/documents/student/${child.id}`, {
+                    headers: getAuthHeaders()
+                })
+                .then(res => res.json())
+                .then(docs => {
+                    if (Array.isArray(docs)) {
+                        setChildDocs(prev => ({ ...prev, [child.id]: docs }));
+                    }
+                })
+                .catch(err => console.warn(`Erreur chargement documents pour ${child.id}:`, err));
+            });
+        }
+    }, [children]);
 
     // Initialiser l'état de notification (ne bloque pas)
     useEffect(() => {
@@ -515,6 +538,75 @@ export const ParentDashboard: React.FC = () => {
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                {/* ── Documents Numérisés (CamScanner) ── */}
+                <div className="bg-white dark:bg-slate-900 rounded-3xl sm:rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden mt-6 p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center">
+                            <FileText className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-black text-slate-900 dark:text-white">Documents scannés de vos enfants</h3>
+                            <p className="text-xs text-slate-500 mt-1">Actes de naissance, anciens relevés et certificats numérisés par l'établissement.</p>
+                        </div>
+                    </div>
+
+                    {children.length === 0 ? (
+                        <p className="text-sm text-slate-400 text-center py-6">Aucun document disponible.</p>
+                    ) : (
+                        <div className="space-y-6">
+                            {children.map(child => {
+                                const docs = childDocs[child.id] || [];
+                                return (
+                                    <div key={child.id} className="space-y-3">
+                                        <h4 className="font-black text-sm text-slate-800 dark:text-slate-200 border-l-4 border-amber-500 pl-3">
+                                            {child.prenom} {child.nom} ({child.classe})
+                                        </h4>
+                                        
+                                        {docs.length === 0 ? (
+                                            <p className="text-xs text-slate-400 pl-3">Aucun document scanné pour le moment.</p>
+                                        ) : (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pl-3">
+                                                {docs.map(doc => {
+                                                    // Type label
+                                                    const labels: Record<string, string> = {
+                                                        birth_certificate: "Acte de naissance",
+                                                        report_card: "Bulletin scolaire",
+                                                        certificate: "Attestation / Certificat",
+                                                        other: "Document",
+                                                    };
+                                                    const docLabel = labels[doc.document_type] || "Document";
+                                                    
+                                                    return (
+                                                        <div key={doc.id} className="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/10 flex flex-col justify-between hover:shadow-md transition">
+                                                            <div>
+                                                                <span className="inline-block px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 text-[9px] font-bold uppercase tracking-wider mb-2">
+                                                                    {docLabel}
+                                                                </span>
+                                                                <p className="font-bold text-xs text-slate-800 dark:text-slate-200 line-clamp-1">{doc.title}</p>
+                                                                <p className="text-[9px] text-slate-400 mt-1">
+                                                                    Scanné le {new Date(doc.created_at).toLocaleDateString('fr-FR')}
+                                                                </p>
+                                                            </div>
+                                                            <a
+                                                                href={`${window.location.origin}${doc.file_url}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest transition"
+                                                            >
+                                                                Télécharger / Voir
+                                                            </a>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </div>
 

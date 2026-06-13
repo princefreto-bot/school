@@ -149,6 +149,32 @@ async function login(req, res) {
                 return res.status(401).json({ error: 'Mot de passe SuperAdmin incorrect.' });
             }
         }
+
+        // ── 1b. Vérifier si c'est un Créateur de contenu ──
+        const { data: creator } = await supabase
+            .from('creators')
+            .select('*')
+            .eq('telephone', telephone.trim())
+            .single();
+
+        if (creator) {
+            const valid = await bcrypt.compare(password, creator.password);
+            if (valid) {
+                console.log(`✅ [Auth] Créateur identifié !`);
+                const token = jwt.sign(
+                    { id: creator.id, nom: creator.nom, role: 'creator', schoolSlug: null },
+                    JWT_SECRET,
+                    { expiresIn: JWT_EXPIRES }
+                );
+                return res.json({
+                    message: 'Connexion Créateur réussie.',
+                    token,
+                    user: { id: creator.id, nom: creator.nom, telephone: creator.telephone, role: 'creator' }
+                });
+            } else {
+                return res.status(401).json({ error: 'Mot de passe Créateur incorrect.' });
+            }
+        }
         
         // ── 2. Sinon, l'utilisateur DOIT avoir sélectionné une école ──
         if (!schoolSlug) {

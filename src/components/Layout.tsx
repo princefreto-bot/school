@@ -51,6 +51,10 @@ const PARENT_NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'annonces',          label: 'Annonces',            icon: <Megaphone className="w-[18px] h-[18px]" /> },
 ];
 
+const CREATOR_NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
+  { id: 'creator_dashboard',  label: 'Mon Espace Pub',     icon: <Megaphone className="w-[18px] h-[18px]" /> },
+];
+
 const NAV_GROUPS: Record<string, string> = {
   dashboard: 'Principal',
   eleves: 'Gestion',
@@ -366,7 +370,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const isSyncing = useStore((s) => s.isSyncing);
   const nonSoldes = students.filter((s) => s.status !== 'Soldé').length;
   const isParent = user?.role === 'parent';
-  const baseNavItems = isParent ? PARENT_NAV_ITEMS : NAV_ITEMS;
+  const isCreator = user?.role === 'creator';
+  const baseNavItems = isCreator ? CREATOR_NAV_ITEMS : (isParent ? PARENT_NAV_ITEMS : NAV_ITEMS);
   const filteredItems = getFilteredNavItems(user?.role, baseNavItems) as Omit<NavItem, 'badge'>[];
 
   const navItems: NavItem[] = filteredItems.map((item) => ({

@@ -3,13 +3,16 @@
 // ============================================================
 import { AppPage } from '../types';
 
-type Role = 'superadmin' | 'admin' | 'directeur' | 'directeur_general' | 'proviseur' | 'censeur' | 'superviseur' | 'surveillant' | 'comptable' | 'parent' | 'enseignant';
+type Role = 'superadmin' | 'admin' | 'directeur' | 'directeur_general' | 'proviseur' | 'censeur' | 'superviseur' | 'surveillant' | 'comptable' | 'parent' | 'enseignant' | 'creator';
 
 // Pages accessibles par rôle
 const ROLE_PAGES: Record<Role, AppPage[]> = {
     // ── SuperAdmin : accès global SaaS ──
     superadmin: [
         'superadmin_dashboard', 'superadmin_schools', 'superadmin_billing'
+    ],
+    creator: [
+        'creator_dashboard'
     ],
     directeur_general: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
@@ -104,6 +107,7 @@ const ROLE_ACTIONS: Record<Role, ActionType[]> = {
     censeur: [],
     parent: [],
     enseignant: [],
+    creator: [],
 };
 
 export const canAccessPage = (role: string | undefined, page: AppPage): boolean => {
@@ -141,6 +145,7 @@ export const getRoleLabel = (role: string): string => {
         censeur: 'Censeur',
         parent: 'Parent',
         enseignant: 'Enseignant (Compte Partagé)',
+        creator: 'Créateur de contenu',
     };
     return labels[role] || role;
 };

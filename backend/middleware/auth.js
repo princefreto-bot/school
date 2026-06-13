@@ -54,4 +54,12 @@ function requireSchoolAdmin(req, res, next) {
     next();
 }
 
-module.exports = { authenticateToken, requireSuperAdmin, requireSchool, requireSchoolAdmin };
+// ── Middleware Créateur de contenu uniquement ───────────────────
+function requireCreator(req, res, next) {
+    if (!req.user || req.user.role !== 'creator') {
+        return res.status(403).json({ error: 'Accès réservé aux créateurs.' });
+    }
+    next();
+}
+
+module.exports = { authenticateToken, requireSuperAdmin, requireSchool, requireSchoolAdmin, requireCreator };

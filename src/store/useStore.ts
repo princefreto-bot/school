@@ -354,6 +354,7 @@ export const useStore = create<AppState>()(
             // Déterminer la page de redirection selon le rôle
             let targetPage: AppPage = 'dashboard';
             if (loggedUser.role === 'superadmin') targetPage = 'superadmin_dashboard';
+            else if (loggedUser.role === 'creator') targetPage = 'creator_dashboard';
             else if (loggedUser.role === 'parent') targetPage = 'parent_dashboard';
             else if (loggedUser.role === 'superviseur' || loggedUser.role === 'surveillant') targetPage = 'scan_presence';
             else if (loggedUser.role === 'enseignant') {
@@ -391,7 +392,7 @@ export const useStore = create<AppState>()(
 
             set({ user: loggedUser, isAuthenticated: true, currentPage: targetPage });
             get().addActivityLog(createActivityLog(loggedUser.nom, loggedUser.role, 'connexion', 'Connexion API réussie'));
-            if (loggedUser.role !== 'superadmin') get().fetchAllFromBackend();
+            if (loggedUser.role !== 'superadmin' && loggedUser.role !== 'creator') get().fetchAllFromBackend();
             return true;
           }
         } catch (err: any) {
