@@ -440,66 +440,30 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
           const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imgData.data;
 
-          // Calculer le contraste et la luminosité
-          // Contraste de 0 à 100 -> facteur
-          const contrast = (contrastValue - 50) * 2; // -100 à 100
+          // Contraste (+30) et Luminosité (+18) automatiques pour effet scanner optimal
+          const contrast = 30;
           const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-          
-          const brightness = (brightnessValue - 50) * 2.5; // -125 à 125
+          const brightness = 18;
 
           for (let i = 0; i < data.length; i += 4) {
-            let r = data[i];
-            let g = data[i + 1];
-            let b = data[i + 2];
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
 
             // 1. Grayscale
-            if (filterType === 'grayscale' || filterType === 'binarized' || filterType === 'magic') {
-              const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-              r = gray;
-              g = gray;
-              b = gray;
-            }
+            const gray = 0.299 * r + 0.587 * g + 0.114 * b;
 
-            // 2. Luminosité
-            r += brightness;
-            g += brightness;
-            b += brightness;
+            // 2. Luminosité et Contraste
+            let finalGray = gray + brightness;
+            finalGray = factor * (finalGray - 128) + 128;
 
-            // 3. Contraste
-            r = factor * (r - 128) + 128;
-            g = factor * (g - 128) + 128;
-            b = factor * (b - 128) + 128;
+            // 3. Seuillage Binarisé
+            const threshold = 135;
+            const val = finalGray > threshold ? 255 : 0;
 
-            // 4. Binarisation (seuillage noir et blanc CamScanner agressif)
-            if (filterType === 'binarized') {
-              const gray = (r + g + b) / 3;
-              const threshold = 135; // Seuil standard
-              const val = gray > threshold ? 255 : 0;
-              r = val;
-              g = val;
-              b = val;
-            } 
-            
-            // 5. Couleur magique : blanchiment des zones presque blanches (fond du papier)
-            if (filterType === 'magic') {
-              // Blanchir le fond si c'est déjà clair
-              const gray = (r + g + b) / 3;
-              if (gray > 180) {
-                r = Math.min(255, r * 1.25);
-                g = Math.min(255, g * 1.25);
-                b = Math.min(255, b * 1.25);
-              } else {
-                // Rendre les écritures sombres encore plus noires
-                r = Math.max(0, r * 0.75);
-                g = Math.max(0, g * 0.75);
-                b = Math.max(0, b * 0.75);
-              }
-            }
-
-            // Clamping
-            data[i] = Math.min(255, Math.max(0, r));
-            data[i + 1] = Math.min(255, Math.max(0, g));
-            data[i + 2] = Math.min(255, Math.max(0, b));
+            data[i] = val;
+            data[i + 1] = val;
+            data[i + 2] = val;
           }
 
           ctx.putImageData(imgData, 0, 0);
@@ -906,40 +870,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
                   ))}
                 </div>
 
-                {/* Sliders avancés si non-original */}
-                {filterType !== 'original' && (
-                  <div className="space-y-3 pt-2">
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase">
-                        <span>Contraste</span>
-                        <span>{contrastValue}</span>
-                      </div>
-                      <input 
-                        type="range" 
-                        min="0" 
-                        max="100" 
-                        value={contrastValue}
-                        onChange={(e) => setContrastValue(Number(e.target.value))}
-                        className="w-full accent-indigo-500" 
-                      />
-                    </div>
 
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase">
-                        <span>Luminosité</span>
-                        <span>{brightnessValue}</span>
-                      </div>
-                      <input 
-                        type="range" 
-                        min="0" 
-                        max="100" 
-                        value={brightnessValue}
-                        onChange={(e) => setBrightnessValue(Number(e.target.value))}
-                        className="w-full accent-indigo-500" 
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
