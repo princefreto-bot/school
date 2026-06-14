@@ -15,6 +15,7 @@ async function getAllSchools(req, res) {
         const { data: schools, error } = await supabase
             .from('schools')
             .select('*')
+            .eq('is_email_verified', true)
             .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -144,6 +145,8 @@ async function createSchool(req, res) {
             phone: validatedData.phone || null,
             email: validatedData.email || null,
             status: 'trial',
+            is_email_verified: true,
+            is_approved: true,
             trial_ends_at: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(), // +2 mois
             accepted_terms: validatedData.accepted_terms,
             accepted_privacy_policy: validatedData.accepted_privacy_policy,
@@ -274,10 +277,12 @@ async function updateSchool(req, res) {
 async function getGlobalStats(req, res) {
     try {
         const { count: totalSchools } = await supabase
-            .from('schools').select('*', { count: 'exact', head: true });
+            .from('schools')
+            .select('*', { count: 'exact', head: true })
+            .eq('is_email_verified', true);
 
         const { data: schools } = await supabase
-            .from('schools').select('slug, status, trial_ends_at');
+            .from('schools').select('slug, status, trial_ends_at').eq('is_email_verified', true);
 
         let totalStudents = 0;
         let totalUsers = 0;

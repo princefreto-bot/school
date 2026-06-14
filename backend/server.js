@@ -77,6 +77,7 @@ app.get('/api/schools', async (req, res) => {
             .from('schools')
             .select('slug, name, logo_url')
             .in('status', ['active', 'trial'])
+            .eq('is_email_verified', true)
             .order('name');
         if (error) throw error;
         res.json(schools);

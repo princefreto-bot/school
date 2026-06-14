@@ -431,6 +431,7 @@ async function registerSchoolRequest(req, res) {
             console.log(`🔑 [CODE DE VALIDATION] E-mail: ${email.trim()} | Code: ${code}`);
             // En mode développement, on ne bloque pas la demande d'inscription si le serveur SMTP n'est pas configuré.
             if (process.env.NODE_ENV === 'production') {
+                await supabase.from('schools').delete().eq('slug', cleanSlug);
                 throw mailErr;
             }
         }

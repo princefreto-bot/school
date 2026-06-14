@@ -11,6 +11,11 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendVerificationEmail(toEmail, schoolName, verificationCode) {
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        console.warn(`⚠️ [Mailer Warning] SMTP non configuré (SMTP_USER ou SMTP_PASS manquant).`);
+        console.log(`🔑 [CODE DE VALIDATION] E-mail: ${toEmail} | Code: ${verificationCode}`);
+        return true;
+    }
     const from = process.env.SMTP_FROM || '"DGhubSchool" <no-reply@dghubschool.com>';
     
     const mailOptions = {
