@@ -1,5 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Camera, Upload, RotateCw, Contrast, X, Check, FileText, AlertTriangle } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 interface DocumentScannerProps {
   onCapture: (file: File, docType: string, title: string) => void;
@@ -26,13 +28,110 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
   const [brightnessValue, setBrightnessValue] = useState(50); // 0 à 100
   const [rotation, setRotation] = useState(0); // 0, 90, 180, 270
 
+  // Cadrage / Crop
+  const [scanStep, setScanStep] = useState<'crop' | 'filter'>('crop');
+  const [cropLeft, setCropLeft] = useState(5); // %
+  const [cropTop, setCropTop] = useState(5); // %
+  const [cropRight, setCropRight] = useState(95); // %
+  const [cropBottom, setCropBottom] = useState(95); // %
+  const [activeHandle, setActiveHandle] = useState<'tl' | 'tr' | 'bl' | 'br' | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const handlePointerDown = (handle: 'tl' | 'tr' | 'bl' | 'br') => (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    setActiveHandle(handle);
+  };
+
+  useEffect(() => {
+    const handlePointerMove = (e: MouseEvent | TouchEvent) => {
+      if (!activeHandle || !containerRef.current) return;
+
+      const rect = containerRef.current.getBoundingClientRect();
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+      let x = ((clientX - rect.left) / rect.width) * 100;
+      let y = ((clientY - rect.top) / rect.height) * 100;
+
+      x = Math.max(0, Math.min(100, x));
+      y = Math.max(0, Math.min(100, y));
+
+      const minSize = 10;
+
+      if (activeHandle === 'tl') {
+        setCropLeft(Math.min(x, cropRight - minSize));
+        setCropTop(Math.min(y, cropBottom - minSize));
+      } else if (activeHandle === 'tr') {
+        setCropRight(Math.max(x, cropLeft + minSize));
+        setCropTop(Math.min(y, cropBottom - minSize));
+      } else if (activeHandle === 'bl') {
+        setCropLeft(Math.min(x, cropRight - minSize));
+        setCropBottom(Math.max(y, cropTop + minSize));
+      } else if (activeHandle === 'br') {
+        setCropRight(Math.max(x, cropLeft + minSize));
+        setCropBottom(Math.max(y, cropTop + minSize));
+      }
+    };
+
+    const handlePointerUp = () => {
+      setActiveHandle(null);
+    };
+
+    if (activeHandle) {
+      window.addEventListener('mousemove', handlePointerMove);
+      window.addEventListener('mouseup', handlePointerUp);
+      window.addEventListener('touchmove', handlePointerMove, { passive: false });
+      window.addEventListener('touchend', handlePointerUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handlePointerMove);
+      window.removeEventListener('mouseup', handlePointerUp);
+      window.removeEventListener('touchmove', handlePointerMove);
+      window.removeEventListener('touchend', handlePointerUp);
+    };
+  }, [activeHandle, cropLeft, cropTop, cropRight, cropBottom]);
+
+  const isNative = Capacitor.isNativePlatform();
+
   // 1. Initialiser la caméra
   useEffect(() => {
-    startCamera();
+    if (isNative) {
+      takeNativePhoto();
+    } else {
+      startCamera();
+    }
     return () => {
       stopCamera();
     };
   }, []);
+
+  const takeNativePhoto = async () => {
+    try {
+      console.log("[Camera] Launching native camera...");
+      const image = await CapCamera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Camera
+      });
+      
+      if (image.dataUrl) {
+        setCapturedImage(image.dataUrl);
+        setScanStep('crop');
+        setCropLeft(5);
+        setCropTop(5);
+        setCropRight(95);
+        setCropBottom(95);
+        setHasCamera(true);
+        setCameraActive(false);
+      }
+    } catch (err) {
+      console.warn("Utilisateur a annulé ou erreur appareil photo natif:", err);
+      setHasCamera(false);
+      setCameraActive(false);
+    }
+  };
 
   const startCamera = async () => {
     try {
@@ -75,6 +174,11 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
         
         const dataUrl = canvas.toDataURL('image/jpeg');
         setCapturedImage(dataUrl);
+        setScanStep('crop');
+        setCropLeft(5);
+        setCropTop(5);
+        setCropRight(95);
+        setCropBottom(95);
         stopCamera();
       }
     }
@@ -88,11 +192,44 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
       reader.onload = (event) => {
         if (event.target?.result) {
           setCapturedImage(event.target.result as string);
+          setScanStep('crop');
+          setCropLeft(5);
+          setCropTop(5);
+          setCropRight(95);
+          setCropBottom(95);
           stopCamera();
         }
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  // 3.5 Valider le cadrage (Crop)
+  const handleNextStep = () => {
+    if (!capturedImage || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = () => {
+      if (!ctx) return;
+
+      const srcX = (cropLeft / 100) * img.width;
+      const srcY = (cropTop / 100) * img.height;
+      const srcWidth = ((cropRight - cropLeft) / 100) * img.width;
+      const srcHeight = ((cropBottom - cropTop) / 100) * img.height;
+
+      canvas.width = srcWidth;
+      canvas.height = srcHeight;
+      ctx.clearRect(0, 0, srcWidth, srcHeight);
+      ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, 0, 0, srcWidth, srcHeight);
+
+      const croppedDataUrl = canvas.toDataURL('image/jpeg');
+      setCapturedImage(croppedDataUrl);
+      setScanStep('filter');
+    };
+    img.src = capturedImage;
   };
 
   // 4. Appliquer les filtres de traitement d'image sur le Canvas
@@ -257,20 +394,107 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
               className="w-full h-full object-cover"
             />
           ) : capturedImage ? (
-            <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden bg-slate-900">
-              <img 
-                src={capturedImage} 
-                alt="Capture Preview" 
-                style={{ transform: `rotate(${rotation}deg)` }}
-                className="max-w-full max-h-[40vh] md:max-h-[50vh] object-contain shadow-2xl rounded-lg transition-transform duration-300" 
-              />
+            <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden bg-slate-900 select-none">
+              {scanStep === 'crop' ? (
+                <div ref={containerRef} className="relative inline-block max-w-full max-h-[40vh] md:max-h-[55vh] select-none">
+                  <img 
+                    src={capturedImage} 
+                    alt="Cadrage" 
+                    className="max-w-full max-h-[40vh] md:max-h-[55vh] object-contain shadow-2xl rounded-lg pointer-events-none select-none" 
+                  />
+                  {/* Overlay SVG */}
+                  <svg className="absolute inset-0 w-full h-full select-none pointer-events-none z-10">
+                    <defs>
+                      <mask id="cropMask">
+                        <rect width="100%" height="100%" fill="white" />
+                        <rect 
+                          x={`${cropLeft}%`} 
+                          y={`${cropTop}%`} 
+                          width={`${cropRight - cropLeft}%`} 
+                          height={`${cropBottom - cropTop}%`} 
+                          fill="black" 
+                        />
+                      </mask>
+                    </defs>
+                    
+                    {/* Dark mask outside crop area */}
+                    <rect width="100%" height="100%" fill="black" opacity="0.6" mask="url(#cropMask)" />
+                    
+                    {/* Border of crop box */}
+                    <rect 
+                      x={`${cropLeft}%`} 
+                      y={`${cropTop}%`} 
+                      width={`${cropRight - cropLeft}%`} 
+                      height={`${cropBottom - cropTop}%`} 
+                      fill="none" 
+                      stroke="#f59e0b" 
+                      strokeWidth="2.5" 
+                      strokeDasharray="5 5"
+                    />
+                  </svg>
+
+                  {/* Corner Handles */}
+                  {/* Top Left */}
+                  <div 
+                    onMouseDown={handlePointerDown('tl')}
+                    onTouchStart={handlePointerDown('tl')}
+                    style={{ left: `${cropLeft}%`, top: `${cropTop}%` }}
+                    className="absolute w-10 h-10 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-nwse-resize z-20 pointer-events-auto active:scale-125 transition-transform"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-amber-500 border-2 border-white shadow-xl" />
+                  </div>
+
+                  {/* Top Right */}
+                  <div 
+                    onMouseDown={handlePointerDown('tr')}
+                    onTouchStart={handlePointerDown('tr')}
+                    style={{ left: `${cropRight}%`, top: `${cropTop}%` }}
+                    className="absolute w-10 h-10 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-nesw-resize z-20 pointer-events-auto active:scale-125 transition-transform"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-amber-500 border-2 border-white shadow-xl" />
+                  </div>
+
+                  {/* Bottom Left */}
+                  <div 
+                    onMouseDown={handlePointerDown('bl')}
+                    onTouchStart={handlePointerDown('bl')}
+                    style={{ left: `${cropLeft}%`, top: `${cropBottom}%` }}
+                    className="absolute w-10 h-10 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-nesw-resize z-20 pointer-events-auto active:scale-125 transition-transform"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-amber-500 border-2 border-white shadow-xl" />
+                  </div>
+
+                  {/* Bottom Right */}
+                  <div 
+                    onMouseDown={handlePointerDown('br')}
+                    onTouchStart={handlePointerDown('br')}
+                    style={{ left: `${cropRight}%`, top: `${cropBottom}%` }}
+                    className="absolute w-10 h-10 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-nwse-resize z-20 pointer-events-auto active:scale-125 transition-transform"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-amber-500 border-2 border-white shadow-xl" />
+                  </div>
+                </div>
+              ) : (
+                <img 
+                  src={capturedImage} 
+                  alt="Capture Preview" 
+                  style={{ transform: `rotate(${rotation}deg)` }}
+                  className="max-w-full max-h-[40vh] md:max-h-[50vh] object-contain shadow-2xl rounded-lg transition-transform duration-300 pointer-events-none select-none" 
+                />
+              )}
               <canvas ref={canvasRef} className="hidden" />
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-6">
               <AlertTriangle className="w-12 h-12 text-amber-500 mb-4" />
               <p className="font-bold text-center text-sm">Caméra indisponible ou permission refusée.</p>
-              <p className="text-xs text-slate-500 text-center mt-1">Veuillez importer un fichier depuis votre appareil.</p>
+              <p className="text-xs text-slate-500 text-center mt-1 mb-4">Veuillez importer un fichier ou autoriser l'accès dans les paramètres de votre appareil.</p>
+              <button 
+                onClick={isNative ? takeNativePhoto : startCamera}
+                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+              >
+                <RotateCw className="w-3.5 h-3.5" /> {isNative ? "Ouvrir l'appareil photo" : "Réessayer d'activer la caméra"}
+              </button>
             </div>
           )}
 
@@ -279,7 +503,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
             {cameraActive && !capturedImage && (
               <button 
                 onClick={capturePhoto}
-                className="w-14 h-14 rounded-full bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center shadow-lg active:scale-90 transition"
+                className="w-14 h-14 rounded-full bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center shadow-lg active:scale-90 transition cursor-pointer"
                 title="Prendre la photo"
               >
                 <Camera className="w-6 h-6" />
@@ -288,30 +512,46 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
 
             {capturedImage && (
               <>
-                <button 
-                  onClick={() => setRotation((prev) => (prev + 90) % 360)}
-                  className="p-3 bg-white/10 text-white rounded-full hover:bg-white/20 active:scale-95 transition"
-                  title="Tourner 90°"
-                >
-                  <RotateCw className="w-5 h-5" />
-                </button>
-                <button 
+                {scanStep === 'crop' ? (
+                  <button 
+                    onClick={handleNextStep}
+                    className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full font-black text-xs uppercase tracking-wider active:scale-95 transition flex items-center gap-1.5 cursor-pointer shadow-lg"
+                  >
+                    <Check className="w-4 h-4" /> Valider le cadrage
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => setRotation((prev) => (prev + 90) % 360)}
+                    className="p-3 bg-white/10 text-white rounded-full hover:bg-white/20 active:scale-95 transition cursor-pointer"
+                    title="Tourner 90°"
+                  >
+                    <RotateCw className="w-5 h-5" />
+                  </button>
+                )}
+                 <button 
                   onClick={() => {
                     setCapturedImage(null);
                     setRotation(0);
-                    startCamera();
+                    setScanStep('crop');
+                    if (isNative) {
+                      takeNativePhoto();
+                    } else {
+                      startCamera();
+                    }
                   }}
-                  className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-full font-bold text-xs active:scale-95 transition"
+                  className="px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-full font-bold text-xs active:scale-95 transition cursor-pointer shadow-lg"
                 >
                   Recommencer
                 </button>
               </>
             )}
 
-            <label className="p-3 bg-white/10 text-white rounded-full hover:bg-white/20 active:scale-95 transition cursor-pointer" title="Importer un document">
-              <Upload className="w-5 h-5" />
-              <input type="file" accept="image/*" onChange={handleFileImport} className="hidden" />
-            </label>
+            {!capturedImage && (
+              <label className="p-3 bg-white/10 text-white rounded-full hover:bg-white/20 active:scale-95 transition cursor-pointer" title="Importer un document">
+                <Upload className="w-5 h-5" />
+                <input type="file" accept="image/*" onChange={handleFileImport} className="hidden" />
+              </label>
+            )}
           </div>
         </div>
 
@@ -321,7 +561,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
-                <h4 className="font-black text-slate-900 dark:text-white text-lg tracking-tight">Numériseur CamScanner</h4>
+                <h4 className="font-black text-slate-900 dark:text-white text-lg tracking-tight">Numériseur de document</h4>
                 <p className="text-[11px] font-bold text-amber-500 uppercase tracking-wider mt-0.5">{studentName}</p>
               </div>
               <button 
@@ -362,7 +602,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
             </div>
 
             {/* Filtres de Traitement */}
-            {capturedImage && (
+            {capturedImage && scanStep === 'filter' && (
               <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800/50">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                   <Contrast className="w-3.5 h-3.5" /> Traitement d'image magique
@@ -430,17 +670,28 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
 
           {/* Action Validation */}
           <div className="pt-6 border-t border-slate-100 dark:border-slate-800/80 mt-6 md:mt-0 flex flex-col gap-2">
-            <button
-              onClick={handleSubmit}
-              disabled={!capturedImage}
-              className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 ${
-                capturedImage 
-                  ? 'bg-amber-500 text-white shadow-xl shadow-amber-500/20 hover:bg-amber-600 active:scale-95 cursor-pointer' 
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
-              }`}
-            >
-              <Check className="w-4 h-4" /> Numériser & Envoyer
-            </button>
+            {!capturedImage ? (
+              <button
+                disabled
+                className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
+              >
+                <Check className="w-4 h-4" /> Numériser & Envoyer
+              </button>
+            ) : scanStep === 'crop' ? (
+              <button
+                onClick={handleNextStep}
+                className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 bg-amber-500 text-white shadow-xl shadow-amber-500/20 hover:bg-amber-600 active:scale-95 cursor-pointer"
+              >
+                <Check className="w-4 h-4" /> Valider le cadrage
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 bg-amber-500 text-white shadow-xl shadow-amber-500/20 hover:bg-amber-600 active:scale-95 cursor-pointer"
+              >
+                <Check className="w-4 h-4" /> Numériser & Envoyer
+              </button>
+            )}
             <p className="text-[9px] text-center text-slate-400 font-bold leading-normal">
               Le document sera associé au profil de l'élève et une notification push sera envoyée immédiatement aux parents.
             </p>

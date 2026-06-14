@@ -540,7 +540,7 @@ export const ParentDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* ── Documents Numérisés (CamScanner) ── */}
+                {/* ── Documents Numérisés ── */}
                 <div className="bg-white dark:bg-slate-900 rounded-3xl sm:rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden mt-6 p-6">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center">

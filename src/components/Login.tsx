@@ -81,15 +81,31 @@ export const Login: React.FC = () => {
   // NOUVEAU : Sélection Établissement
   const [schools, setSchools] = useState<{slug: string, name: string, logo_url: string}[]>([]);
   const [selectedSchool, setSelectedSchool] = useState('');
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     // Récupérer la liste des écoles
+    console.log("Fetching schools from:", `${API_BASE_URL}/schools`);
+    setFetchError(null);
     fetch(`${API_BASE_URL}/schools`)
-      .then(res => res.json())
-      .then(data => {
-         if (Array.isArray(data)) setSchools(data);
+      .then(res => {
+         if (!res.ok) {
+           throw new Error(`Erreur HTTP : ${res.status}`);
+         }
+         return res.json();
       })
-      .catch(console.error);
+      .then(data => {
+         console.log("Schools received:", data);
+         if (Array.isArray(data)) {
+           setSchools(data);
+         } else {
+           setFetchError("Le format de données reçu est incorrect.");
+         }
+      })
+      .catch(err => {
+         console.error("Fetch error:", err);
+         setFetchError(err.message || String(err));
+      });
 
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
@@ -265,6 +281,12 @@ export const Login: React.FC = () => {
               <h1 className="text-2xl font-black text-slate-900 tracking-tighter">Créer un compte</h1>
               <div className="social-container text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-2">Inscription Parent</div>
               
+              {fetchError && (
+                <div className="p-2 mb-2 bg-rose-50 border border-rose-200 text-rose-600 rounded-lg text-xs font-bold w-full">
+                  Erreur de chargement: {fetchError}
+                </div>
+              )}
+
               <select className="auth-input mb-4 font-bold text-slate-600 border border-slate-200" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required>
                   <option value="" disabled>-- Sélectionnez votre établissement --</option>
                   {schools.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
@@ -316,6 +338,12 @@ export const Login: React.FC = () => {
               <h1 className="text-2xl font-black text-slate-900 tracking-tighter">Se connecter</h1>
               <div className="social-container text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-2">Accès {appName}</div>
               
+              {fetchError && (
+                <div className="p-2 mb-2 bg-rose-50 border border-rose-200 text-rose-600 rounded-lg text-xs font-bold w-full">
+                  Erreur de chargement: {fetchError}
+                </div>
+              )}
+
               <select className="auth-input mb-4 font-bold text-slate-600 border border-slate-200" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)}>
                   <option value="">Accès Global (Admin / Créateur)</option>
                   <option disabled>────── Établissements ──────</option>
@@ -388,6 +416,11 @@ export const Login: React.FC = () => {
                 </div>
 
                 <form onSubmit={(e) => handleAuth(e, view === 'login' ? 'login' : 'register')} className="space-y-4">
+                    {fetchError && (
+                      <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-2xl text-xs font-bold text-center">
+                        Erreur réseau: {fetchError}
+                      </div>
+                    )}
                     <div className="relative mb-2">
                         <Store className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
                         <select className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-700 appearance-none" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required={view === 'register'}>

@@ -163,7 +163,7 @@ export const Documents: React.FC = () => {
               Centre de <span className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-indigo-600">Documents</span>
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
-              Numérisez les dossiers de vos élèves (actes de naissance, bulletins, attestations) avec des filtres d'image haute performance style CamScanner. Alertez instantanément les parents lors de chaque enregistrement.
+              Numérisez les dossiers de vos élèves (actes de naissance, bulletins, attestations) avec des filtres d'image haute performance (noir & blanc, couleur améliorée). Alertez instantanément les parents lors de chaque enregistrement.
             </p>
         </div>
       </div>
@@ -348,7 +348,7 @@ export const Documents: React.FC = () => {
               </div>
               <h3 className="font-black text-xl text-slate-900 dark:text-white mb-2">Sélectionnez un élève</h3>
               <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold max-w-sm">
-                Choisissez un élève dans la colonne de gauche pour accéder à son coffre-fort de documents et démarrer une numérisation CamScanner.
+                Choisissez un élève dans la colonne de gauche pour accéder à son coffre-fort de documents et démarrer une numérisation.
               </p>
             </div>
           )}
