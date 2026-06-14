@@ -238,10 +238,6 @@ async function login(req, res) {
             return res.status(403).json({ error: "L'adresse email de cet établissement n'a pas encore été vérifiée. Veuillez d'abord valider votre inscription." });
         }
 
-        if (school.is_approved === false) {
-            return res.status(403).json({ error: "Votre établissement est en attente de validation par l'administration de DGhubSchool." });
-        }
-
         if (school.status === 'suspended') {
             return res.status(403).json({ error: "L'accès à cet établissement est suspendu." });
         }
@@ -294,7 +290,8 @@ async function login(req, res) {
                 role: user.role,
                 school_name: school.name,
                 school_slug: school.slug,
-                school_logo: school.school_logo
+                school_logo: school.logo_url,
+                school_approved: school.is_approved
             },
         });
     } catch (err) {
@@ -489,9 +486,11 @@ async function verifySchoolEmail(req, res) {
             signup_ip_hash: school.signup_ip_hash
         };
 
-        const { error: adminErr } = await supabase
+        const { data: admin, error: adminErr } = await supabase
             .from(`profiles_${school.slug}`)
-            .insert(adminPayload);
+            .insert(adminPayload)
+            .select()
+            .single();
 
         if (adminErr) throw adminErr;
 
@@ -516,9 +515,27 @@ async function verifySchoolEmail(req, res) {
 
         console.log(`🏫 Nouvelle école enregistrée et validée par e-mail : ${school.name} (${school.slug})`);
 
+        // Signer directement un token JWT pour connecter l'utilisateur
+        const token = jwt.sign(
+            { id: admin.id, nom: admin.nom, role: admin.role, schoolSlug: school.slug },
+            JWT_SECRET,
+            { expiresIn: JWT_EXPIRES }
+        );
+
         return res.json({
             success: true,
-            message: 'Votre adresse email a été validée avec succès. Vous pouvez maintenant vous connecter à votre portail.'
+            message: 'Votre adresse email a été validée avec succès.',
+            token,
+            user: {
+                id: admin.id,
+                nom: admin.nom,
+                telephone: admin.telephone,
+                role: admin.role,
+                school_name: school.name,
+                school_slug: school.slug,
+                school_logo: school.logo_url || null,
+                school_approved: false
+            }
         });
     } catch (err) {
         console.error('VerifySchoolEmail Error:', err.message);

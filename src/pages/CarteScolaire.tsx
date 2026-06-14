@@ -65,8 +65,13 @@ const CarteEleve: React.FC<CarteProps> = ({
             <div style={{ width: 44, height: 38, background: '#0F172A', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 3 }}>
                    {schoolLogo ? <img src={schoolLogo} style={{ maxWidth:'100%', maxHeight:'100%', objectFit:'contain' }} /> : <span style={{ color:'white', fontWeight:900, fontSize:10 }}>ID</span>}
                 </div>
-                <div style={{ marginLeft: 12 }}>
-                    <h2 style={{ color: '#0F172A', margin: 0, fontSize: 11, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1 }}>{schoolName}</h2>
+                <div style={{ marginLeft: 12, marginRight: 12, flex: 1, minWidth: 0 }}>
+                    <h2 style={{
+                        color: '#0F172A', margin: 0,
+                        fontSize: schoolName.length > 25 ? 8 : schoolName.length > 15 ? 9 : 11,
+                        fontWeight: 900, textTransform: 'uppercase', lineHeight: 1,
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                    }}>{schoolName}</h2>
                     <p style={{ color: '#EAB308', margin: '2px 0 0 0', fontSize: 7, fontWeight: 700 }}>
                         OFFICIEL {schoolYear} <span style={{ color: '#64748B', fontWeight: 600 }}>· CARTES Scolaire</span>
                     </p>
@@ -100,8 +105,10 @@ const CarteEleve: React.FC<CarteProps> = ({
                 <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 2 }}>Nom & Prénoms</p>
                 <h3 style={{
                     color: '#0F172A', margin: 0, marginBottom: 12, fontWeight: 900, 
-                    fontSize: nomComplet.length > 20 ? 11 : 13,
-                    lineHeight: 1.1, textTransform: 'uppercase'
+                    fontSize: nomComplet.length > 30 ? 9 : nomComplet.length > 20 ? 11 : 13,
+                    lineHeight: 1.1, textTransform: 'uppercase',
+                    maxHeight: 34, overflow: 'hidden',
+                    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical'
                 }}>
                     {nomComplet}
                 </h3>
@@ -318,10 +325,24 @@ const generateCartesPDF = async (
         const txtX      = logoX + logoMM_W + 4;
         const maxNameW  = cardW - logoMM_W - 10;
         doc.setTextColor(15, 23, 42); // Bleu nuit (clair)
-        doc.setFontSize(7);
-        doc.setFont('helvetica', 'bold');
+        let schoolFontSize = 7;
         const schoolLine = (schoolName || 'ÉCOLE').toUpperCase();
-        doc.text(schoolLine, txtX, y + 5);
+        doc.setFontSize(schoolFontSize);
+        let schoolTextWidth = doc.getTextWidth(schoolLine);
+        // Ajuster dynamiquement la taille du texte de l'école pour éviter de dépasser
+        while (schoolTextWidth > maxNameW && schoolFontSize > 4.5) {
+            schoolFontSize -= 0.5;
+            doc.setFontSize(schoolFontSize);
+            schoolTextWidth = doc.getTextWidth(schoolLine);
+        }
+        let finalSchoolLine = schoolLine;
+        if (schoolTextWidth > maxNameW) {
+            while (doc.getTextWidth(finalSchoolLine + '...') > maxNameW && finalSchoolLine.length > 5) {
+                finalSchoolLine = finalSchoolLine.slice(0, -1);
+            }
+            finalSchoolLine += '...';
+        }
+        doc.text(finalSchoolLine, txtX, y + 5);
         
         doc.setFontSize(4.5);
         doc.setFont('helvetica', 'bold');
@@ -397,9 +418,13 @@ const generateCartesPDF = async (
 
         doc.setTextColor(15, 23, 42);
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(fullName.length > 20 ? 8 : 9);
+        let studentFontSize = 9;
+        if (fullName.length > 25) studentFontSize = 6.5;
+        else if (fullName.length > 18) studentFontSize = 8;
+        doc.setFontSize(studentFontSize);
         const nameLines = doc.splitTextToSize(fullName, nameMaxW);
-        doc.text(nameLines, infoStartX, photoY + 5);
+        const finalLines = nameLines.slice(0, 2); // Limiter à 2 lignes maximum pour éviter le chevauchement
+        doc.text(finalLines, infoStartX, photoY + 5);
 
         // ── Tags (Classe & Contact) ─────────────────────────────────
         const tagY = photoY + 13;
@@ -570,18 +595,6 @@ export const CarteScolaire: React.FC = () => {
                                 </select>
                             </div>
                         </div>
-                    </div>
-                    <div className="relative">
-                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                        <select
-                            value={selectedClasse}
-                            onChange={e => setSelectedClasse(e.target.value)}
-                            className="pl-9 pr-8 py-2.5 border border-gray-200 rounded-xl text-sm bg-white appearance-none focus:ring-2 focus:ring-indigo-500 outline-none sm:w-44"
-                        >
-                            <option value="">Toutes les classes</option>
-                            {classes.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
                     </div>
                     <button
                         onClick={handleGenerateAll}

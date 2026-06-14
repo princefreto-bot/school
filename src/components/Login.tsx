@@ -23,7 +23,7 @@ const SLIDE_DURATION = 5000;
 
 const SchoolLogo: React.FC<{ size?: string }> = ({ size = "w-16 h-16" }) => {
   return (
-    <div className={`${size} bg-amber-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-amber-500/20`}>
+    <div className={`${size} bg-amber-500 rounded-none flex items-center justify-center mb-4 shadow-lg shadow-amber-500/20`}>
       <GraduationCap className="w-1/2 h-1/2 text-white" />
     </div>
   );
@@ -162,7 +162,7 @@ export const Login: React.FC = () => {
   if (view === 'link') {
     return (
         <div className="min-h-screen bg-white flex items-center justify-center p-4">
-            <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 border border-slate-100 animate-in fade-in zoom-in duration-300">
+            <div className="w-full max-w-md bg-white rounded-none shadow-2xl p-8 border border-slate-100 animate-in fade-in zoom-in duration-300">
                 <LinkStudent onComplete={async () => {
                    // Une fois lié, on connecte officiellement
                    await login(username, password, selectedSchool);
@@ -184,7 +184,7 @@ export const Login: React.FC = () => {
         /* ──── DESKTOP SLIDING OVERLAY ──── */
         .auth-container {
           background-color: #fff;
-          border-radius: 24px;
+          border-radius: 0;
           box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
           position: relative;
           overflow: hidden;
@@ -241,11 +241,11 @@ export const Login: React.FC = () => {
 
         .auth-input {
           background-color: #f8fafc; border: 1px solid #f1f5f9; padding: 12px 15px; margin: 8px 0;
-          width: 100%; border-radius: 12px; font-size: 14px; focus:outline-none focus:ring-2 focus:ring-amber-400;
+          width: 100%; border-radius: 0; font-size: 14px; focus:outline-none focus:ring-2 focus:ring-amber-400;
         }
 
         .auth-button {
-          border-radius: 12px; border: 1px solid #eab308; background-color: #eab308; color: #FFFFFF;
+          border-radius: 0; border: 1px solid #eab308; background-color: #eab308; color: #FFFFFF;
           font-size: 12px; font-weight: bold; padding: 12px 45px; letter-spacing: 1px;
           text-transform: uppercase; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; margin-top: 15px;
         }
@@ -263,7 +263,7 @@ export const Login: React.FC = () => {
         .mobile-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
-            border-radius: 24px;
+            border-radius: 0;
             width: 90%;
             max-width: 400px;
             padding: 32px 24px;
@@ -284,7 +284,7 @@ export const Login: React.FC = () => {
               <div className="social-container text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-2">Inscription Parent</div>
               
               {fetchError && (
-                <div className="p-2 mb-2 bg-rose-50 border border-rose-200 text-rose-600 rounded-lg text-xs font-bold w-full">
+                <div className="p-2 mb-2 bg-rose-50 border border-rose-200 text-rose-600 rounded-none text-xs font-bold w-full">
                   Erreur de chargement: {fetchError}
                 </div>
               )}
@@ -301,28 +301,28 @@ export const Login: React.FC = () => {
                 <p className="text-[10px] font-bold text-slate-700">Confidentialité & Données (IPDCP)</p>
                 
                 <label className="flex items-start gap-2 cursor-pointer">
-                  <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="mt-0.5 accent-amber-500 rounded scale-90" required />
+                  <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="mt-0.5 accent-amber-500 rounded-none scale-90" required />
                   <span className="text-[9px] text-slate-500 leading-tight">
-                    J'accepte les <span className="font-bold text-slate-700">CGU</span> de l'application de mon établissement. <span className="text-rose-500">*</span>
+                    J'accepte les <a href="/#/conditions-utilisation" target="_blank" className="font-bold text-slate-700 hover:underline">CGU</a> de l'application de mon établissement. <span className="text-rose-500">*</span>
                   </span>
                 </label>
 
                 <label className="flex items-start gap-2 cursor-pointer">
-                  <input type="checkbox" checked={acceptedPrivacy} onChange={(e) => setAcceptedPrivacy(e.target.checked)} className="mt-0.5 accent-amber-500 rounded scale-90" required />
+                  <input type="checkbox" checked={acceptedPrivacy} onChange={(e) => setAcceptedPrivacy(e.target.checked)} className="mt-0.5 accent-amber-500 rounded-none scale-90" required />
                   <span className="text-[9px] text-slate-500 leading-tight">
-                    J'autorise le traitement des <span className="font-bold text-slate-700">données de scolarité/présences</span> de mon enfant. <span className="text-rose-500">*</span>
+                    J'autorise le traitement des données de scolarité/présences de mon enfant selon la <a href="/#/confidentialite" target="_blank" className="font-bold text-slate-700 hover:underline">Politique de Confidentialité</a>. <span className="text-rose-500">*</span>
                   </span>
                 </label>
 
                 <label className="flex items-start gap-2 cursor-pointer">
-                  <input type="checkbox" checked={parentPhotoAuth} onChange={(e) => setParentPhotoAuth(e.target.checked)} className="mt-0.5 accent-amber-500 rounded scale-90" />
+                  <input type="checkbox" checked={parentPhotoAuth} onChange={(e) => setParentPhotoAuth(e.target.checked)} className="mt-0.5 accent-amber-500 rounded-none scale-90" />
                   <span className="text-[9px] text-slate-500 leading-tight">
                     <span className="font-bold text-slate-700">Droit à l'image</span> : J'autorise l'affichage de la photo de mon enfant. <span className="text-slate-400">(Optionnel)</span>
                   </span>
                 </label>
 
                 <label className="flex items-start gap-2 cursor-pointer">
-                  <input type="checkbox" checked={marketingConsent} onChange={(e) => setMarketingConsent(e.target.checked)} className="mt-0.5 accent-amber-500 rounded scale-90" />
+                  <input type="checkbox" checked={marketingConsent} onChange={(e) => setMarketingConsent(e.target.checked)} className="mt-0.5 accent-amber-500 rounded-none scale-90" />
                   <span className="text-[9px] text-slate-500 leading-tight">
                     J'accepte de recevoir des actus et conseils d'YZO. <span className="text-slate-400">(Optionnel)</span>
                   </span>
@@ -341,7 +341,7 @@ export const Login: React.FC = () => {
               <div className="social-container text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-2">Accès {appName}</div>
               
               {fetchError && (
-                <div className="p-2 mb-2 bg-rose-50 border border-rose-200 text-rose-600 rounded-lg text-xs font-bold w-full">
+                <div className="p-2 mb-2 bg-rose-50 border border-rose-200 text-rose-600 rounded-none text-xs font-bold w-full">
                   Erreur de chargement: {fetchError}
                 </div>
               )}
@@ -355,16 +355,16 @@ export const Login: React.FC = () => {
               <input type="password" placeholder="Mot de passe" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
               <div className="flex items-center justify-between w-full mt-2 text-xs px-1">
                 <a href="#" className="text-slate-400 hover:text-amber-600">Mot de passe oublié ?</a>
-                <button 
-                  type="button" 
-                  onClick={() => setIsPrivacyOpen(true)}
+                <a 
+                  href="/#/confidentialite" 
+                  target="_blank"
                   className="text-slate-400 hover:text-amber-600 underline cursor-pointer"
                 >
                   Confidentialité & Données
-                </button>
+                </a>
               </div>
               {trialExpiredSchool && (
-                <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-left">
+                <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-none text-left">
                   <p className="text-amber-800 font-bold text-xs">⏰ Période d'essai expirée</p>
                   <p className="text-amber-700 text-xs mt-1">"{trialExpiredSchool}" doit régler son abonnement. Contactez l'administrateur de la plateforme.</p>
                 </div>
@@ -427,20 +427,20 @@ export const Login: React.FC = () => {
                     <h1 className="text-3xl font-black text-slate-900 tracking-tighter text-center">
                         {view === 'login' ? 'Bienvenue !' : 'Rejoignez-nous'}
                     </h1>
-                    <p className="text-[10px] text-amber-600 font-extrabold uppercase tracking-[0.2em] mt-2 mb-6 bg-amber-50 px-3 py-1 rounded-full">
+                    <p className="text-[10px] text-amber-600 font-extrabold uppercase tracking-[0.2em] mt-2 mb-6 bg-amber-50 px-3 py-1 rounded-none">
                         {appName} • Excellence
                     </p>
                 </div>
 
                 <form onSubmit={(e) => handleAuth(e, view === 'login' ? 'login' : 'register')} className="space-y-4">
                     {fetchError && (
-                      <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-2xl text-xs font-bold text-center">
+                      <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-none text-xs font-bold text-center">
                         Erreur réseau: {fetchError}
                       </div>
                     )}
                     <div className="relative mb-2">
                         <Store className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
-                        <select className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-700 appearance-none" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required>
+                        <select className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-none text-sm font-bold text-slate-700 appearance-none" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required>
                             <option value="" disabled>-- Sélectionnez l'école de votre enfant --</option>
                             {schools.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
                         </select>
@@ -449,56 +449,56 @@ export const Login: React.FC = () => {
                     {view === 'register' && (
                         <div className="relative">
                             <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
-                            <input type="text" placeholder="Nom complet" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" value={nom} onChange={(e) => setNom(e.target.value)} required />
+                            <input type="text" placeholder="Nom complet" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-none text-sm" value={nom} onChange={(e) => setNom(e.target.value)} required />
                         </div>
                     )}
                     <div className="relative">
                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
-                        <input type="tel" placeholder="Téléphone" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                        <input type="tel" placeholder="Téléphone" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-none text-sm" value={username} onChange={(e) => setUsername(e.target.value)} required />
                     </div>
                     <div className="relative">
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
-                        <input type="password" placeholder="Mot de passe" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        <input type="password" placeholder="Mot de passe" className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-none text-sm" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     </div>
 
                     {view === 'login' ? (
                       <div className="flex justify-between items-center px-1 text-[11px] mt-1">
                         <a href="#" className="text-slate-400 hover:text-amber-600">Mot de passe oublié ?</a>
-                        <button 
-                          type="button" 
-                          onClick={() => setIsPrivacyOpen(true)}
+                        <a 
+                          href="/#/confidentialite" 
+                          target="_blank"
                           className="text-slate-400 hover:text-amber-600 underline cursor-pointer"
                         >
                           Confidentialité & Sécurité
-                        </button>
+                        </a>
                       </div>
                     ) : (
                       <div className="text-left w-full mt-2 space-y-1.5 px-1 border-t border-slate-100 pt-2">
                         <p className="text-[10px] font-bold text-slate-700">Confidentialité & Données (loi togolaise / IPDCP)</p>
                         
                         <label className="flex items-start gap-2 cursor-pointer">
-                          <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="mt-0.5 accent-amber-500 rounded scale-90" required />
+                          <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="mt-0.5 accent-amber-500 rounded-none scale-90" required />
                           <span className="text-[9px] text-slate-500 leading-tight">
-                            J'accepte les <span className="font-bold text-slate-700">CGU</span> de l'application de mon établissement. <span className="text-rose-500">*</span>
+                            J'accepte les <a href="/#/conditions-utilisation" target="_blank" className="font-bold text-slate-700 hover:underline">CGU</a> de l'application de mon établissement. <span className="text-rose-500">*</span>
                           </span>
                         </label>
 
                         <label className="flex items-start gap-2 cursor-pointer">
-                          <input type="checkbox" checked={acceptedPrivacy} onChange={(e) => setAcceptedPrivacy(e.target.checked)} className="mt-0.5 accent-amber-500 rounded scale-90" required />
+                          <input type="checkbox" checked={acceptedPrivacy} onChange={(e) => setAcceptedPrivacy(e.target.checked)} className="mt-0.5 accent-amber-500 rounded-none scale-90" required />
                           <span className="text-[9px] text-slate-500 leading-tight">
-                            J'autorise le traitement des <span className="font-bold text-slate-700">données de scolarité/présences</span> de mon enfant. <span className="text-rose-500">*</span>
+                            J'autorise le traitement des données de scolarité/présences de mon enfant selon la <a href="/#/confidentialite" target="_blank" className="font-bold text-slate-700 hover:underline">Politique de Confidentialité</a>. <span className="text-rose-500">*</span>
                           </span>
                         </label>
 
                         <label className="flex items-start gap-2 cursor-pointer">
-                          <input type="checkbox" checked={parentPhotoAuth} onChange={(e) => setParentPhotoAuth(e.target.checked)} className="mt-0.5 accent-amber-500 rounded scale-90" />
+                          <input type="checkbox" checked={parentPhotoAuth} onChange={(e) => setParentPhotoAuth(e.target.checked)} className="mt-0.5 accent-amber-500 rounded-none scale-90" />
                           <span className="text-[9px] text-slate-500 leading-tight">
                             <span className="font-bold text-slate-700">Droit à l'image</span> : J'autorise l'affichage de la photo de mon enfant. <span className="text-slate-400">(Optionnel)</span>
                           </span>
                         </label>
 
                         <label className="flex items-start gap-2 cursor-pointer">
-                          <input type="checkbox" checked={marketingConsent} onChange={(e) => setMarketingConsent(e.target.checked)} className="mt-0.5 accent-amber-500 rounded scale-90" />
+                          <input type="checkbox" checked={marketingConsent} onChange={(e) => setMarketingConsent(e.target.checked)} className="mt-0.5 accent-amber-500 rounded-none scale-90" />
                           <span className="text-[9px] text-slate-500 leading-tight">
                             J'accepte de recevoir des actualités et conseils d'YZO. <span className="text-slate-400">(Optionnel)</span>
                           </span>
@@ -514,7 +514,7 @@ export const Login: React.FC = () => {
                     )}
                     {error && <div className="text-rose-500 text-xs italic text-center font-bold px-4">{error}</div>}
 
-                    <button type="submit" disabled={loading} className="w-full py-4 bg-amber-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-amber-500/30 active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4">
+                    <button type="submit" disabled={loading} className="w-full py-4 bg-amber-500 text-white rounded-none font-black text-xs uppercase tracking-widest shadow-xl shadow-amber-500/30 active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4 cursor-pointer">
                         {loading ? 'Traitement...' : (view === 'login' ? 'Décollage' : 'Inscrire')}
                     </button>
                     
@@ -539,12 +539,13 @@ export const Login: React.FC = () => {
       <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 flex flex-col sm:flex-row items-center gap-2 sm:gap-4 z-20 text-[10px] font-black uppercase tracking-[0.3em] ${isMobile ? 'text-white/60' : 'text-slate-400'} whitespace-nowrap`}>
         <span>© {new Date().getFullYear()} {appName} • Éducation Connectée</span>
         <span className="hidden sm:inline">•</span>
-        <button 
-          onClick={() => setIsPrivacyOpen(true)}
+        <a 
+          href="/#/confidentialite"
+          target="_blank"
           className="hover:text-amber-500 transition-colors underline cursor-pointer"
         >
           Confidentialité
-        </button>
+        </a>
       </div>
 
       <PrivacyPolicyModal isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />

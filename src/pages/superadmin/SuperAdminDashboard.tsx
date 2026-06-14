@@ -396,11 +396,11 @@ const CreateSchoolModal: React.FC<CreateSchoolModalProps> = ({ onClose, onCreate
                   type="checkbox"
                   checked={form.accepted_terms || false}
                   onChange={e => setForm(f => ({ ...f, accepted_terms: e.target.checked }))}
-                  className="mt-1 accent-amber-500 rounded"
+                  className="mt-1 accent-amber-500 rounded-none"
                   required
                 />
                 <span className="text-sm text-slate-300 leading-tight">
-                  J'accepte les <span className="text-amber-500 font-bold hover:underline">Conditions Générales d'Utilisation</span>. <span className="text-red-500">*</span>
+                  J'accepte les <a href="/#/conditions-utilisation" target="_blank" className="text-amber-500 font-bold hover:underline">Conditions Générales d'Utilisation</a>. <span className="text-red-500">*</span>
                 </span>
               </label>
 
@@ -409,11 +409,11 @@ const CreateSchoolModal: React.FC<CreateSchoolModalProps> = ({ onClose, onCreate
                   type="checkbox"
                   checked={form.accepted_privacy_policy || false}
                   onChange={e => setForm(f => ({ ...f, accepted_privacy_policy: e.target.checked }))}
-                  className="mt-1 accent-amber-500 rounded"
+                  className="mt-1 accent-amber-500 rounded-none"
                   required
                 />
                 <span className="text-sm text-slate-300 leading-tight">
-                  J'autorise le traitement des données conformément à la <span className="text-amber-500 font-bold hover:underline">Politique de Confidentialité</span>. <span className="text-red-500">*</span>
+                  J'autorise le traitement des données conformément à la <a href="/#/confidentialite" target="_blank" className="text-amber-500 font-bold hover:underline">Politique de Confidentialité</a>. <span className="text-red-500">*</span>
                 </span>
               </label>
             </div>

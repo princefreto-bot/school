@@ -144,6 +144,7 @@ export interface User {
   telephone?: string;
   schoolSlug?: string; // lié à une école (null pour superadmin)
   schoolName?: string; // nom de l'école pour affichage
+  schoolApproved?: boolean;
 }
 
 // ── École (Multi-Tenant) ─────────────────────────────────

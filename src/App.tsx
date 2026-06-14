@@ -11,6 +11,9 @@ import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-
 import { Confidentialite } from './pages/Confidentialite';
 import { PortailEcole } from './pages/PortailEcole';
 import { CreerCompte } from './pages/CreerCompte';
+import { ConditionsUtilisation } from './pages/ConditionsUtilisation';
+import { ConfirmerEmail } from './pages/ConfirmerEmail';
+import { OfflinePage } from './pages/OfflinePage';
 
 
 // Lazy loading for pages to reduce initial bundle size
@@ -141,12 +144,27 @@ export function App() {
   const fetchAllFromBackend = useStore((s) => s.fetchAllFromBackend);
   const navigate = useNavigate();
   const location = useLocation();
+  const [isOnline, setIsOnline] = React.useState(navigator.onLine);
+
+  // Écoute de l'état de la connexion Internet
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Redirect logic based on login state
   React.useEffect(() => {
-    const publicPaths = ['/confidentialite', '/portail-ecole', '/creer-compte'];
+    const publicPaths = ['/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email'];
     if (isAuthenticated) {
-      if (location.pathname === '/login' || location.pathname === '/portail-ecole' || location.pathname === '/creer-compte') {
+      if (location.pathname === '/login' || location.pathname === '/portail-ecole' || location.pathname === '/creer-compte' || location.pathname === '/confirmer-email') {
         navigate('/', { replace: true });
       }
     } else {
@@ -172,12 +190,14 @@ export function App() {
     // ── Synchronisation Manuelle Uniquement ──────────────────────
     // On ne fait qu'un fetch initial au chargement de l'app.
     // La suite sera gérée manuellement par l'utilisateur via le bouton Sync.
-    fetchAllFromBackend();
+    if (isOnline) {
+      fetchAllFromBackend();
+    }
 
     return () => {
       // Nettoyage si nécessaire
     };
-  }, [isAuthenticated, fetchAllFromBackend]);
+  }, [isAuthenticated, fetchAllFromBackend, isOnline]);
 
   // ── Écoute des messages du Service Worker (navigation depuis push) ──
   React.useEffect(() => {
@@ -199,7 +219,9 @@ export function App() {
         };
         const targetPage = pageMap[notifType] || 'parent_dashboard';
         store.setCurrentPage(targetPage as any);
-        store.fetchAllFromBackend();
+        if (navigator.onLine) {
+          store.fetchAllFromBackend();
+        }
       }
     };
 
@@ -207,9 +229,16 @@ export function App() {
     return () => navigator.serviceWorker.removeEventListener('message', handleSWMessage);
   }, []);
 
+  // Affichage de la page offline si pas d'Internet
+  if (!isOnline) {
+    return <OfflinePage onRetry={() => setIsOnline(navigator.onLine)} />;
+  }
+
   return (
     <Routes>
       <Route path="/confidentialite" element={<Confidentialite />} />
+      <Route path="/conditions-utilisation" element={<ConditionsUtilisation />} />
+      <Route path="/confirmer-email" element={<ConfirmerEmail />} />
       <Route path="/portail-ecole" element={<PortailEcole />} />
       <Route path="/creer-compte" element={<CreerCompte />} />
       <Route 

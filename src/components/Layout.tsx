@@ -403,147 +403,196 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     { id: (isParent ? 'annonces' : 'parametres') as AppPage, label: isParent ? 'Annonces' : 'Config', icon: isParent ? <Megaphone className="w-5 h-5" /> : <Settings className="w-5 h-5" /> },
   ];
 
+  const showOverlay = user?.role === 'directeur' && user?.schoolApproved === false;
+
   return (
-    <div className={`min-h-screen flex ${theme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'}`}>
-      
-      {/* ── Desktop Sidebar ── */}
-      <aside
-        className="hidden lg:block fixed top-0 left-0 bottom-0 z-50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] p-4"
-        style={{ width: sidebarW }}
-      >
-        <SidebarContent {...sidebarProps} onToggleCollapse={toggleCollapse} />
-      </aside>
-
-      {/* ── Mobile Sidebar Overlay ── */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-[100] lg:hidden">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-fadeIn" onClick={() => setSidebarOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-[280px] p-4 animate-slideRight">
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="absolute -right-12 top-6 w-10 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white"
-            >
-              <X size={20} />
-            </button>
-            <SidebarContent {...sidebarProps} collapsed={false} />
-          </aside>
-        </div>
-      )}
-
-      {/* ── Main Content Container ── */}
-      <div
-        className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        style={{ paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 ? sidebarW : 0 }}
-      >
-        <div className="flex-1 flex flex-col min-w-0 p-2 lg:p-4 pb-24 lg:pb-4">
-          
-          {/* ── Premium Topbar ── */}
-          <header className="sticky top-2 lg:top-4 z-40 mb-6 px-4 lg:px-6 h-[72px] flex items-center justify-between gap-4 bg-white/70 dark:bg-slate-900/70 backdrop-blur-[40px] border border-white/50 dark:border-slate-800/50 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
+    <>
+      <div className={`min-h-screen flex ${theme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'} ${showOverlay ? 'filter blur-[6px] pointer-events-none select-none' : ''}`}>
+        
+        {/* ── Desktop Sidebar ── */}
+        <aside
+          className="hidden lg:block fixed top-0 left-0 bottom-0 z-50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] p-4"
+          style={{ width: sidebarW }}
+        >
+          <SidebarContent {...sidebarProps} onToggleCollapse={toggleCollapse} />
+        </aside>
+  
+        {/* ── Mobile Sidebar Overlay ── */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 z-[100] lg:hidden">
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-fadeIn" onClick={() => setSidebarOpen(false)} />
+            <aside className="absolute left-0 top-0 bottom-0 w-[280px] p-4 animate-slideRight">
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="absolute -right-12 top-6 w-10 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white"
+              >
+                <X size={20} />
+              </button>
+              <SidebarContent {...sidebarProps} collapsed={false} />
+            </aside>
+          </div>
+        )}
+  
+        {/* ── Main Content Container ── */}
+        <div
+          className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          style={{ paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 ? sidebarW : 0 }}
+        >
+          <div className="flex-1 flex flex-col min-w-0 p-2 lg:p-4 pb-24 lg:pb-4">
             
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="lg:hidden w-10 h-10 rounded-[16px] bg-white dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-300 shadow-[0_2px_10px_rgba(0,0,0,0.04)] active:scale-[0.95]"
-              >
-                <Menu size={18} />
-              </button>
-
-              <button
-                onClick={toggleCollapse}
-                className="hidden lg:flex w-10 h-10 rounded-[16px] bg-white dark:bg-slate-800 items-center justify-center text-slate-500 hover:text-amber-500 hover:shadow-[0_2px_15px_rgba(245,158,11,0.15)] transition-all duration-300 shadow-[0_2px_10px_rgba(0,0,0,0.04)] active:scale-[0.95]"
-              >
-                {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-              </button>
-
-              <div className="hidden sm:block">
-                <h1 className="text-[18px] font-black tracking-tight text-slate-900 dark:text-white">
-                  {currentLabel}
-                </h1>
+            {/* ── Premium Topbar ── */}
+            <header className="sticky top-2 lg:top-4 z-40 mb-6 px-4 lg:px-6 h-[72px] flex items-center justify-between gap-4 bg-white/70 dark:bg-slate-900/70 backdrop-blur-[40px] border border-white/50 dark:border-slate-800/50 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
+              
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden w-10 h-10 rounded-[16px] bg-white dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-300 shadow-[0_2px_10px_rgba(0,0,0,0.04)] active:scale-[0.95]"
+                >
+                  <Menu size={18} />
+                </button>
+  
+                <button
+                  onClick={toggleCollapse}
+                  className="hidden lg:flex w-10 h-10 rounded-[16px] bg-white dark:bg-slate-800 items-center justify-center text-slate-500 hover:text-amber-500 hover:shadow-[0_2px_15px_rgba(245,158,11,0.15)] transition-all duration-300 shadow-[0_2px_10px_rgba(0,0,0,0.04)] active:scale-[0.95]"
+                >
+                  {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+                </button>
+  
+                <div className="hidden sm:block">
+                  <h1 className="text-[18px] font-black tracking-tight text-slate-900 dark:text-white">
+                    {currentLabel}
+                  </h1>
+                  {!isParent && (
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                        Session {schoolYear}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+  
+              <div className="flex items-center gap-3">
+                <RealTimeClock />
+  
                 {!isParent && (
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                      Session {schoolYear}
-                    </p>
-                  </div>
+                  <button
+                    onClick={() => useStore.getState().fetchAllFromBackend(true)}
+                    disabled={isSyncing}
+                    className="hidden md:flex items-center gap-2 px-5 h-10 bg-white dark:bg-slate-800 rounded-[16px] text-[12px] font-bold text-slate-700 dark:text-slate-300 hover:text-amber-500 shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_15px_rgba(245,158,11,0.15)] transition-all duration-300 active:scale-[0.98]"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+                    {isSyncing ? 'Synchronisation...' : 'Actualiser'}
+                  </button>
                 )}
+  
+                {!isParent && nonSoldes > 0 && (
+                  <button
+                    onClick={() => setCurrentPage('eleves')}
+                    className="flex items-center gap-2 px-3 h-10 bg-rose-500/10 rounded-[16px] text-rose-600 hover:bg-rose-500/20 transition-all duration-300 active:scale-[0.98]"
+                  >
+                    <Bell className="w-4 h-4 animate-bounce" />
+                    <span className="text-[13px] font-black">{nonSoldes}</span>
+                  </button>
+                )}
+  
+                <button
+                  onClick={toggleTheme}
+                  className="w-10 h-10 rounded-[16px] bg-white dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-amber-500 transition-all duration-300 shadow-[0_2px_10px_rgba(0,0,0,0.04)] active:scale-[0.95]"
+                >
+                  {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+                </button>
+              </div>
+            </header>
+  
+            {/* ── Main Canvas ── */}
+            <main className="flex-1 w-full max-w-[1600px] mx-auto animate-slideUp px-2 lg:px-4">
+              {children}
+            </main>
+  
+          </div>
+        </div>
+  
+        {/* ── Bottom Nav Mobile ── */}
+        <nav className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl border-t border-slate-200 dark:border-slate-800 pb-[env(safe-area-inset-bottom)] transition-transform duration-300 ${sidebarOpen ? 'translate-y-full' : 'translate-y-0'}`}>
+          <div className="flex items-center justify-around h-[72px] px-2">
+            {bottomNavItems.map((item) => {
+              const active = currentPage === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setCurrentPage(item.id)}
+                  className="relative flex flex-col items-center justify-center w-full h-full gap-1"
+                >
+                  {active && (
+                    <div className="absolute top-0 w-8 h-1 bg-amber-500 rounded-b-full shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+                  )}
+                  <div className={`p-2 rounded-xl transition-all duration-300 ${active ? 'bg-amber-500/10 text-amber-500 scale-110' : 'text-slate-400'}`}>
+                    {item.icon}
+                    {(item as any).badge != null && (item as any).badge > 0 && (
+                      <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-white dark:border-slate-900 rounded-full flex items-center justify-center text-white text-[9px] font-black">
+                        {(item as any).badge > 9 ? '9+' : (item as any).badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className={`text-[10px] tracking-wide ${active ? 'font-black text-amber-500' : 'font-semibold text-slate-500'}`}>
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+  
+        <SupportModal isOpen={showSupportModal} onClose={() => setShowSupportModal(false)} onSelect={handleStartChat} />
+        <PrivacyPolicyModal isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
+      </div>
+
+      {/* ── Overlay de Validation en Attente (Plein écran) ── */}
+      {showOverlay && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-xl p-4 font-sans select-text">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-none shadow-2xl p-8 text-center space-y-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+            <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none" />
+            
+            {/* Badge de sécurité ambre */}
+            <div className="flex justify-center">
+              <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/35 rounded-none flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-lg shadow-amber-500/5 animate-pulse">
+                <Shield className="w-8 h-8" />
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <RealTimeClock />
+            {/* Titre */}
+            <div className="space-y-2">
+              <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                Établissement Enregistré
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">
+                DGhubSchool — Contrôle d'Accès
+              </p>
+            </div>
 
-              {!isParent && (
-                <button
-                  onClick={() => useStore.getState().fetchAllFromBackend(true)}
-                  disabled={isSyncing}
-                  className="hidden md:flex items-center gap-2 px-5 h-10 bg-white dark:bg-slate-800 rounded-[16px] text-[12px] font-bold text-slate-700 dark:text-slate-300 hover:text-amber-500 shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_15px_rgba(245,158,11,0.15)] transition-all duration-300 active:scale-[0.98]"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-                  {isSyncing ? 'Synchronisation...' : 'Actualiser'}
-                </button>
-              )}
+            {/* Corps du message */}
+            <p className="text-slate-605 dark:text-slate-300 text-sm leading-relaxed">
+              Votre établissement a été créé avec succès. Votre compte est actuellement en cours de validation par l'administration de <span className="font-bold text-amber-500">DGhubSchool</span>.
+            </p>
 
-              {!isParent && nonSoldes > 0 && (
-                <button
-                  onClick={() => setCurrentPage('eleves')}
-                  className="flex items-center gap-2 px-3 h-10 bg-rose-500/10 rounded-[16px] text-rose-600 hover:bg-rose-500/20 transition-all duration-300 active:scale-[0.98]"
-                >
-                  <Bell className="w-4 h-4 animate-bounce" />
-                  <span className="text-[13px] font-black">{nonSoldes}</span>
-                </button>
-              )}
+            <div className="p-3 bg-amber-500/5 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold rounded-none">
+              Vous recevrez une notification par email dès que votre espace de gestion aura été approuvé.
+            </div>
 
+            {/* Bouton déconnexion */}
+            <div className="pt-2">
               <button
-                onClick={toggleTheme}
-                className="w-10 h-10 rounded-[16px] bg-white dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-amber-500 transition-all duration-300 shadow-[0_2px_10px_rgba(0,0,0,0.04)] active:scale-[0.95]"
+                onClick={logout}
+                className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-250 text-xs font-bold uppercase tracking-wider py-3.5 rounded-none transition-all shadow-sm active:scale-98"
               >
-                {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+                <LogOut className="w-4 h-4" /> Se déconnecter
               </button>
             </div>
-          </header>
-
-          {/* ── Main Canvas ── */}
-          <main className="flex-1 w-full max-w-[1600px] mx-auto animate-slideUp px-2 lg:px-4">
-            {children}
-          </main>
-
+          </div>
         </div>
-      </div>
-
-      {/* ── Bottom Nav Mobile ── */}
-      <nav className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl border-t border-slate-200 dark:border-slate-800 pb-[env(safe-area-inset-bottom)] transition-transform duration-300 ${sidebarOpen ? 'translate-y-full' : 'translate-y-0'}`}>
-        <div className="flex items-center justify-around h-[72px] px-2">
-          {bottomNavItems.map((item) => {
-            const active = currentPage === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setCurrentPage(item.id)}
-                className="relative flex flex-col items-center justify-center w-full h-full gap-1"
-              >
-                {active && (
-                  <div className="absolute top-0 w-8 h-1 bg-amber-500 rounded-b-full shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
-                )}
-                <div className={`p-2 rounded-xl transition-all duration-300 ${active ? 'bg-amber-500/10 text-amber-500 scale-110' : 'text-slate-400'}`}>
-                  {item.icon}
-                  {(item as any).badge != null && (item as any).badge > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-white dark:border-slate-900 rounded-full flex items-center justify-center text-white text-[9px] font-black">
-                      {(item as any).badge > 9 ? '9+' : (item as any).badge}
-                    </span>
-                  )}
-                </div>
-                <span className={`text-[10px] tracking-wide ${active ? 'font-black text-amber-500' : 'font-semibold text-slate-500'}`}>
-                  {item.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
-
-      <SupportModal isOpen={showSupportModal} onClose={() => setShowSupportModal(false)} onSelect={handleStartChat} />
-      <PrivacyPolicyModal isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
-    </div>
+      )}
+    </>
   );
 };
