@@ -7,6 +7,7 @@ import { parentApi } from '../services/parentApi';
 import { LinkStudent } from './LinkStudent';
 import { GraduationCap, Lock, User, Phone, CheckCircle, Store } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { useNavigate } from 'react-router-dom';
 
 // ── Images de fond (Mobile uniquement) ──
 import bgImage1 from '../assets/login-bg1.jpg';
@@ -57,6 +58,7 @@ const BackgroundSlideshow: React.FC = () => {
 
 export const Login: React.FC = () => {
   const login = useStore((s) => s.login);
+  const navigate = useNavigate();
   const appName = "DGhubSchool";
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -120,7 +122,7 @@ export const Login: React.FC = () => {
 
     try {
         if (type === 'login') {
-            const ok = await login(username, password, selectedSchool);
+            const ok = await login(username, password, selectedSchool, 'parent');
             if (!ok) setError('Identifiants incorrects.');
         } else {
             if (!acceptedTerms || !acceptedPrivacy) {
@@ -344,9 +346,8 @@ export const Login: React.FC = () => {
                 </div>
               )}
 
-              <select className="auth-input mb-4 font-bold text-slate-600 border border-slate-200" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)}>
-                  <option value="">Accès Global (Admin / Créateur)</option>
-                  <option disabled>────── Établissements ──────</option>
+              <select className="auth-input mb-4 font-bold text-slate-600 border border-slate-200" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required>
+                  <option value="" disabled>-- Sélectionnez l'établissement de votre enfant --</option>
                   {schools.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
               </select>
 
@@ -370,6 +371,15 @@ export const Login: React.FC = () => {
               )}
               {error && <div className="text-rose-500 text-xs mt-2 font-bold">{error}</div>}
               <button className="auth-button" type="submit" disabled={loading}>{loading ? 'Connexion...' : 'Se connecter'}</button>
+              <div className="mt-4">
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/portail-ecole')}
+                  className="text-slate-400 hover:text-amber-600 text-[10px] font-bold tracking-wider uppercase transition-colors"
+                >
+                  Accès Portail Établissement
+                </button>
+              </div>
             </form>
           </div>
 
@@ -423,10 +433,8 @@ export const Login: React.FC = () => {
                     )}
                     <div className="relative mb-2">
                         <Store className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
-                        <select className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-700 appearance-none" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required={view === 'register'}>
-                            {view !== 'register' && <option value="">Accès Global (Admin / Créateur)</option>}
-                            {view !== 'register' && <option disabled>────── Établissements ──────</option>}
-                            {view === 'register' && <option value="" disabled>-- Sélectionnez votre école --</option>}
+                        <select className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-slate-700 appearance-none" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required>
+                            <option value="" disabled>-- Sélectionnez l'école de votre enfant --</option>
                             {schools.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
                         </select>
                     </div>
@@ -506,6 +514,11 @@ export const Login: React.FC = () => {
                     <button type="button" onClick={() => setView(view === 'login' ? 'register' : 'login')} className="w-full py-2 text-amber-600 text-[10px] font-black uppercase tracking-widest mt-2">
                         {view === 'login' ? "Nouveau ? Créer un compte" : "Déjà un compte ? Se connecter"}
                     </button>
+                    {view === 'login' && (
+                      <button type="button" onClick={() => navigate('/portail-ecole')} className="w-full py-2 text-slate-500 text-[9px] font-bold uppercase tracking-wider mt-1">
+                        Accès Portail Établissement
+                      </button>
+                    )}
                 </form>
             </div>
         </>

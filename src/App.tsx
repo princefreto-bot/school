@@ -9,6 +9,8 @@ import { AnnouncementPopup } from './components/AnnouncementPopup';
 import { webPushService } from './services/webPushService';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Confidentialite } from './pages/Confidentialite';
+import { PortailEcole } from './pages/PortailEcole';
+import { CreerCompte } from './pages/CreerCompte';
 
 
 // Lazy loading for pages to reduce initial bundle size
@@ -142,12 +144,13 @@ export function App() {
 
   // Redirect logic based on login state
   React.useEffect(() => {
+    const publicPaths = ['/confidentialite', '/portail-ecole', '/creer-compte'];
     if (isAuthenticated) {
-      if (location.pathname === '/login') {
+      if (location.pathname === '/login' || location.pathname === '/portail-ecole' || location.pathname === '/creer-compte') {
         navigate('/', { replace: true });
       }
     } else {
-      if (location.pathname !== '/confidentialite') {
+      if (!publicPaths.includes(location.pathname)) {
         navigate('/login', { replace: true });
       }
     }
@@ -207,6 +210,8 @@ export function App() {
   return (
     <Routes>
       <Route path="/confidentialite" element={<Confidentialite />} />
+      <Route path="/portail-ecole" element={<PortailEcole />} />
+      <Route path="/creer-compte" element={<CreerCompte />} />
       <Route 
         path="/login" 
         element={

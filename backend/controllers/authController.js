@@ -30,6 +30,39 @@ const parentRegisterSchema = Joi.object({
     parent_photo_authorization: Joi.boolean().default(false)
 });
 
+// Joi validation schema for School registration
+const schoolRegisterSchema = Joi.object({
+    name: Joi.string().trim().required().messages({
+        'any.required': 'Le nom de l\'établissement est requis.'
+    }),
+    slug: Joi.string().trim().lowercase().required().messages({
+        'any.required': 'Le code de l\'établissement (slug) est requis.'
+    }),
+    address: Joi.string().allow('', null),
+    phone: Joi.string().allow('', null),
+    email: Joi.string().email().required().messages({
+        'string.email': 'L\'adresse email est invalide.',
+        'any.required': 'L\'adresse email de l\'établissement est requise.'
+    }),
+    admin_nom: Joi.string().trim().required().messages({
+        'any.required': 'Le nom du directeur est requis.'
+    }),
+    admin_telephone: Joi.string().trim().required().messages({
+        'any.required': 'Le numéro de téléphone du directeur est requis.'
+    }),
+    admin_password: Joi.string().min(6).required().messages({
+        'string.min': 'Le mot de passe doit contenir au moins 6 caractères.',
+        'any.required': 'Le mot de passe est requis.'
+    }),
+    accepted_terms: Joi.boolean().valid(true).required().messages({
+        'any.only': 'Vous devez accepter les conditions d\'utilisation.'
+    }),
+    accepted_privacy_policy: Joi.boolean().valid(true).required().messages({
+        'any.only': 'Vous devez accepter la politique de confidentialité.'
+    }),
+    marketing_consent: Joi.boolean().default(false)
+});
+
 function getIpHash(req) {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '127.0.0.1';
     const clientIp = typeof ip === 'string' ? ip.split(',')[0].trim() : String(ip);
@@ -113,25 +146,30 @@ async function register(req, res) {
     }
 }
 
-// ── Login (Tout Rôles) ──────────────────────────
+// ── Login (Séparé par Portail) ──────────────────────────
 async function login(req, res) {
-    const { telephone, password, schoolSlug } = req.body;
+    const { telephone, password, schoolSlug, portal } = req.body; // portal: 'parent' ou 'school'
 
     if (!telephone || !password) {
         return res.status(400).json({ error: 'Champs requis : telephone, password.' });
     }
 
     try {
-        console.log(`🔍 [Auth] Tentative login pour: ${telephone.trim()}`);
+        const input = telephone.trim();
+        console.log(`🔍 [Auth] Tentative login pour: ${input} (Portail: ${portal || 'non spécifié'})`);
 
         // ── 1. Vérifier si c'est le SuperAdmin ──
         const { data: superadmin } = await supabase
             .from('superadmins')
             .select('*')
-            .eq('telephone', telephone.trim())
-            .single();
+            .or(`telephone.eq.${input}`) // Supporte login téléphone
+            .maybeSingle();
 
         if (superadmin) {
+            // Le SuperAdmin ne peut se connecter que via le portail école
+            if (portal === 'parent') {
+                return res.status(403).json({ error: 'Ce portail est réservé exclusivement aux parents.' });
+            }
             const valid = await bcrypt.compare(password, superadmin.password);
             if (valid) {
                 console.log(`✅ [Auth] SuperAdmin identifié !`);
@@ -154,10 +192,14 @@ async function login(req, res) {
         const { data: creator } = await supabase
             .from('creators')
             .select('*')
-            .eq('telephone', telephone.trim())
-            .single();
+            .or(`telephone.eq.${input}`)
+            .maybeSingle();
 
         if (creator) {
+            // Le Créateur ne peut se connecter que via le portail école
+            if (portal === 'parent') {
+                return res.status(403).json({ error: 'Ce portail est réservé exclusivement aux parents.' });
+            }
             const valid = await bcrypt.compare(password, creator.password);
             if (valid) {
                 console.log(`✅ [Auth] Créateur identifié !`);
@@ -199,20 +241,28 @@ async function login(req, res) {
             return res.status(402).json({ error: 'trial_expired', message: "La période d'essai est terminée." });
         }
 
-        // ── 3. Chercher l'utilisateur dans la table de l'établissement ──
+        // ── 3. Chercher l'utilisateur dans la table de l'établissement (par téléphone OU email) ──
         const { data: user, error } = await supabase
             .from(`profiles_${schoolSlug}`)
             .select('*')
-            .eq('telephone', telephone.trim())
-            .single();
+            .or(`telephone.eq.${input},email.eq.${input}`)
+            .maybeSingle();
 
         if (error || !user) {
-            return res.status(401).json({ error: 'Numéro de téléphone ou mot de passe incorrect.' });
+            return res.status(401).json({ error: 'Identifiants (téléphone/email ou mot de passe) incorrects.' });
+        }
+
+        // Vérification de la compatibilité avec le portail choisi
+        if (portal === 'parent' && user.role !== 'parent') {
+            return res.status(403).json({ error: 'Ce portail est réservé exclusivement aux parents d\'élèves.' });
+        }
+        if (portal === 'school' && user.role === 'parent') {
+            return res.status(403).json({ error: 'Ce portail est réservé exclusivement aux personnels scolaires.' });
         }
 
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) {
-            return res.status(401).json({ error: 'Numéro de téléphone ou mot de passe incorrect.' });
+            return res.status(401).json({ error: 'Identifiants (téléphone/email ou mot de passe) incorrects.' });
         }
 
         console.log(`✅ [Auth] Utilisateur trouvé: ${user.nom} (Rôle: ${user.role}) - École: ${schoolSlug}`);
@@ -236,7 +286,7 @@ async function login(req, res) {
                 role: user.role,
                 school_name: school.name,
                 school_slug: school.slug,
-                school_logo: school.logo_url
+                school_logo: school.school_logo
             },
         });
     } catch (err) {
@@ -290,4 +340,181 @@ async function updatePushToken(req, res) {
     }
 }
 
-module.exports = { register, login, deleteSelfAccount, updatePushToken };
+// ── Inscription Établissement (Demande + Validation) ──────────────────────────
+
+async function registerSchoolRequest(req, res) {
+    const { value: validatedData, error: validationError } = schoolRegisterSchema.validate(req.body, { abortEarly: false });
+    
+    if (validationError) {
+        return res.status(400).json({ error: validationError.details.map(d => d.message).join(', ') });
+    }
+
+    const { name, slug, address, phone, email, admin_nom, admin_telephone, admin_password, accepted_terms, accepted_privacy_policy, marketing_consent } = validatedData;
+
+    try {
+        const cleanSlug = slug.trim().toLowerCase();
+        
+        // 1. Vérifier si le slug est déjà utilisé par une école vérifiée
+        const { data: existingSchool } = await supabase
+            .from('schools')
+            .select('id, is_email_verified')
+            .eq('slug', cleanSlug)
+            .maybeSingle();
+
+        if (existingSchool) {
+            if (existingSchool.is_email_verified) {
+                return res.status(409).json({ error: `Le code d'établissement "${cleanSlug}" est déjà utilisé.` });
+            } else {
+                // Nettoyer la demande d'inscription non vérifiée existante
+                await supabase.from('schools').delete().eq('id', existingSchool.id);
+            }
+        }
+
+        // 2. Vérifier si l'email est déjà enregistré pour une école active/vérifiée
+        const { data: existingEmail } = await supabase
+            .from('schools')
+            .select('id')
+            .eq('email', email.trim().toLowerCase())
+            .eq('is_email_verified', true)
+            .maybeSingle();
+
+        if (existingEmail) {
+            return res.status(409).json({ error: 'Cette adresse email est déjà enregistrée pour un autre établissement.' });
+        }
+
+        // 3. Préparer le code à 6 chiffres
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 mins
+        const ipHash = getIpHash(req);
+        const consentedAt = new Date().toISOString();
+
+        // 4. Crypter le mot de passe directeur
+        const hashedPassword = await bcrypt.hash(admin_password, 10);
+
+        const schoolPayload = {
+            name: name.trim(),
+            slug: cleanSlug,
+            address: address || null,
+            phone: phone || null,
+            email: email.trim().toLowerCase(),
+            status: 'pending_verification',
+            is_email_verified: false,
+            email_verification_code: code,
+            email_verification_expires: expiresAt,
+            temp_admin_nom: admin_nom.trim(),
+            temp_admin_telephone: admin_telephone.trim(),
+            temp_admin_password: hashedPassword,
+            accepted_terms,
+            accepted_privacy_policy,
+            marketing_consent,
+            consented_at: consentedAt,
+            signup_ip_hash: ipHash
+        };
+
+        const { error: schoolErr } = await supabase
+            .from('schools')
+            .insert(schoolPayload);
+
+        if (schoolErr) throw schoolErr;
+
+        // 5. Envoyer l'email
+        const { sendVerificationEmail } = require('../utils/mailer');
+        await sendVerificationEmail(email.trim(), name.trim(), code);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Un code de confirmation a été envoyé à votre adresse email.'
+        });
+    } catch (err) {
+        console.error('RegisterSchoolRequest Error:', err.message);
+        return res.status(500).json({ error: 'Erreur lors de la demande d\'inscription : ' + err.message });
+    }
+}
+
+async function verifySchoolEmail(req, res) {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+        return res.status(400).json({ error: 'Champs requis : email, code.' });
+    }
+
+    try {
+        // 1. Trouver l'école en attente
+        const { data: school, error: fetchErr } = await supabase
+            .from('schools')
+            .select('*')
+            .eq('email', email.trim().toLowerCase())
+            .eq('is_email_verified', false)
+            .maybeSingle();
+
+        if (fetchErr || !school) {
+            return res.status(404).json({ error: 'Aucune demande d\'inscription en attente trouvée pour cet email.' });
+        }
+
+        // 2. Vérifier le code et sa validité temporelle
+        if (school.email_verification_code !== code) {
+            return res.status(400).json({ error: 'Code de validation incorrect.' });
+        }
+
+        if (new Date(school.email_verification_expires) < new Date()) {
+            return res.status(400).json({ error: 'Le code de validation a expiré.' });
+        }
+
+        // 3. Exécuter l'initialisation des tables spécifiques via RPC Supabase
+        const { error: rpcErr } = await supabase.rpc('create_school_tables', { school_slug: school.slug });
+        if (rpcErr) throw rpcErr;
+
+        // Attente de 1s pour le rechargement de schéma REST de Supabase
+        await new Promise(r => setTimeout(r, 1000));
+
+        // 4. Créer le compte directeur (admin principal) de l'école dans sa table dédiée
+        const adminPayload = {
+            nom: school.temp_admin_nom,
+            telephone: school.temp_admin_telephone,
+            email: school.email,
+            password: school.temp_admin_password,
+            role: 'directeur',
+            accepted_terms: school.accepted_terms,
+            accepted_privacy_policy: school.accepted_privacy_policy,
+            marketing_consent: school.marketing_consent,
+            consented_at: school.consented_at,
+            signup_ip_hash: school.signup_ip_hash
+        };
+
+        const { error: adminErr } = await supabase
+            .from(`profiles_${school.slug}`)
+            .insert(adminPayload);
+
+        if (adminErr) throw adminErr;
+
+        // 5. Activer l'école définitivement
+        const trialEndsAt = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(); // +2 mois d'essai gratuit
+        const { error: updateErr } = await supabase
+            .from('schools')
+            .update({
+                status: 'trial',
+                trial_ends_at: trialEndsAt,
+                is_email_verified: true,
+                email_verification_code: null,
+                email_verification_expires: null,
+                temp_admin_nom: null,
+                temp_admin_telephone: null,
+                temp_admin_password: null
+            })
+            .eq('id', school.id);
+
+        if (updateErr) throw updateErr;
+
+        console.log(`🏫 Nouvelle école enregistrée et validée par e-mail : ${school.name} (${school.slug})`);
+
+        return res.json({
+            success: true,
+            message: 'Votre adresse email a été validée avec succès. Vous pouvez maintenant vous connecter à votre portail.'
+        });
+    } catch (err) {
+        console.error('VerifySchoolEmail Error:', err.message);
+        return res.status(500).json({ error: 'Erreur lors de la validation du code : ' + err.message });
+    }
+}
+
+module.exports = { register, login, deleteSelfAccount, updatePushToken, registerSchoolRequest, verifySchoolEmail };
