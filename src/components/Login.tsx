@@ -2,6 +2,7 @@
 // PAGE DE CONNEXION — Hybride PC (Sliding) / Mobile (Slideshow)
 // ============================================================
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { parentApi } from '../services/parentApi';
 import { LinkStudent } from './LinkStudent';
@@ -56,6 +57,7 @@ const BackgroundSlideshow: React.FC = () => {
 // ── COMPOSANT PRINCIPAL ──────────────────────────────────────
 
 export const Login: React.FC = () => {
+  const navigate = useNavigate();
   const login = useStore((s) => s.login);
   const appName = "DGhubSchool";
 
@@ -515,7 +517,7 @@ export const Login: React.FC = () => {
         <span>© {new Date().getFullYear()} {appName} • Éducation Connectée</span>
         <span className="hidden sm:inline">•</span>
         <button 
-          onClick={() => setIsPrivacyOpen(true)}
+          onClick={() => navigate('/confidentialite')}
           className="hover:text-amber-500 transition-colors underline cursor-pointer"
         >
           Confidentialité

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { parseResponse, getAuthHeaders } from '../services/apiHelpers';
 import { useStore } from '../store/useStore';
 import { AppPage } from '../types';
@@ -298,6 +299,7 @@ const SIDEBAR_COLLAPSED_KEY = 'sidebar_collapsed';
 
 // ── LAYOUT PRINCIPAL ──────────────────────────────────────────
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();
   const currentPage = useStore((s) => s.currentPage);
   const setCurrentPage = useStore((s) => s.setCurrentPage);
   const user = useStore((s) => s.user);
@@ -390,7 +392,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     userName: user?.nom ?? '', userRole: user?.role ?? '',
     connectedParentsCount, logout, collapsed,
     onOpenSupport: () => setShowSupportModal(true),
-    onOpenPrivacy: () => setShowPrivacyModal(true),
+    onOpenPrivacy: () => navigate('/confidentialite'),
   };
 
   const bottomNavItems = (user?.role === 'superviseur' || user?.role === 'surveillant') ? [
