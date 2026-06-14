@@ -226,12 +226,16 @@ async function login(req, res) {
         // Vérification accès école
         const { data: school, error: schoolErr } = await supabase
             .from('schools')
-            .select('id, name, slug, status, trial_ends_at, logo_url')
+            .select('id, name, slug, status, trial_ends_at, logo_url, is_email_verified')
             .eq('slug', schoolSlug)
             .single();
 
         if (schoolErr || !school) {
             return res.status(404).json({ error: 'Établissement introuvable.' });
+        }
+
+        if (school.is_email_verified === false) {
+            return res.status(403).json({ error: "L'adresse email de cet établissement n'a pas encore été vérifiée. Veuillez d'abord valider votre inscription." });
         }
 
         if (school.status === 'suspended') {
@@ -397,7 +401,7 @@ async function registerSchoolRequest(req, res) {
             address: address || null,
             phone: phone || null,
             email: email.trim().toLowerCase(),
-            status: 'pending_verification',
+            status: 'trial',
             is_email_verified: false,
             email_verification_code: code,
             email_verification_expires: expiresAt,

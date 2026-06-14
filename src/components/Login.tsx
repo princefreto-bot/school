@@ -371,13 +371,20 @@ export const Login: React.FC = () => {
               )}
               {error && <div className="text-rose-500 text-xs mt-2 font-bold">{error}</div>}
               <button className="auth-button" type="submit" disabled={loading}>{loading ? 'Connexion...' : 'Se connecter'}</button>
-              <div className="mt-4">
+              <div className="mt-4 flex flex-col gap-2">
                 <button 
                   type="button" 
                   onClick={() => navigate('/portail-ecole')}
                   className="text-slate-400 hover:text-amber-600 text-[10px] font-bold tracking-wider uppercase transition-colors"
                 >
                   Accès Portail Établissement
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/admission')}
+                  className="text-slate-400 hover:text-blue-600 text-[10px] font-bold tracking-wider uppercase transition-colors"
+                >
+                  Faire une demande d'admission (Élève)
                 </button>
               </div>
             </form>
@@ -515,9 +522,14 @@ export const Login: React.FC = () => {
                         {view === 'login' ? "Nouveau ? Créer un compte" : "Déjà un compte ? Se connecter"}
                     </button>
                     {view === 'login' && (
-                      <button type="button" onClick={() => navigate('/portail-ecole')} className="w-full py-2 text-slate-500 text-[9px] font-bold uppercase tracking-wider mt-1">
-                        Accès Portail Établissement
-                      </button>
+                      <div className="flex flex-col gap-1 mt-1">
+                        <button type="button" onClick={() => navigate('/portail-ecole')} className="w-full py-2 text-slate-500 text-[9px] font-bold uppercase tracking-wider">
+                          Accès Portail Établissement
+                        </button>
+                        <button type="button" onClick={() => navigate('/admission')} className="w-full py-2 text-blue-600 text-[9px] font-bold uppercase tracking-wider">
+                          Demande d'admission (Élève)
+                        </button>
+                      </div>
                     )}
                 </form>
             </div>

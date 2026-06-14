@@ -60,6 +60,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/parent', require('./routes/parent'));
 app.use('/api/students', require('./routes/students'));
+app.use('/api/admissions', require('./routes/admissions'));
 app.use('/api/sync', require('./routes/sync'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/notifications', require('./routes/notifications'));
@@ -130,7 +131,7 @@ const server = app.listen(PORT, () => {
     console.log(`🛡️  Base de données: Supabase PostgreSQL`);
     console.log(`🔑 Auth: JWT ${process.env.JWT_SECRET ? '(configuré)' : '(DÉFAUT)'}`);
     console.log(`📁 Node env: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`💬 Routes actives: /api/auth, /api/parent, /api/students, /api/sync, /api/chat, /api/notifications, /api/announcements`);
+    console.log(`💬 Routes actives: /api/auth, /api/parent, /api/students, /api/admissions, /api/sync, /api/chat, /api/notifications, /api/announcements`);
     console.log(`🏥 Health check: /api/health`);
     console.log(`${'='.repeat(60)}\n`);
 });

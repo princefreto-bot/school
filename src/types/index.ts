@@ -238,6 +238,7 @@ export interface ReceiptVerification {
 
 export type AppPage =
   | 'dashboard'
+  | 'admissions'
   | 'eleves'
   | 'paiements'
   | 'analyses'

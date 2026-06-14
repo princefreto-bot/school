@@ -3,7 +3,7 @@
 // ============================================================
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, ArrowLeft, Mail, School, ShieldCheck, User, Phone, Lock, Check } from 'lucide-react';
+import { GraduationCap, ArrowLeft, Mail, School, ShieldCheck, User, Phone, Lock } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
 export const CreerCompte: React.FC = () => {
@@ -123,15 +123,15 @@ export const CreerCompte: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center font-['Poppins'] p-4 md:p-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100/80 text-slate-800 flex items-center justify-center font-['Poppins'] p-4 md:p-8 relative overflow-hidden">
       {/* Background gradients pour effet premium */}
-      <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="w-full max-w-2xl bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 md:p-10 shadow-2xl relative z-10 animate-in fade-in zoom-in-95 duration-300">
+      <div className="w-full max-w-2xl bg-white border border-slate-100 rounded-[32px] p-6 md:p-10 shadow-2xl shadow-slate-200/50 relative z-10 animate-in fade-in zoom-in-95 duration-300">
         
         {/* En-tête de page */}
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-800/60">
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
           <button 
             onClick={() => step === 2 ? setStep(1) : navigate('/portail-ecole')} 
             className="flex items-center gap-2 text-slate-400 hover:text-amber-500 transition-colors text-sm font-bold"
@@ -139,7 +139,7 @@ export const CreerCompte: React.FC = () => {
             <ArrowLeft className="w-4 h-4" />
             <span>Retour</span>
           </button>
-          <div className="flex items-center gap-2 bg-amber-500/10 text-amber-500 font-extrabold uppercase text-[10px] tracking-widest px-3 py-1 rounded-full border border-amber-500/20">
+          <div className="flex items-center gap-2 bg-amber-50 text-amber-600 font-extrabold uppercase text-[10px] tracking-widest px-3 py-1 rounded-full border border-amber-100">
             Création Compte Établissement
           </div>
         </div>
@@ -151,28 +151,28 @@ export const CreerCompte: React.FC = () => {
               <div className="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-500/20">
                 <GraduationCap className="w-9 h-9 text-white" />
               </div>
-              <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">Rejoignez DGhubSchool</h1>
-              <p className="text-slate-400 text-xs md:text-sm mt-1">Inscrivez votre école et commencez à digitaliser votre gestion scolaire dès aujourd'hui.</p>
+              <h1 className="text-2xl md:text-3xl font-black text-slate-950 tracking-tight">Rejoignez DGhubSchool</h1>
+              <p className="text-slate-500 text-xs md:text-sm mt-1 font-medium">Inscrivez votre école et commencez à digitaliser votre gestion scolaire dès aujourd'hui.</p>
             </div>
 
             {error && (
-              <div className="p-4 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-2xl text-xs md:text-sm font-bold text-center">
+              <div className="p-4 bg-rose-50 border border-rose-100 text-rose-500 rounded-2xl text-xs md:text-sm font-bold text-center">
                 {error}
               </div>
             )}
 
             <div className="space-y-4">
-              <h2 className="text-sm font-extrabold uppercase tracking-wider text-amber-500 border-l-2 border-amber-500 pl-2">1. Informations de l'Établissement</h2>
+              <h2 className="text-sm font-extrabold uppercase tracking-wider text-amber-600 border-l-2 border-amber-500 pl-2">1. Informations de l'Établissement</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-400">Nom de l'école *</label>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Nom de l'école *</label>
                   <div className="relative">
-                    <School className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <School className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input 
                       type="text" 
                       placeholder="Ex: C.S. YZOMACAMB" 
-                      className="w-full pl-11 pr-4 py-3 bg-slate-950/60 border border-slate-800 rounded-2xl text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                      className="w-full pl-11 pr-4 py-3 bg-slate-550/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                       value={name} 
                       onChange={(e) => setName(e.target.value)} 
                       required 
@@ -181,40 +181,40 @@ export const CreerCompte: React.FC = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-400">Code unique d'école (Slug) *</label>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Code unique d'école (Slug) *</label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-600">@</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">@</span>
                     <input 
                       type="text" 
                       placeholder="Uniquement lettres et chiffres" 
-                      className="w-full pl-8 pr-4 py-3 bg-slate-950/60 border border-slate-800 rounded-2xl text-sm focus:outline-none focus:border-amber-500 transition-colors font-bold text-amber-500"
+                      className="w-full pl-8 pr-4 py-3 bg-slate-550/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-2xl text-sm focus:outline-none transition-colors font-bold text-amber-600"
                       value={slug} 
                       onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))} 
                       required 
                     />
                   </div>
-                  <p className="text-[9px] text-slate-500">Sert d'identifiant technique (ex: csyzomacamb). Sans espace ni caractères spéciaux.</p>
+                  <p className="text-[9px] text-slate-400 font-medium">Sert d'identifiant technique (ex: csyzomacamb). Sans espace ni caractères spéciaux.</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-400">Adresse de l'établissement</label>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Adresse de l'établissement</label>
                   <input 
                     type="text" 
                     placeholder="Ex: Agoé BKS, Lomé, Togo" 
-                    className="w-full px-4 py-3 bg-slate-950/60 border border-slate-800 rounded-2xl text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                    className="w-full px-4 py-3 bg-slate-550/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                     value={address} 
                     onChange={(e) => setAddress(e.target.value)} 
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-400">Téléphone de l'école</label>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Téléphone de l'école</label>
                   <input 
                     type="tel" 
                     placeholder="Ex: +228 90 00 00 00" 
-                    className="w-full px-4 py-3 bg-slate-950/60 border border-slate-800 rounded-2xl text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                    className="w-full px-4 py-3 bg-slate-550/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                     value={phone} 
                     onChange={(e) => setPhone(e.target.value)} 
                   />
@@ -223,17 +223,17 @@ export const CreerCompte: React.FC = () => {
             </div>
 
             <div className="space-y-4 pt-2">
-              <h2 className="text-sm font-extrabold uppercase tracking-wider text-amber-500 border-l-2 border-amber-500 pl-2">2. Directeur / Administrateur</h2>
+              <h2 className="text-sm font-extrabold uppercase tracking-wider text-amber-600 border-l-2 border-amber-500 pl-2">2. Directeur / Administrateur</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-400">Nom complet du Directeur *</label>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Nom complet du Directeur *</label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input 
                       type="text" 
                       placeholder="Ex: Koffi MENSAN" 
-                      className="w-full pl-11 pr-4 py-3 bg-slate-950/60 border border-slate-800 rounded-2xl text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                      className="w-full pl-11 pr-4 py-3 bg-slate-550/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                       value={adminNom} 
                       onChange={(e) => setAdminNom(e.target.value)} 
                       required 
@@ -242,13 +242,13 @@ export const CreerCompte: React.FC = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-400">Numéro mobile du Directeur *</label>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Numéro mobile du Directeur *</label>
                   <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input 
                       type="tel" 
                       placeholder="Ex: +228 99 99 99 99" 
-                      className="w-full pl-11 pr-4 py-3 bg-slate-950/60 border border-slate-800 rounded-2xl text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                      className="w-full pl-11 pr-4 py-3 bg-slate-550/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                       value={adminTelephone} 
                       onChange={(e) => setAdminTelephone(e.target.value)} 
                       required 
@@ -259,29 +259,29 @@ export const CreerCompte: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-400">Adresse Email Réelle * (Pour validation gratuite)</label>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Adresse Email Réelle * (Pour validation gratuite)</label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input 
                       type="email" 
                       placeholder="directeur@ecole.com" 
-                      className="w-full pl-11 pr-4 py-3 bg-slate-950/60 border border-slate-800 rounded-2xl text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                      className="w-full pl-11 pr-4 py-3 bg-slate-550/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                       value={email} 
                       onChange={(e) => setEmail(e.target.value)} 
                       required 
                     />
                   </div>
-                  <p className="text-[9px] text-slate-500">Un code de confirmation y sera envoyé immédiatement.</p>
+                  <p className="text-[9px] text-slate-400 font-medium">Un code de confirmation y sera envoyé immédiatement.</p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-400">Mot de passe Administrateur *</label>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Mot de passe Administrateur *</label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input 
                       type="password" 
                       placeholder="Minimum 6 caractères" 
-                      className="w-full pl-11 pr-4 py-3 bg-slate-950/60 border border-slate-800 rounded-2xl text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                      className="w-full pl-11 pr-4 py-3 bg-slate-550/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                       value={adminPassword} 
                       onChange={(e) => setAdminPassword(e.target.value)} 
                       required 
@@ -292,7 +292,7 @@ export const CreerCompte: React.FC = () => {
             </div>
 
             {/* Checkboxes de consentements */}
-            <div className="space-y-3 pt-2 border-t border-slate-800/60">
+            <div className="space-y-3 pt-2 border-t border-slate-100">
               <label className="flex items-start gap-2.5 cursor-pointer">
                 <input 
                   type="checkbox" 
@@ -301,8 +301,8 @@ export const CreerCompte: React.FC = () => {
                   className="mt-1 accent-amber-500 rounded scale-95" 
                   required 
                 />
-                <span className="text-[10px] md:text-xs text-slate-400 leading-snug">
-                  J'accepte les <span className="font-extrabold text-slate-200">Conditions Générales d'Utilisation</span> de la plateforme. <span className="text-rose-500">*</span>
+                <span className="text-[10px] md:text-xs text-slate-500 leading-snug font-medium">
+                  J'accepte les <span className="font-bold text-slate-800">Conditions Générales d'Utilisation</span> de la plateforme. <span className="text-rose-500">*</span>
                 </span>
               </label>
 
@@ -314,8 +314,8 @@ export const CreerCompte: React.FC = () => {
                   className="mt-1 accent-amber-500 rounded scale-95" 
                   required 
                 />
-                <span className="text-[10px] md:text-xs text-slate-400 leading-snug">
-                  J'autorise la collecte et le traitement sécurisé des données selon la <span className="font-extrabold text-slate-200">Politique de Confidentialité</span> (conforme IPDCP). <span className="text-rose-500">*</span>
+                <span className="text-[10px] md:text-xs text-slate-500 leading-snug font-medium">
+                  J'autorise la collecte et le traitement sécurisé des données selon la <span className="font-bold text-slate-800">Politique de Confidentialité</span> (conforme IPDCP). <span className="text-rose-500">*</span>
                 </span>
               </label>
 
@@ -326,8 +326,8 @@ export const CreerCompte: React.FC = () => {
                   onChange={(e) => setMarketingConsent(e.target.checked)} 
                   className="mt-1 accent-amber-500 rounded scale-95" 
                 />
-                <span className="text-[10px] md:text-xs text-slate-400 leading-snug">
-                  J'accepte de recevoir des actus et conseils d'optimisation scolaire d'YZO. <span className="text-slate-500">(Optionnel)</span>
+                <span className="text-[10px] md:text-xs text-slate-500 leading-snug font-medium">
+                  J'accepte de recevoir des actus et conseils d'optimisation scolaire d'YZO. <span className="text-slate-400">(Optionnel)</span>
                 </span>
               </label>
             </div>
@@ -335,7 +335,7 @@ export const CreerCompte: React.FC = () => {
             <button 
               type="submit" 
               disabled={loading} 
-              className="w-full py-4 bg-amber-500 text-slate-950 font-black text-xs md:text-sm uppercase tracking-wider rounded-2xl shadow-xl shadow-amber-500/10 hover:bg-amber-400 active:scale-[0.98] transition flex items-center justify-center gap-2 mt-4"
+              className="w-full py-4 bg-amber-500 text-slate-900 font-black text-xs md:text-sm uppercase tracking-wider rounded-2xl shadow-xl shadow-amber-500/10 hover:bg-amber-400 active:scale-[0.98] transition flex items-center justify-center gap-2 mt-4"
             >
               {loading ? 'Traitement en cours...' : 'Inscrire mon établissement'}
             </button>
@@ -344,35 +344,35 @@ export const CreerCompte: React.FC = () => {
           /* ================= ÉTAPE 2 ================= */
           <form onSubmit={handleVerifyCode} className="space-y-6">
             <div className="text-center mb-6 animate-in slide-in-from-top duration-300">
-              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/20">
+              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/20">
                 <ShieldCheck className="w-9 h-9 text-white" />
               </div>
-              <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">Vérifiez votre Email</h1>
-              <p className="text-slate-400 text-xs md:text-sm mt-1">
+              <h1 className="text-2xl md:text-3xl font-black text-slate-950 tracking-tight">Vérifiez votre Email</h1>
+              <p className="text-slate-500 text-xs md:text-sm mt-1 font-medium">
                 Un code de vérification à 6 chiffres a été envoyé à l'adresse suivante :<br />
-                <span className="font-bold text-amber-500 text-sm">{email}</span>
+                <span className="font-extrabold text-amber-600 text-sm">{email}</span>
               </p>
             </div>
 
             {successMsg && (
-              <div className="p-4 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-2xl text-xs md:text-sm font-bold text-center">
+              <div className="p-4 bg-blue-50 border border-blue-100 text-blue-600 rounded-2xl text-xs md:text-sm font-bold text-center">
                 {successMsg}
               </div>
             )}
 
             {error && (
-              <div className="p-4 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-2xl text-xs md:text-sm font-bold text-center">
+              <div className="p-4 bg-rose-50 border border-rose-100 text-rose-500 rounded-2xl text-xs md:text-sm font-bold text-center">
                 {error}
               </div>
             )}
 
             <div className="space-y-2 max-w-[280px] mx-auto text-center">
-              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">Saisir le code à 6 chiffres</label>
+              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest block">Saisir le code à 6 chiffres</label>
               <input 
                 type="text" 
                 maxLength={6}
                 placeholder="0 0 0 0 0 0" 
-                className="w-full text-center py-4 bg-slate-950/60 border-2 border-dashed border-slate-800 focus:border-amber-500 rounded-2xl text-2xl font-black tracking-[8px] focus:outline-none transition-colors"
+                className="w-full text-center py-4 bg-slate-50 border-2 border-dashed border-slate-200 focus:border-amber-500 rounded-2xl text-2xl font-black tracking-[8px] focus:outline-none transition-colors text-slate-800"
                 value={code} 
                 onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))} 
                 required 
@@ -385,7 +385,7 @@ export const CreerCompte: React.FC = () => {
                 type="button" 
                 onClick={handleRegisterRequest} 
                 disabled={loading}
-                className="text-xs font-bold text-amber-500 hover:text-amber-400 hover:underline mt-1 disabled:opacity-50"
+                className="text-xs font-bold text-amber-600 hover:text-amber-500 hover:underline mt-1 disabled:opacity-50"
               >
                 Renvoyer le code de validation
               </button>
