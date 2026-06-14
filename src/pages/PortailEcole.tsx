@@ -88,10 +88,10 @@ export const PortailEcole: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100/80 text-slate-800 flex items-center justify-center font-['Poppins'] p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100/80 text-slate-800 flex items-center justify-center font-['Inter'] p-4 relative overflow-hidden">
       {/* Effets lumineux premium discrets */}
       <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="w-full max-w-md bg-white border border-slate-100 rounded-[32px] p-6 md:p-10 shadow-2xl shadow-slate-200/50 relative z-10 animate-in fade-in zoom-in-95 duration-300">
         
@@ -201,14 +201,6 @@ export const PortailEcole: React.FC = () => {
           >
             <span>Inscrire un nouvel établissement</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-          </button>
-
-          <button 
-            onClick={() => navigate('/admission')} 
-            className="text-xs font-bold text-blue-600 hover:text-blue-500 flex items-center justify-center gap-1.5 transition-colors group"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>Faire une demande d'admission (Élève / Parent)</span>
           </button>
 
           <button 

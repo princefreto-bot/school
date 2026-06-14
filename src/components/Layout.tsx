@@ -20,7 +20,6 @@ interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: n
 
 const NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'dashboard',            label: 'Tableau de bord',   icon: <LayoutDashboard className="w-[18px] h-[18px]" /> },
-  { id: 'admissions',           label: 'Admissions',        icon: <UserCheck className="w-[18px] h-[18px]" /> },
   { id: 'eleves',               label: 'Élèves',            icon: <Users className="w-[18px] h-[18px]" /> },
   { id: 'parents_list',         label: 'Parents',           icon: <Users className="w-[18px] h-[18px]" /> },
   { id: 'paiements',            label: 'Paiements',         icon: <CreditCard className="w-[18px] h-[18px]" /> },
@@ -58,7 +57,6 @@ const CREATOR_NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
 
 const NAV_GROUPS: Record<string, string> = {
   dashboard: 'Principal',
-  admissions: 'Gestion',
   eleves: 'Gestion',
   parents_list: 'Gestion',
   paiements: 'Finance',

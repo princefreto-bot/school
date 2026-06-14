@@ -413,4 +413,36 @@ async function impersonateSchool(req, res) {
     }
 }
 
-module.exports = { getAllSchools, createSchool, updateSchoolStatus, updateSchool, deleteSchool, getGlobalStats, impersonateSchool };
+// Approuver/désapprouver une école
+async function approveSchool(req, res) {
+    const { id } = req.params;
+    const { is_approved } = req.body;
+
+    if (typeof is_approved !== 'boolean') {
+        return res.status(400).json({ error: 'La valeur is_approved doit être un booléen.' });
+    }
+
+    try {
+        const { data: school, error } = await supabase
+            .from('schools')
+            .update({ is_approved })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        const action = is_approved ? '✅ approuvée' : '❌ en attente de validation / désapprouvée';
+        console.log(`🏫 École "${school.name}" ${action} par le SuperAdmin`);
+
+        return res.json({
+            message: `École "${school.name}" ${action} avec succès.`,
+            school
+        });
+    } catch (err) {
+        console.error('SuperAdmin approveSchool Error:', err.message);
+        return res.status(500).json({ error: 'Erreur approbation école: ' + err.message });
+    }
+}
+
+module.exports = { getAllSchools, createSchool, updateSchoolStatus, updateSchool, deleteSchool, getGlobalStats, impersonateSchool, approveSchool };

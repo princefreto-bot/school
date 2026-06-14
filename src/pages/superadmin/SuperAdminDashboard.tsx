@@ -331,7 +331,7 @@ const CreateSchoolModal: React.FC<CreateSchoolModalProps> = ({ onClose, onCreate
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Nom de l'établissement *</label>
                 <input type="text" value={form.name} onChange={e => handleNameChange(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   placeholder="ex: Lycée Excellence Lomé" required />
               </div>
               <div>
@@ -346,19 +346,19 @@ const CreateSchoolModal: React.FC<CreateSchoolModalProps> = ({ onClose, onCreate
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Adresse</label>
                 <input type="text" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
-                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   placeholder="Adressez à Lomé" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Téléphone</label>
                 <input type="text" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   placeholder="+228 XX XX XX XX" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
                 <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   placeholder="contact@ecole.tg" />
               </div>
             </div>
@@ -370,19 +370,19 @@ const CreateSchoolModal: React.FC<CreateSchoolModalProps> = ({ onClose, onCreate
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Nom complet *</label>
                 <input type="text" value={form.admin_nom} onChange={e => setForm(f => ({ ...f, admin_nom: e.target.value }))}
-                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   placeholder="M. Jean Dupont" required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Téléphone (login) *</label>
                 <input type="text" value={form.admin_telephone} onChange={e => setForm(f => ({ ...f, admin_telephone: e.target.value }))}
-                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   placeholder="90000001" required />
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Mot de passe provisoire *</label>
                 <input type="password" value={form.admin_password} onChange={e => setForm(f => ({ ...f, admin_password: e.target.value }))}
-                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   placeholder="Minimum 8 caractères" required minLength={6} />
               </div>
             </div>
@@ -396,11 +396,11 @@ const CreateSchoolModal: React.FC<CreateSchoolModalProps> = ({ onClose, onCreate
                   type="checkbox"
                   checked={form.accepted_terms || false}
                   onChange={e => setForm(f => ({ ...f, accepted_terms: e.target.checked }))}
-                  className="mt-1 accent-blue-600 rounded"
+                  className="mt-1 accent-amber-500 rounded"
                   required
                 />
                 <span className="text-sm text-slate-300 leading-tight">
-                  J'accepte les <span className="text-blue-400 font-bold hover:underline">Conditions Générales d'Utilisation</span>. <span className="text-red-500">*</span>
+                  J'accepte les <span className="text-amber-500 font-bold hover:underline">Conditions Générales d'Utilisation</span>. <span className="text-red-500">*</span>
                 </span>
               </label>
 
@@ -409,11 +409,11 @@ const CreateSchoolModal: React.FC<CreateSchoolModalProps> = ({ onClose, onCreate
                   type="checkbox"
                   checked={form.accepted_privacy_policy || false}
                   onChange={e => setForm(f => ({ ...f, accepted_privacy_policy: e.target.checked }))}
-                  className="mt-1 accent-blue-600 rounded"
+                  className="mt-1 accent-amber-500 rounded"
                   required
                 />
                 <span className="text-sm text-slate-300 leading-tight">
-                  J'autorise le traitement des données conformément à la <span className="text-blue-400 font-bold hover:underline">Politique de Confidentialité</span>. <span className="text-red-500">*</span>
+                  J'autorise le traitement des données conformément à la <span className="text-amber-500 font-bold hover:underline">Politique de Confidentialité</span>. <span className="text-red-500">*</span>
                 </span>
               </label>
             </div>
@@ -431,7 +431,7 @@ const CreateSchoolModal: React.FC<CreateSchoolModalProps> = ({ onClose, onCreate
               Annuler
             </button>
             <button type="submit" disabled={loading}
-              className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black transition-all disabled:opacity-50 flex items-center justify-center gap-2">
               {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               {loading ? 'Création...' : 'Créer l\'école'}
             </button>
@@ -500,6 +500,29 @@ export const SuperAdminDashboard: React.FC = () => {
   }, []);
 
   useEffect(() => { loadAll(); }, [loadAll]);
+
+  const handleApproveToggle = async (school: SchoolWithStats, approved: boolean) => {
+    const action = approved ? 'approuver' : 'désapprouver';
+    if (!confirm(`Voulez-vous ${action} "${school.name}" ?`)) return;
+
+    setActionLoading(school.id);
+    try {
+      const res = await fetch(`${API_BASE_URL}/superadmin/schools/${school.id}/approve`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ is_approved: approved })
+      });
+      if (res.ok) await loadSchoolsAndStats();
+      else {
+        const errData = await res.json();
+        alert(errData.error || 'Erreur lors de la modification');
+      }
+    } catch (err) {
+      alert('Erreur réseau lors de la modification');
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const handleStatusToggle = async (school: SchoolWithStats) => {
     const newStatus = school.status === 'active' ? 'suspended' : 'active';
@@ -623,7 +646,7 @@ export const SuperAdminDashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
+        <RefreshCw className="w-8 h-8 text-amber-500 animate-spin" />
       </div>
     );
   }
@@ -633,7 +656,7 @@ export const SuperAdminDashboard: React.FC = () => {
       {/* En-tête */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex items-center gap-5 relative z-10">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shrink-0 shadow-[0_0_30px_rgba(124,58,237,0.3)]">
@@ -654,7 +677,7 @@ export const SuperAdminDashboard: React.FC = () => {
           
           {activeTab === 'schools' ? (
             <button onClick={() => setShowCreateModal(true)}
-              className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold transition-all shadow-[0_8px_20px_-6px_rgba(37,99,235,0.5)] border border-blue-500/30 hover:scale-[1.02] active:scale-[0.98]">
+              className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black transition-all shadow-[0_8px_20px_-6px_rgba(245,158,11,0.4)] border border-amber-500/30 hover:scale-[1.02] active:scale-[0.98]">
               <Plus className="w-5 h-5 shrink-0" />
               <span className="whitespace-nowrap">Nouvelle école</span>
             </button>
@@ -772,6 +795,11 @@ export const SuperAdminDashboard: React.FC = () => {
                           <div className="flex items-center gap-3 flex-wrap mb-2">
                             <h3 className="text-white font-bold text-base">{school.name}</h3>
                             {getStatusBadge(school.status)}
+                            {school.is_approved === false && (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-500 border border-amber-500/30">
+                                <AlertTriangle className="w-3 h-3" /> En attente de validation
+                              </span>
+                            )}
                             {isExpired && (
                               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">
                                 <AlertTriangle className="w-3 h-3" /> Essai expiré
@@ -822,10 +850,30 @@ export const SuperAdminDashboard: React.FC = () => {
                         </div>
 
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 border-t sm:border-t-0 sm:border-l border-slate-700/50 pt-3 sm:pt-0 sm:pl-4 mt-3 sm:mt-0">
+                          {school.is_approved === false ? (
+                            <button
+                              onClick={() => handleApproveToggle(school, true)}
+                              disabled={actionLoading === school.id}
+                              className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md transition-all disabled:opacity-50"
+                            >
+                              {actionLoading === school.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <UserCheck className="w-4 h-4" />}
+                              APPROUVER
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleApproveToggle(school, false)}
+                              disabled={actionLoading === school.id}
+                              className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 shadow-md transition-all disabled:opacity-50"
+                            >
+                              {actionLoading === school.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+                              BLOQUER
+                            </button>
+                          )}
+
                           <button
                             onClick={() => handleImpersonate(school)}
                             disabled={actionLoading === school.id}
-                            className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-blue-600/20 to-blue-500/10 text-blue-400 hover:from-blue-600/30 hover:to-blue-500/20 border border-blue-600/40 shadow-md transition-all disabled:opacity-50"
+                            className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-amber-600/20 to-amber-500/10 text-amber-400 hover:from-amber-600/30 hover:to-amber-500/20 border border-amber-600/40 shadow-md transition-all disabled:opacity-50"
                           >
                             {actionLoading === school.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
                             GÉRER

@@ -157,6 +157,7 @@ export interface School {
   email?: string;
   trial_ends_at: string;   // ISO date
   status: 'active' | 'suspended' | 'trial';
+  is_approved?: boolean;
   created_at: string;
   student_count?: number;  // calculé côté serveur
   revenue?: number;        // 2000 FCFA/élève
@@ -238,7 +239,6 @@ export interface ReceiptVerification {
 
 export type AppPage =
   | 'dashboard'
-  | 'admissions'
   | 'eleves'
   | 'paiements'
   | 'analyses'

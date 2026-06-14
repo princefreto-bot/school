@@ -60,7 +60,6 @@ app.use((req, res, next) => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/parent', require('./routes/parent'));
 app.use('/api/students', require('./routes/students'));
-app.use('/api/admissions', require('./routes/admissions'));
 app.use('/api/sync', require('./routes/sync'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/notifications', require('./routes/notifications'));

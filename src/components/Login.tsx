@@ -179,7 +179,7 @@ export const Login: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center font-['Poppins'] overflow-hidden bg-white relative">
+    <div className="min-h-screen flex items-center justify-center font-['Inter'] overflow-hidden bg-white relative">
       <style>{`
         /* ──── DESKTOP SLIDING OVERLAY ──── */
         .auth-container {

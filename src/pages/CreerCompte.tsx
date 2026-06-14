@@ -123,10 +123,10 @@ export const CreerCompte: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100/80 text-slate-800 flex items-center justify-center font-['Poppins'] p-4 md:p-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100/80 text-slate-800 flex items-center justify-center font-['Inter'] p-4 md:p-8 relative overflow-hidden">
       {/* Background gradients pour effet premium */}
       <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-2xl bg-white border border-slate-100 rounded-[32px] p-6 md:p-10 shadow-2xl shadow-slate-200/50 relative z-10 animate-in fade-in zoom-in-95 duration-300">
         
@@ -344,8 +344,8 @@ export const CreerCompte: React.FC = () => {
           /* ================= ÉTAPE 2 ================= */
           <form onSubmit={handleVerifyCode} className="space-y-6">
             <div className="text-center mb-6 animate-in slide-in-from-top duration-300">
-              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/20">
-                <ShieldCheck className="w-9 h-9 text-white" />
+              <div className="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-500/20">
+                <ShieldCheck className="w-9 h-9 text-slate-950" />
               </div>
               <h1 className="text-2xl md:text-3xl font-black text-slate-950 tracking-tight">Vérifiez votre Email</h1>
               <p className="text-slate-500 text-xs md:text-sm mt-1 font-medium">
@@ -355,7 +355,7 @@ export const CreerCompte: React.FC = () => {
             </div>
 
             {successMsg && (
-              <div className="p-4 bg-blue-50 border border-blue-100 text-blue-600 rounded-2xl text-xs md:text-sm font-bold text-center">
+              <div className="p-4 bg-amber-50 border border-amber-100 text-amber-600 rounded-2xl text-xs md:text-sm font-bold text-center">
                 {successMsg}
               </div>
             )}
@@ -394,7 +394,7 @@ export const CreerCompte: React.FC = () => {
             <button 
               type="submit" 
               disabled={loading} 
-              className="w-full py-4 bg-blue-600 text-white font-black text-xs md:text-sm uppercase tracking-wider rounded-2xl shadow-xl shadow-blue-500/10 hover:bg-blue-500 active:scale-[0.98] transition flex items-center justify-center gap-2 mt-4"
+              className="w-full py-4 bg-amber-500 text-slate-950 font-black text-xs md:text-sm uppercase tracking-wider rounded-2xl shadow-xl shadow-amber-500/10 hover:bg-amber-400 active:scale-[0.98] transition flex items-center justify-center gap-2 mt-4"
             >
               {loading ? 'Validation en cours...' : 'Confirmer mon adresse email'}
             </button>

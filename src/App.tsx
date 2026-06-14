@@ -11,12 +11,10 @@ import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-
 import { Confidentialite } from './pages/Confidentialite';
 import { PortailEcole } from './pages/PortailEcole';
 import { CreerCompte } from './pages/CreerCompte';
-import { AdmissionPublic } from './pages/AdmissionPublic';
 
 
 // Lazy loading for pages to reduce initial bundle size
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
-const Admissions = lazy(() => import('./pages/Admissions').then(m => ({ default: m.Admissions })));
 const Eleves = lazy(() => import('./pages/Eleves').then(m => ({ default: m.Eleves })));
 const Paiements = lazy(() => import('./pages/Paiements').then(m => ({ default: m.Paiements })));
 const Analyses = lazy(() => import('./pages/Analyses').then(m => ({ default: m.Analyses })));
@@ -104,7 +102,6 @@ const PageContent: React.FC = () => {
 
   switch (currentPage) {
     case 'dashboard': return <Dashboard />;
-    case 'admissions': return <Admissions />;
     case 'eleves': return <Eleves />;
     case 'paiements': return <Paiements />;
     case 'analyses': return <Analyses />;
@@ -147,9 +144,9 @@ export function App() {
 
   // Redirect logic based on login state
   React.useEffect(() => {
-    const publicPaths = ['/confidentialite', '/portail-ecole', '/creer-compte', '/admission'];
+    const publicPaths = ['/confidentialite', '/portail-ecole', '/creer-compte'];
     if (isAuthenticated) {
-      if (location.pathname === '/login' || location.pathname === '/portail-ecole' || location.pathname === '/creer-compte' || location.pathname === '/admission') {
+      if (location.pathname === '/login' || location.pathname === '/portail-ecole' || location.pathname === '/creer-compte') {
         navigate('/', { replace: true });
       }
     } else {
@@ -215,7 +212,6 @@ export function App() {
       <Route path="/confidentialite" element={<Confidentialite />} />
       <Route path="/portail-ecole" element={<PortailEcole />} />
       <Route path="/creer-compte" element={<CreerCompte />} />
-      <Route path="/admission" element={<AdmissionPublic />} />
       <Route 
         path="/login" 
         element={

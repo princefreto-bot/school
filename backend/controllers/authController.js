@@ -226,7 +226,7 @@ async function login(req, res) {
         // Vérification accès école
         const { data: school, error: schoolErr } = await supabase
             .from('schools')
-            .select('id, name, slug, status, trial_ends_at, logo_url, is_email_verified')
+            .select('id, name, slug, status, trial_ends_at, logo_url, is_email_verified, is_approved')
             .eq('slug', schoolSlug)
             .single();
 
@@ -236,6 +236,10 @@ async function login(req, res) {
 
         if (school.is_email_verified === false) {
             return res.status(403).json({ error: "L'adresse email de cet établissement n'a pas encore été vérifiée. Veuillez d'abord valider votre inscription." });
+        }
+
+        if (school.is_approved === false) {
+            return res.status(403).json({ error: "Votre établissement est en attente de validation par l'administration de DGhubSchool." });
         }
 
         if (school.status === 'suspended') {
@@ -491,7 +495,7 @@ async function verifySchoolEmail(req, res) {
 
         if (adminErr) throw adminErr;
 
-        // 5. Activer l'école définitivement
+        // 5. Activer l'école définitivement (email vérifié, mais reste is_approved = false)
         const trialEndsAt = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(); // +2 mois d'essai gratuit
         const { error: updateErr } = await supabase
             .from('schools')
@@ -503,7 +507,8 @@ async function verifySchoolEmail(req, res) {
                 email_verification_expires: null,
                 temp_admin_nom: null,
                 temp_admin_telephone: null,
-                temp_admin_password: null
+                temp_admin_password: null,
+                is_approved: false
             })
             .eq('id', school.id);
 
