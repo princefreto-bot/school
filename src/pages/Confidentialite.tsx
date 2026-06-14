@@ -1,125 +1,139 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Shield, ArrowLeft, Eye, Lock, Camera, Server, Check } from 'lucide-react';
-import { useStore } from '../store/useStore';
+import { Shield, ArrowLeft, GraduationCap, Lock, Eye, FileText, CheckCircle } from 'lucide-react';
 
-export const Confidentialite = () => {
-  const navigate = useNavigate();
-  const isAuthenticated = useStore((s) => s.isAuthenticated);
-
-  const handleBack = () => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    } else {
-      navigate('/login');
-    }
-  };
-
-  const sections = [
-    {
-      icon: <Camera className="w-5 h-5 text-amber-500" />,
-      title: "Utilisation de l'appareil photo",
-      content: "L'application requiert l'autorisation d'accéder à l'appareil photo de votre smartphone uniquement dans le but de numériser les documents officiels de vos élèves (actes de naissance, anciens bulletins, certificats). Aucune photo n'est prise à votre insu ou stockée dans votre galerie personnelle de manière permanente."
-    },
-    {
-      icon: <Lock className="w-5 h-5 text-indigo-500" />,
-      title: "Sécurité & Stockage des documents",
-      content: "Une fois numérisés sous forme de PDF, les documents sont immédiatement téléversés sur nos serveurs hautement sécurisés via des connexions cryptées HTTPS SSL. Les données sont hébergées dans un espace cloud protégé et ne sont accessibles qu'aux administrateurs d'établissement autorisés et aux parents légitimes des élèves concernés."
-    },
-    {
-      icon: <Eye className="w-5 h-5 text-emerald-500" />,
-      title: "Respect de la vie privée",
-      content: "SchoolFinance s'engage à ne jamais vendre, louer ou partager les documents scolaires ou données personnelles des élèves à des entreprises tierces. Les données d'authentification et les scans restent strictement confinés au cadre de la gestion académique et financière de votre établissement scolaire."
-    },
-    {
-      icon: <Server className="w-5 h-5 text-rose-500" />,
-      title: "Hébergement & Droits d'accès",
-      content: "Conformément à la réglementation sur la protection des données, vous conservez un droit permanent d'accès, de modification et de suppression des documents scolaires de vos enfants. Les administrateurs scolaires peuvent détruire définitivement tout fichier stocké depuis leur console d'administration."
-    }
-  ];
-
+export const Confidentialite: React.FC = () => {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-between transition-colors duration-300">
-      
-      {/* Navbar Minimaliste */}
-      <header className="px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-900 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-10">
-        <button 
-          onClick={handleBack}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition active:scale-95"
-        >
-          <ArrowLeft className="w-4 h-4" /> Retour
-        </button>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 py-12 px-4 sm:px-6 lg:px-8 font-sans selection:bg-amber-500/20">
+      <div className="max-w-4xl mx-auto space-y-8">
         
-        <div className="flex items-center gap-2">
-          <Shield className="w-5 h-5 text-amber-500" />
-          <span className="font-black text-sm text-slate-800 dark:text-white tracking-tight">SchoolFinance Security</span>
-        </div>
-      </header>
-
-      {/* Corps principal */}
-      <main className="flex-1 w-full max-w-3xl mx-auto px-6 py-12 space-y-10 animate-slideUp">
-        
-        {/* En-tête principal */}
-        <div className="text-center space-y-4">
-          <div className="inline-flex w-16 h-16 bg-amber-500/10 text-amber-500 rounded-[24px] items-center justify-center shadow-inner mb-2">
-            <Shield className="w-8 h-8" />
-          </div>
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
-            Charte de Confidentialité
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm max-w-lg mx-auto font-medium leading-relaxed">
-            Chez SchoolFinance, la sécurité des dossiers scolaires et le respect de la vie privée des élèves sont nos priorités absolues.
-          </p>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-            Dernière mise à jour : Juin 2026
-          </p>
-        </div>
-
-        {/* Section explications des "slashes" */}
-        <div className="p-6 rounded-2xl border border-indigo-100 dark:border-indigo-950/40 bg-indigo-50/30 dark:bg-indigo-950/10 space-y-3">
-          <h3 className="font-black text-sm text-indigo-900 dark:text-indigo-400 tracking-tight flex items-center gap-2">
-            <Shield className="w-4 h-4" /> Accès et transparence de l'application
-          </h3>
-          <p className="text-xs text-indigo-950/70 dark:text-slate-300 leading-relaxed font-semibold">
-            Cette page dispose d'une URL publique directe (`/#/confidentialite`) permettant à nos utilisateurs, ainsi qu'aux validateurs des magasins d'applications Google Play et Apple App Store, de vérifier nos engagements de sécurité à tout moment et en toute transparence, sans nécessiter de compte d'accès préalable.
-          </p>
-        </div>
-
-        {/* Grille de sections explicatives */}
-        <div className="space-y-6">
-          {sections.map((section, idx) => (
-            <div 
-              key={idx}
-              className="p-6 rounded-2xl border border-slate-100 dark:border-slate-900 bg-white dark:bg-slate-900/60 shadow-sm flex flex-col sm:flex-row gap-4 items-start hover:border-slate-200 dark:hover:border-slate-800 transition duration-300"
-            >
-              <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl flex-shrink-0">
-                {section.icon}
-              </div>
-              <div className="space-y-2">
-                <h4 className="font-bold text-slate-900 dark:text-white text-base tracking-tight">{section.title}</h4>
-                <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed font-medium">{section.content}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Bouton de consentement final */}
-        <div className="text-center pt-4">
-          <button 
-            onClick={handleBack}
-            className="px-8 py-3.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-black uppercase tracking-widest transition shadow-lg shadow-amber-500/20 active:scale-95 flex items-center justify-center gap-2 mx-auto"
+        {/* Navigation retour */}
+        <div className="flex items-center justify-between">
+          <a
+            href="/#/login"
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl transition-all shadow-sm active:scale-95"
           >
-            <Check className="w-4 h-4" /> J'ai compris, fermer
-          </button>
+            <ArrowLeft className="w-3.5 h-3.5" /> Retour à la connexion
+          </a>
+
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Version 2.0 — Active</span>
+          </div>
         </div>
 
-      </main>
+        {/* En-tête */}
+        <div className="pro-card p-8 md:p-12 relative overflow-hidden bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-800 rounded-[32px] shadow-sm text-center flex flex-col items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none" />
+          
+          <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[22px] flex items-center justify-center text-white shadow-xl shadow-amber-500/10 mb-6">
+            <GraduationCap className="w-8 h-8" />
+          </div>
 
-      {/* Footer minimal */}
-      <footer className="border-t border-slate-100 dark:border-slate-900 py-6 text-center text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-        © 2026 SchoolFinance. Tous droits réservés.
-      </footer>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-tight max-w-lg">
+            Politique de <span className="text-transparent bg-clip-text bg-gradient-to-br from-amber-500 to-amber-600">Confidentialité</span>
+          </h1>
+          
+          <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest mt-3">
+            SchoolFinance — Gestion & Scolarité
+          </p>
+          
+          <p className="text-slate-600 dark:text-slate-300 text-sm mt-4 max-w-xl leading-relaxed">
+            Chez SchoolFinance, nous accordons une importance primordiale à la protection et à la confidentialité des données personnelles des élèves, des parents et du personnel d'établissement.
+          </p>
+        </div>
 
+        {/* Corps de la charte */}
+        <div className="space-y-6">
+          
+          {/* Section 1 */}
+          <div className="pro-card p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/40 dark:border-slate-800/80 rounded-3xl space-y-4 shadow-xs">
+            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center">
+                <FileText className="w-5 h-5" />
+              </div>
+              <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">1. Nature des Données Collectées</h2>
+            </div>
+            
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              Dans le cadre de la gestion académique et financière de votre établissement, nous collectons les informations nécessaires à la scolarisation :
+            </p>
+            
+            <ul className="space-y-2 text-slate-600 dark:text-slate-300 text-sm pl-4 list-disc marker:text-amber-500">
+              <li><strong>Élèves</strong> : Noms, prénoms, date de naissance, classe, notes, relevés de présence et documents officiels numérisés (actes de naissance, bulletins scolaires antérieurs).</li>
+              <li><strong>Parents</strong> : Noms, numéros de téléphone (utilisés pour les alertes push et notifications de paiement), statut des cotisations financières.</li>
+              <li><strong>Personnel</strong> : Noms, rôles d'accès au système de l'école.</li>
+            </ul>
+          </div>
+
+          {/* Section 2 */}
+          <div className="pro-card p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/40 dark:border-slate-800/80 rounded-3xl space-y-4 shadow-xs">
+            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center">
+                <Eye className="w-5 h-5" />
+              </div>
+              <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">2. Finalité des Traitements</h2>
+            </div>
+            
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              Ces données sont exclusivement traitées pour assurer le bon fonctionnement administratif et pédagogique :
+            </p>
+            
+            <ul className="space-y-2 text-slate-600 dark:text-slate-300 text-sm pl-4 list-disc marker:text-amber-500">
+              <li>Le suivi financier, la facturation des frais scolaires et l'édition de reçus de paiement sécurisés.</li>
+              <li>La saisie et l'édition des bulletins et relevés de notes.</li>
+              <li>La numérisation sécurisée des dossiers des élèves via l'outil scanner.</li>
+              <li>L'envoi d'alertes instantanées (notifications push d'absences, d'événements scolaires ou de reçus financiers) aux comptes de parents associés.</li>
+            </ul>
+          </div>
+
+          {/* Section 3 */}
+          <div className="pro-card p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/40 dark:border-slate-800/80 rounded-3xl space-y-4 shadow-xs">
+            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center">
+                <Lock className="w-5 h-5" />
+              </div>
+              <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">3. Sécurité et Hébergement</h2>
+            </div>
+            
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              Toutes les données sont stockées et sécurisées à l'aide de protocoles stricts :
+            </p>
+            
+            <ul className="space-y-2 text-slate-600 dark:text-slate-300 text-sm pl-4 list-disc marker:text-amber-500">
+              <li>Les bases de données sont gérées via **Supabase** et sont cryptées au repos et en transit via HTTPS/SSL.</li>
+              <li>Les documents numérisés (actes de naissance, bulletins archivés) sont enregistrés dans un stockage privé sécurisé et ne sont accessibles qu'aux comptes autorisés.</li>
+              <li>Un système d'authentification robuste (Jetons JWT sécurisés) empêche toute consultation non autorisée des données des élèves.</li>
+            </ul>
+          </div>
+
+          {/* Section 4 */}
+          <div className="pro-card p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/40 dark:border-slate-800/80 rounded-3xl space-y-4 shadow-xs">
+            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center">
+                <Shield className="w-5 h-5" />
+              </div>
+              <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">4. Partage et Droits</h2>
+            </div>
+            
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              **Aucune donnée n'est cédée, vendue ou louée à des tiers à des fins publicitaires ou marketing.** 
+            </p>
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              Conformément à la réglementation sur la protection des données personnelles, vous disposez d'un droit d'accès, de rectification et d'effacement de vos informations. Pour toute demande de modification ou suppression, vous pouvez contacter directement la direction de l'établissement scolaire.
+            </p>
+          </div>
+
+        </div>
+
+        {/* Footer légal */}
+        <div className="text-center text-xs text-slate-400 dark:text-slate-500 space-y-2 py-6 border-t border-slate-200/60 dark:border-slate-800">
+          <p>© {new Date().getFullYear()} SchoolFinance. Tous droits réservés.</p>
+          <p className="flex items-center justify-center gap-1">
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Plateforme scolaire sécurisée et conforme aux directives de protection des données de l'enfance.
+          </p>
+        </div>
+
+      </div>
     </div>
   );
 };

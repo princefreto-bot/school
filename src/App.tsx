@@ -1,13 +1,13 @@
 // ============================================================
 // APP — Point d'entrée principal
 // ============================================================
-import React, { Suspense, lazy, useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
 import { useStore } from './store/useStore';
 import { Login } from './components/Login';
 import { Layout } from './components/Layout';
 import { AnnouncementPopup } from './components/AnnouncementPopup';
 import { webPushService } from './services/webPushService';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Confidentialite } from './pages/Confidentialite';
 
 
@@ -137,10 +137,21 @@ const PageContent: React.FC = () => {
 export function App() {
   const isAuthenticated = useStore((s) => s.isAuthenticated);
   const fetchAllFromBackend = useStore((s) => s.fetchAllFromBackend);
-  const currentPage = useStore((s) => s.currentPage);
-  const setCurrentPage = useStore((s) => s.setCurrentPage);
-  const location = useLocation();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Redirect logic based on login state
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      if (location.pathname === '/login') {
+        navigate('/', { replace: true });
+      }
+    } else {
+      if (location.pathname !== '/confidentialite') {
+        navigate('/login', { replace: true });
+      }
+    }
+  }, [isAuthenticated, location.pathname, navigate]);
 
   // ── Chargement des paramètres publics (Logo, Nom App) ────────
   React.useEffect(() => {
@@ -193,83 +204,31 @@ export function App() {
     return () => navigator.serviceWorker.removeEventListener('message', handleSWMessage);
   }, []);
 
-  // Sync route path to store currentPage (backwards compatibility)
-  React.useEffect(() => {
-    const path = location.pathname.substring(1); // remove leading slash
-    if (path && path !== 'login' && path !== 'confidentialite') {
-      let mappedPage = path;
-      if (path === 'scan/presence') mappedPage = 'scan_presence';
-      else if (path === 'scan/sortie') mappedPage = 'scan_sortie';
-      else if (path === 'scan/information') mappedPage = 'scan_information';
-      else if (path === 'carte-scolaire') mappedPage = 'carte_scolaire';
-      else if (path === 'academique') mappedPage = 'gestion_academique';
-      else if (path === 'parent/dashboard') mappedPage = 'parent_dashboard';
-      else if (path === 'parent/recus') mappedPage = 'parent_recus';
-      else if (path === 'parent/badges') mappedPage = 'parent_badges';
-      else if (path === 'parent/historique') mappedPage = 'parent_historique';
-      else if (path === 'parent/notes') mappedPage = 'parent_notes';
-      else if (path === 'gestion_personnel') mappedPage = 'gestion_personnel';
-      else if (path === 'import-export') mappedPage = 'import_export';
-      
-      if (currentPage !== mappedPage) {
-        setCurrentPage(mappedPage as any);
-      }
-    }
-  }, [location.pathname, currentPage, setCurrentPage]);
-
-  // Sync store currentPage to route path (when changed internally)
-  React.useEffect(() => {
-    if (isAuthenticated) {
-      let targetPath = `/${currentPage}`;
-      if (currentPage === 'scan_presence') targetPath = '/scan/presence';
-      else if (currentPage === 'scan_sortie') targetPath = '/scan/sortie';
-      else if (currentPage === 'scan_information') targetPath = '/scan/information';
-      else if (currentPage === 'carte_scolaire') targetPath = '/carte-scolaire';
-      else if (currentPage === 'gestion_academique') targetPath = '/academique';
-      else if (currentPage === 'parent_dashboard') targetPath = '/parent/dashboard';
-      else if (currentPage === 'parent_recus') targetPath = '/parent/recus';
-      else if (currentPage === 'parent_badges') targetPath = '/parent/badges';
-      else if (currentPage === 'parent_historique') targetPath = '/parent/historique';
-      else if (currentPage === 'parent_notes') targetPath = '/parent/notes';
-      else if (currentPage === 'gestion_personnel') targetPath = '/personnel';
-      else if (currentPage === 'import_export') targetPath = '/import-export';
-
-      if (location.pathname !== targetPath && location.pathname !== '/login' && location.pathname !== '/confidentialite') {
-        navigate(targetPath, { replace: true });
-      }
-    }
-  }, [currentPage, isAuthenticated, navigate, location.pathname]);
-
-  // Auto-redirect from / or /login to role default dashboard when logged in
-  React.useEffect(() => {
-    if (isAuthenticated && (location.pathname === '/' || location.pathname === '/login')) {
-      const user = useStore.getState().user;
-      const defaultPage = user?.role === 'parent' ? '/parent/dashboard' : '/dashboard';
-      navigate(defaultPage, { replace: true });
-    }
-  }, [isAuthenticated, location.pathname, navigate]);
-
-  if (!isAuthenticated) {
-    return (
-      <Routes>
-        <Route path="/confidentialite" element={<Confidentialite />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    );
-  }
-
   return (
     <Routes>
       <Route path="/confidentialite" element={<Confidentialite />} />
-      <Route path="*" element={
-        <Layout>
-          <Suspense fallback={<LoadingSpinner />}>
-            <PageContent />
-          </Suspense>
-          <AnnouncementPopup />
-        </Layout>
-      } />
+      <Route 
+        path="/login" 
+        element={
+          isAuthenticated ? <Navigate to="/" replace /> : <Login />
+        } 
+      />
+      <Route 
+        path="/" 
+        element={
+          isAuthenticated ? (
+            <Layout>
+              <Suspense fallback={<LoadingSpinner />}>
+                <PageContent />
+              </Suspense>
+              <AnnouncementPopup />
+            </Layout>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        } 
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
