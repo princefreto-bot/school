@@ -440,11 +440,6 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
           const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imgData.data;
 
-          // Contraste (+30) et Luminosité (+18) automatiques pour effet scanner optimal
-          const contrast = 30;
-          const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-          const brightness = 18;
-
           for (let i = 0; i < data.length; i += 4) {
             const r = data[i];
             const g = data[i + 1];
@@ -453,13 +448,8 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
             // 1. Grayscale
             const gray = 0.299 * r + 0.587 * g + 0.114 * b;
 
-            // 2. Luminosité et Contraste
-            let finalGray = gray + brightness;
-            finalGray = factor * (finalGray - 128) + 128;
-
-            // 3. Seuillage Binarisé
-            const threshold = 135;
-            const val = finalGray > threshold ? 255 : 0;
+            // 2. Seuillage Binarisé Standard (seuil 128)
+            const val = gray > 128 ? 255 : 0;
 
             data[i] = val;
             data[i + 1] = val;

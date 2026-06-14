@@ -293,7 +293,7 @@ export const Documents: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {documents.map((doc) => {
                       const badge = getDocTypeBadge(doc.document_type);
-                      const fileUrl = `${window.location.origin}${doc.file_url}`;
+                      const fileUrl = `${API_BASE_URL}${doc.file_url}`;
                       
                       return (
                         <div 
