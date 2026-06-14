@@ -9,7 +9,7 @@ import {
   Bell, ChevronRight, ChevronLeft, Target, Award, MessageSquare,
   ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone,
   BookOpen, Edit3, FileSpreadsheet, Sun, Moon, Clock,
-  PanelLeftClose, PanelLeftOpen, RefreshCw, Command, Shield
+  PanelLeftClose, PanelLeftOpen, RefreshCw, Command, Shield, UserCheck
 } from 'lucide-react';
 
 import { SupportModal } from './SupportModal';
