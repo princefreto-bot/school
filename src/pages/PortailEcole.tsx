@@ -4,14 +4,13 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, Lock, Mail, Store, ArrowRight, UserPlus } from 'lucide-react';
+import { GraduationCap, Lock, Mail, Store, ArrowRight } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
 export const PortailEcole: React.FC = () => {
   const login = useStore((s) => s.login);
   const navigate = useNavigate();
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   
   // Auth Form States
   const [username, setUsername] = useState('');
@@ -43,12 +42,7 @@ export const PortailEcole: React.FC = () => {
       })
       .catch(err => {
          console.error("Fetch error:", err);
-         setFetchError(err.message || String(err));
       });
-
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {

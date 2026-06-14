@@ -6,10 +6,10 @@ import { getFilteredNavItems, isAdminRole } from '../utils/rolePermissions';
 import {
   GraduationCap, LayoutDashboard, Users, CreditCard,
   BarChart3, FileText, Settings, LogOut, Menu, X,
-  Bell, ChevronRight, ChevronLeft, Target, Award, MessageSquare,
+  Bell, ChevronRight, Target, Award, MessageSquare,
   ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone,
-  BookOpen, Edit3, FileSpreadsheet, Sun, Moon, Clock,
-  PanelLeftClose, PanelLeftOpen, RefreshCw, Command, Shield, UserCheck
+  BookOpen, Edit3, FileSpreadsheet, Sun, Moon,
+  PanelLeftClose, PanelLeftOpen, RefreshCw, Shield
 } from 'lucide-react';
 
 import { SupportModal } from './SupportModal';
@@ -196,10 +196,8 @@ const SidebarContent: React.FC<{
   connectedParentsCount: number;
   logout: () => void;
   collapsed: boolean;
-  onToggleCollapse?: () => void;
   onOpenSupport: () => void;
-  onOpenPrivacy: () => void;
-}> = ({ currentPage, setCurrentPage, setSidebarOpen, navItems, schoolName, appName, schoolLogo, userName, userRole, connectedParentsCount, logout, collapsed, onToggleCollapse, onOpenSupport, onOpenPrivacy }) => (
+}> = ({ currentPage, setCurrentPage, setSidebarOpen, navItems, schoolName, appName, schoolLogo, userName, userRole, connectedParentsCount, logout, collapsed, onOpenSupport }) => (
   <div className="flex flex-col h-full bg-slate-950/95 backdrop-blur-3xl overflow-hidden rounded-[32px] shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
     
     {/* Brand header */}
@@ -309,7 +307,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const students = useStore((s) => s.students);
   const appName = useStore((s) => s.appName);
   const schoolLogo = useStore((s) => s.schoolLogo);
-  const parents = useStore((s) => s.parents);
   const connectedParentsCount = useStore((s) => s.connectedParentsCount);
   const setConnectedParentsCount = useStore((s) => s.setConnectedParentsCount);
   const unreadMessages = useStore((s) => s.unreadMessages);
@@ -392,7 +389,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     userName: user?.nom ?? '', userRole: user?.role ?? '',
     connectedParentsCount, logout, collapsed,
     onOpenSupport: () => setShowSupportModal(true),
-    onOpenPrivacy: () => setShowPrivacyModal(true),
   };
 
   const bottomNavItems = (user?.role === 'superviseur' || user?.role === 'surveillant') ? [

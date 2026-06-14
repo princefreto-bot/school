@@ -6,7 +6,7 @@ import {
   Building2, Users, AlertTriangle,
   Plus, Check, X, Clock, RefreshCw, ToggleLeft, ToggleRight,
   Globe, Phone, Mail, MapPin, Wallet, Star, Trash2, ExternalLink,
-  Award, Megaphone, Link as LinkIcon, Key, UserCheck
+  Megaphone, Link as LinkIcon, UserCheck
 } from 'lucide-react';
 import { School } from '../../types';
 import { API_BASE_URL } from '../../config';

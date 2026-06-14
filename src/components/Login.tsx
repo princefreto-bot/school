@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useStore } from '../store/useStore';
 import { parentApi } from '../services/parentApi';
 import { LinkStudent } from './LinkStudent';
-import { GraduationCap, Lock, User, Phone, CheckCircle, Store } from 'lucide-react';
+import { GraduationCap, Lock, User, Phone, Store } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useNavigate } from 'react-router-dom';
 
