@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Camera, Upload, RotateCw, Contrast, X, Check, FileText, AlertTriangle } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
+import jsPDF from 'jspdf';
 
 interface DocumentScannerProps {
   onCapture: (file: File, docType: string, title: string) => void;
@@ -148,7 +149,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
   const [docTitle, setDocTitle] = useState('Acte de naissance');
 
   // Filtres
-  const [filterType, setFilterType] = useState<'original' | 'grayscale' | 'magic' | 'binarized'>('original');
+  const [filterType, setFilterType] = useState<'original' | 'binarized'>('binarized');
   const [contrastValue, setContrastValue] = useState(50); // 0 à 100
   const [brightnessValue, setBrightnessValue] = useState(50); // 0 à 100
   const [rotation, setRotation] = useState(0); // 0, 90, 180, 270
@@ -159,10 +160,15 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
   const [cropTR, setCropTR] = useState({ x: 95, y: 5 }); // %
   const [cropBL, setCropBL] = useState({ x: 5, y: 95 }); // %
   const [cropBR, setCropBR] = useState({ x: 95, y: 95 }); // %
-  const [activeHandle, setActiveHandle] = useState<'tl' | 'tr' | 'bl' | 'br' | null>(null);
+  const [activeHandle, setActiveHandle] = useState<'tl' | 'tr' | 'bl' | 'br' | 'tm' | 'rm' | 'bm' | 'lm' | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const handlePointerDown = (handle: 'tl' | 'tr' | 'bl' | 'br') => (e: React.MouseEvent | React.TouchEvent) => {
+  const cornersRef = useRef({ tl: cropTL, tr: cropTR, bl: cropBL, br: cropBR });
+  useEffect(() => {
+    cornersRef.current = { tl: cropTL, tr: cropTR, bl: cropBL, br: cropBR };
+  }, [cropTL, cropTR, cropBL, cropBR]);
+
+  const handlePointerDown = (handle: 'tl' | 'tr' | 'bl' | 'br' | 'tm' | 'rm' | 'bm' | 'lm') => (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     setActiveHandle(handle);
   };
@@ -181,6 +187,8 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
       x = Math.max(0, Math.min(100, x));
       y = Math.max(0, Math.min(100, y));
 
+      const { tl, tr, bl, br } = cornersRef.current;
+
       if (activeHandle === 'tl') {
         setCropTL({ x, y });
       } else if (activeHandle === 'tr') {
@@ -189,6 +197,34 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
         setCropBL({ x, y });
       } else if (activeHandle === 'br') {
         setCropBR({ x, y });
+      } else if (activeHandle === 'tm') {
+        const midX = (tl.x + tr.x) / 2;
+        const midY = (tl.y + tr.y) / 2;
+        const dx = x - midX;
+        const dy = y - midY;
+        setCropTL({ x: Math.max(0, Math.min(100, tl.x + dx)), y: Math.max(0, Math.min(100, tl.y + dy)) });
+        setCropTR({ x: Math.max(0, Math.min(100, tr.x + dx)), y: Math.max(0, Math.min(100, tr.y + dy)) });
+      } else if (activeHandle === 'rm') {
+        const midX = (tr.x + br.x) / 2;
+        const midY = (tr.y + br.y) / 2;
+        const dx = x - midX;
+        const dy = y - midY;
+        setCropTR({ x: Math.max(0, Math.min(100, tr.x + dx)), y: Math.max(0, Math.min(100, tr.y + dy)) });
+        setCropBR({ x: Math.max(0, Math.min(100, br.x + dx)), y: Math.max(0, Math.min(100, br.y + dy)) });
+      } else if (activeHandle === 'bm') {
+        const midX = (bl.x + br.x) / 2;
+        const midY = (bl.y + br.y) / 2;
+        const dx = x - midX;
+        const dy = y - midY;
+        setCropBL({ x: Math.max(0, Math.min(100, bl.x + dx)), y: Math.max(0, Math.min(100, bl.y + dy)) });
+        setCropBR({ x: Math.max(0, Math.min(100, br.x + dx)), y: Math.max(0, Math.min(100, br.y + dy)) });
+      } else if (activeHandle === 'lm') {
+        const midX = (tl.x + bl.x) / 2;
+        const midY = (tl.y + bl.y) / 2;
+        const dx = x - midX;
+        const dy = y - midY;
+        setCropTL({ x: Math.max(0, Math.min(100, tl.x + dx)), y: Math.max(0, Math.min(100, tl.y + dy)) });
+        setCropBL({ x: Math.max(0, Math.min(100, bl.x + dx)), y: Math.max(0, Math.min(100, bl.y + dy)) });
       }
     };
 
@@ -483,11 +519,28 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
     });
   };
 
-  // 5. Soumettre le document scanné
+  // 5. Soumettre le document scanné sous forme de PDF
   const handleSubmit = async () => {
     try {
-      const blob = await applyFiltersAndGetBlob();
-      const file = new File([blob], `${docTitle.toLowerCase().replace(/\s+/g, '_')}.jpg`, { type: 'image/jpeg' });
+      await applyFiltersAndGetBlob();
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        throw new Error("Impossible d'accéder au canvas de numérisation.");
+      }
+
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.90);
+      pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height);
+      const pdfBlob = pdf.output('blob');
+
+      const fileName = `${docTitle.toLowerCase().replace(/\s+/g, '_')}.pdf`;
+      const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+      
       onCapture(file, docType, docTitle);
     } catch (err: any) {
       alert("Erreur lors du traitement du scan : " + err.message);
@@ -541,11 +594,11 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
           ) : capturedImage ? (
             <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden bg-slate-900 select-none">
               {scanStep === 'crop' ? (
-                <div ref={containerRef} className="relative inline-block max-w-full max-h-[65vh] md:max-h-[75vh] select-none">
+                <div ref={containerRef} className="relative inline-block max-w-full max-h-[72vh] md:max-h-[82vh] select-none">
                   <img 
                     src={capturedImage} 
                     alt="Cadrage" 
-                    className="max-w-full max-h-[65vh] md:max-h-[75vh] object-contain shadow-2xl rounded-lg pointer-events-none select-none" 
+                    className="max-w-full max-h-[72vh] md:max-h-[82vh] object-contain shadow-2xl rounded-lg pointer-events-none select-none" 
                   />
                   {/* Overlay SVG */}
                   <svg 
@@ -657,13 +710,54 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
                     <div className={`w-6 h-6 border-b-4 border-r-4 rounded-br-sm transition-colors ${activeHandle === 'br' ? 'border-amber-400' : 'border-indigo-500'} absolute bottom-1/2 right-1/2`} />
                     <div className={`w-3.5 h-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition-all ${activeHandle === 'br' ? 'bg-amber-400 border-white scale-110 shadow-lg' : 'bg-white border-indigo-500 shadow-md'} absolute bottom-1/2 right-1/2 z-30`} />
                   </div>
+
+                  {/* Side Handles - Styled as grab pills */}
+                  {/* Top Middle */}
+                  <div 
+                    onMouseDown={handlePointerDown('tm')}
+                    onTouchStart={handlePointerDown('tm')}
+                    style={{ left: `${(cropTL.x + cropTR.x) / 2}%`, top: `${(cropTL.y + cropTR.y) / 2}%` }}
+                    className={`absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-ns-resize z-20 pointer-events-auto transition-all duration-150 ${activeHandle === 'tm' ? 'scale-125' : ''}`}
+                  >
+                    <div className={`w-8 h-2.5 rounded-full border-2 transition-all ${activeHandle === 'tm' ? 'bg-amber-400 border-white scale-110 shadow-lg' : 'bg-white border-indigo-500 shadow-md'} absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30`} />
+                  </div>
+
+                  {/* Right Middle */}
+                  <div 
+                    onMouseDown={handlePointerDown('rm')}
+                    onTouchStart={handlePointerDown('rm')}
+                    style={{ left: `${(cropTR.x + cropBR.x) / 2}%`, top: `${(cropTR.y + cropBR.y) / 2}%` }}
+                    className={`absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-ew-resize z-20 pointer-events-auto transition-all duration-150 ${activeHandle === 'rm' ? 'scale-125' : ''}`}
+                  >
+                    <div className={`w-2.5 h-8 rounded-full border-2 transition-all ${activeHandle === 'rm' ? 'bg-amber-400 border-white scale-110 shadow-lg' : 'bg-white border-indigo-500 shadow-md'} absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30`} />
+                  </div>
+
+                  {/* Bottom Middle */}
+                  <div 
+                    onMouseDown={handlePointerDown('bm')}
+                    onTouchStart={handlePointerDown('bm')}
+                    style={{ left: `${(cropBL.x + cropBR.x) / 2}%`, top: `${(cropBL.y + cropBR.y) / 2}%` }}
+                    className={`absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-ns-resize z-20 pointer-events-auto transition-all duration-150 ${activeHandle === 'bm' ? 'scale-125' : ''}`}
+                  >
+                    <div className={`w-8 h-2.5 rounded-full border-2 transition-all ${activeHandle === 'bm' ? 'bg-amber-400 border-white scale-110 shadow-lg' : 'bg-white border-indigo-500 shadow-md'} absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30`} />
+                  </div>
+
+                  {/* Left Middle */}
+                  <div 
+                    onMouseDown={handlePointerDown('lm')}
+                    onTouchStart={handlePointerDown('lm')}
+                    style={{ left: `${(cropTL.x + cropBL.x) / 2}%`, top: `${(cropTL.y + cropBL.y) / 2}%` }}
+                    className={`absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-ew-resize z-20 pointer-events-auto transition-all duration-150 ${activeHandle === 'lm' ? 'scale-125' : ''}`}
+                  >
+                    <div className={`w-2.5 h-8 rounded-full border-2 transition-all ${activeHandle === 'lm' ? 'bg-amber-400 border-white scale-110 shadow-lg' : 'bg-white border-indigo-500 shadow-md'} absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30`} />
+                  </div>
                 </div>
               ) : (
                 <img 
                   src={capturedImage} 
                   alt="Capture Preview" 
                   style={{ transform: `rotate(${rotation}deg)` }}
-                  className="max-w-full max-h-[55vh] md:max-h-[65vh] object-contain shadow-2xl rounded-lg transition-transform duration-300 pointer-events-none select-none" 
+                  className="max-w-full max-h-[62vh] md:max-h-[72vh] object-contain shadow-2xl rounded-lg transition-transform duration-300 pointer-events-none select-none" 
                 />
               )}
               <canvas ref={canvasRef} className="hidden" />
@@ -795,10 +889,8 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
                 {/* Sélecteurs de filtre */}
                 <div className="grid grid-cols-2 gap-2">
                   {([
-                    { id: 'original', label: 'Original' },
-                    { id: 'grayscale', label: 'Noir & Blanc' },
-                    { id: 'magic', label: 'Magique Color' },
-                    { id: 'binarized', label: 'Binarisé' },
+                    { id: 'binarized', label: 'Noir & Blanc' },
+                    { id: 'original', label: 'Couleur' },
                   ] as const).map((filter) => (
                     <button
                       key={filter.id}

@@ -124,6 +124,11 @@ body {
   overflow-x: hidden;
 }
 
+/* Global transitions for interactive elements to make them feel highly fluid */
+button, a, select, input, textarea, .card, .pro-card, .kpi-card, .nav-item {
+  transition: all var(--t-normal);
+}
+
 /* ============================================================
    SCROLLBAR — Minimal & Premium
    ============================================================ */
@@ -387,8 +392,8 @@ body {
   cursor: pointer;
 }
 .card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-1.5px);
+  box-shadow: var(--shadow-md);
 }
 
 .card-header {
@@ -428,9 +433,9 @@ body {
 }
 
 .kpi-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
-  border-color: rgba(244,180,0,0.2);
+  transform: translateY(-1.5px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(244,180,0,0.15);
 }
 
 .kpi-icon {
@@ -497,9 +502,9 @@ body {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
 }
 .pro-card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-4px) scale(1.005);
-  border-color: rgba(244,180,0,0.3);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: rgba(244,180,0,0.2);
 }
 
 /* ============================================================
@@ -842,7 +847,7 @@ select {
 }
 
 @keyframes modal-in {
-  from { opacity: 0; transform: scale(0.95) translateY(12px); }
+  from { opacity: 0; transform: scale(0.98) translateY(6px); }
   to   { opacity: 1; transform: scale(1)    translateY(0); }
 }
 
@@ -871,7 +876,7 @@ select {
 }
 
 @keyframes page-enter-anim {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -884,7 +889,7 @@ select {
   animation: slide-up-anim var(--t-slow);
 }
 @keyframes slide-up-anim {
-  from { opacity: 0; transform: translateY(24px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
