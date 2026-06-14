@@ -424,7 +424,16 @@ async function registerSchoolRequest(req, res) {
 
         // 5. Envoyer l'email
         const { sendVerificationEmail } = require('../utils/mailer');
-        await sendVerificationEmail(email.trim(), name.trim(), code);
+        try {
+            await sendVerificationEmail(email.trim(), name.trim(), code);
+        } catch (mailErr) {
+            console.warn(`⚠️ [Mailer Warning] Échec de l'envoi de l'e-mail de validation :`, mailErr.message);
+            console.log(`🔑 [CODE DE VALIDATION] E-mail: ${email.trim()} | Code: ${code}`);
+            // En mode développement, on ne bloque pas la demande d'inscription si le serveur SMTP n'est pas configuré.
+            if (process.env.NODE_ENV === 'production') {
+                throw mailErr;
+            }
+        }
 
         return res.status(200).json({
             success: true,

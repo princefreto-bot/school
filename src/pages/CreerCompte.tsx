@@ -298,7 +298,7 @@ export const CreerCompte: React.FC = () => {
             disabled={loading} 
             className="w-full py-4 bg-amber-500 text-slate-900 font-black text-xs md:text-sm uppercase tracking-wider rounded-none shadow-xl shadow-amber-500/10 hover:bg-amber-400 active:scale-[0.98] transition flex items-center justify-center gap-2 mt-4 cursor-pointer"
           >
-            {loading ? 'Traitement en cours...' : 'Inscrire mon établissement'}
+            {loading ? 'Traitement en cours...' : "Envoyer la demande d'admission"}
           </button>
         </form>
       </div>
