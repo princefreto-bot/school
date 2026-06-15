@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../config');
+const { supabase } = require('../utils/supabase');
 
 // ── Middleware d'authentification de base ──────────────────────
 function authenticateToken(req, res, next) {
@@ -11,8 +12,48 @@ function authenticateToken(req, res, next) {
     const token = authHeader.split(' ')[1];
     try {
         const payload = jwt.verify(token, JWT_SECRET);
-        req.user = payload; // Contient id, nom, role, schoolSlug (ou null pour superadmin)
-        next();
+        req.user = payload; // Contient id, nom, role, schoolSlug (ou null pour superadmin/creator)
+
+        if (payload.role === 'superadmin' || payload.role === 'creator' || !payload.schoolSlug) {
+            return next();
+        }
+
+        // Vérification de la formule d'abonnement de l'établissement
+        (async () => {
+            try {
+                const { data: school, error: sErr } = await supabase
+                    .from('schools')
+                    .select('student_limit, name')
+                    .eq('slug', payload.schoolSlug)
+                    .single();
+
+                if (sErr || !school) {
+                    return next();
+                }
+
+                const limit = school.student_limit || 500;
+
+                const { count: studentCount, error: cErr } = await supabase
+                    .from(`students_${payload.schoolSlug}`)
+                    .select('id', { count: 'exact', head: true });
+
+                if (cErr) {
+                    return next();
+                }
+
+                if (studentCount > limit) {
+                    return res.status(402).json({
+                        error: 'subscription_limit_exceeded',
+                        message: `L'accès à l'écosystème de l'établissement ${school.name} est suspendu car l'effectif actuel d'élèves enregistrés (${studentCount}) dépasse la limite de votre formule d'abonnement (${limit} élèves). Veuillez mettre à niveau votre abonnement ou contacter notre support.`
+                    });
+                }
+
+                next();
+            } catch (err) {
+                console.error('Error in authenticateToken limit check:', err);
+                next();
+            }
+        })();
     } catch (err) {
         return res.status(401).json({ error: 'Session expirée ou invalide.' });
     }

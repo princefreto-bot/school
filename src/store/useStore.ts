@@ -181,6 +181,8 @@ export interface AppState {
   setLastReportMonth: (month: string) => void;
   privacyMode: boolean;
   setPrivacyMode: (v: boolean) => void;
+  subscriptionBlockedMessage: string | null;
+  setSubscriptionBlockedMessage: (msg: string | null) => void;
 }
 
 // Authentification gérée par Supabase
@@ -299,6 +301,8 @@ export const useStore = create<AppState>()(
       setLastReportMonth: (lastReportMonth) => set({ lastReportMonth }),
       privacyMode: false,
       setPrivacyMode: (privacyMode) => set({ privacyMode }),
+      subscriptionBlockedMessage: null,
+      setSubscriptionBlockedMessage: (msg) => set({ subscriptionBlockedMessage: msg }),
 
       // ── Auth ──────────────────────────────────────────────
       user: null,
@@ -442,6 +446,7 @@ export const useStore = create<AppState>()(
           user: null, 
           isAuthenticated: false, 
           currentPage: 'dashboard',
+          subscriptionBlockedMessage: null,
           students: [],
           parents: [],
           presences: [],
@@ -914,7 +919,15 @@ export const useStore = create<AppState>()(
             const res = await fetch(`${BACKEND_URL}/api/parent/data`, {
               headers: getAuthHeaders()
             });
-            if (!res.ok) return;
+            if (!res.ok) {
+              if (res.status === 402) {
+                const errData = await res.json().catch(() => ({}));
+                if (errData.error === 'subscription_limit_exceeded') {
+                  set({ subscriptionBlockedMessage: errData.message });
+                }
+              }
+              return;
+            }
             const data = await res.json();
             
             // 🎨 Paramètres de l'école (Match logic admin)

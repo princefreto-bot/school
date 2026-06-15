@@ -124,10 +124,21 @@ export async function fetchFromBackend() {
             headers: getAuthHeaders(),
         });
 
+        const { useStore } = await import('../store/useStore');
+
         if (!response.ok) {
+            if (response.status === 402) {
+                const errData = await response.json().catch(() => ({}));
+                if (errData.error === 'subscription_limit_exceeded') {
+                    useStore.getState().setSubscriptionBlockedMessage(errData.message);
+                }
+            }
             console.warn('⚠️ Fetch from backend failed:', response.status);
             return null;
         }
+
+        // Si la requête réussit, on efface le message de blocage de l'abonnement
+        useStore.getState().setSubscriptionBlockedMessage(null);
 
         const data = await response.json();
         return data;
