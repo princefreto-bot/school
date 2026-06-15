@@ -54,7 +54,7 @@ export const Footer: React.FC = () => {
         resources: {
           title: "Ressources",
           items: [
-            { label: "Centre d'aide", path: "https://support.dghubschool.com/fr", external: true },
+            { label: "Centre d'aide", path: "/centre-aide" },
             { label: "Tarifs", path: "/pricing" }
           ]
         },
@@ -95,7 +95,7 @@ export const Footer: React.FC = () => {
         resources: {
           title: "Resources",
           items: [
-            { label: "Help Center", path: "https://support.dghubschool.com/en", external: true },
+            { label: "Help Center", path: "/centre-aide" },
             { label: "Pricing", path: "/pricing" }
           ]
         },

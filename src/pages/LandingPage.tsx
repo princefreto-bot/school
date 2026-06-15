@@ -415,46 +415,7 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            
-            {/* News 1 */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
-              <div className="space-y-4">
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full inline-block">
-                  Paiements Mobiles
-                </span>
-                <h4 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase leading-snug group-hover:text-amber-500 transition-colors">
-                  Intégration de paiements mobiles
-                </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                  Nous facilitons le règlement de la scolarité. Les parents peuvent désormais payer via leur mobile money local et recevoir instantanément leur reçu officiel.
-                </p>
-              </div>
-              <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                <span>Juin 2026</span>
-                <span className="text-amber-505 flex items-center gap-1">Lire l'article <ArrowRight className="w-3 h-3" /></span>
-              </div>
-            </div>
-
-            {/* News 2 */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
-              <div className="space-y-4">
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full inline-block">
-                  Bibliothèque Numérique
-                </span>
-                <h4 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase leading-snug group-hover:text-amber-500 transition-colors">
-                  Hébergez vos supports de cours
-                </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                  La bibliothèque numérique s'enrichit ! Les enseignants peuvent distribuer des supports et des exercices corrigés aux élèves.
-                </p>
-              </div>
-              <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                <span>Mai 2026</span>
-                <span className="text-amber-505 flex items-center gap-1">Lire l'article <ArrowRight className="w-3 h-3" /></span>
-              </div>
-            </div>
-
+          <div className="grid grid-cols-1 gap-8 max-w-3xl mx-auto">
             {/* News 3 */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
               <div className="space-y-4">
@@ -470,10 +431,14 @@ export const LandingPage: React.FC = () => {
               </div>
               <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                 <span>Avril 2026</span>
-                <span className="text-amber-505 flex items-center gap-1">Lire l'article <ArrowRight className="w-3 h-3" /></span>
+                <span 
+                  onClick={() => navigate('/newsroom')}
+                  className="text-amber-505 flex items-center gap-1 cursor-pointer hover:underline"
+                >
+                  Voir toutes les actualités <ArrowRight className="w-3 h-3" />
+                </span>
               </div>
             </div>
-
           </div>
         </div>
       </section>

@@ -51,6 +51,8 @@ const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ defaul
 const Pricing = lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pricing })));
 const APropos = lazy(() => import('./pages/APropos').then(m => ({ default: m.APropos })));
 const Features = lazy(() => import('./pages/Features').then(m => ({ default: m.Features })));
+const Newsroom = lazy(() => import('./pages/Newsroom').then(m => ({ default: m.Newsroom })));
+const HelpCenter = lazy(() => import('./pages/HelpCenter').then(m => ({ default: m.HelpCenter })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-12">
@@ -169,7 +171,7 @@ export function App() {
 
   // Redirect logic based on login state
   React.useEffect(() => {
-    const publicPaths = ['/', '/login', '/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features'];
+    const publicPaths = ['/', '/login', '/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features', '/newsroom', '/centre-aide'];
     if (isAuthenticated) {
       if (location.pathname === '/login' || location.pathname === '/portail-ecole' || location.pathname === '/creer-compte' || location.pathname === '/confirmer-email' || location.pathname === '/pricing' || location.pathname === '/a-propos' || location.pathname === '/features') {
         navigate('/', { replace: true });
@@ -313,6 +315,8 @@ export function App() {
       <Route path="/pricing" element={<Suspense fallback={<LoadingSpinner />}><Pricing /></Suspense>} />
       <Route path="/a-propos" element={<Suspense fallback={<LoadingSpinner />}><APropos /></Suspense>} />
       <Route path="/features" element={<Suspense fallback={<LoadingSpinner />}><Features /></Suspense>} />
+      <Route path="/newsroom" element={<Suspense fallback={<LoadingSpinner />}><Newsroom /></Suspense>} />
+      <Route path="/centre-aide" element={<Suspense fallback={<LoadingSpinner />}><HelpCenter /></Suspense>} />
       <Route 
         path="/login" 
         element={
