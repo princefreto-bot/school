@@ -1,155 +1,556 @@
 // ============================================================
-// PAGE COURS & EXERCICES PARENTS/ÉLÈVES — Modern & Interactive
+// PAGE COURS & EXERCICES PARENTS/ÉLÈVES — Portail Intégré & Interactif
 // ============================================================
 import React, { useState } from 'react';
-import { BookOpen, Award, CheckCircle, XCircle, ExternalLink, Play, FileText, ChevronRight } from 'lucide-react';
+import { 
+  BookOpen, Award, CheckCircle, XCircle, Play, FileText, 
+  ChevronRight, BookOpenCheck, ArrowLeft, ArrowRight, 
+  Book, Download, Eye, Sparkles, Trophy, CheckCircle2,
+  ChevronLeft, Search, ZoomIn, ZoomOut, AlignLeft
+} from 'lucide-react';
 
-interface QuizQuestion {
+interface BookItem {
+  id: string;
+  title: string;
+  author: string;
+  category: string;
+  description: string;
+  coverGradient: string;
+  pagesCount: number;
+  chapters: { title: string; content: string }[];
+}
+
+interface Question {
   id: number;
-  question: string;
+  text: string;
   options: string[];
-  correctAnswer: number;
+  correct: number;
+  explanation: string;
+}
+
+interface SubjectWorkbook {
+  id: string;
+  title: string;
+  subject: string;
+  gradeLevel: string;
+  questionsCount: number;
+  difficulty: 'Facile' | 'Moyen' | 'Difficile';
+  color: string;
+  questions: Question[];
 }
 
 export const ParentCourses: React.FC = () => {
-  // Exercice de révision interactif local (Démonstration H5P / Quiz local)
-  const mathQuiz: QuizQuestion[] = [
-    {
-      id: 1,
-      question: "Calculer : 7 x 8 = ?",
-      options: ["48", "56", "64", "54"],
-      correctAnswer: 1
-    },
-    {
-      id: 2,
-      question: "Quelle est la capitale du Togo ?",
-      options: ["Kpalimé", "Kara", "Lomé", "Atakpamé"],
-      correctAnswer: 2
-    },
-    {
-      id: 3,
-      question: "Trouver la valeur de x : 2x + 5 = 15",
-      options: ["x = 5", "x = 10", "x = 7.5", "x = 2"],
-      correctAnswer: 0
-    }
-  ];
+  // Navigation par onglets local
+  const [activeTab, setActiveTab] = useState<'library' | 'exercises' | 'resources'>('library');
 
+  // États pour la bibliothèque & le lecteur de livres
+  const [selectedBook, setSelectedBook] = useState<BookItem | null>(null);
+  const [currentChapterIdx, setCurrentChapterIdx] = useState(0);
+  const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg'>('base');
+
+  // États pour les exercices
+  const [activeWorkbook, setActiveWorkbook] = useState<SubjectWorkbook | null>(null);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
   const [score, setScore] = useState(0);
-  const [quizFinished, setQuizFinished] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
 
-  // Alternatives gratuites recommandées
-  const alternatives = [
+  // Statistiques simulées d'apprentissage de l'élève
+  const [stats, setStats] = useState({
+    booksRead: 1,
+    exercisesCompleted: 2,
+    averageScore: 85,
+    streakDays: 4
+  });
+
+  // ── Bibliothèque d'Ebooks Intégrés ──
+  const books: BookItem[] = [
     {
-      name: "Sésamath (Maths)",
-      category: "Mathématiques",
-      desc: "Manuels et cahiers d'exercices libres de droits, très populaires dans l'espace francophone. Idéal pour télécharger des fiches d'exercices complètes du CM1 au Lycée.",
-      url: "https://www.sesamath.net/",
-      type: "Fiches & Manuels"
+      id: "l-enfant-noir",
+      title: "L'Enfant Noir",
+      author: "Camara Laye",
+      category: "Littérature Africaine",
+      description: "Roman autobiographique décrivant l'enfance de l'auteur en Haute-Guinée, son éducation traditionnelle et son départ pour la France.",
+      coverGradient: "from-amber-600 via-orange-600 to-amber-800",
+      pagesCount: 180,
+      chapters: [
+        {
+          title: "Chapitre 1 : Mon enfance et la forge",
+          content: "J'étais enfant et je jouais près de la forge de mon père. Mon père était un forgeron renommé à Kouroussa. Dans l'atelier de forge, le feu crépitait sous le soufflet magique. Je regardais les étincelles s'élever comme des étoiles filantes. C'est ici que j'ai appris le respect du métal et des traditions ancestrales. Un petit serpent noir, totem protecteur de notre famille, venait souvent lui rendre visite, glissant le long des outils sous les yeux émerveillés des apprentis."
+        },
+        {
+          title: "Chapitre 2 : La vie à la campagne",
+          content: "Chaque année, pendant la saison des récoltes, je me rendais dans la plaine de Tindican pour rendre visite à ma grand-mère. Les rizières à perte de vue vibraient sous la chaleur tropicale. Là-bas, mes oncles m'apprenaient à couper le riz mûr, à écouter le chant des oiseaux et à comprendre les cycles de la nature. C'était un monde de liberté et d'entraide communautaire, loin des exigences de l'école coloniale."
+        },
+        {
+          title: "Chapitre 3 : Le départ pour Conakry",
+          content: "Après avoir obtenu mon certificat d'études à Kouroussa, le moment était venu de poursuivre ma scolarité au collège technique de Conakry. Les adieux furent déchirants. Ma mère pleurait en versant de l'eau sacrée derrière mes pas pour me souhaiter la bienvenue et me protéger des mauvais esprits. Le train siffla, m'emportant vers un avenir inconnu au bord de l'océan."
+        }
+      ]
     },
     {
-      name: "Khan Academy (Maths & Sciences)",
-      category: "Multi-disciplinaire",
-      desc: "Vidéos de leçons courtes et parcours d'exercices interactifs gratuits avec suivi. Entièrement disponible en français.",
-      url: "https://fr.khanacademy.org/",
-      type: "Vidéos & Exercices"
+      id: "le-petit-prince",
+      title: "Le Petit Prince",
+      author: "Antoine de Saint-Exupéry",
+      category: "Conte Philosophique",
+      description: "L'histoire touchante d'un aviateur égaré dans le désert du Sahara qui fait la rencontre d'un petit garçon venu d'une autre planète.",
+      coverGradient: "from-indigo-600 via-blue-700 to-indigo-950",
+      pagesCount: 96,
+      chapters: [
+        {
+          title: "Chapitre 1 : Le dessin du boa",
+          content: "Lorsque j'avais six ans j'ai vu, une fois, une magnifique image, dans un livre sur la Forêt Vierge qui s'appelait 'Histoires Vécues'. Ça représentait un serpent boa qui avalait un fauve. J'ai dessiné mon dessin numéro 1. Il représentait un chapeau. Mais pour les grandes personnes, c'était un chapeau. Alors j'ai dessiné l'intérieur du boa pour qu'elles puissent comprendre. Elles ont toujours besoin d'explications."
+        },
+        {
+          title: "Chapitre 2 : La rencontre dans le désert",
+          content: "J'ai ainsi vécu seul, sans personne avec qui parler véritablement, jusqu'à une panne dans le désert du Sahara, il y a six ans. Quelque chose s'était cassé dans mon moteur. Et le premier matin je fus bien surpris quand une drôle de petite voix me réveilla. Elle disait : 'S'il vous plaît... dessine-moi un mouton !' J'ai sauté sur mes pieds comme si j'avais été frappé par la foudre."
+        },
+        {
+          title: "Chapitre 3 : La fleur et le renard",
+          content: "Le petit prince apprit à connaître une rose coquette sur son astéroïde, mais c'est sur la Terre qu'il rencontra le renard. 'Viens jouer avec moi', lui proposa le petit prince. 'Je ne puis pas jouer avec toi', dit le renard. 'Je ne suis pas apprivoisé. Créer des liens, c'est ce qui rend unique.' C'est alors que le petit prince comprit que sa fleur était unique au monde."
+        }
+      ]
     },
     {
-      name: "Bibliothèque Numérique Romande",
-      category: "Littérature & Français",
-      desc: "Livres classiques libres de droits au format PDF/EPUB. Parfait pour proposer des lectures gratuites aux élèves (romans, poésies, contes).",
-      url: "https://ebooks-bnr.com/",
-      type: "Livres Gratuits"
-    },
-    {
-      name: "Module H5P (Quizz & Contenu)",
-      category: "Intégration Locale",
-      desc: "Outil open-source permettant de concevoir des vidéos interactives, des textes à trous et des jeux de mémoire. Intégrable directement dans DGhubSchool.",
-      url: "https://h5p.org/",
-      type: "Quiz Interactifs"
+      id: "sesamath-6eme",
+      title: "Manuel de Mathématiques 6ème",
+      author: "Collectif Sésamath",
+      category: "Manuel Scolaire",
+      description: "Manuel officiel de mathématiques libre de droits. Cours complets et exercices d'application directe sur les fractions, la géométrie et le calcul mental.",
+      coverGradient: "from-emerald-600 via-teal-600 to-emerald-800",
+      pagesCount: 220,
+      chapters: [
+        {
+          title: "Chapitre 1 : Les fractions décimales",
+          content: "Une fraction décimale est une fraction dont le dénominateur est 10, 100, 1000... Par exemple, 3/10 s'écrit aussi sous la forme décimale 0,3. Pour ajouter deux fractions de même dénominateur, on ajoute les numérateurs et on garde le dénominateur commun : 3/10 + 4/10 = 7/10. Pratiquez le calcul mental au quotidien pour fluidifier ces opérations fondamentales."
+        },
+        {
+          title: "Chapitre 2 : Les bases de la géométrie plane",
+          content: "Une droite est illimitée. Un segment est une portion de droite délimitée par deux points appelés extrémités. Deux droites sont perpendiculaires lorsqu'elles se coupent en formant un angle droit (90 degrés). Deux droites sont parallèles lorsqu'elles n'ont aucun point commun, même si on les prolonge à l'infini."
+        },
+        {
+          title: "Chapitre 3 : Proportionnalité et pourcentages",
+          content: "Deux grandeurs sont proportionnelles si l'on peut passer de l'une à l'autre en multipliant par un nombre constant appelé coefficient de proportionnalité. Un pourcentage est un rapport dont le dénominateur est 100. Par exemple, appliquer un taux de 20% sur un montant de 1500 F CFA revient à calculer : 1500 x 20 / 100 = 300 F CFA."
+        }
+      ]
     }
   ];
 
-  const handleCheckAnswer = () => {
-    if (selectedOption === null) return;
-    setIsAnswerChecked(true);
-    if (selectedOption === mathQuiz[currentQuestionIdx].correctAnswer) {
-      setScore(s => s + 1);
+  // ── Cahiers d'Exercices Interactifs ──
+  const workbooks: SubjectWorkbook[] = [
+    {
+      id: "maths-6e",
+      title: "Équations & Calcul Mental",
+      subject: "Mathématiques",
+      gradeLevel: "Classe de 6ème",
+      questionsCount: 5,
+      difficulty: "Moyen",
+      color: "from-blue-500 to-indigo-600",
+      questions: [
+        {
+          id: 1,
+          text: "Trouver la valeur de x dans l'équation : x + 12 = 30",
+          options: ["x = 18", "x = 42", "x = 15", "x = 22"],
+          correct: 0,
+          explanation: "Pour isoler x, on soustrait 12 des deux côtés : x = 30 - 12, donc x = 18."
+        },
+        {
+          id: 2,
+          text: "Calculer rapidement : 15% de 4000 F CFA",
+          options: ["400 F CFA", "600 F CFA", "800 F CFA", "150 F CFA"],
+          correct: 1,
+          explanation: "Calculer 15% revient à faire (4000 x 15) / 100 = 40 x 15 = 600 F CFA."
+        },
+        {
+          id: 3,
+          text: "Quelle est la formule de l'aire d'un triangle ?",
+          options: ["Base x Hauteur", "(Base x Hauteur) / 2", "Côté x Côté", "Longueur x Largeur"],
+          correct: 1,
+          explanation: "L'aire d'un triangle s'obtient en multipliant la base par la hauteur, puis en divisant le résultat par 2."
+        },
+        {
+          id: 4,
+          text: "Résoudre : 3x - 5 = 10",
+          options: ["x = 3", "x = 5", "x = 15", "x = 4"],
+          correct: 1,
+          explanation: "On ajoute 5 : 3x = 15. Puis on divise par 3 : x = 15 / 3 = 5."
+        },
+        {
+          id: 5,
+          text: "Combien font 7 x 8 ?",
+          options: ["54", "56", "64", "48"],
+          correct: 1,
+          explanation: "Selon les tables de multiplication standards, 7 multiplié par 8 fait 56."
+        }
+      ]
+    },
+    {
+      id: "francais-5e",
+      title: "Grammaire & Conjugaison",
+      subject: "Français",
+      gradeLevel: "Classe de 5ème",
+      questionsCount: 4,
+      difficulty: "Facile",
+      color: "from-amber-500 to-orange-600",
+      questions: [
+        {
+          id: 1,
+          text: "Quel est le participe passé correct du verbe 'Prendre' ?",
+          options: ["Prendu", "Pris", "Prené", "Print"],
+          correct: 1,
+          explanation: "Le verbe 'prendre' fait son participe passé en 'pris' (ex: 'J'ai pris mes cahiers')."
+        },
+        {
+          id: 2,
+          text: "Trouver la phrase contenant un complément d'objet direct (COD) :",
+          options: ["Il dort paisiblement.", "L'élève écoute le professeur.", "Elle parle à sa mère.", "Nous partons en vacances."],
+          correct: 1,
+          explanation: "'Le professeur' répond à la question 'qui' après le verbe : L'élève écoute qui ? -> Le professeur (COD)."
+        },
+        {
+          id: 3,
+          text: "Au subjonctif présent, que donne le verbe 'Être' à la première personne du pluriel ?",
+          options: ["Que nous soyons", "Que nous soyions", "Que nous sommes", "Que nous étions"],
+          correct: 0,
+          explanation: "La conjugaison correcte au subjonctif présent est 'que nous soyons' (avec un seul 'y')."
+        },
+        {
+          id: 4,
+          text: "Quelle est la nature du mot 'rapidement' ?",
+          options: ["Adjectif", "Adverbe", "Nom commun", "Verbe"],
+          correct: 1,
+          explanation: "Les mots se terminant par '-ment' formés sur un adjectif sont généralement des adverbes de manière."
+        }
+      ]
+    },
+    {
+      id: "sciences-phy",
+      title: "Le Système Solaire & Univers",
+      subject: "Sciences",
+      gradeLevel: "Classe de 4ème",
+      questionsCount: 4,
+      difficulty: "Difficile",
+      color: "from-emerald-500 to-teal-600",
+      questions: [
+        {
+          id: 1,
+          text: "Quelle planète est surnommée la planète rouge ?",
+          options: ["Vénus", "Jupiter", "Mars", "Saturne"],
+          correct: 2,
+          explanation: "Mars est appelée la planète rouge en raison de l'abondance d'oxyde de fer (rouille) à sa surface."
+        },
+        {
+          id: 2,
+          text: "Quelle est la vitesse approximative de la lumière ?",
+          options: ["150 000 km/s", "300 000 km/s", "1 000 000 km/s", "30 000 km/h"],
+          correct: 1,
+          explanation: "La vitesse de la lumière dans le vide est d'environ 300 000 kilomètres par seconde."
+        },
+        {
+          id: 3,
+          text: "Quel gaz compose majoritairement l'atmosphère terrestre ?",
+          options: ["Oxygène (O2)", "Dioxyde de carbone (CO2)", "Azote (N2)", "Hydrogène (H2)"],
+          correct: 2,
+          explanation: "L'azote (diazote) constitue environ 78% de notre atmosphère, contre 21% pour l'oxygène."
+        },
+        {
+          id: 4,
+          text: "Quelle force maintient les planètes en orbite autour du Soleil ?",
+          options: ["La force magnétique", "La force gravitationnelle", "La force centrifuge", "La friction atmosphérique"],
+          correct: 1,
+          explanation: "C'est la force de gravitation (découverte par Isaac Newton) qui régit l'attraction mutuelle des corps célestes."
+        }
+      ]
     }
+  ];
+
+  // Alternatives pour approfondir
+  const externalResources = [
+    {
+      name: "Sésamath France",
+      desc: "Portail officiel de ressources libres de droit. Manuels scolaires complets téléchargeables en PDF.",
+      url: "https://www.sesamath.net/"
+    },
+    {
+      name: "Khan Academy",
+      desc: "Parcours de vidéos et de quiz interactifs sur les sciences, le codage et les mathématiques.",
+      url: "https://fr.khanacademy.org/"
+    },
+    {
+      name: "Bibliothèque Romande (BNR)",
+      desc: "Des milliers de grands classiques de la littérature française en téléchargement gratuit.",
+      url: "https://ebooks-bnr.com/"
+    }
+  ];
+
+  // Gestionnaires pour le lecteur
+  const handleOpenBook = (book: BookItem) => {
+    setSelectedBook(book);
+    setCurrentChapterIdx(0);
   };
 
-  const handleNextQuestion = () => {
-    setSelectedOption(null);
-    setIsAnswerChecked(false);
-    if (currentQuestionIdx < mathQuiz.length - 1) {
-      setCurrentQuestionIdx(idx => idx + 1);
-    } else {
-      setQuizFinished(true);
-    }
+  const handleCloseBook = () => {
+    setSelectedBook(null);
   };
 
-  const handleRestartQuiz = () => {
+  // Gestionnaires pour les exercices
+  const handleStartWorkbook = (wb: SubjectWorkbook) => {
+    setActiveWorkbook(wb);
     setCurrentQuestionIdx(0);
     setSelectedOption(null);
     setIsAnswerChecked(false);
     setScore(0);
-    setQuizFinished(false);
+    setIsFinished(false);
+  };
+
+  const handleAnswerSelect = (idx: number) => {
+    if (isAnswerChecked) return;
+    setSelectedOption(idx);
+  };
+
+  const handleCheckAnswer = () => {
+    if (selectedOption === null || !activeWorkbook) return;
+    setIsAnswerChecked(true);
+    if (selectedOption === activeWorkbook.questions[currentQuestionIdx].correct) {
+      setScore(prev => prev + 1);
+    }
+  };
+
+  const handleNextQuestion = () => {
+    if (!activeWorkbook) return;
+    setSelectedOption(null);
+    setIsAnswerChecked(false);
+    
+    if (currentQuestionIdx < activeWorkbook.questions.length - 1) {
+      setCurrentQuestionIdx(prev => prev + 1);
+    } else {
+      setIsFinished(true);
+      // Mettre à jour les statistiques
+      const successRate = Math.round(((score + (selectedOption === activeWorkbook.questions[currentQuestionIdx].correct ? 1 : 0)) / activeWorkbook.questions.length) * 100);
+      setStats(prev => ({
+        ...prev,
+        exercisesCompleted: prev.exercisesCompleted + 1,
+        averageScore: Math.round((prev.averageScore + successRate) / 2)
+      }));
+    }
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-fadeIn pb-24">
-      {/* En-tête Principal */}
-      <div className="rounded-[24px] p-6 md:p-8 bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-950 text-white relative overflow-hidden shadow-[0_8px_30px_rgba(49,46,129,0.2)]">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4"></div>
+    <div className="max-w-6xl mx-auto space-y-8 animate-fadeIn pb-24 px-2 sm:px-4">
+      
+      {/* ── En-tête Statistique Premium ── */}
+      <div className="rounded-[32px] p-6 md:p-8 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white relative overflow-hidden shadow-xl border border-slate-800">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4 pointer-events-none"></div>
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-white/10 backdrop-blur-xl rounded-[20px] flex items-center justify-center shadow-inner">
-              <BookOpen className="w-7 h-7 text-white" />
+            <div className="w-14 h-14 bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-inner">
+              <BookOpenCheck className="w-8 h-8 text-amber-500" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold tracking-tight text-white drop-shadow-md">Espace Révisions & Exercices</h2>
-              <p className="text-indigo-200 text-sm mt-1 font-medium max-w-md">
-                Cours interactifs et ressources scolaires gratuites pour s'entraîner à la maison.
+              <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white">Espace Révisions & Devoirs</h2>
+              <p className="text-indigo-200 text-xs mt-1 font-medium max-w-sm">
+                Des manuels scolaires officiels et des cahiers d'exercices interactifs intégrés pour s'entraîner à la maison.
               </p>
+            </div>
+          </div>
+
+          {/* Tableau de bord mini-stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl shrink-0">
+            <div className="text-center px-3 border-r border-white/10 last:border-0">
+              <span className="text-xl font-black text-amber-500 block">{stats.streakDays} jours</span>
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Série active</span>
+            </div>
+            <div className="text-center px-3 border-r border-white/10 last:border-0">
+              <span className="text-xl font-black text-white block">{stats.booksRead} livres</span>
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Lectures</span>
+            </div>
+            <div className="text-center px-3 border-r border-white/10 last:border-0">
+              <span className="text-xl font-black text-white block">{stats.exercisesCompleted} devoirs</span>
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Résolus</span>
+            </div>
+            <div className="text-center px-3 last:border-0">
+              <span className="text-xl font-black text-emerald-400 block">{stats.averageScore}%</span>
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Moyenne</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Module Exercice Interactif Local (H5P / Quiz local) */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-6">
-              <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                ✏️ Exercice de Révision Interactif
-              </h3>
-              <span className="px-3 py-1 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 text-amber-700 dark:text-amber-400 text-[10px] font-black rounded-full uppercase tracking-widest">
-                Maths & Culture
-              </span>
-            </div>
+      {/* ── Menu Onglets Modernes ── */}
+      <div className="flex gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
+        <button
+          onClick={() => { setActiveTab('library'); setActiveWorkbook(null); }}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            activeTab === 'library' && !activeWorkbook
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10'
+              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+          }`}
+        >
+          <Book className="w-4 h-4" />
+          <span>Bibliothèque Ebooks</span>
+        </button>
+        <button
+          onClick={() => { setActiveTab('exercises'); }}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            activeTab === 'exercises' || activeWorkbook
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10'
+              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+          }`}
+        >
+          <Trophy className="w-4 h-4" />
+          <span>Cahiers d'Exercices</span>
+        </button>
+        <button
+          onClick={() => { setActiveTab('resources'); setActiveWorkbook(null); }}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            activeTab === 'resources' && !activeWorkbook
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10'
+              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+          }`}
+        >
+          <Eye className="w-4 h-4" />
+          <span>Ressources Externes</span>
+        </button>
+      </div>
 
-            {!quizFinished ? (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center text-xs text-slate-400 font-bold uppercase tracking-wider">
-                  <span>Question {currentQuestionIdx + 1} sur {mathQuiz.length}</span>
-                  <span>Score : {score}/{mathQuiz.length}</span>
+      {/* ── CONTENU : Onglet 1 — Bibliothèque ── */}
+      {activeTab === 'library' && !activeWorkbook && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">📚 Bibliothèque de révision intégrée</h3>
+              <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Livres scolaires et classiques à lire directement sur l'écran</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {books.map((book) => (
+              <div key={book.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
+                <div className={`h-48 bg-gradient-to-br ${book.coverGradient} p-6 flex flex-col justify-between relative`}>
+                  <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                  <span className="px-2.5 py-1 bg-white/20 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-lg w-fit">
+                    {book.category}
+                  </span>
+                  <div className="space-y-1">
+                    <h4 className="text-xl font-black text-white leading-tight">{book.title}</h4>
+                    <p className="text-xs text-white/80 font-medium">{book.author}</p>
+                  </div>
+                </div>
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    {book.description}
+                  </p>
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase">{book.pagesCount} pages</span>
+                    <button
+                      onClick={() => handleOpenBook(book)}
+                      className="px-4 py-2 bg-slate-950 hover:bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Lire en ligne</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── CONTENU : Onglet 2 — Cahiers d'Exercices ── */}
+      {activeTab === 'exercises' && !activeWorkbook && (
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">✏️ Cahiers d'exercices thématiques</h3>
+            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Choisissez une matière et commencez votre cahier de révision interactif</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {workbooks.map((wb) => (
+              <div key={wb.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[28px] p-6 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between space-y-6">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-start">
+                    <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-black rounded-lg uppercase tracking-wider">
+                      {wb.subject}
+                    </span>
+                    <span className={`px-2.5 py-0.5 border text-[9px] font-black rounded-lg uppercase tracking-widest ${
+                      wb.difficulty === 'Facile' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                      wb.difficulty === 'Moyen' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                      'bg-rose-50 text-rose-700 border-rose-200'
+                    }`}>
+                      {wb.difficulty}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h4 className="text-lg font-black text-slate-950 dark:text-white leading-tight">{wb.title}</h4>
+                    <p className="text-xs text-slate-400 mt-1 font-bold uppercase">{wb.gradeLevel}</p>
+                  </div>
                 </div>
 
-                <h4 className="text-lg font-black text-slate-900 dark:text-white leading-snug">
-                  {mathQuiz[currentQuestionIdx].question}
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase">{wb.questionsCount} questions</span>
+                  <button
+                    onClick={() => handleStartWorkbook(wb)}
+                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center gap-1 cursor-pointer border border-amber-600 shadow-sm"
+                  >
+                    <Play className="w-3.5 h-3.5" />
+                    <span>Lancer le cahier</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── CONTENU : Onglet 2 bis — Résolution d'un Cahier d'Exercice Interactif ── */}
+      {activeWorkbook && (
+        <div className="max-w-3xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 md:p-8 shadow-md">
+          {!isFinished ? (
+            <div className="space-y-6">
+              {/* Entête de l'exercice */}
+              <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setActiveWorkbook(null)}
+                    className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                  </button>
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">{activeWorkbook.title}</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{activeWorkbook.subject} • {activeWorkbook.gradeLevel}</p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 text-xs font-black rounded-lg uppercase tracking-wider">
+                  Question {currentQuestionIdx + 1} / {activeWorkbook.questions.length}
+                </span>
+              </div>
+
+              {/* Barre de progression */}
+              <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-blue-600 transition-all duration-300"
+                  style={{ width: `${((currentQuestionIdx) / activeWorkbook.questions.length) * 100}%` }}
+                ></div>
+              </div>
+
+              {/* Question */}
+              <div className="space-y-4 py-2">
+                <h4 className="text-lg font-black text-slate-950 dark:text-white leading-snug">
+                  {activeWorkbook.questions[currentQuestionIdx].text}
                 </h4>
 
-                <div className="grid grid-cols-1 gap-3">
-                  {mathQuiz[currentQuestionIdx].options.map((option, idx) => {
+                <div className="grid grid-cols-1 gap-3 pt-2">
+                  {activeWorkbook.questions[currentQuestionIdx].options.map((option, idx) => {
                     const isSelected = selectedOption === idx;
-                    const isCorrect = idx === mathQuiz[currentQuestionIdx].correctAnswer;
-                    let optionStyle = "border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50";
-                    
+                    const isCorrect = idx === activeWorkbook.questions[currentQuestionIdx].correct;
+                    let optionStyle = "border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50 text-slate-800 dark:text-slate-300";
+
                     if (isSelected) {
                       optionStyle = "border-blue-600 bg-blue-50/50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400";
                     }
@@ -158,6 +559,8 @@ export const ParentCourses: React.FC = () => {
                         optionStyle = "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400";
                       } else if (isSelected) {
                         optionStyle = "border-rose-500 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400";
+                      } else {
+                        optionStyle = "border-slate-200 opacity-50 dark:border-slate-800";
                       }
                     }
 
@@ -165,8 +568,8 @@ export const ParentCourses: React.FC = () => {
                       <button
                         key={idx}
                         disabled={isAnswerChecked}
-                        onClick={() => setSelectedOption(idx)}
-                        className={`flex items-center justify-between p-4 border rounded-2xl text-left text-xs font-bold transition-all ${optionStyle}`}
+                        onClick={() => handleAnswerSelect(idx)}
+                        className={`flex items-center justify-between p-4 border rounded-2xl text-left text-xs font-bold transition-all cursor-pointer ${optionStyle}`}
                       >
                         <span>{option}</span>
                         {isAnswerChecked && isCorrect && <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />}
@@ -176,88 +579,235 @@ export const ParentCourses: React.FC = () => {
                   })}
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-10 space-y-6">
-                <div className="w-16 h-16 bg-amber-50 dark:bg-amber-950/20 rounded-full flex items-center justify-center mx-auto border border-amber-200 dark:border-amber-900">
-                  <Award className="w-8 h-8 text-amber-500" />
+
+              {/* Explication & Bouton de validation */}
+              {isAnswerChecked && (
+                <div className="bg-blue-50/50 dark:bg-slate-800/30 border border-blue-100 dark:border-slate-800 rounded-2xl p-4 animate-scaleUp">
+                  <h5 className="text-xs font-black text-blue-700 dark:text-blue-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4" />
+                    Explication de la réponse
+                  </h5>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                    {activeWorkbook.questions[currentQuestionIdx].explanation}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800 gap-3">
+                {!isAnswerChecked ? (
+                  <button
+                    disabled={selectedOption === null}
+                    onClick={handleCheckAnswer}
+                    className="px-6 py-3 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer border border-amber-600"
+                  >
+                    Vérifier ma réponse
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleNextQuestion}
+                    className="px-6 py-3 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>{currentQuestionIdx < activeWorkbook.questions.length - 1 ? 'Question suivante' : 'Terminer le cahier'}</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-10 space-y-6 animate-scaleUp">
+              <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl flex items-center justify-center mx-auto border border-amber-300 shadow-lg shadow-amber-500/20">
+                <Trophy className="w-10 h-10 text-white" />
+              </div>
+
+              <div>
+                <h4 className="text-2xl font-black text-slate-950 dark:text-white uppercase tracking-tight">Cahier Terminé !</h4>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Série résolue avec succès</p>
+              </div>
+
+              <div className="max-w-xs mx-auto bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-2xl font-black text-slate-900 dark:text-white block">{score} / {activeWorkbook.questions.length}</span>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Score obtenu</span>
                 </div>
                 <div>
-                  <h4 className="text-xl font-black text-slate-900 dark:text-white">Félicitations !</h4>
-                  <p className="text-xs text-slate-500 mt-1">Vous avez terminé l'exercice avec un score de {score} sur {mathQuiz.length}.</p>
+                  <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 block">+{score * 10} XP</span>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Points acquis</span>
                 </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4 max-w-sm mx-auto">
                 <button
-                  onClick={handleRestartQuiz}
-                  className="px-6 py-3 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer"
+                  onClick={() => handleStartWorkbook(activeWorkbook)}
+                  className="flex-1 px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer"
                 >
-                  Recommencer l'exercice
+                  Recommencer
+                </button>
+                <button
+                  onClick={() => setActiveWorkbook(null)}
+                  className="flex-1 px-5 py-3.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer"
+                >
+                  Retour aux exercices
                 </button>
               </div>
-            )}
-          </div>
-
-          {!quizFinished && (
-            <div className="mt-8 border-t border-slate-100 dark:border-slate-800 pt-6 flex justify-end gap-3">
-              {!isAnswerChecked ? (
-                <button
-                  disabled={selectedOption === null}
-                  onClick={handleCheckAnswer}
-                  className="px-6 py-3 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer"
-                >
-                  Vérifier ma réponse
-                </button>
-              ) : (
-                <button
-                  onClick={handleNextQuestion}
-                  className="px-6 py-3 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
-                >
-                  <span>Question Suivante</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              )}
             </div>
           )}
         </div>
+      )}
 
-        {/* Alternatives Gratuites Recommandées */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-6">
+      {/* ── CONTENU : Onglet 3 — Ressources Externes ── */}
+      {activeTab === 'resources' && !activeWorkbook && (
+        <div className="space-y-6">
           <div>
-            <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider mb-1">
-              📚 Alternatives Gratuites
-            </h3>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-              Ressources éducatives en libre accès
-            </p>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">🌐 Autres plateformes gratuites recommandées</h3>
+            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Des sites externes d'excellence pour compléter la formation de vos enfants</p>
           </div>
 
-          <div className="space-y-4 max-h-[380px] overflow-y-auto pr-2 custom-scrollbar">
-            {alternatives.map((alt, idx) => (
-              <div key={idx} className="bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 p-4 rounded-2xl space-y-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="text-xs font-black text-slate-950 dark:text-white">{alt.name}</h4>
-                    <span className="text-[9px] font-bold text-slate-400">{alt.category}</span>
-                  </div>
-                  <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 text-[9px] font-black rounded-lg uppercase tracking-wider">
-                    {alt.type}
-                  </span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {externalResources.map((res, idx) => (
+              <div key={idx} className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-black text-slate-900 dark:text-white">{res.name}</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                    {res.desc}
+                  </p>
                 </div>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                  {alt.desc}
-                </p>
                 <a
-                  href={alt.url}
+                  href={res.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[10px] font-black text-amber-500 hover:text-amber-600 uppercase tracking-wider"
+                  className="inline-flex items-center gap-1 text-[10px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest"
                 >
-                  <span>Accéder à la ressource</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Visiter le portail</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </a>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      )}
+
+      {/* ── MODAL : LECTEUR DE LIVRE INTÉGRÉ (PREMIUM READER VIEW) ── */}
+      {selectedBook && (
+        <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/80 backdrop-blur-sm p-4 flex justify-center items-center">
+          <div className="w-full max-w-4xl h-[90vh] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-[32px] flex flex-col shadow-2xl overflow-hidden animate-scaleUp">
+            
+            {/* Header du lecteur */}
+            <div className="p-4 md:px-6 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-10 bg-gradient-to-br ${selectedBook.coverGradient} rounded-md flex items-center justify-center text-white font-black text-[9px] shadow-sm`}>
+                  {selectedBook.title[0]}
+                </div>
+                <div>
+                  <h4 className="text-xs md:text-sm font-black text-slate-900 dark:text-white leading-tight">{selectedBook.title}</h4>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{selectedBook.author}</p>
+                </div>
+              </div>
+
+              {/* Contrôleurs de lecture */}
+              <div className="flex items-center gap-4">
+                <div className="hidden sm:flex items-center gap-1.5 border border-slate-200 dark:border-slate-800 p-1 rounded-lg">
+                  <button 
+                    onClick={() => setFontSize('sm')} 
+                    className={`px-2 py-1 text-[10px] font-black rounded ${fontSize === 'sm' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-400'}`}
+                  >
+                    A-
+                  </button>
+                  <button 
+                    onClick={() => setFontSize('base')} 
+                    className={`px-2 py-1 text-[10px] font-black rounded ${fontSize === 'base' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-400'}`}
+                  >
+                    A
+                  </button>
+                  <button 
+                    onClick={() => setFontSize('lg')} 
+                    className={`px-2 py-1 text-[10px] font-black rounded ${fontSize === 'lg' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-400'}`}
+                  >
+                    A+
+                  </button>
+                </div>
+
+                <button
+                  onClick={handleCloseBook}
+                  className="px-4 py-2 bg-slate-900 hover:bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-lg cursor-pointer"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+
+            {/* Split view : Table des matières & Corps du texte */}
+            <div className="flex-1 flex overflow-hidden">
+              
+              {/* Sidebar : Table des matières (Desktop) */}
+              <div className="hidden md:block w-64 bg-slate-50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800 p-4 overflow-y-auto">
+                <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Table des chapitres</h5>
+                <div className="space-y-2">
+                  {selectedBook.chapters.map((ch, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentChapterIdx(idx)}
+                      className={`w-full text-left p-3 rounded-xl text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
+                        currentChapterIdx === idx
+                          ? 'bg-blue-600 text-white'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                      }`}
+                    >
+                      <span className="truncate">{ch.title}</span>
+                      <ChevronRight className="w-3.5 h-3.5 shrink-0 ml-1" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Zone de lecture de texte */}
+              <div className="flex-1 flex flex-col justify-between overflow-hidden bg-white dark:bg-slate-950">
+                <div className="flex-1 p-6 md:p-12 overflow-y-auto custom-scrollbar">
+                  <div className="max-w-2xl mx-auto space-y-6">
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-900 pb-4">
+                      {selectedBook.chapters[currentChapterIdx].title}
+                    </h3>
+                    <p className={`text-slate-700 dark:text-slate-300 leading-relaxed text-justify font-medium ${
+                      fontSize === 'sm' ? 'text-xs md:text-sm' :
+                      fontSize === 'base' ? 'text-sm md:text-base' :
+                      'text-base md:text-lg'
+                    }`}>
+                      {selectedBook.chapters[currentChapterIdx].content}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Footer du lecteur : Pagination bascule */}
+                <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex justify-between items-center shrink-0">
+                  <button
+                    disabled={currentChapterIdx === 0}
+                    onClick={() => setCurrentChapterIdx(prev => prev - 1)}
+                    className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Précédent</span>
+                  </button>
+
+                  <span className="text-[10px] text-slate-400 font-bold uppercase">
+                    Chapitre {currentChapterIdx + 1} sur {selectedBook.chapters.length}
+                  </span>
+
+                  <button
+                    disabled={currentChapterIdx === selectedBook.chapters.length - 1}
+                    onClick={() => setCurrentChapterIdx(prev => prev + 1)}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-black text-white disabled:opacity-40 disabled:cursor-not-allowed text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer"
+                  >
+                    <span>Suivant</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
