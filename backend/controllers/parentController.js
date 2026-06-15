@@ -79,10 +79,10 @@ async function getPayments(req, res) {
 
         if (sErr) throw sErr;
 
-        // Sécurité : Licence requise
-        if ((student.license_status || 'inactive') !== 'active') {
-            return res.status(402).json({ error: 'license_required', message: 'Licence active requise.' });
-        }
+        // Sécurité : Licence requise (Bypasse temporaire)
+        // if ((student.license_status || 'inactive') !== 'active') {
+        //     return res.status(402).json({ error: 'license_required', message: 'Licence active requise.' });
+        // }
 
         const { data: payments, error: pErr } = await supabase
             .from(`payments_${schoolSlug}`)
@@ -291,9 +291,9 @@ async function getPresences(req, res) {
 
         if (sErr) throw sErr;
 
-        if ((student.license_status || 'inactive') !== 'active') {
-            return res.status(402).json({ error: 'license_required', message: 'Licence active requise.' });
-        }
+        // if ((student.license_status || 'inactive') !== 'active') {
+        //     return res.status(402).json({ error: 'license_required', message: 'Licence active requise.' });
+        // }
 
         const { data: presences, error: pErr } = await supabase
             .from(`presences_${schoolSlug}`)
@@ -391,7 +391,6 @@ async function getParentData(req, res) {
             }));
 
             activeStudentIds = (dbStudents || [])
-                .filter(s => (s.license_status || 'inactive') === 'active')
                 .map(s => s.id);
         }
 
