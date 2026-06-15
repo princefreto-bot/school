@@ -1,149 +1,170 @@
 import React from 'react';
-import { Shield, ArrowLeft, GraduationCap, Lock, Eye, FileText, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Eye, Lock, FileText, Globe } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Footer } from '../components/Footer';
 
 export const Confidentialite: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans selection:bg-amber-500/20">
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans selection:bg-amber-500/20 flex flex-col">
       
-      {/* Barre de navigation supérieure (pleine largeur, bords droits) */}
-      <div className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <a
-            href="/#/login"
-            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 rounded-none transition-all shadow-sm active:scale-95"
+      {/* ── HEADER / NAVIGATION ── */}
+      <header className="relative z-50 border-b border-slate-200/50 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex-shrink-0">
+        <nav className="max-w-7xl mx-auto flex items-center justify-between p-4 md:px-8">
+          <div 
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl uppercase select-none cursor-pointer"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Retour à la connexion
-          </a>
-
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Version 2.0 — Active</span>
+            <img src="/logo.jpeg" className="w-8 h-8 object-contain rounded-lg" alt="Logo" />
+            <span className="text-amber-500">Chariow</span>
           </div>
-        </div>
-      </div>
+          
+          <button 
+            onClick={() => navigate('/')}
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Retour à l'accueil
+          </button>
+        </nav>
+      </header>
 
-      {/* En-tête (Pleine largeur, bande contrastée) */}
-      <div className="w-full bg-slate-100 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center flex flex-col items-center justify-center relative">
-          <div className="w-16 h-16 bg-amber-500 rounded-none flex items-center justify-center text-slate-950 shadow-xl shadow-amber-500/10 mb-6 border border-amber-600">
-            <GraduationCap className="w-8 h-8" />
-          </div>
-
-          <h1 className="text-3.5xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter leading-tight uppercase">
-            Politique de <span className="text-transparent bg-clip-text bg-gradient-to-br from-amber-500 to-amber-600">Confidentialité</span>
+      {/* ── HERO HEADER (Style axazara.com) ── */}
+      <section className="relative w-full max-w-7xl mx-auto px-6 md:px-8 py-16 md:py-24 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 border-b border-slate-100 dark:border-slate-900">
+        <div className="max-w-xl space-y-4 text-left">
+          <span className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200/40 dark:border-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
+            🛡️ Protection des Données
+          </span>
+          <h1 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white tracking-tight leading-tight uppercase">
+            Politique de confidentialité
           </h1>
-          
-          <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest mt-3">
-            DGhubSchool — Gestion & Scolarité
-          </p>
-          
-          <p className="text-slate-600 dark:text-slate-300 text-sm mt-6 max-w-2xl leading-relaxed">
-            Chez DGhubSchool, nous accordons une importance primordiale à la protection et à la confidentialité des données personnelles des élèves, des parents et du personnel d'établissement.
+          <p className="text-xs md:text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+            Dernière mise à jour : 15 Juin 2026
           </p>
         </div>
-      </div>
 
-      {/* Corps - Bandes horizontales alternées (style Figma / Stitch) */}
-      <div className="w-full">
-        
-        {/* Section 1 - Fond Blanc */}
-        <div className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-12 px-4">
-          <div className="max-w-4xl mx-auto space-y-4">
+        {/* Highlight box */}
+        <div className="w-full md:w-fit bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800/80 p-6 rounded-[24px] shadow-sm max-w-sm flex items-start gap-4">
+          <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl shrink-0">
+            <Lock className="w-6 h-6" />
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed text-left font-medium">
+            Chez Chariow, la protection de la vie privée des élèves et la sécurité des données financières et académiques sont fondamentales. Nous appliquons des protocoles d'isolation stricts pour chaque école.
+          </p>
+        </div>
+      </section>
+
+      {/* ── LEGAL CONTENT SECTION ── */}
+      <section className="bg-slate-50/50 dark:bg-slate-950 py-16 px-6 md:px-8 flex-grow">
+        <div className="max-w-4xl mx-auto space-y-8">
+
+          {/* Introduction */}
+          <div className="p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-[24px] space-y-4 shadow-sm text-left">
+            <h2 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-3">
+              Introduction
+            </h2>
+            <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+              Chez Chariow, nous accordons une importance primordiale à la protection et à la confidentialité des données personnelles des élèves, des parents et du personnel d'établissement. Cette charte détaille la manière dont nous collectons, gérons et sécurisons ces informations scolaires sensibles dans notre infrastructure multi-établissement isolée.
+            </p>
+          </div>
+
+          {/* 1. Nature des Données Collectées */}
+          <div className="p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-[24px] space-y-4 shadow-sm text-left">
             <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-none flex items-center justify-center border border-amber-500/25">
+              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center border border-amber-500/20">
                 <FileText className="w-5 h-5" />
               </div>
-              <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight uppercase">1. Nature des Données Collectées</h2>
+              <h2 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase tracking-wider">
+                1. Nature des Données Collectées
+              </h2>
             </div>
             
-            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-              Dans le cadre de la gestion académique et financière de votre établissement, nous collectons les informations nécessaires à la scolarisation :
-            </p>
-            
-            <ul className="space-y-2 text-slate-600 dark:text-slate-300 text-sm pl-4 list-disc marker:text-amber-500">
-              <li><strong>Élèves</strong> : Noms, prénoms, date de naissance, classe, notes, relevés de présence et documents officiels numérisés (actes de naissance, bulletins scolaires antérieurs).</li>
-              <li><strong>Parents</strong> : Noms, numéros de téléphone (utilisés pour les alertes push et notifications de paiement), statut des cotisations financières.</li>
-              <li><strong>Personnel</strong> : Noms, rôles d'accès au système de l'école.</li>
-            </ul>
+            <div className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-3 font-medium">
+              <p>
+                Dans le cadre de la gestion académique et financière de votre établissement, nous collectons uniquement les informations nécessaires :
+              </p>
+              <ul className="space-y-2 pl-4 list-disc marker:text-amber-500 leading-relaxed">
+                <li><strong>Élèves</strong> : Noms, prénoms, date de naissance, classe, notes, relevés de présence et documents officiels numérisés (actes de naissance, bulletins scolaires antérieurs).</li>
+                <li><strong>Parents</strong> : Noms, numéros de téléphone (utilisés pour les alertes de présence par SMS et reçus de scolarité numériques).</li>
+                <li><strong>Personnel</strong> : Noms, rôles d'accès au système de l'école (directeur, comptable, enseignant, surveillant).</li>
+              </ul>
+            </div>
           </div>
-        </div>
 
-        {/* Section 2 - Fond Gris Clair */}
-        <div className="w-full bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 py-12 px-4">
-          <div className="max-w-4xl mx-auto space-y-4">
-            <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-none flex items-center justify-center border border-amber-500/25">
+          {/* 2. Finalité des Traitements */}
+          <div className="p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-[24px] space-y-4 shadow-sm text-left">
+            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center border border-amber-500/20">
                 <Eye className="w-5 h-5" />
               </div>
-              <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight uppercase">2. Finalité des Traitements</h2>
+              <h2 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase tracking-wider">
+                2. Finalité des Traitements
+              </h2>
             </div>
             
-            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-              Ces données sont exclusivement traitées pour assurer le bon fonctionnement administratif et pédagogique :
-            </p>
-            
-            <ul className="space-y-2 text-slate-600 dark:text-slate-300 text-sm pl-4 list-disc marker:text-amber-500">
-              <li>Le suivi financier, la facturation des frais scolaires et l'édition de reçus de paiement sécurisés.</li>
-              <li>La saisie et l'édition des bulletins et relevés de notes.</li>
-              <li>La numérisation sécurisée des dossiers des élèves via l'outil scanner.</li>
-              <li>L'envoi d'alertes instantanées (notifications push d'absences, d'événements scolaires ou de reçus financiers) aux comptes de parents associés.</li>
-            </ul>
+            <div className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-3 font-medium">
+              <p>
+                Ces données sont exclusivement traitées pour assurer le bon fonctionnement administratif et pédagogique :
+              </p>
+              <ul className="space-y-2 pl-4 list-disc marker:text-amber-500 leading-relaxed">
+                <li>Le suivi financier, la facturation des frais scolaires et l'édition de reçus de paiement sécurisés.</li>
+                <li>La saisie des notes et l'édition automatique des bulletins et relevés de notes.</li>
+                <li>La numérisation sécurisée des dossiers des élèves via l'outil scanner intégré.</li>
+                <li>L'envoi d'alertes instantanées (notifications push et SMS d'absences ou de reçus financiers) aux parents.</li>
+              </ul>
+            </div>
           </div>
-        </div>
 
-        {/* Section 3 - Fond Blanc */}
-        <div className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-12 px-4">
-          <div className="max-w-4xl mx-auto space-y-4">
+          {/* 3. Sécurité et Hébergement */}
+          <div className="p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-[24px] space-y-4 shadow-sm text-left">
             <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-none flex items-center justify-center border border-amber-500/25">
+              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center border border-amber-500/20">
                 <Lock className="w-5 h-5" />
               </div>
-              <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight uppercase">3. Sécurité et Hébergement</h2>
+              <h2 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase tracking-wider">
+                3. Sécurité & Hébergement
+              </h2>
             </div>
             
-            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-              Toutes les données sont stockées et sécurisées à l'aide de protocoles stricts :
-            </p>
-            
-            <ul className="space-y-2 text-slate-600 dark:text-slate-300 text-sm pl-4 list-disc marker:text-amber-500">
-              <li>Les bases de données sont gérées via **Supabase** et sont cryptées au repos et en transit via HTTPS/SSL.</li>
-              <li>Les documents numérisés (actes de naissance, bulletins archivés) sont enregistrés dans un stockage privé sécurisé et ne sont accessibles qu'aux comptes autorisés.</li>
-              <li>Un système d'authentification robuste (Jetons JWT sécurisés) empêche toute consultation non autorisée des données des élèves.</li>
-            </ul>
+            <div className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-3 font-medium">
+              <p>
+                Toutes les données sont stockées et sécurisées à l'aide de protocoles stricts de niveau professionnel :
+              </p>
+              <ul className="space-y-2 pl-4 list-disc marker:text-amber-500 leading-relaxed">
+                <li>Les bases de données sont gérées via **Supabase** et sont cryptées au repos et en transit via HTTPS/SSL.</li>
+                <li>Les documents numérisés (actes de naissance, bulletins archivés) sont enregistrés dans un stockage privé sécurisé et ne sont accessibles qu'aux comptes autorisés.</li>
+                <li>Un système d'authentification robuste (Jetons JWT sécurisés) empêche toute consultation non autorisée des données des élèves.</li>
+              </ul>
+            </div>
           </div>
-        </div>
 
-        {/* Section 4 - Fond Gris Clair */}
-        <div className="w-full bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 py-12 px-4">
-          <div className="max-w-4xl mx-auto space-y-4">
-            <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-none flex items-center justify-center border border-amber-500/25">
-                <Shield className="w-5 h-5" />
+          {/* 4. Partage et Droits */}
+          <div className="p-6 md:p-8 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-[24px] space-y-4 shadow-sm text-left">
+            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center border border-amber-500/20">
+                <Globe className="w-5 h-5" />
               </div>
-              <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight uppercase">4. Partage et Droits</h2>
+              <h2 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase tracking-wider">
+                4. Partage & Droits des Utilisateurs
+              </h2>
             </div>
             
-            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-              **Aucune donnée n'est cédée, vendue ou louée à des tiers à des fins publicitaires ou marketing.** 
-            </p>
-            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-              Conformément à la réglementation sur la protection des données personnelles, vous disposez d'un droit d'accès, de rectification et d'effacement de vos informations. Pour toute demande de modification ou suppression, vous pouvez contacter directement la direction de l'établissement scolaire.
-            </p>
+            <div className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-3 font-medium">
+              <p>
+                <strong>Aucune donnée n'est cédée, vendue ou louée à des tiers à des fins publicitaires ou marketing.</strong>
+              </p>
+              <p>
+                Conformément à la réglementation sur la protection des données personnelles, vous disposez d'un droit d'accès, de rectification et d'effacement de vos informations. Pour toute demande de modification ou suppression, vous pouvez contacter directement la direction de l'établissement scolaire ou envoyer un email à notre service technique.
+              </p>
+            </div>
           </div>
+
         </div>
+      </section>
 
-      </div>
-
-      {/* Footer (Pleine largeur, fond sombre contrasté ou neutre) */}
-      <div className="w-full bg-white dark:bg-slate-900 py-12 px-4 border-t border-slate-200 dark:border-slate-800">
-        <div className="max-w-4xl mx-auto text-center text-xs text-slate-400 dark:text-slate-500 space-y-2">
-          <p>© {new Date().getFullYear()} DGhubSchool. Tous droits réservés.</p>
-          <p className="flex items-center justify-center gap-1">
-            <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Plateforme scolaire sécurisée et conforme aux directives de protection des données de l'enfance.
-          </p>
-        </div>
-      </div>
-
+      {/* ── FOOTER UNIFIÉ ── */}
+      <Footer />
+      
     </div>
   );
 };

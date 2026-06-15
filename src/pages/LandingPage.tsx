@@ -13,6 +13,8 @@ import {
   Menu, 
   X 
 } from 'lucide-react';
+import { Footer } from '../components/Footer';
+
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -382,6 +384,84 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* ── SECTION NEWSROOM (ACTUALITÉS & AVANCÉES) ── */}
+      <section id="newsroom" className="bg-slate-50 dark:bg-slate-900/10 border-t border-slate-200/60 dark:border-slate-900 py-20 relative">
+        <div className="max-w-7xl mx-auto px-6 md:px-8">
+          <div className="text-center mb-16 space-y-4">
+            <span className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200/40 dark:border-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
+              📢 Newsroom
+            </span>
+            <h3 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white tracking-tight uppercase">
+              Dernières avancées de Chariow
+            </h3>
+            <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto text-xs md:text-sm">
+              Suivez l'évolution de la plateforme, nos nouveaux partenariats et les fonctionnalités déployées.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            
+            {/* News 1 */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+              <div className="space-y-4">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full inline-block">
+                  Paiements Mobiles
+                </span>
+                <h4 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase leading-snug group-hover:text-amber-500 transition-colors">
+                  Intégration de Wave, MTN & Orange Money en partenariat avec MiMo Global Inc
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                  Nous facilitons le règlement de la scolarité en Afrique de l'Ouest. Les parents peuvent désormais payer via leur mobile money local et recevoir instantanément leur reçu officiel.
+                </p>
+              </div>
+              <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                <span>Juin 2026</span>
+                <span className="text-amber-505 flex items-center gap-1">Lire l'article <ArrowRight className="w-3 h-3" /></span>
+              </div>
+            </div>
+
+            {/* News 2 */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+              <div className="space-y-4">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full inline-block">
+                  Hébergement de cours
+                </span>
+                <h4 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase leading-snug group-hover:text-amber-500 transition-colors">
+                  Hébergez vos cours vidéo et fichiers PDF sécurisés
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                  La bibliothèque numérique s'enrichit ! Les créateurs de contenu scolaire peuvent distribuer des supports vidéos, des cours structurés et des exercices corrigés en gérant des accès par licence.
+                </p>
+              </div>
+              <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                <span>Mai 2026</span>
+                <span className="text-amber-505 flex items-center gap-1">Lire l'article <ArrowRight className="w-3 h-3" /></span>
+              </div>
+            </div>
+
+            {/* News 3 */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+              <div className="space-y-4">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full inline-block">
+                  Infrastructure
+                </span>
+                <h4 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase leading-snug group-hover:text-amber-500 transition-colors">
+                  Sécurité renforcée et conformité avec les politiques Axa Zara LLC
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                  Chariow intègre les protocoles d'isolation de données d'Axa Zara LLC pour s'assurer que chaque établissement dispose d'un espace hermétique protégé par des clés cryptographiques.
+                </p>
+              </div>
+              <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                <span>Avril 2026</span>
+                <span className="text-amber-505 flex items-center gap-1">Lire l'article <ArrowRight className="w-3 h-3" /></span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* ── SECTION FINAL CTA ────────────────────────────── */}
       <section className="bg-white py-16 text-center relative">
         <div className="max-w-5xl mx-auto px-4">
@@ -406,29 +486,9 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── FOOTER ────────────────────────────────────────── */}
-      <footer className="border-t border-slate-200/80 bg-white py-12 text-slate-400 font-medium text-xs select-none">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* Logo & Droits */}
-          <div className="flex flex-col items-center md:items-start gap-2">
-            <div className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-sm uppercase">
-              <img src="/logo.jpeg" className="w-6 h-6 object-contain" alt="Logo" />
-              <span className="text-amber-500">DGhub<span className="text-slate-900">School</span></span>
-            </div>
-            <p className="text-[10px]">© {new Date().getFullYear()} DGhubSchool. Tous droits réservés.</p>
-          </div>
-
-          {/* Mentions et liens */}
-          <div className="flex gap-6 text-[10px] font-black uppercase tracking-wider">
-            <a href="/#/features" className="hover:text-amber-500 transition-colors">Fonctionnalités</a>
-            <a href="/#/pricing" className="hover:text-amber-500 transition-colors">Tarifs</a>
-            <a href="/#/a-propos" className="hover:text-amber-500 transition-colors">À Propos</a>
-            <a href="/#/conditions-utilisation" target="_blank" className="hover:text-amber-500 transition-colors">CGU</a>
-            <a href="/#/confidentialite" target="_blank" className="hover:text-amber-500 transition-colors">Confidentialité</a>
-            <a href="mailto:contact@dghubschool.com" className="hover:text-amber-500 transition-colors">Contact</a>
-          </div>
-        </div>
-      </footer>
+      {/* ── FOOTER UNIFIÉ ── */}
+      <Footer />
     </div>
   );
 };
+

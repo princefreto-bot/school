@@ -4,6 +4,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ShieldCheck, Heart, Users, Target } from 'lucide-react';
+import { Footer } from '../components/Footer';
 
 export const APropos: React.FC = () => {
   const navigate = useNavigate();
@@ -157,23 +158,8 @@ export const APropos: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-100 bg-slate-50 py-10 text-slate-400 font-medium text-[10px] select-none uppercase tracking-wider">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col items-center md:items-start gap-1">
-            <div className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-sm uppercase">
-              <img src="/logo.jpeg" className="w-6 h-6 object-contain" alt="Logo" />
-              <span className="text-amber-500">DGhub<span className="text-slate-900">School</span></span>
-            </div>
-            <p className="text-[9px]">© {new Date().getFullYear()} DGhubSchool. Tous droits réservés.</p>
-          </div>
-          <div className="flex gap-6 font-black">
-            <a href="/#/conditions-utilisation" className="hover:text-amber-500 transition-colors">CGU</a>
-            <a href="/#/confidentialite" className="hover:text-amber-500 transition-colors">Confidentialité</a>
-            <a href="mailto:contact@dghubschool.com" className="hover:text-amber-500 transition-colors">Contact</a>
-          </div>
-        </div>
-      </footer>
+      {/* ── FOOTER UNIFIÉ ── */}
+      <Footer />
     </div>
   );
 };
