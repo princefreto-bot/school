@@ -18,6 +18,7 @@ interface BookItem {
   coverGradient: string;
   pagesCount: number;
   chapters: { title: string; content: string }[];
+  pdfUrl?: string;
 }
 
 interface Question {
@@ -132,6 +133,66 @@ export const ParentCourses: React.FC = () => {
         {
           title: "Chapitre 3 : Proportionnalité et pourcentages",
           content: "Deux grandeurs sont proportionnelles si l'on peut passer de l'une à l'autre en multipliant par un nombre constant appelé coefficient de proportionnalité. Un pourcentage est un rapport dont le dénominateur est 100. Par exemple, appliquer un taux de 20% sur un montant de 1500 F CFA revient à calculer : 1500 x 20 / 100 = 300 F CFA."
+        }
+      ]
+    },
+    {
+      id: "leo-et-toinon",
+      title: "Léo et Toinon",
+      author: "Marie-Thérèse Latzarus",
+      category: "Lecture Jeunesse",
+      description: "Une charmante histoire d'enfance de deux petits orphelins courageux à travers la campagne française, pleine d'aventures et d'apprentissages.",
+      coverGradient: "from-rose-500 via-pink-600 to-rose-700",
+      pagesCount: 124,
+      pdfUrl: "https://ebooks-bnr.com/?stdb_dl=ebooks%2Fpdf4%2Fleo_toinon.pdf",
+      chapters: [
+        {
+          title: "Chapitre 1 : Les petits orphelins",
+          content: "Dans un petit hameau niché au cœur des collines françaises, Léo et sa sœur Toinon vivaient paisiblement chez leur tante. Bien qu'orphelins, les deux enfants débordaient d'énergie et de joie de vivre. Toinon, toujours soucieuse d'aider, apprenait la couture tandis que Léo, passionné de nature, passait ses journées à explorer les forêts environnantes à la recherche de secrets sylvestres."
+        },
+        {
+          title: "Chapitre 2 : La découverte du vieux moulin",
+          content: "Un après-midi ensoleillé de printemps, Léo entraîna Toinon vers la colline du Moulin de la Garde. Ce vieux moulin abandonné, dont les ailes ne tournaient plus depuis des décennies, abritait bien des légendes locales. En furetant sous les vieilles poutres de chêne, Toinon aperçut un reflet brillant dissimulé derrière un vieux sac de farine."
+        }
+      ]
+    },
+    {
+      id: "les-trois-mousquetaires",
+      title: "Les Trois Mousquetaires",
+      author: "Alexandre Dumas",
+      category: "Classique Français",
+      description: "L'incroyable épopée du jeune Gascon d'Artagnan qui s'associe à Athos, Porthos et Aramis pour déjouer les complots du cardinal de Richelieu.",
+      coverGradient: "from-red-600 via-amber-700 to-red-900",
+      pagesCount: 650,
+      pdfUrl: "https://ebooks-bnr.com/?stdb_dl=ebooks%2Fpdf4%2Fdumas_les_trois_mousquetaires.pdf",
+      chapters: [
+        {
+          title: "Chapitre 1 : Les trois présents de M. d'Artagnan père",
+          content: "Le premier lundi du mois d'avril 1625, le bourg de Meung vit un grand tumulte. Un jeune homme nommé d'Artagnan y faisait son entrée sur un bidet jaune, vêtu d'une jaquette de laine dont la couleur bleue avait fait place à une teinte indéfinissable. Son père lui avait donné trois présents : un cheval, quinze écus et de sages conseils pour servir le Roi."
+        },
+        {
+          title: "Chapitre 2 : L'antichambre de M. de Tréville",
+          content: "Arrivé à Paris, d'Artagnan se rendit chez M. de Tréville, le capitaine des mousquetaires du Roi. L'antichambre était remplie de gentilshommes bruyants, fiers de porter la casaque bleue. C'est dans ce tumulte qu'il bouscula par mégarde Athos blessé à l'épaule, s'emmêla dans le baudrier d'or de Porthos, et ramassa un mouchoir compromettant pour Aramis."
+        }
+      ]
+    },
+    {
+      id: "vingt-mille-lieues",
+      title: "Vingt mille lieues sous les mers",
+      author: "Jules Verne",
+      category: "Aventure & Sci-Fi",
+      description: "Le fantastique voyage à bord du sous-marin Nautilus, commandé par le mystérieux Capitaine Nemo, à travers les profondeurs inexplorées des océans.",
+      coverGradient: "from-cyan-600 via-teal-700 to-blue-900",
+      pagesCount: 450,
+      pdfUrl: "https://ebooks-bnr.com/?stdb_dl=ebooks%2Fpdf4%2Fverne_20000_lieues_sous_les_mers.pdf",
+      chapters: [
+        {
+          title: "Chapitre 1 : Un écueil fuyant",
+          content: "L'année 1866 fut marquée par un événement bizarre, un phénomène inexpliqué et inexplicable. Depuis quelque temps, plusieurs navires s'étaient croisés avec un objet long, fusiforme, parfois phosphorescent, infiniment plus grand et plus rapide qu'une baleine. La rumeur publique s'enflamma, certains y voyant un monstre marin d'une puissance colossale."
+        },
+        {
+          title: "Chapitre 2 : Le capitaine Nemo et le Nautilus",
+          content: "Fait prisonnier à bord avec le harponneur Ned Land et son fidèle domestique Conseil, le professeur Aronnax découvrit avec stupéfaction que le monstre était en réalité un chef-d'œuvre de la technologie humaine : un navire sous-marin propulsé à l'électricité, créé et dirigé par l'énigmatique Capitaine Nemo, un homme ayant rompu tout lien avec l'humanité."
         }
       ]
     }
@@ -443,15 +504,32 @@ export const ParentCourses: React.FC = () => {
                   <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                     {book.description}
                   </p>
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase">{book.pagesCount} pages</span>
-                    <button
-                      onClick={() => handleOpenBook(book)}
-                      className="px-4 py-2 bg-slate-950 hover:bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>Lire en ligne</span>
-                    </button>
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase">
+                      <span>{book.pagesCount} pages</span>
+                      <span className="truncate max-w-[120px]">{book.category}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleOpenBook(book)}
+                        className="flex-1 py-2 bg-slate-950 hover:bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Lire</span>
+                      </button>
+                      {book.pdfUrl && (
+                        <a
+                          href={book.pdfUrl}
+                          download
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer text-center"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>PDF</span>
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -704,7 +782,7 @@ export const ParentCourses: React.FC = () => {
               </div>
 
               {/* Contrôleurs de lecture */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <div className="hidden sm:flex items-center gap-1.5 border border-slate-200 dark:border-slate-800 p-1 rounded-lg">
                   <button 
                     onClick={() => setFontSize('sm')} 
@@ -725,6 +803,20 @@ export const ParentCourses: React.FC = () => {
                     A+
                   </button>
                 </div>
+
+                {selectedBook.pdfUrl && (
+                  <a
+                    href={selectedBook.pdfUrl}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase tracking-widest rounded-lg cursor-pointer text-center"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Télécharger PDF</span>
+                    <span className="sm:hidden">PDF</span>
+                  </a>
+                )}
 
                 <button
                   onClick={handleCloseBook}
