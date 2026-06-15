@@ -141,6 +141,7 @@ const PageContent: React.FC = () => {
 
 export function App() {
   const isAuthenticated = useStore((s) => s.isAuthenticated);
+  const user = useStore((s) => s.user);
   const fetchAllFromBackend = useStore((s) => s.fetchAllFromBackend);
   const navigate = useNavigate();
   const location = useLocation();
@@ -179,12 +180,12 @@ export function App() {
     useStore.getState().fetchPublicSettings();
   }, []);
 
-  // ── Initialisation Web Push (Uniquement pour les Parents ou Web) ──
+  // ── Initialisation Web Push (Uniquement pour les Rôles supportant les Pushs) ──
   React.useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user && user.role !== 'superadmin' && user.role !== 'creator') {
       webPushService.init();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   React.useEffect(() => {
     // ── Synchronisation Manuelle Uniquement ──────────────────────

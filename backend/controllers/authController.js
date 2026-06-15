@@ -329,7 +329,11 @@ async function updatePushToken(req, res) {
     const { id, role, schoolSlug } = req.user;
     const { push_token } = req.body;
     
-    const table = role === 'superadmin' ? 'superadmins' : (role === 'creator' ? 'creators' : `profiles_${schoolSlug}`);
+    if (role === 'superadmin' || role === 'creator') {
+        return res.json({ success: true, message: 'Push non supporté pour ce rôle.' });
+    }
+
+    const table = `profiles_${schoolSlug}`;
 
     try {
         console.log(`📲 Tentative de mise à jour du push_token pour l'utilisateur ${id}`);
