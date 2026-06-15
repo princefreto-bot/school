@@ -39,7 +39,7 @@ const CarteEleve: React.FC<CarteProps> = ({
             width: 320, height: 204, // Proportions 85x54mm (approx)
             background: 'white',
             borderRadius: 0, overflow: 'hidden',
-            position: 'relative', fontFamily: '"Inter", sans-serif',
+            position: 'relative', fontFamily: '"Poppins", sans-serif',
             boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
             userSelect: 'none',
             border: '1px solid #000000'
