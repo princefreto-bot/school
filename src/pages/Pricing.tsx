@@ -13,7 +13,7 @@ export const Pricing: React.FC = () => {
     {
       name: "Licence Standard",
       limit: "Moins de 500 élèves",
-      price: "35 000 F CFA",
+      price: "50 000 F CFA",
       period: "par an / par école",
       description: "Pour les petites écoles de moins de 500 élèves inscrits.",
       features: [
@@ -32,7 +32,7 @@ export const Pricing: React.FC = () => {
     {
       name: "Licence Intermédiaire",
       limit: "Entre 500 et 1000 élèves",
-      price: "90 000 F CFA",
+      price: "100 000 F CFA",
       period: "par an / par école",
       description: "Pour les écoles de taille moyenne comptant entre 500 et 1000 élèves.",
       features: [
@@ -50,7 +50,7 @@ export const Pricing: React.FC = () => {
     {
       name: "Licence Avancée",
       limit: "Entre 1000 et 2000 élèves",
-      price: "120 000 F CFA",
+      price: "150 000 F CFA",
       period: "par an / par école",
       description: "Pour les grands établissements scolaires comptant entre 1000 et 2000 élèves.",
       features: [
