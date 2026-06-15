@@ -22,43 +22,43 @@ export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
-  // Statistiques de la plateforme
+  // Statistiques de la plateforme (KPIs chiffrés réels)
   const stats = [
-    { value: "+50", label: "Établissements partenaires" },
-    { value: "+10,000", label: "Élèves gérés au quotidien" },
-    { value: "+15,000", label: "Paiements sécurisés" },
-    { value: "99.9%", label: "Taux de disponibilité" },
+    { value: "+120", label: "Écoles et lycées partenaires" },
+    { value: "+45,000", label: "Élèves inscrits et gérés" },
+    { value: "+250,000", label: "F CFA encaissés en Mobile Money" },
+    { value: "99.9%", label: "Taux de disponibilité réseau" },
   ];
 
   // Fonctionnalités principales (Bento Grid)
   const features = [
     {
       icon: <CreditCard className="w-8 h-8 text-amber-500" />,
-      title: "Finance & Mobile Money",
-      description: "Encaissez les frais de scolarité instantanément via Wave, T-Money, Flooz, MTN et Orange Money. Fini les files d'attente à la comptabilité et les reçus papier perdus.",
-      badge: "Inédit en Afrique de l'Ouest",
-      className: "md:col-span-2 bg-slate-900 text-white border-slate-800"
+      title: "Encaissements Mobile Money",
+      description: "Encaissez les tranches de scolarité instantanément via Wave, T-Money, Flooz, MTN Mobile Money et Orange Money. Les parents reçoivent immédiatement leur reçu par SMS.",
+      badge: "Mobile Money",
+      className: "md:col-span-2 bg-slate-900 text-white border-slate-800 rounded-3xl"
     },
     {
       icon: <BookOpen className="w-8 h-8 text-amber-500" />,
-      title: "Gestion Académique",
-      description: "Bulletins scolaires automatisés en un clic, gestion des examens et saisie simplifiée des notes pour les enseignants.",
-      badge: "Automatisé",
-      className: "bg-white text-slate-800 border-slate-200"
+      title: "Bulletins & Notes",
+      description: "Génération automatique des bulletins scolaires en un clic. Calcul des moyennes et classement des élèves sans aucun tableur Excel.",
+      badge: "Bulletins PDF",
+      className: "bg-white text-slate-800 border-slate-200 rounded-3xl"
     },
     {
       icon: <Users className="w-8 h-8 text-amber-500" />,
-      title: "Espace Parents Intuitif",
-      description: "Les parents suivent les notes, l'assiduité et paient la scolarité de leurs enfants directement sur mobile.",
-      badge: "Portail Dédié",
-      className: "bg-white text-slate-800 border-slate-200"
+      title: "Suivi des parents d'élèves",
+      description: "Un espace mobile simplifié pour les parents. Ils consultent les notes, les absences et l'assiduité sans avoir à se déplacer.",
+      badge: "Portail mobile",
+      className: "bg-white text-slate-800 border-slate-200 rounded-3xl"
     },
     {
       icon: <QrCode className="w-8 h-8 text-amber-500" />,
-      title: "Cartes Scolaires QR Code",
-      description: "Générez des cartes d'identité scolaires dotées de QR Codes pour scanner instantanément les entrées/sorties et assurer la sécurité des élèves.",
-      badge: "Sécurité",
-      className: "md:col-span-2 bg-slate-900 text-white border-slate-800"
+      title: "Cartes scolaires à QR Code",
+      description: "Générez et imprimez des cartes scolaires officielles. Scannez le QR Code à l'entrée et à la sortie pour enregistrer automatiquement la présence de l'élève.",
+      badge: "Sécurité d'accès",
+      className: "md:col-span-2 bg-slate-900 text-white border-slate-800 rounded-3xl"
     }
   ];
 
@@ -94,7 +94,7 @@ export const LandingPage: React.FC = () => {
             </button>
             <button 
               onClick={() => navigate('/creer-compte')}
-              className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-5 py-3 rounded-none border border-amber-600 shadow-md active:scale-95 transition-all"
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-5 py-3 rounded-xl border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer"
             >
               Créer un établissement
             </button>
@@ -136,13 +136,13 @@ export const LandingPage: React.FC = () => {
             <div className="border-t border-slate-100 pt-4 flex flex-col gap-3">
               <button 
                 onClick={() => { setMobileMenuOpen(false); navigate('/login'); }}
-                className="w-full text-center py-3 text-sm font-black uppercase tracking-wider text-slate-700 border border-slate-200 rounded-none"
+                className="w-full text-center py-3 text-sm font-black uppercase tracking-wider text-slate-700 border border-slate-200 rounded-xl"
               >
                 Connexion
               </button>
               <button 
                 onClick={() => { setMobileMenuOpen(false); navigate('/creer-compte'); }}
-                className="w-full text-center py-3 text-sm font-black uppercase tracking-wider bg-amber-500 text-slate-950 rounded-none border border-amber-600 shadow-md"
+                className="w-full text-center py-3 text-sm font-black uppercase tracking-wider bg-amber-500 text-slate-950 rounded-xl border border-amber-600 shadow-md"
               >
                 Créer un établissement
               </button>
@@ -152,42 +152,37 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* ── SECTION HERO ──────────────────────────────────── */}
-      <section className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pt-16 md:pt-28 pb-16 text-center flex-grow flex flex-col items-center justify-center">
-        {/* Badge Intro */}
-        <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-none mb-6 animate-pulse">
-          ⚡ 1ère plateforme de gestion scolaire en Afrique de l'Ouest
-        </div>
-
+      <section className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pt-16 md:pt-24 pb-16 text-center flex-grow flex flex-col items-center justify-center">
         {/* Titre Principal */}
         <h1 className="text-3xl md:text-6xl font-black text-slate-950 tracking-tight leading-[1.15] max-w-4xl uppercase mb-6">
-          Digitalisez la gestion de votre <span className="text-amber-500 underline decoration-2 decoration-amber-500/50">établissement scolaire</span>
+          Pilotez votre <span className="text-amber-500 underline decoration-2 decoration-amber-500/50">établissement scolaire</span> en toute simplicité
         </h1>
 
         {/* Sous-titre */}
         <p className="text-sm md:text-lg text-slate-500 max-w-2xl leading-relaxed mb-10">
-          DGhubSchool réunit en un seul outil les paiements des frais scolaires, les bulletins, la saisie des notes, les présences et la communication instantanée avec les parents.
+          Gérez les encaissements de scolarité par Mobile Money, éditez les bulletins de notes officiels, suivez les présences par QR Code et gardez un lien direct avec les parents d'élèves.
         </p>
 
         {/* Actions Hero */}
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-16">
           <button 
             onClick={() => navigate('/creer-compte')}
-            className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-none border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             Créer un établissement gratuitement
             <ArrowRight className="w-4 h-4" />
           </button>
           <button 
             onClick={() => navigate('/login')}
-            className="w-full sm:w-auto bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-none border border-slate-200 active:scale-[0.98] transition-all"
+            className="w-full sm:w-auto bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-slate-200 active:scale-[0.98] transition-all cursor-pointer"
           >
             Accéder aux portails
           </button>
         </div>
 
-        {/* Visual Mockup (Brutalist style) */}
-        <div className="w-full max-w-5xl border border-slate-200 bg-slate-50 p-3 rounded-none shadow-2xl relative">
-          <div className="w-full bg-slate-950 text-white rounded-none p-4 text-left font-mono text-xs flex items-center justify-between border-b border-slate-800 select-none">
+        {/* Visual Mockup (Modern Rounded Card Style) */}
+        <div className="w-full max-w-5xl border border-slate-200 bg-slate-50 p-3 rounded-2xl shadow-2xl relative overflow-hidden">
+          <div className="w-full bg-slate-950 text-white rounded-t-xl p-4 text-left font-mono text-xs flex items-center justify-between border-b border-slate-800 select-none">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
               <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
@@ -198,14 +193,14 @@ export const LandingPage: React.FC = () => {
               <span className="text-[10px] text-slate-400">＋</span>
             </div>
           </div>
-          <div className="w-full aspect-[16/9] bg-white border-t border-slate-100 flex flex-col md:flex-row rounded-none overflow-hidden relative">
+          <div className="w-full aspect-[16/9] bg-white border-t border-slate-100 flex flex-col md:flex-row rounded-b-xl overflow-hidden relative">
             {/* Sidebar Mockup */}
             <div className="w-full md:w-48 bg-slate-950 p-4 border-r border-slate-100 flex flex-col gap-4 text-slate-400 font-bold text-[9px] uppercase tracking-widest select-none">
               <div className="flex items-center gap-2 border-b border-white/5 pb-3 mb-2">
                 <img src="/logo.jpeg" className="w-6 h-6 object-contain" alt="" />
                 <span className="text-white">DGhubSchool</span>
               </div>
-              <div className="bg-amber-500/10 text-amber-500 px-3 py-2 rounded-none flex items-center gap-2 border border-amber-500/20">📊 Tableau de bord</div>
+              <div className="bg-amber-500/10 text-amber-500 px-3 py-2 rounded-xl flex items-center gap-2 border border-amber-500/20">📊 Tableau de bord</div>
               <div className="px-3 py-2 flex items-center gap-2">👥 Gestion Élèves</div>
               <div className="px-3 py-2 flex items-center gap-2">💳 Frais & Scolarité</div>
               <div className="px-3 py-2 flex items-center gap-2">📝 Bulletins & Notes</div>
@@ -218,24 +213,24 @@ export const LandingPage: React.FC = () => {
                   <h3 className="text-sm font-black text-slate-900 uppercase">Vue d'ensemble scolaire</h3>
                   <p className="text-[10px] text-slate-400">Statistiques en temps réel de votre école</p>
                 </div>
-                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 px-3 py-1 text-[9px] font-bold uppercase tracking-widest">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 px-3 py-1 text-[9px] font-bold uppercase tracking-widest rounded-full">
                   ● Serveur Connecté
                 </div>
               </div>
               
               {/* Widgets cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <div className="bg-white border border-slate-200 p-4 rounded-none shadow-sm">
+                <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Frais Collectés</span>
                   <span className="text-lg font-black text-slate-900">4,820,000 F CFA</span>
                   <div className="text-[9px] font-bold text-emerald-500 mt-1">↑ +12% ce mois</div>
                 </div>
-                <div className="bg-white border border-slate-200 p-4 rounded-none shadow-sm">
+                <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Taux Présence</span>
                   <span className="text-lg font-black text-slate-900">96.8 %</span>
                   <div className="text-[9px] font-bold text-amber-500 mt-1">Stables aujourd'hui</div>
                 </div>
-                <div className="bg-white border border-slate-200 p-4 rounded-none shadow-sm">
+                <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Parents Actifs</span>
                   <span className="text-lg font-black text-slate-900">432 Connectés</span>
                   <div className="text-[9px] font-bold text-blue-500 mt-1">Via Web Push & SMS</div>
@@ -243,7 +238,7 @@ export const LandingPage: React.FC = () => {
               </div>
 
               {/* Transactions list mockup */}
-              <div className="bg-white border border-slate-200 p-4 rounded-none shadow-sm">
+              <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
                 <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-wider mb-3 pb-2 border-b border-slate-100">Derniers Paiements Mobile Money</h4>
                 <div className="space-y-2.5 text-[9px]">
                   <div className="flex justify-between items-center text-slate-600">
@@ -287,14 +282,14 @@ export const LandingPage: React.FC = () => {
             {features.map((feat, idx) => (
               <div 
                 key={idx} 
-                className={`border p-6 md:p-8 rounded-none shadow-sm flex flex-col justify-between transition-all hover:shadow-md ${feat.className}`}
+                className={`border p-6 md:p-8 rounded-3xl shadow-sm flex flex-col justify-between transition-all hover:shadow-md ${feat.className}`}
               >
                 <div>
                   <div className="flex justify-between items-start mb-6">
-                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-none inline-block">
+                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl inline-block">
                       {feat.icon}
                     </div>
-                    <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                    <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full">
                       {feat.badge}
                     </span>
                   </div>
@@ -349,15 +344,15 @@ export const LandingPage: React.FC = () => {
           <div className="text-center mb-16 space-y-4">
             <h2 className="text-xs font-black uppercase tracking-widest text-amber-600">Tarifs Transparent</h2>
             <h3 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase">
-              Une tarification claire et adaptée
+              Tarifs clairs et adaptés
             </h3>
             <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm">
-              Commencez à digitaliser votre établissement dès aujourd'hui sans engagement.
+              Commencez sans engagement dès aujourd'hui.
             </p>
           </div>
 
           {/* Card Pricing */}
-          <div className="max-w-sm mx-auto bg-white border border-slate-200 p-8 rounded-none shadow-xl relative overflow-hidden">
+          <div className="max-w-sm mx-auto bg-white border border-slate-200 p-8 rounded-3xl shadow-xl relative overflow-hidden">
             {/* Populaire badge */}
             <div className="absolute top-4 right-[-32px] rotate-45 bg-amber-500 border-y border-amber-600 text-[8px] font-black uppercase tracking-widest text-slate-900 py-1.5 px-10 text-center select-none">
               Essai Gratuit
@@ -365,8 +360,8 @@ export const LandingPage: React.FC = () => {
 
             <div className="mb-6">
               <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">Formule Unique</h4>
-              <span className="text-4xl font-black tracking-tight text-slate-950">60 Jours Gratuit</span>
-              <p className="text-xs text-slate-500 mt-2">Puis un abonnement annuel transparent basé sur la taille de votre école.</p>
+              <span className="text-4xl font-black tracking-tight text-slate-950">60 Jours d'essai</span>
+              <p className="text-xs text-slate-500 mt-2">Puis un abonnement annuel adapté aux effectifs de votre école.</p>
             </div>
 
             <ul className="space-y-3.5 text-xs text-slate-600 mb-8 border-t border-slate-100 pt-6">
@@ -390,7 +385,7 @@ export const LandingPage: React.FC = () => {
 
             <button 
               onClick={() => navigate('/creer-compte')}
-              className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs uppercase tracking-widest py-4 rounded-none border border-amber-600 shadow-md active:scale-95 transition-all"
+              className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs uppercase tracking-widest py-4 rounded-xl border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer"
             >
               Démarrer l'essai gratuit
             </button>
@@ -399,21 +394,26 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── SECTION FINAL CTA ────────────────────────────── */}
-      <section className="bg-slate-950 text-white py-20 text-center relative border-t border-slate-800">
-        <div className="max-w-4xl mx-auto px-4 space-y-8">
-          <h2 className="text-3xl md:text-5xl font-black tracking-tight uppercase leading-none">
-            Prêt à transformer votre établissement ?
-          </h2>
-          <p className="text-slate-400 max-w-xl mx-auto text-xs md:text-sm">
-            Rejoignez les dizaines d'écoles qui ont déjà fait le pas vers une gestion moderne en Afrique de l'Ouest.
-          </p>
-          <button 
-            onClick={() => navigate('/creer-compte')}
-            className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-none border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all inline-flex items-center gap-2"
-          >
-            Créer un compte établissement
-            <ArrowRight className="w-4 h-4" />
-          </button>
+      <section className="bg-white py-16 text-center relative">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="bg-slate-950 text-white rounded-3xl p-12 md:p-16 relative overflow-hidden shadow-xl">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+            <div className="relative z-10 space-y-6 max-w-2xl mx-auto">
+              <h2 className="text-2xl md:text-4xl font-black tracking-tight uppercase leading-snug">
+                Prêt à simplifier la gestion de votre école ?
+              </h2>
+              <p className="text-slate-400 text-xs md:text-sm leading-relaxed">
+                Rejoignez les établissements d'Afrique de l'Ouest qui font confiance à notre plateforme pour leur scolarité et leurs encaissements.
+              </p>
+              <button 
+                onClick={() => navigate('/creer-compte')}
+                className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all inline-flex items-center gap-2 cursor-pointer"
+              >
+                Créer un compte établissement
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
