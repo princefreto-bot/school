@@ -535,7 +535,7 @@ async function _autoAssignBadgesSync(parentId, studentId, schoolSlug) {
 
 /**
  * GET /api/parent/license-pricing
- * Calcule le prix des licences (1-2 enfants = 2000 F/chacun, 3-4 = 5000 F, 5+ = 7000 F)
+ * Calcule le prix des licences (1 enfant = 1500 F, 3 = 4000 F, 5 = 7000 F)
  */
 async function getLicensePricing(req, res) {
     const { id: parentId, schoolSlug } = req.user;
@@ -551,14 +551,16 @@ async function getLicensePricing(req, res) {
         const count = links ? links.length : 0;
 
         let totalPrice = 0;
-        let originalPrice = count * 2000;
+        let originalPrice = count * 1500;
         
         if (count === 1) {
-            totalPrice = 2000;
+            totalPrice = 1500;
         } else if (count === 2) {
+            totalPrice = 3000;
+        } else if (count === 3) {
             totalPrice = 4000;
-        } else if (count === 3 || count === 4) {
-            totalPrice = 5000;
+        } else if (count === 4) {
+            totalPrice = 5500;
         } else if (count >= 5) {
             totalPrice = 7000;
         }
@@ -570,7 +572,7 @@ async function getLicensePricing(req, res) {
             totalPrice,
             originalPrice,
             discount,
-            pricePerChild: count > 0 ? Math.round(totalPrice / count) : 2000
+            pricePerChild: count > 0 ? Math.round(totalPrice / count) : 1500
         });
     } catch (err) {
         return res.status(500).json({ error: err.message });

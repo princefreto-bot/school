@@ -180,7 +180,7 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
                                         </div>
                                     )}
                                     <p className="text-[10px] text-slate-400 leading-snug mt-2 italic">
-                                        💡 Forfait 10 mois : 1-2 enfants = 2000 F / enfant. 3-4 enfants = 5000 F total. 5+ enfants = 7000 F total.
+                                        💡 Tarif Annuel : 1 enfant = 1500 F. 3 enfants = 4000 F total. 5 enfants = 7000 F total.
                                     </p>
                                 </div>
                             )}

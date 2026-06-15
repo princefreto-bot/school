@@ -227,7 +227,7 @@ export const ParentDashboard: React.FC = () => {
         );
     }
 
-    const hasUnlicensedChild = children.length > 0 && children.some(child => (child.licenseStatus || 'inactive') !== 'active');
+    const hasUnlicensedChild = false; // Désactivé temporairement pour vérification des fonctionnalités
 
     return (
         <>
