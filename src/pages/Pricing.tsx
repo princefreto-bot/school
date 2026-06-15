@@ -1,86 +1,90 @@
 // ============================================================
-// PAGE TARIFICATION (PRICING) — Modern, Premium, Rounded Borders
+// PAGE TARIFICATION (PRICING) — Uniquement Annuelle & Structurée
 // ============================================================
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, HelpCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export const Pricing: React.FC = () => {
   const navigate = useNavigate();
-  const [billingPeriod, setBillingPeriod] = useState<'annual' | 'monthly'>('annual');
 
-  const plans = [
+  const pricingStructure = [
     {
-      name: "Essai Gratuit",
-      price: "0 F CFA",
-      period: "pendant 60 jours",
-      description: "Découvrez l'ensemble de la plateforme sans aucun engagement financier.",
+      type: "Pour l'Établissement",
+      name: "Licence Annuelle École",
+      price: "35 000 F CFA",
+      period: "par an / par école",
+      description: "Abonnement fixe obligatoire pour l'activation technique de votre établissement scolaire.",
       features: [
-        "Jusqu'à 100 élèves gérés",
-        "Encaissements Mobile Money activés",
-        "Bulletins scolaires et notes illimités",
-        "Espace parents d'élèves inclus",
-        "Support par e-mail et WhatsApp"
+        "Accès complet à la console d'administration",
+        "Espace enseignant pour la saisie des notes et moyennes",
+        "Impression et édition des bulletins scolaires au format officiel",
+        "Système de pointage et présence des élèves",
+        "Génération de cartes d'identité scolaires avec QR Code",
+        "Configuration des frais de scolarité personnalisés"
       ],
-      buttonText: "Démarrer l'essai gratuit",
-      popular: false,
-      ctaAction: () => navigate('/creer-compte'),
-      borderColor: "border-slate-200"
-    },
-    {
-      name: "Standard",
-      price: billingPeriod === 'annual' ? "1 000 F CFA" : "150 F CFA",
-      period: billingPeriod === 'annual' ? "par élève / an" : "par élève / mois",
-      description: "La formule idéale pour piloter l'ensemble de votre établissement en toute autonomie.",
-      features: [
-        "Élèves et classes illimités",
-        "Encaissements Wave, T-Money, Flooz, MTN, Orange Money",
-        "Bulletins de notes officiels (Moyennes auto)",
-        "Envoi de relevés de notes et notifications SMS",
-        "Cartes d'identité scolaires avec QR Code",
-        "Support prioritaire WhatsApp 6j/7"
-      ],
-      buttonText: "Activer mon école",
+      buttonText: "Activer mon établissement",
       popular: true,
       ctaAction: () => navigate('/creer-compte'),
       borderColor: "border-amber-500 shadow-amber-500/10 shadow-lg"
     },
     {
-      name: "Grand Groupe",
-      price: "Sur Mesure",
-      period: "devis personnalisé",
-      description: "Pour les grands complexes scolaires et les réseaux multi-établissements.",
+      type: "Pour les Parents d'Élèves",
+      name: "Abonnement Élève",
+      price: "1 500 F CFA",
+      period: "par élève / par an",
+      description: "Contribution annuelle par élève pour l'accès complet des parents au suivi scolaire.",
       features: [
-        "Toutes les fonctionnalités incluses",
-        "Multi-établissements (Console centrale)",
-        "Développement de modules spécifiques",
-        "Intégration comptable avancée",
-        "Gestionnaire de compte dédié",
-        "Support prioritaire 24h/24 & 7j/7"
+        "Notification en temps réel (Push & SMS) des notes et moyennes",
+        "Alertes instantanées à chaque scan de présence (arrivée / départ)",
+        "Paiements de la scolarité par Mobile Money sans frais cachés",
+        "Accès aux exercices scolaires gratuits à la maison",
+        "Messagerie en ligne directe avec la vie scolaire"
       ],
-      buttonText: "Contacter le support",
+      buttonText: "Découvrir le portail",
       popular: false,
-      ctaAction: () => window.location.href = "mailto:contact@dghubschool.com",
+      ctaAction: () => navigate('/login'),
       borderColor: "border-slate-200"
+    }
+  ];
+
+  const packs = [
+    {
+      title: "Tarif Individuel",
+      sub: "1 Élève",
+      price: "1 500 F CFA",
+      desc: "par élève et par an"
+    },
+    {
+      title: "Pack Famille Réduit",
+      sub: "3 Élèves",
+      price: "4 000 F CFA",
+      desc: "au lieu de 4 500 F CFA / an"
+    },
+    {
+      title: "Pack Grande Famille",
+      sub: "5 Élèves",
+      price: "7 000 F CFA",
+      desc: "au lieu de 7 500 F CFA / an"
     }
   ];
 
   const faqs = [
     {
-      q: "Comment fonctionnent les frais de scolarité via Mobile Money ?",
-      a: "Les parents peuvent payer la scolarité de leurs enfants directement sur mobile via Wave, T-Money, Flooz, MTN ou Orange Money. L'argent est instantanément versé sur le compte de l'école et le reçu est généré automatiquement."
+      q: "Comment est facturé l'abonnement de l'établissement ?",
+      a: "L'école s'acquitte d'un montant annuel unique de 35 000 F CFA pour activer la licence technique. Cette licence permet d'ouvrir les portails de gestion administrative, financière et académique."
     },
     {
-      q: "Que se passe-t-il à la fin de l'essai de 60 jours ?",
-      a: "Vous pouvez continuer à utiliser la plateforme en choisissant notre formule standard ou grand groupe. Aucune carte bancaire n'est requise pour l'essai gratuit, vos données restent enregistrées et prêtes à l'emploi."
+      q: "Qui paie la contribution de 1 500 F CFA par élève ?",
+      a: "Cette contribution annuelle de 1 500 F CFA par élève est à la charge des parents lors de la première connexion. Elle donne accès à tout le suivi (SMS, présences, notes, exercices). Des tarifs réduits s'appliquent automatiquement pour les fratries (4 000 F CFA pour 3 élèves et 7 000 F CFA pour 5 élèves)."
     },
     {
-      q: "Est-il possible d'imprimer les cartes scolaires QR Code nous-mêmes ?",
-      a: "Oui. DGhubSchool génère un document PDF haute résolution respectant la norme ISO 7810. Vous pouvez l'imprimer directement avec n'importe quelle imprimante de cartes PVC standard ou sur papier cartonné."
+      q: "Y a-t-il des frais mensuels ?",
+      a: "Non. DGhubSchool fonctionne uniquement sur un modèle de facturation annuelle sans aucun engagement mensuel ni coût additionnel masqué."
     },
     {
-      q: "Mes données d'élèves sont-elles sécurisées ?",
-      a: "Toutes les données sont chiffrées en transit et stockées sur des serveurs sécurisés. Nous effectuons des sauvegardes automatiques quotidiennes pour garantir que vous ne perdiez jamais vos bulletins scolaires ou vos historiques de caisse."
+      q: "Quels sont les opérateurs Mobile Money supportés ?",
+      a: "Nous supportons Wave, T-Money, Flooz, MTN Mobile Money et Orange Money. Les frais de transfert standards s'appliquent mais la plateforme ne prend aucun pourcentage sur les règlements de scolarité."
     }
   ];
 
@@ -108,46 +112,31 @@ export const Pricing: React.FC = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative z-10 max-w-5xl mx-auto px-4 pt-12 md:pt-16 pb-8 text-center">
-        <h1 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight mb-4">
-          Une tarification claire et flexible
-        </h1>
-        <p className="text-sm md:text-lg text-slate-500 max-w-2xl mx-auto mb-10">
-          Choisissez la formule qui s'adapte aux effectifs de votre établissement scolaire, sans aucun frais caché.
-        </p>
-
-        {/* Toggle Billing Period */}
-        <div className="inline-flex items-center bg-slate-100 p-1.5 rounded-2xl mb-12">
-          <button
-            onClick={() => setBillingPeriod('annual')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${billingPeriod === 'annual' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-500 hover:text-slate-950'}`}
-          >
-            Facturation Annuelle (Recommandé)
-          </button>
-          <button
-            onClick={() => setBillingPeriod('monthly')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${billingPeriod === 'monthly' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-500 hover:text-slate-950'}`}
-          >
-            Mensuelle
-          </button>
+      <section className="relative z-10 max-w-4xl mx-auto px-4 pt-16 pb-6 text-center">
+        <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
+          🗓️ Tarification Annuelle Unique
         </div>
+        <h1 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight mb-4">
+          Une tarification simple et transparente
+        </h1>
+        <p className="text-sm md:text-lg text-slate-500 max-w-2xl mx-auto">
+          DGhubSchool propose un modèle annuel clair réparti entre la licence établissement et l'accès de suivi pour les parents d'élèves.
+        </p>
       </section>
 
-      {/* Pricing Grid */}
-      <section className="relative z-10 max-w-6xl mx-auto px-4 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {plans.map((plan, idx) => (
+      {/* Core Pricing Grid */}
+      <section className="relative z-10 max-w-5xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+          {pricingStructure.map((plan, idx) => (
             <div
               key={idx}
               className={`bg-white border p-8 rounded-3xl flex flex-col justify-between relative transition-all hover:shadow-xl ${plan.borderColor}`}
             >
-              {plan.popular && (
-                <div className="absolute top-4 right-4 bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
-                  Recommandé
-                </div>
-              )}
               <div>
-                <h3 className="text-lg font-black text-slate-950 uppercase tracking-wide mb-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 border border-amber-100 px-3 py-1 rounded-full inline-block mb-4">
+                  {plan.type}
+                </span>
+                <h3 className="text-xl font-black text-slate-950 uppercase tracking-wide mb-2">
                   {plan.name}
                 </h3>
                 <p className="text-xs text-slate-400 mb-6">
@@ -187,8 +176,33 @@ export const Pricing: React.FC = () => {
         </div>
       </section>
 
+      {/* Fratrie / Packs Section */}
+      <section className="relative z-10 bg-slate-50 border-y border-slate-200 py-16">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h3 className="text-xl md:text-3xl font-black text-slate-950 uppercase tracking-tight mb-2">
+              Tarifs Dégressifs Fratries (Parents)
+            </h3>
+            <p className="text-xs md:text-sm text-slate-500">
+              Des tarifs préférentiels adaptés pour l'inscription de plusieurs enfants d'une même famille.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {packs.map((pack, idx) => (
+              <div key={idx} className="bg-white border border-slate-200 p-6 rounded-2xl text-center shadow-sm">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">{pack.title}</span>
+                <span className="text-sm font-black text-slate-900 block mb-3">{pack.sub}</span>
+                <span className="text-2xl font-black text-amber-500 tracking-tight block">{planPriceFormat(pack.price)}</span>
+                <span className="text-[10px] text-slate-500 mt-1 block font-medium">{pack.desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
-      <section className="bg-slate-50 border-t border-slate-200 py-20">
+      <section className="bg-white py-16">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-16 space-y-4">
             <h2 className="text-xs font-black uppercase tracking-widest text-amber-600 flex items-center justify-center gap-1.5">
@@ -197,14 +211,11 @@ export const Pricing: React.FC = () => {
             <h3 className="text-2xl md:text-4xl font-black text-slate-950 uppercase tracking-tight">
               Questions Fréquentes
             </h3>
-            <p className="text-xs md:text-sm text-slate-400">
-              Des réponses claires à toutes vos questions.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+              <div key={idx} className="bg-slate-50 border border-slate-100 p-6 rounded-2xl shadow-sm">
                 <h4 className="text-sm font-black text-slate-900 mb-3 leading-snug">
                   {faq.q}
                 </h4>
@@ -214,25 +225,6 @@ export const Pricing: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Footer CTA */}
-      <section className="bg-white py-16 text-center relative border-t border-slate-100">
-        <div className="max-w-4xl mx-auto px-4 space-y-6">
-          <h2 className="text-2xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
-            Prêt à moderniser votre gestion scolaire ?
-          </h2>
-          <p className="text-xs md:text-sm text-slate-400 max-w-lg mx-auto">
-            Lancez l'essai de 60 jours dès maintenant, aucune carte bancaire n'est demandée.
-          </p>
-          <button 
-            onClick={() => navigate('/creer-compte')}
-            className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all inline-flex items-center gap-2 cursor-pointer"
-          >
-            Commencer l'essai de 60 jours
-            <ArrowRight className="w-4 h-4" />
-          </button>
         </div>
       </section>
 
@@ -256,3 +248,8 @@ export const Pricing: React.FC = () => {
     </div>
   );
 };
+
+// Helper simple pour éviter de répéter
+function planPriceFormat(val: string) {
+  return val;
+}

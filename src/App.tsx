@@ -39,6 +39,7 @@ const ParentRecus = lazy(() => import('./pages/parent/ParentRecus').then(m => ({
 const ParentBadges = lazy(() => import('./pages/parent/ParentBadges').then(m => ({ default: m.ParentBadges })));
 const ParentMessages = lazy(() => import('./pages/parent/ParentMessages').then(m => ({ default: m.ParentMessages })));
 const ParentNotes = lazy(() => import('./pages/parent/ParentNotes').then(m => ({ default: m.ParentNotes })));
+const ParentCourses = lazy(() => import('./pages/parent/ParentCourses').then(m => ({ default: m.ParentCourses })));
 const ParentsList = lazy(() => import('./pages/ParentsList').then(m => ({ default: m.ParentsList })));
 const ImportExport = lazy(() => import('./components/ImportExport').then(m => ({ default: m.ImportExport })));
 const ChatWindow = lazy(() => import('./components/ChatWindow').then(m => ({ default: m.ChatWindow })));
@@ -49,6 +50,7 @@ const CreatorDashboard = lazy(() => import('./pages/creator/CreatorDashboard').t
 const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
 const Pricing = lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pricing })));
 const APropos = lazy(() => import('./pages/APropos').then(m => ({ default: m.APropos })));
+const Features = lazy(() => import('./pages/Features').then(m => ({ default: m.Features })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-12">
@@ -81,7 +83,7 @@ const PageContent: React.FC = () => {
 
   // Sécurité — Empêcher un parent de voir une page admin même si le store est désynchronisé
   if (user?.role === 'parent') {
-    const parentPages = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes'];
+    const parentPages = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes', 'parent_courses'];
     if (!parentPages.includes(currentPage as any)) {
       return <ParentDashboard />;
     }
@@ -130,6 +132,7 @@ const PageContent: React.FC = () => {
     case 'parent_badges': return <ParentBadges />;
     case 'parent_messages': return <ParentMessages />;
     case 'parent_notes': return <ParentNotes />;
+    case 'parent_courses': return <ParentCourses />;
     case 'parents_list': return <ParentsList />;
     case 'import_export': return <ImportExport />;
     case 'chat': return <ChatWindow />;
@@ -166,9 +169,9 @@ export function App() {
 
   // Redirect logic based on login state
   React.useEffect(() => {
-    const publicPaths = ['/', '/login', '/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos'];
+    const publicPaths = ['/', '/login', '/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features'];
     if (isAuthenticated) {
-      if (location.pathname === '/login' || location.pathname === '/portail-ecole' || location.pathname === '/creer-compte' || location.pathname === '/confirmer-email' || location.pathname === '/pricing' || location.pathname === '/a-propos') {
+      if (location.pathname === '/login' || location.pathname === '/portail-ecole' || location.pathname === '/creer-compte' || location.pathname === '/confirmer-email' || location.pathname === '/pricing' || location.pathname === '/a-propos' || location.pathname === '/features') {
         navigate('/', { replace: true });
       }
     } else {
@@ -247,6 +250,7 @@ export function App() {
       <Route path="/creer-compte" element={<CreerCompte />} />
       <Route path="/pricing" element={<Suspense fallback={<LoadingSpinner />}><Pricing /></Suspense>} />
       <Route path="/a-propos" element={<Suspense fallback={<LoadingSpinner />}><APropos /></Suspense>} />
+      <Route path="/features" element={<Suspense fallback={<LoadingSpinner />}><Features /></Suspense>} />
       <Route 
         path="/login" 
         element={
