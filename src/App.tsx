@@ -47,6 +47,8 @@ const SuperAdminDashboard = lazy(() => import('./pages/superadmin/SuperAdminDash
 const SelectionEnseignant = lazy(() => import('./pages/SelectionEnseignant').then(m => ({ default: m.SelectionEnseignant })));
 const CreatorDashboard = lazy(() => import('./pages/creator/CreatorDashboard').then(m => ({ default: m.CreatorDashboard })));
 const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
+const Pricing = lazy(() => import('./pages/Pricing').then(m => ({ default: m.Pricing })));
+const APropos = lazy(() => import('./pages/APropos').then(m => ({ default: m.APropos })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-12">
@@ -164,9 +166,9 @@ export function App() {
 
   // Redirect logic based on login state
   React.useEffect(() => {
-    const publicPaths = ['/', '/login', '/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email'];
+    const publicPaths = ['/', '/login', '/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos'];
     if (isAuthenticated) {
-      if (location.pathname === '/login' || location.pathname === '/portail-ecole' || location.pathname === '/creer-compte' || location.pathname === '/confirmer-email') {
+      if (location.pathname === '/login' || location.pathname === '/portail-ecole' || location.pathname === '/creer-compte' || location.pathname === '/confirmer-email' || location.pathname === '/pricing' || location.pathname === '/a-propos') {
         navigate('/', { replace: true });
       }
     } else {
@@ -243,6 +245,8 @@ export function App() {
       <Route path="/confirmer-email" element={<ConfirmerEmail />} />
       <Route path="/portail-ecole" element={<PortailEcole />} />
       <Route path="/creer-compte" element={<CreerCompte />} />
+      <Route path="/pricing" element={<Suspense fallback={<LoadingSpinner />}><Pricing /></Suspense>} />
+      <Route path="/a-propos" element={<Suspense fallback={<LoadingSpinner />}><APropos /></Suspense>} />
       <Route 
         path="/login" 
         element={

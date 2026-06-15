@@ -80,7 +80,8 @@ export const LandingPage: React.FC = () => {
           {/* Liens Navigation - Desktop */}
           <div className="hidden md:flex items-center gap-8 text-xs font-black uppercase tracking-wider text-slate-500">
             <a href="#features" className="hover:text-amber-500 transition-colors">Fonctionnalités</a>
-            <a href="#pricing" className="hover:text-amber-500 transition-colors">Tarification</a>
+            <button onClick={() => navigate('/pricing')} className="hover:text-amber-500 transition-colors cursor-pointer">Tarification</button>
+            <button onClick={() => navigate('/a-propos')} className="hover:text-amber-500 transition-colors cursor-pointer">À Propos</button>
             <a href="#stats" className="hover:text-amber-500 transition-colors">Preuve Sociale</a>
           </div>
 
@@ -119,13 +120,18 @@ export const LandingPage: React.FC = () => {
             >
               Fonctionnalités
             </a>
-            <a 
-              href="#pricing" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-bold text-slate-700 hover:text-amber-500 transition-colors py-2"
+            <button 
+              onClick={() => { setMobileMenuOpen(false); navigate('/pricing'); }}
+              className="text-sm font-bold text-slate-700 hover:text-amber-500 transition-colors py-2 text-left cursor-pointer"
             >
               Tarification
-            </a>
+            </button>
+            <button 
+              onClick={() => { setMobileMenuOpen(false); navigate('/a-propos'); }}
+              className="text-sm font-bold text-slate-700 hover:text-amber-500 transition-colors py-2 text-left cursor-pointer"
+            >
+              À Propos
+            </button>
             <a 
               href="#stats" 
               onClick={() => setMobileMenuOpen(false)}
@@ -431,6 +437,8 @@ export const LandingPage: React.FC = () => {
 
           {/* Mentions et liens */}
           <div className="flex gap-6 text-[10px] font-black uppercase tracking-wider">
+            <a href="/#/pricing" className="hover:text-amber-500 transition-colors">Tarifs</a>
+            <a href="/#/a-propos" className="hover:text-amber-500 transition-colors">À Propos</a>
             <a href="/#/conditions-utilisation" target="_blank" className="hover:text-amber-500 transition-colors">CGU</a>
             <a href="/#/confidentialite" target="_blank" className="hover:text-amber-500 transition-colors">Confidentialité</a>
             <a href="mailto:contact@dghubschool.com" className="hover:text-amber-500 transition-colors">Contact</a>
