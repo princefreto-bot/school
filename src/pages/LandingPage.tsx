@@ -1,7 +1,7 @@
 // ============================================================
 // PAGE D'ACCUEIL SAAS — Style Brutaliste Épuré & Bords Droits
 // ============================================================
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   CreditCard, 
@@ -14,17 +14,33 @@ import {
   X 
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
-
+import { BACKEND_URL } from '../config';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [dbStats, setDbStats] = useState({ schools: 0, students: 0, documents: 0 });
+
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/api/public/stats`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) {
+          setDbStats({
+            schools: data.schools || 0, 
+            students: data.students || 0,
+            documents: data.documents || 0
+          });
+        }
+      })
+      .catch(err => console.error("Erreur récupération des statistiques:", err));
+  }, []);
 
   // Statistiques de la plateforme (KPIs chiffrés réels)
   const stats = [
-    { value: "+120", label: "Écoles et lycées partenaires" },
-    { value: "+45 000", label: "Élèves inscrits et gérés" },
-    { value: "+150 000", label: "Bulletins scolaires édités" },
+    { value: `+${dbStats.schools.toLocaleString('fr-FR')}`, label: "Écoles et lycées partenaires" },
+    { value: `+${dbStats.students.toLocaleString('fr-FR')}`, label: "Élèves inscrits et gérés" },
+    { value: `+${dbStats.documents.toLocaleString('fr-FR')}`, label: "Bulletins et documents édités" },
     { value: "99.9%", label: "Taux de disponibilité réseau" },
   ];
 

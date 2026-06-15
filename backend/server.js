@@ -86,6 +86,50 @@ app.get('/api/schools', async (req, res) => {
     }
 });
 
+// Route publique pour les statistiques globales
+app.get('/api/public/stats', async (req, res) => {
+    try {
+        const { count: totalSchools } = await supabase
+            .from('schools')
+            .select('*', { count: 'exact', head: true })
+            .in('status', ['active', 'trial']);
+            
+        const { count: totalDocuments } = await supabase
+            .from('student_documents')
+            .select('*', { count: 'exact', head: true });
+
+        const { data: schools } = await supabase
+            .from('schools').select('slug').in('status', ['active', 'trial']);
+            
+        let totalStudents = 0;
+        let totalBulletins = 0;
+        
+        if (schools) {
+            for (let s of schools) {
+                try {
+                    const { count: sCount } = await supabase
+                        .from(`students_${s.slug}`)
+                        .select('*', { count: 'exact', head: true });
+                    totalStudents += (sCount || 0);
+                    
+                    const { count: bCount } = await supabase
+                        .from(`notes_${s.slug}`)
+                        .select('*', { count: 'exact', head: true });
+                    totalBulletins += (bCount || 0);
+                } catch(e) {}
+            }
+        }
+        
+        res.json({
+            schools: totalSchools || 0,
+            students: totalStudents || 0,
+            documents: (totalDocuments || 0) + (totalBulletins || 0)
+        });
+    } catch (err) {
+        res.status(500).json({ error: 'Erreur récupération stats' });
+    }
+});
+
 // ── Health Check ──────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
     res.json({
