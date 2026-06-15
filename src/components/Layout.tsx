@@ -5,7 +5,7 @@ import { useStore } from '../store/useStore';
 import { AppPage } from '../types';
 import { getFilteredNavItems, isAdminRole } from '../utils/rolePermissions';
 import {
-  GraduationCap, LayoutDashboard, Users, CreditCard,
+  LayoutDashboard, Users, CreditCard,
   BarChart3, FileText, Settings, LogOut, Menu, X,
   Bell, ChevronRight, Target, Award, MessageSquare,
   ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone,
@@ -424,7 +424,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           className="hidden lg:block fixed top-0 left-0 bottom-0 z-50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] p-4"
           style={{ width: sidebarW }}
         >
-          <SidebarContent {...sidebarProps} onToggleCollapse={toggleCollapse} />
+          <SidebarContent {...sidebarProps} />
         </aside>
   
         {/* ── Mobile Sidebar Overlay ── */}

@@ -4,14 +4,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  GraduationCap, 
   CreditCard, 
   BookOpen, 
   Users, 
   QrCode, 
-  MessageSquare, 
-  ShieldCheck, 
-  TrendingUp, 
   ArrowRight, 
   Check, 
   Menu, 
