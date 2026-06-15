@@ -22,6 +22,8 @@ export const ConfirmerEmail: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
+  const [resendStatus, setResendStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Refs for the 6 digit inputs
   const inputRefs = [
@@ -39,6 +41,15 @@ export const ConfirmerEmail: React.FC = () => {
       setEmail((location.state as any).email);
     }
   }, [location]);
+
+  // Timer for resend code cooldown
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+    const interval = setInterval(() => {
+      setResendCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [resendCountdown]);
 
   // Handle digit inputs
   const handleDigitChange = (index: number, value: string) => {
@@ -70,6 +81,37 @@ export const ConfirmerEmail: React.FC = () => {
     const digits = pastedData.split('');
     setCodeDigits(digits);
     inputRefs[5].current?.focus();
+  };
+
+  const handleResendCode = async () => {
+    if (!email) {
+      setError("L'adresse email est requise pour renvoyer le code.");
+      return;
+    }
+    
+    setError('');
+    setResendStatus(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/resend-verification-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Une erreur est survenue lors du renvoi du code.");
+      }
+
+      setResendStatus({ type: 'success', message: data.message || "Un nouveau code de validation a été envoyé." });
+      setResendCountdown(60); // 60 seconds cooldown
+    } catch (err: any) {
+      setResendStatus({ type: 'error', message: err.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerify = async (e: React.FormEvent) => {
@@ -214,6 +256,24 @@ export const ConfirmerEmail: React.FC = () => {
           </div>
         )}
 
+        {/* Message de statut du renvoi de code */}
+        {resendStatus && (
+          <div className={`flex items-start gap-2.5 p-3.5 text-xs border rounded-none mb-6 ${
+            resendStatus.type === 'success' 
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-250/50' 
+              : 'bg-red-50 text-red-700 border-red-200/50'
+          }`}>
+            {resendStatus.type === 'success' ? (
+              <div className="w-5 h-5 bg-emerald-500 rounded-none flex items-center justify-center text-white shrink-0">
+                <Check className="w-3.5 h-3.5" />
+              </div>
+            ) : (
+              <ShieldAlert className="w-4 h-4 mt-0.5 shrink-0" />
+            )}
+            <span className="font-semibold">{resendStatus.message}</span>
+          </div>
+        )}
+
         {/* Formulaire */}
         <form onSubmit={handleVerify} className="space-y-6">
           
@@ -267,6 +327,21 @@ export const ConfirmerEmail: React.FC = () => {
           >
             {loading ? 'Validation...' : 'Valider mon compte'}
           </button>
+
+          {/* Option de renvoi du code */}
+          <div className="text-center text-xs mt-4">
+            <span className="text-slate-500">Vous n'avez pas reçu l'e-mail ? </span>
+            <button
+              type="button"
+              onClick={handleResendCode}
+              disabled={loading || success || resendCountdown > 0}
+              className="text-amber-600 hover:text-amber-700 font-bold hover:underline transition-colors disabled:opacity-50 disabled:no-underline"
+            >
+              {resendCountdown > 0 
+                ? `Renvoyer dans ${resendCountdown}s` 
+                : 'Renvoyer le code'}
+            </button>
+          </div>
         </form>
 
         <div className="mt-8 text-center text-[10px] text-slate-400 select-none">

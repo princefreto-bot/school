@@ -393,6 +393,13 @@ async function registerSchoolRequest(req, res) {
             return res.status(409).json({ error: 'Cette adresse email est déjà enregistrée pour un autre établissement.' });
         }
 
+        // 2b. Nettoyer les demandes d'inscription non vérifiées existantes pour cet email
+        await supabase
+            .from('schools')
+            .delete()
+            .eq('email', email.trim().toLowerCase())
+            .eq('is_email_verified', false);
+
         // 3. Préparer le code à 6 chiffres
         const code = Math.floor(100000 + Math.random() * 900000).toString();
         const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 mins
@@ -460,17 +467,19 @@ async function verifySchoolEmail(req, res) {
     }
 
     try {
-        // 1. Trouver l'école en attente
-        const { data: school, error: fetchErr } = await supabase
+        // 1. Trouver les demandes d'inscription en attente pour cet email (la plus récente en premier)
+        const { data: pendingSchools, error: fetchErr } = await supabase
             .from('schools')
             .select('*')
             .eq('email', email.trim().toLowerCase())
             .eq('is_email_verified', false)
-            .maybeSingle();
+            .order('created_at', { ascending: false });
 
-        if (fetchErr || !school) {
+        if (fetchErr || !pendingSchools || pendingSchools.length === 0) {
             return res.status(404).json({ error: 'Aucune demande d\'inscription en attente trouvée pour cet email.' });
         }
+
+        const school = pendingSchools[0];
 
         // 2. Vérifier le code et sa validité temporelle
         if (school.email_verification_code !== code) {
@@ -529,6 +538,14 @@ async function verifySchoolEmail(req, res) {
 
         if (updateErr) throw updateErr;
 
+        // Nettoyer les autres demandes d'inscription non vérifiées pour cet email
+        await supabase
+            .from('schools')
+            .delete()
+            .eq('email', email.trim().toLowerCase())
+            .eq('is_email_verified', false)
+            .neq('id', school.id);
+
         console.log(`🏫 Nouvelle école enregistrée et validée par e-mail : ${school.name} (${school.slug})`);
 
         // Signer directement un token JWT pour connecter l'utilisateur
@@ -559,4 +576,66 @@ async function verifySchoolEmail(req, res) {
     }
 }
 
-module.exports = { register, login, deleteSelfAccount, updatePushToken, registerSchoolRequest, verifySchoolEmail };
+async function resendVerificationEmail(req, res) {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: 'L\'adresse email est requise.' });
+    }
+
+    try {
+        const cleanEmail = email.trim().toLowerCase();
+
+        // 1. Trouver la demande d'inscription la plus récente en attente
+        const { data: pendingSchools, error: fetchErr } = await supabase
+            .from('schools')
+            .select('*')
+            .eq('email', cleanEmail)
+            .eq('is_email_verified', false)
+            .order('created_at', { ascending: false });
+
+        if (fetchErr || !pendingSchools || pendingSchools.length === 0) {
+            return res.status(404).json({ error: 'Aucune demande d\'inscription en attente trouvée pour cet email.' });
+        }
+
+        const school = pendingSchools[0];
+
+        // 2. Générer un nouveau code
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 mins
+
+        // 3. Mettre à jour la demande avec le nouveau code et expiration
+        const { error: updateErr } = await supabase
+            .from('schools')
+            .update({
+                email_verification_code: code,
+                email_verification_expires: expiresAt
+            })
+            .eq('id', school.id);
+
+        if (updateErr) throw updateErr;
+
+        // 4. Renvoyer l'e-mail
+        const { sendVerificationEmail } = require('../utils/mailer');
+        try {
+            await sendVerificationEmail(cleanEmail, school.name, code);
+        } catch (mailErr) {
+            console.warn(`⚠️ [Mailer Warning] Échec du renvoi de l'e-mail de validation :`, mailErr.message);
+            console.log(`🔑 [CODE DE VALIDATION - RENVOI] E-mail: ${cleanEmail} | Code: ${code}`);
+            
+            if (process.env.NODE_ENV === 'production') {
+                throw mailErr;
+            }
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Un nouveau code de confirmation a été envoyé à votre adresse email.'
+        });
+    } catch (err) {
+        console.error('ResendVerificationEmail Error:', err.message);
+        return res.status(500).json({ error: 'Erreur lors du renvoi du code : ' + err.message });
+    }
+}
+
+module.exports = { register, login, deleteSelfAccount, updatePushToken, registerSchoolRequest, verifySchoolEmail, resendVerificationEmail };
