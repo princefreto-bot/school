@@ -207,7 +207,7 @@ const SidebarContent: React.FC<{
         {schoolLogo ? (
           <img src={schoolLogo} alt="" className="w-full h-full object-cover rounded-[20px]" />
         ) : (
-          <GraduationCap className="w-5 h-5 text-white relative z-10" />
+          <img src="/logo.jpeg" alt="" className="w-full h-full object-cover rounded-[20px] bg-white p-0.5" />
         )}
       </div>
 

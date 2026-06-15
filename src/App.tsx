@@ -46,6 +46,7 @@ const Annonces = lazy(() => import('./pages/Annonces').then(m => ({ default: m.A
 const SuperAdminDashboard = lazy(() => import('./pages/superadmin/SuperAdminDashboard').then(m => ({ default: m.SuperAdminDashboard })));
 const SelectionEnseignant = lazy(() => import('./pages/SelectionEnseignant').then(m => ({ default: m.SelectionEnseignant })));
 const CreatorDashboard = lazy(() => import('./pages/creator/CreatorDashboard').then(m => ({ default: m.CreatorDashboard })));
+const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-12">
@@ -163,14 +164,14 @@ export function App() {
 
   // Redirect logic based on login state
   React.useEffect(() => {
-    const publicPaths = ['/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email'];
+    const publicPaths = ['/', '/login', '/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email'];
     if (isAuthenticated) {
       if (location.pathname === '/login' || location.pathname === '/portail-ecole' || location.pathname === '/creer-compte' || location.pathname === '/confirmer-email') {
         navigate('/', { replace: true });
       }
     } else {
       if (!publicPaths.includes(location.pathname)) {
-        navigate('/login', { replace: true });
+        navigate('/', { replace: true });
       }
     }
   }, [isAuthenticated, location.pathname, navigate]);
@@ -259,7 +260,9 @@ export function App() {
               <AnnouncementPopup />
             </Layout>
           ) : (
-            <Navigate to="/login" replace />
+            <Suspense fallback={<LoadingSpinner />}>
+              <LandingPage />
+            </Suspense>
           )
         } 
       />

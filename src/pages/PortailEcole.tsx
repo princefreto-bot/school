@@ -91,8 +91,8 @@ export const PortailEcole: React.FC = () => {
         
         {/* En-tête */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-500/20">
-            <GraduationCap className="w-9 h-9 text-white" />
+          <div className="w-16 h-16 bg-white border border-slate-200 rounded-none flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-500/10 p-1">
+            <img src="/logo.jpeg" className="w-full h-full object-contain" alt="DGhubSchool" />
           </div>
           <h1 className="text-2xl md:text-3xl font-black text-slate-950 tracking-tight">Portail Établissement</h1>
           <p className="text-slate-500 text-xs md:text-sm mt-1 font-medium">Espace réservé à l'administration de l'école.</p>

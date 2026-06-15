@@ -23,8 +23,8 @@ const SLIDE_DURATION = 5000;
 
 const SchoolLogo: React.FC<{ size?: string }> = ({ size = "w-16 h-16" }) => {
   return (
-    <div className={`${size} bg-amber-500 rounded-none flex items-center justify-center mb-4 shadow-lg shadow-amber-500/20`}>
-      <GraduationCap className="w-1/2 h-1/2 text-white" />
+    <div className={`${size} bg-white border border-slate-200 rounded-none flex items-center justify-center mb-4 shadow-lg shadow-amber-500/10 p-1`}>
+      <img src="/logo.jpeg" className="w-full h-full object-contain" alt="DGhubSchool" />
     </div>
   );
 };
