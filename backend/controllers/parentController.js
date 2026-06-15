@@ -362,7 +362,15 @@ async function getParentData(req, res) {
             schoolStamp: dbSettings.school_stamp,
             messageRemerciement: dbSettings.message_remerciement,
             messageRappel: dbSettings.message_rappel,
-            tranches: dbSettings.tranches || []
+            tranches: dbSettings.tranches || [],
+            schoolMotto: dbSettings.school_motto || 'Travail-Rigueur-Succès',
+            schoolBp: dbSettings.school_bp || '80159',
+            schoolTelephone: dbSettings.school_telephone || '+228 90 17 79 66 / 99 41 40 47',
+            schoolAddress: dbSettings.school_address || 'Apéssito - TOGO',
+            schoolCurrency: dbSettings.school_currency || 'FCFA',
+            countryName: dbSettings.country_name || 'République Togolaise',
+            countryMotto: dbSettings.country_motto || 'Travail - Liberté - Patrie',
+            ministereName: dbSettings.ministere_name || 'Ministère de l\'Éducation Nationale'
         } : null;
 
         // 5. Détails des élèves (enfants)

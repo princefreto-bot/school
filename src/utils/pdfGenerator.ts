@@ -6,9 +6,13 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Student } from '../types';
+import { useStore } from '../store/useStore';
 
 // ── Utilitaires (inchangés) ──────────────────────────────────
-const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n).replace(/\s/g, '.') + ' FCFA';
+const fmtMoney = (n: number) => {
+  const currency = useStore.getState().schoolCurrency || 'FCFA';
+  return new Intl.NumberFormat('fr-FR').format(n).replace(/\s/g, '.') + ' ' + currency;
+};
 const fmtDate = (d?: string) => {
   const date = d ? new Date(d) : new Date();
   return date.toLocaleDateString('fr-FR').replace(/\//g, '.');
@@ -49,6 +53,15 @@ const drawOfficialHeader = (
   const w = doc.internal.pageSize.getWidth();
   let y = 14;
 
+  const state = useStore.getState();
+  const schoolMotto = state.schoolMotto || 'Travail-Rigueur-Succès';
+  const schoolBp = state.schoolBp || '80159';
+  const schoolTelephone = state.schoolTelephone || '+228 90 17 79 66 / 99 41 40 47';
+  const schoolAddress = state.schoolAddress || 'Apéssito - TOGO';
+  const countryName = state.countryName || 'République Togolaise';
+  const countryMotto = state.countryMotto || 'Travail - Liberté - Patrie';
+  const ministereName = state.ministereName || 'Ministère de l\'Éducation Nationale';
+
   doc.setTextColor(0, 0, 0);
   doc.setFont('times', 'bold');
 
@@ -64,15 +77,15 @@ const drawOfficialHeader = (
   
   // Bloc Ministère (Centre-Gauche)
   doc.setFontSize(10);
-  doc.text('RÉPUBLIQUE TOGOLAISE', centerX - 35, y, { align: 'center' });
+  doc.text(countryName.toUpperCase(), centerX - 35, y, { align: 'center' });
   doc.setFont('times', 'italic');
   doc.setFontSize(8);
-  doc.text('Travail - Liberté - Patrie', centerX - 35, y + 5, { align: 'center' });
+  doc.text(countryMotto, centerX - 35, y + 5, { align: 'center' });
   doc.setLineWidth(0.3);
   doc.line(centerX - 42, y + 7, centerX - 28, y + 7);
   doc.setFont('times', 'bold');
   doc.setFontSize(10.5);
-  doc.text('MINISTERE DE L\'EDUCATION NATIONALE', centerX - 35, y + 13, { align: 'center' });
+  doc.text(ministereName.toUpperCase(), centerX - 35, y + 13, { align: 'center' });
   doc.setFontSize(9.5);
   doc.text('DIRECTION RÉGIONALE DE L\'ÉDUCATION', centerX - 35, y + 18, { align: 'center' });
   doc.text('INSPECTION DE L\'ENSEIGNEMENT GENERAL', centerX - 35, y + 23, { align: 'center' });
@@ -83,11 +96,11 @@ const drawOfficialHeader = (
   doc.text(schoolName.toUpperCase(), centerX + 35, y, { align: 'center' });
   doc.setFontSize(11);
   doc.setFont('times', 'italic');
-  doc.text('Travail-Rigueur-Succès', centerX + 35, y + 7, { align: 'center' });
+  doc.text(schoolMotto, centerX + 35, y + 7, { align: 'center' });
   doc.setFont('times', 'bold');
   doc.setFontSize(10);
-  doc.text('Tél: +228 90 17 79 66 / 99 41 40 47', centerX + 35, y + 14, { align: 'center' });
-  doc.text('BP: 80159 Apéssito - TOGO', centerX + 35, y + 19, { align: 'center' });
+  doc.text(`Tél: ${schoolTelephone}`, centerX + 35, y + 14, { align: 'center' });
+  doc.text(`BP: ${schoolBp} ${schoolAddress}`, centerX + 35, y + 19, { align: 'center' });
 
   // 3. LOGO (Extrême Droite - Réduit et poussé)
   if (schoolLogo) {
@@ -112,7 +125,8 @@ const drawOfficialHeader = (
   
   y += 10;
   doc.setFontSize(10);
-  doc.text(`Fait à Apéssito, le ${fmtDate()}`, 14, y);
+  const city = schoolAddress ? schoolAddress.split('-')[0].trim() : 'Apéssito';
+  doc.text(`Fait à ${city}, le ${fmtDate()}`, 14, y);
   doc.text(`N° : ${docNumber}`, w - 14, y, { align: 'right' });
   
   y += 5;

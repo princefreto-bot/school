@@ -16,11 +16,28 @@ export const Parametres: React.FC = () => {
   const schoolStamp = useStore((s) => s.schoolStamp);
   const user = useStore((s) => s.user);
 
+  const schoolMotto = useStore((s) => s.schoolMotto);
+  const schoolBp = useStore((s) => s.schoolBp);
+  const schoolTelephone = useStore((s) => s.schoolTelephone);
+  const schoolAddress = useStore((s) => s.schoolAddress);
+  const schoolCurrency = useStore((s) => s.schoolCurrency);
+  const countryName = useStore((s) => s.countryName);
+  const countryMotto = useStore((s) => s.countryMotto);
+  const ministereName = useStore((s) => s.ministereName);
+
   const [localSchool, setLocalSchool] = useState(schoolName);
   const [localYear, setLocalYear] = useState(schoolYear);
   const [localRem, setLocalRem] = useState(messageRemerciement);
   const [localRap, setLocalRap] = useState(messageRappel);
   const [localAppName, setLocalAppName] = useState(appName);
+  const [localMotto, setLocalMotto] = useState(schoolMotto);
+  const [localBp, setLocalBp] = useState(schoolBp);
+  const [localTelephone, setLocalTelephone] = useState(schoolTelephone);
+  const [localAddress, setLocalAddress] = useState(schoolAddress);
+  const [localCurrency, setLocalCurrency] = useState(schoolCurrency);
+  const [localCountryName, setLocalCountryName] = useState(countryName);
+  const [localCountryMotto, setLocalCountryMotto] = useState(countryMotto);
+  const [localMinistereName, setLocalMinistereName] = useState(ministereName);
   const [saved, setSaved] = useState(false);
   
   const [logoPreview, setLogoPreview] = useState<string | null>(schoolLogo);
@@ -136,7 +153,15 @@ export const Parametres: React.FC = () => {
       messageRappel: localRap,
       appName: localAppName,
       schoolLogo: logoPreview,
-      schoolStamp: stampPreview
+      schoolStamp: stampPreview,
+      schoolMotto: localMotto,
+      schoolBp: localBp,
+      schoolTelephone: localTelephone,
+      schoolAddress: localAddress,
+      schoolCurrency: localCurrency,
+      countryName: localCountryName,
+      countryMotto: localCountryMotto,
+      ministereName: localMinistereName
     });
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -266,6 +291,102 @@ export const Parametres: React.FC = () => {
                                 </label>
                                 {stampError && <p className="mt-2 text-[10px] font-bold text-rose-500">{stampError}</p>}
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
+                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <Info className="w-3.5 h-3.5 text-indigo-500" /> Bulletin & Coordonnées Officielles
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Devise de l'école (Motto)
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localMotto}
+                                onChange={(e) => setLocalMotto(e.target.value)}
+                                placeholder="Ex : Travail-Rigueur-Succès"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Boîte Postale (BP)
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localBp}
+                                onChange={(e) => setLocalBp(e.target.value)}
+                                placeholder="Ex : 80159"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Numéro de Téléphone
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localTelephone}
+                                onChange={(e) => setLocalTelephone(e.target.value)}
+                                placeholder="Ex : +228 90 17 79 66 / 99 41 40 47"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Adresse / Ville / Pays
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localAddress}
+                                onChange={(e) => setLocalAddress(e.target.value)}
+                                placeholder="Ex : Apéssito - TOGO"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Devise Monétaire
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localCurrency}
+                                onChange={(e) => setLocalCurrency(e.target.value)}
+                                placeholder="Ex : FCFA"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Nom du Pays (Titre Officiel)
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localCountryName}
+                                onChange={(e) => setLocalCountryName(e.target.value)}
+                                placeholder="Ex : République Togolaise"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Devise Nationale du Pays
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localCountryMotto}
+                                onChange={(e) => setLocalCountryMotto(e.target.value)}
+                                placeholder="Ex : Travail - Liberté - Patrie"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Ministère de Tutelle
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localMinistereName}
+                                onChange={(e) => setLocalMinistereName(e.target.value)}
+                                placeholder="Ex : Ministère de l'Éducation Nationale"
+                            />
                         </div>
                     </div>
                 </div>

@@ -71,6 +71,22 @@ export interface AppState {
   setMessageRemerciement: (m: string) => void;
   messageRappel: string;
   setMessageRappel: (m: string) => void;
+  schoolMotto: string;
+  setSchoolMotto: (motto: string) => void;
+  schoolBp: string;
+  setSchoolBp: (bp: string) => void;
+  schoolTelephone: string;
+  setSchoolTelephone: (tel: string) => void;
+  schoolAddress: string;
+  setSchoolAddress: (addr: string) => void;
+  schoolCurrency: string;
+  setSchoolCurrency: (curr: string) => void;
+  countryName: string;
+  setCountryName: (name: string) => void;
+  countryMotto: string;
+  setCountryMotto: (motto: string) => void;
+  ministereName: string;
+  setMinistereName: (name: string) => void;
   updateAllSettings: (settings: {
     appName?: string,
     schoolName?: string,
@@ -79,7 +95,15 @@ export interface AppState {
     schoolStamp?: string | null,
     messageRemerciement?: string,
     messageRappel?: string,
-    tranches?: any[]
+    tranches?: any[],
+    schoolMotto?: string,
+    schoolBp?: string,
+    schoolTelephone?: string,
+    schoolAddress?: string,
+    schoolCurrency?: string,
+    countryName?: string,
+    countryMotto?: string,
+    ministereName?: string
   }) => Promise<void>;
   settings: AppSettings;
   updateSettings: (settings: AppSettings) => void;
@@ -618,6 +642,22 @@ export const useStore = create<AppState>()(
       messageRappel:
         "Nous vous rappelons cordialement que le règlement du solde de scolarité est attendu. Veuillez régulariser votre situation dans les meilleurs délais.",
       setMessageRappel: (m) => set({ messageRappel: m }),
+      schoolMotto: 'Travail-Rigueur-Succès',
+      setSchoolMotto: (motto) => set({ schoolMotto: motto }),
+      schoolBp: '80159',
+      setSchoolBp: (bp) => set({ schoolBp: bp }),
+      schoolTelephone: '+228 90 17 79 66 / 99 41 40 47',
+      setSchoolTelephone: (tel) => set({ schoolTelephone: tel }),
+      schoolAddress: 'Apéssito - TOGO',
+      setSchoolAddress: (addr) => set({ schoolAddress: addr }),
+      schoolCurrency: 'FCFA',
+      setSchoolCurrency: (curr) => set({ schoolCurrency: curr }),
+      countryName: 'République Togolaise',
+      setCountryName: (name) => set({ countryName: name }),
+      countryMotto: 'Travail - Liberté - Patrie',
+      setCountryMotto: (motto) => set({ countryMotto: motto }),
+      ministereName: "Ministère de l'Éducation Nationale",
+      setMinistereName: (name) => set({ ministereName: name }),
 
       updateAllSettings: async (newSettings) => {
         console.log('💾 [Store] Saving all settings to cloud...', Object.keys(newSettings));
@@ -888,7 +928,15 @@ export const useStore = create<AppState>()(
                 schoolStamp: appSettings.schoolStamp || null,
                 messageRemerciement: appSettings.messageRemerciement || '',
                 messageRappel: appSettings.messageRappel || '',
-                tranches: appSettings.tranches || []
+                tranches: appSettings.tranches || [],
+                schoolMotto: appSettings.schoolMotto || 'Travail-Rigueur-Succès',
+                schoolBp: appSettings.schoolBp || '80159',
+                schoolTelephone: appSettings.schoolTelephone || '+228 90 17 79 66 / 99 41 40 47',
+                schoolAddress: appSettings.schoolAddress || 'Apéssito - TOGO',
+                schoolCurrency: appSettings.schoolCurrency || 'FCFA',
+                countryName: appSettings.countryName || 'République Togolaise',
+                countryMotto: appSettings.countryMotto || 'Travail - Liberté - Patrie',
+                ministereName: appSettings.ministereName || 'Ministère de l\'Éducation Nationale'
               });
               console.log(`🎨 [Sync Parent] Paramètres appliqués ! Logo: ${!!appSettings.schoolLogo}`);
             }
@@ -991,6 +1039,14 @@ export const useStore = create<AppState>()(
               schoolStamp: data.appSettings.schoolStamp !== undefined ? data.appSettings.schoolStamp : get().schoolStamp,
               messageRemerciement: data.appSettings.messageRemerciement || get().messageRemerciement,
               messageRappel: data.appSettings.messageRappel || get().messageRappel,
+              schoolMotto: data.appSettings.schoolMotto || get().schoolMotto,
+              schoolBp: data.appSettings.schoolBp || get().schoolBp,
+              schoolTelephone: data.appSettings.schoolTelephone || get().schoolTelephone,
+              schoolAddress: data.appSettings.schoolAddress || get().schoolAddress,
+              schoolCurrency: data.appSettings.schoolCurrency || get().schoolCurrency,
+              countryName: data.appSettings.countryName || get().countryName,
+              countryMotto: data.appSettings.countryMotto || get().countryMotto,
+              ministereName: data.appSettings.ministereName || get().ministereName,
               ...(data.appSettings.cycleSchedules ? { cycleSchedules: data.appSettings.cycleSchedules } : {}),
               ...(data.appSettings.tranches ? { tranches: data.appSettings.tranches } : {}),
             });

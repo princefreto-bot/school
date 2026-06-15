@@ -8,6 +8,14 @@ interface BulletinTogoPDFProps {
     schoolStamp?: string | null;
     schoolYear: string;
     studentPhoto?: string | null;
+    schoolMotto?: string;
+    schoolBp?: string;
+    schoolTelephone?: string;
+    schoolAddress?: string;
+    schoolCurrency?: string;
+    countryName?: string;
+    countryMotto?: string;
+    ministereName?: string;
 }
 
 // Formatte la date du jour en français
@@ -18,7 +26,16 @@ const getDateFr = (): string => {
 };
 
 export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFProps>(
-    ({ data, schoolName, schoolLogo, schoolStamp, schoolYear, studentPhoto }, ref) => {
+    ({ data, schoolName, schoolLogo, schoolStamp, schoolYear, studentPhoto,
+       schoolMotto = 'Travail-Rigueur-Succès',
+       schoolBp = '80159',
+       schoolTelephone = '+228 90 17 79 66 / 99 41 40 47',
+       schoolAddress = 'Apéssito - TOGO',
+       schoolCurrency = 'FCFA',
+       countryName = 'République Togolaise',
+       countryMotto = 'Travail – Liberté – Patrie',
+       ministereName = 'Ministère de l\'Éducation Nationale'
+     }, ref) => {
     return (
         <div
             ref={ref}
@@ -62,10 +79,10 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                         <div className="flex-1 flex justify-center gap-8 items-start px-2">
                              {/* 2. BLOC MINISTÈRE (Centre-Gauche) */}
                             <div className="flex-1 flex flex-col items-center text-center space-y-1.5">
-                                <p className="font-bold uppercase text-[11px] tracking-widest leading-none">République Togolaise</p>
-                                <p className="italic text-[9px] leading-none">Travail – Liberté – Patrie</p>
+                                <p className="font-bold uppercase text-[11px] tracking-widest leading-none">{countryName}</p>
+                                <p className="italic text-[9px] leading-none">{countryMotto}</p>
                                 <div className="w-12 border-t border-black my-1"></div>
-                                <p className="font-black uppercase text-[11.5px] leading-tight">Ministère de l'Éducation Nationale</p>
+                                <p className="font-black uppercase text-[11.5px] leading-tight">{ministereName}</p>
                                 <p className="font-bold uppercase text-[10px] leading-tight">Direction Régionale de l'Éducation</p>
                                 <p className="font-bold uppercase text-[10px] leading-tight">Inspection de l'Enseignement Général</p>
                             </div>
@@ -75,10 +92,10 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                                 <h2 className="font-black uppercase tracking-tight text-[18px] leading-none mb-1">
                                     {schoolName}
                                 </h2>
-                                <p className="italic font-black text-[11px] uppercase tracking-wider mb-0.5">Travail-Rigueur-succès</p>
+                                <p className="italic font-black text-[11px] uppercase tracking-wider mb-0.5">{schoolMotto}</p>
                                 <div className="flex flex-col text-[10px] font-bold space-y-0.5">
-                                    <p>Tél: +228 90 17 79 66 / 99 41 40 47</p>
-                                    <p>BP: 80159 Apéssito - TOGO</p>
+                                    <p>Tél: {schoolTelephone}</p>
+                                    <p>BP: {schoolBp} {schoolAddress}</p>
                                 </div>
                             </div>
                         </div>
@@ -459,7 +476,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                     </p>
                     {/* Date de création — plus grande, en bas de page */}
                     <p className="text-[11px] font-bold text-black text-right">
-                        Fait à Apessito, le {getDateFr()}
+                        Fait à {schoolAddress ? schoolAddress.split('-')[0].trim() : 'Apessito'}, le {getDateFr()}
                     </p>
                 </div>
             </div>

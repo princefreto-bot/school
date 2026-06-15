@@ -8,7 +8,9 @@ import { FileSpreadsheet, Printer, Users, Award, ShieldCheck } from 'lucide-reac
 export const Bulletins: React.FC = () => {
     const { 
         currentPeriode, students, matieres, classeMatieres, notes,
-        schoolName, schoolLogo, schoolStamp, schoolYear 
+        schoolName, schoolLogo, schoolStamp, schoolYear,
+        schoolMotto, schoolBp, schoolTelephone, schoolAddress, schoolCurrency,
+        countryName, countryMotto, ministereName
     } = useStore();
 
     const classesList = Array.from(new Set(students.map(s => s.classe))).sort();
@@ -137,13 +139,21 @@ export const Bulletins: React.FC = () => {
                 <div ref={printRef} className="print-container">
                     {bulletinsCalcules.map((b) => (
                         <div key={b.eleve.id} className="page-break w-[210mm] h-[297mm] overflow-hidden bg-white mx-auto box-border" style={{ pageBreakAfter: 'always' }}>
-                            <BulletinTogoPDF
+                             <BulletinTogoPDF
                                 data={b}
                                 schoolName={schoolName}
                                 schoolLogo={schoolLogo}
                                 schoolStamp={schoolStamp}
                                 schoolYear={schoolYear}
                                 studentPhoto={b.eleve.photoUrl || null}
+                                schoolMotto={schoolMotto}
+                                schoolBp={schoolBp}
+                                schoolTelephone={schoolTelephone}
+                                schoolAddress={schoolAddress}
+                                schoolCurrency={schoolCurrency}
+                                countryName={countryName}
+                                countryMotto={countryMotto}
+                                ministereName={ministereName}
                             />
                         </div>
                     ))}

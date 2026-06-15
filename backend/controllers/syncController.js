@@ -239,6 +239,14 @@ async function syncFromFrontend(req, res) {
                     message_remerciement: appSettings.messageRemerciement,
                     message_rappel: appSettings.messageRappel,
                     tranches: appSettings.tranches || [],
+                    school_motto: appSettings.schoolMotto,
+                    school_bp: appSettings.schoolBp,
+                    school_telephone: appSettings.schoolTelephone,
+                    school_address: appSettings.schoolAddress,
+                    school_currency: appSettings.schoolCurrency,
+                    country_name: appSettings.countryName,
+                    country_motto: appSettings.countryMotto,
+                    ministere_name: appSettings.ministereName,
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'id' });
                 if (settingsErr) {
@@ -447,7 +455,15 @@ async function syncToFrontend(req, res) {
                 schoolStamp: appSettings.school_stamp,
                 messageRemerciement: appSettings.message_remerciement,
                 messageRappel: appSettings.message_rappel,
-                tranches: appSettings.tranches || []
+                tranches: appSettings.tranches || [],
+                schoolMotto: appSettings.school_motto,
+                schoolBp: appSettings.school_bp,
+                schoolTelephone: appSettings.school_telephone,
+                schoolAddress: appSettings.school_address,
+                schoolCurrency: appSettings.school_currency,
+                countryName: appSettings.country_name,
+                countryMotto: appSettings.country_motto,
+                ministereName: appSettings.ministere_name
             } : null,
             announcements: (announcements || []).map(a => ({
                 id: a.id,

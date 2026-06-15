@@ -9,6 +9,7 @@ import { Student } from '../types';
 import { ClassFinanceRow, computeMonthlyEvolution, computeRecouvrement } from '../services/analyticsService';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useStore } from '../store/useStore';
 
 const COLORS = {
     primary: [0, 0, 0],         // Pure black
@@ -19,7 +20,8 @@ const COLORS = {
 };
 
 const fmtPrice = (n: number) => {
-    return new Intl.NumberFormat('fr-FR').format(n).replace(/\s/g, '.') + ' FCFA';
+    const currency = useStore.getState().schoolCurrency || 'FCFA';
+    return new Intl.NumberFormat('fr-FR').format(n).replace(/\s/g, '.') + ' ' + currency;
 };
 
 export const generateRapportMensuelPDF = (
@@ -67,17 +69,26 @@ export const generateRapportMensuelPDF = (
     // 2. TEXTE CENTRAL (Saturation Max)
     const centerX = w / 2;
     
+    const state = useStore.getState();
+    const schoolMotto = state.schoolMotto || 'Travail-Rigueur-Succès';
+    const schoolBp = state.schoolBp || '80159';
+    const schoolTelephone = state.schoolTelephone || '+228 90 17 79 66 / 99 41 40 47';
+    const schoolAddress = state.schoolAddress || 'Apéssito - TOGO';
+    const countryName = state.countryName || 'RÉPUBLIQUE TOGOLAISE';
+    const countryMotto = state.countryMotto || 'Travail - Liberté - Patrie';
+    const ministereName = state.ministereName || 'MINISTERE DE L\'EDUCATION NATIONALE';
+
     // Bloc Ministère (Centre-Gauche)
     doc.setFontSize(10);
-    doc.text('RÉPUBLIQUE TOGOLAISE', centerX - 35, y, { align: 'center' });
+    doc.text(countryName.toUpperCase(), centerX - 35, y, { align: 'center' });
     doc.setFont('times', 'italic');
     doc.setFontSize(8);
-    doc.text('Travail - Liberté - Patrie', centerX - 35, y + 5, { align: 'center' });
+    doc.text(countryMotto, centerX - 35, y + 5, { align: 'center' });
     doc.setLineWidth(0.3);
     doc.line(centerX - 42, y + 7.5, centerX - 28, y + 7.5);
     doc.setFont('times', 'bold');
     doc.setFontSize(11);
-    doc.text('MINISTERE DE L\'EDUCATION NATIONALE', centerX - 35, y + 13, { align: 'center' });
+    doc.text(ministereName.toUpperCase(), centerX - 35, y + 13, { align: 'center' });
     doc.setFontSize(9.5);
     doc.text('DIRECTION RÉGIONALE DE L\'ÉDUCATION', centerX - 35, y + 18, { align: 'center' });
     doc.text('INSPECTION DE L\'ENSEIGNEMENT GENERAL', centerX - 35, y + 23, { align: 'center' });
@@ -88,11 +99,11 @@ export const generateRapportMensuelPDF = (
     doc.text(schoolInfo.name.toUpperCase(), centerX + 35, y, { align: 'center' });
     doc.setFontSize(11);
     doc.setFont('times', 'italic');
-    doc.text('Travail-Rigueur-Succès', centerX + 35, y + 7, { align: 'center' });
+    doc.text(schoolMotto, centerX + 35, y + 7, { align: 'center' });
     doc.setFont('times', 'bold');
     doc.setFontSize(10);
-    doc.text('Tél: +228 90 17 79 66 / 99 41 40 47', centerX + 35, y + 14, { align: 'center' });
-    doc.text('BP: 80159 Apéssito - TOGO', centerX + 35, y + 19, { align: 'center' });
+    doc.text(`Tél: ${schoolTelephone}`, centerX + 35, y + 14, { align: 'center' });
+    doc.text(`BP: ${schoolBp} ${schoolAddress}`, centerX + 35, y + 19, { align: 'center' });
 
     // 3. LOGO (Extrême Droite - Réduit et poussé)
     if (schoolInfo.logo) {
