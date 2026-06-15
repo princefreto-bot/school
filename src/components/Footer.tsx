@@ -35,97 +35,83 @@ export const Footer: React.FC = () => {
 
   const texts: Record<'fr' | 'en', FooterLangText> = {
     fr: {
-      testimonialTitle: "Votre succès inspire d'autres créateurs",
-      testimonialText: "Partagez comment Chariow transforme votre activité. Votre témoignage encourage d'autres créateurs africains à sauter le pas.",
-      subtitle: "La plateforme tout-en-un pour vendre vos produits numériques.",
-      notice: "Chariow est un service d'Axa Zara LLC, une société américaine enregistrée dans l'État du Delaware. Axa Zara LLC est une entreprise technologique agissant en tant que fournisseur de services logiciels, mais non en tant que fournisseur de services de paiement ou marchand officiel. Les services de paiement et de facturation sont fournis par des prestataires agréés en partenariat avec MiMo Global Inc et ses filiales. Contactez-nous à support@chariow.com pour toute question.",
-      copyright: "Copyright © 2026 Chariow - Axa Zara LLC. Tous droits réservés.",
+      testimonialTitle: "Votre succès inspire d'autres établissements",
+      testimonialText: "Partagez comment DGhubSchool transforme votre gestion quotidienne. Votre témoignage encourage d'autres écoles à sauter le pas.",
+      subtitle: "La plateforme tout-en-un pour gérer votre établissement scolaire.",
+      notice: "DGhubSchool est une solution technologique dédiée aux établissements scolaires, permettant la gestion de la caisse, des notes et du suivi des élèves. Contactez-nous à support@dghubschool.com pour toute question.",
+      copyright: "Copyright © 2026 DGhubSchool. Tous droits réservés.",
       ctaButton: "Partager mon histoire",
       columns: {
         products: {
-          title: "Produits",
+          title: "Fonctionnalités",
           items: [
-            { label: "Fichiers", path: "/features" },
-            { label: "Cours", path: "/features" },
-            { label: "Licences", path: "/features" },
-            { label: "Packs (Bundles)", path: "/features" },
-            { label: "Coaching", path: "/features" }
+            { label: "Suivi des Paiements", path: "/features" },
+            { label: "Bulletins & Notes", path: "/features" },
+            { label: "Portail Parents", path: "/features" },
+            { label: "Cartes Scolaires QR", path: "/features" }
           ]
         },
         resources: {
           title: "Ressources",
           items: [
-            { label: "Centre d'aide", path: "https://support.axazara.com/fr", external: true },
-            { label: "Tarifs", path: "/pricing" },
-            { label: "Roadmap", path: "/features" },
-            { label: "Docs Développeurs", path: "/features" }
+            { label: "Centre d'aide", path: "https://support.dghubschool.com/fr", external: true },
+            { label: "Tarifs", path: "/pricing" }
           ]
         },
         legal: {
           title: "Légal",
           items: [
             { label: "Politique de confidentialité", path: "/confidentialite" },
-            { label: "Conditions d'utilisation", path: "/conditions-utilisation" },
-            { label: "Sécurité", path: "/features" },
-            { label: "Statut des services", path: "https://status.axazara.com", external: true }
+            { label: "Conditions d'utilisation", path: "/conditions-utilisation" }
           ]
         },
         company: {
           title: "Entreprise",
           items: [
             { label: "À propos", path: "/a-propos" },
-            { label: "Équipe", path: "/a-propos" },
-            { label: "Carrières", path: "https://careers.axazara.com/fr", external: true },
             { label: "Newsroom", path: "/#newsroom" },
-            { label: "Contact", path: "mailto:support@chariow.com", external: true }
+            { label: "Contact", path: "mailto:support@dghubschool.com", external: true }
           ]
         }
       }
     },
     en: {
-      testimonialTitle: "Your success inspires other creators",
-      testimonialText: "Share how Chariow transforms your business. Your testimonial encourages other African creators to take the leap.",
-      subtitle: "The All-in-One Platform to Sell Your Digital Products.",
-      notice: "Chariow is a service of Axa Zara LLC, an American company registered in the State of Delaware. Axa Zara LLC is a technology company acting as a software service provider, but not as a payment service provider or merchant of record. Payment and billing services are provided by approved service providers in partnership with MiMo Global Inc and its affiliates. Contact us at support@chariow.com if you have any questions.",
-      copyright: "Copyright © 2026 Chariow - Axa Zara LLC. All rights reserved.",
+      testimonialTitle: "Your success inspires other schools",
+      testimonialText: "Share how DGhubSchool transforms your daily management. Your testimonial encourages other schools to take the leap.",
+      subtitle: "The All-in-One Platform to Manage Your School.",
+      notice: "DGhubSchool is a technology solution dedicated to schools, enabling the management of payments, grades, and student tracking. Contact us at support@dghubschool.com if you have any questions.",
+      copyright: "Copyright © 2026 DGhubSchool. All rights reserved.",
       ctaButton: "Share your story",
       columns: {
         products: {
-          title: "Products",
+          title: "Features",
           items: [
-            { label: "Files", path: "/features" },
-            { label: "Courses", path: "/features" },
-            { label: "Licenses", path: "/features" },
-            { label: "Bundles", path: "/features" },
-            { label: "Coaching", path: "/features" }
+            { label: "Payment Tracking", path: "/features" },
+            { label: "Report Cards & Grades", path: "/features" },
+            { label: "Parents Portal", path: "/features" },
+            { label: "QR School Cards", path: "/features" }
           ]
         },
         resources: {
           title: "Resources",
           items: [
-            { label: "Help Center", path: "https://support.axazara.com/fr", external: true },
-            { label: "Pricing", path: "/pricing" },
-            { label: "Roadmap", path: "/features" },
-            { label: "Developer Docs", path: "/features" }
+            { label: "Help Center", path: "https://support.dghubschool.com/en", external: true },
+            { label: "Pricing", path: "/pricing" }
           ]
         },
         legal: {
           title: "Legal",
           items: [
             { label: "Privacy Policy", path: "/confidentialite" },
-            { label: "Terms & conditions", path: "/conditions-utilisation" },
-            { label: "Security", path: "/features" },
-            { label: "Services status", path: "https://status.axazara.com", external: true }
+            { label: "Terms & conditions", path: "/conditions-utilisation" }
           ]
         },
         company: {
           title: "Company",
           items: [
             { label: "About Us", path: "/a-propos" },
-            { label: "People", path: "/a-propos" },
-            { label: "Careers", path: "https://careers.axazara.com/fr", external: true },
             { label: "Newsroom", path: "/#newsroom" },
-            { label: "Contact", path: "mailto:support@chariow.com", external: true }
+            { label: "Contact", path: "mailto:support@dghubschool.com", external: true }
           ]
         }
       }
@@ -168,7 +154,7 @@ export const Footer: React.FC = () => {
             </p>
           </div>
           <a
-            href="mailto:support@chariow.com?subject=Témoignage%20Chariow"
+            href="mailto:support@dghubschool.com?subject=Témoignage%20DGhubSchool"
             className="inline-flex items-center gap-2 px-6 py-3.5 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-amber-500/10 hover:shadow-amber-500/25 active:scale-95 transition-all duration-300 shrink-0 cursor-pointer"
           >
             <Send className="w-3.5 h-3.5" />
@@ -186,8 +172,8 @@ export const Footer: React.FC = () => {
             onClick={() => handleNavigation('/')}
             className="flex items-center gap-2.5 text-slate-950 dark:text-white font-black tracking-tighter text-2xl uppercase cursor-pointer select-none"
           >
-            <img src="/logo.jpeg" className="w-8 h-8 object-contain rounded-xl bg-white p-0.5 border border-slate-200 dark:border-slate-800" alt="Logo Chariow" />
-            <span>Chariow</span>
+            <img src="/logo.jpeg" className="w-8 h-8 object-contain rounded-xl bg-white p-0.5 border border-slate-200 dark:border-slate-800" alt="Logo DGhubSchool" />
+            <span>DGhubSchool</span>
           </div>
           
           <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-sm">
@@ -296,18 +282,7 @@ export const Footer: React.FC = () => {
               {current.copyright}
             </p>
 
-            {/* Crafted by Axa Zara logo */}
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-              <span>Crafted by</span>
-              <a
-                href="https://axazara.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 hover:opacity-85 transition-opacity"
-              >
-                <span className="text-amber-500 font-black text-xs uppercase tracking-tighter">Axa Zara</span>
-              </a>
-            </div>
+            {/* Removed Crafted by Axa Zara logo as per rebranding instructions */}
 
           </div>
 

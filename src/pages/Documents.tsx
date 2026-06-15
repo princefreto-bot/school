@@ -87,7 +87,7 @@ export const Documents: React.FC = () => {
 
     // Récupérer le token parent_token pour l'auth, et omettre Content-Type
     const token = localStorage.getItem('parent_token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
 
     try {
       const res = await fetch(`${API_BASE_URL}/documents/scan`, {

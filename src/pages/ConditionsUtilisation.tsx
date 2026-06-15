@@ -17,7 +17,7 @@ export const ConditionsUtilisation: React.FC = () => {
             className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl uppercase select-none cursor-pointer"
           >
             <img src="/logo.jpeg" className="w-8 h-8 object-contain rounded-lg" alt="Logo" />
-            <span className="text-amber-500">Chariow</span>
+            <span className="text-amber-500">DGhubSchool</span>
           </div>
           
           <button 
@@ -65,13 +65,13 @@ export const ConditionsUtilisation: React.FC = () => {
             </h2>
             <div className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-3 font-medium">
               <p>
-                <strong>« Nous »</strong> se réfère à <strong>Axa Zara LLC</strong>, la société qui fournit Chariow.
+                <strong>« Nous »</strong> se réfère à la plateforme <strong>DGhubSchool</strong>.
               </p>
               <p>
-                <strong>« Le Service »</strong> désigne <strong>Chariow</strong>, un logiciel de gestion scolaire et de suivi parental en tant que service (SaaS) accessible via Internet.
+                <strong>« Le Service »</strong> désigne <strong>DGhubSchool</strong>, un logiciel de gestion scolaire et de suivi parental en tant que service (SaaS) accessible via Internet.
               </p>
               <p>
-                Le service est proposé via internet en tant que "Software-as-a-Service" par Axa Zara LLC, une société enregistrée aux États-Unis d'Amérique dans l'État du Delaware. L'utilisation du service implique l'acceptation de ces termes et conditions.
+                Le service est proposé via internet en tant que "Software-as-a-Service". L'utilisation du service implique l'acceptation de ces termes et conditions.
               </p>
             </div>
           </div>
@@ -121,7 +121,7 @@ export const ConditionsUtilisation: React.FC = () => {
             
             <div className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-3 font-medium">
               <p>
-                L'utilisation de Chariow pour les établissements et les parents est soumise à des frais de licence annuels conformément aux tarifs indiqués au sein du Service. 
+                L'utilisation de DGhubSchool pour les établissements et les parents est soumise à des frais de licence annuels conformément aux tarifs indiqués au sein du Service. 
               </p>
               <p className="p-3 bg-rose-500/5 dark:bg-rose-950/10 border border-rose-500/25 rounded-xl text-rose-600 dark:text-rose-400 font-semibold">
                 ⚠️ Afin de garantir l'équité, si un établissement dépasse sa limite d'élèves autorisée par son forfait, ou en cas de non-respect des règlements annuels après la période d'essai gratuite, l'accès complet à la plateforme sera automatiquement suspendu.

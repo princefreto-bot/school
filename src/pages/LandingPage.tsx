@@ -23,8 +23,8 @@ export const LandingPage: React.FC = () => {
   // Statistiques de la plateforme (KPIs chiffrés réels)
   const stats = [
     { value: "+120", label: "Écoles et lycées partenaires" },
-    { value: "+45,000", label: "Élèves inscrits et gérés" },
-    { value: "+150,000", label: "Bulletins scolaires édités" },
+    { value: "+45 000", label: "Élèves inscrits et gérés" },
+    { value: "+150 000", label: "Bulletins scolaires édités" },
     { value: "99.9%", label: "Taux de disponibilité réseau" },
   ];
 
@@ -392,10 +392,10 @@ export const LandingPage: React.FC = () => {
               📢 Newsroom
             </span>
             <h3 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white tracking-tight uppercase">
-              Dernières avancées de Chariow
+              Dernières avancées de DGhubSchool
             </h3>
             <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto text-xs md:text-sm">
-              Suivez l'évolution de la plateforme, nos nouveaux partenariats et les fonctionnalités déployées.
+              Suivez l'évolution de la plateforme et les fonctionnalités déployées.
             </p>
           </div>
 
@@ -408,10 +408,10 @@ export const LandingPage: React.FC = () => {
                   Paiements Mobiles
                 </span>
                 <h4 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase leading-snug group-hover:text-amber-500 transition-colors">
-                  Intégration de Wave, MTN & Orange Money en partenariat avec MiMo Global Inc
+                  Intégration de paiements mobiles
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                  Nous facilitons le règlement de la scolarité en Afrique de l'Ouest. Les parents peuvent désormais payer via leur mobile money local et recevoir instantanément leur reçu officiel.
+                  Nous facilitons le règlement de la scolarité. Les parents peuvent désormais payer via leur mobile money local et recevoir instantanément leur reçu officiel.
                 </p>
               </div>
               <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
@@ -424,13 +424,13 @@ export const LandingPage: React.FC = () => {
             <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
               <div className="space-y-4">
                 <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full inline-block">
-                  Hébergement de cours
+                  Bibliothèque Numérique
                 </span>
                 <h4 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase leading-snug group-hover:text-amber-500 transition-colors">
-                  Hébergez vos cours vidéo et fichiers PDF sécurisés
+                  Hébergez vos supports de cours
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                  La bibliothèque numérique s'enrichit ! Les créateurs de contenu scolaire peuvent distribuer des supports vidéos, des cours structurés et des exercices corrigés en gérant des accès par licence.
+                  La bibliothèque numérique s'enrichit ! Les enseignants peuvent distribuer des supports et des exercices corrigés aux élèves.
                 </p>
               </div>
               <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
@@ -446,10 +446,10 @@ export const LandingPage: React.FC = () => {
                   Infrastructure
                 </span>
                 <h4 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase leading-snug group-hover:text-amber-500 transition-colors">
-                  Sécurité renforcée et conformité avec les politiques Axa Zara LLC
+                  Sécurité renforcée
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                  Chariow intègre les protocoles d'isolation de données d'Axa Zara LLC pour s'assurer que chaque établissement dispose d'un espace hermétique protégé par des clés cryptographiques.
+                  DGhubSchool intègre des protocoles d'isolation de données pour s'assurer que chaque établissement dispose d'un espace hermétique protégé.
                 </p>
               </div>
               <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">

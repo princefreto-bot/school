@@ -17,7 +17,7 @@ export const Confidentialite: React.FC = () => {
             className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl uppercase select-none cursor-pointer"
           >
             <img src="/logo.jpeg" className="w-8 h-8 object-contain rounded-lg" alt="Logo" />
-            <span className="text-amber-500">Chariow</span>
+            <span className="text-amber-500">DGhubSchool</span>
           </div>
           
           <button 
@@ -49,7 +49,7 @@ export const Confidentialite: React.FC = () => {
             <Lock className="w-6 h-6" />
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed text-left font-medium">
-            Chez Chariow, la protection de la vie privée des élèves et la sécurité des données financières et académiques sont fondamentales. Nous appliquons des protocoles d'isolation stricts pour chaque école.
+            Chez DGhubSchool, la protection de la vie privée des élèves et la sécurité des données financières et académiques sont fondamentales. Nous appliquons des protocoles d'isolation stricts pour chaque école.
           </p>
         </div>
       </section>
@@ -64,7 +64,7 @@ export const Confidentialite: React.FC = () => {
               Introduction
             </h2>
             <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-              Chez Chariow, nous accordons une importance primordiale à la protection et à la confidentialité des données personnelles des élèves, des parents et du personnel d'établissement. Cette charte détaille la manière dont nous collectons, gérons et sécurisons ces informations scolaires sensibles dans notre infrastructure multi-établissement isolée.
+              Chez DGhubSchool, nous accordons une importance primordiale à la protection et à la confidentialité des données personnelles des élèves, des parents et du personnel d'établissement. Cette charte détaille la manière dont nous collectons, gérons et sécurisons ces informations scolaires sensibles dans notre infrastructure multi-établissement isolée.
             </p>
           </div>
 

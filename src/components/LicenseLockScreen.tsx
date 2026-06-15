@@ -111,7 +111,7 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
                         🔐 Activation de Licence Requise
                     </h2>
                     <p className="text-slate-500 dark:text-slate-400 text-sm max-w-md mt-2 font-medium">
-                        Pour accéder aux dossiers, notes et reçus de vos enfants en temps réel, veuillez activer une licence annuelle Chariow.
+                        Pour accéder aux dossiers, notes et reçus de vos enfants en temps réel, veuillez activer une licence annuelle DGhubSchool.
                     </p>
                 </div>
 
@@ -191,7 +191,7 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
                             className="w-full mt-4 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-sm rounded-xl hover:from-blue-700 hover:to-indigo-700 transition active:scale-95 shadow-lg shadow-blue-500/20"
                         >
                             <ShoppingBag className="w-4 h-4" />
-                            Acheter une licence (Chariow)
+                            Acheter une licence (DGhubSchool)
                         </button>
                     </div>
                 </div>
@@ -235,7 +235,7 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase mb-1.5">Clé de licence Chariow</label>
+                            <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase mb-1.5">Clé de licence DGhubSchool</label>
                             <input
                                 type="text"
                                 placeholder="Saisir la clé (ex: CHA-XXXX-XXXX)"

@@ -597,7 +597,7 @@ async function getLicensePricing(req, res) {
 
 /**
  * POST /api/parent/activate-license
- * Active une licence pour un élève (Bypass DGHUB-VIP/PROMO, ou validation Chariow)
+ * Active une licence pour un élève (Bypass DGHUB-VIP/PROMO, ou validation externe)
  */
 async function activateLicense(req, res) {
     const { id: parentId, schoolSlug } = req.user;
@@ -646,10 +646,10 @@ async function activateLicense(req, res) {
                     isValid = true;
                     chariowData = { id: 'dev-key', key: cleanKey, status: 'active' };
                 } else {
-                    return res.status(500).json({ error: 'Clé secrète Chariow non configurée.' });
+                    return res.status(500).json({ error: 'Clé secrète d\'activation non configurée.' });
                 }
             } else {
-                // Appel API Chariow
+                // Appel API externe
                 const validateRes = await fetch(`https://api.chariow.com/v1/licenses/${cleanKey}`, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${CHARIOW_SECRET}` }
@@ -663,7 +663,7 @@ async function activateLicense(req, res) {
                     }
 
                     if (!license.is_active) {
-                        // Activer sur Chariow
+                        // Activer sur la plateforme externe
                         const actRes = await fetch(`https://api.chariow.com/v1/licenses/${cleanKey}/activate`, {
                             method: 'POST',
                             headers: {

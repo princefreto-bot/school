@@ -258,7 +258,7 @@ export const CreerCompte: React.FC = () => {
               <input 
                 type="checkbox" 
                 checked={acceptedTerms} 
-                onChange={(e) => setAcceptedTerms(e.checked ?? e.target.checked)} 
+                onChange={(e) => setAcceptedTerms(e.target.checked)} 
                 className="mt-1 accent-amber-500 rounded-none scale-95" 
                 required 
               />
@@ -271,7 +271,7 @@ export const CreerCompte: React.FC = () => {
               <input 
                 type="checkbox" 
                 checked={acceptedPrivacy} 
-                onChange={(e) => setAcceptedPrivacy(e.checked ?? e.target.checked)} 
+                onChange={(e) => setAcceptedPrivacy(e.target.checked)} 
                 className="mt-1 accent-amber-500 rounded-none scale-95" 
                 required 
               />
@@ -284,7 +284,7 @@ export const CreerCompte: React.FC = () => {
               <input 
                 type="checkbox" 
                 checked={marketingConsent} 
-                onChange={(e) => setMarketingConsent(e.checked ?? e.target.checked)} 
+                onChange={(e) => setMarketingConsent(e.target.checked)} 
                 className="mt-1 accent-amber-500 rounded-none scale-95" 
               />
               <span className="text-[10px] md:text-xs text-slate-500 leading-snug font-medium">
