@@ -37,7 +37,7 @@ export const Pricing: React.FC = () => {
       features: [
         "Notification en temps réel (Push & SMS) des notes et moyennes",
         "Alertes instantanées à chaque scan de présence (arrivée / départ)",
-        "Paiements de la scolarité par Mobile Money sans frais cachés",
+        "Suivi instantané des versements et soldes de scolarité",
         "Accès aux exercices scolaires gratuits à la maison",
         "Messagerie en ligne directe avec la vie scolaire"
       ],
@@ -83,8 +83,8 @@ export const Pricing: React.FC = () => {
       a: "Non. DGhubSchool fonctionne uniquement sur un modèle de facturation annuelle sans aucun engagement mensuel ni coût additionnel masqué."
     },
     {
-      q: "Quels sont les opérateurs Mobile Money supportés ?",
-      a: "Nous supportons Wave, T-Money, Flooz, MTN Mobile Money et Orange Money. Les frais de transfert standards s'appliquent mais la plateforme ne prend aucun pourcentage sur les règlements de scolarité."
+      q: "Comment s'effectue le suivi des frais de scolarité ?",
+      a: "L'administration enregistre les règlements de scolarité (espèces, chèques, virements) depuis sa console. Les parents reçoivent immédiatement un reçu numérique par SMS et peuvent consulter leur solde en temps réel."
     }
   ];
 

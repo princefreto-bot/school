@@ -26,7 +26,7 @@ export const LandingPage: React.FC = () => {
   const stats = [
     { value: "+120", label: "Écoles et lycées partenaires" },
     { value: "+45,000", label: "Élèves inscrits et gérés" },
-    { value: "+250,000", label: "F CFA encaissés en Mobile Money" },
+    { value: "+150,000", label: "Bulletins scolaires édités" },
     { value: "99.9%", label: "Taux de disponibilité réseau" },
   ];
 
@@ -34,9 +34,9 @@ export const LandingPage: React.FC = () => {
   const features = [
     {
       icon: <CreditCard className="w-8 h-8 text-amber-500" />,
-      title: "Encaissements Mobile Money",
-      description: "Encaissez les tranches de scolarité instantanément via Wave, T-Money, Flooz, MTN Mobile Money et Orange Money. Les parents reçoivent immédiatement leur reçu par SMS.",
-      badge: "Mobile Money",
+      title: "Suivi des Paiements & Caisse",
+      description: "Suivez les tranches de scolarité et les impayés de chaque élève. Enregistrez les règlements et générez des reçus de caisse numériques automatiques.",
+      badge: "Comptabilité",
       className: "md:col-span-2 bg-slate-900 text-white border-slate-800 rounded-3xl"
     },
     {
@@ -165,7 +165,7 @@ export const LandingPage: React.FC = () => {
 
         {/* Sous-titre */}
         <p className="text-sm md:text-lg text-slate-500 max-w-2xl leading-relaxed mb-10">
-          Gérez les encaissements de scolarité par Mobile Money, éditez les bulletins de notes officiels, suivez les présences par QR Code et gardez un lien direct avec les parents d'élèves.
+          Gerez la caisse et le suivi de la scolarité, éditez les bulletins de notes officiels, suivez les présences par QR Code et donnez accès à des ressources scolaires gratuites pour les révisions à la maison.
         </p>
 
         {/* Actions Hero */}
@@ -244,21 +244,21 @@ export const LandingPage: React.FC = () => {
 
               {/* Transactions list mockup */}
               <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
-                <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-wider mb-3 pb-2 border-b border-slate-100">Derniers Paiements Mobile Money</h4>
+                <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-wider mb-3 pb-2 border-b border-slate-100">Derniers Règlements Scolarité</h4>
                 <div className="space-y-2.5 text-[9px]">
                   <div className="flex justify-between items-center text-slate-600">
                     <span className="font-bold text-slate-800">PARENT DE : Koffi Mensah</span>
-                    <span className="bg-amber-100 border border-amber-200 text-amber-800 px-2 py-0.5 font-bold uppercase">T-Money</span>
+                    <span className="bg-amber-100 border border-amber-200 text-amber-800 px-2 py-0.5 font-bold uppercase">Espèces</span>
                     <span className="font-black text-slate-950">45,000 F CFA</span>
                   </div>
                   <div className="flex justify-between items-center text-slate-600">
                     <span className="font-bold text-slate-800">PARENT DE : Amina Diallo</span>
-                    <span className="bg-blue-100 border border-blue-200 text-blue-800 px-2 py-0.5 font-bold uppercase">Wave</span>
+                    <span className="bg-blue-100 border border-blue-200 text-blue-800 px-2 py-0.5 font-bold uppercase">Virement</span>
                     <span className="font-black text-slate-950">80,000 F CFA</span>
                   </div>
                   <div className="flex justify-between items-center text-slate-600">
                     <span className="font-bold text-slate-800">PARENT DE : Fofo Lawson</span>
-                    <span className="bg-red-100 border border-red-200 text-red-800 px-2 py-0.5 font-bold uppercase">Flooz</span>
+                    <span className="bg-red-100 border border-red-200 text-red-800 px-2 py-0.5 font-bold uppercase">Chèque</span>
                     <span className="font-black text-slate-950">25,000 F CFA</span>
                   </div>
                 </div>
@@ -333,7 +333,7 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-2xl mx-auto space-y-6">
             <div className="text-3xl text-amber-500 font-serif leading-none">“</div>
             <p className="text-lg md:text-xl font-bold text-slate-800 leading-relaxed italic">
-              "Grâce à DGhubSchool, nous avons réduit de 85% le taux de retard de paiement des frais de scolarité. Les parents adorent pouvoir payer par T-Money ou Flooz sans avoir à se déplacer."
+              "Grâce à DGhubSchool, nous avons réduit de 85% le taux de retard de paiement des frais de scolarité. Les parents adorent recevoir instantanément leur reçu numérique par SMS sans avoir à faire la queue à l'école."
             </p>
             <div className="space-y-1">
               <p className="text-xs font-black uppercase tracking-wider text-slate-900">M. Koffi Mensah</p>
@@ -372,7 +372,7 @@ export const LandingPage: React.FC = () => {
             <ul className="space-y-3.5 text-xs text-slate-600 mb-8 border-t border-slate-100 pt-6">
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>Paiements Mobile Money intégrés</span>
+                <span>Gestion de la caisse et reçus SMS</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-emerald-500 shrink-0" />

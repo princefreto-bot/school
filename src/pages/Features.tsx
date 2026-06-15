@@ -14,15 +14,16 @@ export const Features: React.FC = () => {
 
   const categories = [
     {
-      title: "Gestion Financière & Mobile Money",
-      subtitle: "Simplifiez la comptabilité et sécurisez les paiements",
+      title: "Gestion Financière & Scolarité",
+      subtitle: "Simplifiez le suivi de la scolarité et de la caisse",
       icon: <CreditCard className="w-6 h-6 text-amber-500" />,
       items: [
-        "Encaissement à distance via Wave, T-Money, Flooz, MTN et Orange Money",
-        "Génération automatique de reçus numériques envoyés par SMS",
-        "Suivi des tranches de scolarité impayées et relances intelligentes en un clic",
+        "Enregistrement des règlements (espèces, chèques, virements) avec reçu instantané",
+        "Génération automatique de reçus de caisse numériques envoyés par SMS",
+        "Suivi des tranches de scolarité impayées et relances en un clic",
         "Journal de caisse quotidien et rapports financiers exportables en Excel"
-      ]
+      ],
+      className: "bg-slate-50 border-slate-200"
     },
     {
       title: "Gestion Académique & Bulletins",
@@ -33,7 +34,8 @@ export const Features: React.FC = () => {
         "Calcul automatique des moyennes de classe, des rangs et des appréciations",
         "Génération des bulletins scolaires au format PDF officiel prêts à imprimer",
         "Suivi des matières par classe et coefficients personnalisés"
-      ]
+      ],
+      className: "bg-slate-50 border-slate-200"
     },
     {
       title: "Sécurité & Présences QR Code",
@@ -44,7 +46,8 @@ export const Features: React.FC = () => {
         "Application de scan intégrée pour enregistrer les entrées et sorties",
         "Notification SMS/Push automatique envoyée aux parents dès le scan de la carte",
         "Historique complet d'assiduité par élève consultable à tout moment"
-      ]
+      ],
+      className: "bg-slate-50 border-slate-200"
     },
     {
       title: "Espace Parents & Communication",
@@ -55,7 +58,20 @@ export const Features: React.FC = () => {
         "Messagerie en ligne sécurisée pour communiquer avec l'administration",
         "Panneau d'annonces de l'établissement avec notifications urgentes",
         "Consultation des documents numérisés et autorisations parentales"
-      ]
+      ],
+      className: "bg-slate-50 border-slate-200"
+    },
+    {
+      title: "Ressources Éducatives & Révisions Gratuites",
+      subtitle: "Des alternatives scolaires d'excellence intégrées pour s'entraîner à la maison",
+      icon: <BookOpen className="w-6 h-6 text-emerald-600 animate-pulse" />,
+      items: [
+        "Sésamath : Fiches et manuels de mathématiques conformes aux programmes francophones",
+        "Khan Academy : Vidéos courtes, leçons claires et parcours d'exercices gratuits",
+        "Bibliothèque Romande : Livres classiques et lectures scolaires en accès libre (PDF/EPUB)",
+        "Quiz Interactifs : Exercices locaux et tests de niveau intégrés pour stimuler l'élève"
+      ],
+      className: "md:col-span-2 bg-emerald-50/40 border-emerald-200/60 dark:bg-emerald-950/5 dark:border-emerald-900/30"
     }
   ];
 
@@ -99,7 +115,7 @@ export const Features: React.FC = () => {
       <section className="relative z-10 max-w-6xl mx-auto px-4 pb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {categories.map((cat, idx) => (
-            <div key={idx} className="bg-slate-50 border border-slate-200 p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+            <div key={idx} className={`p-8 rounded-3xl border shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between ${cat.className}`}>
               <div className="flex items-center gap-4 mb-6">
                 <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
                   {cat.icon}

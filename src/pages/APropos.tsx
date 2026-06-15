@@ -16,8 +16,8 @@ export const APropos: React.FC = () => {
     },
     {
       icon: <Users className="w-6 h-6 text-amber-500" />,
-      title: "Inclusion Numérique",
-      desc: "Intégrer les moyens de paiement locaux (Mobile Money Wave, T-Money, Flooz, MTN, Orange Money) pour permettre à tous les parents de payer sans barrières technologiques."
+      title: "Suivi Simple & Transparent",
+      desc: "Permettre aux établissements d'enregistrer et de suivre facilement tous les règlements (espèces, chèques, virements) et de générer des reçus de caisse numériques instantanés pour les familles."
     },
     {
       icon: <ShieldCheck className="w-6 h-6 text-amber-500" />,
@@ -108,7 +108,7 @@ export const APropos: React.FC = () => {
               Nous savons que les coupures de réseau et le manque de matériel informatique sont des réalités quotidiennes. C'est pourquoi DGhubSchool a été conçu pour être extrêmement léger et utilisable directement depuis n'importe quel smartphone.
             </p>
             <p className="text-xs md:text-sm text-slate-500 leading-relaxed">
-              De l'encaissement d'une tranche de scolarité à la validation des sorties d'élèves par scan QR code, chaque action prend moins de 3 secondes.
+              De l'enregistrement d'un règlement de scolarité à la validation des sorties d'élèves par scan QR code, chaque action prend moins de 3 secondes.
             </p>
           </div>
           <div className="p-6 bg-slate-50 border border-slate-200 rounded-3xl space-y-6">
