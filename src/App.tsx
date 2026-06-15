@@ -245,6 +245,19 @@ export function App() {
     <Routes>
       <Route path="/confidentialite" element={<Confidentialite />} />
       <Route path="/conditions-utilisation" element={<ConditionsUtilisation />} />
+      <Route 
+        path="/parent/exercices" 
+        element={
+          isAuthenticated ? (
+            <Suspense fallback={<LoadingSpinner />}>
+              <ParentCourses />
+            </Suspense>
+          ) : (
+            <Navigate to="/" replace />
+          )
+        } 
+      />
+      <Route path="/parent/courses" element={<Navigate to="/parent/exercices" replace />} />
       <Route path="/confirmer-email" element={<ConfirmerEmail />} />
       <Route path="/portail-ecole" element={<PortailEcole />} />
       <Route path="/creer-compte" element={<CreerCompte />} />

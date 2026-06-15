@@ -1,7 +1,5 @@
-// ============================================================
-// PAGE COURS & EXERCICES PARENTS/ÉLÈVES — Portail Intégré & Interactif
-// ============================================================
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   BookOpen, Award, CheckCircle, XCircle, Play, FileText, 
   ChevronRight, BookOpenCheck, ArrowLeft, ArrowRight, 
@@ -19,6 +17,7 @@ interface BookItem {
   pagesCount: number;
   chapters: { title: string; content: string }[];
   pdfUrl?: string;
+  htmlUrl?: string;
 }
 
 interface Question {
@@ -41,6 +40,8 @@ interface SubjectWorkbook {
 }
 
 export const ParentCourses: React.FC = () => {
+  const navigate = useNavigate();
+
   // Navigation par onglets local
   const [activeTab, setActiveTab] = useState<'library' | 'exercises' | 'resources'>('library');
 
@@ -56,14 +57,6 @@ export const ParentCourses: React.FC = () => {
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
-
-  // Statistiques simulées d'apprentissage de l'élève
-  const [stats, setStats] = useState({
-    booksRead: 1,
-    exercisesCompleted: 2,
-    averageScore: 85,
-    streakDays: 4
-  });
 
   // ── Bibliothèque d'Ebooks Intégrés ──
   const books: BookItem[] = [
@@ -145,6 +138,7 @@ export const ParentCourses: React.FC = () => {
       coverGradient: "from-rose-500 via-pink-600 to-rose-700",
       pagesCount: 124,
       pdfUrl: "https://ebooks-bnr.com/?stdb_dl=ebooks%2Fpdf4%2Fleo_toinon.pdf",
+      htmlUrl: "https://ebooks-bnr.com/ebooks/html/leo_toinon.html",
       chapters: [
         {
           title: "Chapitre 1 : Les petits orphelins",
@@ -165,6 +159,7 @@ export const ParentCourses: React.FC = () => {
       coverGradient: "from-red-600 via-amber-700 to-red-900",
       pagesCount: 650,
       pdfUrl: "https://ebooks-bnr.com/?stdb_dl=ebooks%2Fpdf4%2Fdumas_les_trois_mousquetaires.pdf",
+      htmlUrl: "https://ebooks-bnr.com/ebooks/html/dumas_les_trois_mousquetaires.html",
       chapters: [
         {
           title: "Chapitre 1 : Les trois présents de M. d'Artagnan père",
@@ -185,6 +180,7 @@ export const ParentCourses: React.FC = () => {
       coverGradient: "from-cyan-600 via-teal-700 to-blue-900",
       pagesCount: 450,
       pdfUrl: "https://ebooks-bnr.com/?stdb_dl=ebooks%2Fpdf4%2Fverne_20000_lieues_sous_les_mers.pdf",
+      htmlUrl: "https://ebooks-bnr.com/ebooks/html/verne_20000_lieues_sous_les_mers.html",
       chapters: [
         {
           title: "Chapitre 1 : Un écueil fuyant",
@@ -387,382 +383,402 @@ export const ParentCourses: React.FC = () => {
       setCurrentQuestionIdx(prev => prev + 1);
     } else {
       setIsFinished(true);
-      // Mettre à jour les statistiques
-      const successRate = Math.round(((score + (selectedOption === activeWorkbook.questions[currentQuestionIdx].correct ? 1 : 0)) / activeWorkbook.questions.length) * 100);
-      setStats(prev => ({
-        ...prev,
-        exercisesCompleted: prev.exercisesCompleted + 1,
-        averageScore: Math.round((prev.averageScore + successRate) / 2)
-      }));
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-fadeIn pb-24 px-2 sm:px-4">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-955 text-slate-800 dark:text-slate-100 font-sans selection:bg-amber-500/20 flex flex-col">
       
-      {/* ── En-tête Statistique Premium ── */}
-      <div className="rounded-[32px] p-6 md:p-8 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white relative overflow-hidden shadow-xl border border-slate-800">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4 pointer-events-none"></div>
+      {/* Barre de navigation supérieure (pleine largeur, bords droits) */}
+      <div className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <button
+            onClick={() => navigate('/')}
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 rounded-none transition-all shadow-sm active:scale-95 cursor-pointer"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Retour au Tableau de bord
+          </button>
 
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-inner">
-              <BookOpenCheck className="w-8 h-8 text-amber-500" />
-            </div>
-            <div>
-              <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white">Espace Révisions & Devoirs</h2>
-              <p className="text-indigo-200 text-xs mt-1 font-medium max-w-sm">
-                Des manuels scolaires officiels et des cahiers d'exercices interactifs intégrés pour s'entraîner à la maison.
-              </p>
-            </div>
-          </div>
-
-          {/* Tableau de bord mini-stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl shrink-0">
-            <div className="text-center px-3 border-r border-white/10 last:border-0">
-              <span className="text-xl font-black text-amber-500 block">{stats.streakDays} jours</span>
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Série active</span>
-            </div>
-            <div className="text-center px-3 border-r border-white/10 last:border-0">
-              <span className="text-xl font-black text-white block">{stats.booksRead} livres</span>
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Lectures</span>
-            </div>
-            <div className="text-center px-3 border-r border-white/10 last:border-0">
-              <span className="text-xl font-black text-white block">{stats.exercisesCompleted} devoirs</span>
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Résolus</span>
-            </div>
-            <div className="text-center px-3 last:border-0">
-              <span className="text-xl font-black text-emerald-400 block">{stats.averageScore}%</span>
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Moyenne</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Espace révisions</span>
           </div>
         </div>
       </div>
 
-      {/* ── Menu Onglets Modernes ── */}
-      <div className="flex gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-        <button
-          onClick={() => { setActiveTab('library'); setActiveWorkbook(null); }}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-            activeTab === 'library' && !activeWorkbook
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10'
-              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-          }`}
-        >
-          <Book className="w-4 h-4" />
-          <span>Bibliothèque Ebooks</span>
-        </button>
-        <button
-          onClick={() => { setActiveTab('exercises'); }}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-            activeTab === 'exercises' || activeWorkbook
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10'
-              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-          }`}
-        >
-          <Trophy className="w-4 h-4" />
-          <span>Cahiers d'Exercices</span>
-        </button>
-        <button
-          onClick={() => { setActiveTab('resources'); setActiveWorkbook(null); }}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-            activeTab === 'resources' && !activeWorkbook
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10'
-              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-          }`}
-        >
-          <Eye className="w-4 h-4" />
-          <span>Ressources Externes</span>
-        </button>
-      </div>
-
-      {/* ── CONTENU : Onglet 1 — Bibliothèque ── */}
-      {activeTab === 'library' && !activeWorkbook && (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">📚 Bibliothèque de révision intégrée</h3>
-              <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Livres scolaires et classiques à lire directement sur l'écran</p>
-            </div>
+      {/* En-tête (Pleine largeur, bande contrastée couleur jaune ambre) */}
+      <div className="w-full bg-slate-100 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 py-12 px-4 shrink-0">
+        <div className="max-w-6xl mx-auto text-center flex flex-col items-center justify-center">
+          <div className="w-16 h-16 bg-amber-500 rounded-none flex items-center justify-center text-slate-950 shadow-xl shadow-amber-500/10 mb-6 border border-amber-600">
+            <BookOpen className="w-8 h-8" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {books.map((book) => (
-              <div key={book.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
-                <div className={`h-48 bg-gradient-to-br ${book.coverGradient} p-6 flex flex-col justify-between relative`}>
-                  <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-20 transition-opacity"></div>
-                  <span className="px-2.5 py-1 bg-white/20 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-lg w-fit">
-                    {book.category}
-                  </span>
-                  <div className="space-y-1">
-                    <h4 className="text-xl font-black text-white leading-tight">{book.title}</h4>
-                    <p className="text-xs text-white/80 font-medium">{book.author}</p>
-                  </div>
-                </div>
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                    {book.description}
-                  </p>
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase">
-                      <span>{book.pagesCount} pages</span>
-                      <span className="truncate max-w-[120px]">{book.category}</span>
+          <h1 className="text-3.5xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter leading-tight uppercase">
+            Cours & <span className="text-transparent bg-clip-text bg-gradient-to-br from-amber-500 to-amber-600">Exercices</span>
+          </h1>
+          
+          <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest mt-3">
+            DGhubSchool — Espace Révisions & Devoirs
+          </p>
+          
+          <p className="text-slate-600 dark:text-slate-300 text-sm mt-6 max-w-2xl leading-relaxed">
+            Des manuels scolaires officiels et des cahiers d'exercices interactifs intégrés pour s'entraîner à la maison.
+          </p>
+        </div>
+      </div>
+
+      {/* Zone de Contenu Principal */}
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 flex-1 w-full">
+
+        {/* ── Menu Onglets Modernes (Charte Ambrée) ── */}
+        <div className="flex gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
+          <button
+            onClick={() => { setActiveTab('library'); setActiveWorkbook(null); }}
+            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border ${
+              activeTab === 'library' && !activeWorkbook
+                ? 'bg-amber-500 text-slate-950 border-amber-600 shadow-md shadow-amber-500/15'
+                : 'border-transparent text-slate-500 hover:text-amber-500 hover:bg-amber-500/5'
+            }`}
+          >
+            <Book className="w-4 h-4" />
+            <span>Bibliothèque Ebooks</span>
+          </button>
+          <button
+            onClick={() => { setActiveTab('exercises'); }}
+            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border ${
+              activeTab === 'exercises' || activeWorkbook
+                ? 'bg-amber-500 text-slate-950 border-amber-600 shadow-md shadow-amber-500/15'
+                : 'border-transparent text-slate-500 hover:text-amber-500 hover:bg-amber-500/5'
+            }`}
+          >
+            <Trophy className="w-4 h-4" />
+            <span>Cahiers d'Exercices</span>
+          </button>
+          <button
+            onClick={() => { setActiveTab('resources'); setActiveWorkbook(null); }}
+            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border ${
+              activeTab === 'resources' && !activeWorkbook
+                ? 'bg-amber-500 text-slate-950 border-amber-600 shadow-md shadow-amber-500/15'
+                : 'border-transparent text-slate-500 hover:text-amber-500 hover:bg-amber-500/5'
+            }`}
+          >
+            <Eye className="w-4 h-4" />
+            <span>Ressources Externes</span>
+          </button>
+        </div>
+
+        {/* ── CONTENU : Onglet 1 — Bibliothèque ── */}
+        {activeTab === 'library' && !activeWorkbook && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">📚 Bibliothèque de révision intégrée</h3>
+                <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Livres scolaires et classiques à lire directement sur l'écran ou en ligne</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {books.map((book) => (
+                <div key={book.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
+                  <div className={`h-48 bg-gradient-to-br ${book.coverGradient} p-6 flex flex-col justify-between relative`}>
+                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                    <span className="px-2.5 py-1 bg-white/20 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-lg w-fit">
+                      {book.category}
+                    </span>
+                    <div className="space-y-1">
+                      <h4 className="text-xl font-black text-white text-wrap leading-tight">{book.title}</h4>
+                      <p className="text-xs text-white/80 font-medium">{book.author}</p>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleOpenBook(book)}
-                        className="flex-1 py-2 bg-slate-950 hover:bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Lire</span>
-                      </button>
-                      {book.pdfUrl && (
-                        <a
-                          href={book.pdfUrl}
-                          download
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer text-center"
+                  </div>
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                      {book.description}
+                    </p>
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
+                      <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase mb-1">
+                        <span>{book.pagesCount} pages</span>
+                        <span className="truncate max-w-[120px]">{book.category}</span>
+                      </div>
+                      
+                      <div className="flex flex-col gap-2 w-full">
+                        <button
+                          onClick={() => handleOpenBook(book)}
+                          className="w-full py-2.5 bg-slate-950 hover:bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                         >
-                          <Download className="w-3.5 h-3.5" />
-                          <span>PDF</span>
-                        </a>
-                      )}
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Lire Intégré</span>
+                        </button>
+                        
+                        <div className="flex gap-2 w-full">
+                          {book.pdfUrl && (
+                            <a
+                              href={book.pdfUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-1 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 border border-amber-600 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer text-center"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>Télécharger PDF</span>
+                            </a>
+                          )}
+                          {book.htmlUrl && (
+                            <a
+                              href={book.htmlUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-850 dark:bg-slate-805 dark:hover:bg-slate-700 dark:text-white rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer text-center border border-slate-200 dark:border-slate-700"
+                            >
+                              <BookOpen className="w-3.5 h-3.5" />
+                              <span>Lire en ligne</span>
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── CONTENU : Onglet 2 — Cahiers d'Exercices ── */}
-      {activeTab === 'exercises' && !activeWorkbook && (
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">✏️ Cahiers d'exercices thématiques</h3>
-            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Choisissez une matière et commencez votre cahier de révision interactif</p>
-          </div>
+        {/* ── CONTENU : Onglet 2 — Cahiers d'Exercices ── */}
+        {activeTab === 'exercises' && !activeWorkbook && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">✏️ Cahiers d'exercices thématiques</h3>
+              <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Choisissez une matière et commencez votre cahier de révision interactif</p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {workbooks.map((wb) => (
-              <div key={wb.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[28px] p-6 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between space-y-6">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-start">
-                    <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-black rounded-lg uppercase tracking-wider">
-                      {wb.subject}
-                    </span>
-                    <span className={`px-2.5 py-0.5 border text-[9px] font-black rounded-lg uppercase tracking-widest ${
-                      wb.difficulty === 'Facile' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                      wb.difficulty === 'Moyen' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                      'bg-rose-50 text-rose-700 border-rose-200'
-                    }`}>
-                      {wb.difficulty}
-                    </span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {workbooks.map((wb) => (
+                <div key={wb.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[28px] p-6 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-start">
+                      <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-black rounded-lg uppercase tracking-wider">
+                        {wb.subject}
+                      </span>
+                      <span className={`px-2.5 py-0.5 border text-[9px] font-black rounded-lg uppercase tracking-widest ${
+                        wb.difficulty === 'Facile' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                        wb.difficulty === 'Moyen' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                        'bg-rose-50 text-rose-700 border-rose-200'
+                      }`}>
+                        {wb.difficulty}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-black text-slate-950 dark:text-white leading-tight">{wb.title}</h4>
+                      <p className="text-xs text-slate-400 mt-1 font-bold uppercase">{wb.gradeLevel}</p>
+                    </div>
                   </div>
 
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase">{wb.questionsCount} questions</span>
+                    <button
+                      onClick={() => handleStartWorkbook(wb)}
+                      className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center gap-1 cursor-pointer border border-amber-600 shadow-sm"
+                    >
+                      <Play className="w-3.5 h-3.5" />
+                      <span>Lancer le cahier</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── CONTENU : Onglet 2 bis — Résolution d'un Cahier d'Exercice Interactif ── */}
+        {activeWorkbook && (
+          <div className="max-w-3xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 md:p-8 shadow-md">
+            {!isFinished ? (
+              <div className="space-y-6">
+                {/* Entête de l'exercice */}
+                <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setActiveWorkbook(null)}
+                      className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 rounded-lg transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                    </button>
+                    <div>
+                      <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">{activeWorkbook.title}</h3>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{activeWorkbook.subject} • {activeWorkbook.gradeLevel}</p>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-black rounded-lg uppercase tracking-wider">
+                    Question {currentQuestionIdx + 1} / {activeWorkbook.questions.length}
+                  </span>
+                </div>
+
+                {/* Barre de progression */}
+                <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-amber-500 transition-all duration-300"
+                    style={{ width: `${((currentQuestionIdx) / activeWorkbook.questions.length) * 100}%` }}
+                  ></div>
+                </div>
+
+                {/* Question */}
+                <div className="space-y-4 py-2">
+                  <h4 className="text-lg font-black text-slate-950 dark:text-white leading-snug">
+                    {activeWorkbook.questions[currentQuestionIdx].text}
+                  </h4>
+
+                  <div className="grid grid-cols-1 gap-3 pt-2">
+                    {activeWorkbook.questions[currentQuestionIdx].options.map((option, idx) => {
+                      const isSelected = selectedOption === idx;
+                      const isCorrect = idx === activeWorkbook.questions[currentQuestionIdx].correct;
+                      let optionStyle = "border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50 text-slate-800 dark:text-slate-300";
+
+                      if (isSelected) {
+                        optionStyle = "border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400";
+                      }
+                      if (isAnswerChecked) {
+                        if (isCorrect) {
+                          optionStyle = "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400";
+                        } else if (isSelected) {
+                          optionStyle = "border-rose-500 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400";
+                        } else {
+                          optionStyle = "border-slate-200 opacity-50 dark:border-slate-800";
+                        }
+                      }
+
+                      return (
+                        <button
+                          key={idx}
+                          disabled={isAnswerChecked}
+                          onClick={() => handleAnswerSelect(idx)}
+                          className={`flex items-center justify-between p-4 border rounded-2xl text-left text-xs font-bold transition-all cursor-pointer ${optionStyle}`}
+                        >
+                          <span>{option}</span>
+                          {isAnswerChecked && isCorrect && <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />}
+                          {isAnswerChecked && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-rose-500 shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Explication & Bouton de validation */}
+                {isAnswerChecked && (
+                  <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 animate-scaleUp">
+                    <h5 className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4" />
+                      Explication de la réponse
+                    </h5>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                      {activeWorkbook.questions[currentQuestionIdx].explanation}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800 gap-3">
+                  {!isAnswerChecked ? (
+                    <button
+                      disabled={selectedOption === null}
+                      onClick={handleCheckAnswer}
+                      className="px-6 py-3 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer border border-amber-600"
+                    >
+                      Vérifier ma réponse
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleNextQuestion}
+                      className="px-6 py-3 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>{currentQuestionIdx < activeWorkbook.questions.length - 1 ? 'Question suivante' : 'Terminer le cahier'}</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-10 space-y-6 animate-scaleUp">
+                <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl flex items-center justify-center mx-auto border border-amber-300 shadow-lg shadow-amber-500/20">
+                  <Trophy className="w-10 h-10 text-white" />
+                </div>
+
+                <div>
+                  <h4 className="text-2xl font-black text-slate-955 dark:text-white uppercase tracking-tight">Cahier Terminé !</h4>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Série résolue avec succès</p>
+                </div>
+
+                <div className="max-w-xs mx-auto bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 grid grid-cols-2 gap-4">
                   <div>
-                    <h4 className="text-lg font-black text-slate-950 dark:text-white leading-tight">{wb.title}</h4>
-                    <p className="text-xs text-slate-400 mt-1 font-bold uppercase">{wb.gradeLevel}</p>
+                    <span className="text-2xl font-black text-slate-900 dark:text-white block">{score} / {activeWorkbook.questions.length}</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Score obtenu</span>
+                  </div>
+                  <div>
+                    <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 block">+{score * 10} XP</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Points acquis</span>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase">{wb.questionsCount} questions</span>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4 max-w-sm mx-auto">
                   <button
-                    onClick={() => handleStartWorkbook(wb)}
-                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center gap-1 cursor-pointer border border-amber-600 shadow-sm"
+                    onClick={() => handleStartWorkbook(activeWorkbook)}
+                    className="flex-1 px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer border border-slate-200 dark:border-slate-700"
                   >
-                    <Play className="w-3.5 h-3.5" />
-                    <span>Lancer le cahier</span>
+                    Recommencer
                   </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── CONTENU : Onglet 2 bis — Résolution d'un Cahier d'Exercice Interactif ── */}
-      {activeWorkbook && (
-        <div className="max-w-3xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 md:p-8 shadow-md">
-          {!isFinished ? (
-            <div className="space-y-6">
-              {/* Entête de l'exercice */}
-              <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-2">
                   <button
                     onClick={() => setActiveWorkbook(null)}
-                    className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 rounded-lg transition-colors cursor-pointer"
+                    className="flex-1 px-5 py-3.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer"
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    Retour aux exercices
                   </button>
-                  <div>
-                    <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">{activeWorkbook.title}</h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{activeWorkbook.subject} • {activeWorkbook.gradeLevel}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── CONTENU : Onglet 3 — Ressources Externes ── */}
+        {activeTab === 'resources' && !activeWorkbook && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">🌐 Autres plateformes gratuites recommandées</h3>
+              <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Des sites externes d'excellence pour compléter la formation de vos enfants</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {externalResources.map((res, idx) => (
+                <div key={idx} className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4">
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-black text-slate-900 dark:text-white">{res.name}</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                      {res.desc}
+                    </p>
                   </div>
-                </div>
-                <span className="px-3 py-1 bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 text-xs font-black rounded-lg uppercase tracking-wider">
-                  Question {currentQuestionIdx + 1} / {activeWorkbook.questions.length}
-                </span>
-              </div>
-
-              {/* Barre de progression */}
-              <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-blue-600 transition-all duration-300"
-                  style={{ width: `${((currentQuestionIdx) / activeWorkbook.questions.length) * 100}%` }}
-                ></div>
-              </div>
-
-              {/* Question */}
-              <div className="space-y-4 py-2">
-                <h4 className="text-lg font-black text-slate-950 dark:text-white leading-snug">
-                  {activeWorkbook.questions[currentQuestionIdx].text}
-                </h4>
-
-                <div className="grid grid-cols-1 gap-3 pt-2">
-                  {activeWorkbook.questions[currentQuestionIdx].options.map((option, idx) => {
-                    const isSelected = selectedOption === idx;
-                    const isCorrect = idx === activeWorkbook.questions[currentQuestionIdx].correct;
-                    let optionStyle = "border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50 text-slate-800 dark:text-slate-300";
-
-                    if (isSelected) {
-                      optionStyle = "border-blue-600 bg-blue-50/50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400";
-                    }
-                    if (isAnswerChecked) {
-                      if (isCorrect) {
-                        optionStyle = "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400";
-                      } else if (isSelected) {
-                        optionStyle = "border-rose-500 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400";
-                      } else {
-                        optionStyle = "border-slate-200 opacity-50 dark:border-slate-800";
-                      }
-                    }
-
-                    return (
-                      <button
-                        key={idx}
-                        disabled={isAnswerChecked}
-                        onClick={() => handleAnswerSelect(idx)}
-                        className={`flex items-center justify-between p-4 border rounded-2xl text-left text-xs font-bold transition-all cursor-pointer ${optionStyle}`}
-                      >
-                        <span>{option}</span>
-                        {isAnswerChecked && isCorrect && <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />}
-                        {isAnswerChecked && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-rose-500 shrink-0" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Explication & Bouton de validation */}
-              {isAnswerChecked && (
-                <div className="bg-blue-50/50 dark:bg-slate-800/30 border border-blue-100 dark:border-slate-800 rounded-2xl p-4 animate-scaleUp">
-                  <h5 className="text-xs font-black text-blue-700 dark:text-blue-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4" />
-                    Explication de la réponse
-                  </h5>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                    {activeWorkbook.questions[currentQuestionIdx].explanation}
-                  </p>
-                </div>
-              )}
-
-              <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800 gap-3">
-                {!isAnswerChecked ? (
-                  <button
-                    disabled={selectedOption === null}
-                    onClick={handleCheckAnswer}
-                    className="px-6 py-3 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer border border-amber-600"
+                  <a
+                    href={res.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[10px] font-black text-amber-600 hover:text-amber-700 uppercase tracking-widest"
                   >
-                    Vérifier ma réponse
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleNextQuestion}
-                    className="px-6 py-3 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
-                  >
-                    <span>{currentQuestionIdx < activeWorkbook.questions.length - 1 ? 'Question suivante' : 'Terminer le cahier'}</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
+                    <span>Visiter le portail</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              ))}
             </div>
-          ) : (
-            <div className="text-center py-10 space-y-6 animate-scaleUp">
-              <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl flex items-center justify-center mx-auto border border-amber-300 shadow-lg shadow-amber-500/20">
-                <Trophy className="w-10 h-10 text-white" />
-              </div>
-
-              <div>
-                <h4 className="text-2xl font-black text-slate-950 dark:text-white uppercase tracking-tight">Cahier Terminé !</h4>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Série résolue avec succès</p>
-              </div>
-
-              <div className="max-w-xs mx-auto bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-2xl font-black text-slate-900 dark:text-white block">{score} / {activeWorkbook.questions.length}</span>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Score obtenu</span>
-                </div>
-                <div>
-                  <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 block">+{score * 10} XP</span>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Points acquis</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4 max-w-sm mx-auto">
-                <button
-                  onClick={() => handleStartWorkbook(activeWorkbook)}
-                  className="flex-1 px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer"
-                >
-                  Recommencer
-                </button>
-                <button
-                  onClick={() => setActiveWorkbook(null)}
-                  className="flex-1 px-5 py-3.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all cursor-pointer"
-                >
-                  Retour aux exercices
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── CONTENU : Onglet 3 — Ressources Externes ── */}
-      {activeTab === 'resources' && !activeWorkbook && (
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">🌐 Autres plateformes gratuites recommandées</h3>
-            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Des sites externes d'excellence pour compléter la formation de vos enfants</p>
           </div>
+        )}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {externalResources.map((res, idx) => (
-              <div key={idx} className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4">
-                <div className="space-y-2">
-                  <h4 className="text-sm font-black text-slate-900 dark:text-white">{res.name}</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                    {res.desc}
-                  </p>
-                </div>
-                <a
-                  href={res.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[10px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest"
-                >
-                  <span>Visiter le portail</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </a>
-              </div>
-            ))}
-          </div>
+      </div>
+
+      {/* Footer */}
+      <div className="w-full bg-white dark:bg-slate-900 py-12 px-4 border-t border-slate-200 dark:border-slate-800 shrink-0 mt-auto">
+        <div className="max-w-6xl mx-auto text-center text-xs text-slate-400 dark:text-slate-500 space-y-2">
+          <p>© {new Date().getFullYear()} DGhubSchool. Tous droits réservés.</p>
+          <p className="flex items-center justify-center gap-1">
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Plateforme scolaire sécurisée pour la réussite de vos enfants.
+          </p>
         </div>
-      )}
+      </div>
 
       {/* ── MODAL : LECTEUR DE LIVRE INTÉGRÉ (PREMIUM READER VIEW) ── */}
       {selectedBook && (
@@ -786,19 +802,19 @@ export const ParentCourses: React.FC = () => {
                 <div className="hidden sm:flex items-center gap-1.5 border border-slate-200 dark:border-slate-800 p-1 rounded-lg">
                   <button 
                     onClick={() => setFontSize('sm')} 
-                    className={`px-2 py-1 text-[10px] font-black rounded ${fontSize === 'sm' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-400'}`}
+                    className={`px-2 py-1 text-[10px] font-black rounded cursor-pointer ${fontSize === 'sm' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-400'}`}
                   >
                     A-
                   </button>
                   <button 
                     onClick={() => setFontSize('base')} 
-                    className={`px-2 py-1 text-[10px] font-black rounded ${fontSize === 'base' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-400'}`}
+                    className={`px-2 py-1 text-[10px] font-black rounded cursor-pointer ${fontSize === 'base' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-400'}`}
                   >
                     A
                   </button>
                   <button 
                     onClick={() => setFontSize('lg')} 
-                    className={`px-2 py-1 text-[10px] font-black rounded ${fontSize === 'lg' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-400'}`}
+                    className={`px-2 py-1 text-[10px] font-black rounded cursor-pointer ${fontSize === 'lg' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-400'}`}
                   >
                     A+
                   </button>
@@ -807,14 +823,26 @@ export const ParentCourses: React.FC = () => {
                 {selectedBook.pdfUrl && (
                   <a
                     href={selectedBook.pdfUrl}
-                    download
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase tracking-widest rounded-lg cursor-pointer text-center"
+                    className="flex items-center gap-1 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-[10px] font-black uppercase tracking-widest rounded-lg cursor-pointer text-center border border-amber-600 shadow-sm"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Télécharger PDF</span>
                     <span className="sm:hidden">PDF</span>
+                  </a>
+                )}
+
+                {selectedBook.htmlUrl && (
+                  <a
+                    href={selectedBook.htmlUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 text-[10px] font-black uppercase tracking-widest rounded-lg cursor-pointer text-center"
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Lire en ligne</span>
+                    <span className="sm:hidden">HTML</span>
                   </a>
                 )}
 
@@ -840,7 +868,7 @@ export const ParentCourses: React.FC = () => {
                       onClick={() => setCurrentChapterIdx(idx)}
                       className={`w-full text-left p-3 rounded-xl text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
                         currentChapterIdx === idx
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-amber-500 text-slate-955 font-black'
                           : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
                       }`}
                     >
@@ -852,10 +880,10 @@ export const ParentCourses: React.FC = () => {
               </div>
 
               {/* Zone de lecture de texte */}
-              <div className="flex-1 flex flex-col justify-between overflow-hidden bg-white dark:bg-slate-950">
+              <div className="flex-1 flex flex-col justify-between overflow-hidden bg-white dark:bg-slate-955">
                 <div className="flex-1 p-6 md:p-12 overflow-y-auto custom-scrollbar">
                   <div className="max-w-2xl mx-auto space-y-6">
-                    <h3 className="text-2xl font-black text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-900 pb-4">
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white border-b border-slate-105 dark:border-slate-900 pb-4">
                       {selectedBook.chapters[currentChapterIdx].title}
                     </h3>
                     <p className={`text-slate-700 dark:text-slate-300 leading-relaxed text-justify font-medium ${

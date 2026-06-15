@@ -117,7 +117,10 @@ async function getBadges(req, res) {
 
         if (error) {
             // Gérer le cas où la table n'existe pas encore pour cette école
-            if (error.code === '42P01') return res.json({ badges: [] });
+            const errMsg = (error.message || '').toLowerCase();
+            if (error.code === '42P01' || errMsg.includes('schema cache') || errMsg.includes('does not exist') || errMsg.includes('could not find')) {
+                return res.json({ badges: [] });
+            }
             throw error;
         }
 
@@ -449,7 +452,12 @@ async function getParentData(req, res) {
                 .in('student_id', activeStudentIds)
                 .order('earned_at', { ascending: false });
             
-            if (bErr && bErr.code !== '42P01') throw bErr;
+            if (bErr) {
+                const bErrMsg = (bErr.message || '').toLowerCase();
+                if (bErr.code !== '42P01' && !bErrMsg.includes('schema cache') && !bErrMsg.includes('does not exist') && !bErrMsg.includes('could not find')) {
+                    throw bErr;
+                }
+            }
             
             badges = (dbBadges || []).map(b => ({
                 ...b,
