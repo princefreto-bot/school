@@ -443,7 +443,7 @@ export const useStore = create<AppState>()(
             return;
           }
         } else if (u?.role === 'parent') {
-          const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes'];
+          const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes', 'parent_courses'];
           if (!allowed.includes(page)) {
             set({ currentPage: 'parent_dashboard' });
             return;
@@ -1294,7 +1294,7 @@ export const useStore = create<AppState>()(
 
           // Sécurité — Empêcher la re-connexion automatique de switcher un parent sur l'admin
           if (state.user?.role === 'parent') {
-            const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes'];
+            const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes', 'parent_courses'];
             if (!allowed.includes(state.currentPage)) {
               state.currentPage = 'parent_dashboard';
             }

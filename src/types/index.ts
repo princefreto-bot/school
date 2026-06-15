@@ -262,6 +262,7 @@ export type AppPage =
   | 'parent_badges'
   | 'parent_messages'
   | 'parent_notes'
+  | 'parent_courses'
   | 'parents_list'
   | 'import_export'
   | 'chat'
