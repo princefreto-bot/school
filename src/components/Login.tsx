@@ -379,13 +379,6 @@ export const Login: React.FC = () => {
                 >
                   Accès Portail Établissement
                 </button>
-                <button 
-                  type="button" 
-                  onClick={() => navigate('/admission')}
-                  className="text-slate-400 hover:text-blue-600 text-[10px] font-bold tracking-wider uppercase transition-colors"
-                >
-                  Faire une demande d'admission (Élève)
-                </button>
               </div>
             </form>
           </div>
@@ -525,9 +518,6 @@ export const Login: React.FC = () => {
                       <div className="flex flex-col gap-1 mt-1">
                         <button type="button" onClick={() => navigate('/portail-ecole')} className="w-full py-2 text-slate-500 text-[9px] font-bold uppercase tracking-wider">
                           Accès Portail Établissement
-                        </button>
-                        <button type="button" onClick={() => navigate('/admission')} className="w-full py-2 text-blue-600 text-[9px] font-bold uppercase tracking-wider">
-                          Demande d'admission (Élève)
                         </button>
                       </div>
                     )}

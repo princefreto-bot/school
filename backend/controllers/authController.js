@@ -308,9 +308,11 @@ async function deleteSelfAccount(req, res) {
         return res.status(403).json({ error: "Le compte superadmin ne peut être supprimé ici." });
     }
 
+    const table = role === 'creator' ? 'creators' : `profiles_${schoolSlug}`;
+
     try {
         const { error } = await supabase
-            .from(`profiles_${schoolSlug}`)
+            .from(table)
             .delete()
             .eq('id', id);
 
@@ -327,7 +329,7 @@ async function updatePushToken(req, res) {
     const { id, role, schoolSlug } = req.user;
     const { push_token } = req.body;
     
-    const table = role === 'superadmin' ? 'superadmins' : `profiles_${schoolSlug}`;
+    const table = role === 'superadmin' ? 'superadmins' : (role === 'creator' ? 'creators' : `profiles_${schoolSlug}`);
 
     try {
         console.log(`📲 Tentative de mise à jour du push_token pour l'utilisateur ${id}`);

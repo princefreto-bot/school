@@ -343,7 +343,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
-    if (user?.role !== 'parent') {
+    if (isAdminRole(user?.role)) {
       const fetchCount = async () => {
         try {
           const ctrl = new AbortController();

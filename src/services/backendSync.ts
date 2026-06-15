@@ -20,8 +20,8 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
     // 🛡️ Sécurité SaaS : Les parents n'ont pas accès à l'API /sync (réservée admin)
     // On vérifie le rôle pour éviter les erreurs 403 persistantes dans le dashboard parent
     const currentUser = (store as any).user || null;
-    if (currentUser?.role === 'parent') {
-        // console.log('👤 [Sync] Skip sync for parent (restricted endpoint)');
+    if (currentUser?.role === 'parent' || currentUser?.role === 'superadmin' || currentUser?.role === 'creator') {
+        // console.log('👤 [Sync] Skip sync for parent/superadmin/creator (restricted endpoint)');
         return null;
     }
 

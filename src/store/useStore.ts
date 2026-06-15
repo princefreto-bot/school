@@ -861,6 +861,7 @@ export const useStore = create<AppState>()(
       fetchAllFromBackend: async (force = false) => {
         const user = get().user;
         if (!user) return;
+        if (user.role === 'superadmin' || user.role === 'creator') return;
 
         // ── Parents : sync spécifique (annonces, paiements, messages) ──
         if (user.role === 'parent') {
