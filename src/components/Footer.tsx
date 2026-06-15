@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Linkedin, Facebook, Youtube, Instagram, Globe, Sparkles, Send } from 'lucide-react';
 
 interface FooterItem {
@@ -30,8 +30,20 @@ interface FooterLangText {
 
 export const Footer: React.FC = () => {
   const navigate = useNavigate();
-  const [lang, setLang] = useState<'en' | 'fr'>('fr');
+  const location = useLocation();
+  const parts = location.pathname.split('/');
+  const lang = (parts[1] === 'en' || parts[1] === 'fr') ? parts[1] as 'en' | 'fr' : 'fr';
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+
+  const setLang = (newLang: 'en' | 'fr') => {
+    const parts = location.pathname.split('/');
+    if (parts[1] === 'fr' || parts[1] === 'en') {
+      parts[1] = newLang;
+    } else {
+      parts.unshift(newLang);
+    }
+    navigate(parts.join('/') + location.search + location.hash);
+  };
 
   const texts: Record<'fr' | 'en', FooterLangText> = {
     fr: {
@@ -125,7 +137,7 @@ export const Footer: React.FC = () => {
       window.open(path, '_blank', 'noopener,noreferrer');
     } else if (path.startsWith('/#')) {
       const elementId = path.substring(2);
-      navigate('/');
+      navigate(`/${lang}`);
       setTimeout(() => {
         const element = document.getElementById(elementId);
         if (element) {
@@ -133,7 +145,7 @@ export const Footer: React.FC = () => {
         }
       }, 150);
     } else {
-      navigate(path);
+      navigate(`/${lang}${path}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -142,7 +154,7 @@ export const Footer: React.FC = () => {
     <footer className="w-full bg-slate-50 dark:bg-slate-950 border-t border-slate-200/60 dark:border-slate-900 text-slate-600 dark:text-slate-400 font-sans mt-auto select-none">
       
       {/* ── TESTIMONIAL BANNER (TOP FOOTER) ── */}
-      <div className="max-w-7xl mx-auto px-6 md:px-8 py-10 md:py-12 border-b border-slate-200/50 dark:border-slate-900/50">
+      <div className="w-full px-6 md:px-8 py-10 md:py-12 border-b border-slate-200/50 dark:border-slate-900/50">
         <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/[0.03] to-transparent dark:from-amber-950/20 dark:via-amber-950/[0.05] dark:to-transparent rounded-[32px] p-6 md:p-10 border border-amber-500/20 dark:border-amber-950/40 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="max-w-2xl space-y-2">
             <h4 className="text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-2">
@@ -164,7 +176,7 @@ export const Footer: React.FC = () => {
       </div>
 
       {/* ── MAIN COLUMNS ── */}
-      <div className="max-w-7xl mx-auto px-6 md:px-8 py-16 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
+      <div className="w-full px-6 md:px-8 py-16 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
         
         {/* Brand column */}
         <div className="lg:col-span-4 space-y-6 text-left">
@@ -172,7 +184,7 @@ export const Footer: React.FC = () => {
             onClick={() => handleNavigation('/')}
             className="flex items-center gap-2.5 text-slate-950 dark:text-white font-black tracking-tighter text-2xl uppercase cursor-pointer select-none"
           >
-            <img src="/logo.jpeg" className="w-8 h-8 object-contain rounded-xl bg-white p-0.5 border border-slate-200 dark:border-slate-800" alt="Logo DGhubSchool" />
+            <img src="/logo.png" className="w-8 h-8 object-contain rounded-xl bg-white p-0.5 border border-slate-200 dark:border-slate-800" alt="Logo DGhubSchool" />
             <span>DGhubSchool</span>
           </div>
           
@@ -268,7 +280,7 @@ export const Footer: React.FC = () => {
 
       {/* ── LEGAL NOTICE & COPYRIGHT (BOTTOM) ── */}
       <div className="border-t border-slate-200/50 dark:border-slate-900 bg-slate-100/50 dark:bg-slate-950/40 py-10 px-6 md:px-8">
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="w-full space-y-8">
           
           {/* Detailed Delaware legal notice */}
           <p className="text-[10px] md:text-xs text-slate-400 dark:text-slate-500 leading-relaxed font-medium text-left">

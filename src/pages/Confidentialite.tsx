@@ -1,30 +1,31 @@
 import React from 'react';
 import { ArrowLeft, Eye, Lock, FileText, Globe } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Footer } from '../components/Footer';
 
 export const Confidentialite: React.FC = () => {
   const navigate = useNavigate();
+  const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans selection:bg-amber-500/20 flex flex-col">
       
       {/* ── HEADER / NAVIGATION ── */}
       <header className="relative z-50 border-b border-slate-200/50 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex-shrink-0">
-        <nav className="max-w-7xl mx-auto flex items-center justify-between p-4 md:px-8">
+        <nav className="w-full flex items-center justify-between p-4 md:px-8">
           <div 
-            onClick={() => navigate('/')}
+            onClick={() => navigate(`/${lang}`)}
             className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl uppercase select-none cursor-pointer"
           >
-            <img src="/logo.jpeg" className="w-8 h-8 object-contain rounded-lg" alt="Logo" />
+            <img src="/logo.png" className="w-8 h-8 object-contain rounded-lg" alt="Logo" />
             <span className="text-amber-500">DGhubSchool</span>
           </div>
           
           <button 
-            onClick={() => navigate('/')}
+            onClick={() => navigate(`/${lang}`)}
             className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Retour à l'accueil
+            <ArrowLeft className="w-3.5 h-3.5" /> {lang === 'fr' ? "Retour à l'accueil" : "Back to home"}
           </button>
         </nav>
       </header>
@@ -64,7 +65,7 @@ export const Confidentialite: React.FC = () => {
               Introduction
             </h2>
             <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-              Chez DGhubSchool, nous accordons une importance primordiale à la protection et à la confidentialité des données personnelles des élèves, des parents et du personnel d'établissement. Cette charte détaille la manière dont nous collectons, gérons et sécurisons ces informations scolaires sensibles dans notre infrastructure multi-établissement isolée.
+              Chez DGhubSchool, we prioritize the protection and confidentiality of personal data of students, parents, and school staff. This privacy policy details how we collect, manage, and secure this sensitive educational information within our isolated multi-school infrastructure.
             </p>
           </div>
 

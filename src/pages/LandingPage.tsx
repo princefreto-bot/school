@@ -2,7 +2,7 @@
 // PAGE D'ACCUEIL SAAS — Style Brutaliste Épuré & Bords Droits
 // ============================================================
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { 
   CreditCard, 
   BookOpen, 
@@ -18,6 +18,7 @@ import { BACKEND_URL } from '../config';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [dbStats, setDbStats] = useState({ schools: 0, students: 0, documents: 0 });
 
@@ -36,42 +37,171 @@ export const LandingPage: React.FC = () => {
       .catch(err => console.error("Erreur récupération des statistiques:", err));
   }, []);
 
+  const texts = {
+    fr: {
+      features: "Fonctionnalités",
+      pricing: "Tarification",
+      about: "À Propos",
+      socialProof: "Preuve Sociale",
+      login: "Connexion",
+      createSchool: "Créer un établissement",
+      createSchoolFree: "Créer un établissement gratuitement",
+      accessPortals: "Accéder aux portails",
+      heroTitlePart1: "Pilotez votre ",
+      heroTitleHighlight: "établissement scolaire",
+      heroTitlePart2: " en toute simplicité",
+      heroSubtitle: "Gérez la caisse et le suivi de la scolarité, éditez les bulletins de notes officiels, suivez les présences par QR Code et donnez accès à des ressources scolaires gratuites pour les révisions à la maison.",
+      realTimeDashboard: "Tableau de bord en temps réel (établissement masqué)",
+      screenshotsTitle: "📸 Captures d'Écran Officielles",
+      discoverFeatures: "Découvrez nos fonctionnalités clés en images",
+      discoverDesc: "Une interface épurée, performante et adaptée aux besoins réels des écoles d'Afrique de l'Ouest.",
+      securityTitle: "Cartes Scolaires Bien Visibles",
+      securityDesc: "Générez et imprimez des cartes d'identité officielles pour vos élèves avec une photo passeport et un QR Code unique pour l'enregistrement automatique des présences.",
+      academicsTitle: "Bulletins de Notes bien Remplis",
+      academicsDesc: "Calcul automatique des moyennes trimestrielles/semestrielles, rangs, appréciations des enseignants et signature de la direction. Prêt à être imprimé ou partagé en lot.",
+      bentoTitle: "Tout ce dont vous avez besoin, réuni au même endroit",
+      bentoDesc: "Simplifiez la scolarité de vos élèves et offrez aux parents et aux enseignants une expérience moderne.",
+      paymentTracking: "Suivi des Paiements & Caisse",
+      paymentDesc: "Suivez les tranches de scolarité et les impayés de chaque élève. Enregistrez les règlements et générez des reçus de caisse numériques automatiques.",
+      paymentBadge: "Comptabilité",
+      bulletinsTitle: "Bulletins & Notes",
+      bulletinsDesc: "Génération automatique des bulletins scolaires en un clic. Calcul des moyennes et classement des élèves sans aucun tableur Excel.",
+      bulletinsBadge: "Bulletins PDF",
+      parentsTitle: "Suivi des parents d'élèves",
+      parentsDesc: "Un espace mobile simplifié pour les parents. Ils consultent les notes, les absences et l'assiduité sans avoir à se déplacer.",
+      parentsBadge: "Portail mobile",
+      qrCardsTitle: "Cartes scolaires à QR Code",
+      qrCardsDesc: "Générez et imprimez des cartes scolaires officielles. Scannez le QR Code à l'entrée et à la sortie pour enregistrer automatiquement la présence de l'élève.",
+      qrCardsBadge: "Sécurité d'accès",
+      partnersLabel: "Écoles et lycées partenaires",
+      studentsLabel: "Élèves inscrits et gérés",
+      documentsLabel: "Bulletins et documents édités",
+      networkLabel: "Taux de disponibilité réseau",
+      testimonialText: "\"Grâce à DGhubSchool, nous avons réduit de 85% le taux de retard de paiement des frais de scolarité. Les parents adorent recevoir instantanément leur reçu numérique par SMS sans avoir à faire la queue à l'école.\"",
+      testimonialAuthor: "M. Koffi Mensah",
+      testimonialRole: "Directeur d'Établissement Scolaire à Lomé, Togo",
+      pricingTitle: "Tarifs Transparent",
+      pricingSubtitle: "Tarifs clairs et adaptés",
+      pricingDesc: "Commencez sans engagement dès aujourd'hui.",
+      freeTrialBadge: "Essai Gratuit",
+      singleFormula: "Formule Unique",
+      daysTrial: "60 Jours d'essai",
+      afterTrial: "Puis un abonnement annuel adapté aux effectifs de votre école.",
+      trialBtn: "Démarrer l'essai gratuit",
+      newsroomTitle: "📢 Newsroom",
+      newsroomSub: "Dernières avancées de DGhubSchool",
+      newsroomDesc: "Suivez l'évolution de la plateforme et les fonctionnalités déployées.",
+      newsroomBadge: "Infrastructure",
+      newsroomCardTitle: "Sécurité renforcée",
+      newsroomCardDesc: "DGhubSchool intègre des protocoles d'isolation de données pour s'assurer que chaque établissement dispose d'un espace hermétique protégé.",
+      newsroomDate: "Avril 2026",
+      viewAllNews: "Voir toutes les actualités",
+      readyTitle: "Prêt à simplifier la gestion de votre école ?",
+      readyDesc: "Rejoignez les établissements d'Afrique de l'Ouest qui font confiance à notre plateforme pour leur scolarité et leurs encaissements.",
+      createSchoolBtn: "Créer un compte établissement"
+    },
+    en: {
+      features: "Features",
+      pricing: "Pricing",
+      about: "About Us",
+      socialProof: "Social Proof",
+      login: "Login",
+      createSchool: "Create a School",
+      createSchoolFree: "Create a School for Free",
+      accessPortals: "Access Portals",
+      heroTitlePart1: "Manage your ",
+      heroTitleHighlight: "school establishment",
+      heroTitlePart2: " with complete simplicity",
+      heroSubtitle: "Manage fees and track school activities, generate official report cards, monitor attendance via QR Code, and grant access to free educational resources for home learning.",
+      realTimeDashboard: "Real-time dashboard (school masked)",
+      screenshotsTitle: "📸 Official Screenshots",
+      discoverFeatures: "Discover our key features in pictures",
+      discoverDesc: "A clean, high-performance interface tailored to the real needs of West African schools.",
+      securityTitle: "Clear School Cards",
+      securityDesc: "Generate and print official ID cards for your students with a passport photo and a unique QR Code for automatic attendance tracking.",
+      academicsTitle: "Well-filled Report Cards",
+      academicsDesc: "Automatic calculation of term/semester averages, rankings, teachers' feedback, and administration signatures. Ready to be printed or shared in batch.",
+      bentoTitle: "Everything you need, in one place",
+      bentoDesc: "Simplify your students' education and provide a modern experience to parents and teachers.",
+      paymentTracking: "Payment Tracking & Cashier",
+      paymentDesc: "Track school fee installments and outstanding balances for each student. Record transactions and automatically generate digital receipts.",
+      paymentBadge: "Accounting",
+      bulletinsTitle: "Report Cards & Grades",
+      bulletinsDesc: "Automatic generation of school reports in one click. Grade calculations and rankings without Excel spreadsheets.",
+      bulletinsBadge: "PDF Reports",
+      parentsTitle: "Parental Student Tracking",
+      parentsDesc: "A simplified mobile portal for parents. Check grades, attendance, and progress without having to travel.",
+      parentsBadge: "Mobile Portal",
+      qrCardsTitle: "QR Code School Cards",
+      qrCardsDesc: "Generate and print official student cards. Scan the QR Code at the entrance/exit to automatically record student attendance.",
+      qrCardsBadge: "Access Security",
+      partnersLabel: "Partner schools and high schools",
+      studentsLabel: "Enrolled and managed students",
+      documentsLabel: "Report cards and documents generated",
+      networkLabel: "Network availability rate",
+      testimonialText: "\"Thanks to DGhubSchool, we reduced school fee payment delays by 85%. Parents love receiving their digital receipt instantly by SMS without queuing at the school.\"",
+      testimonialAuthor: "Mr. Koffi Mensah",
+      testimonialRole: "School Principal in Lomé, Togo",
+      pricingTitle: "Transparent Pricing",
+      pricingSubtitle: "Clear and adapted pricing",
+      pricingDesc: "Get started today with no commitment.",
+      freeTrialBadge: "Free Trial",
+      singleFormula: "Single Plan",
+      daysTrial: "60 Days Trial",
+      afterTrial: "Then an annual subscription adjusted to your school's enrollment.",
+      trialBtn: "Start Free Trial",
+      newsroomTitle: "📢 Newsroom",
+      newsroomSub: "Latest Advances of DGhubSchool",
+      newsroomDesc: "Follow the platform updates and deployed features.",
+      newsroomBadge: "Infrastructure",
+      newsroomCardTitle: "Enhanced Security",
+      newsroomCardDesc: "DGhubSchool integrates data isolation protocols to ensure that each school has a secure, airtight space.",
+      newsroomDate: "April 2026",
+      viewAllNews: "See all news",
+      readyTitle: "Ready to simplify your school management?",
+      readyDesc: "Join West African schools that trust our platform for their operations and cash collections.",
+      createSchoolBtn: "Create a school account"
+    }
+  };
+
+  const t = texts[lang];
+
   // Statistiques de la plateforme (KPIs chiffrés réels)
   const stats = [
-    { value: `+${dbStats.schools.toLocaleString('fr-FR')}`, label: "Écoles et lycées partenaires" },
-    { value: `+${dbStats.students.toLocaleString('fr-FR')}`, label: "Élèves inscrits et gérés" },
-    { value: `+${dbStats.documents.toLocaleString('fr-FR')}`, label: "Bulletins et documents édités" },
-    { value: "99.9%", label: "Taux de disponibilité réseau" },
+    { value: `+${dbStats.schools.toLocaleString('fr-FR')}`, label: t.partnersLabel },
+    { value: `+${dbStats.students.toLocaleString('fr-FR')}`, label: t.studentsLabel },
+    { value: `+${dbStats.documents.toLocaleString('fr-FR')}`, label: t.documentsLabel },
+    { value: "99.9%", label: t.networkLabel },
   ];
 
   // Fonctionnalités principales (Bento Grid)
   const features = [
     {
       icon: <CreditCard className="w-8 h-8 text-amber-500" />,
-      title: "Suivi des Paiements & Caisse",
-      description: "Suivez les tranches de scolarité et les impayés de chaque élève. Enregistrez les règlements et générez des reçus de caisse numériques automatiques.",
-      badge: "Comptabilité",
+      title: t.paymentTracking,
+      description: t.paymentDesc,
+      badge: t.paymentBadge,
       className: "md:col-span-2 bg-slate-900 text-white border-slate-800 rounded-3xl"
     },
     {
       icon: <BookOpen className="w-8 h-8 text-amber-500" />,
-      title: "Bulletins & Notes",
-      description: "Génération automatique des bulletins scolaires en un clic. Calcul des moyennes et classement des élèves sans aucun tableur Excel.",
-      badge: "Bulletins PDF",
+      title: t.bulletinsTitle,
+      description: t.bulletinsDesc,
+      badge: t.bulletinsBadge,
       className: "bg-white text-slate-800 border-slate-200 rounded-3xl"
     },
     {
       icon: <Users className="w-8 h-8 text-amber-500" />,
-      title: "Suivi des parents d'élèves",
-      description: "Un espace mobile simplifié pour les parents. Ils consultent les notes, les absences et l'assiduité sans avoir à se déplacer.",
-      badge: "Portail mobile",
+      title: t.parentsTitle,
+      description: t.parentsDesc,
+      badge: t.parentsBadge,
       className: "bg-white text-slate-800 border-slate-200 rounded-3xl"
     },
     {
       icon: <QrCode className="w-8 h-8 text-amber-500" />,
-      title: "Cartes scolaires à QR Code",
-      description: "Générez et imprimez des cartes scolaires officielles. Scannez le QR Code à l'entrée et à la sortie pour enregistrer automatiquement la présence de l'élève.",
-      badge: "Sécurité d'accès",
+      title: t.qrCardsTitle,
+      description: t.qrCardsDesc,
+      badge: t.qrCardsBadge,
       className: "md:col-span-2 bg-slate-900 text-white border-slate-800 rounded-3xl"
     }
   ];
@@ -84,34 +214,34 @@ export const LandingPage: React.FC = () => {
 
       {/* ── HEADER / NAVIGATION ────────────────────────────── */}
       <header className="relative z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
-        <nav className="max-w-7xl mx-auto flex items-center justify-between p-4 md:px-8">
+        <nav className="w-full flex items-center justify-between p-4 md:px-8">
           {/* Logo */}
-          <div className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl uppercase select-none">
-            <img src="/logo.jpeg" className="w-8 h-8 object-contain" alt="Logo" />
+          <div className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl select-none cursor-pointer" onClick={() => navigate(`/${lang}`)}>
+            <img src="/logo.png" className="w-8 h-8 object-contain" alt="Logo" />
             <span className="text-amber-500">DGhub<span className="text-slate-900">School</span></span>
           </div>
 
           {/* Liens Navigation - Desktop */}
-          <div className="hidden md:flex items-center gap-8 text-xs font-black uppercase tracking-wider text-slate-500">
-            <button onClick={() => navigate('/features')} className="hover:text-amber-500 transition-colors cursor-pointer">Fonctionnalités</button>
-            <button onClick={() => navigate('/pricing')} className="hover:text-amber-500 transition-colors cursor-pointer">Tarification</button>
-            <button onClick={() => navigate('/a-propos')} className="hover:text-amber-500 transition-colors cursor-pointer">À Propos</button>
-            <a href="#stats" className="hover:text-amber-500 transition-colors">Preuve Sociale</a>
+          <div className="hidden md:flex items-center gap-8 text-xs font-black tracking-wider text-slate-500">
+            <button onClick={() => navigate(`/${lang}/features`)} className="hover:text-amber-500 transition-colors cursor-pointer">{t.features}</button>
+            <button onClick={() => navigate(`/${lang}/pricing`)} className="hover:text-amber-500 transition-colors cursor-pointer">{t.pricing}</button>
+            <button onClick={() => navigate(`/${lang}/a-propos`)} className="hover:text-amber-500 transition-colors cursor-pointer">{t.about}</button>
+            <a href="#stats" className="hover:text-amber-500 transition-colors">{t.socialProof}</a>
           </div>
 
           {/* Boutons Actions - Desktop */}
           <div className="hidden md:flex items-center gap-4">
             <button 
-              onClick={() => navigate('/login')}
-              className="text-xs font-black uppercase tracking-widest text-slate-600 hover:text-amber-500 transition-colors px-4 py-2"
+              onClick={() => navigate(`/${lang}/login`)}
+              className="text-xs font-black tracking-widest text-slate-600 hover:text-amber-500 transition-colors px-4 py-2"
             >
-              Connexion
+              {t.login}
             </button>
             <button 
-              onClick={() => navigate('/creer-compte')}
-              className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-5 py-3 rounded-xl border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer"
+              onClick={() => navigate(`/${lang}/creer-compte`)}
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black tracking-widest px-5 py-3 rounded-xl border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer"
             >
-              Créer un établissement
+              {t.createSchool}
             </button>
           </div>
 
@@ -128,42 +258,42 @@ export const LandingPage: React.FC = () => {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-slate-200 bg-white p-4 space-y-4 flex flex-col animate-in fade-in slide-in-from-top-4 duration-200">
             <button 
-              onClick={() => { setMobileMenuOpen(false); navigate('/features'); }}
+              onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/features`); }}
               className="text-sm font-bold text-slate-700 hover:text-amber-500 transition-colors py-2 text-left cursor-pointer"
             >
-              Fonctionnalités
+              {t.features}
             </button>
             <button 
-              onClick={() => { setMobileMenuOpen(false); navigate('/pricing'); }}
+              onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/pricing`); }}
               className="text-sm font-bold text-slate-700 hover:text-amber-500 transition-colors py-2 text-left cursor-pointer"
             >
-              Tarification
+              {t.pricing}
             </button>
             <button 
-              onClick={() => { setMobileMenuOpen(false); navigate('/a-propos'); }}
+              onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/a-propos`); }}
               className="text-sm font-bold text-slate-700 hover:text-amber-500 transition-colors py-2 text-left cursor-pointer"
             >
-              À Propos
+              {t.about}
             </button>
             <a 
               href="#stats" 
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm font-bold text-slate-700 hover:text-amber-500 transition-colors py-2"
             >
-              Preuve Sociale
+              {t.socialProof}
             </a>
             <div className="border-t border-slate-100 pt-4 flex flex-col gap-3">
               <button 
-                onClick={() => { setMobileMenuOpen(false); navigate('/login'); }}
-                className="w-full text-center py-3 text-sm font-black uppercase tracking-wider text-slate-700 border border-slate-200 rounded-xl"
+                onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/login`); }}
+                className="w-full text-center py-3 text-sm font-black tracking-wider text-slate-700 border border-slate-200 rounded-xl"
               >
-                Connexion
+                {t.login}
               </button>
               <button 
-                onClick={() => { setMobileMenuOpen(false); navigate('/creer-compte'); }}
-                className="w-full text-center py-3 text-sm font-black uppercase tracking-wider bg-amber-500 text-slate-950 rounded-xl border border-amber-600 shadow-md"
+                onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/creer-compte`); }}
+                className="w-full text-center py-3 text-sm font-black tracking-wider bg-amber-500 text-slate-950 rounded-xl border border-amber-600 shadow-md"
               >
-                Créer un établissement
+                {t.createSchool}
               </button>
             </div>
           </div>
@@ -173,29 +303,29 @@ export const LandingPage: React.FC = () => {
       {/* ── SECTION HERO ──────────────────────────────────── */}
       <section className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pt-16 md:pt-24 pb-16 text-center flex-grow flex flex-col items-center justify-center">
         {/* Titre Principal */}
-        <h1 className="text-3xl md:text-6xl font-black text-slate-950 tracking-tight leading-[1.15] max-w-4xl uppercase mb-6">
-          Pilotez votre <span className="text-amber-500 underline decoration-2 decoration-amber-500/50">établissement scolaire</span> en toute simplicité
+        <h1 className="text-3xl md:text-6xl font-black text-slate-950 tracking-tight leading-[1.15] max-w-4xl mb-6">
+          {t.heroTitlePart1}<span className="text-amber-500 underline decoration-2 decoration-amber-500/50">{t.heroTitleHighlight}</span>{t.heroTitlePart2}
         </h1>
 
         {/* Sous-titre */}
         <p className="text-sm md:text-lg text-slate-500 max-w-2xl leading-relaxed mb-10">
-          Gerez la caisse et le suivi de la scolarité, éditez les bulletins de notes officiels, suivez les présences par QR Code et donnez accès à des ressources scolaires gratuites pour les révisions à la maison.
+          {t.heroSubtitle}
         </p>
 
         {/* Actions Hero */}
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-16">
           <button 
-            onClick={() => navigate('/creer-compte')}
+            onClick={() => navigate(`/${lang}/creer-compte`)}
             className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            Créer un établissement gratuitement
+            {t.createSchoolFree}
             <ArrowRight className="w-4 h-4" />
           </button>
           <button 
-            onClick={() => navigate('/login')}
+            onClick={() => navigate(`/${lang}/login`)}
             className="w-full sm:w-auto bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-slate-200 active:scale-[0.98] transition-all cursor-pointer"
           >
-            Accéder aux portails
+            {t.accessPortals}
           </button>
         </div>
 
@@ -215,7 +345,7 @@ export const LandingPage: React.FC = () => {
           <div className="w-full aspect-[16/9] bg-white border-t border-slate-100 flex items-center justify-center rounded-b-xl overflow-hidden relative">
             <img 
               src="/dashboard_preview.png" 
-              alt="Tableau de bord en temps réel (établissement masqué)" 
+              alt={t.realTimeDashboard} 
               className="w-full h-full object-cover" 
             />
           </div>
@@ -226,13 +356,13 @@ export const LandingPage: React.FC = () => {
       <section className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-16">
         <div className="text-center mb-12 space-y-4">
           <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
-            📸 Captures d'Écran Officielles
+            {t.screenshotsTitle}
           </div>
           <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight">
-            Découvrez nos fonctionnalités clés en images
+            {t.discoverFeatures}
           </h2>
           <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm">
-            Une interface épurée, performante et adaptée aux besoins réels des écoles d'Afrique de l'Ouest.
+            {t.discoverDesc}
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
@@ -242,9 +372,9 @@ export const LandingPage: React.FC = () => {
               <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full">
                 Sécurité & QR Code
               </span>
-              <h4 className="text-lg font-black text-slate-950 uppercase">Cartes Scolaires Bien Visibles</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Générez et imprimez des cartes d'identité officielles pour vos élèves avec une photo passeport et un QR Code unique pour l'enregistrement automatique des présences.
+              <h4 className="text-lg font-black text-slate-950 uppercase">{t.securityTitle}</h4>
+              <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                {t.securityDesc}
               </p>
             </div>
             <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 flex items-center justify-center">
@@ -258,9 +388,9 @@ export const LandingPage: React.FC = () => {
               <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full">
                 Académie & Bulletins
               </span>
-              <h4 className="text-lg font-black text-slate-950 uppercase">Bulletins de Notes bien Remplis</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Calcul automatique des moyennes trimestrielles/semestrielles, rangs, appréciations des enseignants et signature de la direction. Prêt à être imprimé ou partagé en lot.
+              <h4 className="text-lg font-black text-slate-950 uppercase">{t.academicsTitle}</h4>
+              <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                {t.academicsDesc}
               </p>
             </div>
             <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 flex items-center justify-center">
@@ -275,12 +405,12 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           {/* En-tête Section */}
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-xs font-black uppercase tracking-widest text-amber-600">Fonctionnalités Clés</h2>
+            <h2 className="text-xs font-black uppercase tracking-widest text-amber-600">{t.features}</h2>
             <h3 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase">
-              Tout ce dont vous avez besoin, réuni au même endroit
+              {t.bentoTitle}
             </h3>
             <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm">
-              Simplifiez la scolarité de vos élèves et offrez aux parents et aux enseignants une expérience moderne.
+              {t.bentoDesc}
             </p>
           </div>
 
@@ -303,7 +433,7 @@ export const LandingPage: React.FC = () => {
                   <h4 className="text-lg md:text-xl font-black uppercase tracking-tight mb-3">
                     {feat.title}
                   </h4>
-                  <p className="text-xs md:text-sm opacity-80 leading-relaxed">
+                  <p className="text-xs md:text-sm opacity-80 leading-relaxed font-medium">
                     {feat.description}
                   </p>
                 </div>
@@ -335,11 +465,11 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-2xl mx-auto space-y-6">
             <div className="text-3xl text-amber-500 font-serif leading-none">“</div>
             <p className="text-lg md:text-xl font-bold text-slate-800 leading-relaxed italic">
-              "Grâce à DGhubSchool, nous avons réduit de 85% le taux de retard de paiement des frais de scolarité. Les parents adorent recevoir instantanément leur reçu numérique par SMS sans avoir à faire la queue à l'école."
+              {t.testimonialText}
             </p>
             <div className="space-y-1">
-              <p className="text-xs font-black uppercase tracking-wider text-slate-900">M. Koffi Mensah</p>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Directeur d'Établissement Scolaire à Lomé, Togo</p>
+              <p className="text-xs font-black uppercase tracking-wider text-slate-900">{t.testimonialAuthor}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t.testimonialRole}</p>
             </div>
           </div>
         </div>
@@ -349,12 +479,12 @@ export const LandingPage: React.FC = () => {
       <section id="pricing" className="bg-slate-50 border-t border-slate-200 py-20">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-xs font-black uppercase tracking-widest text-amber-600">Tarifs Transparent</h2>
+            <h2 className="text-xs font-black uppercase tracking-widest text-amber-600">{t.pricingTitle}</h2>
             <h3 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase">
-              Tarifs clairs et adaptés
+              {t.pricingSubtitle}
             </h3>
             <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm">
-              Commencez sans engagement dès aujourd'hui.
+              {t.pricingDesc}
             </p>
           </div>
 
@@ -362,39 +492,39 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-sm mx-auto bg-white border border-slate-200 p-8 rounded-3xl shadow-xl relative overflow-hidden">
             {/* Populaire badge */}
             <div className="absolute top-4 right-[-32px] rotate-45 bg-amber-500 border-y border-amber-600 text-[8px] font-black uppercase tracking-widest text-slate-900 py-1.5 px-10 text-center select-none">
-              Essai Gratuit
+              {t.freeTrialBadge}
             </div>
 
             <div className="mb-6">
-              <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">Formule Unique</h4>
-              <span className="text-4xl font-black tracking-tight text-slate-950">60 Jours d'essai</span>
-              <p className="text-xs text-slate-500 mt-2">Puis un abonnement annuel adapté aux effectifs de votre école.</p>
+              <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">{t.singleFormula}</h4>
+              <span className="text-4xl font-black tracking-tight text-slate-950">{t.daysTrial}</span>
+              <p className="text-xs text-slate-500 mt-2">{t.afterTrial}</p>
             </div>
 
             <ul className="space-y-3.5 text-xs text-slate-600 mb-8 border-t border-slate-100 pt-6">
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>Gestion de la caisse et reçus SMS</span>
+                <span>{lang === 'fr' ? 'Gestion de la caisse et reçus SMS' : 'Cash management and SMS receipts'}</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>Bulletins et notes illimités</span>
+                <span>{lang === 'fr' ? 'Bulletins et notes illimités' : 'Unlimited grade books and reports'}</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>Accès complet parents, élèves et profs</span>
+                <span>{lang === 'fr' ? 'Accès complet parents, élèves et profs' : 'Full access for parents, students, and teachers'}</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>Support dédié via WhatsApp</span>
+                <span>{lang === 'fr' ? 'Support dédié via WhatsApp' : 'Dedicated support via WhatsApp'}</span>
               </li>
             </ul>
 
             <button 
-              onClick={() => navigate('/creer-compte')}
+              onClick={() => navigate(`/${lang}/creer-compte`)}
               className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs uppercase tracking-widest py-4 rounded-xl border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer"
             >
-              Démarrer l'essai gratuit
+              {t.trialBtn}
             </button>
           </div>
         </div>
@@ -405,13 +535,13 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 md:px-8">
           <div className="text-center mb-16 space-y-4">
             <span className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200/40 dark:border-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
-              📢 Newsroom
+              {t.newsroomTitle}
             </span>
             <h3 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white tracking-tight uppercase">
-              Dernières avancées de DGhubSchool
+              {t.newsroomSub}
             </h3>
             <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto text-xs md:text-sm">
-              Suivez l'évolution de la plateforme et les fonctionnalités déployées.
+              {t.newsroomDesc}
             </p>
           </div>
 
@@ -420,22 +550,22 @@ export const LandingPage: React.FC = () => {
             <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
               <div className="space-y-4">
                 <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full inline-block">
-                  Infrastructure
+                  {t.newsroomBadge}
                 </span>
                 <h4 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase leading-snug group-hover:text-amber-500 transition-colors">
-                  Sécurité renforcée
+                  {t.newsroomCardTitle}
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                  DGhubSchool intègre des protocoles d'isolation de données pour s'assurer que chaque établissement dispose d'un espace hermétique protégé.
+                  {t.newsroomCardDesc}
                 </p>
               </div>
               <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                <span>Avril 2026</span>
+                <span>{t.newsroomDate}</span>
                 <span 
-                  onClick={() => navigate('/newsroom')}
+                  onClick={() => navigate(`/${lang}/newsroom`)}
                   className="text-amber-505 flex items-center gap-1 cursor-pointer hover:underline"
                 >
-                  Voir toutes les actualités <ArrowRight className="w-3 h-3" />
+                  {t.viewAllNews} <ArrowRight className="w-3 h-3" />
                 </span>
               </div>
             </div>
@@ -450,16 +580,16 @@ export const LandingPage: React.FC = () => {
             <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
             <div className="relative z-10 space-y-6 max-w-2xl mx-auto">
               <h2 className="text-2xl md:text-4xl font-black tracking-tight uppercase leading-snug">
-                Prêt à simplifier la gestion de votre école ?
+                {t.readyTitle}
               </h2>
-              <p className="text-slate-400 text-xs md:text-sm leading-relaxed">
-                Rejoignez les établissements d'Afrique de l'Ouest qui font confiance à notre plateforme pour leur scolarité et leurs encaissements.
+              <p className="text-slate-400 text-xs md:text-sm leading-relaxed font-medium">
+                {t.readyDesc}
               </p>
               <button 
-                onClick={() => navigate('/creer-compte')}
+                onClick={() => navigate(`/${lang}/creer-compte`)}
                 className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all inline-flex items-center gap-2 cursor-pointer"
               >
-                Créer un compte établissement
+                {t.createSchoolBtn}
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -472,4 +602,3 @@ export const LandingPage: React.FC = () => {
     </div>
   );
 };
-

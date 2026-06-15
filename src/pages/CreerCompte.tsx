@@ -110,8 +110,9 @@ export const CreerCompte: React.FC = () => {
         <form onSubmit={handleRegisterRequest} className="space-y-6">
           <div className="text-center mb-6">
             <div className="w-16 h-16 bg-white border border-slate-200 rounded-none flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-500/10 p-1">
-              <img src="/logo.jpeg" className="w-full h-full object-contain" alt="DGhubSchool" />
+              <img src="/logo.png" className="w-full h-full object-contain" alt="DGhubSchool" />
             </div>
+
             <h1 className="text-2xl md:text-3xl font-black text-slate-950 tracking-tight">Rejoignez DGhubSchool</h1>
             <p className="text-slate-500 text-xs md:text-sm mt-1 font-medium">Inscrivez votre école et commencez à digitaliser votre gestion scolaire dès aujourd'hui.</p>
           </div>

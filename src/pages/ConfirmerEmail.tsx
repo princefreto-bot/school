@@ -222,8 +222,8 @@ export const ConfirmerEmail: React.FC = () => {
             <ArrowLeft className="w-4 h-4" /> Retour
           </button>
           
-          <div className="flex items-center gap-1.5 text-amber-500 font-black tracking-tighter text-lg uppercase select-none">
-            <img src="/logo.jpeg" className="w-6 h-6 object-contain" alt="Logo" />
+          <div className="flex items-center gap-1.5 text-amber-500 font-black tracking-tighter text-lg select-none">
+            <img src="/logo.png" className="w-6 h-6 object-contain" alt="Logo" />
             <span>DGhub<span className="text-slate-900">School</span></span>
           </div>
         </div>

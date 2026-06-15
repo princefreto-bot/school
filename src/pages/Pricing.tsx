@@ -2,129 +2,212 @@
 // PAGE TARIFICATION (PRICING) — Uniquement Annuelle & Structurée
 // ============================================================
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Check, HelpCircle, ArrowLeft, Landmark, Users } from 'lucide-react';
 import { Footer } from '../components/Footer';
 
 export const Pricing: React.FC = () => {
   const navigate = useNavigate();
+  const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
   const [activeTab, setActiveTab] = useState<'school' | 'parent'>('school');
+
+  const texts = {
+    fr: {
+      back: "Accueil",
+      badge: "🗓️ Tarification Annuelle Structurée",
+      title: "Une formule adaptée à chaque besoin",
+      subtitle: "Retrouvez nos abonnements annuels transparents pour les établissements scolaires et les parents d'élèves.",
+      tabSchool: "Établissement",
+      tabParent: "Parents d'Élèves",
+      recommended: "Recommandé",
+      perYear: "par an / par école",
+      perYearCustom: "Tarif personnalisé",
+      contactUs: "Nous Contacter",
+      activateBtn: "Activer mon école",
+      complianceWarningTitle: "⚠️ Avertissement de conformité :",
+      complianceWarningDesc: "Le nombre d'élèves enregistrés est vérifié automatiquement. Si un établissement souscrit à une formule inférieure à son effectif réel d'inscriptions, tout son écosystème administratif et académique sera verrouillé jusqu'à la mise à niveau de la licence.",
+      parentPlanBadge: "Pour les Parents d'Élèves",
+      parentPlanTitle: "Abonnement Suivi Élève",
+      parentPlanPeriod: "par élève / par an",
+      parentPlanDesc: "Contribution annuelle par élève donnant aux parents un accès complet au suivi scolaire en temps réel.",
+      parentPlanBtn: "Accéder au portail parent",
+      degressiveTitle: "Tarifs Dégressifs Fratries (Parents)",
+      degressiveSubtitle: "Des abonnements annuels dégressifs calculés pour soulager les familles de plusieurs enfants.",
+      faqTitle: "Questions Fréquentes"
+    },
+    en: {
+      back: "Home",
+      badge: "🗓️ Structured Annual Pricing",
+      title: "A plan tailored to every need",
+      subtitle: "Find our transparent annual subscriptions for schools and parents.",
+      tabSchool: "School",
+      tabParent: "Parents",
+      recommended: "Recommended",
+      perYear: "per year / per school",
+      perYearCustom: "Custom Pricing",
+      contactUs: "Contact Us",
+      activateBtn: "Activate my school",
+      complianceWarningTitle: "⚠️ Compliance Warning:",
+      complianceWarningDesc: "The number of registered students is verified automatically. If a school subscribes to a plan below its actual enrollment, its entire administrative and academic system will be locked until the license is upgraded.",
+      parentPlanBadge: "For Parents",
+      parentPlanTitle: "Student Tracking Subscription",
+      parentPlanPeriod: "per student / per year",
+      parentPlanDesc: "Annual contribution per student giving parents full access to real-time school tracking.",
+      parentPlanBtn: "Access parent portal",
+      degressiveTitle: "Degressive Family Rates (Parents)",
+      degressiveSubtitle: "Degressive annual subscriptions calculated to relieve families with multiple children.",
+      faqTitle: "Frequently Asked Questions"
+    }
+  };
+
+  const t = texts[lang];
 
   const schoolPlans = [
     {
-      name: "Licence Standard",
-      limit: "Moins de 500 élèves",
+      name: lang === 'fr' ? "Licence Standard" : "Standard License",
+      limit: lang === 'fr' ? "Moins de 500 élèves" : "Under 500 students",
       price: "50 000 F CFA",
-      period: "par an / par école",
-      description: "Pour les petites écoles de moins de 500 élèves inscrits.",
-      features: [
+      period: t.perYear,
+      description: lang === 'fr' ? "Pour les petites écoles de moins de 500 élèves inscrits." : "For small schools with less than 500 registered students.",
+      features: lang === 'fr' ? [
         "Accès complet à la console d'administration",
         "Espace enseignant pour la saisie des notes & moyennes",
         "Impression et édition des bulletins officiels DRE",
         "Système de pointage et présence (Scan QR)",
         "Génération de cartes d'identité scolaires avec QR Code",
         "Configuration des frais de scolarité personnalisés"
+      ] : [
+        "Full access to the administration console",
+        "Teacher portal for grading & averages",
+        "Printing and editing of official DRE report cards",
+        "Attendance and clock-in system (QR Scan)",
+        "QR Code student ID card generation",
+        "Custom school fees configuration"
       ],
-      buttonText: "Activer mon école",
+      buttonText: t.activateBtn,
       popular: false,
-      ctaAction: () => navigate('/creer-compte'),
+      ctaAction: () => navigate(`/${lang}/creer-compte`),
       borderColor: "border-slate-200 dark:border-slate-800"
     },
     {
-      name: "Licence Intermédiaire",
-      limit: "Entre 500 et 1000 élèves",
+      name: lang === 'fr' ? "Licence Intermédiaire" : "Intermediate License",
+      limit: lang === 'fr' ? "Entre 500 et 1000 élèves" : "Between 500 and 1000 students",
       price: "100 000 F CFA",
-      period: "par an / par école",
-      description: "Pour les écoles de taille moyenne comptant entre 500 et 1000 élèves.",
-      features: [
+      period: t.perYear,
+      description: lang === 'fr' ? "Pour les écoles de taille moyenne comptant entre 500 et 1000 élèves." : "For mid-size schools with 500 to 1000 students.",
+      features: lang === 'fr' ? [
         "Toutes les fonctionnalités de la formule Standard",
         "Capacité d'inscription de 500 à 1000 élèves",
         "Support technique prioritaire",
         "Rapports financiers et bilans automatisés",
         "Envoi de messages groupés aux parents"
+      ] : [
+        "All features of the Standard plan",
+        "Enrollment capacity from 500 to 1000 students",
+        "Priority technical support",
+        "Automated financial reports and balance sheets",
+        "Send bulk messages to parents"
       ],
-      buttonText: "Activer mon école",
+      buttonText: t.activateBtn,
       popular: true,
-      ctaAction: () => navigate('/creer-compte'),
+      ctaAction: () => navigate(`/${lang}/creer-compte`),
       borderColor: "border-amber-500 shadow-amber-500/10 shadow-lg"
     },
     {
-      name: "Licence Avancée",
-      limit: "Entre 1000 et 2000 élèves",
+      name: lang === 'fr' ? "Licence Avancée" : "Advanced License",
+      limit: lang === 'fr' ? "Entre 1000 et 2000 élèves" : "Between 1000 and 2000 students",
       price: "150 000 F CFA",
-      period: "par an / par école",
-      description: "Pour les grands établissements scolaires comptant entre 1000 et 2000 élèves.",
-      features: [
+      period: t.perYear,
+      description: lang === 'fr' ? "Pour les grands établissements scolaires comptant entre 1000 et 2000 élèves." : "For large school establishments with 1000 to 2000 students.",
+      features: lang === 'fr' ? [
         "Toutes les fonctionnalités de la formule Intermédiaire",
         "Capacité d'inscription de 1000 à 2000 élèves",
         "Support dédié 24h/24 & 7j/7",
         "Sauvegardes automatiques quotidiennes des données",
         "Accès à l'historique d'activités de l'administration"
+      ] : [
+        "All features of the Intermediate plan",
+        "Enrollment capacity from 1000 to 2000 students",
+        "24/7 dedicated support",
+        "Daily automatic data backups",
+        "Access to administration activity history"
       ],
-      buttonText: "Activer mon école",
+      buttonText: t.activateBtn,
       popular: false,
-      ctaAction: () => navigate('/creer-compte'),
+      ctaAction: () => navigate(`/${lang}/creer-compte`),
       borderColor: "border-slate-200 dark:border-slate-800"
     },
     {
-      name: "Licence Sur Mesure",
-      limit: "Plus de 2000 élèves",
-      price: "Sur Devis",
-      period: "Tarif personnalisé",
-      description: "Pour les très grands établissements et complexes scolaires de plus de 2000 élèves.",
-      features: [
+      name: lang === 'fr' ? "Licence Sur Mesure" : "Custom License",
+      limit: lang === 'fr' ? "Plus de 2000 élèves" : "Over 2000 students",
+      price: lang === 'fr' ? "Sur Devis" : "Custom Quote",
+      period: t.perYearCustom,
+      description: lang === 'fr' ? "Pour les très grands complexes de plus de 2000 élèves." : "For very large complexes and school networks with over 2000 students.",
+      features: lang === 'fr' ? [
         "Toutes les fonctionnalités de la formule Avancée",
         "Capacité d'élèves illimitée dans le système",
         "Hébergement Cloud dédié et hautes performances",
         "Personnalisation graphique des bulletins d'établissement",
         "Formation sur site de vos équipes administratives"
+      ] : [
+        "All features of the Advanced plan",
+        "Unlimited student capacity in the system",
+        "Dedicated high-performance Cloud hosting",
+        "Custom graphical layout of report cards",
+        "On-site training for your administrative team"
       ],
-      buttonText: "Nous Contacter",
+      buttonText: t.contactUs,
       popular: false,
-      ctaAction: () => window.location.href = 'mailto:contact@dghubschool.com?subject=Demande%20Tarif%20Sur%20Mesure%20(>2000%20eleves)',
+      ctaAction: () => window.location.href = `mailto:contact@dghubschool.com?subject=Demande%20Tarif%20Sur%20Mesure%20(>2000%20eleves)&body=Langue:${lang}`,
       borderColor: "border-slate-200 dark:border-slate-800"
     }
   ];
 
   const parentPlan = {
-    type: "Pour les Parents d'Élèves",
-    name: "Abonnement Suivi Élève",
+    type: t.parentPlanBadge,
+    name: t.parentPlanTitle,
     price: "1 500 F CFA",
-    period: "par élève / par an",
-    description: "Contribution annuelle par élève donnant aux parents un accès complet au suivi scolaire en temps réel.",
-    features: [
+    period: t.parentPlanPeriod,
+    description: t.parentPlanDesc,
+    features: lang === 'fr' ? [
       "Notification instantanée (Push & SMS) à chaque note saisie",
       "Alertes instantanées de présence (Scan à l'arrivée / au départ)",
       "Suivi transparent des versements de scolarité & soldes restants",
       "Accès aux exercices scolaires et eBooks (Bibliothèque Numérique)",
       "Messagerie interne bidirectionnelle avec la vie scolaire"
+    ] : [
+      "Instant notification (Push & SMS) on every grade entered",
+      "Instant attendance alerts (Scan on arrival / departure)",
+      "Transparent tracking of school fee payments & remaining balances",
+      "Access to academic exercises and eBooks (Digital Library)",
+      "Bidirectional internal messaging with school life staff"
     ],
-    buttonText: "Accéder au portail parent",
-    ctaAction: () => navigate('/login')
+    buttonText: t.parentPlanBtn,
+    ctaAction: () => navigate(`/${lang}/login`)
   };
 
   const packs = [
     {
-      title: "Tarif Individuel",
-      sub: "1 Élève",
+      title: lang === 'fr' ? "Tarif Individuel" : "Individual Rate",
+      sub: lang === 'fr' ? "1 Élève" : "1 Student",
       price: "1 500 F CFA",
-      desc: "par élève et par an"
+      desc: lang === 'fr' ? "par élève et par an" : "per student and per year"
     },
     {
-      title: "Pack Famille Réduit",
-      sub: "3 Élèves",
+      title: lang === 'fr' ? "Pack Famille Réduit" : "Reduced Family Pack",
+      sub: lang === 'fr' ? "3 Élèves" : "3 Students",
       price: "4 000 F CFA",
-      desc: "au lieu de 4 500 F CFA / an"
+      desc: lang === 'fr' ? "au lieu de 4 500 F CFA / an" : "instead of 4,500 F CFA / year"
     },
     {
-      title: "Pack Grande Famille",
-      sub: "5 Élèves",
+      title: lang === 'fr' ? "Pack Grande Famille" : "Large Family Pack",
+      sub: lang === 'fr' ? "5 Élèves" : "5 Students",
       price: "7 000 F CFA",
-      desc: "au lieu de 7 500 F CFA / an"
+      desc: lang === 'fr' ? "au lieu de 7 500 F CFA / an" : "instead of 7,500 F CFA / year"
     }
   ];
 
-  const faqs = [
+  const faqs = lang === 'fr' ? [
     {
       q: "Comment est facturé l'établissement ?",
       a: "L'école souscrit à une formule annuelle selon son effectif réel d'élèves (Moins de 500, 500-1000, 1000-2000, ou Plus de 2000). Cette licence annuelle unique permet d'activer tous les portails de gestion administrative, académique et financière."
@@ -134,12 +217,29 @@ export const Pricing: React.FC = () => {
       a: "Afin de garantir l'équité, si le nombre réel d'élèves inscrits dans votre école dépasse la limite autorisée par votre formule actuelle, l'accès à l'écosystème de l'établissement est temporairement suspendu. Vous devrez simplement mettre à niveau (upgrade) votre formule pour débloquer immédiatement l'accès."
     },
     {
-      q: "Qui s'acquitte de la contribution parentale de 1 500 F CFA ?",
+      q: "Who pays the 1,500 F CFA contribution?",
       a: "Cette contribution est payée annuellement par les parents d'élèves lors de leur première connexion. Elle donne accès au suivi en temps réel (SMS, push, notes, présences, exercices). Des packs famille dégressifs sont proposés automatiquement pour les fratries."
     },
     {
       q: "Y a-t-il des frais mensuels ou cachés ?",
       a: "Non. DGhubSchool fonctionne exclusivement sur un modèle d'activation et de contribution annuelle. Aucun abonnement mensuel ni frais masqué n'est appliqué."
+    }
+  ] : [
+    {
+      q: "How is the school billed?",
+      a: "The school subscribes to an annual formula according to its actual enrollment of students (Under 500, 500-1000, 1000-2000, or Over 2000). This single annual license activates all administrative, academic, and financial management portals."
+    },
+    {
+      q: "What happens if my school exceeds its student limit?",
+      a: "To ensure fairness, if the actual number of registered students in your school exceeds the limit allowed by your current plan, access to the school ecosystem is temporarily suspended. You will simply need to upgrade your plan to unlock access immediately."
+    },
+    {
+      q: "Who pays the 1,500 F CFA parental contribution?",
+      a: "This contribution is paid annually by parents during their first login. It grants access to real-time tracking (SMS, push notifications, grades, attendance, exercises). Decreasing family packs are automatically offered for siblings."
+    },
+    {
+      q: "Are there any monthly or hidden fees?",
+      a: "No. DGhubSchool operates exclusively on an annual activation and contribution model. No monthly subscriptions or hidden fees are applied."
     }
   ];
 
@@ -151,17 +251,17 @@ export const Pricing: React.FC = () => {
 
       {/* Navigation Header */}
       <header className="relative z-50 border-b border-slate-200/50 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
-        <nav className="max-w-7xl mx-auto flex items-center justify-between p-4 md:px-8">
-          <div className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl uppercase select-none cursor-pointer" onClick={() => navigate('/')}>
-            <img src="/logo.jpeg" className="w-8 h-8 object-contain rounded-lg" alt="Logo" />
+        <nav className="w-full flex items-center justify-between p-4 md:px-8">
+          <div className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl select-none cursor-pointer" onClick={() => navigate(`/${lang}`)}>
+            <img src="/logo.png" className="w-8 h-8 object-contain rounded-lg" alt="Logo" />
             <span className="text-amber-500">DGhub<span className="text-slate-900 dark:text-white">School</span></span>
           </div>
           <button 
-            onClick={() => navigate('/')} 
+            onClick={() => navigate(`/${lang}`)} 
             className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-amber-500 transition-colors uppercase tracking-wider"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Accueil</span>
+            <span>{t.back}</span>
           </button>
         </nav>
       </header>
@@ -169,13 +269,13 @@ export const Pricing: React.FC = () => {
       {/* Hero Section */}
       <section className="relative z-10 max-w-4xl mx-auto px-4 pt-16 pb-6 text-center">
         <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
-          🗓️ Tarification Annuelle Structurée
+          {t.badge}
         </div>
         <h1 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white uppercase tracking-tight mb-4">
-          Une formule adaptée à chaque besoin
+          {t.title}
         </h1>
         <p className="text-sm md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-medium">
-          Retrouvez nos abonnements annuels transparents pour les établissements scolaires et les parents d'élèves.
+          {t.subtitle}
         </p>
 
         {/* Tab Switcher */}
@@ -190,7 +290,7 @@ export const Pricing: React.FC = () => {
               }`}
             >
               <Landmark className="w-4 h-4" />
-              Établissement
+              {t.tabSchool}
             </button>
             <button
               onClick={() => setActiveTab('parent')}
@@ -201,7 +301,7 @@ export const Pricing: React.FC = () => {
               }`}
             >
               <Users className="w-4 h-4" />
-              Parents d'Élèves
+              {t.tabParent}
             </button>
           </div>
         </div>
@@ -219,7 +319,7 @@ export const Pricing: React.FC = () => {
                 >
                   {plan.popular && (
                     <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-amber-500 text-slate-950 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-md">
-                      Recommandé
+                      {t.recommended}
                     </div>
                   )}
                   <div>
@@ -243,7 +343,7 @@ export const Pricing: React.FC = () => {
 
                     <ul className="space-y-3 mb-6">
                       {plan.features.map((feat, fidx) => (
-                        <li key={fidx} className="flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        <li key={fidx} className="flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
                           <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                           <span>{feat}</span>
                         </li>
@@ -269,7 +369,7 @@ export const Pricing: React.FC = () => {
             <div className="mt-8 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200/40 dark:border-red-900/30 rounded-2xl max-w-4xl mx-auto flex items-center gap-3 text-red-800 dark:text-red-400 text-xs">
               <Landmark className="w-5 h-5 shrink-0" />
               <p className="font-semibold leading-relaxed">
-                ⚠️ <b>Avertissement de conformité :</b> Le nombre d'élèves enregistrés est vérifié automatiquement. Si un établissement souscrit à une formule inférieure à son effectif réel d'inscriptions, tout son écosystème administratif et académique sera verrouillé jusqu'à la mise à niveau de la licence.
+                ⚠️ <b>{t.complianceWarningTitle}</b> {t.complianceWarningDesc}
               </p>
             </div>
           </div>
@@ -286,7 +386,7 @@ export const Pricing: React.FC = () => {
                 <h3 className="text-2xl font-black text-slate-950 dark:text-white uppercase tracking-wide mb-2">
                   {parentPlan.name}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed font-medium">
                   {parentPlan.description}
                 </p>
                 <div className="mb-8 border-b border-slate-100 dark:border-slate-800 pb-6">
@@ -300,7 +400,7 @@ export const Pricing: React.FC = () => {
 
                 <ul className="space-y-4 mb-8">
                   {parentPlan.features.map((feat, fidx) => (
-                    <li key={fidx} className="flex items-start gap-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <li key={fidx} className="flex items-start gap-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
                       <Check className="w-4.5 h-4.5 text-emerald-500 shrink-0 mt-0.5" />
                       <span>{feat}</span>
                     </li>
@@ -324,10 +424,10 @@ export const Pricing: React.FC = () => {
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-12">
             <h3 className="text-xl md:text-3xl font-black text-slate-950 dark:text-white uppercase tracking-tight mb-2">
-              Tarifs Dégressifs Fratries (Parents)
+              {t.degressiveTitle}
             </h3>
             <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400">
-              Des abonnements annuels dégressifs calculés pour soulager les familles de plusieurs enfants.
+              {t.degressiveSubtitle}
             </p>
           </div>
 
@@ -337,7 +437,7 @@ export const Pricing: React.FC = () => {
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">{pack.title}</span>
                 <span className="text-sm font-black text-slate-900 dark:text-white block mb-3">{pack.sub}</span>
                 <span className="text-2xl font-black text-amber-500 tracking-tight block">{pack.price}</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block font-medium">par an</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block font-medium">{pack.desc}</span>
               </div>
             ))}
           </div>
@@ -352,7 +452,7 @@ export const Pricing: React.FC = () => {
               <HelpCircle className="w-4 h-4" /> FAQ
             </h2>
             <h3 className="text-2xl md:text-4xl font-black text-slate-950 dark:text-white uppercase tracking-tight">
-              Questions Fréquentes
+              {t.faqTitle}
             </h3>
           </div>
 
@@ -362,7 +462,7 @@ export const Pricing: React.FC = () => {
                 <h4 className="text-sm font-black text-slate-900 dark:text-white mb-3 leading-snug">
                   {faq.q}
                 </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                   {faq.a}
                 </p>
               </div>

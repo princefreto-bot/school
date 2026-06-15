@@ -169,16 +169,32 @@ export function App() {
     };
   }, []);
 
+  // Redirect logic to add default lang prefix if missing
+  React.useEffect(() => {
+    const parts = location.pathname.split('/');
+    const firstSegment = parts[1];
+    if (firstSegment !== 'fr' && firstSegment !== 'en') {
+      const rest = location.pathname === '/' ? '' : location.pathname;
+      navigate(`/fr${rest}${location.search}${location.hash}`, { replace: true });
+    }
+  }, [location.pathname, navigate, location.search, location.hash]);
+
   // Redirect logic based on login state
   React.useEffect(() => {
+    const parts = location.pathname.split('/');
+    const currentLang = parts[1];
+    if (currentLang !== 'fr' && currentLang !== 'en') return;
+
+    const pathWithoutLang = '/' + parts.slice(2).join('/');
     const publicPaths = ['/', '/login', '/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features', '/newsroom', '/centre-aide'];
+    
     if (isAuthenticated) {
-      if (location.pathname === '/login' || location.pathname === '/portail-ecole' || location.pathname === '/creer-compte' || location.pathname === '/confirmer-email' || location.pathname === '/pricing' || location.pathname === '/a-propos' || location.pathname === '/features') {
-        navigate('/', { replace: true });
+      if (['/login', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features'].includes(pathWithoutLang)) {
+        navigate(`/${currentLang}/`, { replace: true });
       }
     } else {
-      if (!publicPaths.includes(location.pathname)) {
-        navigate('/', { replace: true });
+      if (!publicPaths.includes(pathWithoutLang)) {
+        navigate(`/${currentLang}/`, { replace: true });
       }
     }
   }, [isAuthenticated, location.pathname, navigate]);
@@ -249,7 +265,7 @@ export function App() {
   if (isAuthenticated && subscriptionBlockedMessage) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 font-['Poppins']">
-        <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-xl text-center space-y-6">
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-8 shadow-xl text-center space-y-6">
           <div className="inline-flex p-4 bg-amber-50 dark:bg-amber-950/20 text-amber-500 rounded-full">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z" />
@@ -294,10 +310,10 @@ export function App() {
 
   return (
     <Routes>
-      <Route path="/confidentialite" element={<Confidentialite />} />
-      <Route path="/conditions-utilisation" element={<ConditionsUtilisation />} />
+      <Route path="/:lang/confidentialite" element={<Confidentialite />} />
+      <Route path="/:lang/conditions-utilisation" element={<ConditionsUtilisation />} />
       <Route 
-        path="/parent/exercices" 
+        path="/:lang/parent/exercices" 
         element={
           isAuthenticated ? (
             <Suspense fallback={<LoadingSpinner />}>
@@ -308,23 +324,23 @@ export function App() {
           )
         } 
       />
-      <Route path="/parent/courses" element={<Navigate to="/parent/exercices" replace />} />
-      <Route path="/confirmer-email" element={<ConfirmerEmail />} />
-      <Route path="/portail-ecole" element={<PortailEcole />} />
-      <Route path="/creer-compte" element={<CreerCompte />} />
-      <Route path="/pricing" element={<Suspense fallback={<LoadingSpinner />}><Pricing /></Suspense>} />
-      <Route path="/a-propos" element={<Suspense fallback={<LoadingSpinner />}><APropos /></Suspense>} />
-      <Route path="/features" element={<Suspense fallback={<LoadingSpinner />}><Features /></Suspense>} />
-      <Route path="/newsroom" element={<Suspense fallback={<LoadingSpinner />}><Newsroom /></Suspense>} />
-      <Route path="/centre-aide" element={<Suspense fallback={<LoadingSpinner />}><HelpCenter /></Suspense>} />
+      <Route path="/:lang/parent/courses" element={<Navigate to="/parent/exercices" replace />} />
+      <Route path="/:lang/confirmer-email" element={<ConfirmerEmail />} />
+      <Route path="/:lang/portail-ecole" element={<PortailEcole />} />
+      <Route path="/:lang/creer-compte" element={<CreerCompte />} />
+      <Route path="/:lang/pricing" element={<Suspense fallback={<LoadingSpinner />}><Pricing /></Suspense>} />
+      <Route path="/:lang/a-propos" element={<Suspense fallback={<LoadingSpinner />}><APropos /></Suspense>} />
+      <Route path="/:lang/features" element={<Suspense fallback={<LoadingSpinner />}><Features /></Suspense>} />
+      <Route path="/:lang/newsroom" element={<Suspense fallback={<LoadingSpinner />}><Newsroom /></Suspense>} />
+      <Route path="/:lang/centre-aide" element={<Suspense fallback={<LoadingSpinner />}><HelpCenter /></Suspense>} />
       <Route 
-        path="/login" 
+        path="/:lang/login" 
         element={
           isAuthenticated ? <Navigate to="/" replace /> : <Login />
         } 
       />
       <Route 
-        path="/" 
+        path="/:lang" 
         element={
           isAuthenticated ? (
             <Layout>
@@ -340,7 +356,8 @@ export function App() {
           )
         } 
       />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="/" element={<Navigate to="/fr" replace />} />
+      <Route path="*" element={<Navigate to="/fr" replace />} />
     </Routes>
   );
 }
