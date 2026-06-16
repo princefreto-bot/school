@@ -400,6 +400,50 @@ button, a, select, input, textarea, .card, .pro-card, .kpi-card, .nav-item {
   box-shadow: var(--shadow-md);
 }
 
+/* ============================================================
+   Remove framed/boxed badge labels (brand/amber accents)
+   The project uses many small "badge" utilities (bg-amber-50,
+   bg-amber-500/10, rounded-none, etc.). To quickly remove the
+   framed look and the small uppercase labels across the app
+   (e.g. "Sécurité d'accès", "QR Code" decorations), we
+   neutralize these decorative utility classes here.
+
+   Note: This is an aggressive stylesheet override that hides
+   backgrounds, borders and the visible text for those badges.
+   If you prefer more selective removal, we can target
+   individual components instead.
+   ============================================================ */
+
+/* Target elements that include the amber brand background utility */
+[class*="bg-amber-50"],
+[class*="bg-amber-500/10"],
+[class*="bg-amber-500/20"],
+[class*="bg-amber-500"],
+[class*="text-amber-"] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: transparent !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Neutralize small inline badges that use rounded-full / rounded-none */
+[class*="rounded-none"][class*="px-"],
+[class*="rounded-full"][class*="px-"],
+[class*="rounded-2xl"][class*="px-"] {
+  color: transparent !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Specific mobile-login badge used on the landing card */
+.mobile-card .text-amber-600.font-extrabold.uppercase,
+.mobile-card p.bg-amber-50 {
+  color: transparent !important;
+  background: transparent !important;
+}
+
 .card-header {
   padding: 20px 24px;
   border-bottom: 1px solid var(--border-light);
