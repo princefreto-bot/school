@@ -18,6 +18,7 @@ import {
 } from '../services/analyticsService';
 import { generateRapportMensuelPDF } from '@/utils/reportGenerator';
 import { DashboardSkeleton } from '../components/SkeletonLoaders';
+import gsap from 'gsap';
 
 const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n);
 const PIE_COLORS = ['#f59e0b', '#10b981', '#f43f5e'];
@@ -108,6 +109,20 @@ export const Dashboard: React.FC = () => {
       initSync();
     }
   }, []);
+
+  // GSAP Entrance Animation
+  useEffect(() => {
+    if (students.length > 0 && !isSyncing) {
+      const tl = gsap.timeline();
+      tl.from('.dashboard-animate-in', {
+        y: 40,
+        opacity: 0,
+        duration: 0.7,
+        stagger: 0.1,
+        ease: 'power3.out',
+      }, 0.1);
+    }
+  }, [students.length, isSyncing]);
 
   const recouvrement = useMemo(() => computeRecouvrement(students), [students]);
   const classComp = useMemo(() => computeClassComparison(students), [students]);
@@ -216,9 +231,15 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 pb-20 max-w-[1600px] mx-auto">
+    <>
+      <div className="guides">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className="col" />
+        ))}
+      </div>
+      <div className="grid-wrap pb-20">
       {/* ── HERO BANNER ── */}
-      <div className="relative pro-card p-8 lg:p-10 overflow-hidden group bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl">
+      <div className="band mt-8 dashboard-animate-in relative pro-card p-8 lg:p-10 overflow-hidden group bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl">
         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.06] group-hover:scale-110 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
             <TrendingUp className="w-64 h-64 text-amber-500" />
         </div>
@@ -283,7 +304,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* ── METRICS GRID ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6">
+      <div className="band mt-8 dashboard-animate-in grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6">
         <StatCard
           delay={100}
           title="Total Élèves"
@@ -329,7 +350,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* ── RECOVERY BAR ── */}
-      <div className="pro-card p-8 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
+      <div className="band mt-8 dashboard-animate-in pro-card p-8 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
         <div className="flex items-center justify-between mb-8">
           <div className="space-y-1">
             <h3 className="font-black text-slate-900 dark:text-white text-xl tracking-tight">Recouvrement Global</h3>
@@ -353,7 +374,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* ── CYCLE ANALYSIS ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="band mt-8 dashboard-animate-in grid grid-cols-1 lg:grid-cols-3 gap-6">
         {([
           {
             label: 'Primaire', sub: 'CI au CM2',
@@ -425,7 +446,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* ── CHARTS SECTION ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="band mt-8 dashboard-animate-in grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 pro-card p-8">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -492,7 +513,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* ── TOP PERFORMERS & SOLVABILITY ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="band mt-8 dashboard-animate-in grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="pro-card p-8">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
@@ -566,6 +587,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };

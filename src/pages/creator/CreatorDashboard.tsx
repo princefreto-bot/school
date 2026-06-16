@@ -10,6 +10,7 @@ import {
   School, Users, CheckCircle, Wallet, Award, Megaphone, 
   ArrowUpRight, AlertCircle, RefreshCw, LogOut, Eye, EyeOff
 } from 'lucide-react';
+import gsap from 'gsap';
 
 const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n);
 const COLORS = ['#fbbf24', '#f59e0b', '#d97706', '#b45309', '#78350f'];
@@ -73,6 +74,20 @@ export const CreatorDashboard: React.FC = () => {
     fetchDashboardData();
   }, []);
 
+  // GSAP Entrance Animation
+  useEffect(() => {
+    if (!loading && !error && data) {
+      const tl = gsap.timeline();
+      tl.from('.creator-animate-in', {
+        y: 40,
+        opacity: 0,
+        duration: 0.7,
+        stagger: 0.1,
+        ease: 'power3.out',
+      }, 0.1);
+    }
+  }, [loading, error, data]);
+
   const maskValue = (val: string | number) => privacyMode ? '••••••' : val;
 
   if (loading) {
@@ -118,9 +133,15 @@ export const CreatorDashboard: React.FC = () => {
   })).filter(d => d.value > 0);
 
   return (
-    <div className="space-y-6 pb-20 max-w-[1600px] mx-auto">
+    <>
+      <div className="guides">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className="col" />
+        ))}
+      </div>
+      <div className="grid-wrap pb-20">
       {/* ── HERO BANNER ── */}
-      <div className="relative pro-card p-8 lg:p-10 overflow-hidden group bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl">
+      <div className="band mt-8 creator-animate-in relative pro-card p-8 lg:p-10 overflow-hidden group bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl">
         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.06] group-hover:scale-110 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
             <Megaphone className="w-64 h-64 text-amber-500" />
         </div>
@@ -160,8 +181,8 @@ export const CreatorDashboard: React.FC = () => {
       </div>
 
       {/* ── STATS CARDS ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6">
-        <div className="pro-card relative group p-6 overflow-hidden animate-slideUp">
+      <div className="band mt-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6 creator-animate-in">
+        <div className="pro-card relative group p-6 overflow-hidden">
           <div className="absolute -right-12 -top-12 w-32 h-32 rounded-full blur-3xl opacity-20 bg-amber-500" />
           <div className="relative z-10 flex items-start justify-between">
             <div className="space-y-2">
@@ -175,7 +196,7 @@ export const CreatorDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="pro-card relative group p-6 overflow-hidden animate-slideUp" style={{ animationDelay: '100ms' }}>
+        <div className="pro-card relative group p-6 overflow-hidden">
           <div className="absolute -right-12 -top-12 w-32 h-32 rounded-full blur-3xl opacity-20 bg-indigo-500" />
           <div className="relative z-10 flex items-start justify-between">
             <div className="space-y-2">
@@ -189,7 +210,7 @@ export const CreatorDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="pro-card relative group p-6 overflow-hidden animate-slideUp" style={{ animationDelay: '200ms' }}>
+        <div className="pro-card relative group p-6 overflow-hidden">
           <div className="absolute -right-12 -top-12 w-32 h-32 rounded-full blur-3xl opacity-20 bg-emerald-500" />
           <div className="relative z-10 flex items-start justify-between">
             <div className="space-y-2">
@@ -203,7 +224,7 @@ export const CreatorDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="pro-card relative group p-6 overflow-hidden animate-slideUp" style={{ animationDelay: '300ms' }}>
+        <div className="pro-card relative group p-6 overflow-hidden">
           <div className="absolute -right-12 -top-12 w-32 h-32 rounded-full blur-3xl opacity-20 bg-rose-500" />
           <div className="relative z-10 flex items-start justify-between">
             <div className="space-y-2">
@@ -217,7 +238,7 @@ export const CreatorDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="pro-card relative group p-6 overflow-hidden animate-slideUp bg-gradient-to-br from-amber-500 to-amber-600 text-white" style={{ animationDelay: '400ms' }}>
+        <div className="pro-card relative group p-6 overflow-hidden bg-gradient-to-br from-amber-500 to-amber-600 text-white">
           <div className="absolute -right-12 -top-12 w-32 h-32 rounded-full blur-3xl opacity-35 bg-white" />
           <div className="relative z-10 flex items-start justify-between">
             <div className="space-y-2">
@@ -233,7 +254,7 @@ export const CreatorDashboard: React.FC = () => {
       </div>
 
       {/* ── VISUALISATIONS & GRAPHS ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="band mt-8 grid grid-cols-1 xl:grid-cols-3 gap-6 creator-animate-in">
         <div className="xl:col-span-2 pro-card p-8">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -302,7 +323,7 @@ export const CreatorDashboard: React.FC = () => {
       </div>
 
       {/* ── AFFILIATED SCHOOLS LIST ── */}
-      <div className="pro-card p-8">
+      <div className="band mt-8 pro-card p-8 creator-animate-in">
         <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-6 flex items-center gap-3">
           <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
             <School className="w-6 h-6" />
@@ -383,6 +404,7 @@ export const CreatorDashboard: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 };

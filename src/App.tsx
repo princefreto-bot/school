@@ -14,6 +14,9 @@ import { CreerCompte } from './pages/CreerCompte';
 import { ConditionsUtilisation } from './pages/ConditionsUtilisation';
 import { ConfirmerEmail } from './pages/ConfirmerEmail';
 import { OfflinePage } from './pages/OfflinePage';
+import { ForgotPasswordParent } from './pages/ForgotPasswordParent';
+import { ForgotPasswordSchool } from './pages/ForgotPasswordSchool';
+import { ResetPassword } from './pages/ResetPassword';
 
 
 // Lazy loading for pages to reduce initial bundle size
@@ -147,7 +150,10 @@ const PageContent: React.FC = () => {
   }
 };
 
+import { useGridToggle } from './hooks/useGridToggle';
+
 export function App() {
+  useGridToggle();
   const isAuthenticated = useStore((s) => s.isAuthenticated);
   const user = useStore((s) => s.user);
   const fetchAllFromBackend = useStore((s) => s.fetchAllFromBackend);
@@ -186,7 +192,7 @@ export function App() {
     if (currentLang !== 'fr' && currentLang !== 'en') return;
 
     const pathWithoutLang = '/' + parts.slice(2).join('/');
-    const publicPaths = ['/', '/login', '/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features', '/newsroom', '/centre-aide'];
+    const publicPaths = ['/', '/login', '/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features', '/newsroom', '/centre-aide', '/mot-de-passe-oublie', '/mot-de-passe-oublie-ecole', '/reset-password'];
     
     if (isAuthenticated) {
       if (['/login', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features'].includes(pathWithoutLang)) {
@@ -334,6 +340,9 @@ export function App() {
       <Route path="/:lang/features" element={<Suspense fallback={<LoadingSpinner />}><Features /></Suspense>} />
       <Route path="/:lang/newsroom" element={<Suspense fallback={<LoadingSpinner />}><Newsroom /></Suspense>} />
       <Route path="/:lang/centre-aide" element={<Suspense fallback={<LoadingSpinner />}><HelpCenter /></Suspense>} />
+      <Route path="/:lang/mot-de-passe-oublie" element={<ForgotPasswordParent />} />
+      <Route path="/:lang/mot-de-passe-oublie-ecole" element={<ForgotPasswordSchool />} />
+      <Route path="/:lang/reset-password" element={<ResetPassword />} />
       <Route 
         path="/:lang/login" 
         element={
@@ -370,6 +379,9 @@ export function App() {
       <Route path="/newsroom" element={<Navigate to="/fr/newsroom" replace />} />
       <Route path="/centre-aide" element={<Navigate to="/fr/centre-aide" replace />} />
       <Route path="/login" element={<Navigate to="/fr/login" replace />} />
+      <Route path="/mot-de-passe-oublie" element={<Navigate to="/fr/mot-de-passe-oublie" replace />} />
+      <Route path="/mot-de-passe-oublie-ecole" element={<Navigate to="/fr/mot-de-passe-oublie-ecole" replace />} />
+      <Route path="/reset-password" element={<Navigate to="/fr/reset-password" replace />} />
 
       <Route path="/" element={<Navigate to="/fr" replace />} />
       <Route path="*" element={<Navigate to="/fr" replace />} />

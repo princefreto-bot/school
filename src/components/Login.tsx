@@ -354,7 +354,7 @@ export const Login: React.FC = () => {
               <input type="text" placeholder="Utilisateur / Téléphone" className="auth-input" value={username} onChange={(e) => setUsername(e.target.value)} required />
               <input type="password" placeholder="Mot de passe" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
               <div className="flex items-center justify-between w-full mt-2 text-xs px-1">
-                <a href="#" className="text-slate-400 hover:text-amber-600">Mot de passe oublié ?</a>
+                <button type="button" onClick={() => navigate(`/${lang}/mot-de-passe-oublie`)} className="text-slate-400 hover:text-amber-600 text-left">Mot de passe oublié ?</button>
                 <a 
                   href="/#/confidentialite" 
                   target="_blank"
@@ -456,7 +456,7 @@ export const Login: React.FC = () => {
 
                     {view === 'login' ? (
                       <div className="flex justify-between items-center px-1 text-[11px] mt-1">
-                        <a href="#" className="text-slate-400 hover:text-amber-600">Mot de passe oublié ?</a>
+                        <button type="button" onClick={() => navigate(`/${lang}/mot-de-passe-oublie`)} className="text-slate-400 hover:text-amber-600 text-left">Mot de passe oublié ?</button>
                         <a 
                           href="/#/confidentialite" 
                           target="_blank"

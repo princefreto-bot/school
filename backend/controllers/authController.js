@@ -638,4 +638,92 @@ async function resendVerificationEmail(req, res) {
     }
 }
 
-module.exports = { register, login, deleteSelfAccount, updatePushToken, registerSchoolRequest, verifySchoolEmail, resendVerificationEmail };
+// ── Password Reset (Établissements) ──────────────────────────
+
+async function requestPasswordReset(req, res) {
+    const { email, schoolSlug } = req.body;
+
+    if (!email || !schoolSlug) {
+        return res.status(400).json({ error: 'Champs requis : email, schoolSlug.' });
+    }
+
+    try {
+        const input = email.trim();
+
+        // Vérifier si l'utilisateur existe dans l'école
+        const { data: user, error } = await supabase
+            .from(`profiles_${schoolSlug}`)
+            .select('id, nom, role, password')
+            .eq('email', input)
+            .maybeSingle();
+
+        if (error || !user) {
+            // Pour des raisons de sécurité, ne pas indiquer si l'email existe ou non
+            return res.json({ success: true, message: 'Si cette adresse email existe pour cet établissement, un lien de réinitialisation a été envoyé.' });
+        }
+
+        // Créer un token stateless incluant une partie du hash pour l'invalider après changement
+        const hashPrefix = user.password.substring(0, 15);
+        const token = jwt.sign(
+            { id: user.id, role: user.role, schoolSlug, hashPrefix },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        // Envoyer l'e-mail
+        const { sendPasswordResetEmail } = require('../utils/mailer');
+        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/#/reset-password?token=${token}`;
+        
+        await sendPasswordResetEmail(input, resetLink);
+
+        return res.json({ success: true, message: 'Si cette adresse email existe pour cet établissement, un lien de réinitialisation a été envoyé.' });
+    } catch (err) {
+        console.error('RequestPasswordReset Error:', err.message);
+        return res.status(500).json({ error: 'Erreur lors de la demande de réinitialisation.' });
+    }
+}
+
+async function resetPassword(req, res) {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword || newPassword.length < 6) {
+        return res.status(400).json({ error: 'Token et nouveau mot de passe (min 6 caractères) requis.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const { id, role, schoolSlug, hashPrefix } = decoded;
+
+        // Récupérer l'utilisateur pour vérifier que le mot de passe n'a pas déjà changé
+        const { data: user, error } = await supabase
+            .from(`profiles_${schoolSlug}`)
+            .select('password')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (error || !user) {
+            return res.status(400).json({ error: 'Lien invalide ou utilisateur introuvable.' });
+        }
+
+        // Vérifier que le préfixe du hash correspond toujours
+        if (user.password.substring(0, 15) !== hashPrefix) {
+            return res.status(400).json({ error: 'Ce lien de réinitialisation a déjà été utilisé.' });
+        }
+
+        // Mettre à jour le mot de passe
+        const newHashedPassword = await bcrypt.hash(newPassword, 10);
+        const { error: updateErr } = await supabase
+            .from(`profiles_${schoolSlug}`)
+            .update({ password: newHashedPassword })
+            .eq('id', id);
+
+        if (updateErr) throw updateErr;
+
+        return res.json({ success: true, message: 'Mot de passe réinitialisé avec succès.' });
+    } catch (err) {
+        console.error('ResetPassword Error:', err.message);
+        return res.status(400).json({ error: 'Le lien de réinitialisation est invalide ou a expiré.' });
+    }
+}
+
+module.exports = { register, login, deleteSelfAccount, updatePushToken, registerSchoolRequest, verifySchoolEmail, resendVerificationEmail, requestPasswordReset, resetPassword };
