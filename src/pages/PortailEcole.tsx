@@ -3,13 +3,14 @@
 // ============================================================
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { GraduationCap, Lock, Mail, Store, ArrowRight } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
 export const PortailEcole: React.FC = () => {
   const login = useStore((s) => s.login);
   const navigate = useNavigate();
+  const { lang = 'fr' } = useParams<{ lang?: string }>();
 
   
   // Auth Form States
@@ -66,7 +67,7 @@ export const PortailEcole: React.FC = () => {
       if (!ok) {
         setError('Identifiants incorrects.');
       } else {
-        navigate('/', { replace: true });
+        navigate(`/${lang}/`, { replace: true });
       }
     } catch (err: any) {
       const msg: string = err?.message || err?.error || "Une erreur est survenue.";
@@ -190,7 +191,7 @@ export const PortailEcole: React.FC = () => {
         {/* Actions alternatives et Liens */}
         <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col gap-4 text-center">
           <button 
-            onClick={() => navigate('/creer-compte')} 
+            onClick={() => navigate(`/${lang}/creer-compte`)} 
             className="text-xs font-bold text-amber-600 hover:text-amber-500 flex items-center justify-center gap-1.5 transition-colors group"
           >
             <span>Inscrire un nouvel établissement</span>
@@ -198,7 +199,7 @@ export const PortailEcole: React.FC = () => {
           </button>
 
           <button 
-            onClick={() => navigate('/login')} 
+            onClick={() => navigate(`/${lang}/login`)} 
             className="text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors pt-2 border-t border-slate-50"
           >
             Accéder à l'espace Parent d'élève

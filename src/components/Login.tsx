@@ -7,7 +7,7 @@ import { parentApi } from '../services/parentApi';
 import { LinkStudent } from './LinkStudent';
 import { GraduationCap, Lock, User, Phone, Store } from 'lucide-react';
 import { API_BASE_URL } from '../config';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 // ── Images de fond (Mobile uniquement) ──
 import bgImage1 from '../assets/login-bg1.jpg';
@@ -58,6 +58,7 @@ const BackgroundSlideshow: React.FC = () => {
 export const Login: React.FC = () => {
   const login = useStore((s) => s.login);
   const navigate = useNavigate();
+  const { lang = 'fr' } = useParams<{ lang?: string }>();
   const appName = "DGhubSchool";
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -373,7 +374,7 @@ export const Login: React.FC = () => {
               <div className="mt-4 flex flex-col gap-2">
                 <button 
                   type="button" 
-                  onClick={() => navigate('/portail-ecole')}
+                  onClick={() => navigate(`/${lang}/portail-ecole`)}
                   className="text-slate-400 hover:text-amber-600 text-[10px] font-bold tracking-wider uppercase transition-colors"
                 >
                   Accès Portail Établissement
@@ -515,7 +516,7 @@ export const Login: React.FC = () => {
                     </button>
                     {view === 'login' && (
                       <div className="flex flex-col gap-1 mt-1">
-                        <button type="button" onClick={() => navigate('/portail-ecole')} className="w-full py-2 text-slate-500 text-[9px] font-bold uppercase tracking-wider">
+                        <button type="button" onClick={() => navigate(`/${lang}/portail-ecole`)} className="w-full py-2 text-slate-500 text-[9px] font-bold uppercase tracking-wider">
                           Accès Portail Établissement
                         </button>
                       </div>

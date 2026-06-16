@@ -2,12 +2,13 @@
 // PAGE D'INSCRIPTION ÉTABLISSEMENT — Épurée & Rectangulaire
 // ============================================================
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { GraduationCap, ArrowLeft, Mail, School, User, Phone, Lock } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
 export const CreerCompte: React.FC = () => {
   const navigate = useNavigate();
+  const { lang = 'fr' } = useParams<{ lang?: string }>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -76,7 +77,7 @@ export const CreerCompte: React.FC = () => {
       }
 
       // Redirection vers l'écran de confirmation d'e-mail avec l'état
-      navigate('/confirmer-email', { state: { email } });
+      navigate(`/${lang}/confirmer-email`, { state: { email } });
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -96,7 +97,7 @@ export const CreerCompte: React.FC = () => {
         {/* En-tête de page */}
         <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
           <button 
-            onClick={() => navigate('/portail-ecole')} 
+            onClick={() => navigate(`/${lang}/portail-ecole`)} 
             className="flex items-center gap-2 text-slate-400 hover:text-amber-500 transition-colors text-sm font-bold"
           >
             <ArrowLeft className="w-4 h-4" />

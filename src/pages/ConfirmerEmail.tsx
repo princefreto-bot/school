@@ -2,7 +2,7 @@
 // PAGE DE CONFIRMATION E-MAIL — Style Épuré & Bords Droits
 // ============================================================
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { GraduationCap, ArrowLeft, Mail, ShieldAlert, Check } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useStore } from '../store/useStore';
@@ -11,6 +11,7 @@ import { createActivityLog } from '../utils/activityLogger';
 export const ConfirmerEmail: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { lang = 'fr' } = useParams<{ lang?: string }>();
   
   // Zustand actions
   const fetchAllFromBackend = useStore((s) => s.fetchAllFromBackend);
@@ -188,12 +189,12 @@ export const ConfirmerEmail: React.FC = () => {
 
         // Attendre 1.5s pour l'animation de succès et rediriger
         setTimeout(() => {
-          navigate('/');
+          navigate(`/${lang}/`);
         }, 1500);
       } else {
         // Fallback si pas de token
         setTimeout(() => {
-          navigate('/login');
+          navigate(`/${lang}/login`);
         }, 2000);
       }
 
@@ -215,7 +216,7 @@ export const ConfirmerEmail: React.FC = () => {
         {/* Logo & Retour */}
         <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
           <button 
-            onClick={() => navigate('/creer-compte')} 
+            onClick={() => navigate(`/${lang}/creer-compte`)} 
             className="flex items-center gap-2 text-slate-400 hover:text-amber-500 transition-colors text-sm font-bold"
             disabled={loading}
           >

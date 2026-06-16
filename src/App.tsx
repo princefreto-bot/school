@@ -310,6 +310,7 @@ export function App() {
 
   return (
     <Routes>
+      {/* Prefixed routes */}
       <Route path="/:lang/confidentialite" element={<Confidentialite />} />
       <Route path="/:lang/conditions-utilisation" element={<ConditionsUtilisation />} />
       <Route 
@@ -356,6 +357,20 @@ export function App() {
           )
         } 
       />
+
+      {/* Non-prefixed fallback routes to prevent blank screen collisions */}
+      <Route path="/confidentialite" element={<Navigate to="/fr/confidentialite" replace />} />
+      <Route path="/conditions-utilisation" element={<Navigate to="/fr/conditions-utilisation" replace />} />
+      <Route path="/confirmer-email" element={<Navigate to="/fr/confirmer-email" replace />} />
+      <Route path="/portail-ecole" element={<Navigate to="/fr/portail-ecole" replace />} />
+      <Route path="/creer-compte" element={<Navigate to="/fr/creer-compte" replace />} />
+      <Route path="/pricing" element={<Navigate to="/fr/pricing" replace />} />
+      <Route path="/a-propos" element={<Navigate to="/fr/a-propos" replace />} />
+      <Route path="/features" element={<Navigate to="/fr/features" replace />} />
+      <Route path="/newsroom" element={<Navigate to="/fr/newsroom" replace />} />
+      <Route path="/centre-aide" element={<Navigate to="/fr/centre-aide" replace />} />
+      <Route path="/login" element={<Navigate to="/fr/login" replace />} />
+
       <Route path="/" element={<Navigate to="/fr" replace />} />
       <Route path="*" element={<Navigate to="/fr" replace />} />
     </Routes>

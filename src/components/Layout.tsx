@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { parseResponse, getAuthHeaders } from '../services/apiHelpers';
 import { useStore } from '../store/useStore';
 import { AppPage } from '../types';
@@ -110,6 +110,7 @@ const SidebarNav: React.FC<{
   onOpenSupport: () => void;
 }> = ({ navItems, currentPage, setCurrentPage, setSidebarOpen, collapsed, onOpenSupport }) => {
   const navigate = useNavigate();
+  const { lang = 'fr' } = useParams<{ lang?: string }>();
   let lastGroup = '';
   return (
     <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1 custom-scrollbar">
@@ -129,7 +130,7 @@ const SidebarNav: React.FC<{
             <button
               onClick={() => {
                 if (item.id === 'parent_courses') {
-                  navigate('/parent/exercices');
+                  navigate(`/${lang}/parent/exercices`);
                 } else {
                   setCurrentPage(item.id);
                 }
