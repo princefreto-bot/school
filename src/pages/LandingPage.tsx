@@ -1,7 +1,7 @@
 // ============================================================
 // PAGE D'ACCUEIL SAAS — Style Brutaliste Épuré & Bords Droits
 // ============================================================
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   CreditCard, 
@@ -14,18 +14,35 @@ import {
   X 
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
+import { BACKEND_URL } from '../config';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [dbStats, setDbStats] = useState({ schools: 0, students: 0, documents: 0 });
 
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/api/public/stats`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) {
+          setDbStats({
+            schools: data.schools || 0, 
+            students: data.students || 0,
+            documents: data.documents || 0
+          });
+        }
+      })
+      .catch(err => console.error("Erreur récupération des statistiques:", err));
+  }, []);
 
   const texts = {
     fr: {
       features: "Fonctionnalités",
       pricing: "Tarification",
       about: "À Propos",
+      socialProof: "Preuve Sociale",
       login: "Connexion",
       createSchool: "Créer un établissement",
       createSchoolFree: "Créer un établissement gratuitement",
@@ -87,6 +104,7 @@ export const LandingPage: React.FC = () => {
       features: "Features",
       pricing: "Pricing",
       about: "About Us",
+      socialProof: "Social Proof",
       login: "Login",
       createSchool: "Create a School",
       createSchoolFree: "Create a School for Free",
@@ -149,6 +167,13 @@ export const LandingPage: React.FC = () => {
   const t = texts[lang];
 
   // Statistiques de la plateforme (KPIs chiffrés réels)
+  const stats = [
+    { value: `+${dbStats.schools.toLocaleString('fr-FR')}`, label: t.partnersLabel },
+    { value: `+${dbStats.students.toLocaleString('fr-FR')}`, label: t.studentsLabel },
+    { value: `+${dbStats.documents.toLocaleString('fr-FR')}`, label: t.documentsLabel },
+    { value: "99.9%", label: t.networkLabel },
+  ];
+
   // Fonctionnalités principales (Bento Grid)
   const features = [
     {
@@ -201,6 +226,7 @@ export const LandingPage: React.FC = () => {
             <button onClick={() => navigate(`/${lang}/features`)} className="hover:text-amber-500 transition-colors cursor-pointer">{t.features}</button>
             <button onClick={() => navigate(`/${lang}/pricing`)} className="hover:text-amber-500 transition-colors cursor-pointer">{t.pricing}</button>
             <button onClick={() => navigate(`/${lang}/a-propos`)} className="hover:text-amber-500 transition-colors cursor-pointer">{t.about}</button>
+            <a href="#stats" className="hover:text-amber-500 transition-colors">{t.socialProof}</a>
           </div>
 
           {/* Boutons Actions - Desktop */}
@@ -249,6 +275,13 @@ export const LandingPage: React.FC = () => {
             >
               {t.about}
             </button>
+            <a 
+              href="#stats" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-bold text-slate-700 hover:text-amber-500 transition-colors py-2"
+            >
+              {t.socialProof}
+            </a>
             <div className="border-t border-slate-100 pt-4 flex flex-col gap-3">
               <button 
                 onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/login`); }}
@@ -336,6 +369,9 @@ export const LandingPage: React.FC = () => {
           {/* Card 1: Cartes Scolaires */}
           <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-md transition">
             <div className="space-y-2">
+              <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full">
+                Sécurité & QR Code
+              </span>
               <h4 className="text-lg font-black text-slate-950 uppercase">{t.securityTitle}</h4>
               <p className="text-xs text-slate-500 leading-relaxed font-medium">
                 {t.securityDesc}
@@ -403,6 +439,38 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION STATS / PRUVE SOCIALE ─────────────────── */}
+      <section id="stats" className="bg-white py-20 relative">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
+          <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, idx) => (
+              <div key={idx} className="space-y-1">
+                <span className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight block">
+                  {stat.value}
+                </span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block leading-tight">
+                  {stat.label}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <hr className="max-w-4xl mx-auto border-slate-100 my-16" />
+
+          {/* Citation / Témoignage */}
+          <div className="max-w-2xl mx-auto space-y-6">
+            <div className="text-3xl text-amber-500 font-serif leading-none">“</div>
+            <p className="text-lg md:text-xl font-bold text-slate-800 leading-relaxed italic">
+              {t.testimonialText}
+            </p>
+            <div className="space-y-1">
+              <p className="text-xs font-black uppercase tracking-wider text-slate-900">{t.testimonialAuthor}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t.testimonialRole}</p>
+            </div>
           </div>
         </div>
       </section>
