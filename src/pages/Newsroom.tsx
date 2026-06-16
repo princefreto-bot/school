@@ -44,7 +44,7 @@ export const Newsroom: React.FC = () => {
             </button>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center transform -rotate-6">
-                <img src="/logo.png" className="w-full h-full object-contain rounded-md" alt="" />
+                <img src="/logo.svg" className="w-full h-full object-contain rounded-md" alt="" />
               </div>
               <span className="font-black text-xl tracking-tight text-slate-950 dark:text-white">
                 DGhub<span className="text-amber-500">School</span>

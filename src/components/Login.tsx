@@ -22,8 +22,8 @@ const SLIDE_DURATION = 5000;
 
 const SchoolLogo: React.FC<{ size?: string }> = ({ size = "w-16 h-16" }) => {
   return (
-    <div className={`${size} bg-white border border-slate-200 rounded-none flex items-center justify-center mb-4 shadow-lg shadow-amber-500/10 p-1`}>
-      <img src="/logo.png" className="w-full h-full object-contain" alt="DGhubSchool" />
+    <div className={`${size} bg-white border border-slate-200 rounded-[28px] flex items-center justify-center mb-4 shadow-lg shadow-amber-500/10 p-2`}>
+      <img src="/logo.svg" className="w-full h-full object-contain" alt="DGhubSchool" />
     </div>
   );
 };

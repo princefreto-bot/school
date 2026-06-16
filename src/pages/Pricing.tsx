@@ -253,7 +253,7 @@ export const Pricing: React.FC = () => {
       <header className="relative z-50 border-b border-slate-200/50 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
         <nav className="w-full flex items-center justify-between p-4 md:px-8">
           <div className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl select-none cursor-pointer" onClick={() => navigate(`/${lang}`)}>
-            <img src="/logo.png" className="w-8 h-8 object-contain rounded-lg" alt="Logo" />
+            <img src="/logo.svg" className="w-8 h-8 object-contain rounded-lg" alt="Logo" />
             <span className="text-amber-500">DGhub<span className="text-slate-900 dark:text-white">School</span></span>
           </div>
           <button 

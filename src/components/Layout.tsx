@@ -218,7 +218,7 @@ const SidebarContent: React.FC<{
         {schoolLogo ? (
           <img src={schoolLogo} alt="" className="w-full h-full object-cover rounded-[20px]" />
         ) : (
-          <img src="/logo.jpeg" alt="" className="w-full h-full object-cover rounded-[20px] bg-white p-0.5" />
+          <img src="/logo.svg" alt="" className="w-full h-full object-cover rounded-[20px] bg-white p-0.5" />
         )}
       </div>
 

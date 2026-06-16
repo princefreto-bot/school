@@ -184,7 +184,7 @@ export const Footer: React.FC = () => {
             onClick={() => handleNavigation('/')}
             className="flex items-center gap-2.5 text-slate-950 dark:text-white font-black tracking-tighter text-2xl uppercase cursor-pointer select-none"
           >
-            <img src="/logo.png" className="w-8 h-8 object-contain rounded-xl bg-white p-0.5 border border-slate-200 dark:border-slate-800" alt="Logo DGhubSchool" />
+            <img src="/logo.svg" className="w-8 h-8 object-contain rounded-xl bg-white p-0.5 border border-slate-200 dark:border-slate-800" alt="Logo DGhubSchool" />
             <span>DGhubSchool</span>
           </div>
           

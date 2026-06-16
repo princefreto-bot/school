@@ -17,7 +17,7 @@ export const Confidentialite: React.FC = () => {
             onClick={() => navigate(`/${lang}`)}
             className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl uppercase select-none cursor-pointer"
           >
-            <img src="/logo.png" className="w-8 h-8 object-contain rounded-lg" alt="Logo" />
+            <img src="/logo.svg" className="w-8 h-8 object-contain rounded-lg" alt="Logo" />
             <span className="text-amber-500">DGhubSchool</span>
           </div>
           
