@@ -689,29 +689,30 @@ export const SuperAdminDashboard: React.FC = () => {
                 <p className="text-slate-400 text-sm sm:text-base font-medium mt-1">Plateforme SaaS — Contrôle & Gestion centralisée</p>
               </div>
             </div>
-        
-        <div className="flex items-center gap-3 relative z-10">
-          <button onClick={loadAll}
-            className="p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-slate-700/50 hover:shadow-lg"
-            title="Actualiser">
-            <RefreshCw className="w-5 h-5" />
-          </button>
-          
-          {activeTab === 'schools' ? (
-            <button onClick={() => setShowCreateModal(true)}
-              className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black transition-all shadow-[0_8px_20px_-6px_rgba(245,158,11,0.4)] border border-amber-500/30 hover:scale-[1.02] active:scale-[0.98]">
-              <Plus className="w-5 h-5 shrink-0" />
-              <span className="whitespace-nowrap">Nouvelle école</span>
-            </button>
-          ) : (
-            <button onClick={() => setShowCreateCreatorModal(true)}
-              className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black transition-all shadow-[0_8px_20px_-6px_rgba(245,158,11,0.4)] border border-amber-500/30 hover:scale-[1.02] active:scale-[0.98]">
-              <Plus className="w-5 h-5 shrink-0" />
-              <span className="whitespace-nowrap">Nouveau Créateur</span>
-            </button>
-          )}
+
+            <div className="flex items-center gap-3 relative z-10">
+              <button onClick={loadAll}
+                className="p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-slate-700/50 hover:shadow-lg"
+                title="Actualiser">
+                <RefreshCw className="w-5 h-5" />
+              </button>
+              
+              {activeTab === 'schools' ? (
+                <button onClick={() => setShowCreateModal(true)}
+                  className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black transition-all shadow-[0_8px_20px_-6px_rgba(245,158,11,0.4)] border border-amber-500/30 hover:scale-[1.02] active:scale-[0.98]">
+                  <Plus className="w-5 h-5 shrink-0" />
+                  <span className="whitespace-nowrap">Nouvelle école</span>
+                </button>
+              ) : (
+                <button onClick={() => setShowCreateCreatorModal(true)}
+                  className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black transition-all shadow-[0_8px_20px_-6px_rgba(245,158,11,0.4)] border border-amber-500/30 hover:scale-[1.02] active:scale-[0.98]">
+                  <Plus className="w-5 h-5 shrink-0" />
+                  <span className="whitespace-nowrap">Nouveau Créateur</span>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
 
       {/* ── TABS NAVIGATION ── */}
       <div className="band sa-animate-in mt-8">
@@ -1115,5 +1116,6 @@ export const SuperAdminDashboard: React.FC = () => {
         />
       )}
     </div>
+  </>
   );
 };
