@@ -209,7 +209,8 @@ export const ParentDashboard: React.FC = () => {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-slate-500">
                 <Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" />
-                <p>Chargement de votre espace parent...</p>
+                <p className="font-medium">Préparation de votre espace parent...</p>
+                <p className="text-xs text-slate-400 mt-1">Cela ne prend que quelques secondes.</p>
             </div>
         );
     }
@@ -218,11 +219,12 @@ export const ParentDashboard: React.FC = () => {
         return (
             <div className="bg-red-50 border border-red-100 rounded-2xl p-8 text-center">
                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-red-900 mb-2">Erreur de connexion</h3>
-                <p className="text-red-700">{errorMsg}</p>
+                <h3 className="text-lg font-bold text-red-900 mb-2">Impossible de charger vos données</h3>
+                <p className="text-red-700 text-sm">{errorMsg}</p>
+                <p className="text-red-500 text-xs mt-1">Vérifiez votre connexion internet puis réessayez.</p>
                 <button
                     onClick={() => fetchData()}
-                    className="mt-4 px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition"
+                    className="mt-4 px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition font-bold"
                 >
                     Réessayer
                 </button>
@@ -238,8 +240,8 @@ export const ParentDashboard: React.FC = () => {
                 {/* ── Barre supérieure ── */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Salut, {user?.nom}</h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium italic mt-1">L'école de vos enfants dans votre poche.</p>
+                        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Bonjour, {user?.nom} 👋</h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">Tout ce qu'il se passe pour vos enfants, ici et maintenant.</p>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -370,8 +372,8 @@ export const ParentDashboard: React.FC = () => {
                                 <Bell className="w-8 h-8 text-white animate-pulse" />
                             </div>
                             <div>
-                                <h3 className="font-black text-xl md:text-2xl text-white tracking-tight">Restez Connecté</h3>
-                                <p className="text-blue-50 text-[11px] md:text-sm mt-1 leading-snug max-w-sm font-medium">Ne ratez plus rien ! Soyez alerté dès que votre enfant rentre ou sort de l'école.</p>
+                                <h3 className="font-black text-xl md:text-2xl text-white tracking-tight">Ne ratez plus aucune alerte</h3>
+                                <p className="text-blue-50 text-[11px] md:text-sm mt-1 leading-snug max-w-sm font-medium">Activez les notifications pour être prévenu en temps réel dès qu'il y a une entrée, une sortie ou un nouveau message de l'école.</p>
                             </div>
                         </div>
                         <button 
@@ -403,11 +405,11 @@ export const ParentDashboard: React.FC = () => {
                             <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:emerald-400 rounded-3xl flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-inner">
                                 <TrendingUp className="w-7 h-7" />
                             </div>
-                            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:text-emerald-400 transition-colors">Déjà Payé</span>
+                            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:text-emerald-400 transition-colors">Versé à ce jour</span>
                         </div>
                         <div>
                             <p className="text-3xl font-black text-slate-900 dark:text-white mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{totalDejaPaye.toLocaleString()} FCFA</p>
-                            <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wide">{totalEcolage > 0 ? Math.round((totalDejaPaye / totalEcolage) * 100) : 0}% du total</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wide">{totalEcolage > 0 ? Math.round((totalDejaPaye / totalEcolage) * 100) : 0}% du montant total ● Confirmé</p>
                         </div>
                     </div>
 
@@ -416,11 +418,11 @@ export const ParentDashboard: React.FC = () => {
                             <div className="w-14 h-14 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-3xl flex items-center justify-center shrink-0 group-hover:bg-rose-600 group-hover:text-white transition-all shadow-inner">
                                 <CreditCard className="w-7 h-7" />
                             </div>
-                            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:text-rose-400 transition-colors">Reste à Payer</span>
+                            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:text-rose-400 transition-colors">Solde Restant</span>
                         </div>
                         <div>
                             <p className="text-3xl font-black text-slate-900 dark:text-white mb-1 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">{totalRestant.toLocaleString()} FCFA</p>
-                            <p className="text-xs text-rose-400 dark:text-rose-500 font-bold uppercase tracking-wide">Délai Règlement à respecter</p>
+                            <p className="text-xs text-rose-400 dark:text-rose-500 font-bold uppercase tracking-wide">À régler — Contactez l'établissement</p>
                         </div>
                     </div>
 
@@ -432,11 +434,11 @@ export const ParentDashboard: React.FC = () => {
                             <div className="w-14 h-14 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-3xl flex items-center justify-center shrink-0 group-hover:bg-amber-600 group-hover:text-white transition-all shadow-inner">
                                 <GraduationCap className="w-7 h-7" />
                             </div>
-                            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:text-amber-400 transition-colors">Résultats Scolaires</span>
+                            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:text-amber-400 transition-colors">Notes & Bulletins</span>
                         </div>
                         <div>
-                            <p className="text-xl font-black text-slate-900 dark:text-white mb-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Consulter les Notes</p>
-                            <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wide">Suivi des performances</p>
+                            <p className="text-xl font-black text-slate-900 dark:text-white mb-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Voir les Résultats</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wide">Moyennes, rangs et appréciations</p>
                         </div>
                     </div>
                 </div>
@@ -448,10 +450,10 @@ export const ParentDashboard: React.FC = () => {
                             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center">
                                 <GraduationCap className="w-6 h-6" />
                             </div>
-                            <h3 className="text-xl font-black text-slate-900 dark:text-white">Dossiers Scolaires</h3>
+                            <h3 className="text-xl font-black text-slate-900 dark:text-white">Dossiers de vos enfants</h3>
                         </div>
                         {children.length > 0 && (
-                            <span className="px-4 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full text-[10px] font-black uppercase tracking-widest">{children.length} enfant{children.length > 1 ? 's' : ''}</span>
+                            <span className="px-4 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full text-[10px] font-black uppercase tracking-widest">{children.length} enfant{children.length > 1 ? 's' : ''} lié{children.length > 1 ? 's' : ''}</span>
                         )}
                     </div>
                     <div className="overflow-x-auto">
@@ -476,14 +478,14 @@ export const ParentDashboard: React.FC = () => {
                                                     <Search className="w-8 h-8 text-slate-200" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-lg font-bold text-slate-800 mb-1">Aucun enfant lié</p>
-                                                    <p className="text-sm text-slate-400">Liez vos enfants pour voir leurs informations financières, leurs reçus et leurs badges.</p>
+                                                    <p className="text-lg font-bold text-slate-800 mb-1">Aucun enfant lié à votre compte</p>
+                                                    <p className="text-sm text-slate-400">Liez votre enfant avec son numéro d'élève pour accéder à ses notes, ses reçus, ses bulletins et l'historique de présences.</p>
                                                 </div>
                                                 <button
                                                     onClick={() => setIsLinkModalOpen(true)}
                                                     className="px-6 py-2 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-600 hover:text-white transition-all text-sm"
                                                 >
-                                                    Lier un enfant maintenant
+                                                    → Lier mon enfant maintenant
                                                 </button>
                                             </div>
                                         </td>
@@ -559,8 +561,8 @@ export const ParentDashboard: React.FC = () => {
                             <FileText className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-black text-slate-900 dark:text-white">Documents scannés de vos enfants</h3>
-                            <p className="text-xs text-slate-500 mt-1">Actes de naissance, anciens relevés et certificats numérisés par l'établissement.</p>
+                            <h3 className="text-xl font-black text-slate-900 dark:text-white">Documents officiels numérisés</h3>
+                            <p className="text-xs text-slate-500 mt-1">Actes de naissance, bulletins, attestations et autres pièces transmis par l'établissement.</p>
                         </div>
                     </div>
 
