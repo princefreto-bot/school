@@ -17,6 +17,7 @@ import { OfflinePage } from './pages/OfflinePage';
 import { ForgotPasswordParent } from './pages/ForgotPasswordParent';
 import { ForgotPasswordSchool } from './pages/ForgotPasswordSchool';
 import { ResetPassword } from './pages/ResetPassword';
+import { NotFound } from './pages/NotFound';
 
 
 // Lazy loading for pages to reduce initial bundle size
@@ -387,7 +388,7 @@ export function App() {
       <Route path="/activation-licence" element={<Navigate to="/fr/activation-licence" replace />} />
 
       <Route path="/" element={<Navigate to="/fr" replace />} />
-      <Route path="*" element={<Navigate to="/fr" replace />} />
+      <Route path="*" element={<Suspense fallback={<LoadingSpinner />}><NotFound /></Suspense>} />
     </Routes>
   );
 }
