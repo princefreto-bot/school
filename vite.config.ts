@@ -20,10 +20,18 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          gsap: ['gsap'],
-          ui: ['lucide-react', 'recharts']
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor';
+            }
+            if (id.includes('gsap')) {
+              return 'gsap';
+            }
+            if (id.includes('lucide-react') || id.includes('recharts')) {
+              return 'ui';
+            }
+          }
         }
       }
     }
