@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useStore } from '../../store/useStore';
 import { parentApi } from '../../services/parentApi';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
     CreditCard, Wallet, TrendingUp, Loader2, AlertCircle, UserPlus,
     Search, GraduationCap, X, Megaphone, AlertTriangle, Info, Bell, MessageSquare,
-    FileText
+    FileText, Play
 } from 'lucide-react';
 import { LinkStudentModal } from '../../components/LinkStudentModal';
 import { SupportModal } from '../../components/SupportModal';
@@ -61,6 +62,8 @@ const IMP_STYLES = {
 export const ParentDashboard: React.FC = () => {
     const user = useStore((s) => s.user);
     const children = useStore((s) => s.students);
+    const navigate = useNavigate();
+    const { lang = 'fr' } = useParams<{ lang?: string }>();
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
@@ -270,6 +273,15 @@ export const ParentDashboard: React.FC = () => {
                                     {unseenCount > 9 ? '9+' : unseenCount}
                                 </span>
                             )}
+                        </button>
+
+                        {/* Bouton Kids Place */}
+                        <button
+                            onClick={() => navigate(`/${lang}/parent/kids-place`)}
+                            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-400 to-pink-500 hover:from-amber-500 hover:to-pink-600 text-white rounded-2xl shadow-lg shadow-pink-500/20 transition-all font-bold text-sm"
+                        >
+                            <Play className="w-4 h-4" />
+                            🎬 Kids Place
                         </button>
 
                         <button

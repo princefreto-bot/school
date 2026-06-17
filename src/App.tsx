@@ -44,6 +44,7 @@ const ParentBadges = lazy(() => import('./pages/parent/ParentBadges').then(m => 
 const ParentMessages = lazy(() => import('./pages/parent/ParentMessages').then(m => ({ default: m.ParentMessages })));
 const ParentNotes = lazy(() => import('./pages/parent/ParentNotes').then(m => ({ default: m.ParentNotes })));
 const ParentCourses = lazy(() => import('./pages/parent/ParentCourses').then(m => ({ default: m.ParentCourses })));
+const KidsPlace = lazy(() => import('./pages/parent/KidsPlace').then(m => ({ default: m.KidsPlace })));
 const ParentsList = lazy(() => import('./pages/ParentsList').then(m => ({ default: m.ParentsList })));
 const ImportExport = lazy(() => import('./components/ImportExport').then(m => ({ default: m.ImportExport })));
 const ChatWindow = lazy(() => import('./components/ChatWindow').then(m => ({ default: m.ChatWindow })));
@@ -334,6 +335,14 @@ export function App() {
         } 
       />
       <Route path="/:lang/parent/courses" element={<Navigate to="/parent/exercices" replace />} />
+      <Route 
+        path="/:lang/parent/kids-place" 
+        element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <KidsPlace />
+          </Suspense>
+        } 
+      />
       <Route path="/:lang/confirmer-email" element={<ConfirmerEmail />} />
       <Route path="/:lang/portail-ecole" element={<PortailEcole />} />
       <Route path="/:lang/creer-compte" element={<CreerCompte />} />

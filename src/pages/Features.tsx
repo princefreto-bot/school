@@ -1,287 +1,511 @@
 // ============================================================
-// PAGE FONCTIONNALITÉS (FEATURES) — Premium, Interactive Layout
+// PAGE FONCTIONNALITÉS — Layout alterné Image / Description
+// Animations au défilement via IntersectionObserver
 // ============================================================
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { 
-  CreditCard, BookOpen, QrCode, Users, 
-  Settings, ArrowLeft, ArrowRight, CheckCircle2, ShieldCheck, 
-  MessageSquare, UserCheck
+import {
+  ArrowLeft, ArrowRight,
+  Users, CreditCard, SearchCheck,
+  FolderOpen, History, MessageSquare,
+  Megaphone, Database, Settings, CreditCard as CardIcon
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
-import { StickerStar, StickerHeart, StickerCurvedArrow, StickerWave, StickerCheck, StickerNote, StickerCircle, StickerSparkle, StickerBang } from '../components/Stickers';
 
+// ── Définition des 10 fonctionnalités ──────────────────────
+const featuresFr = [
+  {
+    image: '/DASH4.png',
+    icon: Users,
+    color: '#F59E0B',
+    title: 'Gestion des Comptes Parents',
+    badge: 'Espace Famille',
+    description:
+      'Offrez aux parents un accès sécurisé et personnalisé à toutes les informations de leurs enfants. Consultez les notes, les absences, les paiements et les communications directement depuis leur espace dédié, disponible 24h/24 sur mobile et ordinateur.',
+    points: [
+      'Tableau de bord parent en temps réel',
+      'Suivi des notes et moyennes par matière',
+      'Historique des présences et absences',
+      'Notifications push instantanées',
+    ],
+  },
+  {
+    image: '/DASH5.png',
+    icon: CreditCard,
+    color: '#10B981',
+    title: 'Gestion des Paiements',
+    badge: 'Finance',
+    description:
+      'Centralisez et automatisez toute la comptabilité scolaire. Enregistrez les règlements en espèces, Mobile Money ou virement bancaire, générez des reçus PDF en quelques secondes et suivez les impayés par élève avec un tableau de bord clair.',
+    points: [
+      'Enregistrement multi-modes de paiement',
+      'Génération de reçus PDF instantanés',
+      'Suivi des tranches et impayés',
+      'Export Excel/CSV des rapports financiers',
+    ],
+  },
+  {
+    image: '/DASH6.png',
+    icon: SearchCheck,
+    color: '#3B82F6',
+    title: 'Vérification des Informations Élève',
+    badge: 'Sécurité',
+    description:
+      'Accédez instantanément à la fiche complète de chaque élève. Vérifiez l\'identité, les informations médicales, les contacts d\'urgence et le dossier académique complet en moins de 5 secondes grâce au scan QR ou à la recherche rapide.',
+    points: [
+      'Scan QR Code pour accès instantané',
+      'Fiche élève complète avec photo',
+      'Informations médicales et contacts d\'urgence',
+      'Historique académique consolidé',
+    ],
+  },
+  {
+    image: '/DASH8.png',
+    icon: FolderOpen,
+    color: '#8B5CF6',
+    title: 'Centre de Documents',
+    badge: 'Bibliothèque',
+    description:
+      'Stockez, organisez et partagez tous les documents scolaires en un seul endroit sécurisé. Autorisations de sortie, certificats de scolarité, manuels numériques et ressources pédagogiques accessibles par les parents et les enseignants en un clic.',
+    points: [
+      'Stockage sécurisé de tous les documents',
+      'Partage direct avec parents et enseignants',
+      'Certificats et autorisations numériques',
+      'Bibliothèque de ressources pédagogiques',
+    ],
+  },
+  {
+    image: '/DASH10.png',
+    icon: History,
+    color: '#F97316',
+    title: 'Historiques & Activités',
+    badge: 'Traçabilité',
+    description:
+      'Gardez une trace complète de toutes les activités : entrées/sorties, paiements effectués, messages échangés, documents téléchargés et modifications de données. Un journal d\'audit horodaté pour une transparence totale de la gestion scolaire.',
+    points: [
+      'Journal d\'audit complet et horodaté',
+      'Historique des entrées et sorties',
+      'Traçabilité des paiements et transactions',
+      'Export des logs pour vérification externe',
+    ],
+  },
+  {
+    image: '/DASH11.png',
+    icon: MessageSquare,
+    color: '#06B6D4',
+    title: 'Messagerie Intégrée',
+    badge: 'Communication',
+    description:
+      'Facilitez la communication entre l\'école et les familles grâce à une messagerie sécurisée et bidirectionnelle. Les parents, enseignants et administrateurs échangent directement sans passer par des applications externes, tout est centralisé.',
+    points: [
+      'Messagerie sécurisée bidirectionnelle',
+      'Conversations parents-administration',
+      'Messagerie enseignant-direction',
+      'Notifications push instantanées',
+    ],
+  },
+  {
+    image: '/DASH12.png',
+    icon: Megaphone,
+    color: '#EC4899',
+    title: 'Annonces & Actualités',
+    badge: 'Information',
+    description:
+      'Diffusez vos annonces scolaires à tous les parents en quelques secondes. Réunions parents-profs, fermetures exceptionnelles, événements scolaires ou informations urgentes : chaque message est délivré par notification push et visible dans l\'application.',
+    points: [
+      'Diffusion massive en un clic',
+      'Notifications push urgentes',
+      'Ciblage par classe ou groupe',
+      'Historique des annonces publiées',
+    ],
+  },
+  {
+    image: '/DASH13.png',
+    icon: Database,
+    color: '#14B8A6',
+    title: 'Base de Données Centralisée',
+    badge: 'Données',
+    description:
+      'Toutes les données de votre établissement réunies dans une base sécurisée et structurée. Élèves, enseignants, classes, matières, coefficients — gérez tout depuis un tableau de bord unique sans duplication ni perte d\'information.',
+    points: [
+      'Données centralisées et structurées',
+      'Gestion des élèves, classes, matières',
+      'Import/Export de données en masse',
+      'Sauvegardes automatiques quotidiennes',
+    ],
+  },
+  {
+    image: '/DASH14.png',
+    icon: Settings,
+    color: '#6366F1',
+    title: 'Paramètres du Système',
+    badge: 'Configuration',
+    description:
+      'Configurez votre établissement à votre image sans intervention technique. Définissez les années académiques, les cycles scolaires, les coefficients, les tranches de paiement et les permissions d\'accès de chaque rôle utilisateur.',
+    points: [
+      'Configuration des années académiques',
+      'Gestion des rôles et permissions',
+      'Paramètres des tranches de paiement',
+      'Personnalisation des coefficients',
+    ],
+  },
+  {
+    image: '/DASH15.png',
+    icon: CardIcon,
+    color: '#F59E0B',
+    title: 'Carte Scolaire Numérique',
+    badge: 'Identité',
+    description:
+      'Générez automatiquement des cartes d\'identité scolaires numériques avec photo passeport, QR Code unique crypté et toutes les informations de l\'élève. Compatible avec le système de contrôle d\'accès QR pour les entrées et sorties.',
+    points: [
+      'Génération automatique avec photo',
+      'QR Code unique crypté par élève',
+      'Compatible scan entrée/sortie',
+      'Format numérique et imprimable',
+    ],
+  },
+];
+
+const featuresEn = [
+  {
+    image: '/DASH4.png',
+    icon: Users,
+    color: '#F59E0B',
+    title: 'Parent Account Management',
+    badge: 'Family Portal',
+    description:
+      'Give parents secure, personalized access to all their children\'s information. View grades, absences, payments, and communications directly from their dedicated space, available 24/7 on mobile and desktop.',
+    points: [
+      'Real-time parent dashboard',
+      'Track grades and averages by subject',
+      'Attendance and absence history',
+      'Instant push notifications',
+    ],
+  },
+  {
+    image: '/DASH5.png',
+    icon: CreditCard,
+    color: '#10B981',
+    title: 'Payment Management',
+    badge: 'Finance',
+    description:
+      'Centralize and automate all school accounting. Record payments in cash, Mobile Money, or bank transfer, generate PDF receipts in seconds, and track outstanding balances per student with a clear dashboard.',
+    points: [
+      'Multi-mode payment recording',
+      'Instant PDF receipt generation',
+      'Installment and unpaid tracking',
+      'Excel/CSV financial report export',
+    ],
+  },
+  {
+    image: '/DASH6.png',
+    icon: SearchCheck,
+    color: '#3B82F6',
+    title: 'Student Information Verification',
+    badge: 'Security',
+    description:
+      'Instantly access each student\'s complete profile. Verify identity, medical information, emergency contacts, and full academic record in under 5 seconds via QR scan or quick search.',
+    points: [
+      'QR Code scan for instant access',
+      'Complete student profile with photo',
+      'Medical info and emergency contacts',
+      'Consolidated academic history',
+    ],
+  },
+  {
+    image: '/DASH8.png',
+    icon: FolderOpen,
+    color: '#8B5CF6',
+    title: 'Document Center',
+    badge: 'Library',
+    description:
+      'Store, organize, and share all school documents in one secure place. Exit authorizations, enrollment certificates, digital textbooks, and educational resources accessible by parents and teachers in one click.',
+    points: [
+      'Secure storage for all documents',
+      'Direct sharing with parents & teachers',
+      'Digital certificates and authorizations',
+      'Educational resource library',
+    ],
+  },
+  {
+    image: '/DASH10.png',
+    icon: History,
+    color: '#F97316',
+    title: 'History & Activity Logs',
+    badge: 'Traceability',
+    description:
+      'Keep a complete trace of all activities: entries/exits, payments made, messages exchanged, documents downloaded, and data modifications. A timestamped audit log for total transparency in school management.',
+    points: [
+      'Complete timestamped audit log',
+      'Entry and exit history',
+      'Payment and transaction traceability',
+      'Export logs for external verification',
+    ],
+  },
+  {
+    image: '/DASH11.png',
+    icon: MessageSquare,
+    color: '#06B6D4',
+    title: 'Integrated Messaging',
+    badge: 'Communication',
+    description:
+      'Facilitate communication between the school and families with secure, bidirectional messaging. Parents, teachers, and administrators communicate directly without external apps — everything is centralized.',
+    points: [
+      'Secure bidirectional messaging',
+      'Parent-administration conversations',
+      'Teacher-management messaging',
+      'Instant push notifications',
+    ],
+  },
+  {
+    image: '/DASH12.png',
+    icon: Megaphone,
+    color: '#EC4899',
+    title: 'Announcements & News',
+    badge: 'Information',
+    description:
+      'Broadcast school announcements to all parents in seconds. Parent-teacher meetings, exceptional closures, school events, or urgent information — every message is delivered via push notification and visible in the app.',
+    points: [
+      'Mass broadcast in one click',
+      'Urgent push notifications',
+      'Target by class or group',
+      'History of published announcements',
+    ],
+  },
+  {
+    image: '/DASH13.png',
+    icon: Database,
+    color: '#14B8A6',
+    title: 'Centralized Database',
+    badge: 'Data',
+    description:
+      'All your institution\'s data in a secure, structured database. Students, teachers, classes, subjects, coefficients — manage everything from a single dashboard with no duplication or data loss.',
+    points: [
+      'Centralized and structured data',
+      'Manage students, classes, subjects',
+      'Bulk data import/export',
+      'Automatic daily backups',
+    ],
+  },
+  {
+    image: '/DASH14.png',
+    icon: Settings,
+    color: '#6366F1',
+    title: 'System Settings',
+    badge: 'Configuration',
+    description:
+      'Configure your institution to your needs without any technical assistance. Set up academic years, school cycles, coefficients, payment installments, and access permissions for each user role.',
+    points: [
+      'Academic year configuration',
+      'Role and permission management',
+      'Payment installment settings',
+      'Coefficient customization',
+    ],
+  },
+  {
+    image: '/DASH15.png',
+    icon: CardIcon,
+    color: '#F59E0B',
+    title: 'Digital School ID Card',
+    badge: 'Identity',
+    description:
+      'Automatically generate digital school ID cards with a passport photo, unique encrypted QR Code, and all student information. Compatible with the QR access control system for entry and exit.',
+    points: [
+      'Automatic generation with photo',
+      'Unique encrypted QR Code per student',
+      'Compatible with entry/exit scan',
+      'Digital and printable format',
+    ],
+  },
+];
+
+// ── Composant FeatureRow ─────────────────────────────────────
+interface FeatureRowProps {
+  feature: (typeof featuresFr)[0];
+  index: number;
+  isReversed: boolean;
+}
+
+const FeatureRow: React.FC<FeatureRowProps> = ({ feature, index, isReversed }) => {
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add('feat-visible');
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const Icon = feature.icon;
+
+  return (
+    <div
+      ref={rowRef}
+      className={`feat-row ${isReversed ? 'feat-row--reversed' : ''}`}
+      style={{ '--feat-color': feature.color } as React.CSSProperties}
+    >
+      {/* ── Image Side ── */}
+      <div className="feat-image-wrap">
+        <div className="feat-image-inner">
+          {/* Badge numéro */}
+          <div className="feat-number">
+            {String(index + 1).padStart(2, '0')}
+          </div>
+          <img
+            src={feature.image}
+            alt={feature.title}
+            className="feat-image"
+            loading="lazy"
+          />
+          {/* Glow effect */}
+          <div className="feat-image-glow" style={{ background: `${feature.color}20` }} />
+        </div>
+      </div>
+
+      {/* ── Text Side ── */}
+      <div className="feat-text-wrap">
+        {/* Badge */}
+        <div className="feat-badge" style={{ color: feature.color, borderColor: `${feature.color}30`, background: `${feature.color}10` }}>
+          <Icon size={13} />
+          <span>{feature.badge}</span>
+        </div>
+
+        {/* Title */}
+        <h2 className="feat-title">{feature.title}</h2>
+
+        {/* Description */}
+        <p className="feat-description">{feature.description}</p>
+
+        {/* Points */}
+        <ul className="feat-points">
+          {feature.points.map((point, i) => (
+            <li key={i} className="feat-point">
+              <span className="feat-point-dot" style={{ background: feature.color }} />
+              <span>{point}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+// ── Page principale ──────────────────────────────────────────
 export const Features: React.FC = () => {
   const navigate = useNavigate();
   const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
 
+  const features = lang === 'en' ? featuresEn : featuresFr;
+
   const texts = {
     fr: {
-      back: "Accueil",
-      badge: "⚙️ Fonctionnalités",
-      title: "Une suite d'outils complète pour votre école",
-      subtitle: "Découvrez comment DGhubSchool modernise la gestion académique, comptable et la sécurité de votre établissement.",
-      moreFeatures: "Et bien plus encore",
-      moreFeaturesSub: "Des petits détails qui font une grande différence au quotidien.",
-      ctaTitle: "Prêt à franchir le pas ?",
-      ctaDesc: "Activez votre portail et commencez à digitaliser votre école dès aujourd'hui.",
-      ctaBtn: "Démarrer mon essai de 60 jours",
-      securityMax: "Sécurité Maximale",
-      securityMaxDesc: "Sauvegardes quotidiennes et cryptage des données financières.",
-      emailsSms: "E-mails & SMS",
-      emailsSmsDesc: "Alertes automatiques pour relancer les paiements ou envoyer les bulletins.",
-      trombi: "Trombinoscope",
-      trombiDesc: "Fiches élèves complètes avec photo d'identité passeport.",
-      easyConfig: "Configuration simple",
-      easyConfigDesc: "Ajoutez vos classes, matières et coefficients en quelques clics."
+      back: 'Accueil',
+      badge: '⚙️ Fonctionnalités',
+      title: 'Tout ce dont votre école a besoin',
+      subtitle: 'Découvrez comment DGhubSchool modernise chaque aspect de la gestion scolaire — de la scolarité aux paiements, en passant par la sécurité et la communication.',
+      ctaTitle: 'Prêt à transformer votre école ?',
+      ctaDesc: 'Démarrez votre essai gratuit de 60 jours et découvrez toutes ces fonctionnalités en action.',
+      ctaBtn: 'Démarrer mon essai gratuit',
     },
     en: {
-      back: "Home",
-      badge: "⚙️ Features",
-      title: "A complete suite of tools for your school",
-      subtitle: "Discover how DGhubSchool modernizes academic, accounting, and security management in your establishment.",
-      moreFeatures: "And much more",
-      moreFeaturesSub: "Small details that make a big difference on a daily basis.",
-      ctaTitle: "Ready to take the leap?",
-      ctaDesc: "Activate your portal and start digitalizing your school today.",
-      ctaBtn: "Start my 60-day trial",
-      securityMax: "Maximum Security",
-      securityMaxDesc: "Daily backups and encryption of financial data.",
-      emailsSms: "Emails & SMS",
-      emailsSmsDesc: "Automatic alerts to follow up payments or send report cards.",
-      trombi: "Student Directory",
-      trombiDesc: "Complete student profiles with passport ID photo.",
-      easyConfig: "Simple Configuration",
-      easyConfigDesc: "Add your classes, subjects, and coefficients in a few clicks."
-    }
+      back: 'Home',
+      badge: '⚙️ Features',
+      title: 'Everything your school needs',
+      subtitle: 'Discover how DGhubSchool modernizes every aspect of school management — from academics and payments to security and communication.',
+      ctaTitle: 'Ready to transform your school?',
+      ctaDesc: 'Start your free 60-day trial and discover all these features in action.',
+      ctaBtn: 'Start my free trial',
+    },
   };
 
-  const t = texts[lang];
-
-  const categories = [
-    {
-      title: lang === 'fr' ? "Gestion Financière & Scolarité" : "Financial Management & Tuition",
-      subtitle: lang === 'fr' ? "Simplifiez le suivi de la scolarité et de la caisse" : "Simplify tuition and cash tracking",
-      icon: <CreditCard className="w-6 h-6 text-amber-500" />,
-      items: lang === 'fr' ? [
-        "Enregistrement instantané des règlements (espèces, chèques, Mobile Money, virements bancaires) avec horodatage automatique et reçu PDF généré en temps réel",
-        "Envoi automatique de reçus de caisse numériques par SMS au numéro du parent dès validation du paiement — délai moyen : moins de 3 secondes",
-        "Tableau de suivi des tranches impayées par élève avec relance en un clic (SMS ou notification push au parent)",
-        "Journal de caisse quotidien alimenté automatiquement + export Excel/CSV des rapports financiers mensuels et trimestriels"
-      ] : [
-        "Instant recording of payments (cash, checks, Mobile Money, bank transfers) with automatic timestamping and real-time PDF receipt generation",
-        "Automatic sending of digital cash receipts via SMS to parent's number upon payment validation — average delay: under 3 seconds",
-        "Per-student unpaid installment tracking dashboard with one-click follow-up (SMS or push notification to parent)",
-        "Auto-fed daily cash journal + Excel/CSV export of monthly and quarterly financial reports"
-      ],
-      className: "bg-slate-50 border-slate-200"
-    },
-    {
-      title: lang === 'fr' ? "Gestion Académique & Bulletins" : "Academic Management & Report Cards",
-      subtitle: lang === 'fr' ? "Fini les calculs manuels et les erreurs de saisie" : "No more manual calculations and entry errors",
-      icon: <BookOpen className="w-6 h-6 text-amber-500" />,
-      items: lang === 'fr' ? [
-        "Portail enseignant ultra-léger : saisie des notes depuis n'importe quel smartphone ou PC, même en connexion 2G/3G",
-        "Calcul automatique des moyennes pondérées par coefficient, rangs de classe et appréciations personnalisées de chaque enseignant",
-        "Génération en un clic des bulletins de notes au format PDF officiel conforme DRE — prêts à imprimer ou envoyer en lot par SMS/email",
-        "Configuration libre des matières, coefficients, classes et groupes pédagogiques sans intervention technique"
-      ] : [
-        "Ultra-lightweight teacher portal: grade entry from any smartphone or PC, even on 2G/3G connection",
-        "Automatic weighted average calculation by coefficient, class rankings, and personalized remarks from each teacher",
-        "One-click generation of report cards in official DRE-compliant PDF format — ready to print or batch send via SMS/email",
-        "Free configuration of subjects, coefficients, classes, and teaching groups without technical intervention"
-      ],
-      className: "bg-slate-50 border-slate-200"
-    },
-    {
-      title: lang === 'fr' ? "Sécurité & Présences QR Code" : "Security & QR Code Attendances",
-      subtitle: lang === 'fr' ? "Tranquillité d'esprit pour l'école et les familles" : "Peace of mind for school and families",
-      icon: <QrCode className="w-6 h-6 text-amber-500" />,
-      items: lang === 'fr' ? [
-        "Génération automatique de cartes d'identité scolaires personnalisées avec photo passeport, nom, classe et QR Code unique crypté",
-        "Application de scan intégrée : l'agent de sécurité scanne la carte à l'entrée et à la sortie — enregistrement en moins de 2 secondes",
-        "Notification SMS/Push envoyée instantanément au parent à chaque scan (arrivée + départ) avec l'heure exacte et le nom de l'élève",
-        "Historique complet d'assiduité consultable 24h/24 par l'administration et les parents : retards, absences, heures d'arrivée/départ"
-      ] : [
-        "Automatic generation of personalized school ID cards with passport photo, name, class, and unique encrypted QR Code",
-        "Integrated scanning app: the security agent scans the card at entry and exit — registration in under 2 seconds",
-        "SMS/Push notification sent instantly to the parent on each scan (arrival + departure) with exact time and student name",
-        "Complete 24/7 attendance history accessible by administration and parents: delays, absences, arrival/departure times"
-      ],
-      className: "bg-slate-50 border-slate-200"
-    },
-    {
-      title: lang === 'fr' ? "Espace Parents & Communication" : "Parent Portal & Communication",
-      subtitle: lang === 'fr' ? "Rapprochez l'école des familles au quotidien" : "Bring the school closer to families daily",
-      icon: <Users className="w-6 h-6 text-amber-500" />,
-      items: lang === 'fr' ? [
-        "Accès mobile pour consulter en temps réel les notes, moyennes pondérées, retards et absences de chaque enfant",
-        "Messagerie bidirectionnelle sécurisée : les parents échangent avec l'administration et la vie scolaire directement depuis l'application",
-        "Panneau d'annonces avec notifications urgentes push : fermeture exceptionnelle, réunion parents-profs, événements scolaires",
-        "Consultation des documents numérisés (autorisations, certificats), accès à la bibliothèque d'exercices et eBooks intégrés"
-      ] : [
-        "Mobile access to check in real time grades, weighted averages, delays, and absences for each child",
-        "Secure bidirectional messaging: parents exchange with administration and school life staff directly from the app",
-        "Announcement board with urgent push notifications: exceptional closures, parent-teacher meetings, school events",
-        "Access to digitized documents (permissions, certificates), integrated exercise library and eBooks"
-      ],
-      className: "bg-slate-50 border-slate-200"
-    },
-    {
-      title: lang === 'fr' ? "Ressources Éducatives & Révisions Gratuites" : "Educational Resources & Free Revisions",
-      subtitle: lang === 'fr' ? "Des alternatives scolaires d'excellence intégrées pour s'entraîner à la maison" : "Integrated excellent academic alternatives to practice at home",
-      icon: <BookOpen className="w-6 h-6 text-emerald-600 animate-pulse" />,
-      items: lang === 'fr' ? [
-        "Sésamath : Fiches et manuels de mathématiques conformes aux programmes francophones",
-        "Khan Academy : Vidéos courtes, leçons claires et parcours d'exercices gratuits",
-        "Bibliothèque Romande : Livres classiques et lectures scolaires en accès libre (PDF/EPUB)",
-        "Quiz Interactifs : Exercices locaux et tests de niveau intégrés pour stimuler l'élève"
-      ] : [
-        "Sesamath: Math worksheets and textbooks conforming to francophone curricula",
-        "Khan Academy: Short videos, clear lessons, and free exercise pathways",
-        "Bibliothèque Romande: Classic books and free access school readings (PDF/EPUB)",
-        "Interactive Quizzes: Integrated local exercises and level tests to stimulate the student"
-      ],
-      className: "md:col-span-2 bg-emerald-50/40 border-emerald-200/60 dark:bg-emerald-950/5 dark:border-emerald-900/30"
-    }
-  ];
+  const t = texts[lang] ?? texts.fr;
 
   return (
-    <div className="min-h-screen bg-white text-slate-800 font-['Poppins'] relative overflow-hidden flex flex-col">
-      {/* Background decoration */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
-
-      {/* Navigation Header */}
-      <header className="relative z-50 border-b border-slate-100 bg-white/80 backdrop-blur-md">
-        <nav className="w-full flex items-center justify-between p-4 md:px-8">
-          <div className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl select-none cursor-pointer" onClick={() => navigate(`/${lang}`)}>
-            <img src="/logo.svg" className="w-8 h-8 object-contain" alt="Logo" />
-            <span className="text-amber-500">DGhub<span className="text-slate-900">School</span></span>
-          </div>
-          <button 
-            onClick={() => navigate(`/${lang}`)} 
-            className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-amber-500 transition-colors uppercase tracking-wider"
+    <div className="features-page">
+      {/* ── Header ── */}
+      <header className="features-header">
+        <nav className="features-nav">
+          <div
+            className="features-logo"
+            onClick={() => navigate(`/${lang}`)}
           >
-            <ArrowLeft className="w-4 h-4" />
+            <img src="/logo.svg" className="w-8 h-8 object-contain" alt="Logo" />
+            <span className="text-amber-500 font-black text-xl">DGhub<span className="text-slate-900">School</span></span>
+          </div>
+          <button
+            onClick={() => navigate(`/${lang}`)}
+            className="features-back-btn"
+          >
+            <ArrowLeft size={16} />
             <span>{t.back}</span>
           </button>
         </nav>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative z-10 max-w-4xl mx-auto px-4 pt-16 pb-12 text-center">
-        {/* Stickers décoratifs Hero */}
-        <StickerStar className="absolute top-20 left-4 hidden md:block" style={{ transform: 'rotate(-8deg)', opacity: 0.6 }} />
-        <StickerCurvedArrow className="absolute top-28 right-8 hidden lg:block" style={{ transform: 'rotate(10deg) scaleX(-1)' }} />
-        <StickerSparkle className="absolute bottom-4 left-[20%] hidden md:block" />
-
-        <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
-          {t.badge}
-        </div>
-        <h1 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight mb-6">
-          {t.title}
-        </h1>
-        <p className="text-sm md:text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto font-medium">
-          {t.subtitle}
-        </p>
-      </section>
-
-      {/* Feature Showcase Grid */}
-      <section className="relative z-10 max-w-6xl mx-auto px-4 pb-20">
-        {/* Stickers décoratifs Grid */}
-        <StickerHeart className="absolute top-12 right-4 hidden md:block" style={{ transform: 'rotate(15deg)', opacity: 0.4 }} />
-        <StickerWave className="absolute bottom-24 left-4 hidden lg:block" />
-        <StickerNote className="absolute top-1/3 right-2 hidden xl:block" style={{ transform: 'rotate(2deg)' }}>
-          {lang === 'fr' ? 'Fini le papier ✨' : 'No more paper ✨'}
-        </StickerNote>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {categories.map((cat, idx) => (
-            <div key={idx} className={`p-8 rounded-3xl border shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between ${cat.className}`}>
-              <div className="flex items-center gap-4 mb-6">
-                <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
-                  {cat.icon}
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-slate-950 uppercase tracking-tight leading-none mb-1">
-                    {cat.title}
-                  </h3>
-                  <span className="text-xs text-slate-400 font-medium">{cat.subtitle}</span>
-                </div>
-              </div>
-
-              <ul className="space-y-4">
-                {cat.items.map((item, itemIdx) => (
-                  <li key={itemIdx} className="flex items-start gap-3 text-xs text-slate-600 leading-relaxed font-medium">
-                    <CheckCircle2 className="w-4.5 h-4.5 text-amber-500 shrink-0 mt-0.5" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Extra Features Section (Bento sub-items) */}
-      <section className="bg-slate-950 text-white py-20 border-t border-slate-900 relative">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-        {/* Stickers */}
-        <StickerCircle className="absolute top-16 left-8 hidden md:block" style={{ opacity: 0.3 }} />
-        <StickerBang className="absolute bottom-20 right-12 hidden lg:block" style={{ opacity: 0.3 }} />
-
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16 space-y-4">
-            <h3 className="text-2xl md:text-4xl font-black uppercase tracking-tight">
-              {t.moreFeatures}
-            </h3>
-            <p className="text-xs md:text-sm text-slate-400 max-w-md mx-auto font-medium">
-              {t.moreFeaturesSub}
-            </p>
+      {/* ── Hero ── */}
+      <section className="features-hero">
+        <div className="features-hero-inner">
+          <div className="features-hero-badge">
+            {t.badge}
           </div>
+          <h1 className="features-hero-title">{t.title}</h1>
+          <p className="features-hero-subtitle">{t.subtitle}</p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: <ShieldCheck className="w-6 h-6 text-amber-500" />, t: t.securityMax, d: t.securityMaxDesc },
-              { icon: <MessageSquare className="w-6 h-6 text-amber-500" />, t: t.emailsSms, d: t.emailsSmsDesc },
-              { icon: <UserCheck className="w-6 h-6 text-amber-500" />, t: t.trombi, d: t.trombiDesc },
-              { icon: <Settings className="w-6 h-6 text-amber-500" />, t: t.easyConfig, d: t.easyConfigDesc }
-            ].map((extra, idx) => (
-              <div key={idx} className="bg-slate-900 border border-slate-800 p-6 rounded-2xl text-center space-y-3">
-                <div className="p-3 bg-white/5 rounded-xl inline-block">{extra.icon}</div>
-                <h4 className="text-xs font-black uppercase tracking-wider">{extra.t}</h4>
-                <p className="text-[10px] text-slate-400 leading-relaxed font-medium">{extra.d}</p>
-              </div>
-            ))}
+          {/* Scroll indicator */}
+          <div className="features-scroll-indicator">
+            <div className="features-scroll-dot" />
+            <span>{lang === 'fr' ? 'Défilez pour explorer' : 'Scroll to explore'}</span>
           </div>
         </div>
+
+        {/* Decorative blobs */}
+        <div className="feat-blob feat-blob-1" />
+        <div className="feat-blob feat-blob-2" />
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-white py-16 text-center relative">
-        {/* Sticker CTA */}
-        <StickerCheck className="absolute top-8 left-[15%] hidden md:block" style={{ transform: 'rotate(10deg)', opacity: 0.6 }} />
-        <StickerStar className="absolute bottom-8 right-[10%] hidden lg:block" style={{ opacity: 0.4 }} />
+      {/* ── Features List ── */}
+      <main className="features-main">
+        {features.map((feature, index) => (
+          <React.Fragment key={index}>
+            <FeatureRow
+              feature={feature}
+              index={index}
+              isReversed={index % 2 !== 0}
+            />
+            {/* Separateur subtil entre les items (sauf dernier) */}
+            {index < features.length - 1 && (
+              <div className="feat-separator" />
+            )}
+          </React.Fragment>
+        ))}
+      </main>
 
-        <div className="max-w-4xl mx-auto px-4 space-y-6">
-          <h2 className="text-2xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
-            {t.ctaTitle}
-          </h2>
-          <p className="text-xs md:text-sm text-slate-400 max-w-md mx-auto font-medium">
-            {t.ctaDesc}
-          </p>
-          <button 
+      {/* ── CTA Section ── */}
+      <section className="features-cta-section">
+        <div className="features-cta-inner">
+          <h2 className="features-cta-title">{t.ctaTitle}</h2>
+          <p className="features-cta-desc">{t.ctaDesc}</p>
+          <button
             onClick={() => navigate(`/${lang}/creer-compte`)}
-            className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all inline-flex items-center gap-2 cursor-pointer"
+            className="features-cta-btn"
           >
-            {t.ctaBtn}
-            <ArrowRight className="w-4 h-4" />
+            <span>{t.ctaBtn}</span>
+            <ArrowRight size={18} />
           </button>
         </div>
+        <div className="feat-blob feat-blob-cta" />
       </section>
 
-      {/* ── FOOTER UNIFIÉ ── */}
       <Footer />
     </div>
   );
