@@ -11,7 +11,6 @@ import {
 import { School } from '../../types';
 import { API_BASE_URL } from '../../config';
 import { useStore } from '../../store/useStore';
-import gsap from 'gsap';
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -502,20 +501,6 @@ export const SuperAdminDashboard: React.FC = () => {
 
   useEffect(() => { loadAll(); }, [loadAll]);
 
-  // GSAP Entrance Animation
-  useEffect(() => {
-    if (!loading) {
-      const tl = gsap.timeline();
-      tl.from('.sa-animate-in', {
-        y: 40,
-        opacity: 0,
-        duration: 0.7,
-        stagger: 0.1,
-        ease: 'power3.out',
-      }, 0.1);
-    }
-  }, [loading, activeTab]);
-
   const handleApproveToggle = async (school: SchoolWithStats, approved: boolean) => {
     const action = approved ? 'approuver' : 'désapprouver';
     if (!confirm(`Voulez-vous ${action} "${school.name}" ?`)) return;
@@ -667,85 +652,75 @@ export const SuperAdminDashboard: React.FC = () => {
   }
 
   return (
-    <>
-      <div className="guides">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className="col" />
-        ))}
-      </div>
-      <div className="grid-wrap pb-20">
-        {/* En-tête */}
-        <div className="band sa-animate-in mt-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="space-y-8 max-w-[1600px] mx-auto pb-20">
+      {/* En-tête */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="flex items-center gap-5 relative z-10">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shrink-0 shadow-[0_0_30px_rgba(124,58,237,0.3)]">
-                <Star className="w-8 h-8 text-white fill-white/20" />
-              </div>
-              <div>
-                <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight uppercase">SuperAdmin Global</h1>
-                <p className="text-slate-400 text-sm sm:text-base font-medium mt-1">Plateforme SaaS — Contrôle & Gestion centralisée</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 relative z-10">
-              <button onClick={loadAll}
-                className="p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-slate-700/50 hover:shadow-lg"
-                title="Actualiser">
-                <RefreshCw className="w-5 h-5" />
-              </button>
-              
-              {activeTab === 'schools' ? (
-                <button onClick={() => setShowCreateModal(true)}
-                  className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black transition-all shadow-[0_8px_20px_-6px_rgba(245,158,11,0.4)] border border-amber-500/30 hover:scale-[1.02] active:scale-[0.98]">
-                  <Plus className="w-5 h-5 shrink-0" />
-                  <span className="whitespace-nowrap">Nouvelle école</span>
-                </button>
-              ) : (
-                <button onClick={() => setShowCreateCreatorModal(true)}
-                  className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black transition-all shadow-[0_8px_20px_-6px_rgba(245,158,11,0.4)] border border-amber-500/30 hover:scale-[1.02] active:scale-[0.98]">
-                  <Plus className="w-5 h-5 shrink-0" />
-                  <span className="whitespace-nowrap">Nouveau Créateur</span>
-                </button>
-              )}
-            </div>
+        <div className="flex items-center gap-5 relative z-10">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shrink-0 shadow-[0_0_30px_rgba(124,58,237,0.3)]">
+            <Star className="w-8 h-8 text-white fill-white/20" />
+          </div>
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight uppercase">SuperAdmin Global</h1>
+            <p className="text-slate-400 text-sm sm:text-base font-medium mt-1">Plateforme SaaS — Contrôle & Gestion centralisée</p>
           </div>
         </div>
+        
+        <div className="flex items-center gap-3 relative z-10">
+          <button onClick={loadAll}
+            className="p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-slate-700/50 hover:shadow-lg"
+            title="Actualiser">
+            <RefreshCw className="w-5 h-5" />
+          </button>
+          
+          {activeTab === 'schools' ? (
+            <button onClick={() => setShowCreateModal(true)}
+              className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black transition-all shadow-[0_8px_20px_-6px_rgba(245,158,11,0.4)] border border-amber-500/30 hover:scale-[1.02] active:scale-[0.98]">
+              <Plus className="w-5 h-5 shrink-0" />
+              <span className="whitespace-nowrap">Nouvelle école</span>
+            </button>
+          ) : (
+            <button onClick={() => setShowCreateCreatorModal(true)}
+              className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black transition-all shadow-[0_8px_20px_-6px_rgba(245,158,11,0.4)] border border-amber-500/30 hover:scale-[1.02] active:scale-[0.98]">
+              <Plus className="w-5 h-5 shrink-0" />
+              <span className="whitespace-nowrap">Nouveau Créateur</span>
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* ── TABS NAVIGATION ── */}
-      <div className="band sa-animate-in mt-8">
-        <div className="flex gap-2 p-1.5 bg-slate-950 border border-slate-800 rounded-2xl w-fit">
-          <button
-            onClick={() => setActiveTab('schools')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition ${
-              activeTab === 'schools'
-                ? 'bg-slate-800 text-white border border-slate-700'
-                : 'text-slate-500 hover:text-slate-300'
-            }`}
-          >
-            <Building2 className="w-4 h-4" /> Établissements
-          </button>
-          <button
-            onClick={() => setActiveTab('creators')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition ${
-              activeTab === 'creators'
-                ? 'bg-slate-800 text-white border border-slate-700'
-                : 'text-slate-500 hover:text-slate-300'
-            }`}
-          >
-            <Megaphone className="w-4 h-4" /> Partenaires Créateurs
-          </button>
-        </div>
+      <div className="flex gap-2 p-1.5 bg-slate-950 border border-slate-800 rounded-2xl w-fit">
+        <button
+          onClick={() => setActiveTab('schools')}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition ${
+            activeTab === 'schools'
+              ? 'bg-slate-800 text-white border border-slate-700'
+              : 'text-slate-500 hover:text-slate-300'
+          }`}
+        >
+          <Building2 className="w-4 h-4" /> Établissements
+        </button>
+        <button
+          onClick={() => setActiveTab('creators')}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition ${
+            activeTab === 'creators'
+              ? 'bg-slate-800 text-white border border-slate-700'
+              : 'text-slate-500 hover:text-slate-300'
+          }`}
+        >
+          <Megaphone className="w-4 h-4" /> Partenaires Créateurs
+        </button>
       </div>
 
       {/* ── CONTENU ONGLET ÉCOLES ── */}
       {activeTab === 'schools' && (
-        <div className="band mt-8 space-y-6">
+        <div className="space-y-6">
           {/* Stats globales */}
           {stats && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full sa-animate-in">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 {
                   label: 'Total Écoles', value: stats.total_schools, icon: <Building2 className="w-5 h-5" />,
@@ -779,7 +754,7 @@ export const SuperAdminDashboard: React.FC = () => {
           )}
 
           {stats && stats.expired_trials > 0 && (
-            <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-400 w-full sa-animate-in">
+            <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-400">
               <AlertTriangle className="w-5 h-5 shrink-0" />
               <div>
                 <p className="font-bold">{stats.expired_trials} école{stats.expired_trials > 1 ? 's' : ''} en essai expiré</p>
@@ -789,7 +764,7 @@ export const SuperAdminDashboard: React.FC = () => {
           )}
 
           {/* Liste des écoles */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden w-full sa-animate-in">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-slate-800">
               <h2 className="text-lg font-bold text-white">Établissements enregistrés</h2>
               <span className="text-sm text-slate-500">{schools.length} école{schools.length !== 1 ? 's' : ''}</span>
@@ -943,10 +918,10 @@ export const SuperAdminDashboard: React.FC = () => {
 
       {/* ── CONTENU ONGLET CRÉATEURS ── */}
       {activeTab === 'creators' && (
-        <div className="band mt-8 space-y-6">
+        <div className="space-y-6">
           
           {/* Stats Créateurs */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full sa-animate-in">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
               <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-4">
                 <Users className="w-5 h-5" />
@@ -978,7 +953,7 @@ export const SuperAdminDashboard: React.FC = () => {
           </div>
 
           {/* Liste des Créateurs */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden w-full sa-animate-in">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-slate-800">
               <h2 className="text-lg font-bold text-white">Créateurs enregistrés</h2>
               <span className="text-sm text-slate-500">{creators.length} créateur{creators.length !== 1 ? 's' : ''}</span>
@@ -1116,6 +1091,5 @@ export const SuperAdminDashboard: React.FC = () => {
         />
       )}
     </div>
-  </>
   );
 };

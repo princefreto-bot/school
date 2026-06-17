@@ -56,6 +56,7 @@ const APropos = lazy(() => import('./pages/APropos').then(m => ({ default: m.APr
 const Features = lazy(() => import('./pages/Features').then(m => ({ default: m.Features })));
 const Newsroom = lazy(() => import('./pages/Newsroom').then(m => ({ default: m.Newsroom })));
 const HelpCenter = lazy(() => import('./pages/HelpCenter').then(m => ({ default: m.HelpCenter })));
+const ActivationLicence = lazy(() => import('./pages/ActivationLicence').then(m => ({ default: m.ActivationLicence })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-12">
@@ -192,10 +193,10 @@ export function App() {
     if (currentLang !== 'fr' && currentLang !== 'en') return;
 
     const pathWithoutLang = '/' + parts.slice(2).join('/');
-    const publicPaths = ['/', '/login', '/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features', '/newsroom', '/centre-aide', '/mot-de-passe-oublie', '/mot-de-passe-oublie-ecole', '/reset-password'];
+    const publicPaths = ['/', '/login', '/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features', '/newsroom', '/centre-aide', '/mot-de-passe-oublie', '/mot-de-passe-oublie-ecole', '/reset-password', '/activation-licence'];
     
     if (isAuthenticated) {
-      if (['/login', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features'].includes(pathWithoutLang)) {
+      if (['/login', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features', '/activation-licence'].includes(pathWithoutLang)) {
         navigate(`/${currentLang}/`, { replace: true });
       }
     } else {
@@ -343,6 +344,7 @@ export function App() {
       <Route path="/:lang/mot-de-passe-oublie" element={<ForgotPasswordParent />} />
       <Route path="/:lang/mot-de-passe-oublie-ecole" element={<ForgotPasswordSchool />} />
       <Route path="/:lang/reset-password" element={<ResetPassword />} />
+      <Route path="/:lang/activation-licence" element={<Suspense fallback={<LoadingSpinner />}><ActivationLicence /></Suspense>} />
       <Route 
         path="/:lang/login" 
         element={
@@ -382,6 +384,7 @@ export function App() {
       <Route path="/mot-de-passe-oublie" element={<Navigate to="/fr/mot-de-passe-oublie" replace />} />
       <Route path="/mot-de-passe-oublie-ecole" element={<Navigate to="/fr/mot-de-passe-oublie-ecole" replace />} />
       <Route path="/reset-password" element={<Navigate to="/fr/reset-password" replace />} />
+      <Route path="/activation-licence" element={<Navigate to="/fr/activation-licence" replace />} />
 
       <Route path="/" element={<Navigate to="/fr" replace />} />
       <Route path="*" element={<Navigate to="/fr" replace />} />

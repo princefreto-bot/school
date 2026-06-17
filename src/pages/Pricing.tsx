@@ -94,7 +94,7 @@ export const Pricing: React.FC = () => {
       ],
       buttonText: t.activateBtn,
       popular: false,
-      ctaAction: () => navigate(`/${lang}/creer-compte`),
+      ctaAction: () => window.location.href = "https://zwhhrrbi.mychariow.co/prd_g2q3747l/checkout",
       borderColor: "border-slate-200 dark:border-slate-800"
     },
     {
@@ -118,7 +118,7 @@ export const Pricing: React.FC = () => {
       ],
       buttonText: t.activateBtn,
       popular: true,
-      ctaAction: () => navigate(`/${lang}/creer-compte`),
+      ctaAction: () => window.location.href = "https://zwhhrrbi.mychariow.co/prd_j0i0tpq5/checkout",
       borderColor: "border-amber-500 shadow-amber-500/10 shadow-lg"
     },
     {
@@ -142,7 +142,7 @@ export const Pricing: React.FC = () => {
       ],
       buttonText: t.activateBtn,
       popular: false,
-      ctaAction: () => navigate(`/${lang}/creer-compte`),
+      ctaAction: () => window.location.href = "https://zwhhrrbi.mychariow.co/prd_8m8dqral/checkout",
       borderColor: "border-slate-200 dark:border-slate-800"
     },
     {
@@ -191,7 +191,7 @@ export const Pricing: React.FC = () => {
       "Bidirectional internal messaging with school life staff"
     ],
     buttonText: t.parentPlanBtn,
-    ctaAction: () => navigate(`/${lang}/login`)
+    ctaAction: () => window.location.href = "https://zwhhrrbi.mychariow.co/prd_u611otjw/checkout"
   };
 
   const packs = [
