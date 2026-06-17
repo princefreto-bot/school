@@ -5,11 +5,20 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Check, HelpCircle, ArrowLeft, Landmark, Users } from 'lucide-react';
 import { Footer } from '../components/Footer';
+import gsap from 'gsap';
 
 export const Pricing: React.FC = () => {
   const navigate = useNavigate();
   const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
+  const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
   const [activeTab, setActiveTab] = useState<'school' | 'parent'>('school');
+
+  React.useEffect(() => {
+    gsap.fromTo('.pricing-animate-in', 
+      { y: 40, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power3.out', delay: 0.1 }
+    );
+  }, [activeTab]);
 
   const texts = {
     fr: {
@@ -267,7 +276,7 @@ export const Pricing: React.FC = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative z-10 max-w-4xl mx-auto px-4 pt-16 pb-6 text-center">
+      <section className="pricing-animate-in relative z-10 max-w-4xl mx-auto px-4 pt-16 pb-6 text-center">
         <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
           {t.badge}
         </div>
@@ -308,7 +317,7 @@ export const Pricing: React.FC = () => {
       </section>
 
       {/* Pricing Grid */}
-      <section className="relative z-10 max-w-7xl mx-auto px-4 py-8 flex-1">
+      <section className="pricing-animate-in relative z-10 max-w-7xl mx-auto px-4 py-8 flex-1">
         {activeTab === 'school' ? (
           <div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
@@ -420,7 +429,7 @@ export const Pricing: React.FC = () => {
       </section>
 
       {/* Fratrie / Packs Section */}
-      <section className="relative z-10 bg-slate-100 dark:bg-slate-900/50 border-y border-slate-200/50 dark:border-slate-800/80 py-16">
+      <section className="pricing-animate-in relative z-10 bg-slate-100 dark:bg-slate-900/50 border-y border-slate-200/50 dark:border-slate-800/80 py-16">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-12">
             <h3 className="text-xl md:text-3xl font-black text-slate-950 dark:text-white uppercase tracking-tight mb-2">
@@ -445,7 +454,7 @@ export const Pricing: React.FC = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="bg-white dark:bg-slate-950 py-16">
+      <section className="pricing-animate-in bg-white dark:bg-slate-950 py-16">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-16 space-y-4">
             <h2 className="text-xs font-black uppercase tracking-widest text-amber-600 flex items-center justify-center gap-1.5">
