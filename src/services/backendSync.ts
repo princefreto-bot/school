@@ -5,8 +5,8 @@
 
 import { BACKEND_URL } from '../config';
 import { getAuthHeaders } from './apiHelpers';
-
 import { AppState } from '../store/useStore';
+import { useStore } from '../store/useStore';
 
 /**
  * Synchronise les données du store Zustand vers le backend Supabase.
@@ -123,8 +123,6 @@ export async function fetchFromBackend() {
             method: 'GET',
             headers: getAuthHeaders(),
         });
-
-        const { useStore } = await import('../store/useStore');
 
         if (!response.ok) {
             if (response.status === 402) {

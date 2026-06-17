@@ -4,10 +4,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Student, User, AppPage, Payment, Parent, AppSettings, Presence, ActivityLog, CycleSchedule, Announcement, AnnouncementRead, Matiere, ClasseMatiere, Note, PeriodeType } from '../types';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, BACKEND_URL } from '../config';
 import { getEcolage, getCycle } from '../data/classConfig';
 import { v4 as uuid } from '../utils/uuid';
 import { createActivityLog } from '../utils/activityLogger';
+import { syncToBackend } from '../services/backendSync';
+import { chatApi } from '../services/chatApi';
+import { getAuthHeaders } from '../services/apiHelpers';
 
 export interface AppState {
   // Identité de l'app
@@ -288,9 +291,7 @@ export const useStore = create<AppState>()(
       tranches: [],
       setTranches: (tranches) => {
         set({ tranches });
-        import('../services/backendSync').then(({ syncToBackend }) => {
-          syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
-        });
+        syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
 
       // ── Thème ──────────────────────────────────────────
@@ -315,9 +316,6 @@ export const useStore = create<AppState>()(
 
       reportAnnouncementReadToBackend: async (announcementId: string) => {
         try {
-          const { API_BASE_URL } = await import('../config');
-          const { getAuthHeaders } = await import('../services/apiHelpers');
-          
           await fetch(`${API_BASE_URL}/announcements/${announcementId}/read`, {
             method: 'POST',
             headers: getAuthHeaders()
@@ -334,7 +332,6 @@ export const useStore = create<AppState>()(
         if (user?.role === 'parent') return;
 
         try {
-          const { chatApi } = await import('../services/chatApi');
           const count = await chatApi.getUnreadCount();
           set({ unreadMessages: count });
         } catch (err) {
@@ -523,13 +520,11 @@ export const useStore = create<AppState>()(
         set({ students: [...get().students, student] });
 
         // Background sync
-        import('../services/backendSync').then(({ syncToBackend }) => {
-          syncToBackend({
-            students: get().students,
-            presences: get().presences,
-            activityLogs: get().activityLogs
-          }).then(() => set({ lastSyncTimestamp: Date.now() }));
-        });
+        syncToBackend({
+          students: get().students,
+          presences: get().presences,
+          activityLogs: get().activityLogs
+        }).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
       updateStudent: (id, updates) => {
         const students = get().students.map((s) => {
@@ -555,13 +550,11 @@ export const useStore = create<AppState>()(
         set({ students });
 
         // Background sync
-        import('../services/backendSync').then(({ syncToBackend }) => {
-          syncToBackend({
-            students: get().students,
-            presences: get().presences,
-            activityLogs: get().activityLogs
-          }).then(() => set({ lastSyncTimestamp: Date.now() }));
-        });
+        syncToBackend({
+          students: get().students,
+          presences: get().presences,
+          activityLogs: get().activityLogs
+        }).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
       deleteStudent: async (id) => {
         const u = get().user;
@@ -575,7 +568,6 @@ export const useStore = create<AppState>()(
         });
 
         try {
-          const { getAuthHeaders } = await import('../services/apiHelpers');
           await fetch(`${API_BASE_URL}/sync/student/${id}`, {
             method: 'DELETE',
             headers: getAuthHeaders()
@@ -609,13 +601,11 @@ export const useStore = create<AppState>()(
         set({ students });
 
         // Background sync
-        import('../services/backendSync').then(({ syncToBackend }) => {
-          syncToBackend({
-            students: get().students,
-            presences: get().presences,
-            activityLogs: get().activityLogs
-          }).then(() => set({ lastSyncTimestamp: Date.now() }));
-        });
+        syncToBackend({
+          students: get().students,
+          presences: get().presences,
+          activityLogs: get().activityLogs
+        }).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
 
       // ── Parents ──────────────────────────────────────────
@@ -668,7 +658,6 @@ export const useStore = create<AppState>()(
         console.log('💾 [Store] Saving all settings to cloud...', Object.keys(newSettings));
         set(newSettings);
         try {
-          const { syncToBackend } = await import('../services/backendSync');
           const result = await syncToBackend(newSettings);
           if (result) {
             console.log('✅ [Store] All settings synced successfully!');
@@ -700,13 +689,11 @@ export const useStore = create<AppState>()(
       addPresence: (presence) => {
         set({ presences: [presence, ...get().presences] });
         // Background sync
-        import('../services/backendSync').then(({ syncToBackend }) => {
-          syncToBackend({
-            students: get().students,
-            presences: get().presences,
-            activityLogs: get().activityLogs
-          }).then(() => set({ lastSyncTimestamp: Date.now() }));
-        });
+        syncToBackend({
+          students: get().students,
+          presences: get().presences,
+          activityLogs: get().activityLogs
+        }).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
       getPresencesToday: () => {
         const today = new Date().toISOString().split('T')[0];
@@ -734,9 +721,7 @@ export const useStore = create<AppState>()(
       setCycleSchedules: (schedules) => {
         set({ cycleSchedules: schedules });
         // Sync to backend
-        import('../services/backendSync').then(({ syncToBackend }) => {
-          syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
-        });
+        syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
       getHeureLimite: (cycle: string) => {
         const schedule = get().cycleSchedules.find(s => s.cycle === cycle);
@@ -756,8 +741,6 @@ export const useStore = create<AppState>()(
 
         // Appel backend dédié → sauvegarde Supabase + Push à tous les parents
         try {
-          const { BACKEND_URL } = await import('../config');
-          const { getAuthHeaders } = await import('../services/apiHelpers');
           const res = await fetch(`${BACKEND_URL}/api/announcements`, {
             method: 'POST',
             headers: getAuthHeaders(),
@@ -782,9 +765,7 @@ export const useStore = create<AppState>()(
         }
 
         // Sync global pour garder la cohérence
-        import('../services/backendSync').then(({ syncToBackend }) => {
-          syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
-        });
+        syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
       deleteAnnouncement: async (id) => {
         set({
@@ -793,8 +774,6 @@ export const useStore = create<AppState>()(
         });
         set({ lastSyncTimestamp: Date.now() }); // Bloque le polling entrant
         try {
-          const { BACKEND_URL } = await import('../config');
-          const { getAuthHeaders } = await import('../services/apiHelpers');
           await fetch(`${BACKEND_URL}/api/announcements/${id}`, {
             method: 'DELETE',
             headers: getAuthHeaders(),

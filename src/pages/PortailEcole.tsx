@@ -30,22 +30,32 @@ export const PortailEcole: React.FC = () => {
 
   // GSAP entrance animation
   useEffect(() => {
-    if (cardRef.current) {
-      gsap.from(cardRef.current, {
-        y: 60,
-        opacity: 0,
-        duration: 0.9,
-        ease: 'power4.out',
-      });
-      gsap.from(cardRef.current.querySelectorAll('.portal-animate-item'), {
-        y: 24,
-        opacity: 0,
-        duration: 0.6,
-        stagger: 0.08,
-        ease: 'power3.out',
-        delay: 0.3,
-      });
-    }
+    if (!cardRef.current) return;
+
+    // Garantit la visibilité si GSAP échoue
+    const card = cardRef.current;
+    const items = card.querySelectorAll<HTMLElement>('.portal-animate-item');
+
+    // Défaut : visible (sécurité anti-freeze)
+    items.forEach(el => { el.style.opacity = '1'; el.style.transform = 'none'; });
+
+    const tl = gsap.timeline();
+    tl.from(card, {
+      y: 40,
+      opacity: 0,
+      duration: 0.7,
+      ease: 'power3.out',
+      clearProps: 'all',
+    }).from(items, {
+      y: 18,
+      opacity: 0,
+      duration: 0.5,
+      stagger: 0.07,
+      ease: 'power2.out',
+      clearProps: 'all',
+    }, '-=0.35');
+
+    return () => { tl.kill(); };
   }, []);
 
   useEffect(() => {
@@ -111,7 +121,7 @@ export const PortailEcole: React.FC = () => {
       <div className="absolute bottom-[-15%] left-[-10%] w-[55%] h-[55%] bg-amber-600/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1px] h-full bg-gradient-to-b from-transparent via-amber-500/10 to-transparent pointer-events-none" />
 
-      <div ref={cardRef} className="w-full max-w-md bg-white/90 backdrop-blur-2xl border border-slate-100 rounded-[32px] p-6 md:p-10 shadow-2xl shadow-slate-200/50 relative z-10">
+      <div ref={cardRef} className="w-full max-w-md bg-white/90 backdrop-blur-2xl border border-slate-100 rounded-[32px] p-6 md:p-10 shadow-2xl shadow-slate-200/50 relative z-10" style={{ willChange: 'transform, opacity' }}>
         
         {/* En-tête */}
         <div className="text-center mb-8 portal-animate-item">

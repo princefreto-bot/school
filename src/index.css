@@ -115,6 +115,8 @@ html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -125,13 +127,39 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Transition uniquement les propriétés visuelles (pas layout) */
   transition: background-color var(--t-slow), color var(--t-slow);
   overflow-x: hidden;
+  /* Évite les reflows inutiles sur mobile */
+  overscroll-behavior-y: contain;
 }
 
-/* Global transitions for interactive elements to make them feel highly fluid */
-button, a, select, input, textarea, .card, .pro-card, .kpi-card, .nav-item {
-  transition: all var(--t-normal);
+/* Transitions ciblées — évite `transition: all` qui trigger layout/paint sur tout */
+button, a {
+  transition:
+    color var(--t-normal),
+    background-color var(--t-normal),
+    border-color var(--t-normal),
+    box-shadow var(--t-normal),
+    opacity var(--t-normal),
+    transform var(--t-normal);
+}
+select, input, textarea {
+  transition:
+    border-color var(--t-normal),
+    box-shadow var(--t-normal),
+    background-color var(--t-normal);
+}
+.card, .pro-card, .kpi-card {
+  transition:
+    box-shadow var(--t-normal),
+    border-color var(--t-normal),
+    transform var(--t-normal);
+}
+.nav-item {
+  transition:
+    background-color var(--t-fast),
+    color var(--t-fast);
 }
 
 /* ============================================================
@@ -199,8 +227,12 @@ button, a, select, input, textarea, .card, .pro-card, .kpi-card, .nav-item {
   flex-direction: column;
   background: var(--sidebar-bg);
   border-right: 1px solid rgba(255,255,255,0.05);
-  transition: width var(--t-slow), transform var(--t-slow);
+  /* GPU-composited pour transition sans jank */
+  transition: width var(--t-slow);
+  will-change: width;
   overflow: hidden;
+  /* Contient le repaint à la sidebar uniquement */
+  contain: strict;
 }
 
 .sidebar-collapsed { width: var(--sidebar-w-collapsed); }
@@ -266,7 +298,7 @@ button, a, select, input, textarea, .card, .pro-card, .kpi-card, .nav-item {
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
-  transition: background var(--t-fast), color var(--t-fast), box-shadow var(--t-normal);
+  transition: background var(--t-fast), color var(--t-fast);
   position: relative;
 }
 

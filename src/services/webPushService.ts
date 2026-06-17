@@ -4,6 +4,9 @@
  */
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
+import { API_BASE_URL } from '../config';
+import { getAuthHeaders } from './apiHelpers';
+import { useStore } from '../store/useStore';
 
 const PUBLIC_VAPID_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -69,8 +72,6 @@ export const webPushService = {
 
   async saveSubscription(subscription: PushSubscription) {
     try {
-      const { API_BASE_URL } = await import('../config');
-      const { getAuthHeaders } = await import('./apiHelpers');
       const response = await fetch(`${API_BASE_URL}/auth/update-push-token`, {
         method: 'POST',
         headers: getAuthHeaders(),
@@ -127,22 +128,20 @@ export const webPushService = {
         const data = action.notification.data;
         if (data && data.url) {
           // Navigation
-          import('../store/useStore').then(({ useStore }) => {
-            const store = useStore.getState();
-            if (store.user && store.user.role === 'parent') {
-              const pageMap: Record<string, string> = {
-                message:      'chat',
-                announcement: 'annonces',
-                payment:      'parent_historique',
-                presence:     'parent_dashboard',
-                document:     'parent_dashboard',
-                general:      'parent_dashboard',
-              };
-              const targetPage = pageMap[data.type] || 'parent_dashboard';
-              store.setCurrentPage(targetPage as any);
-              store.fetchAllFromBackend();
-            }
-          });
+          const store = useStore.getState();
+          if (store.user && store.user.role === 'parent') {
+            const pageMap: Record<string, string> = {
+              message:      'chat',
+              announcement: 'annonces',
+              payment:      'parent_historique',
+              presence:     'parent_dashboard',
+              document:     'parent_dashboard',
+              general:      'parent_dashboard',
+            };
+            const targetPage = pageMap[data.type] || 'parent_dashboard';
+            store.setCurrentPage(targetPage as any);
+            store.fetchAllFromBackend();
+          }
         }
       });
 
@@ -153,12 +152,10 @@ export const webPushService = {
 
   async saveCapacitorToken(token: string) {
     try {
-      const { API_BASE_URL } = await import('../config');
-      const { getAuthHeaders } = await import('./apiHelpers');
       const response = await fetch(`${API_BASE_URL}/auth/update-push-token`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ push_token: token }) // envoie le token brut directement!
+        body: JSON.stringify({ push_token: token })
       });
 
       if (!response.ok) {

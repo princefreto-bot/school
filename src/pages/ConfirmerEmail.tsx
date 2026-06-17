@@ -378,9 +378,9 @@ export const ConfirmerEmail: React.FC = () => {
             <button
               type="submit"
               disabled={loading || success}
-              className="w-full bg-amber-500 border border-amber-600 hover:bg-amber-600 text-slate-950 hover:text-slate-950 text-xs font-bold uppercase tracking-widest p-4 transition-all shadow-md active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed select-none"
+              className="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-950 text-xs font-black uppercase tracking-widest p-4 rounded-xl transition-all shadow-md active:scale-[0.99] disabled:bg-amber-300 disabled:cursor-not-allowed select-none"
             >
-              {loading ? 'Validation...' : 'Valider mon compte'}
+              {loading ? 'Validation en cours...' : success ? '✓ Compte validé !' : 'Valider mon compte'}
             </button>
 
             {/* Option de renvoi du code */}
