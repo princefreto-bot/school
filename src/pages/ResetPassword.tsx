@@ -80,8 +80,8 @@ export const ResetPassword: React.FC = () => {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 font-['Poppins'] text-center">
-        <div className="p-6 bg-rose-500/10 text-rose-400 rounded-2xl font-bold border border-rose-500/20 max-w-sm">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center p-4 font-['Poppins'] text-center">
+        <div className="p-6 bg-rose-50 text-rose-600 rounded-2xl font-bold border border-rose-200 max-w-sm">
           Le lien de réinitialisation est manquant ou invalide.
         </div>
       </div>
@@ -89,31 +89,31 @@ export const ResetPassword: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 font-['Poppins'] relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center p-4 font-['Poppins'] relative overflow-hidden">
       {/* Ambient glows */}
-      <div className="absolute top-[-15%] right-[-10%] w-[55%] h-[55%] bg-emerald-500/6 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-15%] left-[-10%] w-[55%] h-[55%] bg-amber-500/6 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-15%] right-[-10%] w-[55%] h-[55%] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-15%] left-[-10%] w-[55%] h-[55%] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-      <div ref={cardRef} className="w-full max-w-md bg-slate-900/90 backdrop-blur-2xl border border-slate-800/80 rounded-[32px] p-6 md:p-10 shadow-[0_32px_80px_rgba(0,0,0,0.5)] relative z-10">
+      <div ref={cardRef} className="w-full max-w-md bg-white/90 backdrop-blur-2xl border border-slate-100 rounded-[32px] p-6 md:p-10 shadow-2xl shadow-slate-200/50 relative z-10">
 
         <div className="text-center mb-8 rp-item">
-          <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/10">
+          <div className="w-16 h-16 bg-emerald-50 border border-emerald-100 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/10">
             <ShieldCheck className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">Nouveau mot de passe</h1>
-          <p className="text-sm text-slate-400 mt-2">Veuillez saisir votre nouveau mot de passe sécurisé.</p>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Nouveau mot de passe</h1>
+          <p className="text-sm text-slate-500 mt-2">Veuillez saisir votre nouveau mot de passe sécurisé.</p>
         </div>
 
         {message ? (
           <div className="text-center space-y-6 rp-item">
-            <div className="p-6 bg-emerald-500/10 text-emerald-400 rounded-2xl flex flex-col items-center gap-3 border border-emerald-500/20">
-              <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+            <div className="p-6 bg-emerald-50 text-emerald-700 rounded-2xl flex flex-col items-center gap-3 border border-emerald-100">
+              <CheckCircle2 className="w-8 h-8 text-emerald-600" />
               <p className="font-bold">{message}</p>
-              <p className="text-xs text-emerald-500/80">Redirection vers la connexion...</p>
+              <p className="text-xs text-emerald-600/80">Redirection vers la connexion...</p>
             </div>
             <button 
               onClick={() => navigate('/fr/portail-ecole')}
-              className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm rounded-2xl transition-all border border-slate-700"
+              className="w-full py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-2xl transition-all border border-slate-200"
             >
               Se connecter maintenant
             </button>
@@ -121,11 +121,11 @@ export const ResetPassword: React.FC = () => {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative rp-item">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input 
                 type="password" 
                 placeholder="Nouveau mot de passe (min 6 car.)" 
-                className="w-full pl-11 pr-4 py-3 bg-slate-800/60 border border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-100 placeholder-slate-500"
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-900 placeholder-slate-400"
                 value={newPassword} 
                 onChange={(e) => setNewPassword(e.target.value)} 
                 required 
@@ -133,11 +133,11 @@ export const ResetPassword: React.FC = () => {
             </div>
 
             <div className="relative rp-item">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input 
                 type="password" 
                 placeholder="Confirmer le mot de passe" 
-                className="w-full pl-11 pr-4 py-3 bg-slate-800/60 border border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-100 placeholder-slate-500"
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-900 placeholder-slate-400"
                 value={confirmPassword} 
                 onChange={(e) => setConfirmPassword(e.target.value)} 
                 required 
@@ -145,7 +145,7 @@ export const ResetPassword: React.FC = () => {
             </div>
 
             {error && (
-              <div className="text-rose-400 text-xs font-bold text-center p-3 bg-rose-500/10 rounded-xl border border-rose-500/20 rp-item">
+              <div className="text-rose-500 text-xs font-bold text-center p-3 bg-rose-50 rounded-xl border border-rose-200 rp-item">
                 {error}
               </div>
             )}
@@ -153,7 +153,7 @@ export const ResetPassword: React.FC = () => {
             <button 
               type="submit" 
               disabled={loading} 
-              className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm uppercase tracking-wider rounded-2xl shadow-[0_8px_24px_rgba(16,185,129,0.3)] hover:shadow-[0_12px_30px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center gap-2 mt-4 active:scale-[0.98] disabled:opacity-50 rp-item"
+              className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm uppercase tracking-wider rounded-2xl shadow-[0_8px_24px_rgba(16,185,129,0.3)] hover:shadow-[0_12px_30px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center gap-2 mt-4 active:scale-[0.98] disabled:opacity-50 rp-item"
             >
               {loading ? 'Enregistrement...' : 'Enregistrer le mot de passe'}
               {!loading && <Save className="w-4 h-4" />}
@@ -161,10 +161,10 @@ export const ResetPassword: React.FC = () => {
           </form>
         )}
 
-        <div className="mt-6 pt-5 border-t border-white/10 text-center rp-item">
+        <div className="mt-6 pt-5 border-t border-slate-100 text-center rp-item">
           <button
             onClick={() => navigate('/fr/portail-ecole')}
-            className="text-xs font-bold text-slate-500 hover:text-slate-300 transition-colors"
+            className="text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
           >
             ← Retour à la connexion
           </button>

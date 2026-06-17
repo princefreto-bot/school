@@ -33,20 +33,20 @@ export const Newsroom: React.FC = () => {
   const t = texts[lang];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-900">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-900">
       
       {/* HEADER */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
         <div className="w-full px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate(`/${lang}`)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-              <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+            <button onClick={() => navigate(`/${lang}`)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+              <ArrowLeft className="w-5 h-5 text-slate-600" />
             </button>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center transform -rotate-6">
                 <img src="/logo.svg" className="w-full h-full object-contain rounded-md" alt="" />
               </div>
-              <span className="font-black text-xl tracking-tight text-slate-950 dark:text-white">
+              <span className="font-black text-xl tracking-tight text-slate-950">
                 DGhub<span className="text-amber-500">School</span>
               </span>
             </div>
@@ -60,34 +60,34 @@ export const Newsroom: React.FC = () => {
           <span className="text-xs font-black uppercase tracking-widest text-amber-600 bg-amber-500/10 px-3 py-1.5 rounded-full inline-block">
             {t.badge}
           </span>
-          <h1 className="text-4xl md:text-6xl font-black text-slate-950 dark:text-white tracking-tight uppercase leading-none">
+          <h1 className="text-4xl md:text-6xl font-black text-slate-950 tracking-tight uppercase leading-none">
             {t.title}
           </h1>
-          <p className="text-lg text-slate-500 dark:text-slate-400 font-medium max-w-2xl">
+          <p className="text-lg text-slate-500 font-medium max-w-2xl">
             {t.subtitle}
           </p>
         </div>
 
         <div className="space-y-12">
           {/* Article 1 */}
-          <article className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-8 md:p-10 shadow-sm">
+          <article className="bg-white border border-slate-200/60 rounded-3xl p-8 md:p-10 shadow-sm">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center">
                 <BookOpen className="w-6 h-6 text-amber-500" />
               </div>
               <div>
-                <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t.art1Date}</span>
-                <h3 className="text-xl md:text-2xl font-black text-slate-950 dark:text-white uppercase tracking-tight">{t.art1Title}</h3>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.art1Date}</span>
+                <h3 className="text-xl md:text-2xl font-black text-slate-950 uppercase tracking-tight">{t.art1Title}</h3>
               </div>
             </div>
             
-            <div className="prose prose-slate dark:prose-invert prose-amber max-w-none">
-              <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+            <div className="prose prose-slate prose-amber max-w-none">
+              <p className="text-slate-600 leading-relaxed font-medium">
                 {t.art1Desc}
               </p>
-              <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 mt-6">
-                <h4 className="text-sm font-black uppercase tracking-wide text-slate-900 dark:text-white mb-2">{t.art1TipTitle}</h4>
-                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 mt-6">
+                <h4 className="text-sm font-black uppercase tracking-wide text-slate-900 mb-2">{t.art1TipTitle}</h4>
+                <p className="text-sm text-slate-500 leading-relaxed font-medium">
                   {t.art1TipDesc}
                 </p>
               </div>
