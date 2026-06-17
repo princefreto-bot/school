@@ -206,10 +206,9 @@ export const Dashboard: React.FC = () => {
         <div className="w-32 h-32 bg-amber-500/10 dark:bg-amber-500/5 rounded-[32px] flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(245,158,11,0.2)]">
           <GraduationCap className="w-16 h-16 text-amber-500 animate-bounce" />
         </div>
-        <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">Aucune donnée trouvée</h2>
+        <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">Bienvenue sur votre tableau de bord</h2>
         <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto px-4 text-base leading-relaxed">
-          Importez un fichier Excel ou patientez si une synchronisation est en cours.
-          Vérifiez que vous êtes bien connecté à internet.
+          Vos données apparaissent ici dès que vous importez vos élèves. Utilisez le menu <strong>Importation</strong> pour charger votre fichier Excel, ou ajoutez vos élèves manuellement.
         </p>
       </div>
     );
@@ -226,13 +225,13 @@ export const Dashboard: React.FC = () => {
         <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-8">
             <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500 text-[10px] font-black text-white uppercase tracking-[0.2em] mb-6 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
-                    <Target className="w-3.5 h-3.5" /> Dashboard Stratégique
+                    <Target className="w-3.5 h-3.5" /> Pilotage Stratégique
                 </div>
                 <h2 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tighter mb-4 leading-tight">
-                    Vision & <span className="text-transparent bg-clip-text bg-gradient-to-br from-amber-400 to-amber-600">Performance</span>
+                    Vos encaissements. <span className="text-transparent bg-clip-text bg-gradient-to-br from-amber-400 to-amber-600">En temps réel.</span>
                 </h2>
                 <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed font-medium max-w-xl">
-                    Tableau de bord exécutif en temps réel : analysez le recouvrement, les projections financières et les performances globales par cycle.
+                    Recouvrement, soldes par cycle, performances par classe — toutes vos métriques clés en un coup d'œil. Prenez des décisions éclairées, pas des suppositions.
                 </p>
             </div>
 
@@ -286,34 +285,34 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6">
         <StatCard
           delay={100}
-          title="Total Élèves"
+          title="Élèves Inscrits"
           value={maskValue(students.length)}
-          sub={privacyMode ? 'Données masquées' : `${stats.soldes} soldés / ${stats.nonSoldes} non soldés`}
+          sub={privacyMode ? 'Données masquées' : `${stats.soldes} soldés / ${stats.nonSoldes} en attente`}
           icon={<Users className="w-6 h-6 text-amber-600" />}
           color="bg-amber-50/80 dark:bg-amber-900/20 border-amber-500/20"
         />
         <StatCard
           delay={200}
-          title="Écolage Attendu"
+          title="Écolage Total Attendu"
           value={maskValue(`${fmtMoney(stats.totalEcolage)} F`)}
-          sub="Total annuel"
+          sub="Montant annuel global"
           icon={<Wallet className="w-6 h-6 text-indigo-600" />}
           color="bg-indigo-50/80 dark:bg-indigo-900/20 border-indigo-500/20"
         />
         <StatCard
           delay={300}
-          title="Déjà Perçu"
+          title="Encaissé à ce Jour"
           value={maskValue(`${fmtMoney(stats.totalPaye)} F`)}
-          sub="Paiements reçus"
+          sub="Versements confirmés"
           icon={<CheckCircle className="w-6 h-6 text-emerald-600" />}
           color="bg-emerald-50/80 dark:bg-emerald-900/20 border-emerald-500/20"
           trend={privacyMode ? undefined : `+${stats.taux}% recouvré`}
         />
         <StatCard
           delay={400}
-          title="Solde Restant"
+          title="Solde à Recouvrer"
           value={maskValue(`${fmtMoney(stats.totalRestant)} F`)}
-          sub="À recouvrer"
+          sub="Reste à encaisser"
           icon={<AlertCircle className="w-6 h-6 text-rose-600" />}
           color="bg-rose-50/80 dark:bg-rose-900/20 border-rose-500/20"
         />
@@ -321,7 +320,7 @@ export const Dashboard: React.FC = () => {
           delay={500}
           title="Présences du Jour"
           value={maskValue(`${todayPresences.length} / ${students.length}`)}
-          sub="Élèves pointés"
+          sub="Élèves pointés aujourd'hui"
           icon={<UserCheck className="w-6 h-6 text-cyan-600" />}
           color="bg-cyan-50/80 dark:bg-cyan-900/20 border-cyan-500/20"
           trend={privacyMode ? undefined : `${tauxPresence}% de présence`}
@@ -332,8 +331,8 @@ export const Dashboard: React.FC = () => {
       <div className="pro-card p-8 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
         <div className="flex items-center justify-between mb-8">
           <div className="space-y-1">
-            <h3 className="font-black text-slate-900 dark:text-white text-xl tracking-tight">Recouvrement Global</h3>
-            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Progression des encaissements sur l'année</p>
+            <h3 className="font-black text-slate-900 dark:text-white text-xl tracking-tight">Recouvrement Global des Frais</h3>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Progression des encaissements sur l'année scolaire en cours</p>
           </div>
           <div className="text-5xl font-black text-amber-500 dark:text-amber-400 tracking-tighter drop-shadow-sm">{maskValue(`${stats.taux}%`)}</div>
         </div>

@@ -47,17 +47,17 @@ export const Footer: React.FC = () => {
 
   const texts: Record<'fr' | 'en', FooterLangText> = {
     fr: {
-      testimonialTitle: "Votre succès inspire d'autres établissements",
-      testimonialText: "Partagez comment DGhubSchool transforme votre gestion quotidienne. Votre témoignage encourage d'autres écoles à sauter le pas.",
-      subtitle: "La plateforme tout-en-un pour gérer votre établissement scolaire.",
-      notice: "DGhubSchool est une solution technologique dédiée aux établissements scolaires, permettant la gestion de la caisse, des notes et du suivi des élèves. Contactez-nous à support@dghubschool.com pour toute question.",
-      copyright: "Copyright © 2026 DGhubSchool. Tous droits réservés.",
-      ctaButton: "Partager mon histoire",
+      testimonialTitle: "Votre témoignage peut convaincre 10 autres directeurs",
+      testimonialText: "Partagez en 2 phrases comment DGhubSchool a transformé votre gestion quotidienne. Votre retour terrain est notre meilleure publicité — et il aide d'autres écoles à faire le bon choix.",
+      subtitle: "L'outil tout-en-un des directeurs d'écoles en Afrique de l'Ouest.",
+      notice: "DGhubSchool est une plateforme de gestion scolaire conçue pour les établissements primaires, secondaires et lycées. Elle couvre la gestion des paiements de scolarité, les bulletins académiques, le suivi des présences et le portail parents. Pour toute demande, écrivez-nous à support@dghubschool.com.",
+      copyright: "Copyright © 2026 DGhubSchool — Tous droits réservés.",
+      ctaButton: "Partager mon expérience",
       columns: {
         products: {
           title: "Fonctionnalités",
           items: [
-            { label: "Suivi des Paiements", path: "/features" },
+            { label: "Caisse & Paiements", path: "/features" },
             { label: "Bulletins & Notes", path: "/features" },
             { label: "Portail Parents", path: "/features" },
             { label: "Cartes Scolaires QR", path: "/features" }
@@ -78,27 +78,27 @@ export const Footer: React.FC = () => {
           ]
         },
         company: {
-          title: "Entreprise",
+          title: "À propos",
           items: [
-            { label: "À propos", path: "/a-propos" },
-            { label: "Newsroom", path: "/#newsroom" },
-            { label: "Contact", path: "mailto:support@dghubschool.com", external: true }
+            { label: "Notre histoire", path: "/a-propos" },
+            { label: "Actualités", path: "/#newsroom" },
+            { label: "Nous contacter", path: "mailto:support@dghubschool.com", external: true }
           ]
         }
       }
     },
     en: {
-      testimonialTitle: "Your success inspires other schools",
-      testimonialText: "Share how DGhubSchool transforms your daily management. Your testimonial encourages other schools to take the leap.",
-      subtitle: "The All-in-One Platform to Manage Your School.",
-      notice: "DGhubSchool is a technology solution dedicated to schools, enabling the management of payments, grades, and student tracking. Contact us at support@dghubschool.com if you have any questions.",
-      copyright: "Copyright © 2026 DGhubSchool. All rights reserved.",
-      ctaButton: "Share your story",
+      testimonialTitle: "Your story can convince 10 other principals",
+      testimonialText: "Share in 2 sentences how DGhubSchool transformed your daily management. Your field feedback is our best advertising — and helps other schools make the right choice.",
+      subtitle: "The all-in-one tool for school principals in West Africa.",
+      notice: "DGhubSchool is a school management platform designed for primary, secondary and high school institutions. It covers tuition payment management, academic report cards, attendance tracking and the parent portal. For any inquiries, write to us at support@dghubschool.com.",
+      copyright: "Copyright © 2026 DGhubSchool — All rights reserved.",
+      ctaButton: "Share my experience",
       columns: {
         products: {
           title: "Features",
           items: [
-            { label: "Payment Tracking", path: "/features" },
+            { label: "Cashier & Payments", path: "/features" },
             { label: "Report Cards & Grades", path: "/features" },
             { label: "Parents Portal", path: "/features" },
             { label: "QR School Cards", path: "/features" }
@@ -115,15 +115,15 @@ export const Footer: React.FC = () => {
           title: "Legal",
           items: [
             { label: "Privacy Policy", path: "/confidentialite" },
-            { label: "Terms & conditions", path: "/conditions-utilisation" }
+            { label: "Terms & Conditions", path: "/conditions-utilisation" }
           ]
         },
         company: {
-          title: "Company",
+          title: "About",
           items: [
-            { label: "About Us", path: "/a-propos" },
-            { label: "Newsroom", path: "/#newsroom" },
-            { label: "Contact", path: "mailto:support@dghubschool.com", external: true }
+            { label: "Our story", path: "/a-propos" },
+            { label: "News", path: "/#newsroom" },
+            { label: "Contact us", path: "mailto:support@dghubschool.com", external: true }
           ]
         }
       }
