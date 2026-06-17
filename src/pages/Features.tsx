@@ -9,6 +9,7 @@ import {
   MessageSquare, UserCheck
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
+import { StickerStar, StickerHeart, StickerCurvedArrow, StickerWave, StickerCheck, StickerNote, StickerCircle, StickerSparkle, StickerBang } from '../components/Stickers';
 
 export const Features: React.FC = () => {
   const navigate = useNavigate();
@@ -63,15 +64,15 @@ export const Features: React.FC = () => {
       subtitle: lang === 'fr' ? "Simplifiez le suivi de la scolarité et de la caisse" : "Simplify tuition and cash tracking",
       icon: <CreditCard className="w-6 h-6 text-amber-500" />,
       items: lang === 'fr' ? [
-        "Enregistrement des règlements (espèces, chèques, virements) avec reçu instantané",
-        "Génération automatique de reçus de caisse numériques envoyés par SMS",
-        "Suivi des tranches de scolarité impayées et relances en un clic",
-        "Journal de caisse quotidien et rapports financiers exportables en Excel"
+        "Enregistrement instantané des règlements (espèces, chèques, Mobile Money, virements bancaires) avec horodatage automatique et reçu PDF généré en temps réel",
+        "Envoi automatique de reçus de caisse numériques par SMS au numéro du parent dès validation du paiement — délai moyen : moins de 3 secondes",
+        "Tableau de suivi des tranches impayées par élève avec relance en un clic (SMS ou notification push au parent)",
+        "Journal de caisse quotidien alimenté automatiquement + export Excel/CSV des rapports financiers mensuels et trimestriels"
       ] : [
-        "Recording payments (cash, checks, transfers) with instant receipts",
-        "Automatic generation of digital cashier receipts sent via SMS",
-        "Tracking unpaid school fee installments and follow-ups in one click",
-        "Daily cash journal and financial reports exportable to Excel"
+        "Instant recording of payments (cash, checks, Mobile Money, bank transfers) with automatic timestamping and real-time PDF receipt generation",
+        "Automatic sending of digital cash receipts via SMS to parent's number upon payment validation — average delay: under 3 seconds",
+        "Per-student unpaid installment tracking dashboard with one-click follow-up (SMS or push notification to parent)",
+        "Auto-fed daily cash journal + Excel/CSV export of monthly and quarterly financial reports"
       ],
       className: "bg-slate-50 border-slate-200"
     },
@@ -80,15 +81,15 @@ export const Features: React.FC = () => {
       subtitle: lang === 'fr' ? "Fini les calculs manuels et les erreurs de saisie" : "No more manual calculations and entry errors",
       icon: <BookOpen className="w-6 h-6 text-amber-500" />,
       items: lang === 'fr' ? [
-        "Portail enseignant ultra-léger pour saisir les notes sur mobile ou PC",
-        "Calcul automatique des moyennes de classe, des rangs et des appréciations",
-        "Génération des bulletins scolaires au format PDF officiel prêts à imprimer",
-        "Suivi des matières par classe et coefficients personnalisés"
+        "Portail enseignant ultra-léger : saisie des notes depuis n'importe quel smartphone ou PC, même en connexion 2G/3G",
+        "Calcul automatique des moyennes pondérées par coefficient, rangs de classe et appréciations personnalisées de chaque enseignant",
+        "Génération en un clic des bulletins de notes au format PDF officiel conforme DRE — prêts à imprimer ou envoyer en lot par SMS/email",
+        "Configuration libre des matières, coefficients, classes et groupes pédagogiques sans intervention technique"
       ] : [
-        "Ultra-lightweight teacher portal to enter grades on mobile or PC",
-        "Automatic calculation of class averages, rankings, and teacher remarks",
-        "Generation of school reports in official PDF format ready to print",
-        "Tracking subjects by class and customized coefficients"
+        "Ultra-lightweight teacher portal: grade entry from any smartphone or PC, even on 2G/3G connection",
+        "Automatic weighted average calculation by coefficient, class rankings, and personalized remarks from each teacher",
+        "One-click generation of report cards in official DRE-compliant PDF format — ready to print or batch send via SMS/email",
+        "Free configuration of subjects, coefficients, classes, and teaching groups without technical intervention"
       ],
       className: "bg-slate-50 border-slate-200"
     },
@@ -97,15 +98,15 @@ export const Features: React.FC = () => {
       subtitle: lang === 'fr' ? "Tranquillité d'esprit pour l'école et les familles" : "Peace of mind for school and families",
       icon: <QrCode className="w-6 h-6 text-amber-500" />,
       items: lang === 'fr' ? [
-        "Génération automatique de cartes d'élèves officielles munies de QR Codes",
-        "Application de scan intégrée pour enregistrer les entrées et sorties",
-        "Notification SMS/Push automatique envoyée aux parents dès le scan de la carte",
-        "Historique complet d'assiduité par élève consultable à tout moment"
+        "Génération automatique de cartes d'identité scolaires personnalisées avec photo passeport, nom, classe et QR Code unique crypté",
+        "Application de scan intégrée : l'agent de sécurité scanne la carte à l'entrée et à la sortie — enregistrement en moins de 2 secondes",
+        "Notification SMS/Push envoyée instantanément au parent à chaque scan (arrivée + départ) avec l'heure exacte et le nom de l'élève",
+        "Historique complet d'assiduité consultable 24h/24 par l'administration et les parents : retards, absences, heures d'arrivée/départ"
       ] : [
-        "Automatic generation of official student cards with QR Codes",
-        "Integrated scanning application to record entries and exits",
-        "Automatic SMS/Push notification sent to parents upon scanning the card",
-        "Complete attendance history per student accessible at any time"
+        "Automatic generation of personalized school ID cards with passport photo, name, class, and unique encrypted QR Code",
+        "Integrated scanning app: the security agent scans the card at entry and exit — registration in under 2 seconds",
+        "SMS/Push notification sent instantly to the parent on each scan (arrival + departure) with exact time and student name",
+        "Complete 24/7 attendance history accessible by administration and parents: delays, absences, arrival/departure times"
       ],
       className: "bg-slate-50 border-slate-200"
     },
@@ -114,15 +115,15 @@ export const Features: React.FC = () => {
       subtitle: lang === 'fr' ? "Rapprochez l'école des familles au quotidien" : "Bring the school closer to families daily",
       icon: <Users className="w-6 h-6 text-amber-500" />,
       items: lang === 'fr' ? [
-        "Accès mobile pour consulter les notes, moyennes, retards et absences",
-        "Messagerie en ligne sécurisée pour communiquer avec l'administration",
-        "Panneau d'annonces de l'établissement avec notifications urgentes",
-        "Consultation des documents numérisés et autorisations parentales"
+        "Accès mobile pour consulter en temps réel les notes, moyennes pondérées, retards et absences de chaque enfant",
+        "Messagerie bidirectionnelle sécurisée : les parents échangent avec l'administration et la vie scolaire directement depuis l'application",
+        "Panneau d'annonces avec notifications urgentes push : fermeture exceptionnelle, réunion parents-profs, événements scolaires",
+        "Consultation des documents numérisés (autorisations, certificats), accès à la bibliothèque d'exercices et eBooks intégrés"
       ] : [
-        "Mobile access to consult grades, averages, delays, and absences",
-        "Secure online messaging to communicate with the administration",
-        "Institution announcement board with urgent notifications",
-        "Consultation of digitized documents and parental permissions"
+        "Mobile access to check in real time grades, weighted averages, delays, and absences for each child",
+        "Secure bidirectional messaging: parents exchange with administration and school life staff directly from the app",
+        "Announcement board with urgent push notifications: exceptional closures, parent-teacher meetings, school events",
+        "Access to digitized documents (permissions, certificates), integrated exercise library and eBooks"
       ],
       className: "bg-slate-50 border-slate-200"
     },
@@ -170,6 +171,11 @@ export const Features: React.FC = () => {
 
       {/* Hero Section */}
       <section className="relative z-10 max-w-4xl mx-auto px-4 pt-16 pb-12 text-center">
+        {/* Stickers décoratifs Hero */}
+        <StickerStar className="absolute top-20 left-4 hidden md:block" style={{ transform: 'rotate(-8deg)', opacity: 0.6 }} />
+        <StickerCurvedArrow className="absolute top-28 right-8 hidden lg:block" style={{ transform: 'rotate(10deg) scaleX(-1)' }} />
+        <StickerSparkle className="absolute bottom-4 left-[20%] hidden md:block" />
+
         <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
           {t.badge}
         </div>
@@ -183,6 +189,13 @@ export const Features: React.FC = () => {
 
       {/* Feature Showcase Grid */}
       <section className="relative z-10 max-w-6xl mx-auto px-4 pb-20">
+        {/* Stickers décoratifs Grid */}
+        <StickerHeart className="absolute top-12 right-4 hidden md:block" style={{ transform: 'rotate(15deg)', opacity: 0.4 }} />
+        <StickerWave className="absolute bottom-24 left-4 hidden lg:block" />
+        <StickerNote className="absolute top-1/3 right-2 hidden xl:block" style={{ transform: 'rotate(2deg)' }}>
+          {lang === 'fr' ? 'Fini le papier ✨' : 'No more paper ✨'}
+        </StickerNote>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {categories.map((cat, idx) => (
             <div key={idx} className={`p-8 rounded-3xl border shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between ${cat.className}`}>
@@ -214,6 +227,10 @@ export const Features: React.FC = () => {
       {/* Extra Features Section (Bento sub-items) */}
       <section className="bg-slate-950 text-white py-20 border-t border-slate-900 relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+        {/* Stickers */}
+        <StickerCircle className="absolute top-16 left-8 hidden md:block" style={{ opacity: 0.3 }} />
+        <StickerBang className="absolute bottom-20 right-12 hidden lg:block" style={{ opacity: 0.3 }} />
+
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-16 space-y-4">
             <h3 className="text-2xl md:text-4xl font-black uppercase tracking-tight">
@@ -242,7 +259,11 @@ export const Features: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-white py-16 text-center">
+      <section className="bg-white py-16 text-center relative">
+        {/* Sticker CTA */}
+        <StickerCheck className="absolute top-8 left-[15%] hidden md:block" style={{ transform: 'rotate(10deg)', opacity: 0.6 }} />
+        <StickerStar className="absolute bottom-8 right-[10%] hidden lg:block" style={{ opacity: 0.4 }} />
+
         <div className="max-w-4xl mx-auto px-4 space-y-6">
           <h2 className="text-2xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
             {t.ctaTitle}

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import { BACKEND_URL } from '../config';
+import { StickerStar, StickerHeart, StickerCurvedArrow, StickerWave, StickerCheck, StickerNote, StickerSparkle, StickerCircle } from '../components/Stickers';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ export const LandingPage: React.FC = () => {
       heroTitlePart1: "Pilotez votre ",
       heroTitleHighlight: "établissement scolaire",
       heroTitlePart2: " en toute simplicité",
-      heroSubtitle: "Gérez la caisse et le suivi de la scolarité, éditez les bulletins de notes officiels, suivez les présences par QR Code et donnez accès à des ressources scolaires gratuites pour les révisions à la maison.",
+      heroSubtitle: "Enregistrez chaque règlement de scolarité en temps réel (espèces, chèques, virement), recevez un reçu numérique instantané par SMS, éditez les bulletins de notes PDF conformes DRE, suivez les entrées/sorties des élèves par scan QR Code en 2 secondes et offrez aux parents un suivi en direct depuis leur téléphone.",
       realTimeDashboard: "Tableau de bord en temps réel (établissement masqué)",
       screenshotsTitle: "📸 Captures d'Écran Officielles",
       discoverFeatures: "Découvrez nos fonctionnalités clés en images",
@@ -62,16 +63,16 @@ export const LandingPage: React.FC = () => {
       bentoTitle: "Tout ce dont vous avez besoin, réuni au même endroit",
       bentoDesc: "Simplifiez la scolarité de vos élèves et offrez aux parents et aux enseignants une expérience moderne.",
       paymentTracking: "Suivi des Paiements & Caisse",
-      paymentDesc: "Suivez les tranches de scolarité et les impayés de chaque élève. Enregistrez les règlements et générez des reçus de caisse numériques automatiques.",
+      paymentDesc: "Enregistrez chaque versement (espèces, chèques, Mobile Money) avec horodatage automatique. Le système calcule instantanément le solde restant par élève, envoie un reçu PDF + SMS au parent, et alimente le journal de caisse quotidien exportable en Excel.",
       paymentBadge: "Comptabilité",
       bulletinsTitle: "Bulletins & Notes",
-      bulletinsDesc: "Génération automatique des bulletins scolaires en un clic. Calcul des moyennes et classement des élèves sans aucun tableur Excel.",
+      bulletinsDesc: "Un clic → le système calcule automatiquement les moyennes trimestrielles, les rangs, les appréciations des enseignants et génère un bulletin PDF conforme au format officiel DRE. Plus besoin d'Excel ni de calculs manuels.",
       bulletinsBadge: "Bulletins PDF",
       parentsTitle: "Suivi des parents d'élèves",
-      parentsDesc: "Un espace mobile simplifié pour les parents. Ils consultent les notes, les absences et l'assiduité sans avoir à se déplacer.",
+      parentsDesc: "Le parent reçoit une notification push à chaque note saisie et chaque scan de présence. Il consulte en temps réel les moyennes, les retards, les versements effectués et le solde de scolarité restant — directement depuis son téléphone.",
       parentsBadge: "Portail mobile",
       qrCardsTitle: "Cartes scolaires à QR Code",
-      qrCardsDesc: "Générez et imprimez des cartes scolaires officielles. Scannez le QR Code à l'entrée et à la sortie pour enregistrer automatiquement la présence de l'élève.",
+      qrCardsDesc: "Chaque élève reçoit une carte d'identité scolaire imprimée avec photo passeport et QR Code unique. Au scan d'entrée ou de sortie, le parent est notifié par SMS/Push en moins de 2 secondes. L'historique d'assiduité est consultable 24h/24.",
       qrCardsBadge: "Sécurité d'accès",
       partnersLabel: "Écoles et lycées partenaires",
       studentsLabel: "Élèves inscrits et gérés",
@@ -112,7 +113,7 @@ export const LandingPage: React.FC = () => {
       heroTitlePart1: "Manage your ",
       heroTitleHighlight: "school establishment",
       heroTitlePart2: " with complete simplicity",
-      heroSubtitle: "Manage fees and track school activities, generate official report cards, monitor attendance via QR Code, and grant access to free educational resources for home learning.",
+      heroSubtitle: "Record every tuition payment in real time (cash, check, bank transfer), send instant digital receipts via SMS, generate official DRE-compliant PDF report cards, track student entries/exits with a 2-second QR Code scan, and give parents live monitoring from their phone.",
       realTimeDashboard: "Real-time dashboard (school masked)",
       screenshotsTitle: "📸 Official Screenshots",
       discoverFeatures: "Discover our key features in pictures",
@@ -124,16 +125,16 @@ export const LandingPage: React.FC = () => {
       bentoTitle: "Everything you need, in one place",
       bentoDesc: "Simplify your students' education and provide a modern experience to parents and teachers.",
       paymentTracking: "Payment Tracking & Cashier",
-      paymentDesc: "Track school fee installments and outstanding balances for each student. Record transactions and automatically generate digital receipts.",
+      paymentDesc: "Record each payment (cash, checks, Mobile Money) with automatic timestamping. The system instantly calculates the remaining balance per student, sends a PDF + SMS receipt to the parent, and feeds the daily cash journal exportable to Excel.",
       paymentBadge: "Accounting",
       bulletinsTitle: "Report Cards & Grades",
-      bulletinsDesc: "Automatic generation of school reports in one click. Grade calculations and rankings without Excel spreadsheets.",
+      bulletinsDesc: "One click → the system automatically calculates term averages, rankings, teacher remarks and generates a PDF report card in official DRE format. No more Excel or manual calculations.",
       bulletinsBadge: "PDF Reports",
       parentsTitle: "Parental Student Tracking",
-      parentsDesc: "A simplified mobile portal for parents. Check grades, attendance, and progress without having to travel.",
+      parentsDesc: "Parents receive a push notification on every grade entry and every attendance scan. They check averages, delays, payments made, and remaining tuition balance in real time — directly from their phone.",
       parentsBadge: "Mobile Portal",
       qrCardsTitle: "QR Code School Cards",
-      qrCardsDesc: "Generate and print official student cards. Scan the QR Code at the entrance/exit to automatically record student attendance.",
+      qrCardsDesc: "Each student receives a printed school ID card with passport photo and unique QR Code. On entry or exit scan, the parent is notified by SMS/Push in under 2 seconds. Attendance history is accessible 24/7.",
       qrCardsBadge: "Access Security",
       partnersLabel: "Partner schools and high schools",
       studentsLabel: "Enrolled and managed students",
@@ -302,6 +303,11 @@ export const LandingPage: React.FC = () => {
 
       {/* ── SECTION HERO ──────────────────────────────────── */}
       <section className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pt-16 md:pt-24 pb-16 text-center flex-grow flex flex-col items-center justify-center">
+        {/* Stickers décoratifs Hero */}
+        <StickerStar className="absolute top-24 left-8 hidden md:block animate-pulse" style={{ animationDuration: '3s' }} />
+        <StickerHeart className="absolute top-32 right-12 hidden md:block" style={{ transform: 'rotate(12deg)' }} />
+        <StickerSparkle className="absolute top-48 left-[15%] hidden lg:block" />
+
         {/* Titre Principal */}
         <h1 className="text-3xl md:text-6xl font-black text-slate-950 tracking-tight leading-[1.15] max-w-4xl mb-6">
           {t.heroTitlePart1}<span className="text-amber-500 underline decoration-2 decoration-amber-500/50">{t.heroTitleHighlight}</span>{t.heroTitlePart2}
@@ -354,6 +360,10 @@ export const LandingPage: React.FC = () => {
 
       {/* ── SECTION APERÇUS RÉELS (SCREENSHOTS) ────────────────── */}
       <section className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-16">
+        {/* Stickers décoratifs Screenshots */}
+        <StickerCurvedArrow className="absolute -top-2 right-[20%] hidden md:block" style={{ transform: 'rotate(-15deg)' }} />
+        <StickerWave className="absolute bottom-8 left-8 hidden lg:block" />
+
         <div className="text-center mb-12 space-y-4">
           <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
             {t.screenshotsTitle}
@@ -402,6 +412,13 @@ export const LandingPage: React.FC = () => {
 
       {/* ── SECTION FEATURES (BENTO GRID) ────────────────── */}
       <section id="features" className="bg-slate-50 border-y border-slate-200 py-20 relative">
+        {/* Stickers décoratifs Bento */}
+        <StickerStar className="absolute top-12 right-12 hidden md:block" style={{ transform: 'rotate(15deg) scale(0.8)', opacity: 0.5 }} />
+        <StickerCheck className="absolute bottom-16 left-8 hidden lg:block" style={{ transform: 'rotate(-8deg)' }} />
+        <StickerNote className="absolute top-20 left-6 hidden xl:block" style={{ transform: 'rotate(-3deg)' }}>
+          {lang === 'fr' ? '100% sans Excel !' : '100% Excel-free!'}
+        </StickerNote>
+
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           {/* En-tête Section */}
           <div className="text-center mb-16 space-y-4">
@@ -445,6 +462,10 @@ export const LandingPage: React.FC = () => {
 
       {/* ── SECTION STATS / PRUVE SOCIALE ─────────────────── */}
       <section id="stats" className="bg-white py-20 relative">
+        {/* Stickers décoratifs Stats */}
+        <StickerCircle className="absolute top-8 left-[10%] hidden md:block" />
+        <StickerSparkle className="absolute bottom-12 right-[15%] hidden lg:block" />
+
         <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
           <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, idx) => (
@@ -575,6 +596,9 @@ export const LandingPage: React.FC = () => {
 
       {/* ── SECTION FINAL CTA ────────────────────────────── */}
       <section className="bg-white py-16 text-center relative">
+        {/* Sticker CTA */}
+        <StickerHeart className="absolute top-6 left-[12%] hidden md:block" style={{ transform: 'rotate(-10deg)', opacity: 0.5 }} />
+
         <div className="max-w-5xl mx-auto px-4">
           <div className="bg-slate-950 text-white rounded-3xl p-12 md:p-16 relative overflow-hidden shadow-xl">
             <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />

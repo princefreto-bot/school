@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Footer } from '../components/Footer';
+import { StickerStar, StickerWave, StickerSparkle, StickerHeart } from '../components/Stickers';
 
 export const Newsroom: React.FC = () => {
   const navigate = useNavigate();
@@ -67,6 +68,12 @@ export const Newsroom: React.FC = () => {
             {t.subtitle}
           </p>
         </div>
+
+        {/* Stickers décoratifs */}
+        <StickerStar className="absolute top-20 right-8 hidden md:block" style={{ transform: 'rotate(10deg)', opacity: 0.5 }} />
+        <StickerHeart className="absolute top-32 left-4 hidden lg:block" style={{ transform: 'rotate(-8deg)', opacity: 0.4 }} />
+        <StickerWave className="absolute bottom-12 right-[15%] hidden md:block" />
+        <StickerSparkle className="absolute top-48 left-[20%] hidden lg:block" />
 
         <div className="space-y-12">
           {/* Article 1 */}

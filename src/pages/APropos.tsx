@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ShieldCheck, Heart, Users, Target } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import { BACKEND_URL } from '../config';
+import { StickerStar, StickerHeart, StickerCurvedArrow, StickerWave, StickerNote, StickerCircle, StickerSparkle, StickerCheck } from '../components/Stickers';
 
 export const APropos: React.FC = () => {
   const navigate = useNavigate();
@@ -36,16 +37,16 @@ export const APropos: React.FC = () => {
       valuesBadge: "Nos Valeurs",
       valuesTitle: "Ce qui nous guide au quotidien",
       missionTitle: "Notre Mission",
-      missionDesc: "Simplifier la gestion administrative des écoles d'Afrique de l'Ouest pour libérer du temps aux éducateurs et directeurs afin qu'ils se concentrent sur la pédagogie.",
+      missionDesc: "Libérer les directeurs et enseignants des tâches répétitives (calcul des moyennes, impression des bulletins, suivi des paiements) grâce à un système automatisé accessible depuis n'importe quel smartphone, même en connexion 2G/3G.",
       transparentTitle: "Suivi Simple & Transparent",
-      transparentDesc: "Permettre aux établissements d'enregistrer et de suivre facilement tous les règlements (espèces, chèques, virements) et de générer des reçus de caisse numériques instantanés pour les familles.",
+      transparentDesc: "Chaque versement (espèces, chèques, Mobile Money, virements) est enregistré avec horodatage automatique. Le parent reçoit un reçu PDF + SMS instantanément. Le journal de caisse quotidien s'alimente en temps réel et s'exporte en Excel/CSV.",
       securityTitle: "Sécurité & Transparence",
-      securityDesc: "Fournir un cadre robuste et transparent pour la gestion financière des établissements et le suivi sécurisé des élèves via QR Code.",
+      securityDesc: "Chaque élève dispose d'une carte d'identité avec QR Code crypté unique. Au scan d'entrée ou de sortie, le parent est notifié par SMS/Push en moins de 2 secondes. Les données financières sont chiffrées et les sauvegardes sont effectuées quotidiennement.",
       proximityTitle: "Proximité locale",
-      proximityDesc: "Accompagner personnellement chaque école partenaire avec un support direct sur le terrain et via WhatsApp au quotidien.",
+      proximityDesc: "Un support technique dédié disponible 7j/7 via WhatsApp et téléphone. Formation des équipes sur site, accompagnement au déploiement, et suivi personnalisé tout au long de l'année scolaire.",
       adaptedTitle: "Un outil conçu pour le terrain scolaire africain",
-      adaptedDesc1: "Nous savons que les coupures de réseau et le manque de matériel informatique sont des réalités quotidiennes. C'est pourquoi DGhubSchool a été conçu pour être extrêmement léger et utilisable directement depuis n'importe quel smartphone.",
-      adaptedDesc2: "De l'enregistrement d'un règlement de scolarité à la validation des sorties d'élèves par scan QR code, chaque action prend moins de 3 secondes.",
+      adaptedDesc1: "Nous savons que les coupures de réseau et le manque de matériel informatique sont des réalités quotidiennes. C'est pourquoi DGhubSchool a été conçu pour être extrêmement léger (moins de 500 Ko par page) et utilisable directement depuis n'importe quel smartphone Android ou iPhone, même en connexion 2G.",
+      adaptedDesc2: "De l'enregistrement d'un règlement de scolarité à la validation des sorties d'élèves par scan QR Code, chaque action prend moins de 2 secondes. Les bulletins PDF se génèrent en un clic et les reçus numériques sont envoyés par SMS en moins de 3 secondes.",
       statsTitle: "DGhubSchool en quelques chiffres",
       statsSchools: "Écoles partenaires",
       statsStudents: "Élèves enregistrés",
@@ -63,16 +64,16 @@ export const APropos: React.FC = () => {
       valuesBadge: "Our Values",
       valuesTitle: "What guides us daily",
       missionTitle: "Our Mission",
-      missionDesc: "Simplify the administrative management of West African schools to free up time for educators and directors to focus on pedagogy.",
+      missionDesc: "Free directors and teachers from repetitive tasks (average calculations, report card printing, payment tracking) through an automated system accessible from any smartphone, even on 2G/3G connection.",
       transparentTitle: "Simple & Transparent Tracking",
-      transparentDesc: "Enable institutions to easily record and track all payments (cash, checks, bank transfers) and generate instant digital receipts for families.",
+      transparentDesc: "Every payment (cash, checks, Mobile Money, transfers) is recorded with automatic timestamping. Parents receive an instant PDF + SMS receipt. The daily cash journal feeds in real time and exports to Excel/CSV.",
       securityTitle: "Security & Transparency",
-      securityDesc: "Provide a robust and transparent framework for the financial management of institutions and the secure tracking of students via QR Code.",
+      securityDesc: "Each student has an ID card with a unique encrypted QR Code. On entry or exit scan, parents are notified by SMS/Push in under 2 seconds. Financial data is encrypted and backups are performed daily.",
       proximityTitle: "Local Proximity",
-      proximityDesc: "Personally support each partner school with direct field support and via WhatsApp daily.",
+      proximityDesc: "Dedicated technical support available 7 days a week via WhatsApp and phone. On-site team training, deployment assistance, and personalized follow-up throughout the school year.",
       adaptedTitle: "A tool designed for the African school context",
-      adaptedDesc1: "We know that network outages and lack of computer equipment are daily realities. That is why DGhubSchool was designed to be extremely lightweight and usable directly from any smartphone.",
-      adaptedDesc2: "From recording a school fee payment to validating student exits by QR code scan, each action takes less than 3 seconds.",
+      adaptedDesc1: "We know that network outages and lack of computer equipment are daily realities. That is why DGhubSchool was designed to be extremely lightweight (under 500 KB per page) and usable directly from any Android or iPhone, even on 2G connection.",
+      adaptedDesc2: "From recording a school fee payment to validating student exits by QR Code scan, each action takes under 2 seconds. PDF report cards are generated in one click and digital receipts are sent by SMS in under 3 seconds.",
       statsTitle: "DGhubSchool in numbers",
       statsSchools: "Partner schools",
       statsStudents: "Registered students",
@@ -134,6 +135,11 @@ export const APropos: React.FC = () => {
 
       {/* Hero Section */}
       <section className="relative z-10 max-w-4xl mx-auto px-4 pt-16 md:pt-20 pb-12 text-center">
+        {/* Stickers décoratifs Hero */}
+        <StickerStar className="absolute top-20 left-6 hidden md:block" style={{ transform: 'rotate(-10deg)', opacity: 0.6 }} />
+        <StickerHeart className="absolute top-16 right-8 hidden lg:block" style={{ transform: 'rotate(12deg)', opacity: 0.5 }} />
+        <StickerSparkle className="absolute bottom-6 right-[20%] hidden md:block" />
+
         <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
           {t.badge}
         </div>
@@ -147,6 +153,13 @@ export const APropos: React.FC = () => {
 
       {/* Core Values Section */}
       <section className="relative z-10 bg-slate-50 border-y border-slate-200 py-20">
+        {/* Stickers décoratifs Values */}
+        <StickerCurvedArrow className="absolute top-16 right-12 hidden lg:block" style={{ transform: 'rotate(-10deg)' }} />
+        <StickerCircle className="absolute bottom-12 left-8 hidden md:block" />
+        <StickerNote className="absolute top-24 left-4 hidden xl:block" style={{ transform: 'rotate(-2deg)' }}>
+          {lang === 'fr' ? 'Fait pour le terrain 🌍' : 'Built for the field 🌍'}
+        </StickerNote>
+
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-16 space-y-4">
             <h2 className="text-xs font-black uppercase tracking-widest text-amber-600">{t.valuesBadge}</h2>
@@ -177,6 +190,10 @@ export const APropos: React.FC = () => {
 
       {/* About The Platform Section */}
       <section className="relative z-10 max-w-4xl mx-auto px-4 py-20">
+        {/* Stickers */}
+        <StickerWave className="absolute top-12 right-4 hidden md:block" />
+        <StickerCheck className="absolute bottom-16 left-8 hidden lg:block" style={{ transform: 'rotate(6deg)', opacity: 0.5 }} />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h3 className="text-xl md:text-2xl font-black text-slate-950 uppercase tracking-tight leading-snug">
@@ -222,6 +239,9 @@ export const APropos: React.FC = () => {
       {/* CTA Section */}
       <section className="bg-slate-950 text-white py-16 text-center relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        {/* Sticker CTA */}
+        <StickerStar className="absolute top-8 left-[10%] hidden md:block" style={{ opacity: 0.3 }} />
+
         <div className="max-w-3xl mx-auto px-4 space-y-6 relative z-10">
           <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight leading-snug">
             {t.ctaTitle}

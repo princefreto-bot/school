@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Check, HelpCircle, ArrowLeft, Landmark, Users } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import gsap from 'gsap';
+import { StickerStar, StickerHeart, StickerCurvedArrow, StickerNote, StickerCheck, StickerWave, StickerSparkle } from '../components/Stickers';
 
 export const Pricing: React.FC = () => {
   const navigate = useNavigate();
@@ -78,19 +79,19 @@ export const Pricing: React.FC = () => {
       period: t.perYear,
       description: lang === 'fr' ? "Pour les petites écoles de moins de 500 élèves inscrits." : "For small schools with less than 500 registered students.",
       features: lang === 'fr' ? [
-        "Accès complet à la console d'administration",
-        "Espace enseignant pour la saisie des notes & moyennes",
-        "Impression et édition des bulletins officiels DRE",
-        "Système de pointage et présence (Scan QR)",
-        "Génération de cartes d'identité scolaires avec QR Code",
-        "Configuration des frais de scolarité personnalisés"
+        "Accès complet à la console d'administration (tableau de bord en temps réel, indicateurs de performance, vue globale)",
+        "Espace enseignant pour la saisie des notes & moyennes pondérées par coefficient",
+        "Impression et édition des bulletins officiels DRE au format PDF prêts à imprimer",
+        "Système de pointage présence par scan QR Code (entrée/sortie en < 2s)",
+        "Génération de cartes d'identité scolaires avec photo passeport et QR Code crypté",
+        "Configuration des frais de scolarité personnalisés par classe et par tranche"
       ] : [
-        "Full access to the administration console",
-        "Teacher portal for grading & averages",
-        "Printing and editing of official DRE report cards",
-        "Attendance and clock-in system (QR Scan)",
-        "QR Code student ID card generation",
-        "Custom school fees configuration"
+        "Full access to the administration console (real-time dashboard, KPIs, global overview)",
+        "Teacher portal for grading & weighted averages by coefficient",
+        "Printing and editing of official DRE report cards in print-ready PDF format",
+        "QR Code attendance system (entry/exit scan in < 2s)",
+        "Student ID card generation with passport photo and encrypted QR Code",
+        "Custom school fees configuration by class and installment"
       ],
       buttonText: t.activateBtn,
       popular: false,
@@ -104,17 +105,17 @@ export const Pricing: React.FC = () => {
       period: t.perYear,
       description: lang === 'fr' ? "Pour les écoles de taille moyenne comptant entre 500 et 1000 élèves." : "For mid-size schools with 500 to 1000 students.",
       features: lang === 'fr' ? [
-        "Toutes les fonctionnalités de la formule Standard",
-        "Capacité d'inscription de 500 à 1000 élèves",
-        "Support technique prioritaire",
-        "Rapports financiers et bilans automatisés",
-        "Envoi de messages groupés aux parents"
+        "Toutes les fonctionnalités de la formule Standard incluses",
+        "Capacité d'inscription de 500 à 1 000 élèves avec gestion multi-classes",
+        "Support technique prioritaire WhatsApp & téléphone (délai de réponse < 2h)",
+        "Rapports financiers automatisés : bilans mensuels, journal de caisse, export Excel/CSV",
+        "Envoi de messages groupés SMS/Push aux parents (relances, annonces, convocations)"
       ] : [
-        "All features of the Standard plan",
-        "Enrollment capacity from 500 to 1000 students",
-        "Priority technical support",
-        "Automated financial reports and balance sheets",
-        "Send bulk messages to parents"
+        "All features of the Standard plan included",
+        "Enrollment capacity from 500 to 1,000 students with multi-class management",
+        "Priority technical support via WhatsApp & phone (response time < 2h)",
+        "Automated financial reports: monthly statements, cash journal, Excel/CSV export",
+        "Batch SMS/Push messages to parents (reminders, announcements, summons)"
       ],
       buttonText: t.activateBtn,
       popular: true,
@@ -128,17 +129,17 @@ export const Pricing: React.FC = () => {
       period: t.perYear,
       description: lang === 'fr' ? "Pour les grands établissements scolaires comptant entre 1000 et 2000 élèves." : "For large school establishments with 1000 to 2000 students.",
       features: lang === 'fr' ? [
-        "Toutes les fonctionnalités de la formule Intermédiaire",
-        "Capacité d'inscription de 1000 à 2000 élèves",
-        "Support dédié 24h/24 & 7j/7",
-        "Sauvegardes automatiques quotidiennes des données",
-        "Accès à l'historique d'activités de l'administration"
+        "Toutes les fonctionnalités de la formule Intermédiaire incluses",
+        "Capacité d'inscription de 1 000 à 2 000 élèves avec classes illimitées",
+        "Support dédié 24h/24 & 7j/7 par WhatsApp, téléphone et email",
+        "Sauvegardes automatiques quotidiennes des données (historique 90 jours)",
+        "Accès à l'historique complet d'activités de l'administration (journal d'audit)"
       ] : [
-        "All features of the Intermediate plan",
-        "Enrollment capacity from 1000 to 2000 students",
-        "24/7 dedicated support",
-        "Daily automatic data backups",
-        "Access to administration activity history"
+        "All features of the Intermediate plan included",
+        "Enrollment capacity from 1,000 to 2,000 students with unlimited classes",
+        "24/7 dedicated support via WhatsApp, phone, and email",
+        "Daily automatic data backups (90-day history)",
+        "Access to the complete administration activity history (audit log)"
       ],
       buttonText: t.activateBtn,
       popular: false,
@@ -152,17 +153,17 @@ export const Pricing: React.FC = () => {
       period: t.perYearCustom,
       description: lang === 'fr' ? "Pour les très grands complexes de plus de 2000 élèves." : "For very large complexes and school networks with over 2000 students.",
       features: lang === 'fr' ? [
-        "Toutes les fonctionnalités de la formule Avancée",
-        "Capacité d'élèves illimitée dans le système",
-        "Hébergement Cloud dédié et hautes performances",
-        "Personnalisation graphique des bulletins d'établissement",
-        "Formation sur site de vos équipes administratives"
+        "Toutes les fonctionnalités de la formule Avancée incluses",
+        "Capacité d'élèves illimitée dans le système (sans plafond)",
+        "Hébergement Cloud dédié, isolé et haute performance (SLA 99.9%)",
+        "Personnalisation graphique complète des bulletins (logo, couleurs, mise en page de l'établissement)",
+        "Formation sur site de vos équipes administratives + accompagnement de déploiement"
       ] : [
-        "All features of the Advanced plan",
-        "Unlimited student capacity in the system",
-        "Dedicated high-performance Cloud hosting",
-        "Custom graphical layout of report cards",
-        "On-site training for your administrative team"
+        "All features of the Advanced plan included",
+        "Unlimited student capacity in the system (no ceiling)",
+        "Dedicated, isolated high-performance Cloud hosting (SLA 99.9%)",
+        "Full graphical customization of report cards (logo, colors, school layout)",
+        "On-site training for your administrative team + deployment support"
       ],
       buttonText: t.contactUs,
       popular: false,
@@ -178,17 +179,17 @@ export const Pricing: React.FC = () => {
     period: t.parentPlanPeriod,
     description: t.parentPlanDesc,
     features: lang === 'fr' ? [
-      "Notification instantanée (Push & SMS) à chaque note saisie",
-      "Alertes instantanées de présence (Scan à l'arrivée / au départ)",
-      "Suivi transparent des versements de scolarité & soldes restants",
-      "Accès aux exercices scolaires et eBooks (Bibliothèque Numérique)",
-      "Messagerie interne bidirectionnelle avec la vie scolaire"
+      "Notification instantanée (Push & SMS) à chaque note saisie par un enseignant — avec la matière, la note et la moyenne actualisée",
+      "Alertes en temps réel de présence (Scan QR à l'arrivée / au départ) avec l'heure exacte et le nom de l'élève",
+      "Suivi transparent des versements de scolarité : montant versé, solde restant, historique des reçus PDF",
+      "Accès à la bibliothèque d'exercices scolaires, eBooks et quiz interactifs (Sésamath, Khan Academy, etc.)",
+      "Messagerie interne bidirectionnelle avec la vie scolaire : envoi de messages à l'administration et aux enseignants"
     ] : [
-      "Instant notification (Push & SMS) on every grade entered",
-      "Instant attendance alerts (Scan on arrival / departure)",
-      "Transparent tracking of school fee payments & remaining balances",
-      "Access to academic exercises and eBooks (Digital Library)",
-      "Bidirectional internal messaging with school life staff"
+      "Instant notification (Push & SMS) on every grade entered by a teacher — with subject, grade, and updated average",
+      "Real-time attendance alerts (QR Scan on arrival / departure) with exact time and student name",
+      "Transparent tracking of school fee payments: amount paid, remaining balance, PDF receipt history",
+      "Access to academic exercise library, eBooks and interactive quizzes (Sesamath, Khan Academy, etc.)",
+      "Bidirectional internal messaging with school life: send messages to administration and teachers"
     ],
     buttonText: t.parentPlanBtn,
     ctaAction: () => window.location.href = "https://zwhhrrbi.mychariow.co/prd_u611otjw/checkout"
@@ -276,6 +277,11 @@ export const Pricing: React.FC = () => {
 
       {/* Hero Section */}
       <section className="pricing-animate-in relative z-10 max-w-4xl mx-auto px-4 pt-16 pb-6 text-center">
+        {/* Stickers décoratifs Hero */}
+        <StickerStar className="absolute top-20 left-4 hidden md:block" style={{ transform: 'rotate(-12deg)', opacity: 0.5 }} />
+        <StickerHeart className="absolute top-24 right-6 hidden lg:block" style={{ transform: 'rotate(8deg)', opacity: 0.5 }} />
+        <StickerSparkle className="absolute bottom-8 left-[25%] hidden md:block" />
+
         <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
           {t.badge}
         </div>
@@ -317,6 +323,12 @@ export const Pricing: React.FC = () => {
 
       {/* Pricing Grid */}
       <section className="pricing-animate-in relative z-10 max-w-7xl mx-auto px-4 py-8 flex-1">
+        {/* Stickers décoratifs Pricing */}
+        <StickerCurvedArrow className="absolute top-4 right-[10%] hidden lg:block" style={{ transform: 'rotate(-20deg)' }} />
+        <StickerNote className="absolute top-8 left-4 hidden xl:block" style={{ transform: 'rotate(-2deg)' }}>
+          {lang === 'fr' ? 'Zéro frais cachés !' : 'Zero hidden fees!'}
+        </StickerNote>
+
         {activeTab === 'school' ? (
           <div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
@@ -429,6 +441,10 @@ export const Pricing: React.FC = () => {
 
       {/* Fratrie / Packs Section */}
       <section className="pricing-animate-in relative z-10 bg-slate-100 dark:bg-slate-900/50 border-y border-slate-200/50 dark:border-slate-800/80 py-16">
+        {/* Sticker */}
+        <StickerCheck className="absolute top-8 right-8 hidden md:block" style={{ opacity: 0.5 }} />
+        <StickerWave className="absolute bottom-6 left-[15%] hidden lg:block" />
+
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-12">
             <h3 className="text-xl md:text-3xl font-black text-slate-950 dark:text-white uppercase tracking-tight mb-2">
