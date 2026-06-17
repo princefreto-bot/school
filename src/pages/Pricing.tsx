@@ -10,7 +10,6 @@ import gsap from 'gsap';
 export const Pricing: React.FC = () => {
   const navigate = useNavigate();
   const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
-  const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
   const [activeTab, setActiveTab] = useState<'school' | 'parent'>('school');
 
   React.useEffect(() => {
