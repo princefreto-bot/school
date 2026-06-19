@@ -42,6 +42,7 @@ export const Parametres: React.FC = () => {
   
   const [logoPreview, setLogoPreview] = useState<string | null>(schoolLogo);
   const [logoError, setLogoError] = useState('');
+  const [yearError, setYearError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [stampPreview, setStampPreview] = useState<string | null>(schoolStamp);
@@ -146,6 +147,31 @@ export const Parametres: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setYearError('');
+
+    // Validation de l'année scolaire (intervalle de 2 ans ou plus interdit)
+    if (!localYear.trim()) {
+      setYearError("L'année scolaire ne peut pas être vide.");
+      return;
+    }
+
+    const years = localYear.match(/\b\d{4}\b/g);
+    if (years && years.length === 2) {
+      const start = parseInt(years[0], 10);
+      const end = parseInt(years[1], 10);
+      const diff = Math.abs(end - start);
+      if (diff > 1) {
+        setYearError(`L'intervalle de l'année scolaire ne peut pas être de ${diff} ans (ex : 2025-2026).`);
+        return;
+      }
+    } else if (years && years.length > 2) {
+      setYearError("Le format de l'année scolaire est invalide. Utilisez par exemple 2024-2025.");
+      return;
+    } else if (!years || years.length < 1) {
+      setYearError("L'année scolaire doit contenir au moins une année à 4 chiffres (ex : 2024-2025 ou 2025).");
+      return;
+    }
+
     await updateAllSettings({
       schoolName: localSchool,
       schoolYear: localYear,
@@ -233,9 +259,13 @@ export const Parametres: React.FC = () => {
                         <input
                             className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                             value={localYear}
-                            onChange={(e) => setLocalYear(e.target.value)}
+                            onChange={(e) => {
+                              setLocalYear(e.target.value);
+                              if (yearError) setYearError('');
+                            }}
                             placeholder="Ex : 2024-2025"
                         />
+                        {yearError && <p className="mt-2 text-[10px] font-bold text-rose-500">{yearError}</p>}
                     </div>
                 </div>
 

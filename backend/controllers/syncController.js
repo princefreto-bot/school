@@ -286,6 +286,19 @@ async function syncFromFrontend(req, res) {
 
         // --- 5. Sync App Settings ---
         if (appSettings) {
+            // Validation de la session (année scolaire)
+            if (appSettings.schoolYear) {
+                const years = appSettings.schoolYear.match(/\b\d{4}\b/g);
+                if (years && years.length === 2) {
+                    const start = parseInt(years[0], 10);
+                    const end = parseInt(years[1], 10);
+                    const diff = Math.abs(end - start);
+                    if (diff > 1) {
+                        return res.status(400).json({ error: "L'intervalle de l'année scolaire ne peut pas dépasser 1 an (ex: 2025-2026)." });
+                    }
+                }
+            }
+
             console.log('🎨 [Sync POST] Saving appSettings:', {
                 appName: appSettings.appName,
                 schoolName: appSettings.schoolName,
