@@ -8,7 +8,7 @@ import { API_BASE_URL, BACKEND_URL } from '../config';
 import { getEcolage, getCycle } from '../data/classConfig';
 import { v4 as uuid } from '../utils/uuid';
 import { createActivityLog } from '../utils/activityLogger';
-import { syncToBackend } from '../services/backendSync';
+import { syncToBackend, fetchFromBackend } from '../services/backendSync';
 import { chatApi } from '../services/chatApi';
 import { getAuthHeaders } from '../services/apiHelpers';
 
@@ -823,9 +823,7 @@ export const useStore = create<AppState>()(
         // On ne tente de sync vers le cloud que si on n'est pas un parent 
         // car l'URL /api/sync est restreinte.
         if (user && user.role !== 'parent') {
-          import('../services/backendSync').then(({ syncToBackend }) => {
-            syncToBackend({ announcementReads: newReads }).then(() => set({ lastSyncTimestamp: Date.now() }));
-          });
+          syncToBackend({ announcementReads: newReads }).then(() => set({ lastSyncTimestamp: Date.now() }));
         }
       },
       remindAnnouncementLater: (announcementId, parentId) => {
@@ -899,8 +897,6 @@ export const useStore = create<AppState>()(
           const now = Date.now();
           if (!force && now - get().lastSyncTimestamp < 12000) return;
           try {
-            const { getAuthHeaders } = await import('../services/apiHelpers');
-            const { BACKEND_URL } = await import('../config');
             const res = await fetch(`${BACKEND_URL}/api/parent/data`, {
               headers: getAuthHeaders()
             });
@@ -1009,7 +1005,6 @@ export const useStore = create<AppState>()(
         console.log(`🔄 [Sync] Démarrage du fetch cloud... (force=${force})`);
         set({ isSyncing: true });
         try {
-          const { fetchFromBackend } = await import('../services/backendSync');
           const data = await fetchFromBackend();
 
           if (!data) {
@@ -1071,9 +1066,7 @@ export const useStore = create<AppState>()(
             if (countRemoved > 0) {
               console.warn(`🧹 [Sync] Déduplication effectuée : ${rawCount} reçus -> ${repairedStudents.length} uniques (${countRemoved} doublons supprimés).`);
               console.log("🚀 Lancement du nettoyage permanent sur le Cloud...");
-              import('../services/backendSync').then(({ syncToBackend }) => {
-                syncToBackend(get(), true); 
-              });
+              syncToBackend(get(), true);
             } else {
               console.log(`✅ [Sync] ${repairedStudents.length} élèves chargés (Source: Cloud).`);
             }
@@ -1127,7 +1120,6 @@ export const useStore = create<AppState>()(
       },
       clearCloudPresences: async () => {
         try {
-          const { getAuthHeaders } = await import('../services/apiHelpers');
           const res = await fetch(`${API_BASE_URL}/sync/presences`, {
             method: 'DELETE',
             headers: getAuthHeaders()
@@ -1144,7 +1136,6 @@ export const useStore = create<AppState>()(
       },
       clearCloudActivityLogs: async () => {
         try {
-          const { getAuthHeaders } = await import('../services/apiHelpers');
           const res = await fetch(`${API_BASE_URL}/sync/logs`, {
             method: 'DELETE',
             headers: getAuthHeaders()
@@ -1161,7 +1152,6 @@ export const useStore = create<AppState>()(
       },
       clearCloudStudents: async () => {
         try {
-          const { getAuthHeaders } = await import('../services/apiHelpers');
           const res = await fetch(`${API_BASE_URL}/sync/students`, {
             method: 'DELETE',
             headers: getAuthHeaders()
@@ -1215,15 +1205,11 @@ export const useStore = create<AppState>()(
       setMatieres: (m) => set({ matieres: m }),
       addMatiere: (m) => {
         set(s => ({ matieres: [...s.matieres, m] }));
-        import('../services/backendSync').then(({ syncToBackend }) =>
-          syncToBackend({ matieres: get().matieres }).then(() => set({ lastSyncTimestamp: Date.now() }))
-        );
+        syncToBackend({ matieres: get().matieres }).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
       updateMatiere: (id, m) => {
         set(s => ({ matieres: s.matieres.map(x => x.id === id ? { ...x, ...m } : x) }));
-        import('../services/backendSync').then(({ syncToBackend }) =>
-          syncToBackend({ matieres: get().matieres }).then(() => set({ lastSyncTimestamp: Date.now() }))
-        );
+        syncToBackend({ matieres: get().matieres }).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
       deleteMatiere: async (id) => {
         set(s => ({
@@ -1231,7 +1217,6 @@ export const useStore = create<AppState>()(
           lastSyncTimestamp: Date.now()
         }));
         try {
-          const { getAuthHeaders } = await import('../services/apiHelpers');
           await fetch(`${API_BASE_URL}/sync/matiere/${id}`, {
             method: 'DELETE',
             headers: getAuthHeaders()
@@ -1245,15 +1230,11 @@ export const useStore = create<AppState>()(
       setClasseMatieres: (cm) => set({ classeMatieres: cm }),
       addClasseMatiere: (cm) => {
         set(s => ({ classeMatieres: [...s.classeMatieres, cm] }));
-        import('../services/backendSync').then(({ syncToBackend }) =>
-          syncToBackend({ classeMatieres: get().classeMatieres }).then(() => set({ lastSyncTimestamp: Date.now() }))
-        );
+        syncToBackend({ classeMatieres: get().classeMatieres }).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
       updateClasseMatiere: (id, cm) => {
         set(s => ({ classeMatieres: s.classeMatieres.map(x => x.id === id ? { ...x, ...cm } : x) }));
-        import('../services/backendSync').then(({ syncToBackend }) =>
-          syncToBackend({ classeMatieres: get().classeMatieres }).then(() => set({ lastSyncTimestamp: Date.now() }))
-        );
+        syncToBackend({ classeMatieres: get().classeMatieres }).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
       deleteClasseMatiere: async (id) => {
         set(s => ({
@@ -1261,7 +1242,6 @@ export const useStore = create<AppState>()(
           lastSyncTimestamp: Date.now()
         }));
         try {
-          const { getAuthHeaders } = await import('../services/apiHelpers');
           await fetch(`${API_BASE_URL}/sync/classe-matiere/${id}`, {
             method: 'DELETE',
             headers: getAuthHeaders()
@@ -1298,7 +1278,6 @@ export const useStore = create<AppState>()(
           lastSyncTimestamp: Date.now()
         }));
         try {
-          const { getAuthHeaders } = await import('../services/apiHelpers');
           await fetch(`${API_BASE_URL}/sync/note/${id}`, {
             method: 'DELETE',
             headers: getAuthHeaders()
