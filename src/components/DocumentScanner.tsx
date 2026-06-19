@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Camera, Upload, RotateCw, Contrast, X, Check, FileText, AlertTriangle } from 'lucide-react';
+import { Camera, Upload, RotateCw, Contrast, X, Check, FileText, AlertTriangle, Sun } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 import jsPDF from 'jspdf';
@@ -154,6 +154,83 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
   const [contrastValue, setContrastValue] = useState(50); // 0 à 100
   const [brightnessValue, setBrightnessValue] = useState(50); // 0 à 100
   const [rotation, setRotation] = useState(0); // 0, 90, 180, 270
+  const [filteredPreview, setFilteredPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!capturedImage) {
+      setFilteredPreview(null);
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const isRotated90or270 = rotation === 90 || rotation === 270;
+      const width = isRotated90or270 ? img.height : img.width;
+      const height = isRotated90or270 ? img.width : img.height;
+
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.translate(width / 2, height / 2);
+      ctx.rotate((rotation * Math.PI) / 180);
+      ctx.drawImage(img, -img.width / 2, -img.height / 2);
+      ctx.rotate(-(rotation * Math.PI) / 180);
+      ctx.translate(-width / 2, -height / 2);
+
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imgData.data;
+
+      if (filterType !== 'original') {
+        const threshold = Math.max(10, Math.min(245, 128 + (50 - brightnessValue) * 2.2));
+        const contrastFactor = (contrastValue - 50) * 1.5;
+
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+
+          // 1. Grayscale
+          let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+
+          // 2. Contrast adjustment
+          if (contrastFactor !== 0) {
+            gray = ((gray - 128) * (128 + contrastFactor)) / 128 + 128;
+          }
+
+          // 3. Threshold binarization
+          const val = gray > threshold ? 255 : 0;
+
+          data[i] = val;
+          data[i + 1] = val;
+          data[i + 2] = val;
+        }
+      } else {
+        // Original color filter with brightness/contrast adjustment
+        if (brightnessValue !== 50 || contrastValue !== 50) {
+          const bFactor = (brightnessValue - 50) * 2;
+          const cFactor = (259 * ((contrastValue - 50) * 2.5 + 255)) / (255 * (259 - (contrastValue - 50) * 2.5));
+
+          for (let i = 0; i < data.length; i += 4) {
+            for (let j = 0; j < 3; j++) {
+              let val = data[i + j];
+              val = val + bFactor;
+              val = cFactor * (val - 128) + 128;
+              data[i + j] = Math.max(0, Math.min(255, val));
+            }
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+      setFilteredPreview(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.src = capturedImage;
+  }, [capturedImage, filterType, contrastValue, brightnessValue, rotation]);
 
   // Cadrage / Crop
   const [scanStep, setScanStep] = useState<'crop' | 'filter'>('crop');
@@ -400,7 +477,8 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
   // 4. Appliquer les filtres de traitement d'image sur le Canvas
   const applyFiltersAndGetBlob = (): Promise<Blob> => {
     return new Promise((resolve, reject) => {
-      if (!capturedImage || !canvasRef.current) {
+      const source = filteredPreview || capturedImage;
+      if (!source || !canvasRef.current) {
         reject(new Error("Aucune image chargée."));
         return;
       }
@@ -415,43 +493,78 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
           return;
         }
 
-        // Gérer la rotation
-        const isRotated90or270 = rotation === 90 || rotation === 270;
-        const width = isRotated90or270 ? img.height : img.width;
-        const height = isRotated90or270 ? img.width : img.height;
+        canvas.width = img.width;
+        canvas.height = img.height;
 
-        canvas.width = width;
-        canvas.height = height;
+        ctx.clearRect(0, 0, img.width, img.height);
+        ctx.drawImage(img, 0, 0);
 
-        ctx.clearRect(0, 0, width, height);
-        ctx.translate(width / 2, height / 2);
-        ctx.rotate((rotation * Math.PI) / 180);
-        ctx.drawImage(img, -img.width / 2, -img.height / 2);
-        ctx.rotate(-(rotation * Math.PI) / 180);
-        ctx.translate(-width / 2, -height / 2);
+        // Si filteredPreview n'est pas encore généré par sécurité,
+        // on applique les filtres à la volée.
+        if (!filteredPreview) {
+          // Gérer la rotation
+          const isRotated90or270 = rotation === 90 || rotation === 270;
+          const width = isRotated90or270 ? img.height : img.width;
+          const height = isRotated90or270 ? img.width : img.height;
 
-        // Appliquer les filtres pixel-par-pixel
-        if (filterType !== 'original') {
-          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const data = imgData.data;
+          canvas.width = width;
+          canvas.height = height;
 
-          for (let i = 0; i < data.length; i += 4) {
-            const r = data[i];
-            const g = data[i + 1];
-            const b = data[i + 2];
+          ctx.clearRect(0, 0, width, height);
+          ctx.translate(width / 2, height / 2);
+          ctx.rotate((rotation * Math.PI) / 180);
+          ctx.drawImage(img, -img.width / 2, -img.height / 2);
+          ctx.rotate(-(rotation * Math.PI) / 180);
+          ctx.translate(-width / 2, -height / 2);
 
-            // 1. Grayscale
-            const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+          if (filterType !== 'original') {
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imgData.data;
 
-            // 2. Seuillage Binarisé Standard (seuil 128)
-            const val = gray > 128 ? 255 : 0;
+            const threshold = Math.max(10, Math.min(245, 128 + (50 - brightnessValue) * 2.2));
+            const contrastFactor = (contrastValue - 50) * 1.5;
 
-            data[i] = val;
-            data[i + 1] = val;
-            data[i + 2] = val;
+            for (let i = 0; i < data.length; i += 4) {
+              const r = data[i];
+              const g = data[i + 1];
+              const b = data[i + 2];
+
+              // 1. Grayscale
+              let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+
+              // 2. Contrast adjustment
+              if (contrastFactor !== 0) {
+                gray = ((gray - 128) * (128 + contrastFactor)) / 128 + 128;
+              }
+
+              // 3. Threshold binarization
+              const val = gray > threshold ? 255 : 0;
+
+              data[i] = val;
+              data[i + 1] = val;
+              data[i + 2] = val;
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+          } else {
+            // Original color filter with brightness/contrast adjustment
+            if (brightnessValue !== 50 || contrastValue !== 50) {
+              const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              const data = imgData.data;
+              const bFactor = (brightnessValue - 50) * 2;
+              const cFactor = (259 * ((contrastValue - 50) * 2.5 + 255)) / (255 * (259 - (contrastValue - 50) * 2.5));
+
+              for (let i = 0; i < data.length; i += 4) {
+                for (let j = 0; j < 3; j++) {
+                  let val = data[i + j];
+                  val = val + bFactor;
+                  val = cFactor * (val - 128) + 128;
+                  data[i + j] = Math.max(0, Math.min(255, val));
+                }
+              }
+              ctx.putImageData(imgData, 0, 0);
+            }
           }
-
-          ctx.putImageData(imgData, 0, 0);
         }
 
         canvas.toBlob((blob) => {
@@ -460,35 +573,20 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
           } else {
             reject(new Error("Erreur de conversion canvas en blob."));
           }
-        }, 'image/jpeg', 0.85);
+        }, 'image/png');
       };
 
       img.onerror = () => reject(new Error("Erreur de chargement de la source d'image."));
-      img.src = capturedImage;
+      img.src = source;
     });
   };
 
-  // 5. Soumettre le document scanné sous forme de PDF
+  // 5. Soumettre le document scanné sous forme d'image PNG
   const handleSubmit = async () => {
     try {
-      await applyFiltersAndGetBlob();
-      const canvas = canvasRef.current;
-      if (!canvas) {
-        throw new Error("Impossible d'accéder au canvas de numérisation.");
-      }
-
-      const pdf = new jsPDF({
-        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
-        unit: 'px',
-        format: [canvas.width, canvas.height]
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.90);
-      pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height);
-      const pdfBlob = pdf.output('blob');
-
-      const fileName = `${docTitle.toLowerCase().replace(/\s+/g, '_')}.pdf`;
-      const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+      const blob = await applyFiltersAndGetBlob();
+      const fileName = `${docTitle.toLowerCase().replace(/\s+/g, '_')}.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
       
       onCapture(file, docType, docTitle);
     } catch (err: any) {
@@ -703,9 +801,9 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
                 </div>
               ) : (
                 <img 
-                  src={capturedImage} 
+                  src={filteredPreview || capturedImage || ''} 
                   alt="Capture Preview" 
-                  style={{ transform: `rotate(${rotation}deg)` }}
+                  style={{ transform: filteredPreview ? 'none' : `rotate(${rotation}deg)` }}
                   className="max-w-full max-h-[62vh] md:max-h-[72vh] object-contain shadow-2xl rounded-lg transition-transform duration-300 pointer-events-none select-none" 
                 />
               )}
@@ -867,7 +965,53 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
                   ))}
                 </div>
 
+                {/* Luminosité Slider */}
+                <div className="space-y-1.5 pt-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1">
+                      <Sun className="w-3.5 h-3.5 text-amber-500" />
+                      Luminosité
+                    </span>
+                    <span>{brightnessValue}%</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="10" 
+                    max="90" 
+                    value={brightnessValue} 
+                    onChange={(e) => setBrightnessValue(Number(e.target.value))}
+                    className="w-full h-1 bg-slate-100 dark:bg-slate-850 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                  />
+                  <div className="flex justify-between text-[9px] text-slate-400 font-semibold px-0.5">
+                    <span>Plus sombre</span>
+                    <span>Standard</span>
+                    <span>Plus clair</span>
+                  </div>
+                </div>
 
+                {/* Contraste Slider */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1">
+                      <Contrast className="w-3.5 h-3.5 text-indigo-500" />
+                      Contraste & Épaisseur
+                    </span>
+                    <span>{contrastValue}%</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="10" 
+                    max="90" 
+                    value={contrastValue} 
+                    onChange={(e) => setContrastValue(Number(e.target.value))}
+                    className="w-full h-1 bg-slate-100 dark:bg-slate-850 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                  />
+                  <div className="flex justify-between text-[9px] text-slate-400 font-semibold px-0.5">
+                    <span>Doux</span>
+                    <span>Standard</span>
+                    <span>Prononcé</span>
+                  </div>
+                </div>
               </div>
             </div>
 

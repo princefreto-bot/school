@@ -77,10 +77,7 @@ export const ForgotPasswordSchool: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center p-4 py-12 font-['Poppins'] relative overflow-y-auto">
-      {/* Ambient glows */}
-      <div className="absolute top-[-15%] right-[-10%] w-[55%] h-[55%] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-15%] left-[-10%] w-[55%] h-[55%] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50/50 via-white to-amber-50/50 flex items-center justify-center p-4 py-12 font-['Poppins'] relative overflow-y-auto">
 
       <div ref={cardRef} className="w-full max-w-md bg-white/90 backdrop-blur-2xl border border-slate-100 rounded-[32px] p-6 md:p-10 shadow-2xl shadow-slate-200/50 relative z-10">
         <div className="text-center mb-8 fps-item">

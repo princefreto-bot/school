@@ -686,6 +686,30 @@ export const ParentDashboard: React.FC = () => {
                                                                 <p className="text-[9px] text-slate-400 mt-1">
                                                                     Scanné le {new Date(doc.created_at).toLocaleDateString('fr-FR')}
                                                                 </p>
+                                                                
+                                                                {/* Image Thumbnail Preview */}
+                                                                {(doc.file_url.toLowerCase().endsWith('.png') || doc.file_url.toLowerCase().endsWith('.jpg') || doc.file_url.toLowerCase().endsWith('.jpeg')) && (
+                                                                    <a 
+                                                                        href={`${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="mt-3 block relative w-full h-28 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 flex items-center justify-center group/thumb cursor-zoom-in"
+                                                                    >
+                                                                        <img 
+                                                                            src={`${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`} 
+                                                                            alt={doc.title}
+                                                                            className="w-full h-full object-cover transition-transform duration-300 group-hover/thumb:scale-105"
+                                                                            onError={(e) => {
+                                                                                (e.target as HTMLElement).style.display = 'none';
+                                                                            }}
+                                                                        />
+                                                                        <div className="absolute inset-0 bg-slate-950/0 group-hover/thumb:bg-slate-950/30 transition-colors flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 duration-300">
+                                                                            <span className="text-[9px] font-bold text-white bg-indigo-500/90 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                                                                Agrandir
+                                                                            </span>
+                                                                        </div>
+                                                                    </a>
+                                                                )}
                                                             </div>
                                                             <a
                                                                 href={`${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`}

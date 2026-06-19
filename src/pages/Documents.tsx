@@ -323,6 +323,30 @@ export const Documents: React.FC = () => {
                               <Calendar className="w-3.5 h-3.5" />
                               <span>Ajouté le {new Date(doc.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
+
+                            {/* Image Thumbnail Preview */}
+                            {(filename?.toLowerCase().endsWith('.png') || filename?.toLowerCase().endsWith('.jpg') || filename?.toLowerCase().endsWith('.jpeg')) && (
+                              <a 
+                                href={fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-3 block relative w-full h-32 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-805 flex items-center justify-center group/thumb cursor-zoom-in"
+                              >
+                                <img 
+                                  src={fileUrl} 
+                                  alt={doc.title}
+                                  className="w-full h-full object-cover transition-transform duration-300 group-hover/thumb:scale-105"
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = 'none';
+                                  }}
+                                />
+                                <div className="absolute inset-0 bg-slate-950/0 group-hover/thumb:bg-slate-950/30 transition-colors flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 duration-300">
+                                  <span className="text-[10px] font-bold text-white bg-indigo-500/90 px-3 py-1 rounded-full uppercase tracking-wider shadow-md">
+                                    Agrandir l'image
+                                  </span>
+                                </div>
+                              </a>
+                            )}
                           </div>
 
                           <div className="pt-4 border-t border-slate-100 dark:border-slate-800/50 mt-4">
