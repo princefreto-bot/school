@@ -656,11 +656,17 @@ export const useStore = create<AppState>()(
 
       updateAllSettings: async (newSettings) => {
         console.log('💾 [Store] Saving all settings to cloud...', Object.keys(newSettings));
+        const previousYear = get().schoolYear;
         set(newSettings);
         try {
           const result = await syncToBackend(newSettings);
           if (result) {
             console.log('✅ [Store] All settings synced successfully!');
+            // If the academic year changed, re-fetch all data for the new year
+            if (newSettings.schoolYear && newSettings.schoolYear !== previousYear) {
+               console.log('🔄 [Store] Academic year changed, fetching new data...');
+               await get().fetchAllFromBackend(true);
+            }
           }
         } catch (err) {
           console.error('❌ [Store] Error syncing settings:', err);

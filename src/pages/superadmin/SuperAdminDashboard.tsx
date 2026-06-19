@@ -317,7 +317,7 @@ const CreateSchoolModal: React.FC<CreateSchoolModalProps> = ({ onClose, onCreate
         <div className="flex items-center justify-between p-6 border-b border-slate-700">
           <div>
             <h2 className="text-xl font-black text-white">Créer un nouvel établissement</h2>
-            <p className="text-slate-400 text-sm">L'école bénéficiera de 2 mois d'essai gratuit</p>
+            <p className="text-slate-400 text-sm">L'école bénéficiera de 1 mois d'essai gratuit</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white">
             <X className="w-5 h-5" />
@@ -444,7 +444,14 @@ const CreateSchoolModal: React.FC<CreateSchoolModalProps> = ({ onClose, onCreate
 
 // ── DASHBOARD PRINCIPAL ───────────────────────────────────────
 export const SuperAdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'schools' | 'creators'>('schools');
+  const [activeTab, setActiveTab] = useState<'schools' | 'creators' | 'expenses'>('schools');
+  
+  // États Dépenses
+  const [expenses, setExpenses] = useState<any[]>([]);
+  const [newExpenseCategory, setNewExpenseCategory] = useState('');
+  const [newExpenseAmount, setNewExpenseAmount] = useState('');
+  const [newExpensePeriod, setNewExpensePeriod] = useState('annuel');
+
   
   // États Écoles
   const [schools, setSchools] = useState<SchoolWithStats[]>([]);
@@ -463,7 +470,8 @@ export const SuperAdminDashboard: React.FC = () => {
     try {
       const [schoolsRes, statsRes] = await Promise.all([
         fetch(`${API_BASE_URL}/superadmin/schools`, { headers: getAuthHeaders() }),
-        fetch(`${API_BASE_URL}/superadmin/stats`, { headers: getAuthHeaders() })
+        fetch(`${API_BASE_URL}/superadmin/stats`, { headers: getAuthHeaders() }),
+        fetch(`${API_BASE_URL}/superadmin/expenses`, { headers: getAuthHeaders() })
       ]);
       if (schoolsRes.ok) {
         const d = await schoolsRes.json();
@@ -473,8 +481,12 @@ export const SuperAdminDashboard: React.FC = () => {
         const d = await statsRes.json();
         setStats(d);
       }
+      if (expensesRes.ok) {
+        const d = await expensesRes.json();
+        setExpenses(d || []);
+      }
     } catch (err) {
-      console.error('SuperAdmin load schools/stats error:', err);
+      console.error('SuperAdmin load schools/stats/expenses error:', err);
     }
   };
 
@@ -641,6 +653,38 @@ export const SuperAdminDashboard: React.FC = () => {
     }
   };
 
+  const handleAddExpense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newExpenseCategory || !newExpenseAmount) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/superadmin/expenses`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ category: newExpenseCategory, amount: Number(newExpenseAmount), period: newExpensePeriod })
+      });
+      if (res.ok) {
+        setNewExpenseCategory('');
+        setNewExpenseAmount('');
+        await loadAll();
+      }
+    } catch(err) {
+      console.error(err);
+    }
+  };
+
+  const handleRemoveExpense = async (id: string) => {
+    if (!confirm('Supprimer cette dépense ?')) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/superadmin/expenses/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      if (res.ok) await loadAll();
+    } catch(err) {
+      console.error(err);
+    }
+  };
+
   const totalCommissionsAll = creators.reduce((acc, c) => acc + c.total_commission, 0);
 
   if (loading) {
@@ -711,7 +755,17 @@ export const SuperAdminDashboard: React.FC = () => {
               : 'text-slate-500 hover:text-slate-300'
           }`}
         >
-          <Megaphone className="w-4 h-4" /> Partenaires Créateurs
+          <Megaphone className="w-4 h-4" /> Partenaires
+        </button>
+        <button
+          onClick={() => setActiveTab('expenses')}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition ${
+            activeTab === 'expenses'
+              ? 'bg-slate-800 text-white border border-slate-700'
+              : 'text-slate-500 hover:text-slate-300'
+          }`}
+        >
+          <Wallet className="w-4 h-4" /> Dépenses & CA
         </button>
       </div>
 
@@ -728,15 +782,15 @@ export const SuperAdminDashboard: React.FC = () => {
                 },
                 {
                   label: 'Total Élèves', value: stats.total_students.toLocaleString(), icon: <Users className="w-5 h-5" />,
-                  color: 'from-emerald-500 to-teal-500', sub: `${stats.total_users} utilisateurs`
+                  color: 'from-emerald-500 to-teal-500', sub: `${stats.total_users} users`
                 },
                 {
-                  label: 'Chiffre d\'affaires', value: formatFCFA(stats.total_revenue), icon: <Wallet className="w-5 h-5" />,
+                  label: 'Parents Activés', value: (stats as any).total_parents || 0, icon: <UserCheck className="w-5 h-5" />,
+                  color: 'from-indigo-500 to-blue-500', sub: `sur la plateforme`
+                },
+                {
+                  label: 'CA Mensuel', value: formatFCFA(stats.total_revenue), icon: <Wallet className="w-5 h-5" />,
                   color: 'from-purple-500 to-violet-500', sub: `${stats.price_per_student.toLocaleString()} FCFA/élève`
-                },
-                {
-                  label: 'Alertes', value: stats.expired_trials + stats.suspended_schools, icon: <AlertTriangle className="w-5 h-5" />,
-                  color: 'from-red-500 to-rose-500', sub: `${stats.expired_trials} essais expirés`
                 },
               ].map((card) => (
                 <div key={card.label} className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
@@ -1061,6 +1115,93 @@ export const SuperAdminDashboard: React.FC = () => {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── CONTENU ONGLET DÉPENSES & CA ── */}
+      {activeTab === 'expenses' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4">
+                <Wallet className="w-5 h-5" />
+              </div>
+              <p className="text-2xl font-black text-white">{formatFCFA(stats?.total_revenue || 0)}</p>
+              <p className="text-slate-400 text-sm font-semibold">Revenus SaaS Globaux</p>
+              <p className="text-slate-500 text-xs mt-1">Abonnements générés (Ecoles + Parents)</p>
+            </div>
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center mb-4">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <p className="text-2xl font-black text-white">{formatFCFA(expenses.reduce((a, b) => a + Number(b.amount), 0))}</p>
+              <p className="text-slate-400 text-sm font-semibold">Dépenses SaaS Annuelles</p>
+              <p className="text-slate-500 text-xs mt-1">Hébergement, bases de données, etc.</p>
+            </div>
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4">
+                <Star className="w-5 h-5" />
+              </div>
+              <p className="text-2xl font-black text-emerald-400">
+                {formatFCFA((stats?.total_revenue || 0) - expenses.reduce((a, b) => a + Number(b.amount), 0))}
+              </p>
+              <p className="text-slate-400 text-sm font-semibold">Bénéfice Net Estimé</p>
+              <p className="text-slate-500 text-xs mt-1">Revenus - Dépenses (sans commissions)</p>
+            </div>
+          </div>
+
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden p-6">
+            <h2 className="text-lg font-bold text-white mb-6">Ajouter une dépense / charge</h2>
+            <form onSubmit={handleAddExpense} className="flex flex-wrap items-end gap-4">
+              <div className="flex-1 min-w-[200px]">
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Catégorie / Nom</label>
+                <input type="text" value={newExpenseCategory} onChange={e => setNewExpenseCategory(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  placeholder="ex: Serveur Render" required />
+              </div>
+              <div className="w-32">
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Montant (FCFA)</label>
+                <input type="number" value={newExpenseAmount} onChange={e => setNewExpenseAmount(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  required />
+              </div>
+              <div className="w-32">
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Périodicité</label>
+                <select value={newExpensePeriod} onChange={e => setNewExpensePeriod(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                >
+                  <option value="annuel">Annuel</option>
+                  <option value="mensuel">Mensuel</option>
+                  <option value="unique">Unique</option>
+                </select>
+              </div>
+              <button type="submit"
+                className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold transition-all h-[46px]">
+                Ajouter
+              </button>
+            </form>
+
+            <div className="mt-8 border-t border-slate-800 pt-6">
+              <h3 className="text-md font-bold text-slate-300 mb-4">Liste des dépenses</h3>
+              <div className="space-y-3">
+                {expenses.length === 0 ? <p className="text-slate-500 text-sm">Aucune dépense enregistrée.</p> : null}
+                {expenses.map(exp => (
+                  <div key={exp.id} className="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl border border-slate-700">
+                    <div>
+                      <p className="text-white font-bold">{exp.category}</p>
+                      <p className="text-xs text-slate-400 capitalize">{exp.period}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="font-black text-rose-400">{formatFCFA(exp.amount)}</span>
+                      <button onClick={() => handleRemoveExpense(exp.id)} className="p-2 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 rounded-lg transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}

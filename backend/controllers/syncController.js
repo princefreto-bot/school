@@ -15,6 +15,22 @@ async function syncFromFrontend(req, res) {
 
     let { students = [], presences = [], activityLogs = [], appSettings = null, replace = false, matieres = [], classeMatieres = [], notes = [] } = req.body;
     const { role, schoolSlug } = req.user;
+    const yearName = req.headers['x-academic-year'];
+    
+    let academicYearId = null;
+    if (yearName && schoolSlug) {
+        const { data: yearRow } = await supabase.from('academic_years').select('id').eq('school_slug', schoolSlug).eq('name', yearName).single();
+        if (yearRow) {
+            academicYearId = yearRow.id;
+        } else {
+            const { data: newRow } = await supabase.from('academic_years').insert({
+                school_slug: schoolSlug,
+                name: yearName,
+                is_current: true
+            }).select('id').single();
+            if (newRow) academicYearId = newRow.id;
+        }
+    }
 
     if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur', 'enseignant'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
@@ -96,7 +112,8 @@ async function syncFromFrontend(req, res) {
                 ecole_provenance: s.ecoleProvenance || '',
                 date_naissance: s.dateNaissance || null,
                 adsn: s.adsn || null,
-                photo_url: s.photoUrl || null
+                photo_url: s.photoUrl || null,
+                academic_year_id: academicYearId || null
             }));
 
             for (let i = 0; i < studentData.length; i += CHUNK_SIZE) {
@@ -115,7 +132,8 @@ async function syncFromFrontend(req, res) {
                             montant: p.montant,
                             date: p.date,
                             recu: p.recu || null,
-                            note: p.note || null
+                            note: p.note || null,
+                            academic_year_id: academicYearId || null
                         });
                     });
                 }
@@ -168,7 +186,8 @@ async function syncFromFrontend(req, res) {
                 eleve_classe: p.eleveClasse,
                 date: p.date,
                 heure: p.heure,
-                statut: p.statut
+                statut: p.statut,
+                academic_year_id: academicYearId || null
             }));
             for (let i = 0; i < presenceData.length; i += CHUNK_SIZE) {
                 const chunk = presenceData.slice(i, i + CHUNK_SIZE);
@@ -210,7 +229,8 @@ async function syncFromFrontend(req, res) {
                 utilisateur_role: l.utilisateurRole,
                 action: l.action,
                 description: l.description,
-                date_heure: l.dateHeure
+                date_heure: l.dateHeure,
+                academic_year_id: academicYearId || null
             }));
             for (let i = 0; i < logData.length; i += CHUNK_SIZE) {
                 const chunk = logData.slice(i, i + CHUNK_SIZE);
@@ -265,7 +285,8 @@ async function syncFromFrontend(req, res) {
                 const matieresData = matieres.map(m => ({
                     id: m.id,
                     nom: m.nom,
-                    categorie: m.categorie
+                    categorie: m.categorie,
+                    academic_year_id: academicYearId || null
                 }));
                 const { error: matErr } = await supabase.from(tbl('matieres')).upsert(matieresData, { onConflict: 'id' });
                 if (matErr) {
@@ -285,7 +306,8 @@ async function syncFromFrontend(req, res) {
                     classe: cm.classe,
                     matiere_id: cm.matiereId,
                     professeur: cm.professeur || '',
-                    coefficient: cm.coefficient || 1
+                    coefficient: cm.coefficient || 1,
+                    academic_year_id: academicYearId || null
                 }));
                 const { error: cmErr } = await supabase.from(tbl('classe_matieres')).upsert(cmData, { onConflict: 'id' });
                 if (cmErr) {
@@ -311,7 +333,8 @@ async function syncFromFrontend(req, res) {
                         periode: n.periode,
                         note_classe: n.noteClasse,
                         note_devoir: n.noteDevoir,
-                        note_compo: n.noteCompo
+                        note_compo: n.noteCompo,
+                        academic_year_id: academicYearId || null
                     }));
                     const { error: chunkErr } = await supabase.from(tbl('notes')).upsert(chunk, { onConflict: 'id' });
                     if (chunkErr) {
@@ -363,26 +386,45 @@ async function syncToFrontend(req, res) {
         return res.status(403).json({ error: 'Compte non associé à un établissement.' });
     }
 
+    const yearName = req.headers['x-academic-year'];
+    let academicYearId = null;
+    if (yearName) {
+        const { data: yearRow } = await supabase.from('academic_years').select('id').eq('school_slug', schoolSlug).eq('name', yearName).single();
+        if (yearRow) {
+            academicYearId = yearRow.id;
+        } else {
+            const { data: newRow } = await supabase.from('academic_years').insert({
+                school_slug: schoolSlug,
+                name: yearName,
+                is_current: true
+            }).select('id').single();
+            if (newRow) academicYearId = newRow.id;
+        }
+    }
+
     const tbl = (name) => `${name}_${schoolSlug}`;
 
     try {
-        const fetchTable = async (name, orderField = null, ascending = false) => {
+        const fetchTable = async (name, orderField = null, ascending = false, filterByYear = false) => {
             let q = supabase.from(tbl(name)).select('*');
+            if (filterByYear && academicYearId) {
+                q = q.eq('academic_year_id', academicYearId);
+            }
             if (orderField) q = q.order(orderField, { ascending });
             const { data, error } = await q;
             if (error && error.code !== '42P01') throw error;
             return data || [];
         };
 
-        const students = await fetchTable('students', 'nom');
-        const payments = await fetchTable('payments', 'date');
-        const presences = await fetchTable('presences', 'date');
-        const logs = await fetchTable('activity_logs', 'date_heure');
+        const students = await fetchTable('students', 'nom', true, true);
+        const payments = await fetchTable('payments', 'date', false, true);
+        const presences = await fetchTable('presences', 'date', false, true);
+        const logs = await fetchTable('activity_logs', 'date_heure', false, true);
         const links = await fetchTable('parent_student');
         const announcements = await fetchTable('announcements', 'created_at');
-        const dbMatieres = await fetchTable('matieres');
-        const dbClasseMatieres = await fetchTable('classe_matieres');
-        const dbNotes = await fetchTable('notes');
+        const dbMatieres = await fetchTable('matieres', null, false, true);
+        const dbClasseMatieres = await fetchTable('classe_matieres', null, false, true);
+        const dbNotes = await fetchTable('notes', null, false, true);
         const announcementReads = await fetchTable('announcement_reads');
         
         const { data: appSettings, error: settingsError } = await supabase.from(tbl('app_settings')).select('*').single();

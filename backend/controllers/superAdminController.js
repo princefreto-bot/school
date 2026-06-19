@@ -147,7 +147,7 @@ async function createSchool(req, res) {
             status: 'trial',
             is_email_verified: true,
             is_approved: true,
-            trial_ends_at: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(), // +2 mois
+            trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // +1 mois
             accepted_terms: validatedData.accepted_terms,
             accepted_privacy_policy: validatedData.accepted_privacy_policy,
             marketing_consent: validatedData.marketing_consent,
@@ -286,14 +286,17 @@ async function getGlobalStats(req, res) {
 
         let totalStudents = 0;
         let totalUsers = 0;
+        let totalParents = 0;
 
         if (schools) {
             for (let s of schools) {
                 try {
                     const { count: sCount } = await supabase.from(`students_${s.slug}`).select('*', { count: 'exact', head: true });
                     const { count: uCount } = await supabase.from(`profiles_${s.slug}`).select('*', { count: 'exact', head: true });
+                    const { count: pCount } = await supabase.from(`profiles_${s.slug}`).select('*', { count: 'exact', head: true }).eq('role', 'parent');
                     totalStudents += (sCount || 0);
                     totalUsers += (uCount || 0);
+                    totalParents += (pCount || 0);
                 } catch(e) {}
             }
         }
@@ -315,6 +318,7 @@ async function getGlobalStats(req, res) {
             expired_trials: expiredTrials,
             total_students: totalStudents || 0,
             total_users: totalUsers || 0,
+            total_parents: totalParents || 0,
             total_revenue: (totalStudents || 0) * PRICE_PER_STUDENT,
             price_per_student: PRICE_PER_STUDENT,
             currency: 'FCFA'
@@ -450,4 +454,39 @@ async function approveSchool(req, res) {
     }
 }
 
-module.exports = { getAllSchools, createSchool, updateSchoolStatus, updateSchool, deleteSchool, getGlobalStats, impersonateSchool, approveSchool };
+// ── DÉPENSES (EXPENSES) ──────────────────────────────────────────
+async function getExpenses(req, res) {
+    try {
+        const { data, error } = await supabase.from('saas_expenses').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        return res.json(data);
+    } catch (err) {
+        return res.status(500).json({ error: 'Erreur getExpenses: ' + err.message });
+    }
+}
+
+async function addExpense(req, res) {
+    const { category, amount, period } = req.body;
+    try {
+        const { data, error } = await supabase.from('saas_expenses')
+            .insert({ category, amount, period: period || 'annuel' })
+            .select().single();
+        if (error) throw error;
+        return res.json(data);
+    } catch (err) {
+        return res.status(500).json({ error: 'Erreur addExpense: ' + err.message });
+    }
+}
+
+async function deleteExpense(req, res) {
+    const { id } = req.params;
+    try {
+        const { error } = await supabase.from('saas_expenses').delete().eq('id', id);
+        if (error) throw error;
+        return res.json({ message: 'Dépense supprimée' });
+    } catch (err) {
+        return res.status(500).json({ error: 'Erreur deleteExpense: ' + err.message });
+    }
+}
+
+module.exports = { getAllSchools, createSchool, updateSchoolStatus, updateSchool, deleteSchool, getGlobalStats, impersonateSchool, approveSchool, getExpenses, addExpense, deleteExpense };

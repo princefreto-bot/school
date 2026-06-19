@@ -56,8 +56,15 @@ app.use((req, res, next) => {
     next();
 });
 
+// ── Limiteur de requêtes ───────────────────────────────────────
+const { globalLimiter, authLimiter } = require('./middleware/rateLimiter');
+
+// Appliquer le limiteur global à toutes les requêtes API (hors static)
+app.use('/api', globalLimiter);
+
 // ── Routes API ────────────────────────────────────────────────
-app.use('/api/auth', require('./routes/auth'));
+// Appliquer le limiteur plus strict aux routes d'authentification
+app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/parent', require('./routes/parent'));
 app.use('/api/students', require('./routes/students'));
 app.use('/api/sync', require('./routes/sync'));
@@ -88,7 +95,15 @@ app.get('/api/schools', async (req, res) => {
 
 // Route publique pour les statistiques globales
 app.get('/api/public/stats', async (req, res) => {
+    const { getCache, setCache } = require('./services/cacheService');
+    const CACHE_KEY = 'public_stats';
+
     try {
+        const cachedStats = await getCache(CACHE_KEY);
+        if (cachedStats) {
+            return res.json(cachedStats);
+        }
+
         const { count: totalSchools } = await supabase
             .from('schools')
             .select('*', { count: 'exact', head: true })
@@ -120,11 +135,14 @@ app.get('/api/public/stats', async (req, res) => {
             }
         }
         
-        res.json({
+        const stats = {
             schools: totalSchools || 0,
             students: totalStudents || 0,
             documents: (totalDocuments || 0) + (totalBulletins || 0)
-        });
+        };
+
+        await setCache(CACHE_KEY, stats, 900); // Cache pendant 15 minutes
+        res.json(stats);
     } catch (err) {
         res.status(500).json({ error: 'Erreur récupération stats' });
     }

@@ -435,19 +435,13 @@ async function registerSchoolRequest(req, res) {
 
         if (schoolErr) throw schoolErr;
 
-        // 5. Envoyer l'email
-        const { sendVerificationEmail } = require('../utils/mailer');
-        try {
-            await sendVerificationEmail(email.trim(), name.trim(), code);
-        } catch (mailErr) {
-            console.warn(`⚠️ [Mailer Warning] Échec de l'envoi de l'e-mail de validation :`, mailErr.message);
-            console.log(`🔑 [CODE DE VALIDATION] E-mail: ${email.trim()} | Code: ${code}`);
-            // En mode développement, on ne bloque pas la demande d'inscription si le serveur SMTP n'est pas configuré.
-            if (process.env.NODE_ENV === 'production') {
-                await supabase.from('schools').delete().eq('slug', cleanSlug);
-                throw mailErr;
-            }
-        }
+        // 5. Envoyer l'email (Via file d'attente BullMQ)
+        const { addEmailJob } = require('../services/queueService');
+        await addEmailJob('send-verification', {
+            to: email.trim(),
+            schoolName: name.trim(),
+            code
+        });
 
         return res.status(200).json({
             success: true,
@@ -615,18 +609,13 @@ async function resendVerificationEmail(req, res) {
 
         if (updateErr) throw updateErr;
 
-        // 4. Renvoyer l'e-mail
-        const { sendVerificationEmail } = require('../utils/mailer');
-        try {
-            await sendVerificationEmail(cleanEmail, school.name, code);
-        } catch (mailErr) {
-            console.warn(`⚠️ [Mailer Warning] Échec du renvoi de l'e-mail de validation :`, mailErr.message);
-            console.log(`🔑 [CODE DE VALIDATION - RENVOI] E-mail: ${cleanEmail} | Code: ${code}`);
-            
-            if (process.env.NODE_ENV === 'production') {
-                throw mailErr;
-            }
-        }
+        // 4. Renvoyer l'e-mail via file d'attente
+        const { addEmailJob } = require('../services/queueService');
+        await addEmailJob('send-verification', {
+            to: cleanEmail,
+            schoolName: school.name,
+            code
+        });
 
         return res.status(200).json({
             success: true,
@@ -670,11 +659,14 @@ async function requestPasswordReset(req, res) {
             { expiresIn: '1h' }
         );
 
-        // Envoyer l'e-mail
-        const { sendPasswordResetEmail } = require('../utils/mailer');
+        // Envoyer l'e-mail via file d'attente
+        const { addEmailJob } = require('../services/queueService');
         const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/#/reset-password?token=${token}`;
         
-        await sendPasswordResetEmail(input, resetLink);
+        await addEmailJob('send-password-reset', {
+            to: input,
+            resetLink
+        });
 
         return res.json({ success: true, message: 'Si cette adresse email existe pour cet établissement, un lien de réinitialisation a été envoyé.' });
     } catch (err) {

@@ -11,6 +11,8 @@ export async function parseResponse(res: Response) {
     }
 }
 
+import { useStore } from '../store/useStore';
+
 /**
  * Common headers including JWT token from local storage when available.
  * `Content-Type` is always set to application/json because most endpoints
@@ -19,8 +21,10 @@ export async function parseResponse(res: Response) {
  */
 export function getAuthHeaders(): Record<string, string> {
     const token = localStorage.getItem('parent_token');
+    const schoolYear = useStore.getState().schoolYear;
     return {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        'x-academic-year': schoolYear || '2024-2025'
     };
 }

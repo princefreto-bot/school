@@ -11,7 +11,8 @@ import {
   ArrowRight, 
   Check, 
   Menu, 
-  X 
+  X,
+  Star
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import { BACKEND_URL } from '../config';
@@ -98,8 +99,21 @@ export const LandingPage: React.FC = () => {
       newsroomDate: "Juin 2026",
       viewAllNews: "Lire toutes les actualités",
       readyTitle: "Votre école mérite mieux qu'Excel.",
-      readyDesc: "Rejoignez les directeurs d'Afrique de l'Ouest qui ont arrêté les calculs manuels, les files d'attente à la caisse et les bulletins imprimés à la dernière minute. Votre essai gratuit de 60 jours commence maintenant.",
-      createSchoolBtn: "Lancer mon école gratuitement"
+      readyDesc: "Rejoignez les directeurs d'Afrique de l'Ouest qui ont arrêté les calculs manuels, les files d'attente à la caisse et les bulletins imprimés à la dernière minute. Votre essai gratuit de 1 mois commence maintenant.",
+      createSchoolBtn: "Lancer mon école gratuitement",
+      cloudTitle: "Oubliez les serveurs locaux. Passez au Cloud.",
+      cloudDesc: "La majorité des écoles utilisent encore des systèmes installés sur des ordinateurs locaux. Résultat : virus, disques durs grillés, perte totale des données scolaires et inaccessibilité à distance. Avec DGhubSchool, vos données sont sauvegardées en temps réel sur des serveurs Cloud ultra-sécurisés.",
+      cloudPoint1: "Zéro risque de perte : Sauvegardes automatisées 24/7.",
+      cloudPoint2: "Accessibilité mondiale : Gérez votre école depuis n'importe où.",
+      cloudPoint3: "Zéro maintenance : Pas de serveur à acheter ou réparer.",
+      parentsFocusTitle: "Impliquez les parents comme jamais auparavant",
+      parentsFocusDesc: "Offrez aux parents une visibilité totale sur le parcours de leur enfant via une interface dédiée. Fini les carnets de correspondance papier égarés.",
+      parentsFocus1: "Suivi des Cours & Devoirs",
+      parentsFocus1Desc: "Les parents consultent le cahier de texte en ligne, l'emploi du temps et les devoirs à venir depuis leur téléphone.",
+      parentsFocus2: "Alertes Instantanées",
+      parentsFocus2Desc: "Notifications en temps réel pour les absences, retards et rappels de paiements via SMS et Push.",
+      parentsFocus3: "Paiements Dématérialisés",
+      parentsFocus3Desc: "Règlement des frais de scolarité via Mobile Money sans se déplacer."
     },
     en: {
       features: "Features",
@@ -160,8 +174,21 @@ export const LandingPage: React.FC = () => {
       newsroomDate: "June 2026",
       viewAllNews: "Read all news",
       readyTitle: "Your school deserves better than Excel.",
-      readyDesc: "Join school principals across West Africa who have stopped manual calculations, cashier queues and last-minute printed report cards. Your free 60-day trial starts now.",
-      createSchoolBtn: "Launch my school for free"
+      readyDesc: "Join school principals across West Africa who have stopped manual calculations, cashier queues and last-minute printed report cards. Your free 1-month trial starts now.",
+      createSchoolBtn: "Launch my school for free",
+      cloudTitle: "Forget local servers. Switch to the Cloud.",
+      cloudDesc: "Most schools still use systems installed on local computers. Result: viruses, dead hard drives, total loss of school data, and lack of remote access. With DGhubSchool, your data is backed up in real-time on ultra-secure Cloud servers.",
+      cloudPoint1: "Zero risk of loss: 24/7 automated backups.",
+      cloudPoint2: "Global accessibility: Manage your school from anywhere.",
+      cloudPoint3: "Zero maintenance: No servers to buy or repair.",
+      parentsFocusTitle: "Engage parents like never before",
+      parentsFocusDesc: "Give parents full visibility into their child's journey via a dedicated interface. No more lost paper communication books.",
+      parentsFocus1: "Courses & Homework Tracking",
+      parentsFocus1Desc: "Parents check the online lesson book, schedule, and upcoming homework from their phones.",
+      parentsFocus2: "Instant Alerts",
+      parentsFocus2Desc: "Real-time notifications for absences, lateness, and payment reminders via SMS and Push.",
+      parentsFocus3: "Digital Payments",
+      parentsFocus3Desc: "Pay tuition fees via Mobile Money without traveling."
     }
   };
 
@@ -354,6 +381,176 @@ export const LandingPage: React.FC = () => {
               alt={t.realTimeDashboard} 
               className="w-full h-full object-cover" 
             />
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION MARQUEES ────────────────────────────────── */}
+      <section className="bg-slate-950 py-16 overflow-hidden relative border-y border-slate-900">
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 pointer-events-none" />
+        
+        <div className="space-y-6">
+          <div className="flex overflow-hidden group">
+            <div className="animate-marquee-left hover-pause flex gap-4 items-center">
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="flex gap-4 items-center whitespace-nowrap">
+                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Numérisation</span>
+                  <Star className="w-6 h-6 text-amber-500" />
+                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Code QR</span>
+                  <Star className="w-6 h-6 text-amber-500" />
+                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Historique</span>
+                  <Star className="w-6 h-6 text-amber-500" />
+                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Annonces SMS</span>
+                  <Star className="w-6 h-6 text-amber-500" />
+                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Caisse</span>
+                  <Star className="w-6 h-6 text-amber-500" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex overflow-hidden group">
+            <div className="animate-marquee-right hover-pause flex gap-4 items-center">
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="flex gap-4 items-center whitespace-nowrap">
+                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Recouvrement</span>
+                  <Star className="w-6 h-6 text-emerald-500" />
+                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Bulletins PDF</span>
+                  <Star className="w-6 h-6 text-emerald-500" />
+                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Format DRE</span>
+                  <Star className="w-6 h-6 text-emerald-500" />
+                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Espace Parents</span>
+                  <Star className="w-6 h-6 text-emerald-500" />
+                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Absences</span>
+                  <Star className="w-6 h-6 text-emerald-500" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex overflow-hidden group">
+            <div className="animate-marquee-left hover-pause flex gap-4 items-center">
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="flex gap-4 items-center whitespace-nowrap">
+                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Retards</span>
+                  <Star className="w-6 h-6 text-indigo-500" />
+                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Messagerie</span>
+                  <Star className="w-6 h-6 text-indigo-500" />
+                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Export Excel</span>
+                  <Star className="w-6 h-6 text-indigo-500" />
+                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Cloud Sécurisé</span>
+                  <Star className="w-6 h-6 text-indigo-500" />
+                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Zéro Perte</span>
+                  <Star className="w-6 h-6 text-indigo-500" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION CLOUD VS LOCAL ────────────────────────────── */}
+      <section className="bg-slate-50 py-24 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <span className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-indigo-200">
+                Sécurité & Fiabilité
+              </span>
+              <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight leading-tight">
+                {(t as any).cloudTitle}
+              </h2>
+              <p className="text-slate-600 text-sm md:text-base leading-relaxed">
+                {(t as any).cloudDesc}
+              </p>
+              
+              <ul className="space-y-5 mt-8">
+                <li className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                    <Check className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900">{(t as any).cloudPoint1.split(':')[0]}</h4>
+                    <p className="text-sm text-slate-500">{(t as any).cloudPoint1.split(':')[1]}</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                    <Check className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900">{(t as any).cloudPoint2.split(':')[0]}</h4>
+                    <p className="text-sm text-slate-500">{(t as any).cloudPoint2.split(':')[1]}</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                    <Check className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900">{(t as any).cloudPoint3.split(':')[0]}</h4>
+                    <p className="text-sm text-slate-500">{(t as any).cloudPoint3.split(':')[1]}</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            
+            <div className="relative">
+              {/* Illustration Cloud */}
+              <div className="aspect-square bg-slate-900 rounded-[3rem] p-8 relative shadow-2xl border border-slate-800 overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-indigo-500/20 opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="h-full w-full border border-slate-700/50 rounded-2xl bg-slate-950/50 backdrop-blur-sm p-6 flex flex-col justify-center items-center text-center space-y-6 relative z-10">
+                  <div className="w-24 h-24 bg-amber-500 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(244,180,0,0.4)] animate-pulse">
+                    <BookOpen className="w-10 h-10 text-slate-950" />
+                  </div>
+                  <h3 className="text-white text-2xl font-black">DGhubSchool Cloud</h3>
+                  <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div className="bg-amber-500 h-full w-full animate-marquee-left" style={{ animationDuration: '3s' }} />
+                  </div>
+                  <p className="text-slate-400 text-sm">Synchronisation mondiale active</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION EXPÉRIENCE PARENTS ─────────────────────── */}
+      <section className="bg-white py-24 relative overflow-hidden border-t border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="text-center mb-16 space-y-4 max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight">
+              {(t as any).parentsFocusTitle}
+            </h2>
+            <p className="text-slate-500 text-sm md:text-base">
+              {(t as any).parentsFocusDesc}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 hover:-translate-y-2 transition-transform duration-300">
+              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+                <BookOpen className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 mb-3">{(t as any).parentsFocus1}</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">{(t as any).parentsFocus1Desc}</p>
+            </div>
+            
+            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 hover:-translate-y-2 transition-transform duration-300">
+              <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-6">
+                <Menu className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 mb-3">{(t as any).parentsFocus2}</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">{(t as any).parentsFocus2Desc}</p>
+            </div>
+            
+            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 hover:-translate-y-2 transition-transform duration-300">
+              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-6">
+                <CreditCard className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 mb-3">{(t as any).parentsFocus3}</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">{(t as any).parentsFocus3Desc}</p>
+            </div>
           </div>
         </div>
       </section>

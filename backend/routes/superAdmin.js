@@ -11,7 +11,10 @@ const {
     deleteSchool,
     getGlobalStats,
     impersonateSchool,
-    approveSchool
+    approveSchool,
+    getExpenses,
+    addExpense,
+    deleteExpense
 } = require('../controllers/superAdminController');
 
 const {
@@ -41,5 +44,10 @@ router.post('/creators', authenticateToken, requireSuperAdmin, createCreator);
 router.delete('/creators/:id', authenticateToken, requireSuperAdmin, deleteCreator);
 router.post('/creators/:id/link', authenticateToken, requireSuperAdmin, linkCreatorToSchool);
 router.delete('/creators/:id/link/:schoolId', authenticateToken, requireSuperAdmin, unlinkCreatorFromSchool);
+
+// ── RÉSÉRVÉ SUPERADMIN : GESTION DES DÉPENSES ──
+router.get('/expenses', authenticateToken, requireSuperAdmin, getExpenses);
+router.post('/expenses', authenticateToken, requireSuperAdmin, addExpense);
+router.delete('/expenses/:id', authenticateToken, requireSuperAdmin, deleteExpense);
 
 module.exports = router;
