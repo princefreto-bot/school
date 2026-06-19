@@ -1,2 +1,3 @@
-export const BACKEND_URL = 'https://school-t79e.onrender.com';
-export const API_BASE_URL = 'https://school-t79e.onrender.com/api';
+const isProd = import.meta.env.PROD;
+export const BACKEND_URL = isProd ? window.location.origin : 'http://localhost:3001';
+export const API_BASE_URL = `${BACKEND_URL}/api`;
