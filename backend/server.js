@@ -18,6 +18,11 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 // ── Application Express ───────────────────────────────────────
 const app = express();
 
+// ⚡ Render (et tout reverse proxy) transmet l'IP réelle via X-Forwarded-For.
+// Sans ce paramètre, express-rate-limit lance ERR_ERL_UNEXPECTED_X_FORWARDED_FOR.
+// La valeur 1 signifie "faire confiance à exactement 1 proxy en amont" (le load balancer Render).
+app.set('trust proxy', 1);
+
 // Middleware globaux
 const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',')
