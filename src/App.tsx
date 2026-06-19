@@ -3,21 +3,22 @@
 // ============================================================
 import React, { Suspense, lazy } from 'react';
 import { useStore } from './store/useStore';
-import { Login } from './components/Login';
-import { Layout } from './components/Layout';
-import { AnnouncementPopup } from './components/AnnouncementPopup';
 import { webPushService } from './services/webPushService';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Confidentialite } from './pages/Confidentialite';
-import { PortailEcole } from './pages/PortailEcole';
-import { CreerCompte } from './pages/CreerCompte';
-import { ConditionsUtilisation } from './pages/ConditionsUtilisation';
-import { ConfirmerEmail } from './pages/ConfirmerEmail';
-import { OfflinePage } from './pages/OfflinePage';
-import { ForgotPasswordParent } from './pages/ForgotPasswordParent';
-import { ForgotPasswordSchool } from './pages/ForgotPasswordSchool';
-import { ResetPassword } from './pages/ResetPassword';
-import { NotFound } from './pages/NotFound';
+
+const Login = lazy(() => import('./components/Login').then(m => ({ default: m.Login })));
+const Layout = lazy(() => import('./components/Layout').then(m => ({ default: m.Layout })));
+const AnnouncementPopup = lazy(() => import('./components/AnnouncementPopup').then(m => ({ default: m.AnnouncementPopup })));
+const Confidentialite = lazy(() => import('./pages/Confidentialite').then(m => ({ default: m.Confidentialite })));
+const PortailEcole = lazy(() => import('./pages/PortailEcole').then(m => ({ default: m.PortailEcole })));
+const CreerCompte = lazy(() => import('./pages/CreerCompte').then(m => ({ default: m.CreerCompte })));
+const ConditionsUtilisation = lazy(() => import('./pages/ConditionsUtilisation').then(m => ({ default: m.ConditionsUtilisation })));
+const ConfirmerEmail = lazy(() => import('./pages/ConfirmerEmail').then(m => ({ default: m.ConfirmerEmail })));
+const OfflinePage = lazy(() => import('./pages/OfflinePage').then(m => ({ default: m.OfflinePage })));
+const ForgotPasswordParent = lazy(() => import('./pages/ForgotPasswordParent').then(m => ({ default: m.ForgotPasswordParent })));
+const ForgotPasswordSchool = lazy(() => import('./pages/ForgotPasswordSchool').then(m => ({ default: m.ForgotPasswordSchool })));
+const ResetPassword = lazy(() => import('./pages/ResetPassword').then(m => ({ default: m.ResetPassword })));
+const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
 
 
 // Lazy loading for pages to reduce initial bundle size
@@ -59,7 +60,7 @@ const Features = lazy(() => import('./pages/Features').then(m => ({ default: m.F
 const Newsroom = lazy(() => import('./pages/Newsroom').then(m => ({ default: m.Newsroom })));
 const HelpCenter = lazy(() => import('./pages/HelpCenter').then(m => ({ default: m.HelpCenter })));
 const ActivationLicence = lazy(() => import('./pages/ActivationLicence').then(m => ({ default: m.ActivationLicence })));
-import { CookieConsent } from './components/CookieConsent';
+const CookieConsent = lazy(() => import('./components/CookieConsent').then(m => ({ default: m.CookieConsent })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-12">
@@ -262,7 +263,7 @@ export function App() {
 
   // Affichage de la page offline si pas d'Internet
   if (!isOnline) {
-    return <OfflinePage onRetry={() => setIsOnline(navigator.onLine)} />;
+    return <Suspense fallback={<LoadingSpinner />}><OfflinePage onRetry={() => setIsOnline(navigator.onLine)} /></Suspense>;
   }
 
   const subscriptionBlockedMessage = useStore((s) => s.subscriptionBlockedMessage);
@@ -318,8 +319,8 @@ export function App() {
     <>
       <Routes>
         {/* Prefixed routes */}
-        <Route path="/:lang/confidentialite" element={<Confidentialite />} />
-        <Route path="/:lang/conditions-utilisation" element={<ConditionsUtilisation />} />
+        <Route path="/:lang/confidentialite" element={<Suspense fallback={<LoadingSpinner />}><Confidentialite /></Suspense>} />
+        <Route path="/:lang/conditions-utilisation" element={<Suspense fallback={<LoadingSpinner />}><ConditionsUtilisation /></Suspense>} />
         <Route 
           path="/:lang/parent/exercices" 
           element={
@@ -341,22 +342,22 @@ export function App() {
             </Suspense>
           } 
         />
-        <Route path="/:lang/confirmer-email" element={<ConfirmerEmail />} />
-        <Route path="/:lang/portail-ecole" element={<PortailEcole />} />
-        <Route path="/:lang/creer-compte" element={<CreerCompte />} />
+        <Route path="/:lang/confirmer-email" element={<Suspense fallback={<LoadingSpinner />}><ConfirmerEmail /></Suspense>} />
+        <Route path="/:lang/portail-ecole" element={<Suspense fallback={<LoadingSpinner />}><PortailEcole /></Suspense>} />
+        <Route path="/:lang/creer-compte" element={<Suspense fallback={<LoadingSpinner />}><CreerCompte /></Suspense>} />
         <Route path="/:lang/pricing" element={<Suspense fallback={<LoadingSpinner />}><Pricing /></Suspense>} />
         <Route path="/:lang/a-propos" element={<Suspense fallback={<LoadingSpinner />}><APropos /></Suspense>} />
         <Route path="/:lang/features" element={<Suspense fallback={<LoadingSpinner />}><Features /></Suspense>} />
         <Route path="/:lang/newsroom" element={<Suspense fallback={<LoadingSpinner />}><Newsroom /></Suspense>} />
         <Route path="/:lang/centre-aide" element={<Suspense fallback={<LoadingSpinner />}><HelpCenter /></Suspense>} />
-        <Route path="/:lang/mot-de-passe-oublie" element={<ForgotPasswordParent />} />
-        <Route path="/:lang/mot-de-passe-oublie-ecole" element={<ForgotPasswordSchool />} />
-        <Route path="/:lang/reset-password" element={<ResetPassword />} />
+        <Route path="/:lang/mot-de-passe-oublie" element={<Suspense fallback={<LoadingSpinner />}><ForgotPasswordParent /></Suspense>} />
+        <Route path="/:lang/mot-de-passe-oublie-ecole" element={<Suspense fallback={<LoadingSpinner />}><ForgotPasswordSchool /></Suspense>} />
+        <Route path="/:lang/reset-password" element={<Suspense fallback={<LoadingSpinner />}><ResetPassword /></Suspense>} />
         <Route path="/:lang/activation-licence" element={<Suspense fallback={<LoadingSpinner />}><ActivationLicence /></Suspense>} />
         <Route 
           path="/:lang/login" 
           element={
-            isAuthenticated ? <Navigate to="/" replace /> : <Login />
+            isAuthenticated ? <Navigate to="/" replace /> : <Suspense fallback={<LoadingSpinner />}><Login /></Suspense>
           } 
         />
         <Route 
@@ -397,7 +398,9 @@ export function App() {
         <Route path="/" element={<Navigate to="/fr" replace />} />
         <Route path="*" element={<Suspense fallback={<LoadingSpinner />}><NotFound /></Suspense>} />
       </Routes>
-      <CookieConsent />
+      <Suspense fallback={null}>
+        <CookieConsent />
+      </Suspense>
     </>
   );
 }
