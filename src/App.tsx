@@ -202,10 +202,6 @@ export function App() {
       if (['/login', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features', '/activation-licence'].includes(pathWithoutLang)) {
         navigate(`/${currentLang}/`, { replace: true });
       }
-    } else {
-      if (!publicPaths.includes(pathWithoutLang)) {
-        navigate(`/${currentLang}/`, { replace: true });
-      }
     }
   }, [isAuthenticated, location.pathname, navigate]);
 
