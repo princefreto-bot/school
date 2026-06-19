@@ -142,6 +142,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
 
   const [hasCamera, setHasCamera] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
+  const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   
   // Paramètres du document
@@ -272,12 +273,10 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
       });
       
       if (image.dataUrl) {
-        setCapturedImage(image.dataUrl);
-        setScanStep('crop');
-        setCropTL({ x: 5, y: 5 });
-        setCropTR({ x: 95, y: 5 });
-        setCropBL({ x: 5, y: 95 });
-        setCropBR({ x: 95, y: 95 });
+        setOriginalImage(image.dataUrl);
+        autoFlatten(image.dataUrl, { 
+          tl: { x: 5, y: 5 }, tr: { x: 95, y: 5 }, bl: { x: 5, y: 95 }, br: { x: 95, y: 95 } 
+        });
         setHasCamera(true);
         setCameraActive(false);
       }
@@ -328,12 +327,10 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         
         const dataUrl = canvas.toDataURL('image/jpeg');
-        setCapturedImage(dataUrl);
-        setScanStep('crop');
-        setCropTL({ x: 5, y: 5 });
-        setCropTR({ x: 95, y: 5 });
-        setCropBL({ x: 5, y: 95 });
-        setCropBR({ x: 95, y: 95 });
+        setOriginalImage(dataUrl);
+        autoFlatten(dataUrl, { 
+          tl: { x: 5, y: 5 }, tr: { x: 95, y: 5 }, bl: { x: 5, y: 95 }, br: { x: 95, y: 95 } 
+        });
         stopCamera();
       }
     }
@@ -346,12 +343,11 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-          setCapturedImage(event.target.result as string);
-          setScanStep('crop');
-          setCropTL({ x: 5, y: 5 });
-          setCropTR({ x: 95, y: 5 });
-          setCropBL({ x: 5, y: 95 });
-          setCropBR({ x: 95, y: 95 });
+          const dataUrl = event.target.result as string;
+          setOriginalImage(dataUrl);
+          autoFlatten(dataUrl, { 
+            tl: { x: 5, y: 5 }, tr: { x: 95, y: 5 }, bl: { x: 5, y: 95 }, br: { x: 95, y: 95 } 
+          });
           stopCamera();
         }
       };
@@ -359,24 +355,20 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
     }
   };
 
-  // 3.5 Valider le cadrage (Perspective Warp + Flattening)
-  const handleNextStep = () => {
-    if (!capturedImage || !canvasRef.current) return;
-
-    const canvas = canvasRef.current;
+  // 3.5 Auto-flatten function
+  const autoFlatten = (sourceImage: string, corners: any) => {
+    const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
     
     img.onload = () => {
       if (!ctx) return;
 
-      // Convert percentages to original image dimensions
-      const TL = { x: (cropTL.x / 100) * img.width, y: (cropTL.y / 100) * img.height };
-      const TR = { x: (cropTR.x / 100) * img.width, y: (cropTR.y / 100) * img.height };
-      const BL = { x: (cropBL.x / 100) * img.width, y: (cropBL.y / 100) * img.height };
-      const BR = { x: (cropBR.x / 100) * img.width, y: (cropBR.y / 100) * img.height };
+      const TL = { x: (corners.tl.x / 100) * img.width, y: (corners.tl.y / 100) * img.height };
+      const TR = { x: (corners.tr.x / 100) * img.width, y: (corners.tr.y / 100) * img.height };
+      const BL = { x: (corners.bl.x / 100) * img.width, y: (corners.bl.y / 100) * img.height };
+      const BR = { x: (corners.br.x / 100) * img.width, y: (corners.br.y / 100) * img.height };
 
-      // Compute destination dimensions (max side lengths to preserve details)
       const widthTop = Math.hypot(TR.x - TL.x, TR.y - TL.y);
       const widthBottom = Math.hypot(BR.x - BL.x, BR.y - BL.y);
       const dstWidth = Math.round(Math.max(widthTop, widthBottom));
@@ -389,17 +381,20 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
       canvas.height = dstHeight;
       ctx.clearRect(0, 0, dstWidth, dstHeight);
       
-      // Perform perspective warp to flatten the quadrilateral to a rectangle
       perspectiveWarp(ctx, img, [TL, TR, BR, BL], dstWidth, dstHeight);
 
       const croppedDataUrl = canvas.toDataURL('image/jpeg');
       setCapturedImage(croppedDataUrl);
-      
-      // Put binarized filter (B&W) by default for pro-scanning look
       setFilterType('binarized');
       setScanStep('filter');
     };
-    img.src = capturedImage;
+    img.src = sourceImage;
+  };
+
+  // 3.6 Valider le cadrage manuel
+  const handleNextStep = () => {
+    if (!originalImage) return;
+    autoFlatten(originalImage, { tl: cropTL, tr: cropTR, bl: cropBL, br: cropBR });
   };
 
   // 4. Appliquer les filtres de traitement d'image sur le Canvas
@@ -550,7 +545,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
               {scanStep === 'crop' ? (
                 <div ref={containerRef} className="relative inline-block max-w-full max-h-[72vh] md:max-h-[82vh] select-none">
                   <img 
-                    src={capturedImage} 
+                    src={originalImage || capturedImage || ''} 
                     alt="Cadrage" 
                     className="max-w-full max-h-[72vh] md:max-h-[82vh] object-contain shadow-2xl rounded-lg pointer-events-none select-none" 
                   />
@@ -752,17 +747,29 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
                     <Check className="w-4 h-4" /> Valider le cadrage
                   </button>
                 ) : (
-                  <button 
-                    onClick={() => setRotation((prev) => (prev + 90) % 360)}
-                    className="p-3 bg-white/10 text-white rounded-full hover:bg-white/20 active:scale-95 transition cursor-pointer"
-                    title="Tourner 90°"
-                  >
-                    <RotateCw className="w-5 h-5" />
-                  </button>
+                  <>
+                    <button 
+                      onClick={() => {
+                        setCapturedImage(originalImage);
+                        setScanStep('crop');
+                      }}
+                      className="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-full font-bold text-xs active:scale-95 transition flex items-center gap-1.5 shadow-lg"
+                    >
+                      Recadrer
+                    </button>
+                    <button 
+                      onClick={() => setRotation((prev) => (prev + 90) % 360)}
+                      className="p-3 bg-white/10 text-white rounded-full hover:bg-white/20 active:scale-95 transition cursor-pointer"
+                      title="Tourner 90°"
+                    >
+                      <RotateCw className="w-5 h-5" />
+                    </button>
+                  </>
                 )}
                  <button 
                   onClick={() => {
                     setCapturedImage(null);
+                    setOriginalImage(null);
                     setRotation(0);
                     setScanStep('crop');
                     if (isNative) {
