@@ -414,7 +414,7 @@ export const Features: React.FC = () => {
       title: 'Tout ce dont votre école a besoin',
       subtitle: 'Découvrez comment DGhubSchool modernise chaque aspect de la gestion scolaire — de la scolarité aux paiements, en passant par la sécurité et la communication.',
       ctaTitle: 'Prêt à transformer votre école ?',
-      ctaDesc: 'Démarrez votre essai gratuit de 60 jours et découvrez toutes ces fonctionnalités en action.',
+      ctaDesc: 'Démarrez votre essai gratuit de 30 jours et découvrez toutes ces fonctionnalités en action.',
       ctaBtn: 'Démarrer mon essai gratuit',
     },
     en: {

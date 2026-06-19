@@ -514,7 +514,7 @@ async function verifySchoolEmail(req, res) {
         if (adminErr) throw adminErr;
 
         // 5. Activer l'école définitivement (email vérifié, mais reste is_approved = false)
-        const trialEndsAt = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(); // +2 mois d'essai gratuit
+        const trialEndsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // +30 jours d'essai gratuit
         const { error: updateErr } = await supabase
             .from('schools')
             .update({

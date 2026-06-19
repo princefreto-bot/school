@@ -53,7 +53,7 @@ export const APropos: React.FC = () => {
       statsAPI: "Disponibilité plateforme",
       statsSupport: "Support disponible",
       ctaTitle: "Votre école a déjà attendu trop longtemps.",
-      ctaDesc: "60 jours gratuits pour tester la plateforme avec vos vraies données, vos vrais élèves. Aucune carte bancaire requise. Si vous n'êtes pas convaincu, vous ne payez rien.",
+      ctaDesc: "30 jours gratuits pour tester la plateforme avec vos vraies données, vos vrais élèves. Aucune carte bancaire requise. Si vous n'êtes pas convaincu, vous ne payez rien.",
       ctaBtn: "Lancer mon école gratuitement"
     },
     en: {
