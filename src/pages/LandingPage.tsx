@@ -386,62 +386,50 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── SECTION MARQUEES ────────────────────────────────── */}
-      <section className="bg-slate-950 py-16 overflow-hidden relative border-y border-slate-900">
+      <section className="bg-slate-950 py-10 overflow-hidden relative border-y border-slate-900 font-['Poppins']">
         <div className="absolute inset-0 opacity-5 pointer-events-none" />
         
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="flex overflow-hidden group">
-            <div className="animate-marquee-left hover-pause flex gap-4 items-center">
-              {[...Array(2)].map((_, i) => (
-                <div key={i} className="flex gap-4 items-center whitespace-nowrap">
-                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Numérisation</span>
-                  <Star className="w-6 h-6 text-amber-500" />
-                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Code QR</span>
-                  <Star className="w-6 h-6 text-amber-500" />
-                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Historique</span>
-                  <Star className="w-6 h-6 text-amber-500" />
-                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Annonces SMS</span>
-                  <Star className="w-6 h-6 text-amber-500" />
-                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Caisse</span>
-                  <Star className="w-6 h-6 text-amber-500" />
+            <div className="animate-marquee-left hover-pause flex gap-3 items-center">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex gap-3 items-center whitespace-nowrap">
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Numérisation</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Code QR</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Historique</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Annonces SMS</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Caisse</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Export Excel</span>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="flex overflow-hidden group">
-            <div className="animate-marquee-right hover-pause flex gap-4 items-center">
-              {[...Array(2)].map((_, i) => (
-                <div key={i} className="flex gap-4 items-center whitespace-nowrap">
-                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Recouvrement</span>
-                  <Star className="w-6 h-6 text-emerald-500" />
-                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Bulletins PDF</span>
-                  <Star className="w-6 h-6 text-emerald-500" />
-                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Format DRE</span>
-                  <Star className="w-6 h-6 text-emerald-500" />
-                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Espace Parents</span>
-                  <Star className="w-6 h-6 text-emerald-500" />
-                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Absences</span>
-                  <Star className="w-6 h-6 text-emerald-500" />
+            <div className="animate-marquee-right hover-pause flex gap-3 items-center">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex gap-3 items-center whitespace-nowrap">
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Recouvrement</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Bulletins PDF</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Format DRE</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Espace Parents</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Absences</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Retards</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Messagerie</span>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="flex overflow-hidden group">
-            <div className="animate-marquee-left hover-pause flex gap-4 items-center">
-              {[...Array(2)].map((_, i) => (
-                <div key={i} className="flex gap-4 items-center whitespace-nowrap">
-                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Retards</span>
-                  <Star className="w-6 h-6 text-indigo-500" />
-                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Messagerie</span>
-                  <Star className="w-6 h-6 text-indigo-500" />
-                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Export Excel</span>
-                  <Star className="w-6 h-6 text-indigo-500" />
-                  <span className="text-2xl md:text-4xl font-black text-white uppercase tracking-widest px-8">Cloud Sécurisé</span>
-                  <Star className="w-6 h-6 text-indigo-500" />
-                  <span className="text-2xl md:text-4xl font-black text-slate-800 uppercase tracking-widest px-8">Zéro Perte</span>
-                  <Star className="w-6 h-6 text-indigo-500" />
+            <div className="animate-marquee-left hover-pause flex gap-3 items-center">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex gap-3 items-center whitespace-nowrap">
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Cloud Sécurisé</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Zéro Perte</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Performance Active</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Tableaux de bord</span>
+                  <span className="text-sm font-medium text-white border border-white/20 rounded-full px-6 py-2 hover:bg-white/5 transition-colors">Multi-Années</span>
                 </div>
               ))}
             </div>
