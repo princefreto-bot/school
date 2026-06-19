@@ -488,8 +488,8 @@ async function verifySchoolEmail(req, res) {
         const { error: rpcErr } = await supabase.rpc('create_school_tables', { school_slug: school.slug });
         if (rpcErr) throw rpcErr;
 
-        // Attente de 1s pour le rechargement de schéma REST de Supabase
-        await new Promise(r => setTimeout(r, 1000));
+        // Attente initiale de 2s pour le rechargement de schéma REST de Supabase
+        await new Promise(r => setTimeout(r, 2000));
 
         // 4. Créer le compte directeur (admin principal) de l'école dans sa table dédiée
         const adminPayload = {
@@ -505,16 +505,35 @@ async function verifySchoolEmail(req, res) {
             signup_ip_hash: school.signup_ip_hash
         };
 
-        const { data: admin, error: adminErr } = await supabase
-            .from(`profiles_${school.slug}`)
-            .insert(adminPayload)
-            .select()
-            .single();
+        let admin = null;
+        let adminErr = null;
+        
+        // Retry loop to handle Supabase PostgREST schema cache delay
+        for (let i = 0; i < 5; i++) {
+            const { data, error } = await supabase
+                .from(`profiles_${school.slug}`)
+                .insert(adminPayload)
+                .select()
+                .single();
+
+            if (!error) {
+                admin = data;
+                adminErr = null;
+                break;
+            } else if (error.code === '42P01') {
+                console.log(`[Cache] Table profiles_${school.slug} introuvable, nouvel essai dans 1.5s...`);
+                await new Promise(r => setTimeout(r, 1500));
+                adminErr = error;
+            } else {
+                adminErr = error;
+                break;
+            }
+        }
 
         if (adminErr) throw adminErr;
 
-        // 5. Activer l'école définitivement (email vérifié, mais reste is_approved = false)
-        const trialEndsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // +30 jours d'essai gratuit
+        // 5. Activer l'école définitivement (email vérifié, is_approved = true)
+        const trialEndsAt = new Date(Date.now() + 40 * 24 * 60 * 60 * 1000).toISOString(); // +40 jours d'essai gratuit
         const { error: updateErr } = await supabase
             .from('schools')
             .update({
@@ -526,7 +545,7 @@ async function verifySchoolEmail(req, res) {
                 temp_admin_nom: null,
                 temp_admin_telephone: null,
                 temp_admin_password: null,
-                is_approved: false
+                is_approved: true
             })
             .eq('id', school.id);
 
@@ -561,7 +580,7 @@ async function verifySchoolEmail(req, res) {
                 school_name: school.name,
                 school_slug: school.slug,
                 school_logo: school.logo_url || null,
-                school_approved: false
+                school_approved: true
             }
         });
     } catch (err) {
