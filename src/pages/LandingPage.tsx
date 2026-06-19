@@ -112,8 +112,8 @@ export const LandingPage: React.FC = () => {
       parentsFocus1Desc: "Les parents consultent le cahier de texte en ligne, l'emploi du temps et les devoirs à venir depuis leur téléphone.",
       parentsFocus2: "Alertes Instantanées",
       parentsFocus2Desc: "Notifications en temps réel pour les absences, retards et rappels de paiements via SMS et Push.",
-      parentsFocus3: "Paiements Dématérialisés",
-      parentsFocus3Desc: "Règlement des frais de scolarité via Mobile Money sans se déplacer."
+      parentsFocus3: "Reçus Numériques",
+      parentsFocus3Desc: "Accès instantané aux reçus de paiement numérisés dès leur enregistrement par l'école."
     },
     en: {
       features: "Features",
@@ -127,7 +127,7 @@ export const LandingPage: React.FC = () => {
       heroTitlePart1: "No more queues. Run ",
       heroTitleHighlight: "your entire school in 2 seconds",
       heroTitlePart2: " from your phone.",
-      heroSubtitle: "Collect tuition fees in real time (cash, Mobile Money, transfers), generate instant SMS receipts, produce DRE-compliant PDF report cards in one click, track entries and exits by QR scan, and give parents a live dashboard — all without Excel, without queuing, even on a 2G connection.",
+      heroSubtitle: "Record tuition payments (cash, Mobile Money, transfers) to notify parents instantly, produce DRE-compliant PDF report cards in one click, track entries and exits by QR scan, and give parents a live dashboard — all without Excel, without queuing, even on a 2G connection.",
       realTimeDashboard: "Real-time dashboard",
       screenshotsTitle: "📸 The platform in pictures",
       discoverFeatures: "What your principals, parents and students see",
@@ -187,8 +187,8 @@ export const LandingPage: React.FC = () => {
       parentsFocus1Desc: "Parents check the online lesson book, schedule, and upcoming homework from their phones.",
       parentsFocus2: "Instant Alerts",
       parentsFocus2Desc: "Real-time notifications for absences, lateness, and payment reminders via SMS and Push.",
-      parentsFocus3: "Digital Payments",
-      parentsFocus3Desc: "Pay tuition fees via Mobile Money without traveling."
+      parentsFocus3: "Digital Receipts",
+      parentsFocus3Desc: "Instant access to digitized payment receipts as soon as they are recorded by the school."
     }
   };
 
