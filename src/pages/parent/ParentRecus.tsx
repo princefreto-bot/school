@@ -16,16 +16,23 @@ export const ParentRecus: React.FC = () => {
                 const dash = await parentApi.getDashboard();
                 const children = dash.students || [];
 
-                const allPayPromises = children.map((c: any) => parentApi.getPayments(c.id));
+                const allPayPromises = children.map((c: any) =>
+                    parentApi.getPayments(c.id)
+                        .catch(err => {
+                            console.warn(`Paiements non accessibles pour ${c.id}:`, err);
+                            return { student: c, payments: [], licenseError: true };
+                        })
+                );
                 const results = await Promise.all(allPayPromises);
 
-                const merged = results.flatMap((res: any) =>
-                    res.payments.map((p: any) => ({
+                const merged = results.flatMap((res: any) => {
+                    if (res.licenseError || !res.payments) return [];
+                    return res.payments.map((p: any) => ({
                         ...p,
                         studentName: `${res.student.prenom} ${res.student.nom}`,
                         classe: res.student.classe
-                    }))
-                ).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                    }));
+                }).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
                 setPayments(merged);
             } catch (err: any) {
