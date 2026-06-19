@@ -1,57 +1,28 @@
-const { Queue, Worker } = require('bullmq');
-const Redis = require('ioredis');
-
-const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-
-// Configuration Redis pour BullMQ
-const connection = new Redis(redisUrl, {
-  maxRetriesPerRequest: null, // Requis par BullMQ
-});
-
-// File d'attente pour les emails
-const emailQueue = new Queue('email-queue', { connection });
-
-// Fonction pour ajouter un email à la file d'attente
-const addEmailJob = async (jobName, emailData) => {
-  try {
-    await emailQueue.add(jobName, emailData, {
-      attempts: 3,
-      backoff: {
-        type: 'exponential',
-        delay: 1000,
-      },
-    });
-    console.log(`Job email ${jobName} ajouté pour:`, emailData.to);
-  } catch (err) {
-    console.error('Erreur lors de l\'ajout du job email:', err);
-  }
-};
-
-// Importer le service d'envoi (soit mailer.js soit emailService.js, adapté selon l'implémentation existante)
-// Note: Ici nous utilisons un bloc try/catch pour le worker. L'import réel doit être aligné avec la structure
+// Fallback asynchrone direct sans nécessiter Redis / BullMQ
 const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/mailer'); 
 
-const emailWorker = new Worker('email-queue', async job => {
-  if (job.name === 'send-verification') {
-    const { to, schoolName, code } = job.data;
-    console.log(`Traitement de l'envoi d'email de vérification à ${to}`);
-    await sendVerificationEmail(to, schoolName, code);
-  } else if (job.name === 'send-password-reset') {
-    const { to, resetLink } = job.data;
-    console.log(`Traitement de l'envoi d'email de reset à ${to}`);
-    await sendPasswordResetEmail(to, resetLink);
-  }
-}, { connection });
-
-emailWorker.on('completed', job => {
-  console.log(`Job ${job.id} terminé avec succès`);
-});
-
-emailWorker.on('failed', (job, err) => {
-  console.error(`Job ${job.id} a échoué avec l'erreur: ${err.message}`);
-});
+// Fonction pour ajouter un email (exécuté en background sans file d'attente Redis)
+const addEmailJob = async (jobName, emailData) => {
+  console.log(`Exécution de l'email en direct (sans Redis) pour le job ${jobName} vers:`, emailData.to);
+  
+  // Utiliser setImmediate pour ne pas bloquer le thread principal (simule l'effet background)
+  setImmediate(async () => {
+    try {
+      if (jobName === 'send-verification') {
+        const { to, schoolName, code } = emailData;
+        await sendVerificationEmail(to, schoolName, code);
+      } else if (jobName === 'send-password-reset') {
+        const { to, resetLink } = emailData;
+        await sendPasswordResetEmail(to, resetLink);
+      }
+      console.log(`Email envoyé avec succès pour ${jobName}`);
+    } catch (err) {
+      console.error('Erreur lors de l\'envoi direct de l\'email:', err);
+    }
+  });
+};
 
 module.exports = {
-  emailQueue,
+  emailQueue: null,
   addEmailJob
 };
