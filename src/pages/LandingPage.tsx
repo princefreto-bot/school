@@ -36,6 +36,7 @@ export const LandingPage: React.FC = () => {
             documents: data.documents || 0
           });
         }
+      })
       .catch(err => console.error("Erreur récupération des statistiques:", err));
 
     fetch(`${BACKEND_URL}/api/testimonials`)
@@ -391,7 +392,7 @@ export const LandingPage: React.FC = () => {
               src="/dashboard_preview.png" 
               alt={t.realTimeDashboard} 
               className="w-full h-full object-cover" 
-              fetchpriority="high"
+              fetchPriority="high"
               decoding="async"
             />
           </div>
