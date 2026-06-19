@@ -28,13 +28,17 @@ function authenticateToken(req, res, next) {
             try {
                 const { data: school, error: sErr } = await supabase
                     .from('schools')
-                    .select('student_limit, name')
+                    .select('student_limit, name, created_at')
                     .eq('slug', payload.schoolSlug)
                     .single();
 
                 if (sErr || !school) {
                     return next();
                 }
+
+                const createdDate = new Date(school.created_at);
+                const daysSinceCreation = (new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
+                const isWithinGrace = daysSinceCreation <= 90;
 
                 const limit = school.student_limit || 500;
 
@@ -46,7 +50,7 @@ function authenticateToken(req, res, next) {
                     return next();
                 }
 
-                if (studentCount > limit) {
+                if (studentCount > limit && !isWithinGrace) {
                     return res.status(402).json({
                         error: 'subscription_limit_exceeded',
                         message: `L'accès à l'écosystème de l'établissement ${school.name} est suspendu car l'effectif actuel d'élèves enregistrés (${studentCount}) dépasse la limite de votre formule d'abonnement (${limit} élèves). Veuillez mettre à niveau votre abonnement ou contacter notre support.`

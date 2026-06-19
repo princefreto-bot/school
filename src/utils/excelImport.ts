@@ -58,6 +58,7 @@ export const importFromExcel = async (file: File): Promise<Student[]> => {
         const students: Student[] = rows
           .filter((row) => row['B'] && String(row['B']).trim() !== '')
           .map((row) => {
+            const adsn = String(row['A'] || '').trim();
             const nom = String(row['B'] || '').trim();
             const prenom = String(row['C'] || '').trim();
             const classe = String(row['D'] || '').trim();
@@ -83,6 +84,7 @@ export const importFromExcel = async (file: File): Promise<Student[]> => {
 
             return {
               id: studentId,
+              adsn: adsn || undefined,
               nom,
               prenom,
               classe,

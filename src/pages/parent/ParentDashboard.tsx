@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
     CreditCard, Wallet, TrendingUp, Loader2, AlertCircle, UserPlus,
     Search, GraduationCap, X, Megaphone, AlertTriangle, Info, Bell, MessageSquare,
-    FileText, Play
+    FileText, Play, Download
 } from 'lucide-react';
 import { LinkStudentModal } from '../../components/LinkStudentModal';
 import { SupportModal } from '../../components/SupportModal';
@@ -71,6 +71,60 @@ export const ParentDashboard: React.FC = () => {
     const [notifStatus, setNotifStatus] = useState<NotificationPermission>(
         'Notification' in window ? Notification.permission : 'denied'
     );
+    const [isLicenseReminderOpen, setIsLicenseReminderOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState<{ url: string; title: string } | null>(null);
+
+    const parentGraceRemaining = useMemo(() => {
+        if (!user?.created_at) return 0;
+        const creationDate = new Date(user.created_at);
+        const expiryDate = new Date(creationDate.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 jours
+        const diffTime = expiryDate.getTime() - new Date().getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    }, [user?.created_at]);
+
+    const isWithinGracePeriod = parentGraceRemaining > 0;
+
+    const handleDownloadFile = async (url: string, title: string, format: 'png' | 'pdf') => {
+        try {
+            const response = await fetch(url, {
+                headers: getAuthHeaders()
+            });
+            const blob = await response.blob();
+            
+            if (format === 'png') {
+                const objectUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = objectUrl;
+                link.download = `${title.replace(/\s+/g, '_')}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(objectUrl);
+            } else {
+                const { jsPDF } = await import('jspdf');
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64data = reader.result as string;
+                    const img = new Image();
+                    img.src = base64data;
+                    img.onload = () => {
+                        const doc = new jsPDF({
+                            orientation: img.width > img.height ? 'landscape' : 'portrait',
+                            unit: 'px',
+                            format: [img.width, img.height]
+                        });
+                        doc.addImage(img, 'PNG', 0, 0, img.width, img.height);
+                        doc.save(`${title.replace(/\s+/g, '_')}.pdf`);
+                    };
+                };
+                reader.readAsDataURL(blob);
+            }
+        } catch (err) {
+            console.error("Erreur de téléchargement :", err);
+            alert("Une erreur est survenue lors du téléchargement.");
+        }
+    };
 
     // État des annonces
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -232,11 +286,31 @@ export const ParentDashboard: React.FC = () => {
         );
     }
 
-    const hasUnlicensedChild = false; // Désactivé temporairement pour vérification des fonctionnalités
+    const hasUnlicensedChild = children.some(child => (child.licenseStatus || 'inactive') !== 'active') && !isWithinGracePeriod;
 
     return (
         <>
             <div className={hasUnlicensedChild ? "space-y-6 filter blur-md pointer-events-none select-none" : "space-y-6"}>
+                {isWithinGracePeriod && children.some(child => (child.licenseStatus || 'inactive') !== 'active') && (
+                    <div className="bg-gradient-to-r from-amber-500 to-rose-500 rounded-3xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md animate-fadeIn text-white">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                                <AlertCircle className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-black tracking-tight">Période de grâce en cours</p>
+                                <p className="text-xs font-medium text-amber-50">Il vous reste {parentGraceRemaining} jour{parentGraceRemaining > 1 ? 's' : ''} avant que l'accès aux données ne soit bloqué. Veuillez activer vos licences.</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => setIsLicenseReminderOpen(true)}
+                            className="px-4 py-2 bg-white text-rose-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition active:scale-95 cursor-pointer shrink-0"
+                        >
+                            Activer maintenant
+                        </button>
+                    </div>
+                )}
+
                 {/* ── Barre supérieure ── */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -689,10 +763,11 @@ export const ParentDashboard: React.FC = () => {
                                                                 
                                                                 {/* Image Thumbnail Preview */}
                                                                 {(doc.file_url.toLowerCase().endsWith('.png') || doc.file_url.toLowerCase().endsWith('.jpg') || doc.file_url.toLowerCase().endsWith('.jpeg')) && (
-                                                                    <a 
-                                                                        href={`${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
+                                                                    <div 
+                                                                        onClick={() => setPreviewImage({ 
+                                                                            url: `${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`, 
+                                                                            title: doc.title 
+                                                                        })}
                                                                         className="mt-3 block relative w-full h-28 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 flex items-center justify-center group/thumb cursor-zoom-in"
                                                                     >
                                                                         <img 
@@ -708,17 +783,33 @@ export const ParentDashboard: React.FC = () => {
                                                                                 Agrandir
                                                                             </span>
                                                                         </div>
-                                                                    </a>
+                                                                    </div>
                                                                 )}
                                                             </div>
-                                                            <a
-                                                                href={`${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest transition"
-                                                            >
-                                                                Télécharger / Voir
-                                                            </a>
+                                                            <div className="mt-3 flex gap-2 w-full">
+                                                                <button
+                                                                    onClick={() => handleDownloadFile(
+                                                                        `${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`, 
+                                                                        doc.title, 
+                                                                        'png'
+                                                                    )}
+                                                                    className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-[9px] font-black uppercase tracking-widest transition cursor-pointer"
+                                                                    title="Télécharger PNG"
+                                                                >
+                                                                    PNG
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDownloadFile(
+                                                                        `${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`, 
+                                                                        doc.title, 
+                                                                        'pdf'
+                                                                    )}
+                                                                    className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-[9px] font-black uppercase tracking-widest transition cursor-pointer"
+                                                                    title="Télécharger PDF"
+                                                                >
+                                                                    PDF
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     );
                                                 })}
@@ -731,6 +822,21 @@ export const ParentDashboard: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {isLicenseReminderOpen && (
+                <LicenseLockScreen
+                    childrenList={children}
+                    onSuccess={() => {
+                        setIsLicenseReminderOpen(false);
+                        fetchData(true);
+                    }}
+                    onLinkClick={() => {
+                        setIsLicenseReminderOpen(false);
+                        setIsLinkModalOpen(true);
+                    }}
+                    onClose={() => setIsLicenseReminderOpen(false)}
+                />
+            )}
 
             {hasUnlicensedChild && (
                 <LicenseLockScreen
@@ -751,6 +857,38 @@ export const ParentDashboard: React.FC = () => {
                 onClose={() => setShowSupportModal(false)}
                 onSelect={handleStartChat}
             />
+
+            {/* LIGHTBOX PREVIEW */}
+            {previewImage && (
+                <div className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md flex flex-col justify-between p-4 animate-fadeIn">
+                    <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-2xl border border-slate-800 backdrop-blur-md">
+                        <h3 className="text-white font-black text-sm uppercase tracking-widest">{previewImage.title}</h3>
+                        <button 
+                            onClick={() => setPreviewImage(null)}
+                            className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center transition cursor-pointer"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="flex-grow flex items-center justify-center p-4">
+                        <img src={previewImage.url} alt={previewImage.title} className="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-slate-800" />
+                    </div>
+                    <div className="flex justify-center gap-4 p-4">
+                        <button 
+                            onClick={() => handleDownloadFile(previewImage.url, previewImage.title, 'png')}
+                            className="px-6 py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-black text-xs uppercase tracking-widest rounded-xl transition flex items-center gap-2 cursor-pointer"
+                        >
+                            <Download className="w-4 h-4" /> Télécharger PNG
+                        </button>
+                        <button 
+                            onClick={() => handleDownloadFile(previewImage.url, previewImage.title, 'pdf')}
+                            className="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-widest rounded-xl transition flex items-center gap-2 shadow-lg shadow-indigo-500/20 cursor-pointer"
+                        >
+                            <Download className="w-4 h-4" /> Télécharger PDF
+                        </button>
+                    </div>
+                </div>
+            )}
         </>
     );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Sparkles, Key, CheckCircle, AlertCircle, ShoppingBag, Loader2, LogOut } from 'lucide-react';
+import { Shield, Sparkles, Key, CheckCircle, AlertCircle, ShoppingBag, Loader2, LogOut, X } from 'lucide-react';
 import { parentApi } from '../services/parentApi';
 import { useStore } from '../store/useStore';
 
@@ -16,9 +16,10 @@ interface LicenseLockScreenProps {
     childrenList: Child[];
     onSuccess: () => void;
     onLinkClick?: () => void;
+    onClose?: () => void;
 }
 
-export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenList, onSuccess, onLinkClick }) => {
+export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenList, onSuccess, onLinkClick, onClose }) => {
     const logout = useStore((s) => s.logout);
     const [pricing, setPricing] = useState<any>(null);
     const [selectedChildId, setSelectedChildId] = useState<string>('');
@@ -89,6 +90,17 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-md p-3 sm:p-6 flex justify-center items-start md:items-center min-h-screen">
             <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-5 sm:p-6 md:p-8 my-auto animate-scaleUp">
                 
+                {/* Bouton de fermeture temporaire si onClose est fourni */}
+                {onClose && (
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 left-4 sm:top-6 sm:right-6 flex items-center justify-center w-8 h-8 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition duration-300 dark:bg-slate-800 dark:text-slate-400 cursor-pointer"
+                        title="Fermer"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                )}
+
                 {/* Bouton de déconnexion dans le coin supérieur droit */}
                 <button
                     onClick={logout}

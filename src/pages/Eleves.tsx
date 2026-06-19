@@ -46,6 +46,7 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
     ecoleProvenance: student?.ecoleProvenance ?? '',
     dejaPaye: student?.dejaPaye ?? 0,
     recu: student?.recu ?? '',
+    adsn: student?.adsn ?? '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -75,6 +76,21 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Matricule (Optionnel)</label>
+              <input 
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white uppercase placeholder:normal-case" 
+                placeholder="Ex: MAT-2026-0001"
+                value={form.adsn} 
+                onChange={(e) => setForm({ ...form, adsn: e.target.value })} 
+              />
+            </div>
+            <div>
+              {/* Espace libre ou autre information */}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Nom de l'élève *</label>
@@ -325,10 +341,53 @@ export const Eleves: React.FC = () => {
   const [modal, setModal] = useState<{ open: boolean; student?: Student | null }>({ open: false });
   const [photoModal, setPhotoModal] = useState<{ open: boolean; student: Student | null }>({ open: false, student: null });
   const updateStudent = useStore((s) => s.updateStudent);
+  const updateMultipleStudents = useStore((s) => s.updateMultipleStudents);
   const [sortKey, setSortKey] = useState<SortKey>('nom');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+
+  const handleGenerateMatricules = () => {
+    if (!students || students.length === 0) {
+      alert("Aucun élève dans la base de données.");
+      return;
+    }
+    if (!confirm("Voulez-vous vraiment générer automatiquement des matricules pour tous les élèves qui n'en ont pas ?")) {
+      return;
+    }
+
+    const yearPart = schoolYear.split('-')[0] || new Date().getFullYear().toString();
+    
+    // Trouver le compteur maximum existant
+    let maxSeq = 0;
+    students.forEach(s => {
+      if (s.adsn) {
+        const match = s.adsn.match(/^MAT-\d{4}-(\d{4})$/);
+        if (match) {
+          const seq = parseInt(match[1], 10);
+          if (seq > maxSeq) maxSeq = seq;
+        }
+      }
+    });
+
+    let currentSeq = maxSeq;
+    const updatesList: { id: string; updates: Partial<Student> }[] = [];
+
+    students.forEach(s => {
+      if (!s.adsn || s.adsn.trim() === '') {
+        currentSeq++;
+        const newAdsn = `MAT-${yearPart}-${String(currentSeq).padStart(4, '0')}`;
+        updatesList.push({ id: s.id, updates: { adsn: newAdsn } });
+      }
+    });
+
+    if (updatesList.length > 0) {
+      updateMultipleStudents(updatesList);
+      alert(`${updatesList.length} matricule(s) généré(s) et sauvegardé(s) avec succès !`);
+    } else {
+      alert("Tous les élèves ont déjà un matricule.");
+    }
+  };
 
   const filtered = useMemo(() => {
     let list = [...students];
@@ -393,13 +452,21 @@ export const Eleves: React.FC = () => {
           </div>
           
           {(user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') && (
-            <button 
-              onClick={() => setModal({ open: true })} 
-              className="group relative inline-flex items-center gap-2 px-6 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-[13px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(0,0,0,0.2)] dark:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-            >
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 opacity-0 group-hover:opacity-10 transition-opacity"></div>
-              <Plus className="w-4 h-4 text-amber-500" /> Nouvelle Inscription
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <button 
+                onClick={handleGenerateMatricules} 
+                className="group relative inline-flex items-center gap-2 px-6 py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl text-[13px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(245,158,11,0.2)]"
+              >
+                Générer les Matricules
+              </button>
+              <button 
+                onClick={() => setModal({ open: true })} 
+                className="group relative inline-flex items-center gap-2 px-6 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-[13px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(0,0,0,0.2)] dark:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+              >
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                <Plus className="w-4 h-4 text-amber-500" /> Nouvelle Inscription
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -534,7 +601,14 @@ export const Eleves: React.FC = () => {
                           )}
                         </button>
                         <div>
-                          <p className="font-black text-base text-slate-900 dark:text-white tracking-tight">{s.prenom} {s.nom}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-black text-base text-slate-900 dark:text-white tracking-tight">{s.prenom} {s.nom}</p>
+                            {s.adsn && (
+                              <span className="font-mono text-[10px] font-black text-slate-500 bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 px-1.5 py-0.5 rounded">
+                                {s.adsn}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5 flex items-center gap-1">
                             <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-400">{s.sexe === 'M' ? 'Garçon' : 'Fille'}</span>
                             {s.redoublant && <span className="bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 px-1.5 py-0.5 rounded">Redoublant</span>}

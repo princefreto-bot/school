@@ -192,7 +192,7 @@ async function register(req, res) {
         return res.status(201).json({
             message: 'Compte créé avec succès.',
             token,
-            parent: { id: parent.id, nom: parent.nom, telephone: parent.telephone, role: parent.role, schoolSlug: school_slug },
+            parent: { id: parent.id, nom: parent.nom, telephone: parent.telephone, role: parent.role, schoolSlug: school_slug, created_at: parent.created_at },
         });
     } catch (err) {
         console.error('Register Error:', err.message);
@@ -235,7 +235,7 @@ async function login(req, res) {
                 return res.json({
                     message: 'Connexion globale réussie.',
                     token,
-                    user: { id: superadmin.id, nom: superadmin.nom, telephone: superadmin.telephone, role: 'superadmin' }
+                    user: { id: superadmin.id, nom: superadmin.nom, telephone: superadmin.telephone, role: 'superadmin', created_at: superadmin.created_at }
                 });
             } else {
                 return res.status(401).json({ error: 'Mot de passe SuperAdmin incorrect.' });
@@ -265,7 +265,7 @@ async function login(req, res) {
                 return res.json({
                     message: 'Connexion Créateur réussie.',
                     token,
-                    user: { id: creator.id, nom: creator.nom, telephone: creator.telephone, role: 'creator' }
+                    user: { id: creator.id, nom: creator.nom, telephone: creator.telephone, role: 'creator', created_at: creator.created_at }
                 });
             } else {
                 return res.status(401).json({ error: 'Mot de passe Créateur incorrect.' });
@@ -345,7 +345,8 @@ async function login(req, res) {
                 school_name: school.name,
                 school_slug: school.slug,
                 school_logo: school.logo_url,
-                school_approved: school.is_approved
+                school_approved: school.is_approved,
+                created_at: user.created_at
             },
         });
     } catch (err) {
@@ -587,7 +588,7 @@ async function verifySchoolEmail(req, res) {
         if (adminErr) throw adminErr;
 
         // 5. Activer l'école définitivement (email vérifié, is_approved = true)
-        const trialEndsAt = new Date(Date.now() + 40 * 24 * 60 * 60 * 1000).toISOString(); // +40 jours d'essai gratuit
+        const trialEndsAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(); // +90 jours d'essai gratuit
         const { error: updateErr } = await supabase
             .from('schools')
             .update({
@@ -634,7 +635,8 @@ async function verifySchoolEmail(req, res) {
                 school_name: school.name,
                 school_slug: school.slug,
                 school_logo: school.logo_url || null,
-                school_approved: true
+                school_approved: true,
+                created_at: admin.created_at
             }
         });
     } catch (err) {

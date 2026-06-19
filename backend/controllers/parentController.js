@@ -106,8 +106,23 @@ async function getPayments(req, res) {
 
         if (sErr) throw sErr;
 
-        // Sécurité : Licence requise
-        if ((student.license_status || 'inactive') !== 'active') {
+        // Vérifier la période de grâce de 14 jours pour le parent
+        const { data: parentProfile } = await supabase
+            .from(`profiles_${schoolSlug}`)
+            .select('created_at')
+            .eq('id', parentId)
+            .single();
+
+        const parentCreatedAt = parentProfile?.created_at;
+        const isWithinGracePeriod = (() => {
+            if (!parentCreatedAt) return false;
+            const createdDate = new Date(parentCreatedAt);
+            const daysSinceCreation = (new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
+            return daysSinceCreation <= 14;
+        })();
+
+        // Sécurité : Licence requise (sauf pendant la période de grâce)
+        if ((student.license_status || 'inactive') !== 'active' && !isWithinGracePeriod) {
             return res.status(402).json({ error: 'license_required', message: 'Licence active requise.' });
         }
 
@@ -326,7 +341,22 @@ async function getPresences(req, res) {
 
         if (sErr) throw sErr;
 
-        if ((student.license_status || 'inactive') !== 'active') {
+        // Vérifier la période de grâce de 14 jours pour le parent
+        const { data: parentProfile } = await supabase
+            .from(`profiles_${schoolSlug}`)
+            .select('created_at')
+            .eq('id', parentId)
+            .single();
+
+        const parentCreatedAt = parentProfile?.created_at;
+        const isWithinGracePeriod = (() => {
+            if (!parentCreatedAt) return false;
+            const createdDate = new Date(parentCreatedAt);
+            const daysSinceCreation = (new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
+            return daysSinceCreation <= 14;
+        })();
+
+        if ((student.license_status || 'inactive') !== 'active' && !isWithinGracePeriod) {
             return res.status(402).json({ error: 'license_required', message: 'Licence active requise.' });
         }
 
@@ -365,6 +395,20 @@ async function getParentData(req, res) {
             .eq('parent_id', parentId);
         
         const studentIds = (links || []).map(l => l.student_id);
+
+        const { data: parentProfile } = await supabase
+            .from(`profiles_${schoolSlug}`)
+            .select('created_at')
+            .eq('id', parentId)
+            .single();
+
+        const parentCreatedAt = parentProfile?.created_at;
+        const isWithinGracePeriod = (() => {
+            if (!parentCreatedAt) return false;
+            const createdDate = new Date(parentCreatedAt);
+            const daysSinceCreation = (new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
+            return daysSinceCreation <= 14;
+        })();
 
         // 1. Annonces de l'école
         const { data: announcements } = await supabase
@@ -438,7 +482,7 @@ async function getParentData(req, res) {
             }));
 
             activeStudentIds = (dbStudents || [])
-                .filter(s => (s.license_status || 'inactive') === 'active')
+                .filter(s => (s.license_status || 'inactive') === 'active' || isWithinGracePeriod)
                 .map(s => s.id);
         }
 

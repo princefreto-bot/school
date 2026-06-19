@@ -190,6 +190,7 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   {[
+                    { label: 'Matricule', value: student.adsn || 'Non assigné' },
                     { label: 'Nom complet', value: `${student.prenom} ${student.nom}` },
                     { label: 'Sexe', value: student.sexe === 'M' ? 'Masculin' : 'Féminin' },
                     { label: 'Redoublant', value: student.redoublant ? 'Oui' : 'Non' },

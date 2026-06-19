@@ -90,6 +90,16 @@ export const Dashboard: React.FC = () => {
   const privacyMode = useStore((s) => s.privacyMode);
   const setPrivacyMode = useStore((s) => s.setPrivacyMode);
 
+  const trialEndsAt = localStorage.getItem('trial_ends_at');
+  const schoolStatus = localStorage.getItem('school_status') || 'trial';
+  
+  const remainingDays = useMemo(() => {
+    if (!trialEndsAt || schoolStatus !== 'trial') return null;
+    const diffTime = new Date(trialEndsAt).getTime() - new Date().getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  }, [trialEndsAt, schoolStatus]);
+
   const maskValue = (val: string | number) => privacyMode ? '••••••' : val;
 
   const todayPresences = useMemo(() => getPresencesToday(), [getPresencesToday]);
@@ -216,6 +226,20 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-20 max-w-[1600px] mx-auto">
+      {remainingDays !== null && remainingDays > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-3xl p-4 flex items-center justify-between shadow-sm animate-fadeIn dark:bg-amber-500/10 dark:border-amber-500/20">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 shrink-0">
+              <AlertCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-black text-slate-800 dark:text-slate-200 tracking-tight">Période d'essai en cours</p>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Il vous reste {remainingDays} jour{remainingDays > 1 ? 's' : ''} avant l'activation obligatoire de votre licence d'établissement.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── HERO BANNER ── */}
       <div className="relative pro-card p-8 lg:p-10 overflow-hidden group bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl">
         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.06] group-hover:scale-110 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">

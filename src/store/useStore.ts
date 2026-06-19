@@ -44,6 +44,7 @@ export interface AppState {
   setStudents: (students: Student[]) => void;
   addStudent: (student: Omit<Student, 'id' | 'createdAt' | 'updatedAt' | 'cycle' | 'status' | 'restant' | 'historiquesPaiements' | 'ecolage'>) => void;
   updateStudent: (id: string, updates: Partial<Student>) => void;
+  updateMultipleStudents: (updates: { id: string; updates: Partial<Student> }[]) => void;
   deleteStudent: (id: string) => void;
   addPayment: (studentId: string, payment: Omit<Payment, 'id' | 'studentId'>) => void;
 
@@ -380,6 +381,7 @@ export const useStore = create<AppState>()(
               schoolSlug: result.user.school_slug || undefined,
               schoolName: result.user.school_name || undefined,
               schoolApproved: result.user.school_approved !== undefined ? result.user.school_approved : true,
+              created_at: result.user.created_at || undefined,
             };
 
             // Déterminer la page de redirection selon le rôle
@@ -552,6 +554,36 @@ export const useStore = create<AppState>()(
         if (u) {
           const student = get().students.find(s => s.id === id);
           get().addActivityLog(createActivityLog(u.nom, u.role, 'modification_eleve', `Modification : ${student ? student.prenom + ' ' + student.nom : id}`));
+        }
+
+        set({ students });
+
+        // Background sync
+        syncToBackend({
+          students: get().students,
+          presences: get().presences,
+          activityLogs: get().activityLogs
+        }).then(() => set({ lastSyncTimestamp: Date.now() }));
+      },
+      updateMultipleStudents: (updatesList) => {
+        const students = get().students.map((s) => {
+          const up = updatesList.find(item => item.id === s.id);
+          if (!up) return s;
+          const updated = { ...s, ...up.updates, updatedAt: new Date().toISOString() };
+          if (up.updates.classe) {
+            updated.ecolage = getEcolage(up.updates.classe);
+            updated.cycle = getCycle(up.updates.classe);
+          }
+          if (up.updates.dejaPaye !== undefined || up.updates.classe) {
+            updated.restant = updated.ecolage - updated.dejaPaye;
+          }
+          updated.status = computeStatus(updated.restant, updated.ecolage);
+          return updated;
+        });
+
+        const u = get().user;
+        if (u) {
+          get().addActivityLog(createActivityLog(u.nom, u.role, 'modification_eleve', `Génération de ${updatesList.length} matricules`));
         }
 
         set({ students });

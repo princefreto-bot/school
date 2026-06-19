@@ -124,6 +124,11 @@ export const ConditionsUtilisation: React.FC = () => {
               <p>
                 L'utilisation de DGhubSchool pour les établissements et les parents est soumise à des frais de licence annuels conformément aux tarifs indiqués au sein du Service. 
               </p>
+              <p className="p-3.5 bg-amber-500/5 dark:bg-amber-950/10 border border-amber-500/25 rounded-xl text-amber-600 dark:text-amber-400 font-semibold">
+                💡 <strong>Périodes de grâce applicables (Essai initial)</strong> :
+                <br />• <strong>Établissements scolaires (Écoles)</strong> : Bénéficient d'un report de paiement obligatoire et d'un accès complet sans restriction de <strong>90 jours</strong> à compter de la création de leur compte.
+                <br />• <strong>Comptes Parents</strong> : Bénéficient d'une période de grâce de <strong>14 jours</strong> après inscription pour lier et consulter les informations de leurs enfants avant l'activation requise d'une licence.
+              </p>
               <p className="p-3 bg-rose-500/5 dark:bg-rose-950/10 border border-rose-500/25 rounded-xl text-rose-600 dark:text-rose-400 font-semibold">
                 ⚠️ Afin de garantir l'équité, si un établissement dépasse sa limite d'élèves autorisée par son forfait, ou en cas de non-respect des règlements annuels après la période d'essai gratuite, l'accès complet à la plateforme sera automatiquement suspendu.
               </p>

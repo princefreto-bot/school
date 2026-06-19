@@ -6,7 +6,7 @@ import { getAuthHeaders, parseResponse } from '../services/apiHelpers';
 import { DocumentScanner } from '../components/DocumentScanner';
 import { 
   FileText, Search, User, Calendar, Download, Trash, Plus, 
-  AlertCircle, CheckCircle, Shield, Award, Sparkles, Filter 
+  AlertCircle, CheckCircle, Shield, Award, Sparkles, Filter, X 
 } from 'lucide-react';
 
 interface StudentDocument {
@@ -30,6 +30,48 @@ export const Documents: React.FC = () => {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [previewImage, setPreviewImage] = useState<{ url: string; title: string } | null>(null);
+
+  const handleDownloadFile = async (url: string, title: string, format: 'png' | 'pdf') => {
+    try {
+      const response = await fetch(url, {
+        headers: getAuthHeaders()
+      });
+      const blob = await response.blob();
+      
+      if (format === 'png') {
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = `${title.replace(/\s+/g, '_')}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(objectUrl);
+      } else {
+        const { jsPDF } = await import('jspdf');
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          const img = new Image();
+          img.src = base64data;
+          img.onload = () => {
+            const doc = new jsPDF({
+              orientation: img.width > img.height ? 'landscape' : 'portrait',
+              unit: 'px',
+              format: [img.width, img.height]
+            });
+            doc.addImage(img, 'PNG', 0, 0, img.width, img.height);
+            doc.save(`${title.replace(/\s+/g, '_')}.pdf`);
+          };
+        };
+        reader.readAsDataURL(blob);
+      }
+    } catch (err) {
+      console.error("Erreur de téléchargement :", err);
+      alert("Une erreur est survenue lors du téléchargement.");
+    }
+  };
 
   // Extraire les classes uniques pour les filtres
   const classes = [...new Set(students.map(s => s.classe))].sort();
@@ -326,10 +368,8 @@ export const Documents: React.FC = () => {
 
                             {/* Image Thumbnail Preview */}
                             {(filename?.toLowerCase().endsWith('.png') || filename?.toLowerCase().endsWith('.jpg') || filename?.toLowerCase().endsWith('.jpeg')) && (
-                              <a 
-                                href={fileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                              <div 
+                                onClick={() => setPreviewImage({ url: fileUrl, title: doc.title })}
                                 className="mt-3 block relative w-full h-32 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-805 flex items-center justify-center group/thumb cursor-zoom-in"
                               >
                                 <img 
@@ -345,19 +385,25 @@ export const Documents: React.FC = () => {
                                     Agrandir l'image
                                   </span>
                                 </div>
-                              </a>
+                              </div>
                             )}
                           </div>
 
-                          <div className="pt-4 border-t border-slate-100 dark:border-slate-800/50 mt-4">
-                            <a
-                              href={fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-indigo-500 dark:hover:text-indigo-400 rounded-xl text-[11px] font-black uppercase tracking-widest transition"
+                          <div className="pt-4 border-t border-slate-100 dark:border-slate-800/50 mt-4 flex gap-2">
+                            <button
+                              onClick={() => handleDownloadFile(fileUrl, doc.title, 'png')}
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-indigo-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition cursor-pointer"
+                              title="Télécharger en PNG"
                             >
-                              <Download className="w-3.5 h-3.5" /> Télécharger / Voir
-                            </a>
+                              <Download className="w-3.5 h-3.5" /> PNG
+                            </button>
+                            <button
+                              onClick={() => handleDownloadFile(fileUrl, doc.title, 'pdf')}
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-indigo-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition cursor-pointer"
+                              title="Télécharger en PDF"
+                            >
+                              <Download className="w-3.5 h-3.5" /> PDF
+                            </button>
                           </div>
                         </div>
                       );
@@ -389,6 +435,38 @@ export const Documents: React.FC = () => {
           onCapture={handleScannerCapture}
           onClose={() => setIsScannerOpen(false)}
         />
+      )}
+
+      {/* LIGHTBOX PREVIEW */}
+      {previewImage && (
+        <div className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md flex flex-col justify-between p-4 animate-fadeIn">
+          <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-2xl border border-slate-800 backdrop-blur-md">
+            <h3 className="text-white font-black text-sm uppercase tracking-widest">{previewImage.title}</h3>
+            <button 
+              onClick={() => setPreviewImage(null)}
+              className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="flex-grow flex items-center justify-center p-4">
+            <img src={previewImage.url} alt={previewImage.title} className="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-slate-800" />
+          </div>
+          <div className="flex justify-center gap-4 p-4">
+            <button 
+              onClick={() => handleDownloadFile(previewImage.url, previewImage.title, 'png')}
+              className="px-6 py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-black text-xs uppercase tracking-widest rounded-xl transition flex items-center gap-2 cursor-pointer"
+            >
+              <Download className="w-4 h-4" /> Télécharger PNG
+            </button>
+            <button 
+              onClick={() => handleDownloadFile(previewImage.url, previewImage.title, 'pdf')}
+              className="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-widest rounded-xl transition flex items-center gap-2 shadow-lg shadow-indigo-500/20 cursor-pointer"
+            >
+              <Download className="w-4 h-4" /> Télécharger PDF
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
