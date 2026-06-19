@@ -52,7 +52,7 @@ export const LandingPage: React.FC = () => {
       heroTitlePart1: "Fini les files d'attente. Gérez ",
       heroTitleHighlight: "votre école en 2 secondes",
       heroTitlePart2: " depuis votre téléphone.",
-      heroSubtitle: "Encaissez les frais de scolarité en temps réel (espèces, Mobile Money, virement), générez un reçu SMS instantané, éditez les bulletins PDF conformes DRE en un clic, enregistrez les entrées/sorties par scan QR et offrez aux parents un tableau de bord live — le tout sans Excel, sans file d'attente, même en connexion 2G.",
+      heroSubtitle: "Enregistrez vos encaissements de scolarité (espèces, Mobile Money, virement) pour notifier les parents instantanément, éditez les bulletins PDF conformes DRE en un clic, pointez les entrées/sorties par scan QR et offrez aux parents un tableau de bord live — le tout sans Excel, sans file d'attente, même en connexion 2G.",
       realTimeDashboard: "Tableau de bord en temps réel",
       screenshotsTitle: "📸 La plateforme en images",
       discoverFeatures: "Ce que voient vos directeurs, parents et élèves",
