@@ -468,7 +468,7 @@ export const SuperAdminDashboard: React.FC = () => {
 
   const loadSchoolsAndStats = async () => {
     try {
-      const [schoolsRes, statsRes] = await Promise.all([
+      const [schoolsRes, statsRes, expensesRes] = await Promise.all([
         fetch(`${API_BASE_URL}/superadmin/schools`, { headers: getAuthHeaders() }),
         fetch(`${API_BASE_URL}/superadmin/stats`, { headers: getAuthHeaders() }),
         fetch(`${API_BASE_URL}/superadmin/expenses`, { headers: getAuthHeaders() })
