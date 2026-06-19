@@ -158,3 +158,20 @@ export async function isBackendAvailable() {
         return false;
     }
 }
+
+export async function deleteAcademicYearBackend(id: string) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/sync/academic-year/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+        });
+        if (!response.ok) {
+            console.warn('⚠️ Erreur suppression année scolaire:', response.statusText);
+            return false;
+        }
+        return true;
+    } catch (err) {
+        console.error('⚠️ Exception suppression année scolaire:', err);
+        return false;
+    }
+}

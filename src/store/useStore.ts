@@ -112,6 +112,7 @@ export interface AppState {
   updateSettings: (settings: AppSettings) => void;
   academicYears: { id: string, name: string, isCurrent: boolean }[];
   setAcademicYears: (years: { id: string, name: string, isCurrent: boolean }[]) => void;
+  deleteAcademicYear: (yearId: string) => Promise<boolean>;
 
   // Présences
   presences: Presence[];
@@ -670,13 +671,23 @@ export const useStore = create<AppState>()(
             console.log('✅ [Store] All settings synced successfully!');
             // If the academic year changed, completely reload the page
             if (newSettings.schoolYear && newSettings.schoolYear !== previousYear) {
-               console.log('🔄 [Store] Academic year changed, reloading page...');
+               console.log('🔄 [Store] Academic year changed, clearing data and reloading page...');
+               // Clear data specifically bound to the previous year before reloading
+               set({ students: [], presences: [], activityLogs: [], notes: [] });
                window.location.reload();
             }
           }
         } catch (err) {
           console.error('❌ [Store] Error syncing settings:', err);
         }
+      },
+      deleteAcademicYear: async (yearId: string) => {
+        const { deleteAcademicYearBackend } = await import('../services/backendSync');
+        const success = await deleteAcademicYearBackend(yearId);
+        if (success) {
+            set({ academicYears: get().academicYears.filter(y => y.id !== yearId) });
+        }
+        return success;
       },
       settings: {
         seuilDeuxiemeTranche: 70,

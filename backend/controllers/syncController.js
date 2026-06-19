@@ -706,4 +706,25 @@ async function deleteStudent(req, res) {
     }
 }
 
-module.exports = { syncFromFrontend, syncToFrontend, clearPresences, clearActivityLogs, clearStudents, deleteMatiere, deleteClasseMatiere, deleteNote, deleteStudent };
+async function deleteAcademicYear(req, res) {
+    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) return res.status(403).json({ error: 'Non autorisé.' });
+    try {
+        const schoolSlug = req.user.schoolSlug;
+        const yearId = req.params.id;
+        
+        // Nettoyage manuel au cas où le ON DELETE CASCADE ne serait pas actif sur toutes les tables dynamiques
+        const tables = ['students', 'payments', 'presences', 'notes', 'matieres', 'classe_matieres', 'activity_logs'];
+        for (const t of tables) {
+            await supabase.from(`${t}_${schoolSlug}`).delete().eq('academic_year_id', yearId);
+        }
+        
+        const { error } = await supabase.from('academic_years').delete().eq('id', yearId).eq('school_slug', schoolSlug);
+        if (error) throw error;
+        
+        return res.json({ success: true, message: 'Année scolaire supprimée.' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+module.exports = { syncFromFrontend, syncToFrontend, clearPresences, clearActivityLogs, clearStudents, deleteMatiere, deleteClasseMatiere, deleteNote, deleteStudent, deleteAcademicYear };

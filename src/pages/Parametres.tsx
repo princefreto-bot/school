@@ -259,31 +259,61 @@ export const Parametres: React.FC = () => {
                             Année scolaire
                         </label>
                         {!showNewYearInput ? (
-                            <select
-                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                value={localYear}
-                                onChange={(e) => {
-                                    if (e.target.value === 'NEW') {
-                                        setShowNewYearInput(true);
-                                        setLocalYear('');
-                                    } else {
-                                        setLocalYear(e.target.value);
-                                        if (yearError) setYearError('');
-                                    }
-                                }}
-                            >
-                                <option value="" disabled>Sélectionner une année</option>
-                                {academicYears.map(y => (
-                                    <option key={y.id} value={y.name}>{y.name}</option>
-                                ))}
-                                {academicYears.length > 0 && !academicYears.find(y => y.name === schoolYear) && (
-                                    <option value={schoolYear}>{schoolYear}</option>
+                            <div className="flex items-center gap-2">
+                                <select
+                                    className="flex-1 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    value={localYear}
+                                    onChange={(e) => {
+                                        if (e.target.value === 'NEW') {
+                                            setShowNewYearInput(true);
+                                            setLocalYear('');
+                                        } else {
+                                            setLocalYear(e.target.value);
+                                            if (yearError) setYearError('');
+                                        }
+                                    }}
+                                >
+                                    <option value="" disabled>Sélectionner une année</option>
+                                    {academicYears.map(y => (
+                                        <option key={y.id} value={y.name}>{y.name}</option>
+                                    ))}
+                                    {academicYears.length > 0 && !academicYears.find(y => y.name === schoolYear) && (
+                                        <option value={schoolYear}>{schoolYear}</option>
+                                    )}
+                                    {academicYears.length === 0 && (
+                                        <option value={schoolYear}>{schoolYear}</option>
+                                    )}
+                                    <option value="NEW">+ Créer une nouvelle année scolaire...</option>
+                                </select>
+                                {academicYears.length > 1 && localYear && academicYears.find(y => y.name === localYear) && (
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            const yearObj = academicYears.find(y => y.name === localYear);
+                                            if (!yearObj) return;
+                                            if (window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement l'année scolaire ${localYear} ainsi que TOUTES les données associées (élèves, présences, notes) ? Cette action est irréversible.`)) {
+                                                const store = useStore.getState();
+                                                const success = await store.deleteAcademicYear(yearObj.id);
+                                                if (success) {
+                                                    const remaining = store.academicYears;
+                                                    if (remaining.length > 0) {
+                                                        const nextYear = remaining[0].name;
+                                                        setLocalYear(nextYear);
+                                                        // Déclencher la sauvegarde pour recharger la page sur la nouvelle année
+                                                        await store.updateAllSettings({ schoolYear: nextYear });
+                                                    }
+                                                } else {
+                                                    alert('Erreur lors de la suppression de l\'année scolaire.');
+                                                }
+                                            }
+                                        }}
+                                        className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 transition-colors"
+                                        title="Supprimer cette année scolaire"
+                                    >
+                                        <Trash2 className="w-5 h-5" />
+                                    </button>
                                 )}
-                                {academicYears.length === 0 && (
-                                    <option value={schoolYear}>{schoolYear}</option>
-                                )}
-                                <option value="NEW">+ Créer une nouvelle année scolaire...</option>
-                            </select>
+                            </div>
                         ) : (
                             <div className="flex items-center gap-2">
                                 <input
