@@ -202,6 +202,14 @@ async function deleteDocument(req, res) {
                 console.log(`[Document Cleanup] Fichier supprimé : ${filePath}`);
             }
         });
+
+        return res.json({ message: 'Document supprimé avec succès.' });
+    } catch (err) {
+        console.error('deleteDocument Error:', err.message);
+        return res.status(500).json({ error: 'Erreur serveur: ' + err.message });
+    }
+}
+
 // Télécharge ou visionne de façon sécurisée un fichier document
 async function downloadDocumentFile(req, res) {
     const { filename } = req.params;
