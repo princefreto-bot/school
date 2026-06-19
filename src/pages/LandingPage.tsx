@@ -361,14 +361,14 @@ export const LandingPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-16">
           <button 
             onClick={() => navigate(`/${lang}/creer-compte`)}
-            className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group"
           >
             {t.createSchoolFree}
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
           <button 
             onClick={() => navigate(`/${lang}/login`)}
-            className="w-full sm:w-auto bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-slate-200 active:scale-[0.98] transition-all cursor-pointer"
+            className="w-full sm:w-auto bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-slate-200 active:scale-[0.98] transition-all hover:border-slate-300 cursor-pointer"
           >
             {t.accessPortals}
           </button>
@@ -653,7 +653,7 @@ export const LandingPage: React.FC = () => {
             {features.map((feat, idx) => (
               <div 
                 key={idx} 
-                className={`border p-6 md:p-8 rounded-3xl shadow-sm flex flex-col justify-between transition-all hover:shadow-md ${feat.className}`}
+                className={`border p-6 md:p-8 rounded-3xl shadow-sm flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-amber-500/30 ${feat.className}`}
               >
                 <div>
                   <div className="flex justify-between items-start mb-6">

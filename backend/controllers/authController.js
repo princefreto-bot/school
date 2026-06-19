@@ -720,8 +720,7 @@ async function requestPasswordReset(req, res) {
             .maybeSingle();
 
         if (error || !user) {
-            // Pour des raisons de sécurité, ne pas indiquer si l'email existe ou non
-            return res.json({ success: true, message: 'Si cette adresse email existe pour cet établissement, un lien de réinitialisation a été envoyé.' });
+            return res.status(404).json({ error: "Cette adresse e-mail n'est pas enregistrée pour cet établissement." });
         }
 
         // Créer un token stateless incluant une partie du hash pour l'invalider après changement

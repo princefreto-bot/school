@@ -77,6 +77,11 @@ const LoadingSpinner = () => (
   </div>
 );
 
+const RedirectWithSearch: React.FC<{ to: string }> = ({ to }) => {
+  const location = useLocation();
+  return <Navigate to={`${to}${location.search}`} replace />;
+};
+
 
 const PageContent: React.FC = () => {
   const currentPage = useStore((s) => s.currentPage);
@@ -397,7 +402,7 @@ export function App() {
         {/* Non-prefixed fallback routes to prevent blank screen collisions */}
         <Route path="/confidentialite" element={<Navigate to="/fr/confidentialite" replace />} />
         <Route path="/conditions-utilisation" element={<Navigate to="/fr/conditions-utilisation" replace />} />
-        <Route path="/confirmer-email" element={<Navigate to="/fr/confirmer-email" replace />} />
+        <Route path="/confirmer-email" element={<RedirectWithSearch to="/fr/confirmer-email" />} />
         <Route path="/portail-ecole" element={<Navigate to="/fr/portail-ecole" replace />} />
         <Route path="/creer-compte" element={<Navigate to="/fr/creer-compte" replace />} />
         <Route path="/pricing" element={<Navigate to="/fr/pricing" replace />} />
@@ -408,9 +413,10 @@ export function App() {
         <Route path="/login" element={<Navigate to="/fr/login" replace />} />
         <Route path="/mot-de-passe-oublie" element={<Navigate to="/fr/mot-de-passe-oublie" replace />} />
         <Route path="/mot-de-passe-oublie-ecole" element={<Navigate to="/fr/mot-de-passe-oublie-ecole" replace />} />
-        <Route path="/reset-password" element={<Navigate to="/fr/reset-password" replace />} />
-        <Route path="/activation-licence" element={<Navigate to="/fr/activation-licence" replace />} />
+        <Route path="/reset-password" element={<RedirectWithSearch to="/fr/reset-password" />} />
+        <Route path="/activation-licence" element={<RedirectWithSearch to="/fr/activation-licence" />} />
         <Route path="/partager-mon-histoire" element={<Navigate to="/fr/partager-mon-histoire" replace />} />
+
         <Route path="/stats" element={<Navigate to="/fr#stats" replace />} />
         <Route path="/fr/stats" element={<Navigate to="/fr#stats" replace />} />
         <Route path="/en/stats" element={<Navigate to="/en#stats" replace />} />
