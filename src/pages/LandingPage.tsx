@@ -246,7 +246,7 @@ export const LandingPage: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl select-none cursor-pointer" onClick={() => navigate(`/${lang}`)}>
             <img src="/logo.svg" className="w-8 h-8 object-contain" alt="Logo" />
-            <span className="text-amber-500">DGhub<span className="text-slate-900">School</span></span>
+            <span className="text-amber-600">DGhub<span className="text-slate-900">School</span></span>
           </div>
 
           {/* Liens Navigation - Desktop */}
@@ -277,6 +277,7 @@ export const LandingPage: React.FC = () => {
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 text-slate-600 hover:text-amber-500 transition-colors"
+            aria-label="Menu principal"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -328,6 +329,7 @@ export const LandingPage: React.FC = () => {
         )}
       </header>
 
+      <main className="flex-grow flex flex-col">
       {/* ── SECTION HERO ──────────────────────────────────── */}
       <section className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pt-16 md:pt-24 pb-16 text-center flex-grow flex flex-col items-center justify-center">
         {/* Stickers décoratifs Hero */}
@@ -337,7 +339,7 @@ export const LandingPage: React.FC = () => {
 
         {/* Titre Principal */}
         <h1 className="text-3xl md:text-6xl font-black text-slate-950 tracking-tight leading-[1.15] max-w-4xl mb-6">
-          {t.heroTitlePart1}<span className="text-amber-500 underline decoration-2 decoration-amber-500/50">{t.heroTitleHighlight}</span>{t.heroTitlePart2}
+          {t.heroTitlePart1}<span className="text-amber-600 underline decoration-2 decoration-amber-600/50">{t.heroTitleHighlight}</span>{t.heroTitlePart2}
         </h1>
 
         {/* Sous-titre */}
@@ -380,6 +382,8 @@ export const LandingPage: React.FC = () => {
               src="/dashboard_preview.png" 
               alt={t.realTimeDashboard} 
               className="w-full h-full object-cover" 
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </div>
@@ -458,7 +462,7 @@ export const LandingPage: React.FC = () => {
                     <Check className="w-5 h-5 text-emerald-600" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-900">{(t as any).cloudPoint1.split(':')[0]}</h4>
+                    <h3 className="font-bold text-slate-900">{(t as any).cloudPoint1.split(':')[0]}</h3>
                     <p className="text-sm text-slate-500">{(t as any).cloudPoint1.split(':')[1]}</p>
                   </div>
                 </li>
@@ -467,7 +471,7 @@ export const LandingPage: React.FC = () => {
                     <Check className="w-5 h-5 text-amber-600" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-900">{(t as any).cloudPoint2.split(':')[0]}</h4>
+                    <h3 className="font-bold text-slate-900">{(t as any).cloudPoint2.split(':')[0]}</h3>
                     <p className="text-sm text-slate-500">{(t as any).cloudPoint2.split(':')[1]}</p>
                   </div>
                 </li>
@@ -476,7 +480,7 @@ export const LandingPage: React.FC = () => {
                     <Check className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-900">{(t as any).cloudPoint3.split(':')[0]}</h4>
+                    <h3 className="font-bold text-slate-900">{(t as any).cloudPoint3.split(':')[0]}</h3>
                     <p className="text-sm text-slate-500">{(t as any).cloudPoint3.split(':')[1]}</p>
                   </div>
                 </li>
@@ -585,13 +589,13 @@ export const LandingPage: React.FC = () => {
               <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full">
                 Sécurité & QR Code
               </span>
-              <h4 className="text-lg font-black text-slate-950 uppercase">{t.securityTitle}</h4>
+              <h3 className="text-lg font-black text-slate-950 uppercase">{t.securityTitle}</h3>
               <p className="text-xs text-slate-500 leading-relaxed font-medium">
                 {t.securityDesc}
               </p>
             </div>
             <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 flex items-center justify-center">
-              <img src="/student_card_preview.png" alt="Cartes scolaires officielles avec QR Code" className="w-full h-full object-contain" />
+              <img src="/student_card_preview.png" alt="Cartes scolaires officielles avec QR Code" className="w-full h-full object-contain" loading="lazy" decoding="async" />
             </div>
           </div>
 
@@ -601,13 +605,13 @@ export const LandingPage: React.FC = () => {
               <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full">
                 Académie & Bulletins
               </span>
-              <h4 className="text-lg font-black text-slate-950 uppercase">{t.academicsTitle}</h4>
+              <h3 className="text-lg font-black text-slate-950 uppercase">{t.academicsTitle}</h3>
               <p className="text-xs text-slate-500 leading-relaxed font-medium">
                 {t.academicsDesc}
               </p>
             </div>
             <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 flex items-center justify-center">
-              <img src="/report_card_preview.png" alt="Bulletins de notes officiels" className="w-full h-full object-contain" />
+              <img src="/report_card_preview.png" alt="Bulletins de notes officiels" className="w-full h-full object-contain" loading="lazy" decoding="async" />
             </div>
           </div>
         </div>
@@ -650,9 +654,9 @@ export const LandingPage: React.FC = () => {
                       {feat.badge}
                     </span>
                   </div>
-                  <h4 className="text-lg md:text-xl font-black uppercase tracking-tight mb-3">
+                  <h3 className="text-lg md:text-xl font-black uppercase tracking-tight mb-3">
                     {feat.title}
-                  </h4>
+                  </h3>
                   <p className="text-xs md:text-sm opacity-80 leading-relaxed font-medium">
                     {feat.description}
                   </p>
@@ -720,7 +724,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             <div className="mb-6">
-              <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">{t.singleFormula}</h4>
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">{t.singleFormula}</h3>
               <span className="text-4xl font-black tracking-tight text-slate-950">{t.daysTrial}</span>
               <p className="text-xs text-slate-500 mt-2">{t.afterTrial}</p>
             </div>
@@ -776,9 +780,9 @@ export const LandingPage: React.FC = () => {
                 <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full inline-block">
                   {t.newsroomBadge}
                 </span>
-                <h4 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase leading-snug group-hover:text-amber-500 transition-colors">
+                <h3 className="text-base md:text-lg font-black text-slate-950 dark:text-white uppercase leading-snug group-hover:text-amber-500 transition-colors">
                   {t.newsroomCardTitle}
-                </h4>
+                </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                   {t.newsroomCardDesc}
                 </p>
@@ -823,6 +827,8 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      </main>
 
       {/* ── FOOTER UNIFIÉ ── */}
       <Footer />

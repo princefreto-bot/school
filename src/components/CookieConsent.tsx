@@ -56,6 +56,7 @@ export const CookieConsent: React.FC = () => {
           <button 
             onClick={() => setIsVisible(false)}
             className="absolute -top-12 -right-2 md:hidden text-slate-500 hover:text-white"
+            aria-label="Fermer"
           >
             <X className="w-6 h-6" />
           </button>
