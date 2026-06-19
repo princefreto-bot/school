@@ -29,7 +29,7 @@
     "dotenv": "^17.4.2",
     "express": "^4.22.2",
     "express-rate-limit": "^8.5.2",
-    "firebase-admin": "^10.3.0",
+    "firebase-admin": "^14.0.0",
     "gsap": "^3.15.0",
     "html5-qrcode": "^2.3.8",
     "joi": "^18.2.3",
@@ -53,6 +53,9 @@
     "web-push": "^3.6.7",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zustand": "^5.0.11"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.1",

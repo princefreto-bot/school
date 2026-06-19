@@ -917,7 +917,7 @@ export const useStore = create<AppState>()(
               set({
                 appName: appSettings.appName || 'YZO GESTION',
                 schoolName: appSettings.schoolName || '',
-                schoolYear: appSettings.schoolYear || '',
+                schoolYear: user.role === 'parent' ? (get().schoolYear || appSettings.schoolYear || '') : (appSettings.schoolYear || ''),
                 schoolLogo: appSettings.schoolLogo || null,
                 schoolStamp: appSettings.schoolStamp || null,
                 messageRemerciement: appSettings.messageRemerciement || '',

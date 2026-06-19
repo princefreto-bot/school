@@ -395,7 +395,7 @@ export const ParentCourses: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <button
             onClick={() => navigate(`/${lang}`)}
-            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 rounded-none transition-all shadow-sm active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-50 dark:bg-slate-955 border border-slate-200/60 dark:border-slate-800 rounded-none transition-all shadow-sm active:scale-95 cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Retour au Tableau de bord
           </button>
@@ -410,7 +410,7 @@ export const ParentCourses: React.FC = () => {
       {/* En-tête (Pleine largeur, bande contrastée couleur jaune ambre) */}
       <div className="w-full bg-slate-100 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 py-12 px-4 shrink-0">
         <div className="max-w-6xl mx-auto text-center flex flex-col items-center justify-center">
-          <div className="w-16 h-16 bg-amber-500 rounded-none flex items-center justify-center text-slate-950 shadow-xl shadow-amber-500/10 mb-6 border border-amber-600">
+          <div className="w-16 h-16 bg-amber-500 rounded-none flex items-center justify-center text-slate-955 shadow-xl shadow-amber-500/10 mb-6 border border-amber-600">
             <BookOpen className="w-8 h-8" />
           </div>
 
@@ -432,12 +432,12 @@ export const ParentCourses: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 flex-1 w-full">
 
         {/* ── Menu Onglets Modernes (Charte Ambrée) ── */}
-        <div className="flex gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
+        <div className="flex gap-2 border-b border-slate-100 dark:border-slate-800 pb-2 overflow-x-auto whitespace-nowrap scrollbar-none">
           <button
             onClick={() => { setActiveTab('library'); setActiveWorkbook(null); }}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border ${
+            className={`flex items-center gap-2 px-4 md:px-5 py-2.5 md:py-3 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-wider transition-all cursor-pointer border shrink-0 ${
               activeTab === 'library' && !activeWorkbook
-                ? 'bg-amber-500 text-slate-950 border-amber-600 shadow-md shadow-amber-500/15'
+                ? 'bg-amber-500 text-slate-955 border-amber-600 shadow-md shadow-amber-500/15'
                 : 'border-transparent text-slate-500 hover:text-amber-500 hover:bg-amber-500/5'
             }`}
           >
@@ -446,9 +446,9 @@ export const ParentCourses: React.FC = () => {
           </button>
           <button
             onClick={() => { setActiveTab('exercises'); }}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border ${
+            className={`flex items-center gap-2 px-4 md:px-5 py-2.5 md:py-3 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-wider transition-all cursor-pointer border shrink-0 ${
               activeTab === 'exercises' || activeWorkbook
-                ? 'bg-amber-500 text-slate-950 border-amber-600 shadow-md shadow-amber-500/15'
+                ? 'bg-amber-500 text-slate-955 border-amber-600 shadow-md shadow-amber-500/15'
                 : 'border-transparent text-slate-500 hover:text-amber-500 hover:bg-amber-500/5'
             }`}
           >
@@ -457,9 +457,9 @@ export const ParentCourses: React.FC = () => {
           </button>
           <button
             onClick={() => { setActiveTab('resources'); setActiveWorkbook(null); }}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border ${
+            className={`flex items-center gap-2 px-4 md:px-5 py-2.5 md:py-3 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-wider transition-all cursor-pointer border shrink-0 ${
               activeTab === 'resources' && !activeWorkbook
-                ? 'bg-amber-500 text-slate-950 border-amber-600 shadow-md shadow-amber-500/15'
+                ? 'bg-amber-500 text-slate-955 border-amber-600 shadow-md shadow-amber-500/15'
                 : 'border-transparent text-slate-500 hover:text-amber-500 hover:bg-amber-500/5'
             }`}
           >
@@ -792,9 +792,9 @@ export const ParentCourses: React.FC = () => {
                 <div className={`w-8 h-10 bg-gradient-to-br ${selectedBook.coverGradient} rounded-md flex items-center justify-center text-white font-black text-[9px] shadow-sm`}>
                   {selectedBook.title[0]}
                 </div>
-                <div>
-                  <h4 className="text-xs md:text-sm font-black text-slate-900 dark:text-white leading-tight">{selectedBook.title}</h4>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{selectedBook.author}</p>
+                <div className="min-w-0 max-w-[120px] sm:max-w-none">
+                  <h4 className="text-xs md:text-sm font-black text-slate-900 dark:text-white leading-tight truncate">{selectedBook.title}</h4>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">{selectedBook.author}</p>
                 </div>
               </div>
 
@@ -898,26 +898,26 @@ export const ParentCourses: React.FC = () => {
                 </div>
 
                 {/* Footer du lecteur : Pagination bascule */}
-                <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex justify-between items-center shrink-0">
+                <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex justify-between items-center shrink-0">
                   <button
                     disabled={currentChapterIdx === 0}
                     onClick={() => setCurrentChapterIdx(prev => prev - 1)}
-                    className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 sm:px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
-                    <span>Précédent</span>
+                    <span className="hidden sm:inline">Précédent</span>
                   </button>
 
-                  <span className="text-[10px] text-slate-400 font-bold uppercase">
-                    Chapitre {currentChapterIdx + 1} sur {selectedBook.chapters.length}
+                  <span className="text-[10px] text-slate-400 font-bold uppercase whitespace-nowrap">
+                    <span className="sm:hidden">Ch. </span><span className="hidden sm:inline">Chapitre </span>{currentChapterIdx + 1} <span className="sm:hidden">/ </span><span className="hidden sm:inline">sur </span>{selectedBook.chapters.length}
                   </span>
 
                   <button
                     disabled={currentChapterIdx === selectedBook.chapters.length - 1}
                     onClick={() => setCurrentChapterIdx(prev => prev + 1)}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-black text-white disabled:opacity-40 disabled:cursor-not-allowed text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-slate-900 hover:bg-black text-white disabled:opacity-40 disabled:cursor-not-allowed text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer"
                   >
-                    <span>Suivant</span>
+                    <span className="hidden sm:inline">Suivant</span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
