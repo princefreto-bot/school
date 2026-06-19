@@ -28,6 +28,9 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',')
     : ['http://localhost', 'https://localhost', 'capacitor://localhost', 'http://localhost:5173', 'http://localhost:3000', 'http://localhost:3001', 'https://dghubschool.com', 'https://www.dghubschool.com'];
 
+// Toujours autoriser les origines locales des builds mobiles (Capacitor)
+const capacitorOrigins = ['http://localhost', 'https://localhost', 'capacitor://localhost'];
+
 app.use(cors((req, callback) => {
     const origin = req.header('Origin');
     const corsOptions = { credentials: true };
@@ -35,7 +38,7 @@ app.use(cors((req, callback) => {
     if (!origin || process.env.NODE_ENV !== 'production') {
         corsOptions.origin = true;
     } else {
-        let isAllowed = allowedOrigins.includes(origin);
+        let isAllowed = allowedOrigins.includes(origin) || capacitorOrigins.includes(origin);
         if (!isAllowed) {
             try {
                 const host = req.header('Host');

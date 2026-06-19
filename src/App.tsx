@@ -6,10 +6,10 @@ import { useStore } from './store/useStore';
 import { webPushService } from './services/webPushService';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 
-const isCapacitor = typeof window !== 'undefined' && (
-  window.location.origin.startsWith('capacitor://') ||
-  (window.location.origin.startsWith('http://localhost') && (window as any).Capacitor)
-);
+import { Capacitor } from '@capacitor/core';
+
+const isCapacitor = Capacitor.isNativePlatform();
+
 
 
 const Login = lazy(() => import('./components/Login').then(m => ({ default: m.Login })));
