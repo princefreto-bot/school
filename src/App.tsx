@@ -59,6 +59,7 @@ const Features = lazy(() => import('./pages/Features').then(m => ({ default: m.F
 const Newsroom = lazy(() => import('./pages/Newsroom').then(m => ({ default: m.Newsroom })));
 const HelpCenter = lazy(() => import('./pages/HelpCenter').then(m => ({ default: m.HelpCenter })));
 const ActivationLicence = lazy(() => import('./pages/ActivationLicence').then(m => ({ default: m.ActivationLicence })));
+import { CookieConsent } from './components/CookieConsent';
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-12">
@@ -318,86 +319,89 @@ export function App() {
   }
 
   return (
-    <Routes>
-      {/* Prefixed routes */}
-      <Route path="/:lang/confidentialite" element={<Confidentialite />} />
-      <Route path="/:lang/conditions-utilisation" element={<ConditionsUtilisation />} />
-      <Route 
-        path="/:lang/parent/exercices" 
-        element={
-          isAuthenticated ? (
-            <Suspense fallback={<LoadingSpinner />}>
-              <ParentCourses />
-            </Suspense>
-          ) : (
-            <Navigate to="/" replace />
-          )
-        } 
-      />
-      <Route path="/:lang/parent/courses" element={<Navigate to="/parent/exercices" replace />} />
-      <Route 
-        path="/:lang/parent/kids-place" 
-        element={
-          <Suspense fallback={<LoadingSpinner />}>
-            <KidsPlace />
-          </Suspense>
-        } 
-      />
-      <Route path="/:lang/confirmer-email" element={<ConfirmerEmail />} />
-      <Route path="/:lang/portail-ecole" element={<PortailEcole />} />
-      <Route path="/:lang/creer-compte" element={<CreerCompte />} />
-      <Route path="/:lang/pricing" element={<Suspense fallback={<LoadingSpinner />}><Pricing /></Suspense>} />
-      <Route path="/:lang/a-propos" element={<Suspense fallback={<LoadingSpinner />}><APropos /></Suspense>} />
-      <Route path="/:lang/features" element={<Suspense fallback={<LoadingSpinner />}><Features /></Suspense>} />
-      <Route path="/:lang/newsroom" element={<Suspense fallback={<LoadingSpinner />}><Newsroom /></Suspense>} />
-      <Route path="/:lang/centre-aide" element={<Suspense fallback={<LoadingSpinner />}><HelpCenter /></Suspense>} />
-      <Route path="/:lang/mot-de-passe-oublie" element={<ForgotPasswordParent />} />
-      <Route path="/:lang/mot-de-passe-oublie-ecole" element={<ForgotPasswordSchool />} />
-      <Route path="/:lang/reset-password" element={<ResetPassword />} />
-      <Route path="/:lang/activation-licence" element={<Suspense fallback={<LoadingSpinner />}><ActivationLicence /></Suspense>} />
-      <Route 
-        path="/:lang/login" 
-        element={
-          isAuthenticated ? <Navigate to="/" replace /> : <Login />
-        } 
-      />
-      <Route 
-        path="/:lang" 
-        element={
-          isAuthenticated ? (
-            <Layout>
+    <>
+      <Routes>
+        {/* Prefixed routes */}
+        <Route path="/:lang/confidentialite" element={<Confidentialite />} />
+        <Route path="/:lang/conditions-utilisation" element={<ConditionsUtilisation />} />
+        <Route 
+          path="/:lang/parent/exercices" 
+          element={
+            isAuthenticated ? (
               <Suspense fallback={<LoadingSpinner />}>
-                <PageContent />
+                <ParentCourses />
               </Suspense>
-              <AnnouncementPopup />
-            </Layout>
-          ) : (
+            ) : (
+              <Navigate to="/" replace />
+            )
+          } 
+        />
+        <Route path="/:lang/parent/courses" element={<Navigate to="/parent/exercices" replace />} />
+        <Route 
+          path="/:lang/parent/kids-place" 
+          element={
             <Suspense fallback={<LoadingSpinner />}>
-              <LandingPage />
+              <KidsPlace />
             </Suspense>
-          )
-        } 
-      />
+          } 
+        />
+        <Route path="/:lang/confirmer-email" element={<ConfirmerEmail />} />
+        <Route path="/:lang/portail-ecole" element={<PortailEcole />} />
+        <Route path="/:lang/creer-compte" element={<CreerCompte />} />
+        <Route path="/:lang/pricing" element={<Suspense fallback={<LoadingSpinner />}><Pricing /></Suspense>} />
+        <Route path="/:lang/a-propos" element={<Suspense fallback={<LoadingSpinner />}><APropos /></Suspense>} />
+        <Route path="/:lang/features" element={<Suspense fallback={<LoadingSpinner />}><Features /></Suspense>} />
+        <Route path="/:lang/newsroom" element={<Suspense fallback={<LoadingSpinner />}><Newsroom /></Suspense>} />
+        <Route path="/:lang/centre-aide" element={<Suspense fallback={<LoadingSpinner />}><HelpCenter /></Suspense>} />
+        <Route path="/:lang/mot-de-passe-oublie" element={<ForgotPasswordParent />} />
+        <Route path="/:lang/mot-de-passe-oublie-ecole" element={<ForgotPasswordSchool />} />
+        <Route path="/:lang/reset-password" element={<ResetPassword />} />
+        <Route path="/:lang/activation-licence" element={<Suspense fallback={<LoadingSpinner />}><ActivationLicence /></Suspense>} />
+        <Route 
+          path="/:lang/login" 
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : <Login />
+          } 
+        />
+        <Route 
+          path="/:lang" 
+          element={
+            isAuthenticated ? (
+              <Layout>
+                <Suspense fallback={<LoadingSpinner />}>
+                  <PageContent />
+                </Suspense>
+                <AnnouncementPopup />
+              </Layout>
+            ) : (
+              <Suspense fallback={<LoadingSpinner />}>
+                <LandingPage />
+              </Suspense>
+            )
+          } 
+        />
 
-      {/* Non-prefixed fallback routes to prevent blank screen collisions */}
-      <Route path="/confidentialite" element={<Navigate to="/fr/confidentialite" replace />} />
-      <Route path="/conditions-utilisation" element={<Navigate to="/fr/conditions-utilisation" replace />} />
-      <Route path="/confirmer-email" element={<Navigate to="/fr/confirmer-email" replace />} />
-      <Route path="/portail-ecole" element={<Navigate to="/fr/portail-ecole" replace />} />
-      <Route path="/creer-compte" element={<Navigate to="/fr/creer-compte" replace />} />
-      <Route path="/pricing" element={<Navigate to="/fr/pricing" replace />} />
-      <Route path="/a-propos" element={<Navigate to="/fr/a-propos" replace />} />
-      <Route path="/features" element={<Navigate to="/fr/features" replace />} />
-      <Route path="/newsroom" element={<Navigate to="/fr/newsroom" replace />} />
-      <Route path="/centre-aide" element={<Navigate to="/fr/centre-aide" replace />} />
-      <Route path="/login" element={<Navigate to="/fr/login" replace />} />
-      <Route path="/mot-de-passe-oublie" element={<Navigate to="/fr/mot-de-passe-oublie" replace />} />
-      <Route path="/mot-de-passe-oublie-ecole" element={<Navigate to="/fr/mot-de-passe-oublie-ecole" replace />} />
-      <Route path="/reset-password" element={<Navigate to="/fr/reset-password" replace />} />
-      <Route path="/activation-licence" element={<Navigate to="/fr/activation-licence" replace />} />
+        {/* Non-prefixed fallback routes to prevent blank screen collisions */}
+        <Route path="/confidentialite" element={<Navigate to="/fr/confidentialite" replace />} />
+        <Route path="/conditions-utilisation" element={<Navigate to="/fr/conditions-utilisation" replace />} />
+        <Route path="/confirmer-email" element={<Navigate to="/fr/confirmer-email" replace />} />
+        <Route path="/portail-ecole" element={<Navigate to="/fr/portail-ecole" replace />} />
+        <Route path="/creer-compte" element={<Navigate to="/fr/creer-compte" replace />} />
+        <Route path="/pricing" element={<Navigate to="/fr/pricing" replace />} />
+        <Route path="/a-propos" element={<Navigate to="/fr/a-propos" replace />} />
+        <Route path="/features" element={<Navigate to="/fr/features" replace />} />
+        <Route path="/newsroom" element={<Navigate to="/fr/newsroom" replace />} />
+        <Route path="/centre-aide" element={<Navigate to="/fr/centre-aide" replace />} />
+        <Route path="/login" element={<Navigate to="/fr/login" replace />} />
+        <Route path="/mot-de-passe-oublie" element={<Navigate to="/fr/mot-de-passe-oublie" replace />} />
+        <Route path="/mot-de-passe-oublie-ecole" element={<Navigate to="/fr/mot-de-passe-oublie-ecole" replace />} />
+        <Route path="/reset-password" element={<Navigate to="/fr/reset-password" replace />} />
+        <Route path="/activation-licence" element={<Navigate to="/fr/activation-licence" replace />} />
 
-      <Route path="/" element={<Navigate to="/fr" replace />} />
-      <Route path="*" element={<Suspense fallback={<LoadingSpinner />}><NotFound /></Suspense>} />
-    </Routes>
+        <Route path="/" element={<Navigate to="/fr" replace />} />
+        <Route path="*" element={<Suspense fallback={<LoadingSpinner />}><NotFound /></Suspense>} />
+      </Routes>
+      <CookieConsent />
+    </>
   );
 }
