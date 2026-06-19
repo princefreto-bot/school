@@ -9,7 +9,7 @@ import {
   BarChart3, FileText, Settings, LogOut, Menu, X,
   Bell, ChevronRight, Target, Award, MessageSquare,
   ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone,
-  BookOpen, Edit3, FileSpreadsheet, Sun, Moon,
+  BookOpen, Edit3, FileSpreadsheet, Sun, Moon, Calendar,
   PanelLeftClose, PanelLeftOpen, RefreshCw, Shield
 } from 'lucide-react';
 
@@ -29,7 +29,8 @@ const NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'scan_sortie',          label: 'Scan Sortie',       icon: <ScanLine className="w-[18px] h-[18px]" /> },
   { id: 'scan_information',     label: 'Scan Information',  icon: <ScanLine className="w-[18px] h-[18px]" /> },
   { id: 'carte_scolaire',       label: 'Cartes Scolaires',  icon: <IdCard className="w-[18px] h-[18px]" /> },
-  { id: 'gestion_academique',   label: 'Académique',        icon: <BookOpen className="w-[18px] h-[18px]" /> },
+  { id: 'gestion_academique',   label: 'Matières & Coefs',  icon: <BookOpen className="w-[18px] h-[18px]" /> },
+  { id: 'gestion_annees_scolaires', label: 'Années Scolaires', icon: <Calendar className="w-[18px] h-[18px]" /> },
   { id: 'saisie_notes',         label: 'Saisie Notes',      icon: <Edit3 className="w-[18px] h-[18px]" /> },
   { id: 'bulletins',            label: 'Bulletins',         icon: <FileSpreadsheet className="w-[18px] h-[18px]" /> },
   { id: 'verification_recu',    label: 'Vérif. Reçus',      icon: <ShieldCheck className="w-[18px] h-[18px]" /> },
@@ -69,6 +70,7 @@ const NAV_GROUPS: Record<string, string> = {
   scan_information: 'Présences',
   carte_scolaire: 'Présences',
   gestion_academique: 'Académique',
+  gestion_annees_scolaires: 'Académique',
   saisie_notes: 'Académique',
   bulletins: 'Académique',
   verification_recu: 'Outils',

@@ -43,8 +43,6 @@ export const Parametres: React.FC = () => {
   
   const [logoPreview, setLogoPreview] = useState<string | null>(schoolLogo);
   const [logoError, setLogoError] = useState('');
-  const [yearError, setYearError] = useState('');
-  const [showNewYearInput, setShowNewYearInput] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [stampPreview, setStampPreview] = useState<string | null>(schoolStamp);
@@ -149,30 +147,7 @@ export const Parametres: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setYearError('');
-
-    // Validation de l'année scolaire (intervalle de 2 ans ou plus interdit)
-    if (!localYear.trim()) {
-      setYearError("L'année scolaire ne peut pas être vide.");
-      return;
-    }
-
-    const years = localYear.match(/\b\d{4}\b/g);
-    if (years && years.length === 2) {
-      const start = parseInt(years[0], 10);
-      const end = parseInt(years[1], 10);
-      const diff = Math.abs(end - start);
-      if (diff > 1) {
-        setYearError(`L'intervalle de l'année scolaire ne peut pas être de ${diff} ans (ex : 2025-2026).`);
-        return;
-      }
-    } else if (years && years.length > 2) {
-      setYearError("Le format de l'année scolaire est invalide. Utilisez par exemple 2024-2025.");
-      return;
-    } else if (!years || years.length < 1) {
-      setYearError("L'année scolaire doit contenir au moins une année à 4 chiffres (ex : 2024-2025 ou 2025).");
-      return;
-    }
+    // L'année scolaire est maintenant gérée dans la page GestionAnneesScolaires
 
     await updateAllSettings({
       schoolName: localSchool,
@@ -256,89 +231,12 @@ export const Parametres: React.FC = () => {
                     </div>
                     <div>
                         <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
-                            Année scolaire
+                            Année scolaire en cours
                         </label>
-                        {!showNewYearInput ? (
-                            <div className="flex items-center gap-2">
-                                <select
-                                    className="flex-1 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                    value={localYear}
-                                    onChange={(e) => {
-                                        if (e.target.value === 'NEW') {
-                                            setShowNewYearInput(true);
-                                            setLocalYear('');
-                                        } else {
-                                            setLocalYear(e.target.value);
-                                            if (yearError) setYearError('');
-                                        }
-                                    }}
-                                >
-                                    <option value="" disabled>Sélectionner une année</option>
-                                    {academicYears.map(y => (
-                                        <option key={y.id} value={y.name}>{y.name}</option>
-                                    ))}
-                                    {academicYears.length > 0 && !academicYears.find(y => y.name === schoolYear) && (
-                                        <option value={schoolYear}>{schoolYear}</option>
-                                    )}
-                                    {academicYears.length === 0 && (
-                                        <option value={schoolYear}>{schoolYear}</option>
-                                    )}
-                                    <option value="NEW">+ Créer une nouvelle année scolaire...</option>
-                                </select>
-                                {academicYears.length > 1 && localYear && academicYears.find(y => y.name === localYear) && (
-                                    <button
-                                        type="button"
-                                        onClick={async () => {
-                                            const yearObj = academicYears.find(y => y.name === localYear);
-                                            if (!yearObj) return;
-                                            if (window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement l'année scolaire ${localYear} ainsi que TOUTES les données associées (élèves, présences, notes) ? Cette action est irréversible.`)) {
-                                                const store = useStore.getState();
-                                                const success = await store.deleteAcademicYear(yearObj.id);
-                                                if (success) {
-                                                    const remaining = store.academicYears;
-                                                    if (remaining.length > 0) {
-                                                        const nextYear = remaining[0].name;
-                                                        setLocalYear(nextYear);
-                                                        // Déclencher la sauvegarde pour recharger la page sur la nouvelle année
-                                                        await store.updateAllSettings({ schoolYear: nextYear });
-                                                    }
-                                                } else {
-                                                    alert('Erreur lors de la suppression de l\'année scolaire.');
-                                                }
-                                            }
-                                        }}
-                                        className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 transition-colors"
-                                        title="Supprimer cette année scolaire"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="flex items-center gap-2">
-                                <input
-                                    className="flex-1 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                    value={localYear}
-                                    onChange={(e) => {
-                                      setLocalYear(e.target.value);
-                                      if (yearError) setYearError('');
-                                    }}
-                                    placeholder="Ex : 2026-2027"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setShowNewYearInput(false);
-                                        setLocalYear(schoolYear);
-                                    }}
-                                    className="p-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl transition-colors"
-                                    title="Annuler"
-                                >
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-                        )}
-                        {yearError && <p className="mt-2 text-[10px] font-bold text-rose-500">{yearError}</p>}
+                        <div className="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-500 dark:text-slate-400 cursor-not-allowed">
+                            {schoolYear}
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1">Pour changer d'année scolaire, utilisez le menu "Années Scolaires".</p>
                     </div>
                 </div>
 
