@@ -485,6 +485,7 @@ async function syncToFrontend(req, res) {
         const dbClasseMatieres = await fetchTable('classe_matieres', null, false, true);
         const dbNotes = await fetchTable('notes', null, false, true);
         const announcementReads = await fetchTable('announcement_reads');
+        const { data: academicYearsData } = await supabase.from('academic_years').select('*').eq('school_slug', schoolSlug).order('name', { ascending: false });
         
         const { data: appSettings, error: settingsError } = await supabase.from(tbl('app_settings')).select('*').single();
         console.log('🎨 [Sync GET] appSettings from DB:', {
@@ -602,6 +603,11 @@ async function syncToFrontend(req, res) {
                 parentId: r.parent_id,
                 readAt: r.read_at,
                 remindAt: r.remind_at || null
+            })),
+            academicYears: (academicYearsData || []).map(y => ({
+                id: y.id,
+                name: y.name,
+                isCurrent: y.is_current
             }))
         });
 

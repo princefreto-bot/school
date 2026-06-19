@@ -110,6 +110,8 @@ export interface AppState {
   }) => Promise<void>;
   settings: AppSettings;
   updateSettings: (settings: AppSettings) => void;
+  academicYears: { id: string, name: string, isCurrent: boolean }[];
+  setAcademicYears: (years: { id: string, name: string, isCurrent: boolean }[]) => void;
 
   // Présences
   presences: Presence[];
@@ -293,6 +295,8 @@ export const useStore = create<AppState>()(
         set({ tranches });
         syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
+      academicYears: [],
+      setAcademicYears: (years) => set({ academicYears: years }),
 
       // ── Thème ──────────────────────────────────────────
       theme: 'light',
@@ -411,6 +415,7 @@ export const useStore = create<AppState>()(
               matieres: [],
               classeMatieres: [],
               notes: [],
+              academicYears: [],
               schoolLogo: result.user.school_logo || null,
               schoolStamp: null,
               schoolName: result.user.school_name || 'Établissement',
@@ -448,8 +453,9 @@ export const useStore = create<AppState>()(
           parents: [],
           presences: [],
           activityLogs: [],
-          links: [],
+          academicYears: [],
           announcements: [],
+          links: [],
           announcementReads: [],
           matieres: [],
           classeMatieres: [],
@@ -1078,6 +1084,9 @@ export const useStore = create<AppState>()(
           }
           if (Array.isArray(data.announcementReads)) {
             set({ announcementReads: data.announcementReads });
+          }
+          if (Array.isArray(data.academicYears)) {
+            set({ academicYears: data.academicYears });
           }
           // Récupération des données académiques
           if (Array.isArray(data.matieres)) {

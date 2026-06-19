@@ -15,6 +15,7 @@ export const Parametres: React.FC = () => {
   const schoolLogo = useStore((s) => s.schoolLogo);
   const schoolStamp = useStore((s) => s.schoolStamp);
   const user = useStore((s) => s.user);
+  const academicYears = useStore((s) => s.academicYears) || [];
 
   const schoolMotto = useStore((s) => s.schoolMotto);
   const schoolBp = useStore((s) => s.schoolBp);
@@ -43,6 +44,7 @@ export const Parametres: React.FC = () => {
   const [logoPreview, setLogoPreview] = useState<string | null>(schoolLogo);
   const [logoError, setLogoError] = useState('');
   const [yearError, setYearError] = useState('');
+  const [showNewYearInput, setShowNewYearInput] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [stampPreview, setStampPreview] = useState<string | null>(schoolStamp);
@@ -256,15 +258,56 @@ export const Parametres: React.FC = () => {
                         <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
                             Année scolaire
                         </label>
-                        <input
-                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                            value={localYear}
-                            onChange={(e) => {
-                              setLocalYear(e.target.value);
-                              if (yearError) setYearError('');
-                            }}
-                            placeholder="Ex : 2024-2025"
-                        />
+                        {!showNewYearInput ? (
+                            <select
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localYear}
+                                onChange={(e) => {
+                                    if (e.target.value === 'NEW') {
+                                        setShowNewYearInput(true);
+                                        setLocalYear('');
+                                    } else {
+                                        setLocalYear(e.target.value);
+                                        if (yearError) setYearError('');
+                                    }
+                                }}
+                            >
+                                <option value="" disabled>Sélectionner une année</option>
+                                {academicYears.map(y => (
+                                    <option key={y.id} value={y.name}>{y.name}</option>
+                                ))}
+                                {academicYears.length > 0 && !academicYears.find(y => y.name === schoolYear) && (
+                                    <option value={schoolYear}>{schoolYear}</option>
+                                )}
+                                {academicYears.length === 0 && (
+                                    <option value={schoolYear}>{schoolYear}</option>
+                                )}
+                                <option value="NEW">+ Créer une nouvelle année scolaire...</option>
+                            </select>
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <input
+                                    className="flex-1 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    value={localYear}
+                                    onChange={(e) => {
+                                      setLocalYear(e.target.value);
+                                      if (yearError) setYearError('');
+                                    }}
+                                    placeholder="Ex : 2026-2027"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowNewYearInput(false);
+                                        setLocalYear(schoolYear);
+                                    }}
+                                    className="p-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl transition-colors"
+                                    title="Annuler"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                        )}
                         {yearError && <p className="mt-2 text-[10px] font-bold text-rose-500">{yearError}</p>}
                     </div>
                 </div>
