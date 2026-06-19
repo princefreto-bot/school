@@ -397,6 +397,9 @@ export function App() {
         <Route path="/reset-password" element={<Navigate to="/fr/reset-password" replace />} />
         <Route path="/activation-licence" element={<Navigate to="/fr/activation-licence" replace />} />
         <Route path="/partager-mon-histoire" element={<Navigate to="/fr/partager-mon-histoire" replace />} />
+        <Route path="/stats" element={<Navigate to="/fr#stats" replace />} />
+        <Route path="/fr/stats" element={<Navigate to="/fr#stats" replace />} />
+        <Route path="/en/stats" element={<Navigate to="/en#stats" replace />} />
 
         <Route path="/" element={<Navigate to="/fr" replace />} />
         <Route path="*" element={<Suspense fallback={<LoadingSpinner />}><NotFound /></Suspense>} />

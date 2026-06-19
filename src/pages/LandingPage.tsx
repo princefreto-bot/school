@@ -202,7 +202,7 @@ export const LandingPage: React.FC = () => {
     }
   };
 
-  const t = texts[lang];
+  const t = texts[lang as keyof typeof texts] ?? texts['fr'];
 
   // Statistiques de la plateforme (KPIs chiffrés réels)
   const stats = [
