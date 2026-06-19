@@ -485,17 +485,35 @@ export const LandingPage: React.FC = () => {
             
             <div className="relative">
               {/* Illustration Cloud */}
-              <div className="aspect-square bg-slate-900 rounded-[3rem] p-8 relative shadow-2xl border border-slate-800 overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-indigo-500/20 opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="h-full w-full border border-slate-700/50 rounded-2xl bg-slate-950/50 backdrop-blur-sm p-6 flex flex-col justify-center items-center text-center space-y-6 relative z-10">
-                  <div className="w-24 h-24 bg-amber-500 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(244,180,0,0.4)] animate-pulse">
-                    <BookOpen className="w-10 h-10 text-slate-950" />
+              <div className="aspect-square bg-slate-950 rounded-[3rem] p-8 relative shadow-2xl border border-slate-800 overflow-hidden group">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent opacity-50" />
+                
+                <div className="h-full w-full border border-slate-800 rounded-2xl bg-slate-900/50 backdrop-blur-md p-6 flex flex-col justify-center items-center text-center space-y-8 relative z-10">
+                  
+                  {/* Animation de synchronisation fluide avec Logo */}
+                  <div className="relative flex items-center justify-center w-32 h-32">
+                    {/* Anneaux rotatifs fluides */}
+                    <div className="absolute inset-0 border-2 border-slate-800 rounded-full"></div>
+                    <div className="absolute inset-0 border-2 border-white border-t-transparent rounded-full animate-spin" style={{ animationDuration: '2s' }}></div>
+                    <div className="absolute inset-2 border-2 border-white/20 border-b-transparent rounded-full animate-spin" style={{ animationDuration: '3s', animationDirection: 'reverse' }}></div>
+                    
+                    {/* Logo blanc épuré */}
+                    <div className="w-20 h-20 bg-slate-950 rounded-full flex items-center justify-center z-10 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
+                      <img src="/logo.svg" alt="Logo" className="w-12 h-12 brightness-0 invert" />
+                    </div>
                   </div>
-                  <h3 className="text-white text-2xl font-black">DGhubSchool Cloud</h3>
-                  <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                    <div className="bg-amber-500 h-full w-full animate-marquee-left" style={{ animationDuration: '3s' }} />
+
+                  <div className="space-y-3">
+                    <h3 className="text-white text-2xl font-black tracking-tight">DGhubSchool Cloud</h3>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                      </span>
+                      <p className="text-slate-300 text-sm font-medium tracking-wide uppercase">Synchronisation mondiale active</p>
+                    </div>
                   </div>
-                  <p className="text-slate-400 text-sm">Synchronisation mondiale active</p>
+                  
                 </div>
               </div>
             </div>
