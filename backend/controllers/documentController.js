@@ -202,10 +202,52 @@ async function deleteDocument(req, res) {
                 console.log(`[Document Cleanup] Fichier supprimé : ${filePath}`);
             }
         });
+// Télécharge ou visionne de façon sécurisée un fichier document
+async function downloadDocumentFile(req, res) {
+    const { filename } = req.params;
+    const { schoolSlug, role, id: userId } = req.user;
 
-        return res.json({ message: 'Document supprimé avec succès.' });
+    if (!schoolSlug) {
+        return res.status(403).json({ error: 'Accès non autorisé.' });
+    }
+
+    try {
+        // 1. Rechercher le document dans student_documents pour vérifier s'il existe et appartient à l'école
+        const fileUrlPattern = `/uploads/documents/${filename}`;
+        const { data: doc, error: dbErr } = await supabase
+            .from('student_documents')
+            .select('*')
+            .eq('file_url', fileUrlPattern)
+            .eq('school_slug', schoolSlug)
+            .single();
+
+        if (dbErr || !doc) {
+            return res.status(404).json({ error: 'Document introuvable ou n\'appartient pas à cet établissement.' });
+        }
+
+        // 2. Si le rôle est parent, vérifier la liaison parent-élève pour cet élève
+        if (role === 'parent') {
+            const { data: link, error: lErr } = await supabase
+                .from(`parent_student_${schoolSlug}`)
+                .select('student_id')
+                .eq('parent_id', userId)
+                .eq('student_id', doc.student_id)
+                .single();
+
+            if (lErr || !link) {
+                return res.status(403).json({ error: 'Accès refusé. Vous n\'êtes pas lié à l\'élève de ce document.' });
+            }
+        }
+
+        // 3. Envoyer le fichier physique de façon sécurisée
+        const filePath = path.join(__dirname, '..', 'uploads', 'documents', filename);
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: 'Le fichier physique est introuvable sur le serveur.' });
+        }
+
+        return res.sendFile(filePath);
     } catch (err) {
-        console.error('deleteDocument Error:', err.message);
+        console.error('downloadDocumentFile Error:', err.message);
         return res.status(500).json({ error: 'Erreur serveur: ' + err.message });
     }
 }
@@ -213,5 +255,6 @@ async function deleteDocument(req, res) {
 module.exports = {
     scanAndUploadDocument,
     getStudentDocuments,
-    deleteDocument
+    deleteDocument,
+    downloadDocumentFile
 };

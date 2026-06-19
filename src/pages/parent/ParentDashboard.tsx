@@ -688,7 +688,7 @@ export const ParentDashboard: React.FC = () => {
                                                                 </p>
                                                             </div>
                                                             <a
-                                                                href={`${API_BASE_URL}${doc.file_url}`}
+                                                                href={`${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest transition"

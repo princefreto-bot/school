@@ -4,12 +4,17 @@ const { supabase } = require('../utils/supabase');
 
 // ── Middleware d'authentification de base ──────────────────────
 function authenticateToken(req, res, next) {
+    let token = null;
     const authHeader = req.headers['authorization'];
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Accès refusé. Token manquant.' });
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    } else if (req.query && req.query.token) {
+        token = req.query.token;
     }
 
-    const token = authHeader.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ error: 'Accès refusé. Token manquant.' });
+    }
     try {
         const payload = jwt.verify(token, JWT_SECRET);
         req.user = payload; // Contient id, nom, role, schoolSlug (ou null pour superadmin/creator)

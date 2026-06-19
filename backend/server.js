@@ -3,6 +3,11 @@
 // ============================================================
 'use strict';
 require('dotenv').config();
+
+// Désactiver les console.log en production
+if (process.env.NODE_ENV === 'production') {
+    console.log = () => {};
+}
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -58,11 +63,13 @@ app.use(cors((req, callback) => {
 app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Logger simple des requêtes
-app.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
-    next();
-});
+// Logger simple des requêtes (uniquement en développement)
+if (process.env.NODE_ENV !== 'production') {
+    app.use((req, res, next) => {
+        console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+        next();
+    });
+}
 
 // ── Limiteur de requêtes ───────────────────────────────────────
 const { globalLimiter, authLimiter } = require('./middleware/rateLimiter');

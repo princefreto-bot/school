@@ -293,7 +293,9 @@ export const Documents: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {documents.map((doc) => {
                       const badge = getDocTypeBadge(doc.document_type);
-                      const fileUrl = `${API_BASE_URL}${doc.file_url}`;
+                      const filename = doc.file_url.split('/').pop();
+                      const token = localStorage.getItem('parent_token');
+                      const fileUrl = `${API_BASE_URL}/documents/file/${filename}?token=${token}`;
                       
                       return (
                         <div 

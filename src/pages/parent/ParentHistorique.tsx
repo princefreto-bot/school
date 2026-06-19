@@ -19,28 +19,42 @@ export const ParentHistorique: React.FC = () => {
                 const children = dash.students || [];
 
                 // Récupérer paiements
-                const allPayPromises = children.map((c: any) => parentApi.getPayments(c.id));
+                const allPayPromises = children.map((c: any) => 
+                    parentApi.getPayments(c.id)
+                        .catch(err => {
+                            console.warn(`Paiements non accessibles pour ${c.id}:`, err);
+                            return { student: c, payments: [], licenseError: true };
+                        })
+                );
                 const payResults = await Promise.all(allPayPromises);
-                const mergedPayments = payResults.flatMap((res: any) =>
-                    res.payments.map((p: any) => ({
+                const mergedPayments = payResults.flatMap((res: any) => {
+                    if (res.licenseError || !res.payments) return [];
+                    return res.payments.map((p: any) => ({
                         ...p,
                         studentName: `${res.student.prenom} ${res.student.nom}`,
                         classe: res.student.classe
-                    }))
-                ).sort((a: any) => new Date(a.date).getTime());
+                    }));
+                }).sort((a: any) => new Date(a.date).getTime());
 
                 setPayments(mergedPayments.reverse());
 
                 // Récupérer présences
-                const allPresPromises = children.map((c: any) => parentApi.getPresences(c.id));
+                const allPresPromises = children.map((c: any) => 
+                    parentApi.getPresences(c.id)
+                        .catch(err => {
+                            console.warn(`Présences non accessibles pour ${c.id}:`, err);
+                            return { presences: [], licenseError: true };
+                        })
+                );
                 const presResults = await Promise.all(allPresPromises);
-                const mergedPresences = presResults.flatMap((res: any, idx: number) =>
-                    res.presences.map((p: any) => ({
+                const mergedPresences = presResults.flatMap((res: any, idx: number) => {
+                    if (res.licenseError || !res.presences) return [];
+                    return res.presences.map((p: any) => ({
                         ...p,
                         studentName: `${children[idx].prenom} ${children[idx].nom}`,
                         classe: children[idx].classe
-                    }))
-                ).sort((a: any) => new Date(a.date + 'T' + a.heure).getTime());
+                    }));
+                }).sort((a: any) => new Date(a.date + 'T' + a.heure).getTime());
 
                 setPresences(mergedPresences.reverse());
 
