@@ -237,8 +237,8 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white text-slate-800 font-['Poppins'] relative overflow-hidden flex flex-col">
       {/* Background gradients pour effet premium */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-none blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-none blur-[120px] pointer-events-none" />
+      <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vh] bg-amber-500/5 rounded-none blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vh] bg-amber-500/5 rounded-none blur-[120px] pointer-events-none" />
 
       {/* ── HEADER / NAVIGATION ────────────────────────────── */}
       <header className="relative z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
@@ -382,7 +382,7 @@ export const LandingPage: React.FC = () => {
               src="/dashboard_preview.png" 
               alt={t.realTimeDashboard} 
               className="w-full h-full object-cover" 
-              loading="lazy"
+              fetchpriority="high"
               decoding="async"
             />
           </div>
