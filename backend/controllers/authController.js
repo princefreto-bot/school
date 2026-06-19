@@ -135,7 +135,7 @@ async function register(req, res) {
                 .from(`app_settings_${school_slug}`)
                 .select('school_year')
                 .single();
-            const yearName = settings?.school_year || '2024-2025';
+            const yearName = settings?.school_year || '2025-2026';
 
             const { data: yearRow } = await supabase
                 .from('academic_years')

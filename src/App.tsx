@@ -45,6 +45,7 @@ const ParentBadges = lazy(() => import('./pages/parent/ParentBadges').then(m => 
 const ParentMessages = lazy(() => import('./pages/parent/ParentMessages').then(m => ({ default: m.ParentMessages })));
 const ParentNotes = lazy(() => import('./pages/parent/ParentNotes').then(m => ({ default: m.ParentNotes })));
 const ParentCourses = lazy(() => import('./pages/parent/ParentCourses').then(m => ({ default: m.ParentCourses })));
+const ParentSettings = lazy(() => import('./pages/parent/ParentSettings').then(m => ({ default: m.ParentSettings })));
 const KidsPlace = lazy(() => import('./pages/parent/KidsPlace').then(m => ({ default: m.KidsPlace })));
 const ParentsList = lazy(() => import('./pages/ParentsList').then(m => ({ default: m.ParentsList })));
 const ImportExport = lazy(() => import('./components/ImportExport').then(m => ({ default: m.ImportExport })));
@@ -94,7 +95,7 @@ const PageContent: React.FC = () => {
 
   // Sécurité — Empêcher un parent de voir une page admin même si le store est désynchronisé
   if (user?.role === 'parent') {
-    const parentPages = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes', 'parent_courses'];
+    const parentPages = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes', 'parent_courses', 'parent_parametres'];
     if (!parentPages.includes(currentPage as any)) {
       return <ParentDashboard />;
     }
@@ -144,6 +145,7 @@ const PageContent: React.FC = () => {
     case 'parent_messages': return <ParentMessages />;
     case 'parent_notes': return <ParentNotes />;
     case 'parent_courses': return <ParentCourses />;
+    case 'parent_parametres': return <ParentSettings />;
     case 'parents_list': return <ParentsList />;
     case 'import_export': return <ImportExport />;
     case 'chat': return <ChatWindow />;

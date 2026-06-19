@@ -8,7 +8,7 @@ async function resolveAcademicYearId(schoolSlug, req) {
             .from(`app_settings_${schoolSlug}`)
             .select('school_year')
             .single();
-        yearName = settings?.school_year || '2024-2025';
+        yearName = settings?.school_year || '2025-2026';
     }
 
     const { data: yearRow } = await supabase

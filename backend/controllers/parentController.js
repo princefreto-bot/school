@@ -8,7 +8,7 @@ async function resolveAcademicYearId(schoolSlug, req) {
             .from(`app_settings_${schoolSlug}`)
             .select('school_year')
             .single();
-        yearName = settings?.school_year || '2024-2025';
+        yearName = settings?.school_year || '2025-2026';
     }
 
     const { data: yearRow } = await supabase
@@ -772,6 +772,26 @@ async function activateLicense(req, res) {
     }
 }
 
+async function getAcademicYears(req, res) {
+    const { schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+
+    try {
+        const { data: years, error } = await supabase
+            .from('academic_years')
+            .select('id, name, is_current')
+            .eq('school_slug', schoolSlug);
+
+        if (error) throw error;
+        // Sort years logically (newest first or oldest first)
+        const sortedYears = (years || []).sort((a, b) => b.name.localeCompare(a.name));
+        return res.json(sortedYears);
+    } catch (err) {
+        console.error('getAcademicYears Error:', err.message);
+        return res.status(500).json({ error: err.message });
+    }
+}
+
 module.exports = {
     getDashboard,
     getPayments,
@@ -783,5 +803,6 @@ module.exports = {
     adminDeleteAccount,
     getParentData,
     getLicensePricing,
-    activateLicense
+    activateLicense,
+    getAcademicYears
 };

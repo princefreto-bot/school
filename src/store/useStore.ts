@@ -469,7 +469,7 @@ export const useStore = create<AppState>()(
             return;
           }
         } else if (u?.role === 'parent') {
-          const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes', 'parent_courses'];
+          const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes', 'parent_courses', 'parent_parametres'];
           if (!allowed.includes(page)) {
             set({ currentPage: 'parent_dashboard' });
             return;
@@ -629,7 +629,7 @@ export const useStore = create<AppState>()(
       // ── Paramètres ───────────────────────────────────────
       schoolName: 'Établissement Scolaire',
       setSchoolName: (name) => set({ schoolName: name }),
-      schoolYear: '2024-2025',
+      schoolYear: '2025-2026',
       setSchoolYear: (year) => set({ schoolYear: year }),
       messageRemerciement:
         "Nous vous remercions sincèrement pour votre ponctualité dans le règlement de la scolarité. Votre soutien contribue au bon fonctionnement de notre établissement.",
@@ -662,10 +662,10 @@ export const useStore = create<AppState>()(
           const result = await syncToBackend(newSettings);
           if (result) {
             console.log('✅ [Store] All settings synced successfully!');
-            // If the academic year changed, re-fetch all data for the new year
+            // If the academic year changed, completely reload the page
             if (newSettings.schoolYear && newSettings.schoolYear !== previousYear) {
-               console.log('🔄 [Store] Academic year changed, fetching new data...');
-               await get().fetchAllFromBackend(true);
+               console.log('🔄 [Store] Academic year changed, reloading page...');
+               window.location.reload();
             }
           }
         } catch (err) {
@@ -675,12 +675,12 @@ export const useStore = create<AppState>()(
       settings: {
         seuilDeuxiemeTranche: 70,
         schoolName: 'Établissement Scolaire',
-        schoolYear: '2024-2025',
+        schoolYear: '2025-2026',
         messageRemerciement: "Nous vous remercions sincèrement pour votre ponctualité dans le règlement de la scolarité. Votre soutien contribue au bon fonctionnement de notre établissement.",
         messageRappel: "Nous vous rappelons cordialement que le règlement du solde de scolarité est attendu. Veuillez régulariser votre situation dans les meilleurs délais.",
         currency: 'FCFA',
         nomEcole: 'Établissement Scolaire',
-        anneScolaire: '2024-2025',
+        anneScolaire: '2025-2026',
         adresse: 'Adresse de l\'établissement',
         telephone: '+229 XX XX XX XX',
         email: 'contact@ecole.ci',
@@ -1327,7 +1327,7 @@ export const useStore = create<AppState>()(
 
           // Sécurité — Empêcher la re-connexion automatique de switcher un parent sur l'admin
           if (state.user?.role === 'parent') {
-            const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes', 'parent_courses'];
+            const allowed: AppPage[] = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes', 'parent_courses', 'parent_parametres'];
             if (!allowed.includes(state.currentPage)) {
               state.currentPage = 'parent_dashboard';
             }

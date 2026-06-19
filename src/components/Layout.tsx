@@ -51,6 +51,7 @@ const PARENT_NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'parent_courses',    label: 'Cours & Exercices',   icon: <BookOpen className="w-[18px] h-[18px]" /> },
   { id: 'chat',              label: 'Messagerie',          icon: <MessageSquare className="w-[18px] h-[18px]" /> },
   { id: 'annonces',          label: 'Annonces',            icon: <Megaphone className="w-[18px] h-[18px]" /> },
+  { id: 'parent_parametres', label: 'Paramètres',          icon: <Settings className="w-[18px] h-[18px]" /> },
 ];
 
 const CREATOR_NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
@@ -412,7 +413,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     { id: (isParent ? 'parent_dashboard' : 'dashboard') as AppPage, label: 'Accueil', icon: <LayoutDashboard className="w-5 h-5" /> },
     { id: (isParent ? 'parent_historique' : 'eleves') as AppPage, label: isParent ? 'Paiements' : 'Élèves', icon: isParent ? <CreditCard className="w-5 h-5" /> : <Users className="w-5 h-5" /> },
     { id: 'chat' as AppPage, label: 'Chat', icon: <MessageSquare className="w-5 h-5" />, badge: unreadMessages },
-    { id: (isParent ? 'annonces' : 'parametres') as AppPage, label: isParent ? 'Annonces' : 'Config', icon: isParent ? <Megaphone className="w-5 h-5" /> : <Settings className="w-5 h-5" /> },
+    { id: (isParent ? 'parent_parametres' : 'parametres') as AppPage, label: isParent ? 'Paramètres' : 'Config', icon: isParent ? <Settings className="w-5 h-5" /> : <Settings className="w-5 h-5" /> },
   ];
 
   const showOverlay = user?.role === 'directeur' && user?.schoolApproved === false;
@@ -474,44 +475,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   <h1 className="text-sm sm:text-[18px] font-black tracking-tight text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-none">
                     {currentLabel}
                   </h1>
-                  {isParent ? (
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                      <select
-                        value={schoolYear}
-                        onChange={async (e) => {
-                          useStore.getState().setSchoolYear(e.target.value);
-                          await useStore.getState().fetchAllFromBackend(true);
-                        }}
-                        className="bg-transparent border-none text-[10px] font-bold text-slate-500 uppercase tracking-widest focus:ring-0 cursor-pointer hover:text-amber-500 transition-colors p-0 m-0 outline-none"
-                      >
-                        <option value="2023-2024">Session 2023-2024</option>
-                        <option value="2024-2025">Session 2024-2025</option>
-                        <option value="2025-2026">Session 2025-2026</option>
-                        <option value="2026-2027">Session 2026-2027</option>
-                      </select>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                      {isAdminRole(user?.role) ? (
-                        <select
-                          value={schoolYear}
-                          onChange={(e) => updateAllSettings({ schoolYear: e.target.value })}
-                          className="bg-transparent border-none text-[10px] font-bold text-slate-500 uppercase tracking-widest focus:ring-0 cursor-pointer hover:text-amber-500 transition-colors p-0 m-0 outline-none"
-                        >
-                          <option value="2023-2024">Session 2023-2024</option>
-                          <option value="2024-2025">Session 2024-2025</option>
-                          <option value="2025-2026">Session 2025-2026</option>
-                          <option value="2026-2027">Session 2026-2027</option>
-                        </select>
-                      ) : (
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                          Session {schoolYear}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                      Session {schoolYear}
+                    </p>
+                  </div>
                 </div>
               </div>
   

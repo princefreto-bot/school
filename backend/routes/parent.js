@@ -11,12 +11,14 @@ const {
     adminDeleteAccount,
     getParentData,
     getLicensePricing,
-    activateLicense
+    activateLicense,
+    getAcademicYears
 } = require('../controllers/parentController');
 
 // Routes protégées
 router.use(authenticateToken);
 
+router.get('/years', getAcademicYears);
 router.get('/data', getParentData);  // Sync temps réel pour parent
 router.get('/dashboard', getDashboard);
 router.get('/payments/:studentId', getPayments);

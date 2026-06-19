@@ -263,6 +263,7 @@ export type AppPage =
   | 'parent_messages'
   | 'parent_notes'
   | 'parent_courses'
+  | 'parent_parametres'
   | 'parents_list'
   | 'import_export'
   | 'chat'
