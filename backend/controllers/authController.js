@@ -129,6 +129,60 @@ async function register(req, res) {
 
         if (error) throw error;
 
+        // --- Auto-liaison des élèves à l'inscription du parent ---
+        try {
+            const { data: settings } = await supabase
+                .from(`app_settings_${school_slug}`)
+                .select('school_year')
+                .single();
+            const yearName = settings?.school_year || '2024-2025';
+
+            const { data: yearRow } = await supabase
+                .from('academic_years')
+                .select('id')
+                .eq('school_slug', school_slug)
+                .eq('name', yearName)
+                .single();
+
+            let query = supabase
+                .from(`students_${school_slug}`)
+                .select('id, telephone_parent');
+
+            if (yearRow?.id) {
+                query = query.eq('academic_year_id', yearRow.id);
+            }
+
+            const { data: students } = await query;
+
+            if (students && students.length > 0) {
+                const clean = (num) => (num || '').replace(/[\s\-\(\)\+]/g, '');
+                const parentClean = clean(telephone);
+
+                const linksToInsert = [];
+                students.forEach(s => {
+                    if (s.telephone_parent && clean(s.telephone_parent) === parentClean) {
+                        linksToInsert.push({
+                            parent_id: parent.id,
+                            student_id: s.id
+                        });
+                    }
+                });
+
+                if (linksToInsert.length > 0) {
+                    console.log(`🔗 [Register AutoLink] Liaison automatique de ${linksToInsert.length} élèves au parent ${parent.id}`);
+                    const { error: linkErr } = await supabase
+                        .from(`parent_student_${school_slug}`)
+                        .upsert(linksToInsert, { onConflict: 'parent_id,student_id' });
+                    
+                    if (linkErr) {
+                        console.error('❌ [Register AutoLink] Erreur lors de l\'auto-liaison:', linkErr.message);
+                    }
+                }
+            }
+        } catch (linkEx) {
+            console.error('❌ [Register AutoLink] Exception inattendue lors de l\'auto-liaison:', linkEx.message);
+        }
+
         const token = jwt.sign(
             { id: parent.id, nom: parent.nom, role: parent.role, schoolSlug: school_slug },
             JWT_SECRET,

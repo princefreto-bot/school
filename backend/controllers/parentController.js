@@ -1,5 +1,26 @@
 const { supabase } = require('../utils/supabase');
 
+async function resolveAcademicYearId(schoolSlug, req) {
+    let yearName = req.headers['x-academic-year'];
+    
+    if (!yearName) {
+        const { data: settings } = await supabase
+            .from(`app_settings_${schoolSlug}`)
+            .select('school_year')
+            .single();
+        yearName = settings?.school_year || '2024-2025';
+    }
+
+    const { data: yearRow } = await supabase
+        .from('academic_years')
+        .select('id')
+        .eq('school_slug', schoolSlug)
+        .eq('name', yearName)
+        .single();
+
+    return yearRow?.id || null;
+}
+
 /**
  * GET /api/parent/dashboard
  */
@@ -9,6 +30,8 @@ async function getDashboard(req, res) {
     console.log('🔍 [Dashboard] Parent ID:', parentId);
 
     try {
+        const academicYearId = await resolveAcademicYearId(schoolSlug, req);
+
         // Récupérer les ids des élèves liés via la table parent_student
         const { data: links, error: lErr } = await supabase
             .from(`parent_student_${schoolSlug}`)
@@ -35,6 +58,7 @@ async function getDashboard(req, res) {
             .from(`students_${schoolSlug}`)
             .select('*')
             .in('id', studentIds)
+            .eq('academic_year_id', academicYearId)
             .order('nom', { ascending: true });
 
         if (sErr) {
@@ -59,6 +83,8 @@ async function getPayments(req, res) {
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
+        const academicYearId = await resolveAcademicYearId(schoolSlug, req);
+
         // Vérifier lien dans la table parent_student
         const { data: isLinked, error: lErr } = await supabase
             .from(`parent_student_${schoolSlug}`)
@@ -75,6 +101,7 @@ async function getPayments(req, res) {
             .from(`students_${schoolSlug}`)
             .select('*')
             .eq('id', studentId)
+            .eq('academic_year_id', academicYearId)
             .single();
 
         if (sErr) throw sErr;
@@ -88,6 +115,7 @@ async function getPayments(req, res) {
             .from(`payments_${schoolSlug}`)
             .select('*')
             .eq('student_id', studentId)
+            .eq('academic_year_id', academicYearId)
             .order('date', { ascending: false });
 
         if (pErr) throw pErr;
@@ -106,11 +134,13 @@ async function getBadges(req, res) {
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
+        const academicYearId = await resolveAcademicYearId(schoolSlug, req);
+
         const { data: badges, error } = await supabase
             .from(`badges_${schoolSlug}`)
             .select(`
                 *,
-                student:student_id (nom, prenom, classe)
+                student:student_id (nom, prenom, classe, academic_year_id)
             `)
             .eq('parent_id', parentId)
             .order('earned_at', { ascending: false });
@@ -124,12 +154,14 @@ async function getBadges(req, res) {
             throw error;
         }
 
-        const formatted = (badges || []).map(b => ({
-            ...b,
-            student_nom: b.student?.nom,
-            student_prenom: b.student?.prenom,
-            classe: b.student?.classe
-        }));
+        const formatted = (badges || [])
+            .filter(b => b.student && b.student.academic_year_id === academicYearId)
+            .map(b => ({
+                ...b,
+                student_nom: b.student?.nom,
+                student_prenom: b.student?.prenom,
+                classe: b.student?.classe
+            }));
 
         return res.json({ badges: formatted });
     } catch (err) {
@@ -270,6 +302,8 @@ async function getPresences(req, res) {
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
+        const academicYearId = await resolveAcademicYearId(schoolSlug, req);
+
         // Vérifier lien dans la table parent_student
         const { data: isLinked, error: lErr } = await supabase
             .from(`parent_student_${schoolSlug}`)
@@ -287,6 +321,7 @@ async function getPresences(req, res) {
             .from(`students_${schoolSlug}`)
             .select('license_status')
             .eq('id', studentId)
+            .eq('academic_year_id', academicYearId)
             .single();
 
         if (sErr) throw sErr;
@@ -299,6 +334,7 @@ async function getPresences(req, res) {
             .from(`presences_${schoolSlug}`)
             .select('*')
             .eq('student_id', studentId)
+            .eq('academic_year_id', academicYearId)
             .order('date', { ascending: false })
             .order('heure', { ascending: false });
 
@@ -320,6 +356,8 @@ async function getParentData(req, res) {
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
+        const academicYearId = await resolveAcademicYearId(schoolSlug, req);
+
         // 0. Récupérer les IDs des enfants liés pour filtrer les notes
         const { data: links } = await supabase
             .from(`parent_student_${schoolSlug}`)
@@ -380,7 +418,8 @@ async function getParentData(req, res) {
             const { data: dbStudents } = await supabase
                 .from(`students_${schoolSlug}`)
                 .select('*')
-                .in('id', studentIds);
+                .in('id', studentIds)
+                .eq('academic_year_id', academicYearId);
             
             students = (dbStudents || []).map(s => ({
                 ...s,
@@ -395,7 +434,7 @@ async function getParentData(req, res) {
                 licenseKey: s.license_key || null,
                 licenseStatus: s.license_status || 'inactive',
                 licenseActivatedAt: s.license_activated_at || null,
-                historiquesPaiements: [] // Non requis pour le dashboard simple mais bon pour la cohérence
+                historiquesPaiements: []
             }));
 
             activeStudentIds = (dbStudents || [])
@@ -413,7 +452,8 @@ async function getParentData(req, res) {
             const { data: dbNotes } = await supabase
                 .from(`notes_${schoolSlug}`)
                 .select('*')
-                .in('eleve_id', activeStudentIds);
+                .in('eleve_id', activeStudentIds)
+                .eq('academic_year_id', academicYearId);
             notes = (dbNotes || []).map(n => ({
                 id: n.id,
                 eleveId: n.eleve_id,
@@ -427,7 +467,8 @@ async function getParentData(req, res) {
             // Récupérer toutes les matières
             const { data: dbMatieres } = await supabase
                 .from(`matieres_${schoolSlug}`)
-                .select('*');
+                .select('*')
+                .eq('academic_year_id', academicYearId);
             matieres = (dbMatieres || []).map(m => ({
                 id: m.id,
                 nom: m.nom,
@@ -437,7 +478,8 @@ async function getParentData(req, res) {
             // Récupérer les configurations de classe
             const { data: dbClasseMatieres } = await supabase
                 .from(`classe_matieres_${schoolSlug}`)
-                .select('*');
+                .select('*')
+                .eq('academic_year_id', academicYearId);
             classeMatieres = (dbClasseMatieres || []).map(cm => ({
                 id: cm.id,
                 classe: cm.classe,
@@ -454,7 +496,7 @@ async function getParentData(req, res) {
                 .from(`badges_${schoolSlug}`)
                 .select(`
                     *,
-                    student:student_id (nom, prenom, classe)
+                    student:student_id (nom, prenom, classe, academic_year_id)
                 `)
                 .eq('parent_id', parentId)
                 .in('student_id', activeStudentIds)
@@ -467,12 +509,14 @@ async function getParentData(req, res) {
                 }
             }
             
-            badges = (dbBadges || []).map(b => ({
-                ...b,
-                student_nom: b.student?.nom,
-                student_prenom: b.student?.prenom,
-                classe: b.student?.classe
-            }));
+            badges = (dbBadges || [])
+                .filter(b => b.student && b.student.academic_year_id === academicYearId)
+                .map(b => ({
+                    ...b,
+                    student_nom: b.student?.nom,
+                    student_prenom: b.student?.prenom,
+                    classe: b.student?.classe
+                }));
 
             // Proactif : Si le parent a des enfants mais aucun badge, on tente une génération auto
             if (badges.length === 0 && activeStudentIds.length > 0) {
@@ -558,13 +602,27 @@ async function getLicensePricing(req, res) {
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
+        const academicYearId = await resolveAcademicYearId(schoolSlug, req);
+
         const { data: links, error: lErr } = await supabase
             .from(`parent_student_${schoolSlug}`)
             .select('student_id')
             .eq('parent_id', parentId);
 
         if (lErr) throw lErr;
-        const count = links ? links.length : 0;
+
+        let count = 0;
+        if (links && links.length > 0) {
+            const studentIds = links.map(l => l.student_id);
+            const { data: students, error: sErr } = await supabase
+                .from(`students_${schoolSlug}`)
+                .select('id')
+                .in('id', studentIds)
+                .eq('academic_year_id', academicYearId);
+            
+            if (sErr) throw sErr;
+            count = students ? students.length : 0;
+        }
 
         let totalPrice = 0;
         let originalPrice = count * 1500;

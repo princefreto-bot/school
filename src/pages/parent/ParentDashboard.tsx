@@ -244,7 +244,7 @@ export const ParentDashboard: React.FC = () => {
                         <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">Tout ce qu'il se passe pour vos enfants, ici et maintenant.</p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="grid grid-cols-2 md:flex md:items-center gap-2 md:gap-3 w-full md:w-auto">
                         {/* Status Notifications */}
                         {notifStatus !== 'granted' && (
                             <button
@@ -266,7 +266,7 @@ export const ParentDashboard: React.FC = () => {
                                     announcements.forEach(a => markAnnouncementRead(a.id, user.id));
                                 }
                             }}
-                            className="relative flex items-center gap-2 px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 text-slate-600 dark:text-slate-300 rounded-[20px] shadow-sm transition-all font-black text-sm active:scale-95"
+                            className="relative flex items-center justify-center gap-2 px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 text-slate-600 dark:text-slate-300 rounded-[20px] shadow-sm transition-all font-black text-sm active:scale-95 w-full md:w-auto"
                         >
                             <Bell className="w-5 h-5 text-blue-500" />
                             Annonces
@@ -280,7 +280,7 @@ export const ParentDashboard: React.FC = () => {
                         {/* Bouton Kids Place */}
                         <button
                             onClick={() => navigate(`/${lang}/parent/kids-place`)}
-                            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-400 to-pink-500 hover:from-amber-500 hover:to-pink-600 text-white rounded-2xl shadow-lg shadow-pink-500/20 transition-all font-bold text-sm"
+                            className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-400 to-pink-500 hover:from-amber-500 hover:to-pink-600 text-white rounded-2xl shadow-lg shadow-pink-500/20 transition-all font-bold text-sm w-full md:w-auto"
                         >
                             <Play className="w-4 h-4" />
                             🎬 Kids Place
@@ -289,7 +289,7 @@ export const ParentDashboard: React.FC = () => {
                         <button
                             id="btn-link-child"
                             onClick={() => setIsLinkModalOpen(true)}
-                            className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-600/20 transition-all font-bold text-sm"
+                            className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-600/20 transition-all font-bold text-sm col-span-2 md:col-span-1 w-full md:w-auto"
                         >
                             <UserPlus className="w-5 h-5" />
                             Lier un nouvel enfant
@@ -297,7 +297,7 @@ export const ParentDashboard: React.FC = () => {
 
                         <button
                             onClick={() => setShowSupportModal(true)}
-                            className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl shadow-lg shadow-emerald-600/20 transition-all font-bold text-sm"
+                            className="flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl shadow-lg shadow-emerald-600/20 transition-all font-bold text-sm col-span-2 md:col-span-1 w-full md:w-auto"
                         >
                             <MessageSquare className="w-5 h-5" />
                             Assistance
@@ -456,7 +456,7 @@ export const ParentDashboard: React.FC = () => {
                             <span className="px-4 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full text-[10px] font-black uppercase tracking-widest">{children.length} enfant{children.length > 1 ? 's' : ''} lié{children.length > 1 ? 's' : ''}</span>
                         )}
                     </div>
-                    <div className="overflow-x-auto">
+                    <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50/50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 text-[9px] font-black uppercase tracking-[0.1em] border-b border-slate-100 dark:border-slate-800">
@@ -551,6 +551,90 @@ export const ParentDashboard: React.FC = () => {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* ── Liste des enfants sur Mobile ── */}
+                    <div className="block md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+                        {children.length === 0 ? (
+                            <div className="px-6 py-20 text-center text-slate-500">
+                                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Search className="w-8 h-8 text-slate-200" />
+                                </div>
+                                <p className="text-lg font-bold text-slate-800 mb-1">Aucun enfant lié</p>
+                                <p className="text-xs text-slate-400 max-w-xs mx-auto mb-4">Liez votre enfant avec son numéro d'élève pour accéder à son dossier.</p>
+                                <button
+                                    onClick={() => setIsLinkModalOpen(true)}
+                                    className="px-6 py-2 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-600 hover:text-white transition-all text-sm"
+                                >
+                                    Lier mon enfant maintenant
+                                </button>
+                            </div>
+                        ) : (
+                            children.map(child => (
+                                <div key={child.id} className="p-5 space-y-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <h4 className="font-bold text-slate-800 dark:text-slate-200 text-base">{child.prenom} {child.nom}</h4>
+                                            <code className="text-[10px] text-slate-400 font-mono">REF: {child.id}</code>
+                                        </div>
+                                        <button
+                                            onClick={() => handleUnlink(child.id, `${child.prenom} ${child.nom}`)}
+                                            className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition"
+                                            title="Retirer cet enfant"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4 text-xs">
+                                        <div>
+                                            <p className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Cursus</p>
+                                            <p className="text-slate-700 dark:text-slate-350 font-bold mt-0.5">{child.classe}</p>
+                                            <span className="text-[10px] text-slate-400 uppercase font-semibold">{child.cycle}</span>
+                                        </div>
+                                        <div>
+                                            <p className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Situation</p>
+                                            <div className="mt-1 flex flex-wrap gap-1">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-bold ${
+                                                    child.status === 'Soldé' ? 'bg-emerald-100 text-emerald-700' :
+                                                    child.status === 'Partiel' ? 'bg-amber-100 text-amber-700' :
+                                                    'bg-red-100 text-red-700'
+                                                }`}>
+                                                    {child.status}
+                                                </span>
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-bold ${
+                                                    (child.licenseStatus || 'inactive') === 'active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30' : 'bg-amber-100 text-amber-700 dark:bg-amber-950/30'
+                                                }`}>
+                                                    {(child.licenseStatus || 'inactive') === 'active' ? 'Active' : 'Requise'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="border-t border-slate-100 dark:border-slate-800/60 pt-3 grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Versé</p>
+                                            <p className="text-emerald-600 font-bold text-base mt-0.5">{(child.dejaPaye || 0).toLocaleString()} F</p>
+                                            {child.ecolage > 0 && (
+                                                <div className="w-24 h-1 bg-slate-100 dark:bg-slate-800 rounded-full mt-1.5 overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-emerald-500 rounded-full"
+                                                        style={{ width: `${Math.min(((child.dejaPaye || 0) / child.ecolage) * 100, 100)}%` }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Reliquat</p>
+                                            <p className={`font-bold text-base mt-0.5 ${child.restant > 25000 ? 'text-red-500' : 'text-amber-600'}`}>
+                                                {(child.restant || 0).toLocaleString()} F
+                                            </p>
+                                            <p className="text-[10px] text-slate-400 italic">Total: {(child.ecolage || 0).toLocaleString()} F</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 

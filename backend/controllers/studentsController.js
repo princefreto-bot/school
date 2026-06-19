@@ -1,5 +1,26 @@
 const { supabase } = require('../utils/supabase');
 
+async function resolveAcademicYearId(schoolSlug, req) {
+    let yearName = req.headers['x-academic-year'];
+    
+    if (!yearName) {
+        const { data: settings } = await supabase
+            .from(`app_settings_${schoolSlug}`)
+            .select('school_year')
+            .single();
+        yearName = settings?.school_year || '2024-2025';
+    }
+
+    const { data: yearRow } = await supabase
+        .from('academic_years')
+        .select('id')
+        .eq('school_slug', schoolSlug)
+        .eq('name', yearName)
+        .single();
+
+    return yearRow?.id || null;
+}
+
 /**
  * GET /api/students
  * Recherche d'élèves par nom, prénom ou classe.
@@ -12,9 +33,15 @@ async function listStudents(req, res) {
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
+        const academicYearId = await resolveAcademicYearId(schoolSlug, req);
+
         let query = supabase
             .from(`students_${schoolSlug}`)
             .select('*');
+
+        if (academicYearId) {
+            query = query.eq('academic_year_id', academicYearId);
+        }
 
         if (search || nom) {
             const q = (search || nom).toLowerCase().trim();
@@ -67,9 +94,16 @@ async function countStudents(req, res) {
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
-        const { count, error } = await supabase
+        const academicYearId = await resolveAcademicYearId(schoolSlug, req);
+        let query = supabase
             .from(`students_${schoolSlug}`)
             .select('*', { count: 'exact', head: true });
+
+        if (academicYearId) {
+            query = query.eq('academic_year_id', academicYearId);
+        }
+
+        const { count, error } = await query;
 
         if (error) throw error;
         return res.json({ count: count || 0 });

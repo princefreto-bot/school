@@ -474,7 +474,24 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   <h1 className="text-sm sm:text-[18px] font-black tracking-tight text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-none">
                     {currentLabel}
                   </h1>
-                  {!isParent && (
+                  {isParent ? (
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                      <select
+                        value={schoolYear}
+                        onChange={async (e) => {
+                          useStore.getState().setSchoolYear(e.target.value);
+                          await useStore.getState().fetchAllFromBackend(true);
+                        }}
+                        className="bg-transparent border-none text-[10px] font-bold text-slate-500 uppercase tracking-widest focus:ring-0 cursor-pointer hover:text-amber-500 transition-colors p-0 m-0 outline-none"
+                      >
+                        <option value="2023-2024">Session 2023-2024</option>
+                        <option value="2024-2025">Session 2024-2025</option>
+                        <option value="2025-2026">Session 2025-2026</option>
+                        <option value="2026-2027">Session 2026-2027</option>
+                      </select>
+                    </div>
+                  ) : (
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                       {isAdminRole(user?.role) ? (

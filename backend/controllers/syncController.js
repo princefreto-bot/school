@@ -121,6 +121,52 @@ async function syncFromFrontend(req, res) {
                 await supabase.from(tbl('students')).upsert(chunk, { onConflict: 'id' });
             }
 
+            // --- Auto-liaison des parents par numéro de téléphone ---
+            try {
+                const { data: parents } = await supabase
+                    .from(tbl('profiles'))
+                    .select('id, telephone')
+                    .eq('role', 'parent');
+
+                if (parents && parents.length > 0) {
+                    const parentMap = new Map();
+                    parents.forEach(p => {
+                        if (p.telephone) {
+                            const clean = p.telephone.replace(/[\s\-\(\)\+]/g, '');
+                            if (clean) parentMap.set(clean, p.id);
+                        }
+                    });
+
+                    const linksToInsert = [];
+                    studentData.forEach(s => {
+                        if (s.telephone_parent) {
+                            const cleanS = s.telephone_parent.replace(/[\s\-\(\)\+]/g, '');
+                            const parentId = parentMap.get(cleanS);
+                            if (parentId) {
+                                linksToInsert.push({
+                                    parent_id: parentId,
+                                    student_id: s.id
+                                });
+                            }
+                        }
+                    });
+
+                    if (linksToInsert.length > 0) {
+                        console.log(`🔗 [Sync AutoLink] Insertion/Mise à jour de ${linksToInsert.length} liaisons parent-enfant...`);
+                        const { error: linkErr } = await supabase
+                            .from(tbl('parent_student'))
+                            .upsert(linksToInsert, { onConflict: 'parent_id,student_id' });
+                        if (linkErr) {
+                            console.error('❌ [Sync AutoLink] Erreur lors de l\'insertion des liaisons:', linkErr.message);
+                        } else {
+                            console.log('✅ [Sync AutoLink] Liaisons parent-enfant insérées avec succès.');
+                        }
+                    }
+                }
+            } catch (linkEx) {
+                console.error('❌ [Sync AutoLink] Exception inattendue:', linkEx.message);
+            }
+
             // --- 2. Sync Payments ---
             const allPayments = [];
             students.forEach(s => {

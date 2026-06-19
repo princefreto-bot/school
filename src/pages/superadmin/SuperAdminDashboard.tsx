@@ -736,10 +736,10 @@ export const SuperAdminDashboard: React.FC = () => {
       </div>
 
       {/* ── TABS NAVIGATION ── */}
-      <div className="flex gap-2 p-1.5 bg-slate-950 border border-slate-800 rounded-2xl w-fit">
+      <div className="flex gap-2 p-1.5 bg-slate-950 border border-slate-800 rounded-2xl w-full sm:w-fit overflow-x-auto whitespace-nowrap scrollbar-none">
         <button
           onClick={() => setActiveTab('schools')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition ${
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition shrink-0 ${
             activeTab === 'schools'
               ? 'bg-slate-800 text-white border border-slate-700'
               : 'text-slate-500 hover:text-slate-300'
@@ -749,7 +749,7 @@ export const SuperAdminDashboard: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveTab('creators')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition ${
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition shrink-0 ${
             activeTab === 'creators'
               ? 'bg-slate-800 text-white border border-slate-700'
               : 'text-slate-500 hover:text-slate-300'
@@ -759,7 +759,7 @@ export const SuperAdminDashboard: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveTab('expenses')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition ${
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition shrink-0 ${
             activeTab === 'expenses'
               ? 'bg-slate-800 text-white border border-slate-700'
               : 'text-slate-500 hover:text-slate-300'
@@ -774,7 +774,7 @@ export const SuperAdminDashboard: React.FC = () => {
         <div className="space-y-6">
           {/* Stats globales */}
           {stats && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 {
                   label: 'Total Écoles', value: stats.total_schools, icon: <Building2 className="w-5 h-5" />,
@@ -836,74 +836,76 @@ export const SuperAdminDashboard: React.FC = () => {
                   const isExpired = school.status === 'trial' && school.trial_days_left === 0;
                   return (
                     <div key={school.id} className={`p-5 hover:bg-slate-800/30 transition-colors ${isExpired ? 'border-l-4 border-amber-500' : ''}`}>
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-700 to-slate-600 flex items-center justify-center shrink-0 overflow-hidden">
-                          {school.logo_url ? (
-                            <img src={school.logo_url} alt={school.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <Building2 className="w-6 h-6 text-slate-400" />
-                          )}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 flex-wrap mb-2">
-                            <h3 className="text-white font-bold text-base">{school.name}</h3>
-                            {getStatusBadge(school.status)}
-                            {school.is_approved === false && (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-500 border border-amber-500/30">
-                                <AlertTriangle className="w-3 h-3" /> En attente de validation
-                              </span>
-                            )}
-                            {isExpired && (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">
-                                <AlertTriangle className="w-3 h-3" /> Essai expiré
-                              </span>
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div className="flex items-start gap-4 flex-1">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-700 to-slate-600 flex items-center justify-center shrink-0 overflow-hidden">
+                            {school.logo_url ? (
+                              <img src={school.logo_url} alt={school.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <Building2 className="w-6 h-6 text-slate-400" />
                             )}
                           </div>
 
-                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-400 mb-3">
-                            <span className="flex items-center gap-1.5">
-                              <Globe className="w-3.5 h-3.5" />
-                              <code className="text-slate-300 text-xs">/{school.slug}</code>
-                            </span>
-                            {school.address && (
-                              <span className="flex items-center gap-1.5">
-                                <MapPin className="w-3.5 h-3.5" />{school.address}
-                              </span>
-                            )}
-                            {school.phone && (
-                              <span className="flex items-center gap-1.5">
-                                <Phone className="w-3.5 h-3.5" />{school.phone}
-                              </span>
-                            )}
-                            {school.email && (
-                              <span className="flex items-center gap-1.5">
-                                <Mail className="w-3.5 h-3.5" />{school.email}
-                              </span>
-                            )}
-                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 flex-wrap mb-2">
+                              <h3 className="text-white font-bold text-base">{school.name}</h3>
+                              {getStatusBadge(school.status)}
+                              {school.is_approved === false && (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-500 border border-amber-500/30">
+                                  <AlertTriangle className="w-3 h-3" /> En attente de validation
+                                </span>
+                              )}
+                              {isExpired && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">
+                                  <AlertTriangle className="w-3 h-3" /> Essai expiré
+                                </span>
+                              )}
+                            </div>
 
-                          <div className="flex flex-wrap gap-4">
-                            <div className="text-center">
-                              <p className="text-white font-bold text-lg">{school.student_count}</p>
-                              <p className="text-slate-500 text-xs">Élèves actuels</p>
+                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-400 mb-3">
+                              <span className="flex items-center gap-1.5">
+                                <Globe className="w-3.5 h-3.5" />
+                                <code className="text-slate-300 text-xs">/{school.slug}</code>
+                              </span>
+                              {school.address && (
+                                <span className="flex items-center gap-1.5">
+                                  <MapPin className="w-3.5 h-3.5" />{school.address}
+                                </span>
+                              )}
+                              {school.phone && (
+                                <span className="flex items-center gap-1.5">
+                                  <Phone className="w-3.5 h-3.5" />{school.phone}
+                                </span>
+                              )}
+                              {school.email && (
+                                <span className="flex items-center gap-1.5">
+                                  <Mail className="w-3.5 h-3.5" />{school.email}
+                                </span>
+                              )}
                             </div>
-                            <div className="text-center">
-                              <p className="text-emerald-400 font-bold text-lg">{formatFCFA(school.revenue)}</p>
-                              <p className="text-slate-500 text-xs">Revenus/mois</p>
-                            </div>
-                            {school.status === 'trial' && (
+
+                            <div className="flex flex-wrap gap-4">
                               <div className="text-center">
-                                <p className={`font-bold text-lg ${school.trial_days_left > 7 ? 'text-amber-400' : 'text-red-400'}`}>
-                                  {school.trial_days_left}j
-                                </p>
-                                <p className="text-slate-500 text-xs">Restant essai</p>
+                                <p className="text-white font-bold text-lg">{school.student_count}</p>
+                                <p className="text-slate-500 text-xs">Élèves actuels</p>
                               </div>
-                            )}
+                              <div className="text-center">
+                                <p className="text-emerald-400 font-bold text-lg">{formatFCFA(school.revenue)}</p>
+                                <p className="text-slate-500 text-xs">Revenus/mois</p>
+                              </div>
+                              {school.status === 'trial' && (
+                                <div className="text-center">
+                                  <p className={`font-bold text-lg ${school.trial_days_left > 7 ? 'text-amber-400' : 'text-red-400'}`}>
+                                    {school.trial_days_left}j
+                                  </p>
+                                  <p className="text-slate-500 text-xs">Restant essai</p>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 border-t sm:border-t-0 sm:border-l border-slate-700/50 pt-3 sm:pt-0 sm:pl-4 mt-3 sm:mt-0">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 lg:border-l border-slate-700/50 pt-3 sm:pt-0 lg:pl-4">
                           {school.is_approved === false ? (
                             <button
                               onClick={() => handleApproveToggle(school, true)}
@@ -938,8 +940,8 @@ export const SuperAdminDashboard: React.FC = () => {
                             disabled={actionLoading === school.id}
                             className={`flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md ${
                               school.status === 'suspended'
-                                ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-400/10 text-emerald-400 hover:from-emerald-500/30 hover:to-emerald-400/20 border border-emerald-500/40'
-                                : 'bg-gradient-to-r from-amber-500/20 to-amber-400/10 text-amber-400 hover:from-amber-500/30 hover:to-amber-400/20 border border-amber-500/40'
+                                  ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-400/10 text-emerald-400 hover:from-emerald-500/30 hover:to-emerald-400/20 border border-emerald-500/40'
+                                  : 'bg-gradient-to-r from-amber-500/20 to-amber-400/10 text-amber-400 hover:from-amber-500/30 hover:to-amber-400/20 border border-amber-500/40'
                             } disabled:opacity-50`}
                           >
                             {actionLoading === school.id
@@ -1023,76 +1025,78 @@ export const SuperAdminDashboard: React.FC = () => {
               <div className="divide-y divide-slate-800">
                 {creators.map((creator) => (
                   <div key={creator.id} className="p-5 hover:bg-slate-800/30 transition-colors">
-                    <div className="flex items-start gap-4">
-                      {/* Avatar */}
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-slate-950 flex items-center justify-center shrink-0 font-black text-lg">
-                        {creator.nom.charAt(0).toUpperCase()}
-                      </div>
-
-                      {/* Infos */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 flex-wrap mb-2">
-                          <h3 className="text-white font-bold text-base">{creator.nom}</h3>
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                            PARTENAIRE
-                          </span>
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                      <div className="flex items-start gap-4 flex-1">
+                        {/* Avatar */}
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-slate-950 flex items-center justify-center shrink-0 font-black text-lg">
+                          {creator.nom.charAt(0).toUpperCase()}
                         </div>
 
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-400 mb-4">
-                          <span className="flex items-center gap-1.5">
-                            <Phone className="w-3.5 h-3.5" />{creator.telephone}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5" />
-                            Créé le {new Date(creator.created_at).toLocaleDateString('fr-FR')}
-                          </span>
-                        </div>
+                        {/* Infos */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 flex-wrap mb-2">
+                            <h3 className="text-white font-bold text-base">{creator.nom}</h3>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                              PARTENAIRE
+                            </span>
+                          </div>
 
-                        {/* Écoles Affiliées en badge avec croix */}
-                        <div className="mb-4">
-                          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Établissements affiliés ({creator.linked_schools.length})</p>
-                          <div className="flex flex-wrap gap-2">
-                            {creator.linked_schools.map(school => (
-                              <span 
-                                key={school.id} 
-                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold border border-slate-700/50"
-                              >
-                                <Building2 className="w-3 h-3 text-slate-500" />
-                                {school.name}
-                                <button 
-                                  onClick={() => handleUnlinkSchool(creator.id, school.id, school.name)}
-                                  className="w-4 h-4 rounded-full bg-slate-700 hover:bg-rose-500/20 hover:text-rose-400 flex items-center justify-center transition"
-                                  title="Délier cet établissement"
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-400 mb-4">
+                            <span className="flex items-center gap-1.5">
+                              <Phone className="w-3.5 h-3.5" />{creator.telephone}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <Clock className="w-3.5 h-3.5" />
+                              Créé le {new Date(creator.created_at).toLocaleDateString('fr-FR')}
+                            </span>
+                          </div>
+
+                          {/* Écoles Affiliées en badge avec croix */}
+                          <div className="mb-4">
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Établissements affiliés ({creator.linked_schools.length})</p>
+                            <div className="flex flex-wrap gap-2">
+                              {creator.linked_schools.map(school => (
+                                <span 
+                                  key={school.id} 
+                                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold border border-slate-700/50"
                                 >
-                                  <X className="w-2.5 h-2.5" />
-                                </button>
-                              </span>
-                            ))}
-                            {creator.linked_schools.length === 0 && (
-                              <p className="text-xs text-slate-600 italic">Aucune école affiliée.</p>
-                            )}
+                                  <Building2 className="w-3 h-3 text-slate-500" />
+                                  {school.name}
+                                  <button 
+                                    onClick={() => handleUnlinkSchool(creator.id, school.id, school.name)}
+                                    className="w-4 h-4 rounded-full bg-slate-700 hover:bg-rose-500/20 hover:text-rose-400 flex items-center justify-center transition"
+                                    title="Délier cet établissement"
+                                  >
+                                    <X className="w-2.5 h-2.5" />
+                                  </button>
+                                </span>
+                              ))}
+                              {creator.linked_schools.length === 0 && (
+                                <p className="text-xs text-slate-600 italic">Aucune école affiliée.</p>
+                              )}
+                            </div>
                           </div>
-                        </div>
 
-                        {/* Revenus associés */}
-                        <div className="flex flex-wrap gap-6 border-t border-slate-800/60 pt-3">
-                          <div className="text-center sm:text-left">
-                            <p className="text-slate-400 font-bold text-base tabular-nums">{creator.total_active_students} / {creator.total_students}</p>
-                            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Licences payées</p>
-                          </div>
-                          <div className="text-center sm:text-left">
-                            <p className="text-slate-400 font-bold text-base tabular-nums">{formatFCFA(creator.total_revenue_generated)}</p>
-                            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">CA écoles lié</p>
-                          </div>
-                          <div className="text-center sm:text-left">
-                            <p className="text-amber-400 font-black text-base tabular-nums">{formatFCFA(creator.total_commission)}</p>
-                            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Commissions créateur (20%)</p>
+                          {/* Revenus associés */}
+                          <div className="flex flex-wrap gap-6 border-t border-slate-800/60 pt-3">
+                            <div className="text-center sm:text-left">
+                              <p className="text-slate-400 font-bold text-base tabular-nums">{creator.total_active_students} / {creator.total_students}</p>
+                              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Licences payées</p>
+                            </div>
+                            <div className="text-center sm:text-left">
+                              <p className="text-slate-400 font-bold text-base tabular-nums">{formatFCFA(creator.total_revenue_generated)}</p>
+                              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">CA écoles lié</p>
+                            </div>
+                            <div className="text-center sm:text-left">
+                              <p className="text-amber-400 font-black text-base tabular-nums">{formatFCFA(creator.total_commission)}</p>
+                              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Commissions créateur (20%)</p>
+                            </div>
                           </div>
                         </div>
                       </div>
 
                       {/* Actions Créateurs */}
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 border-t sm:border-t-0 sm:border-l border-slate-700/50 pt-3 sm:pt-0 sm:pl-4 mt-3 sm:mt-0">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 lg:border-l border-slate-700/50 pt-3 lg:pt-0 lg:pl-4">
                         <button
                           onClick={() => setSelectedCreatorForLink(creator)}
                           className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 shadow-md transition-all"
@@ -1153,20 +1157,20 @@ export const SuperAdminDashboard: React.FC = () => {
 
           <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden p-6">
             <h2 className="text-lg font-bold text-white mb-6">Ajouter une dépense / charge</h2>
-            <form onSubmit={handleAddExpense} className="flex flex-wrap items-end gap-4">
-              <div className="flex-1 min-w-[200px]">
+            <form onSubmit={handleAddExpense} className="grid grid-cols-1 sm:flex sm:flex-wrap items-end gap-4">
+              <div className="flex-1 w-full min-w-0 sm:min-w-[200px]">
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Catégorie / Nom</label>
                 <input type="text" value={newExpenseCategory} onChange={e => setNewExpenseCategory(e.target.value)}
                   className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   placeholder="ex: Serveur Render" required />
               </div>
-              <div className="w-32">
+              <div className="w-full sm:w-32">
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Montant (FCFA)</label>
                 <input type="number" value={newExpenseAmount} onChange={e => setNewExpenseAmount(e.target.value)}
                   className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
                   required />
               </div>
-              <div className="w-32">
+              <div className="w-full sm:w-32">
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Périodicité</label>
                 <select value={newExpensePeriod} onChange={e => setNewExpensePeriod(e.target.value)}
                   className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -1177,7 +1181,7 @@ export const SuperAdminDashboard: React.FC = () => {
                 </select>
               </div>
               <button type="submit"
-                className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold transition-all h-[46px]">
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold transition-all h-[46px]">
                 Ajouter
               </button>
             </form>
