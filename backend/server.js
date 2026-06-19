@@ -93,6 +93,40 @@ app.get('/api/schools', async (req, res) => {
     }
 });
 
+// Routes publiques pour les témoignages
+app.get('/api/testimonials', async (req, res) => {
+    try {
+        const { data: testimonials, error } = await supabase
+            .from('testimonials')
+            .select('id, name, role, school_name, content, created_at')
+            .eq('is_approved', true)
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        res.json(testimonials);
+    } catch (err) {
+        res.status(500).json({ error: 'Erreur récupération témoignages' });
+    }
+});
+
+app.post('/api/testimonials', async (req, res) => {
+    try {
+        const { name, role, school_name, content } = req.body;
+        if (!name || !role || !content) {
+            return res.status(400).json({ error: 'Nom, rôle et contenu requis' });
+        }
+        
+        const { data, error } = await supabase
+            .from('testimonials')
+            .insert([{ name, role, school_name, content, is_approved: false }])
+            .select();
+            
+        if (error) throw error;
+        res.status(201).json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({ error: 'Erreur soumission témoignage' });
+    }
+});
+
 // Route publique pour les statistiques globales
 app.get('/api/public/stats', async (req, res) => {
     const { getCache, setCache } = require('./services/cacheService');

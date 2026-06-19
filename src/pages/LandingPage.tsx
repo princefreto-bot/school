@@ -23,6 +23,7 @@ export const LandingPage: React.FC = () => {
   const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [dbStats, setDbStats] = useState({ schools: 0, students: 0, documents: 0 });
+  const [testimonials, setTestimonials] = useState<any[]>([]);
 
   useEffect(() => {
     fetch(`${BACKEND_URL}/api/public/stats`)
@@ -35,8 +36,16 @@ export const LandingPage: React.FC = () => {
             documents: data.documents || 0
           });
         }
-      })
       .catch(err => console.error("Erreur récupération des statistiques:", err));
+
+    fetch(`${BACKEND_URL}/api/testimonials`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setTestimonials(data);
+        }
+      })
+      .catch(err => console.error("Erreur récupération témoignages:", err));
   }, []);
 
   const texts = {
@@ -52,7 +61,7 @@ export const LandingPage: React.FC = () => {
       heroTitlePart1: "Fini les files d'attente. Gérez ",
       heroTitleHighlight: "votre école en 2 secondes",
       heroTitlePart2: " depuis votre téléphone.",
-      heroSubtitle: "Enregistrez vos encaissements de scolarité (espèces, Mobile Money, virement) pour notifier les parents instantanément, éditez les bulletins PDF conformes DRE en un clic, pointez les entrées/sorties par scan QR et offrez aux parents un tableau de bord live — le tout sans Excel, sans file d'attente, même en connexion 2G.",
+      heroSubtitle: "Centralisez vos encaissements de scolarité (espèces, chèques, virements) avec enregistrement de reçus physiques pour notifier les parents instantanément, éditez les bulletins PDF conformes DRE en un clic, pointez les entrées/sorties par scan QR et offrez aux parents un tableau de bord live — le tout sans Excel, sans file d'attente, même en connexion 2G.",
       realTimeDashboard: "Tableau de bord en temps réel",
       screenshotsTitle: "📸 La plateforme en images",
       discoverFeatures: "Ce que voient vos directeurs, parents et élèves",
@@ -64,7 +73,7 @@ export const LandingPage: React.FC = () => {
       bentoTitle: "Tout ce que gère un directeur. Dans un seul outil.",
       bentoDesc: "DGhubSchool centralise la caisse, les bulletins, le suivi des parents et la sécurité d'accès — pour que vous passiez enfin du temps à enseigner, pas à administrer.",
       paymentTracking: "Caisse & Recouvrement en temps réel",
-      paymentDesc: "Chaque versement (espèces, chèques, Mobile Money) est horodaté et associé à l'élève en 2 secondes. Le solde restant est recalculé instantanément, le reçu PDF + SMS part au parent, et votre journal de caisse s'alimente seul. Exportable Excel en un clic.",
+      paymentDesc: "Chaque versement (espèces, chèques, virements) est horodaté et associé à l'élève en 2 secondes après enregistrement du reçu physique. Le solde restant est recalculé instantanément, le reçu PDF + SMS part au parent, et votre journal de caisse s'alimente seul. Exportable Excel en un clic.",
       paymentBadge: "💰 Caisse",
       bulletinsTitle: "Bulletins & Relevés de Notes",
       bulletinsDesc: "Vos enseignants saisissent les notes, DGhubSchool fait le reste : moyennes trimestrielles, rangs de classe, appréciations et bulletins PDF conformes au format officiel DRE. Imprimables ou partageables en masse en quelques secondes.",
@@ -108,7 +117,7 @@ export const LandingPage: React.FC = () => {
       cloudPoint3: "Zéro maintenance : Pas de serveur à acheter ou réparer.",
       parentsFocusTitle: "Impliquez les parents comme jamais auparavant",
       parentsFocusDesc: "Offrez aux parents une visibilité totale sur le parcours de leur enfant via une interface dédiée. Fini les carnets de correspondance papier égarés.",
-      parentsFocus1: "Exercices d'Entraînement",
+      parentsFocus1: "Proposition d'Exercices",
       parentsFocus1Desc: "La plateforme propose une sélection d'exercices permettant aux parents d'accompagner leurs enfants dans les révisions à la maison.",
       parentsFocus2: "Alertes Instantanées",
       parentsFocus2Desc: "Notifications en temps réel pour les absences, retards et rappels de paiements via SMS et Push.",
@@ -127,7 +136,7 @@ export const LandingPage: React.FC = () => {
       heroTitlePart1: "No more queues. Run ",
       heroTitleHighlight: "your entire school in 2 seconds",
       heroTitlePart2: " from your phone.",
-      heroSubtitle: "Record tuition payments (cash, Mobile Money, transfers) to notify parents instantly, produce DRE-compliant PDF report cards in one click, track entries and exits by QR scan, and give parents a live dashboard — all without Excel, without queuing, even on a 2G connection.",
+      heroSubtitle: "Centralize your tuition collections (cash, checks, transfers) with physical receipt recording to notify parents instantly, produce DRE-compliant PDF report cards in one click, track entries and exits by QR scan, and give parents a live dashboard — all without Excel, without queuing, even on a 2G connection.",
       realTimeDashboard: "Real-time dashboard",
       screenshotsTitle: "📸 The platform in pictures",
       discoverFeatures: "What your principals, parents and students see",
@@ -139,7 +148,7 @@ export const LandingPage: React.FC = () => {
       bentoTitle: "Everything a principal manages. In one tool.",
       bentoDesc: "DGhubSchool centralizes cashiering, report cards, parent communication and access security — so you spend your time teaching, not administering.",
       paymentTracking: "Cashier & Collections in Real Time",
-      paymentDesc: "Every payment (cash, checks, Mobile Money) is timestamped and linked to the student in 2 seconds. The remaining balance is instantly recalculated, a PDF + SMS receipt goes to the parent, and your cash journal updates itself. Exportable to Excel in one click.",
+      paymentDesc: "Every payment (cash, checks, transfers) is timestamped and linked to the student in 2 seconds after recording the physical receipt. The remaining balance is instantly recalculated, a PDF + SMS receipt goes to the parent, and your cash journal updates itself. Exportable to Excel in one click.",
       paymentBadge: "💰 Cashier",
       bulletinsTitle: "Report Cards & Grade Records",
       bulletinsDesc: "Teachers enter grades, DGhubSchool does the rest: term averages, class rankings, remarks and DRE-compliant PDF report cards. Printable or shareable in bulk in seconds.",
@@ -674,31 +683,39 @@ export const LandingPage: React.FC = () => {
         <StickerSparkle className="absolute bottom-12 right-[15%] hidden lg:block" />
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
-          <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, idx) => (
-              <div key={idx} className="space-y-1">
-                <span className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight block">
-                  {stat.value}
-                </span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block leading-tight">
-                  {stat.label}
-                </span>
+
+
+          {/* Témoignages Dynamiques */}
+          {testimonials.length > 0 && (
+            <div className="max-w-4xl mx-auto space-y-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {testimonials.map((tItem) => (
+                  <div key={tItem.id} className="bg-slate-50 border border-slate-200 rounded-3xl p-8 text-left relative shadow-sm hover:shadow-md transition-shadow">
+                    <div className="text-5xl text-amber-500 font-serif leading-none absolute top-4 left-6 opacity-20">“</div>
+                    <p className="text-sm md:text-base font-medium text-slate-700 leading-relaxed italic relative z-10 pt-4 mb-6">
+                      "{tItem.content}"
+                    </p>
+                    <div className="space-y-1 relative z-10">
+                      <p className="text-sm font-black tracking-tight text-slate-900">{tItem.name}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        {tItem.role} {tItem.school_name ? `— ${tItem.school_name}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-
-          <hr className="max-w-4xl mx-auto border-slate-100 my-16" />
-
-          {/* Citation / Témoignage */}
-          <div className="max-w-2xl mx-auto space-y-6">
-            <div className="text-3xl text-amber-500 font-serif leading-none">“</div>
-            <p className="text-lg md:text-xl font-bold text-slate-800 leading-relaxed italic">
-              {t.testimonialText}
-            </p>
-            <div className="space-y-1">
-              <p className="text-xs font-black uppercase tracking-wider text-slate-900">{t.testimonialAuthor}</p>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t.testimonialRole}</p>
             </div>
+          )}
+
+          {/* Bouton Partager mon histoire */}
+          <div className="mt-12">
+            <button
+              onClick={() => navigate(`/${lang}/partager-mon-histoire`)}
+              className="bg-white hover:bg-slate-50 text-slate-900 border-2 border-slate-200 text-xs font-black uppercase tracking-widest px-8 py-4 rounded-xl transition-all inline-flex items-center gap-2 cursor-pointer"
+            >
+              <Star className="w-4 h-4 text-amber-500" />
+              Partager mon histoire
+            </button>
           </div>
         </div>
       </section>
