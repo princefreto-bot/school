@@ -387,7 +387,7 @@ export const LandingPage: React.FC = () => {
 
       {/* ── SECTION MARQUEES ────────────────────────────────── */}
       <section className="bg-slate-950 py-16 overflow-hidden relative border-y border-slate-900">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 pointer-events-none" />
+        <div className="absolute inset-0 opacity-5 pointer-events-none" />
         
         <div className="space-y-6">
           <div className="flex overflow-hidden group">
