@@ -6,6 +6,12 @@ import { useStore } from './store/useStore';
 import { webPushService } from './services/webPushService';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 
+const isCapacitor = typeof window !== 'undefined' && (
+  window.location.origin.startsWith('capacitor://') ||
+  (window.location.origin.startsWith('http://localhost') && (window as any).Capacitor)
+);
+
+
 const Login = lazy(() => import('./components/Login').then(m => ({ default: m.Login })));
 const Layout = lazy(() => import('./components/Layout').then(m => ({ default: m.Layout })));
 const AnnouncementPopup = lazy(() => import('./components/AnnouncementPopup').then(m => ({ default: m.AnnouncementPopup })));
@@ -376,6 +382,10 @@ export function App() {
                 </Suspense>
                 <AnnouncementPopup />
               </Layout>
+            ) : isCapacitor ? (
+              <Suspense fallback={<LoadingSpinner />}>
+                <Login />
+              </Suspense>
             ) : (
               <Suspense fallback={<LoadingSpinner />}>
                 <LandingPage />
