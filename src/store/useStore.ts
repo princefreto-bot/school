@@ -501,9 +501,9 @@ export const useStore = create<AppState>()(
         const restant = ecolage - ((data as { dejaPaye?: number }).dejaPaye || 0);
         const studentId = uuid();
         const existing = get().students.find(s => 
-          s.nom.toLowerCase() === data.nom.toLowerCase() && 
+          (s.nom || '').toLowerCase() === (data.nom || '').toLowerCase() && 
           (s.prenom || '').toLowerCase() === (data.prenom || '').toLowerCase() && 
-          s.classe.toLowerCase() === data.classe.toLowerCase()
+          (s.classe || '').toLowerCase() === (data.classe || '').toLowerCase()
         );
 
         if (existing) {

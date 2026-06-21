@@ -20,10 +20,15 @@ const BG_IMAGES = [bgImage1, bgImage2, bgImage3, bgImage4];
 const SLIDE_DURATION = 5000;
 
 
-const SchoolLogo: React.FC<{ size?: string }> = ({ size = "w-16 h-16" }) => {
+const SchoolLogo: React.FC<{ size?: string; logoUrl?: string | null }> = ({ size = "w-16 h-16", logoUrl }) => {
   return (
     <div className={`${size} bg-white border border-slate-200 rounded-[28px] flex items-center justify-center mb-4 shadow-lg shadow-amber-500/10 p-2`}>
-      <img src="/logo.svg" className="w-full h-full object-contain" alt="DGhubSchool" />
+      <img 
+        src={logoUrl || "/logo.svg"} 
+        className="w-full h-full object-contain" 
+        alt="DGhubSchool" 
+        onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
+      />
     </div>
   );
 };
@@ -58,7 +63,7 @@ const BackgroundSlideshow: React.FC = () => {
 export const Login: React.FC = () => {
   const login = useStore((s) => s.login);
   const navigate = useNavigate();
-  const { lang = 'fr' } = useParams<{ lang?: string }>();
+  const { lang = 'fr', schoolSlug } = useParams<{ lang?: string, schoolSlug?: string }>();
   const appName = "DGhubSchool";
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -84,6 +89,18 @@ export const Login: React.FC = () => {
   const [schools, setSchools] = useState<{slug: string, name: string, logo_url: string}[]>([]);
   const [selectedSchool, setSelectedSchool] = useState('');
   const [fetchError, setFetchError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (schoolSlug) {
+      setSelectedSchool(schoolSlug);
+      localStorage.setItem('last_school_slug', schoolSlug);
+    } else {
+      const savedSlug = localStorage.getItem('last_school_slug');
+      if (savedSlug && savedSlug !== 'undefined' && savedSlug !== 'null') {
+        navigate(`/${lang}/login/${savedSlug}`, { replace: true });
+      }
+    }
+  }, [schoolSlug, lang, navigate]);
 
   useEffect(() => {
     // Récupérer la liste des écoles
@@ -279,7 +296,7 @@ export const Login: React.FC = () => {
           {/* Register Panel */}
           <div className="form-container sign-up-container">
             <form className="auth-form" onSubmit={(e) => handleAuth(e, 'register')}>
-              <SchoolLogo />
+              <SchoolLogo logoUrl={schoolSlug && schools.find(s => s.slug === schoolSlug)?.logo_url} />
               <h1 className="text-2xl font-black text-slate-900 tracking-tighter">Créer un compte</h1>
               <div className="social-container text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-2">Inscription Parent</div>
               
@@ -289,10 +306,40 @@ export const Login: React.FC = () => {
                 </div>
               )}
 
-              <select className="auth-input mb-4 font-bold text-slate-600 border border-slate-200" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required>
-                  <option value="" disabled>-- Sélectionnez votre établissement --</option>
-                  {schools.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
-              </select>
+              {schoolSlug && schools.length > 0 && schools.find(s => s.slug === schoolSlug) ? (
+                <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-none mb-4 text-left w-full">
+                  <div className="w-10 h-10 bg-white border border-slate-200 flex items-center justify-center p-1 shrink-0">
+                    <img 
+                      src={schools.find(s => s.slug === schoolSlug)?.logo_url || "/logo.svg"} 
+                      className="w-full h-full object-contain" 
+                      alt="Logo"
+                      onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest">Établissement</p>
+                    <p className="font-bold text-slate-800 text-xs truncate">
+                      {schools.find(s => s.slug === schoolSlug)?.name}
+                    </p>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      localStorage.removeItem('last_school_slug');
+                      setSelectedSchool('');
+                      navigate(`/${lang}/login`);
+                    }}
+                    className="text-[9px] font-black uppercase text-slate-400 hover:text-rose-500 transition-colors shrink-0"
+                  >
+                    Changer
+                  </button>
+                </div>
+              ) : (
+                <select className="auth-input mb-4 font-bold text-slate-600 border border-slate-200" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required>
+                    <option value="" disabled>-- Sélectionnez votre établissement --</option>
+                    {schools.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+                </select>
+              )}
 
               <input type="text" placeholder="Nom complet" className="auth-input" value={nom} onChange={(e) => setNom(e.target.value)} required />
               <input type="tel" placeholder="Téléphone" className="auth-input" value={username} onChange={(e) => setUsername(e.target.value)} required />
@@ -336,7 +383,7 @@ export const Login: React.FC = () => {
           {/* Login Panel */}
           <div className="form-container sign-in-container">
             <form className="auth-form" onSubmit={(e) => handleAuth(e, 'login')}>
-              <SchoolLogo />
+              <SchoolLogo logoUrl={schoolSlug && schools.find(s => s.slug === schoolSlug)?.logo_url} />
               <h1 className="text-2xl font-black text-slate-900 tracking-tighter">Se connecter</h1>
               <div className="social-container text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-2">Accès {appName}</div>
               
@@ -346,10 +393,40 @@ export const Login: React.FC = () => {
                 </div>
               )}
 
-              <select className="auth-input mb-4 font-bold text-slate-600 border border-slate-200" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required>
-                  <option value="" disabled>-- Sélectionnez l'établissement de votre enfant --</option>
-                  {schools.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
-              </select>
+              {schoolSlug && schools.length > 0 && schools.find(s => s.slug === schoolSlug) ? (
+                <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-none mb-4 text-left w-full">
+                  <div className="w-10 h-10 bg-white border border-slate-200 flex items-center justify-center p-1 shrink-0">
+                    <img 
+                      src={schools.find(s => s.slug === schoolSlug)?.logo_url || "/logo.svg"} 
+                      className="w-full h-full object-contain" 
+                      alt="Logo"
+                      onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest">Établissement</p>
+                    <p className="font-bold text-slate-800 text-xs truncate">
+                      {schools.find(s => s.slug === schoolSlug)?.name}
+                    </p>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      localStorage.removeItem('last_school_slug');
+                      setSelectedSchool('');
+                      navigate(`/${lang}/login`);
+                    }}
+                    className="text-[9px] font-black uppercase text-slate-400 hover:text-rose-500 transition-colors shrink-0"
+                  >
+                    Changer
+                  </button>
+                </div>
+              ) : (
+                <select className="auth-input mb-4 font-bold text-slate-600 border border-slate-200" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required>
+                    <option value="" disabled>-- Sélectionnez l'établissement de votre enfant --</option>
+                    {schools.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+                </select>
+              )}
 
               <input type="text" placeholder="Utilisateur / Téléphone" className="auth-input" value={username} onChange={(e) => setUsername(e.target.value)} required />
               <input type="password" placeholder="Mot de passe" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
@@ -416,7 +493,7 @@ export const Login: React.FC = () => {
             <BackgroundSlideshow />
             <div className="mobile-card">
                 <div className="flex flex-col items-center">
-                    <SchoolLogo size="w-20 h-20" />
+                    <SchoolLogo size="w-20 h-20" logoUrl={schoolSlug && schools.find(s => s.slug === schoolSlug)?.logo_url} />
                     <h1 className="text-3xl font-black text-slate-900 tracking-tighter text-center">
                         {view === 'login' ? 'Bienvenue !' : 'Rejoignez-nous'}
                     </h1>
@@ -431,13 +508,44 @@ export const Login: React.FC = () => {
                         Erreur réseau: {fetchError}
                       </div>
                     )}
-                    <div className="relative mb-2">
-                        <Store className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
-                        <select className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-none text-sm font-bold text-slate-700 appearance-none" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required>
-                            <option value="" disabled>-- Sélectionnez l'école de votre enfant --</option>
-                            {schools.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
-                        </select>
-                    </div>
+                    
+                    {schoolSlug && schools.length > 0 && schools.find(s => s.slug === schoolSlug) ? (
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-none mb-4 text-left w-full">
+                        <div className="w-10 h-10 bg-white border border-slate-200 flex items-center justify-center p-1 shrink-0">
+                          <img 
+                            src={schools.find(s => s.slug === schoolSlug)?.logo_url || "/logo.svg"} 
+                            className="w-full h-full object-contain" 
+                            alt="Logo"
+                            onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest">Établissement</p>
+                          <p className="font-bold text-slate-800 text-xs truncate">
+                            {schools.find(s => s.slug === schoolSlug)?.name}
+                          </p>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            localStorage.removeItem('last_school_slug');
+                            setSelectedSchool('');
+                            navigate(`/${lang}/login`);
+                          }}
+                          className="text-[9px] font-black uppercase text-slate-400 hover:text-rose-500 transition-colors shrink-0"
+                        >
+                          Changer
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="relative mb-2">
+                          <Store className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
+                          <select className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-none text-sm font-bold text-slate-700 appearance-none" value={selectedSchool} onChange={(e) => setSelectedSchool(e.target.value)} required>
+                              <option value="" disabled>-- Sélectionnez l'école de votre enfant --</option>
+                              {schools.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+                          </select>
+                      </div>
+                    )}
 
                     {view === 'register' && (
                         <div className="relative">

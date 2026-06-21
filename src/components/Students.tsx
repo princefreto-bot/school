@@ -62,9 +62,9 @@ export default function Students() {
   const filteredStudents = useMemo(() => {
     return students.filter(s => {
       const matchSearch = search === '' || 
-        s.nom.toLowerCase().includes(search.toLowerCase()) ||
-        s.prenom.toLowerCase().includes(search.toLowerCase()) ||
-        s.classe.toLowerCase().includes(search.toLowerCase());
+        (s.nom || '').toLowerCase().includes(search.toLowerCase()) ||
+        (s.prenom || '').toLowerCase().includes(search.toLowerCase()) ||
+        (s.classe || '').toLowerCase().includes(search.toLowerCase());
       
       const matchClass = filterClass === '' || s.classe === filterClass;
       

@@ -40,15 +40,19 @@ export const CLASSES: ClassInfo[] = [
 ];
 
 export const getEcolageByClass = (className: string): number => {
-  const classInfo = CLASSES.find(c => c.nom.toLowerCase() === className.toLowerCase());
+  const nameStr = String(className || '');
+  if (!nameStr) return 60000;
+  const classInfo = CLASSES.find(c => c.nom.toLowerCase() === nameStr.toLowerCase());
   return classInfo?.ecolage || 60000;
 };
 
 export const getCycleByClass = (className: string): 'Primaire' | 'Collège' | 'Lycée' => {
-  const classInfo = CLASSES.find(c => c.nom.toLowerCase() === className.toLowerCase());
+  const nameStr = String(className || '');
+  if (!nameStr) return 'Primaire';
+  const classInfo = CLASSES.find(c => c.nom.toLowerCase() === nameStr.toLowerCase());
   if (classInfo) return classInfo.cycle;
   
-  const upper = className.toUpperCase();
+  const upper = nameStr.toUpperCase();
   if (['CI', 'CP', 'CE', 'CM'].some(p => upper.includes(p))) return 'Primaire';
   if (['6E', '5E', '4E', '3E'].some(p => upper.includes(p))) return 'Collège';
   return 'Lycée';

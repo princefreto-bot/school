@@ -101,14 +101,6 @@ async function main() {
     .toFile(path.join(dirPath, 'ic_launcher_foreground.png'));
   }
 
-  // Nettoyer l'image PNG temporaire pour ne pas encombrer le dépôt
-  if (fs.existsSync(tempPngPath)) {
-    try {
-      fs.unlinkSync(tempPngPath);
-      console.log('Cleaned up temporary PNG logo.');
-    } catch(e) {}
-  }
-
   console.log('All icons generated successfully!');
 }
 

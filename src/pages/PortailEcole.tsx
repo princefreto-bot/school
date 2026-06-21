@@ -11,10 +11,9 @@ import gsap from 'gsap';
 export const PortailEcole: React.FC = () => {
   const login = useStore((s) => s.login);
   const navigate = useNavigate();
-  const { lang = 'fr' } = useParams<{ lang?: string }>();
+  const { lang = 'fr', schoolSlug } = useParams<{ lang?: string, schoolSlug?: string }>();
   const cardRef = useRef<HTMLDivElement>(null);
 
-  
   // Auth Form States
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -27,6 +26,19 @@ export const PortailEcole: React.FC = () => {
   const [selectedSchool, setSelectedSchool] = useState('');
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [isGlobalAccess, setIsGlobalAccess] = useState(false);
+
+  useEffect(() => {
+    if (schoolSlug) {
+      setSelectedSchool(schoolSlug);
+      setIsGlobalAccess(false);
+      localStorage.setItem('last_school_slug', schoolSlug);
+    } else {
+      const savedSlug = localStorage.getItem('last_school_slug');
+      if (savedSlug && savedSlug !== 'undefined' && savedSlug !== 'null') {
+        navigate(`/${lang}/portail-ecole/${savedSlug}`, { replace: true });
+      }
+    }
+  }, [schoolSlug, lang, navigate]);
 
   // GSAP entrance animation
   useEffect(() => {
@@ -126,7 +138,12 @@ export const PortailEcole: React.FC = () => {
         {/* En-tête */}
         <div className="text-center mb-8 portal-animate-item">
           <div className="w-16 h-16 bg-amber-50 dark:bg-slate-850 border border-amber-100 dark:border-slate-800 rounded-none flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-500/10 p-1">
-            <img src="/logo.svg" className="w-full h-full object-contain" alt="DGhubSchool" />
+            <img 
+              src={(schoolSlug && schools.find(s => s.slug === schoolSlug)?.logo_url) || "/logo.svg"} 
+              className="w-full h-full object-contain" 
+              alt="DGhubSchool" 
+              onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
+            />
           </div>
           <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Portail Établissement</h1>
           <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm mt-1 font-medium">Éspace réservé à l'administration de l'école.</p>
@@ -142,35 +159,65 @@ export const PortailEcole: React.FC = () => {
           )}
 
           {/* Type d'accès (Global vs Établissement) */}
-          <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 space-y-3 portal-animate-item">
-            <label className="flex items-center gap-2.5 cursor-pointer">
-              <input 
-                type="checkbox" 
-                checked={isGlobalAccess} 
-                onChange={(e) => {
-                  setIsGlobalAccess(e.target.checked);
-                  if (e.target.checked) setSelectedSchool('');
-                }} 
-                className="accent-amber-500 rounded" 
-              />
-              <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Accès Global (SuperAdmin / Créateur)</span>
-            </label>
-
-            {!isGlobalAccess && (
-              <div className="relative animate-in slide-in-from-top-2 duration-200">
-                <Store className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
-                <select 
-                  className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-amber-500 rounded-2xl text-xs md:text-sm font-bold text-slate-700 dark:text-slate-200 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-500 transition-colors"
-                  value={selectedSchool} 
-                  onChange={(e) => setSelectedSchool(e.target.value)} 
-                  required={!isGlobalAccess}
-                >
-                  <option value="" disabled className="dark:bg-slate-800">-- Sélectionnez votre école --</option>
-                  {schools.map(s => <option key={s.slug} value={s.slug} className="dark:bg-slate-800">{s.name}</option>)}
-                </select>
+          {schoolSlug && schools.length > 0 && schools.find(s => s.slug === schoolSlug) ? (
+            <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-slate-950 border border-amber-100 dark:border-slate-800 rounded-2xl mb-4 portal-animate-item">
+              <div className="w-12 h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center p-1 shadow-sm shrink-0">
+                <img 
+                  src={schools.find(s => s.slug === schoolSlug)?.logo_url || "/logo.svg"} 
+                  className="w-full h-full object-contain" 
+                  alt="Logo" 
+                  onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
+                />
               </div>
-            )}
-          </div>
+              <div className="min-w-0 text-left flex-1">
+                <p className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Établissement</p>
+                <p className="font-bold text-slate-800 dark:text-white text-sm truncate font-black">
+                  {schools.find(s => s.slug === schoolSlug)?.name}
+                </p>
+              </div>
+              <button 
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem('last_school_slug');
+                  setSelectedSchool('');
+                  navigate(`/${lang}/portail-ecole`);
+                }}
+                className="text-[10px] font-black uppercase text-slate-400 hover:text-rose-500 transition-colors shrink-0"
+              >
+                Changer
+              </button>
+            </div>
+          ) : (
+            <div className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 space-y-3 portal-animate-item">
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={isGlobalAccess} 
+                  onChange={(e) => {
+                    setIsGlobalAccess(e.target.checked);
+                    if (e.target.checked) setSelectedSchool('');
+                  }} 
+                  className="accent-amber-500 rounded" 
+                />
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Accès Global (SuperAdmin / Créateur)</span>
+              </label>
+
+              {!isGlobalAccess && (
+                <div className="relative animate-in slide-in-from-top-2 duration-200">
+                  <Store className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
+                  <select 
+                    className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-amber-500 rounded-2xl text-xs md:text-sm font-bold text-slate-700 dark:text-slate-200 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-500 transition-colors"
+                    value={selectedSchool} 
+                    onChange={(e) => setSelectedSchool(e.target.value)} 
+                    required={!isGlobalAccess}
+                  >
+                    <option value="" disabled className="dark:bg-slate-800">-- Sélectionnez votre école --</option>
+                    {schools.map(s => <option key={s.slug} value={s.slug} className="dark:bg-slate-800">{s.name}</option>)}
+                  </select>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Identifiants */}
           <div className="space-y-3 portal-animate-item">

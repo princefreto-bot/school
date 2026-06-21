@@ -90,6 +90,7 @@ export const Dashboard: React.FC = () => {
   const isSyncing = useStore((s) => s.isSyncing);
   const privacyMode = useStore((s) => s.privacyMode);
   const setPrivacyMode = useStore((s) => s.setPrivacyMode);
+  const tranches = useStore((s) => s.tranches);
 
   const trialEndsAt = localStorage.getItem('trial_ends_at');
   const schoolStatus = localStorage.getItem('school_status') || 'trial';
@@ -213,7 +214,6 @@ export const Dashboard: React.FC = () => {
 
   if (students.length === 0) {
     const setCurrentPage = useStore.getState().setCurrentPage;
-    const tranches = useStore((s) => s.tranches);
     const tranchesConfigured = tranches && tranches.length > 0;
     const progressPercent = tranchesConfigured ? 33 : 0;
 

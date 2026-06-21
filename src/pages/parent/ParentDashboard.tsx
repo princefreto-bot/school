@@ -762,7 +762,7 @@ export const ParentDashboard: React.FC = () => {
                                                                 </p>
                                                                 
                                                                 {/* Image Thumbnail Preview */}
-                                                                {(doc.file_url.toLowerCase().endsWith('.png') || doc.file_url.toLowerCase().endsWith('.jpg') || doc.file_url.toLowerCase().endsWith('.jpeg')) && (
+                                                                {(doc.file_url?.toLowerCase().endsWith('.png') || doc.file_url?.toLowerCase().endsWith('.jpg') || doc.file_url?.toLowerCase().endsWith('.jpeg')) && (
                                                                     <div 
                                                                         onClick={() => setPreviewImage({ 
                                                                             url: `${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`, 

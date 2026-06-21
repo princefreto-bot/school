@@ -234,10 +234,13 @@ export function App() {
     if (currentLang !== 'fr' && currentLang !== 'en') return;
 
     const pathWithoutLang = '/' + parts.slice(2).join('/');
-    const publicPaths = ['/', '/login', '/confidentialite', '/conditions-utilisation', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features', '/newsroom', '/centre-aide', '/mot-de-passe-oublie', '/mot-de-passe-oublie-ecole', '/reset-password', '/activation-licence', '/partager-mon-histoire'];
     
     if (isAuthenticated) {
-      if (['/login', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features', '/activation-licence', '/partager-mon-histoire'].includes(pathWithoutLang)) {
+      if (
+        ['/login', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features', '/activation-licence', '/partager-mon-histoire'].includes(pathWithoutLang) ||
+        pathWithoutLang.startsWith('/login/') ||
+        pathWithoutLang.startsWith('/portail-ecole/')
+      ) {
         navigate(`/${currentLang}/`, { replace: true });
       }
     }
@@ -381,6 +384,7 @@ export function App() {
         />
         <Route path="/:lang/confirmer-email" element={<Suspense fallback={<LoadingSpinner />}><ConfirmerEmail /></Suspense>} />
         <Route path="/:lang/portail-ecole" element={<Suspense fallback={<LoadingSpinner />}><PortailEcole /></Suspense>} />
+        <Route path="/:lang/portail-ecole/:schoolSlug" element={<Suspense fallback={<LoadingSpinner />}><PortailEcole /></Suspense>} />
         <Route path="/:lang/creer-compte" element={<Suspense fallback={<LoadingSpinner />}><CreerCompte /></Suspense>} />
         <Route path="/:lang/pricing" element={<Suspense fallback={<LoadingSpinner />}><Pricing /></Suspense>} />
         <Route path="/:lang/a-propos" element={<Suspense fallback={<LoadingSpinner />}><APropos /></Suspense>} />
@@ -394,6 +398,12 @@ export function App() {
         <Route path="/:lang/partager-mon-histoire" element={<Suspense fallback={<LoadingSpinner />}><SubmitStory /></Suspense>} />
         <Route 
           path="/:lang/login" 
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : <Suspense fallback={<LoadingSpinner />}><Login /></Suspense>
+          } 
+        />
+        <Route 
+          path="/:lang/login/:schoolSlug" 
           element={
             isAuthenticated ? <Navigate to="/" replace /> : <Suspense fallback={<LoadingSpinner />}><Login /></Suspense>
           } 
