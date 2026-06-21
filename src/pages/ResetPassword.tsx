@@ -89,31 +89,31 @@ export const ResetPassword: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center p-4 font-['Poppins'] relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center p-4 font-['Poppins'] relative overflow-hidden">
       {/* Ambient glows */}
       <div className="absolute top-[-15%] right-[-10%] w-[55%] h-[55%] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-15%] left-[-10%] w-[55%] h-[55%] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-      <div ref={cardRef} className="w-full max-w-md bg-white/90 backdrop-blur-2xl border border-slate-100 rounded-[32px] p-6 md:p-10 shadow-2xl shadow-slate-200/50 relative z-10">
+      <div ref={cardRef} className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[32px] p-6 md:p-10 shadow-2xl shadow-slate-200/50 dark:shadow-black/50 relative z-10">
 
         <div className="text-center mb-8 rp-item">
-          <div className="w-16 h-16 bg-emerald-50 border border-emerald-100 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/10">
+          <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 text-emerald-500 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/10">
             <ShieldCheck className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Nouveau mot de passe</h1>
-          <p className="text-sm text-slate-500 mt-2">Veuillez saisir votre nouveau mot de passe sécurisé.</p>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Nouveau mot de passe</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Veuillez saisir votre nouveau mot de passe sécurisé.</p>
         </div>
 
         {message ? (
           <div className="text-center space-y-6 rp-item">
-            <div className="p-6 bg-emerald-50 text-emerald-700 rounded-2xl flex flex-col items-center gap-3 border border-emerald-100">
+            <div className="p-6 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 rounded-2xl flex flex-col items-center gap-3 border border-emerald-100 dark:border-emerald-900/50">
               <CheckCircle2 className="w-8 h-8 text-emerald-600" />
               <p className="font-bold">{message}</p>
-              <p className="text-xs text-emerald-600/80">Redirection vers la connexion...</p>
+              <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80">Redirection vers la connexion...</p>
             </div>
             <button 
               onClick={() => navigate('/fr/portail-ecole')}
-              className="w-full py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-2xl transition-all border border-slate-200"
+              className="w-full py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm rounded-2xl transition-all border border-slate-200 dark:border-slate-700"
             >
               Se connecter maintenant
             </button>
@@ -121,11 +121,11 @@ export const ResetPassword: React.FC = () => {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative rp-item">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
               <input 
                 type="password" 
                 placeholder="Nouveau mot de passe (min 6 car.)" 
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-900 placeholder-slate-400"
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
                 value={newPassword} 
                 onChange={(e) => setNewPassword(e.target.value)} 
                 required 
@@ -133,11 +133,11 @@ export const ResetPassword: React.FC = () => {
             </div>
 
             <div className="relative rp-item">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
               <input 
                 type="password" 
                 placeholder="Confirmer le mot de passe" 
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-900 placeholder-slate-400"
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
                 value={confirmPassword} 
                 onChange={(e) => setConfirmPassword(e.target.value)} 
                 required 
@@ -145,7 +145,7 @@ export const ResetPassword: React.FC = () => {
             </div>
 
             {error && (
-              <div className="text-rose-500 text-xs font-bold text-center p-3 bg-rose-50 rounded-xl border border-rose-200 rp-item">
+              <div className="text-rose-500 dark:text-rose-450 text-xs font-bold text-center p-3 bg-rose-50 dark:bg-rose-950/20 rounded-xl border border-rose-200 dark:border-rose-900/50 rp-item">
                 {error}
               </div>
             )}
@@ -161,10 +161,10 @@ export const ResetPassword: React.FC = () => {
           </form>
         )}
 
-        <div className="mt-6 pt-5 border-t border-slate-100 text-center rp-item">
+        <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 text-center rp-item">
           <button
             onClick={() => navigate('/fr/portail-ecole')}
-            className="text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
+            className="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
           >
             ← Retour à la connexion
           </button>

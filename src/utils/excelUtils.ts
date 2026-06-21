@@ -15,14 +15,24 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as unknown[][];
         
-        // Skip header row (row 1), data starts at row 2
+        // Skip header row if present, otherwise start at index 0
         const students: Student[] = [];
         
-        for (let i = 1; i < jsonData.length; i++) {
+        for (let i = 0; i < jsonData.length; i++) {
           const row = jsonData[i] as (string | number | undefined)[];
           if (!row || row.length < 5) continue;
           
-          // Colonnes: B=NOMS, C=Prénoms, D=CLASSE, E=TELEPHONE, F=SEXE, G=REDOUBLANT, H=ECOLE, I=ECOLAGE, J=DEJA PAYE, K=RESTANT, L=RECU
+          // Skip header row if present
+          if (i === 0 && row && (
+            String(row[0] || '').toUpperCase() === 'MATRICULE' || 
+            String(row[1] || '').toUpperCase() === 'NOMS' || 
+            String(row[1] || '').toUpperCase() === 'NOM'
+          )) {
+            continue;
+          }
+          
+          // Colonnes: A=MATRICULE, B=NOMS, C=Prénoms, D=CLASSE, E=TELEPHONE, F=SEXE, G=REDOUBLANT, H=ECOLE, I=ECOLAGE, J=DEJA PAYE, K=RESTANT, L=RECU
+          const adsn = String(row[0] || '').trim();
           const nom = String(row[1] || '').trim();
           const prenom = String(row[2] || '').trim();
           const classe = String(row[3] || '').trim();
@@ -79,6 +89,7 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
               dejaPaye,
               restant,
               recu,
+              adsn: adsn || undefined,
               cycle: getCycleByClass(classe),
               status: restant === 0 ? 'Soldé' : (dejaPaye > 0 ? 'Partiel' : 'Non soldé'),
               historiquesPaiements: initialPayment ? [initialPayment] : [],
@@ -103,6 +114,7 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
 
 export const exportToExcel = (students: Student[], filename: string = 'eleves.xlsx'): void => {
   const data = students.map(s => ({
+    'MATRICULE': s.adsn || '',
     'NOM': s.nom,
     'PRÉNOM': s.prenom,
     'CLASSE': s.classe,

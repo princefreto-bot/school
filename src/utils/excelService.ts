@@ -25,19 +25,35 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
         const existingMap = new Map<string, Student>();
         
         // Map existing students for quick lookup
+        // Map existing students for quick lookup
         if (existingStudents) {
           existingStudents.forEach(s => {
             const key = `${(s.nom || '').trim().toLowerCase()}|${((s.prenom || '')).trim().toLowerCase()}|${(s.classe || '').trim().toLowerCase()}`;
             existingMap.set(key, s);
+            if (s.adsn) {
+              existingMap.set(s.adsn.trim().toLowerCase(), s);
+            }
           });
         }
         
-        // Skip header row (index 0), data starts at row 2 (index 1)
-        for (let i = 1; i < jsonData.length; i++) {
+        // Data starts at row 1 (index 0)
+        for (let i = 0; i < jsonData.length; i++) {
           const row = jsonData[i] as (string | number)[];
           
-          if (!row || !row[1]) continue; // Skip empty rows
+          if (!row) continue;
           
+          // Skip header row if present
+          if (i === 0 && row && (
+            String(row[0] || '').toUpperCase() === 'MATRICULE' || 
+            String(row[1] || '').toUpperCase() === 'NOMS' || 
+            String(row[1] || '').toUpperCase() === 'NOM'
+          )) {
+            continue;
+          }
+          
+          if (!row[1]) continue; // Skip empty rows (must have a NOM)
+          
+          const adsn = String(row[0] || '').trim();
           const nom = String(row[1] || '').trim();
           const prenom = String(row[2] || '').trim();
           const classe = String(row[3] || '').trim();
@@ -76,14 +92,20 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
           const key = `${nom.toLowerCase()}|${prenom.toLowerCase()}|${validClasse.toLowerCase()}`;
           
           // If we already processed this student IN THIS FILE (loop), skip to avoid internal duplicates
-          if (studentsMap.has(key)) continue;
+          if (studentsMap.has(key) || (adsn && studentsMap.has(adsn.toLowerCase()))) continue;
 
           const ecolage = Number(row[8]) || getEcolageFromClasse(validClasse);
           const dejaPaye = Number(row[9]) || 0;
           const restant = row[10] === 'SOLDE' ? 0 : (Number(row[10]) || Math.max(0, ecolage - dejaPaye));
           const recu = String(row[11] || '').trim();
           
-          const existingStudent = existingMap.get(key);
+          let existingStudent = null;
+          if (adsn) {
+            existingStudent = existingMap.get(adsn.toLowerCase());
+          }
+          if (!existingStudent) {
+            existingStudent = existingMap.get(key);
+          }
           
           const studentId = existingStudent ? existingStudent.id : generateId();
           const student: Student = {
@@ -99,6 +121,7 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
             dejaPaye,
             restant,
             recu,
+            adsn: adsn || undefined,
             cycle: getCycleFromClasse(validClasse),
             dateInscription: existingStudent ? existingStudent.dateInscription : new Date().toISOString(),
             status: 'Non soldé', 
@@ -130,8 +153,8 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
 };
 
 export const exportToExcel = (students: Student[], filename: string = 'eleves.xlsx'): void => {
-  const data = students.map((s, index) => ({
-    'N°': index + 1,
+  const data = students.map((s) => ({
+    'MATRICULE': s.adsn || '',
     'NOMS': s.nom,
     'PRÉNOMS': s.prenom,
     'CLASSE': s.classe,
@@ -151,7 +174,7 @@ export const exportToExcel = (students: Student[], filename: string = 'eleves.xl
   
   // Auto-size columns
   const colWidths = [
-    { wch: 5 }, { wch: 20 }, { wch: 20 }, { wch: 10 },
+    { wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 10 },
     { wch: 15 }, { wch: 6 }, { wch: 12 }, { wch: 25 },
     { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 15 }
   ];

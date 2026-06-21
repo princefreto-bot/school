@@ -7,8 +7,8 @@ import { Student } from '../types';
 const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n);
 
 export const exportToExcel = (students: Student[], filename = 'export_eleves'): void => {
-  const data = students.map((s, i) => ({
-    '#': i + 1,
+  const data = students.map((s) => ({
+    MATRICULE: s.adsn || '',
     Nom: s.nom,
     Prénom: s.prenom,
     Classe: s.classe,

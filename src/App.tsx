@@ -178,9 +178,30 @@ export function App() {
   const isAuthenticated = useStore((s) => s.isAuthenticated);
   const user = useStore((s) => s.user);
   const fetchAllFromBackend = useStore((s) => s.fetchAllFromBackend);
+  const theme = useStore((s) => s.theme);
+  const setTheme = useStore((s) => s.setTheme);
   const navigate = useNavigate();
   const location = useLocation();
   const [isOnline, setIsOnline] = React.useState(navigator.onLine);
+
+  // Synchronisation du thème sur document.documentElement
+  React.useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else if (theme === 'light') {
+      root.classList.remove('dark');
+    } else {
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (systemPrefersDark) {
+        root.classList.add('dark');
+        setTheme('dark');
+      } else {
+        root.classList.remove('dark');
+        setTheme('light');
+      }
+    }
+  }, [theme, setTheme]);
 
   // Écoute de l'état de la connexion Internet
   React.useEffect(() => {

@@ -7,7 +7,8 @@ import {
 } from 'recharts';
 import { 
   Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, 
-  GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck, FileText, Eye, EyeOff 
+  GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck, FileText, Eye, EyeOff,
+  Check, Settings, PlayCircle
 } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import {
@@ -211,15 +212,135 @@ export const Dashboard: React.FC = () => {
   }
 
   if (students.length === 0) {
+    const setCurrentPage = useStore.getState().setCurrentPage;
+    const tranches = useStore((s) => s.tranches);
+    const tranchesConfigured = tranches && tranches.length > 0;
+    const progressPercent = tranchesConfigured ? 33 : 0;
+
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fadeIn">
-        <div className="w-32 h-32 bg-amber-500/10 dark:bg-amber-500/5 rounded-[32px] flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(245,158,11,0.2)]">
-          <GraduationCap className="w-16 h-16 text-amber-500 animate-bounce" />
+      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12 animate-fadeIn font-['Poppins']">
+        {/* En-tête de bienvenue */}
+        <div className="text-center mb-10">
+          <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-500 text-white rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-xl shadow-amber-500/20 transform hover:rotate-6 transition-transform duration-300">
+            <School className="w-10 h-10" />
+          </div>
+          <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
+            Félicitations pour la création de votre établissement ! 🎉
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto text-sm md:text-base font-medium leading-relaxed">
+            Votre espace de gestion scolaire <strong>{useStore.getState().schoolName || useStore.getState().appName}</strong> est maintenant actif. Suivez ce guide pour configurer vos données en quelques minutes.
+          </p>
         </div>
-        <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">Bienvenue sur votre tableau de bord</h2>
-        <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto px-4 text-base leading-relaxed">
-          Vos données apparaissent ici dès que vous importez vos élèves. Utilisez le menu <strong>Importation</strong> pour charger votre fichier Excel, ou ajoutez vos élèves manuellement.
-        </p>
+
+        {/* Barre de progression de la mise en route */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-6 mb-8 shadow-sm">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+            <div>
+              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Mise en route de votre école</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-bold mt-0.5">
+                {tranchesConfigured ? '1 sur 3 étapes complétées' : '0 sur 3 étapes complétées'}
+              </p>
+            </div>
+            <span className="text-sm font-black text-amber-500 bg-amber-500/10 px-3 py-1 rounded-full">{progressPercent}% complété</span>
+          </div>
+          <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-amber-400 to-amber-500 transition-all duration-700 ease-out rounded-full" 
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Liste des étapes */}
+        <div className="space-y-6">
+          {/* Étape 1 : Paramètres / Tranches */}
+          <div className={`pro-card p-6 flex flex-col md:flex-row gap-6 items-start transition-all duration-300 border bg-white dark:bg-slate-900 ${tranchesConfigured ? 'border-emerald-500/20 dark:border-emerald-500/10 bg-emerald-500/[0.01]' : 'border-slate-200/60 dark:border-slate-800 hover:border-amber-500/20'}`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${tranchesConfigured ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400'}`}>
+              {tranchesConfigured ? <CheckCircle className="w-6 h-6" /> : <Settings className="w-6 h-6" />}
+            </div>
+            
+            <div className="flex-1 space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Étape 1 • Configuration Financière</span>
+                {tranchesConfigured && <span className="w-fit text-[9px] font-black uppercase tracking-widest bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 px-2.5 py-0.5 rounded-full">Complété</span>}
+              </div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Définir les tranches de scolarité</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                Déterminez les dates limites et les montants des tranches de paiement dans les paramètres. Étape indispensable pour que les reçus officiels, les restants dus et les relances de paiement automatiques soient corrects.
+              </p>
+              {!tranchesConfigured && (
+                <button
+                  onClick={() => setCurrentPage('parametres')}
+                  className="mt-2 inline-flex items-center gap-2 py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-wider rounded-xl transition active:scale-[0.98] cursor-pointer"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  Configurer les tranches
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Étape 2 : Inscription ou Importation */}
+          <div className="pro-card p-6 flex flex-col md:flex-row gap-6 items-start transition-all duration-300 border border-slate-200/60 dark:border-slate-800 hover:border-amber-500/20 bg-white dark:bg-slate-900">
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+              <Users className="w-6 h-6" />
+            </div>
+            
+            <div className="flex-1 space-y-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Étape 2 • Base Élèves (Obligatoire)</span>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Ajouter ou importer vos élèves</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                Alimentez votre base de scolarité. Vous pouvez importer instantanément votre liste complète à partir d'un fichier Excel, ou enregistrer les élèves manuellement un par un.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <button
+                  onClick={() => setCurrentPage('import_export')}
+                  className="inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-wider rounded-xl transition active:scale-[0.98] cursor-pointer"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  Importer depuis Excel
+                </button>
+                <button
+                  onClick={() => setCurrentPage('eleves')}
+                  className="inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 text-xs font-black uppercase tracking-wider rounded-xl transition active:scale-[0.98] cursor-pointer border border-slate-250 dark:border-slate-700"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  Inscrire manuellement
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Étape 3 : Premier versement test */}
+          <div className="pro-card p-6 flex flex-col md:flex-row gap-6 items-start transition-all duration-300 border border-slate-200/60 dark:border-slate-800 hover:border-amber-500/20 bg-white dark:bg-slate-900 opacity-60">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center shrink-0">
+              <PlayCircle className="w-6 h-6" />
+            </div>
+            
+            <div className="flex-1 space-y-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Étape 3 • Essai Pratique</span>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Enregistrer un premier paiement fictif</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                Une fois vos élèves enregistrés, simulez un encaissement à la caisse pour découvrir comment se met à jour le solde d'écolage et comment est généré le reçu PDF officiel.
+              </p>
+              <p className="text-[10px] font-black text-amber-600 bg-amber-500/10 w-fit px-2.5 py-0.5 rounded-full">
+                🔒 Nécessite des élèves enregistrés
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Conseil pratique en bas */}
+        <div className="mt-10 p-4 bg-amber-50 dark:bg-amber-950/10 border border-amber-250/60 dark:border-amber-900/40 rounded-2xl flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-black text-amber-800 dark:text-amber-400 uppercase tracking-wider">💡 Conseil Pratique</p>
+            <p className="text-xs text-amber-700 dark:text-slate-350 mt-1 leading-relaxed">
+              Pour toute question lors du démarrage, vous pouvez également consulter le centre d'aide ou contacter le support directement via WhatsApp.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }

@@ -82,7 +82,7 @@ export const Footer: React.FC = () => {
           items: [
             { label: "Notre histoire", path: "/a-propos" },
             { label: "Actualités", path: "/#newsroom" },
-            { label: "Nous contacter", path: "mailto:support@dghubschool.com", external: true }
+            { label: "Nous contacter", path: "https://wa.me/22872473027", external: true }
           ]
         }
       }
@@ -123,7 +123,7 @@ export const Footer: React.FC = () => {
           items: [
             { label: "Our story", path: "/a-propos" },
             { label: "News", path: "/#newsroom" },
-            { label: "Contact us", path: "mailto:support@dghubschool.com", external: true }
+            { label: "Contact us", path: "https://wa.me/22872473027", external: true }
           ]
         }
       }
@@ -165,13 +165,13 @@ export const Footer: React.FC = () => {
               {current.testimonialText}
             </p>
           </div>
-          <a
-            href="mailto:support@dghubschool.com?subject=Témoignage%20DGhubSchool"
-            className="inline-flex items-center gap-2 px-6 py-3.5 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-amber-500/10 hover:shadow-amber-500/25 active:scale-95 transition-all duration-300 shrink-0 cursor-pointer"
+          <button
+            onClick={() => handleNavigation('/partager-mon-histoire')}
+            className="inline-flex items-center gap-2 px-6 py-3.5 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-amber-500/10 hover:shadow-amber-500/25 active:scale-95 transition-all duration-300 shrink-0 cursor-pointer border-none"
           >
             <Send className="w-3.5 h-3.5" />
             {current.ctaButton}
-          </a>
+          </button>
         </div>
       </div>
 

@@ -48,15 +48,25 @@ export const importFromExcel = async (file: File): Promise<Student[]> => {
         const sheetName = workbook.SheetNames[1] ?? workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
 
-        // Lire à partir de la ligne 2 (row 2 = index 1)
+        // Lire à partir de la ligne 1 (row 1 = index 0)
         const rows: RawRow[] = XLSX.utils.sheet_to_json(worksheet, {
           header: 'A',
-          range: 1, // Commence à la ligne 2 (0-indexed → ligne 1 = headers, ligne 2 = data)
+          range: 0, // Commence à la ligne 1 (0-indexed)
           defval: '',
         });
 
         const students: Student[] = rows
-          .filter((row) => row['B'] && String(row['B']).trim() !== '')
+          .filter((row) => {
+            // Skip header row if present
+            if (row['A'] && (
+              String(row['A']).toUpperCase() === 'MATRICULE' ||
+              String(row['B']).toUpperCase() === 'NOMS' ||
+              String(row['B']).toUpperCase() === 'NOM'
+            )) {
+              return false;
+            }
+            return row['B'] && String(row['B']).trim() !== '';
+          })
           .map((row) => {
             const adsn = String(row['A'] || '').trim();
             const nom = String(row['B'] || '').trim();

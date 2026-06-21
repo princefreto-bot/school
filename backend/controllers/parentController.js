@@ -758,13 +758,36 @@ async function activateLicense(req, res) {
                 });
 
                 if (validateRes.ok) {
-                    const license = await validateRes.json();
+                    const responseBody = await validateRes.json();
+                    const license = responseBody.data || responseBody;
                     
                     if (license.is_expired) {
                         return res.status(400).json({ error: 'Cette licence a expiré.' });
                     }
 
-                    if (!license.is_active) {
+                    // Vérifier si la licence est déjà activée pour cet élève précis
+                    let isAlreadyActivatedForThisStudent = false;
+                    try {
+                        const activationsRes = await fetch(`https://api.chariow.com/v1/licenses/${cleanKey}/activations`, {
+                            method: 'GET',
+                            headers: { 'Authorization': `Bearer ${CHARIOW_SECRET}` }
+                        });
+                        if (activationsRes.ok) {
+                            const activationsBody = await activationsRes.json();
+                            const activationsList = activationsBody.data || [];
+                            isAlreadyActivatedForThisStudent = activationsList.some(act => 
+                                (act.activated_by?.device === studentId) || 
+                                (act.device === studentId)
+                            );
+                        }
+                    } catch (e) {
+                        console.error('Erreur lors de la vérification de l\'historique d\'activations:', e);
+                    }
+
+                    if (isAlreadyActivatedForThisStudent) {
+                        chariowData = license;
+                        isValid = true;
+                    } else if (!license.is_active || license.can_activate) {
                         // Activer sur la plateforme externe
                         const actRes = await fetch(`https://api.chariow.com/v1/licenses/${cleanKey}/activate`, {
                             method: 'POST',
@@ -776,16 +799,15 @@ async function activateLicense(req, res) {
                         });
 
                         if (actRes.ok) {
-                            chariowData = await actRes.json();
+                            const actBody = await actRes.json();
+                            chariowData = actBody.data || actBody;
                             isValid = true;
                         } else {
                             const errData = await actRes.json();
                             return res.status(400).json({ error: errData.message || 'Erreur lors de l\'activation.' });
                         }
                     } else {
-                        // Déjà active sur cet élève ?
-                        chariowData = license;
-                        isValid = true;
+                        return res.status(400).json({ error: 'Cette licence a déjà atteint sa limite d\'activation sur un autre compte.' });
                     }
                 } else {
                     return res.status(400).json({ error: 'Licence introuvable ou invalide.' });

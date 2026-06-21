@@ -164,6 +164,7 @@ export const ImportExport = () => {
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 sm:p-4">
               <h3 className="font-medium text-blue-800 mb-2 text-sm sm:text-base">Format attendu:</h3>
               <ul className="text-xs sm:text-sm text-blue-700 space-y-0.5 sm:space-y-1">
+                <li>• Colonne A: MATRICULE</li>
                 <li>• Colonne B: NOMS</li>
                 <li>• Colonne C: PRÉNOMS</li>
                 <li>• Colonne D: CLASSE</li>
@@ -176,7 +177,7 @@ export const ImportExport = () => {
                 <li>• Colonne K: RESTANT (ou "SOLDE")</li>
                 <li>• Colonne L: REÇU</li>
               </ul>
-              <p className="text-xs text-blue-600 mt-2">* Les données commencent à la ligne 2</p>
+              <p className="text-xs text-blue-600 mt-2">* Les données commencent à la ligne 1</p>
             </div>
           </div>
         </div>

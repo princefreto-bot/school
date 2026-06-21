@@ -41,9 +41,7 @@ async function sendVerificationEmail(toEmail, schoolName, verificationCode) {
     const htmlContent = `
         <div style="font-family: 'Poppins', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #f1f5f9; border-radius: 16px; background-color: #ffffff;">
             <div style="text-align: center; margin-bottom: 24px;">
-                <div style="display: inline-block; padding: 12px; background-color: #f59e0b; border-radius: 12px; color: #ffffff; font-weight: bold; font-size: 24px;">
-                    🏫
-                </div>
+                <img src="https://dghubschool.com/logo.svg" alt="DGhubSchool" style="height: 60px; max-width: 200px; margin-bottom: 12px; object-fit: contain;" />
                 <h2 style="color: #0f172a; margin-top: 12px; font-weight: 800; letter-spacing: -0.025em;">Validation de votre établissement</h2>
             </div>
             
@@ -84,9 +82,7 @@ async function sendPasswordResetEmail(toEmail, resetLink) {
     const htmlContent = `
         <div style="font-family: 'Poppins', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #f1f5f9; border-radius: 16px; background-color: #ffffff;">
             <div style="text-align: center; margin-bottom: 24px;">
-                <div style="display: inline-block; padding: 12px; background-color: #3b82f6; border-radius: 12px; color: #ffffff; font-weight: bold; font-size: 24px;">
-                    🔒
-                </div>
+                <img src="https://dghubschool.com/logo.svg" alt="DGhubSchool" style="height: 60px; max-width: 200px; margin-bottom: 12px; object-fit: contain;" />
                 <h2 style="color: #0f172a; margin-top: 12px; font-weight: 800; letter-spacing: -0.025em;">Réinitialisation de mot de passe</h2>
             </div>
             

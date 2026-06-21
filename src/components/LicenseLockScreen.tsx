@@ -19,6 +19,56 @@ interface LicenseLockScreenProps {
     onClose?: () => void;
 }
 
+const getLicensePacksToBuy = (count: number) => {
+    if (count <= 0) return [];
+    const packs5 = Math.floor(count / 5);
+    const remainder = count % 5;
+    
+    let packs3 = 0;
+    let packs1 = 0;
+    
+    if (remainder === 4) {
+        packs3 = 1;
+        packs1 = 1;
+    } else if (remainder === 3) {
+        packs3 = 1;
+    } else if (remainder === 2) {
+        packs1 = 2;
+    } else if (remainder === 1) {
+        packs1 = 1;
+    }
+    
+    const result = [];
+    if (packs5 > 0) {
+        result.push({
+            id: 'pack_5',
+            name: `Pack 5 Enfants`,
+            quantity: packs5,
+            price: 7000,
+            url: 'https://zwhhrrbi.mychariow.co/prd_rxpueeu9'
+        });
+    }
+    if (packs3 > 0) {
+        result.push({
+            id: 'pack_3',
+            name: `Pack 3 Enfants`,
+            quantity: packs3,
+            price: 4000,
+            url: 'https://zwhhrrbi.mychariow.co/prd_27g3ge9e'
+        });
+    }
+    if (packs1 > 0) {
+        result.push({
+            id: 'pack_1',
+            name: packs1 > 1 ? `Licence Individuelle (x${packs1})` : `Licence Individuelle`,
+            quantity: packs1,
+            price: 1500,
+            url: 'https://zwhhrrbi.mychariow.co/prd_u611otjw/checkout'
+        });
+    }
+    return result;
+};
+
 export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenList, onSuccess, onLinkClick, onClose }) => {
     const logout = useStore((s) => s.logout);
     const [pricing, setPricing] = useState<any>(null);
@@ -79,12 +129,8 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
         }
     };
 
-    const handleCheckout = () => {
-        const CHECKOUT_URL = 'https://zwhhrrbi.mychariow.co/prd_uky8xjl7/checkout';
-        window.open(CHECKOUT_URL, '_blank');
-    };
-
     const inactiveCount = childrenList.filter(c => (c.licenseStatus || 'inactive') !== 'active').length;
+    const packsToBuy = getLicensePacksToBuy(inactiveCount);
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-md p-3 sm:p-6 flex justify-center items-start md:items-center min-h-screen">
@@ -170,41 +216,66 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
                     {/* Tarification */}
                     <div className="bg-slate-50 dark:bg-slate-950/40 rounded-2xl p-4 sm:p-5 border border-slate-100 dark:border-slate-800 flex flex-col justify-between">
                         <div>
-                            <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Tarif & Réductions</h3>
+                            <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Achat de Licence(s)</h3>
                             {loadingPricing ? (
                                 <div className="flex items-center gap-2 text-slate-400 text-sm py-4">
                                     <Loader2 className="w-4 h-4 animate-spin text-blue-600" /> Calcul en cours...
                                 </div>
                             ) : (
-                                <div className="space-y-2">
-                                    <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
-                                        <span>Nombre d'enfants :</span>
-                                        <span className="font-bold text-slate-800 dark:text-slate-200">{pricing?.count}</span>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
+                                        <span>Enfants à activer :</span>
+                                        <span className="font-extrabold text-amber-600 dark:text-amber-400">{inactiveCount} / {childrenList.length}</span>
                                     </div>
-                                    <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
-                                        <span>Forfait applicable :</span>
-                                        <span className="font-bold text-slate-800 dark:text-slate-200">{pricing?.totalPrice.toLocaleString()} F</span>
-                                    </div>
-                                    {pricing?.discount > 0 && (
-                                        <div className="flex justify-between text-xs text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950/30 p-2 rounded-lg mt-1">
-                                            <span>Économie de groupe :</span>
-                                            <span>-{pricing?.discount.toLocaleString()} F</span>
+                                    
+                                    {inactiveCount > 0 ? (
+                                        <div className="space-y-2">
+                                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-snug">
+                                                Pour vos {inactiveCount} enfant(s) non activé(s), veuillez acheter la/les licence(s) ci-dessous :
+                                            </p>
+                                            
+                                            <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                                                {packsToBuy.map((pack) => (
+                                                    <div key={pack.id} className="flex flex-col gap-1.5 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-xl shadow-sm">
+                                                        <div className="flex justify-between items-center text-[11px]">
+                                                            <span className="font-bold text-slate-800 dark:text-slate-200">
+                                                                {pack.name} {pack.quantity > 1 && `(x${pack.quantity})`}
+                                                            </span>
+                                                            <span className="font-extrabold text-blue-600 dark:text-blue-400">
+                                                                {(pack.price * pack.quantity).toLocaleString()} F
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        {pack.id === 'pack_1' && pack.quantity > 1 && (
+                                                            <p className="text-[9px] text-amber-600 dark:text-amber-400 font-semibold leading-none">
+                                                                ⚠️ Faire {pack.quantity} paiements séparés.
+                                                            </p>
+                                                        )}
+                                                        
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => window.open(pack.url, '_blank')}
+                                                            className="w-full flex items-center justify-center gap-1 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-[10px] rounded-lg transition active:scale-95 shadow-sm cursor-pointer"
+                                                        >
+                                                            <ShoppingBag className="w-3 h-3" />
+                                                            {pack.quantity > 1 ? `Payer les ${pack.quantity} licences` : `Acheter`}
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
+                                    ) : (
+                                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/20 p-2.5 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                                            ✅ Tous vos enfants ont une licence active.
+                                        </p>
                                     )}
-                                    <p className="text-[10px] text-slate-400 leading-snug mt-2 italic">
-                                        💡 Tarif Annuel : 1 enfant = 1500 F. 3 enfants = 4000 F total. 5 enfants = 7000 F total.
+
+                                    <p className="text-[9px] text-slate-400 leading-snug italic mt-1 pt-1.5 border-t border-slate-100 dark:border-slate-800">
+                                        💡 Tarifs : 1 enfant = 1500 F | 3 enfants = 4000 F | 5 enfants = 7000 F
                                     </p>
                                 </div>
                             )}
                         </div>
-
-                        <button
-                            onClick={handleCheckout}
-                            className="w-full mt-4 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-sm rounded-xl hover:from-blue-700 hover:to-indigo-700 transition active:scale-95 shadow-lg shadow-blue-500/20"
-                        >
-                            <ShoppingBag className="w-4 h-4" />
-                            Acheter une licence (DGhubSchool)
-                        </button>
                     </div>
                 </div>
 
