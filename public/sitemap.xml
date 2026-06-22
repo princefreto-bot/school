@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- Home Page -->
+  <url>
+    <loc>https://dghubschool.com/fr</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Features -->
+  <url>
+    <loc>https://dghubschool.com/fr/features</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/features"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/features"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en/features</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/features"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/features"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Pricing -->
+  <url>
+    <loc>https://dghubschool.com/fr/pricing</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/pricing"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/pricing"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en/pricing</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/pricing"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/pricing"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- À propos / About -->
+  <url>
+    <loc>https://dghubschool.com/fr/a-propos</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/a-propos"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/a-propos"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en/a-propos</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/a-propos"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/a-propos"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Newsroom -->
+  <url>
+    <loc>https://dghubschool.com/fr/newsroom</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/newsroom"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/newsroom"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en/newsroom</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/newsroom"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/newsroom"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Centre d'aide / Help Center -->
+  <url>
+    <loc>https://dghubschool.com/fr/centre-aide</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/centre-aide"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/centre-aide"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en/centre-aide</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/centre-aide"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/centre-aide"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Partager mon histoire -->
+  <url>
+    <loc>https://dghubschool.com/fr/partager-mon-histoire</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/partager-mon-histoire"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/partager-mon-histoire"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en/partager-mon-histoire</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/partager-mon-histoire"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/partager-mon-histoire"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Confidentialité -->
+  <url>
+    <loc>https://dghubschool.com/fr/confidentialite</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/confidentialite"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/confidentialite"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en/confidentialite</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/confidentialite"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/confidentialite"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Conditions d'utilisation -->
+  <url>
+    <loc>https://dghubschool.com/fr/conditions-utilisation</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/conditions-utilisation"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/conditions-utilisation"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en/conditions-utilisation</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/conditions-utilisation"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/conditions-utilisation"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Login -->
+  <url>
+    <loc>https://dghubschool.com/fr/login</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/login"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/login"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en/login</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/login"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/login"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Portail école -->
+  <url>
+    <loc>https://dghubschool.com/fr/portail-ecole</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/portail-ecole"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/portail-ecole"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en/portail-ecole</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/portail-ecole"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/portail-ecole"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Créer compte -->
+  <url>
+    <loc>https://dghubschool.com/fr/creer-compte</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/creer-compte"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/creer-compte"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en/creer-compte</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/creer-compte"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/creer-compte"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Activation licence -->
+  <url>
+    <loc>https://dghubschool.com/fr/activation-licence</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/activation-licence"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/activation-licence"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en/activation-licence</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/activation-licence"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/activation-licence"/>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+</urlset>

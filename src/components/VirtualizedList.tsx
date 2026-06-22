@@ -1,5 +1,5 @@
 import React from 'react';
-import { FixedSizeList as List } from 'react-window';
+import { List } from 'react-window';
 
 interface VirtualizedListProps {
   items: any[];
@@ -8,6 +8,33 @@ interface VirtualizedListProps {
   renderItem: (props: { index: number; style: React.CSSProperties; data: any }) => React.ReactElement;
   width?: string | number;
 }
+
+interface RowProps {
+  items: any[];
+  renderItem: (props: { index: number; style: React.CSSProperties; data: any }) => React.ReactElement;
+}
+
+const RowComponent = ({
+  index,
+  style,
+  items,
+  renderItem,
+  ariaAttributes,
+}: {
+  index: number;
+  style: React.CSSProperties;
+  ariaAttributes: {
+    'aria-posinset': number;
+    'aria-setsize': number;
+    role: 'listitem';
+  };
+} & RowProps) => {
+  return (
+    <div style={style} {...ariaAttributes}>
+      {renderItem({ index, style: {}, data: items[index] })}
+    </div>
+  );
+};
 
 export const VirtualizedList: React.FC<VirtualizedListProps> = ({
   items,
@@ -21,15 +48,14 @@ export const VirtualizedList: React.FC<VirtualizedListProps> = ({
   }
 
   return (
-    <List
-      height={listHeight}
-      itemCount={items.length}
-      itemSize={itemHeight}
-      width={width}
-      itemData={items}
+    <List<RowProps>
+      rowCount={items.length}
+      rowHeight={itemHeight}
+      rowComponent={RowComponent}
+      rowProps={{ items, renderItem }}
+      style={{ height: listHeight, width }}
       className="scrollbar-thin scrollbar-thumb-slate-200"
-    >
-      {({ index, style, data }) => renderItem({ index, style, data: data[index] })}
-    </List>
+    />
   );
 };
+

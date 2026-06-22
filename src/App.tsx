@@ -4,7 +4,7 @@
 import React, { Suspense, lazy } from 'react';
 import { useStore } from './store/useStore';
 import { webPushService } from './services/webPushService';
-import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
 
 import { Capacitor } from '@capacitor/core';
 
@@ -80,6 +80,16 @@ const LoadingSpinner = () => (
 const RedirectWithSearch: React.FC<{ to: string }> = ({ to }) => {
   const location = useLocation();
   return <Navigate to={`${to}${location.search}`} replace />;
+};
+
+const RedirectToLogin: React.FC = () => {
+  const { lang = 'fr' } = useParams<{ lang?: string }>();
+  return <Navigate to={`/${lang}/login`} replace />;
+};
+
+const RedirectToApp: React.FC = () => {
+  const { lang = 'fr' } = useParams<{ lang?: string }>();
+  return <Navigate to={`/${lang}/app`} replace />;
 };
 
 
@@ -241,7 +251,7 @@ export function App() {
         pathWithoutLang.startsWith('/login/') ||
         pathWithoutLang.startsWith('/portail-ecole/')
       ) {
-        navigate(`/${currentLang}/`, { replace: true });
+        navigate(`/${currentLang}/app`, { replace: true });
       }
     }
   }, [isAuthenticated, location.pathname, navigate]);
@@ -399,17 +409,17 @@ export function App() {
         <Route 
           path="/:lang/login" 
           element={
-            isAuthenticated ? <Navigate to="/" replace /> : <Suspense fallback={<LoadingSpinner />}><Login /></Suspense>
+            isAuthenticated ? <RedirectToApp /> : <Suspense fallback={<LoadingSpinner />}><Login /></Suspense>
           } 
         />
         <Route 
           path="/:lang/login/:schoolSlug" 
           element={
-            isAuthenticated ? <Navigate to="/" replace /> : <Suspense fallback={<LoadingSpinner />}><Login /></Suspense>
+            isAuthenticated ? <RedirectToApp /> : <Suspense fallback={<LoadingSpinner />}><Login /></Suspense>
           } 
         />
         <Route 
-          path="/:lang" 
+          path="/:lang/app" 
           element={
             isAuthenticated ? (
               <Layout>
@@ -418,14 +428,27 @@ export function App() {
                 </Suspense>
                 <AnnouncementPopup />
               </Layout>
-            ) : isCapacitor ? (
-              <Suspense fallback={<LoadingSpinner />}>
-                <Login />
-              </Suspense>
             ) : (
-              <Suspense fallback={<LoadingSpinner />}>
-                <LandingPage />
-              </Suspense>
+              <RedirectToLogin />
+            )
+          } 
+        />
+        <Route 
+          path="/:lang" 
+          element={
+            isCapacitor ? (
+              isAuthenticated ? (
+                <Layout>
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <PageContent />
+                  </Suspense>
+                  <AnnouncementPopup />
+                </Layout>
+              ) : (
+                <Suspense fallback={<LoadingSpinner />}><Login /></Suspense>
+              )
+            ) : (
+              <Suspense fallback={<LoadingSpinner />}><LandingPage /></Suspense>
             )
           } 
         />

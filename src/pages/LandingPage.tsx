@@ -3,6 +3,7 @@
 // ============================================================
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useStore } from '../store/useStore';
 import { 
   CreditCard, 
   BookOpen, 
@@ -20,6 +21,7 @@ import { StickerStar, StickerHeart, StickerCurvedArrow, StickerWave, StickerChec
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const isAuthenticated = useStore((s) => s.isAuthenticated);
   const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [dbStats, setDbStats] = useState({ schools: 0, students: 0, documents: 0 });
@@ -269,18 +271,29 @@ export const LandingPage: React.FC = () => {
 
           {/* Boutons Actions - Desktop */}
           <div className="hidden md:flex items-center gap-4">
-            <button 
-              onClick={() => navigate(`/${lang}/login`)}
-              className="text-xs font-black tracking-widest text-slate-600 hover:text-amber-500 transition-colors px-4 py-2"
-            >
-              {t.login}
-            </button>
-            <button 
-              onClick={() => navigate(`/${lang}/creer-compte`)}
-              className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black tracking-widest px-5 py-3 rounded-xl border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer"
-            >
-              {t.createSchool}
-            </button>
+            {isAuthenticated ? (
+              <button 
+                onClick={() => navigate(`/${lang}/app`)}
+                className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black tracking-widest px-5 py-3 rounded-xl border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer"
+              >
+                {t.accessPortals}
+              </button>
+            ) : (
+              <>
+                <button 
+                  onClick={() => navigate(`/${lang}/login`)}
+                  className="text-xs font-black tracking-widest text-slate-600 hover:text-amber-500 transition-colors px-4 py-2"
+                >
+                  {t.login}
+                </button>
+                <button 
+                  onClick={() => navigate(`/${lang}/creer-compte`)}
+                  className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black tracking-widest px-5 py-3 rounded-xl border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer"
+                >
+                  {t.createSchool}
+                </button>
+              </>
+            )}
           </div>
 
           {/* Toggle Menu - Mobile */}
@@ -322,18 +335,29 @@ export const LandingPage: React.FC = () => {
               {t.socialProof}
             </a>
             <div className="border-t border-slate-100 pt-4 flex flex-col gap-3">
-              <button 
-                onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/login`); }}
-                className="w-full text-center py-3 text-sm font-black tracking-wider text-slate-700 border border-slate-200 rounded-xl"
-              >
-                {t.login}
-              </button>
-              <button 
-                onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/creer-compte`); }}
-                className="w-full text-center py-3 text-sm font-black tracking-wider bg-amber-500 text-slate-950 rounded-xl border border-amber-600 shadow-md"
-              >
-                {t.createSchool}
-              </button>
+              {isAuthenticated ? (
+                <button 
+                  onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/app`); }}
+                  className="w-full text-center py-3 text-sm font-black tracking-wider bg-amber-500 text-slate-950 rounded-xl border border-amber-600 shadow-md"
+                >
+                  {t.accessPortals}
+                </button>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/login`); }}
+                    className="w-full text-center py-3 text-sm font-black tracking-wider text-slate-700 border border-slate-200 rounded-xl"
+                  >
+                    {t.login}
+                  </button>
+                  <button 
+                    onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/creer-compte`); }}
+                    className="w-full text-center py-3 text-sm font-black tracking-wider bg-amber-500 text-slate-950 rounded-xl border border-amber-600 shadow-md"
+                  >
+                    {t.createSchool}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -359,19 +383,31 @@ export const LandingPage: React.FC = () => {
 
         {/* Actions Hero */}
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-16">
-          <button 
-            onClick={() => navigate(`/${lang}/creer-compte`)}
-            className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group"
-          >
-            {t.createSchoolFree}
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
-          <button 
-            onClick={() => navigate(`/${lang}/login`)}
-            className="w-full sm:w-auto bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-slate-200 active:scale-[0.98] transition-all hover:border-slate-300 cursor-pointer"
-          >
-            {t.accessPortals}
-          </button>
+          {isAuthenticated ? (
+            <button 
+              onClick={() => navigate(`/${lang}/app`)}
+              className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group"
+            >
+              {t.accessPortals}
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          ) : (
+            <>
+              <button 
+                onClick={() => navigate(`/${lang}/creer-compte`)}
+                className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group"
+              >
+                {t.createSchoolFree}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <button 
+                onClick={() => navigate(`/${lang}/login`)}
+                className="w-full sm:w-auto bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-slate-200 active:scale-[0.98] transition-all hover:border-slate-300 cursor-pointer"
+              >
+                {t.accessPortals}
+              </button>
+            </>
+          )}
         </div>
 
         {/* Visual Mockup (Modern Rounded Card Style) */}

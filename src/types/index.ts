@@ -255,6 +255,7 @@ export type AppPage =
   | 'historique_activites'
   | 'annonces'
   | 'gestion_academique'
+  | 'gestion_annees_scolaires'
   | 'saisie_notes'
   | 'bulletins'
   | 'parent_dashboard'
