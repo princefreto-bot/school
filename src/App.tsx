@@ -21,8 +21,8 @@ const CreerCompte = lazy(() => import('./pages/CreerCompte').then(m => ({ defaul
 const ConditionsUtilisation = lazy(() => import('./pages/ConditionsUtilisation').then(m => ({ default: m.ConditionsUtilisation })));
 const ConfirmerEmail = lazy(() => import('./pages/ConfirmerEmail').then(m => ({ default: m.ConfirmerEmail })));
 const OfflinePage = lazy(() => import('./pages/OfflinePage').then(m => ({ default: m.OfflinePage })));
-const ForgotPasswordParent = lazy(() => import('./pages/ForgotPasswordParent').then(m => ({ default: m.ForgotPasswordParent })));
-const ForgotPasswordSchool = lazy(() => import('./pages/ForgotPasswordSchool').then(m => ({ default: m.ForgotPasswordSchool })));
+import { ForgotPasswordParent } from './pages/ForgotPasswordParent';
+import { ForgotPasswordSchool } from './pages/ForgotPasswordSchool';
 const ResetPassword = lazy(() => import('./pages/ResetPassword').then(m => ({ default: m.ResetPassword })));
 const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
 
