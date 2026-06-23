@@ -13,6 +13,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const { supabase } = require('./utils/supabase');
+require('./services/cacheService');
 
 const { PORT } = require('./config');
 
