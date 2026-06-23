@@ -850,6 +850,11 @@ export const SuperAdminDashboard: React.FC = () => {
                             <div className="flex items-center gap-3 flex-wrap mb-2">
                               <h3 className="text-white font-bold text-base">{school.name}</h3>
                               {getStatusBadge(school.status)}
+                              {school.is_email_verified === false && (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse">
+                                  <Mail className="w-3 h-3" /> Email non vérifié
+                                </span>
+                              )}
                               {school.is_approved === false && (
                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-500 border border-amber-500/30">
                                   <AlertTriangle className="w-3 h-3" /> En attente de validation

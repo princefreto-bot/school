@@ -15,7 +15,6 @@ async function getAllSchools(req, res) {
         const { data: schools, error } = await supabase
             .from('schools')
             .select('*')
-            .eq('is_email_verified', true)
             .order('created_at', { ascending: false });
 
         if (error) throw error;
