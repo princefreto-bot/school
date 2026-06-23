@@ -1,40 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Mail, Store, ArrowLeft, Send } from 'lucide-react';
 import { API_BASE_URL } from '../config';
-import gsap from 'gsap';
 
 export const ForgotPasswordSchool: React.FC = () => {
   const navigate = useNavigate();
   const { lang = 'fr' } = useParams<{ lang?: string }>();
-  const cardRef = useRef<HTMLDivElement>(null);
-  
   const [schools, setSchools] = useState<{slug: string, name: string}[]>([]);
   const [selectedSchool, setSelectedSchool] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-
-  // GSAP entrance animation
-  useEffect(() => {
-    if (cardRef.current) {
-      gsap.from(cardRef.current, {
-        y: 60,
-        opacity: 0,
-        duration: 0.9,
-        ease: 'power4.out',
-      });
-      gsap.from(cardRef.current.querySelectorAll('.fps-item'), {
-        y: 20,
-        opacity: 0,
-        duration: 0.55,
-        stagger: 0.08,
-        ease: 'power3.out',
-        delay: 0.35,
-      });
-    }
-  }, []);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/schools`)
@@ -79,7 +56,7 @@ export const ForgotPasswordSchool: React.FC = () => {
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50/50 via-white to-amber-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center p-4 py-12 font-['Poppins'] relative overflow-y-auto">
 
-      <div ref={cardRef} className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[32px] p-6 md:p-10 shadow-2xl shadow-slate-200/50 dark:shadow-black/50 relative z-10">
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[32px] p-6 md:p-10 shadow-2xl shadow-slate-200/50 dark:shadow-black/50 relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-500">
         <div className="text-center mb-8 fps-item">
           <div className="w-16 h-16 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 text-blue-500 dark:text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/10">
             <Mail className="w-8 h-8" />

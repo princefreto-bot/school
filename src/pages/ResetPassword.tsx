@@ -1,40 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Lock, Save, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { API_BASE_URL } from '../config';
-import gsap from 'gsap';
 
 export const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const cardRef = useRef<HTMLDivElement>(null);
-  
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-
-  // GSAP entrance animation
-  useEffect(() => {
-    if (cardRef.current) {
-      gsap.from(cardRef.current, {
-        y: 60,
-        opacity: 0,
-        duration: 0.9,
-        ease: 'power4.out',
-      });
-      gsap.from(cardRef.current.querySelectorAll('.rp-item'), {
-        y: 20,
-        opacity: 0,
-        duration: 0.55,
-        stagger: 0.08,
-        ease: 'power3.out',
-        delay: 0.35,
-      });
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +71,7 @@ export const ResetPassword: React.FC = () => {
       <div className="absolute top-[-15%] right-[-10%] w-[55%] h-[55%] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-15%] left-[-10%] w-[55%] h-[55%] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-      <div ref={cardRef} className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[32px] p-6 md:p-10 shadow-2xl shadow-slate-200/50 dark:shadow-black/50 relative z-10">
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[32px] p-6 md:p-10 shadow-2xl shadow-slate-200/50 dark:shadow-black/50 relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-500">
 
         <div className="text-center mb-8 rp-item">
           <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 text-emerald-500 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/10">
