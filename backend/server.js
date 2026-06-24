@@ -29,6 +29,16 @@ const app = express();
 // La valeur 1 signifie "faire confiance à exactement 1 proxy en amont" (le load balancer Render).
 app.set('trust proxy', 1);
 
+// Rediriger le trafic HTTP vers HTTPS en production (sauf pour le health check)
+if (process.env.NODE_ENV === 'production') {
+    app.use((req, res, next) => {
+        if (!req.secure && req.path !== '/api/health') {
+            return res.redirect(301, `https://${req.headers.host}${req.url}`);
+        }
+        next();
+    });
+}
+
 // Middleware globaux
 const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',')
