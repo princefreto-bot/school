@@ -80,7 +80,7 @@ export const APropos: React.FC = () => {
       statsAPI: "Platform uptime",
       statsSupport: "Support available",
       ctaTitle: "Your school has already waited long enough.",
-      ctaDesc: "60 days free to test the platform with your real data, your real students. No credit card required. If you're not convinced, you pay nothing.",
+      ctaDesc: "40 days free to test the platform with your real data, your real students. No credit card required. If you're not convinced, you pay nothing.",
       ctaBtn: "Launch my school for free"
     }
   };

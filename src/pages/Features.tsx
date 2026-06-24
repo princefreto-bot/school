@@ -423,7 +423,7 @@ export const Features: React.FC = () => {
       title: 'Everything your school needs',
       subtitle: 'Discover how DGhubSchool modernizes every aspect of school management — from academics and payments to security and communication.',
       ctaTitle: 'Ready to transform your school?',
-      ctaDesc: 'Start your free 60-day trial and discover all these features in action.',
+      ctaDesc: 'Start your free 40-day trial and discover all these features in action.',
       ctaBtn: 'Start my free trial',
     },
   };
