@@ -212,10 +212,18 @@ app.get('/api/health', (req, res) => {
 // On pointe vers le dossier 'dist' à la racine du projet
 const frontendDir = path.join(__dirname, '..', 'dist');
 if (fs.existsSync(frontendDir)) {
-    app.use(express.static(frontendDir));
+    // Exclure index.html pour que les routes génériques passent par notre injection SEO
+    app.use(express.static(frontendDir, { index: false }));
+
+    let indexHtmlCache = null;
 
     // Pour toutes les autres routes, on renvoie index.html (React Router)
     app.get('*', (req, res) => {
+        // Redirection HTTP 302 de la racine vers /fr pour éviter le duplicate content
+        if (req.path === '/') {
+            return res.redirect(302, '/fr');
+        }
+
         // Si la requête cherche un fichier statique (qui a une extension ou est dans /assets) mais qui n'existe pas, on renvoie un 404
         const isStaticAsset = req.path.startsWith('/assets/') || req.path.match(/\.(css|js|png|jpg|jpeg|gif|svg|ico|json|woff2?|eot|ttf|mp3)$/i);
         if (isStaticAsset) {
@@ -223,7 +231,70 @@ if (fs.existsSync(frontendDir)) {
         }
 
         if (!req.path.startsWith('/api')) {
-            res.sendFile(path.join(frontendDir, 'index.html'));
+            const htmlPath = path.join(frontendDir, 'index.html');
+            
+            const serveHtml = (htmlContent) => {
+                const pathname = req.path;
+                const parts = pathname.split('/');
+                let currentLang = 'fr';
+                let pagePath = pathname;
+                
+                if (parts[1] === 'fr' || parts[1] === 'en') {
+                    currentLang = parts[1];
+                    pagePath = '/' + parts.slice(2).join('/');
+                }
+                
+                const cleanPath = pathname.endsWith('/') && pathname !== '/'
+                    ? pathname.slice(0, -1)
+                    : pathname;
+                    
+                const canonicalPath = cleanPath === '/' ? '/fr' : cleanPath;
+                const canonicalUrl = `https://dghubschool.com${canonicalPath}`;
+                
+                const pagePathClean = pagePath === '/' ? '' : pagePath;
+                const alternateFr = `https://dghubschool.com/fr${pagePathClean}`;
+                const alternateEn = `https://dghubschool.com/en${pagePathClean}`;
+                
+                let modifiedHtml = htmlContent;
+                
+                // 1. Remplacer l'attribut lang de html
+                modifiedHtml = modifiedHtml.replace('<html lang="fr">', `<html lang="${currentLang}">`);
+                
+                // 2. Injecter canonical et hreflangs dans le head
+                const seoTags = `
+    <link rel="canonical" href="${canonicalUrl}" />
+    <link rel="alternate" hreflang="fr" href="${alternateFr}" />
+    <link rel="alternate" hreflang="en" href="${alternateEn}" />
+    <link rel="alternate" hreflang="x-default" href="${alternateFr}" />
+  </head>`;
+                modifiedHtml = modifiedHtml.replace('</head>', seoTags);
+                
+                // 3. Mettre à jour og:url et twitter:url
+                modifiedHtml = modifiedHtml.replace(
+                    '<meta property="og:url" content="https://dghubschool.com/" />',
+                    `<meta property="og:url" content="${canonicalUrl}" />`
+                );
+                modifiedHtml = modifiedHtml.replace(
+                    '<meta name="twitter:url" content="https://dghubschool.com/" />',
+                    `<meta name="twitter:url" content="${canonicalUrl}" />`
+                );
+                
+                res.send(modifiedHtml);
+            };
+
+            if (process.env.NODE_ENV === 'production' && indexHtmlCache) {
+                serveHtml(indexHtmlCache);
+            } else {
+                fs.readFile(htmlPath, 'utf8', (err, html) => {
+                    if (err) {
+                        return res.status(500).send('Error loading index.html');
+                    }
+                    if (process.env.NODE_ENV === 'production') {
+                        indexHtmlCache = html;
+                    }
+                    serveHtml(html);
+                });
+            }
         }
     });
 }
