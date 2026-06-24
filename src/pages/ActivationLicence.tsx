@@ -100,7 +100,7 @@ export const ActivationLicence: React.FC = () => {
               <KeyRound className="w-8 h-8 text-amber-500" />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Activer votre licence</h2>
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">Activer votre licence</h1>
               <p className="text-sm text-slate-500 mt-2">Saisissez la clé UUID de 320 jours générée par Chariow pour activer votre compte.</p>
             </div>
             

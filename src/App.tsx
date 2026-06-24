@@ -227,6 +227,46 @@ export function App() {
     };
   }, []);
 
+  // Dynamisation des balises SEO (Lang, Canonical, Hreflang alternates & x-default)
+  React.useEffect(() => {
+    const parts = location.pathname.split('/');
+    const currentLang = parts[1] === 'en' ? 'en' : 'fr';
+    const pathWithoutLang = '/' + parts.slice(2).join('/');
+    const cleanPath = location.pathname.endsWith('/') && location.pathname !== '/'
+      ? location.pathname.slice(0, -1)
+      : location.pathname;
+    
+    // Mettre à jour le HTML lang
+    document.documentElement.lang = currentLang;
+
+    // Mettre à jour la balise canonical
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', `https://dghubschool.com${cleanPath}`);
+
+    // Mettre à jour/créer les balises hreflang alternates (fr, en, x-default)
+    const pagePath = pathWithoutLang === '/' ? '' : pathWithoutLang;
+    
+    const updateHreflang = (lang: string, href: string) => {
+      let el = document.querySelector(`link[rel="alternate"][hreflang="${lang}"]`);
+      if (!el) {
+        el = document.createElement('link');
+        el.setAttribute('rel', 'alternate');
+        el.setAttribute('hreflang', lang);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('href', href);
+    };
+
+    updateHreflang('fr', `https://dghubschool.com/fr${pagePath}`);
+    updateHreflang('en', `https://dghubschool.com/en${pagePath}`);
+    updateHreflang('x-default', `https://dghubschool.com/fr${pagePath}`);
+  }, [location.pathname]);
+
   // Redirect logic to add default lang prefix if missing
   React.useEffect(() => {
     const parts = location.pathname.split('/');
