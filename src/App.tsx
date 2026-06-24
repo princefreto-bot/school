@@ -240,13 +240,24 @@ export function App() {
     document.documentElement.lang = currentLang;
 
     // Mettre à jour la balise canonical
+    const canonicalHref = `https://dghubschool.com${cleanPath}`;
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
       canonical = document.createElement('link');
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', `https://dghubschool.com${cleanPath}`);
+    canonical.setAttribute('href', canonicalHref);
+
+    // Mettre à jour og:url et twitter:url
+    let ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) {
+      ogUrl.setAttribute('content', canonicalHref);
+    }
+    let twitterUrl = document.querySelector('meta[name="twitter:url"]');
+    if (twitterUrl) {
+      twitterUrl.setAttribute('content', canonicalHref);
+    }
 
     // Mettre à jour/créer les balises hreflang alternates (fr, en, x-default)
     const pagePath = pathWithoutLang === '/' ? '' : pathWithoutLang;
