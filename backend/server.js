@@ -224,8 +224,16 @@ if (fs.existsSync(frontendDir)) {
             return res.redirect(302, '/fr');
         }
 
+        // Redirection 301 pour les fichiers sitemap et robots avec slash final
+        if (req.path === '/sitemap.xml/') {
+            return res.redirect(301, '/sitemap.xml');
+        }
+        if (req.path === '/robots.txt/') {
+            return res.redirect(301, '/robots.txt');
+        }
+
         // Si la requête cherche un fichier statique (qui a une extension ou est dans /assets) mais qui n'existe pas, on renvoie un 404
-        const isStaticAsset = req.path.startsWith('/assets/') || req.path.match(/\.(css|js|png|jpg|jpeg|gif|svg|ico|json|woff2?|eot|ttf|mp3)$/i);
+        const isStaticAsset = req.path.startsWith('/assets/') || req.path.match(/\.(css|js|png|jpg|jpeg|gif|svg|ico|json|woff2?|eot|ttf|mp3|xml|txt)$/i);
         if (isStaticAsset) {
             return res.status(404).send('Not Found');
         }
