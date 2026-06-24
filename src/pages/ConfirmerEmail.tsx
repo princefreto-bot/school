@@ -9,6 +9,53 @@ import { useStore } from '../store/useStore';
 import { createActivityLog } from '../utils/activityLogger';
 import { StickerStar, StickerCheck as StickerCheckSticker, StickerSparkle } from '../components/Stickers';
 
+const translations = {
+  fr: {
+    back: "Retour",
+    confirmTitle: "Confirmer votre e-mail",
+    confirmSubtitle: "Saisissez le code de validation reçu sur la messagerie de votre établissement.",
+    emailRequiredForResend: "L'adresse email est requise pour renvoyer le code.",
+    resendError: "Une erreur est survenue lors du renvoi du code.",
+    resendSuccess: "Un nouveau code de validation a été envoyé.",
+    emailRequired: "L'adresse email est requise.",
+    codeLengthError: "Le code de confirmation doit comporter 6 chiffres.",
+    invalidCode: "Le code saisi est invalide ou expiré.",
+    emailValidated: "Adresse e-mail validée ! Connexion en cours...",
+    emailLabel: "Adresse e-mail de l'établissement",
+    emailPlaceholder: "direction@votre-ecole.com",
+    codeLabel: "Code de confirmation à 6 chiffres",
+    validating: "Validation en cours...",
+    success: "✓ Compte validé !",
+    validateBtn: "Valider mon compte",
+    noEmail: "Vous n'avez pas reçu l'e-mail ? ",
+    resendIn: "Renvoyer dans ",
+    resendBtn: "Renvoyer le code",
+    roleNotice: "En validant votre compte, vous confirmez votre rôle en tant que Directeur ou Représentant de l'établissement.",
+  },
+  en: {
+    back: "Back",
+    confirmTitle: "Confirm your email",
+    confirmSubtitle: "Enter the validation code received in your school's email inbox.",
+    emailRequiredForResend: "The email address is required to resend the code.",
+    resendError: "An error occurred while resending the code.",
+    resendSuccess: "A new validation code has been sent.",
+    emailRequired: "The email address is required.",
+    codeLengthError: "The confirmation code must be 6 digits.",
+    invalidCode: "The code entered is invalid or expired.",
+    emailValidated: "Email address validated! Login in progress...",
+    emailLabel: "School email address",
+    emailPlaceholder: "principal@your-school.com",
+    codeLabel: "6-digit confirmation code",
+    validating: "Validating...",
+    success: "✓ Account validated!",
+    validateBtn: "Validate my account",
+    noEmail: "Didn't receive the email? ",
+    resendIn: "Resend in ",
+    resendBtn: "Resend code",
+    roleNotice: "By validating your account, you confirm your role as the Principal or Representative of the school.",
+  }
+};
+
 export const ConfirmerEmail: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,6 +73,9 @@ export const ConfirmerEmail: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [resendCountdown, setResendCountdown] = useState(0);
   const [resendStatus, setResendStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const currentLang = (lang === 'en' ? 'en' : 'fr') as 'fr' | 'en';
+  const t = (key: keyof typeof translations['fr']) => translations[currentLang][key];
 
   // Refs for the 6 digit inputs
   const inputRefs = [
@@ -87,7 +137,7 @@ export const ConfirmerEmail: React.FC = () => {
 
   const handleResendCode = async () => {
     if (!email) {
-      setError("L'adresse email est requise pour renvoyer le code.");
+      setError(t('emailRequiredForResend'));
       return;
     }
     
@@ -104,10 +154,10 @@ export const ConfirmerEmail: React.FC = () => {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Une erreur est survenue lors du renvoi du code.");
+        throw new Error(data.error || t('resendError'));
       }
 
-      setResendStatus({ type: 'success', message: data.message || "Un nouveau code de validation a été envoyé." });
+      setResendStatus({ type: 'success', message: data.message || t('resendSuccess') });
       setResendCountdown(60); // 60 seconds cooldown
     } catch (err: any) {
       setResendStatus({ type: 'error', message: err.message });
@@ -122,11 +172,11 @@ export const ConfirmerEmail: React.FC = () => {
     
     const verificationCode = codeDigits.join('');
     if (!email) {
-      setError("L'adresse email est requise.");
+      setError(t('emailRequired'));
       return;
     }
     if (verificationCode.length !== 6) {
-      setError("Le code de confirmation doit comporter 6 chiffres.");
+      setError(t('codeLengthError'));
       return;
     }
 
@@ -144,7 +194,7 @@ export const ConfirmerEmail: React.FC = () => {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Le code saisi est invalide ou expiré.");
+        throw new Error(data.error || t('invalidCode'));
       }
 
       setSuccess(true);
@@ -273,7 +323,7 @@ export const ConfirmerEmail: React.FC = () => {
               className="flex items-center gap-2 text-slate-400 hover:text-amber-500 transition-colors text-sm font-bold"
               disabled={loading}
             >
-              <ArrowLeft className="w-4 h-4" /> Retour
+              <ArrowLeft className="w-4 h-4" /> {t('back')}
             </button>
             
             {/* Logo visible seulement sur mobile (caché quand le panel de gauche est visible) */}
@@ -286,10 +336,10 @@ export const ConfirmerEmail: React.FC = () => {
           {/* Titre */}
           <div className="space-y-2 mb-6">
             <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase">
-              Confirmer votre e-mail
+              {t('confirmTitle')}
             </h1>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Saisissez le code de validation reçu sur la messagerie de votre établissement.
+              {t('confirmSubtitle')}
             </p>
           </div>
 
@@ -307,7 +357,7 @@ export const ConfirmerEmail: React.FC = () => {
               <div className="w-5 h-5 bg-emerald-500 flex items-center justify-center text-white">
                 <Check className="w-3.5 h-3.5" />
               </div>
-              <span className="font-semibold">Adresse e-mail validée ! Connexion en cours...</span>
+              <span className="font-semibold">{t('emailValidated')}</span>
             </div>
           )}
 
@@ -335,7 +385,7 @@ export const ConfirmerEmail: React.FC = () => {
             {/* Saisie E-mail */}
             <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                Adresse e-mail de l'établissement
+                {t('emailLabel')}
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
@@ -344,7 +394,7 @@ export const ConfirmerEmail: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="direction@votre-ecole.com"
+                  placeholder={t('emailPlaceholder')}
                   disabled={loading || success}
                   className="w-full bg-slate-50 border border-slate-200/80 focus:border-amber-500/80 focus:ring-1 focus:ring-amber-500/80 focus:bg-white p-3 pl-10 text-sm outline-none text-slate-900 placeholder:text-slate-400/80 transition-all"
                 />
@@ -354,7 +404,7 @@ export const ConfirmerEmail: React.FC = () => {
             {/* Saisie Code à 6 chiffres */}
             <div className="space-y-2">
               <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">
-                Code de confirmation à 6 chiffres
+                {t('codeLabel')}
               </label>
               <div className="flex justify-between gap-2">
                 {codeDigits.map((digit, idx) => (
@@ -380,12 +430,12 @@ export const ConfirmerEmail: React.FC = () => {
               disabled={loading || success}
               className="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-950 text-xs font-black uppercase tracking-widest p-4 rounded-xl transition-all shadow-md active:scale-[0.99] disabled:bg-amber-300 disabled:cursor-not-allowed select-none"
             >
-              {loading ? 'Validation en cours...' : success ? '✓ Compte validé !' : 'Valider mon compte'}
+              {loading ? t('validating') : success ? t('success') : t('validateBtn')}
             </button>
 
             {/* Option de renvoi du code */}
             <div className="text-center text-xs mt-4">
-              <span className="text-slate-500">Vous n'avez pas reçu l'e-mail ? </span>
+              <span className="text-slate-500">{t('noEmail')}</span>
               <button
                 type="button"
                 onClick={handleResendCode}
@@ -393,14 +443,14 @@ export const ConfirmerEmail: React.FC = () => {
                 className="text-amber-600 hover:text-amber-700 font-bold hover:underline transition-colors disabled:opacity-50 disabled:no-underline"
               >
                 {resendCountdown > 0 
-                  ? `Renvoyer dans ${resendCountdown}s` 
-                  : 'Renvoyer le code'}
+                  ? `${t('resendIn')}${resendCountdown}s` 
+                  : t('resendBtn')}
               </button>
             </div>
           </form>
 
           <div className="mt-8 text-center text-[10px] text-slate-400 select-none">
-            En validant votre compte, vous confirmez votre rôle en tant que Directeur ou Représentant de l'établissement.
+            {t('roleNotice')}
           </div>
         </div>
       </div>

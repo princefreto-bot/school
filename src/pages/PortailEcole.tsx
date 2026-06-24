@@ -8,11 +8,59 @@ import { GraduationCap, Lock, Mail, Store, ArrowRight } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import gsap from 'gsap';
 
+const translations = {
+  fr: {
+    portalTitle: "Portail Établissement",
+    portalSubtitle: "Éspace réservé à l'administration de l'école.",
+    networkError: "Erreur réseau: ",
+    dataError: "Le format de données reçu est incorrect.",
+    change: "Changer",
+    schoolLabel: "Établissement",
+    globalAccess: "Accès Global (SuperAdmin / Créateur)",
+    selectSchool: "-- Sélectionnez votre école --",
+    usernamePlaceholder: "Email ou Téléphone portable",
+    passwordPlaceholder: "Mot de passe",
+    forgotPassword: "Mot de passe oublié ?",
+    trialExpired: "⏰ Période d'essai expirée",
+    trialExpiredSuffix: " doit régler son abonnement auprès du SuperAdmin pour réactiver l'accès.",
+    incorrectCreds: "Identifiants incorrects.",
+    errorValidation: "Veuillez sélectionner un établissement ou cocher l'accès global.",
+    loginBtn: "Se connecter",
+    connecting: "Connexion en cours...",
+    registerSchool: "Inscrire un nouvel établissement",
+    accessParent: "Accéder à l'espace Parent d'élève",
+  },
+  en: {
+    portalTitle: "School Portal",
+    portalSubtitle: "Area reserved for school administration.",
+    networkError: "Network error: ",
+    dataError: "The received data format is incorrect.",
+    change: "Change",
+    schoolLabel: "School",
+    globalAccess: "Global Access (SuperAdmin / Creator)",
+    selectSchool: "-- Select your school --",
+    usernamePlaceholder: "Email or Mobile Phone",
+    passwordPlaceholder: "Password",
+    forgotPassword: "Forgot password?",
+    trialExpired: "⏰ Trial period expired",
+    trialExpiredSuffix: " must pay their subscription to the SuperAdmin to reactivate access.",
+    incorrectCreds: "Incorrect credentials.",
+    errorValidation: "Please select a school or check global access.",
+    loginBtn: "Login",
+    connecting: "Connecting...",
+    registerSchool: "Register a new school",
+    accessParent: "Access Parent Area",
+  }
+};
+
 export const PortailEcole: React.FC = () => {
   const login = useStore((s) => s.login);
   const navigate = useNavigate();
   const { lang = 'fr', schoolSlug } = useParams<{ lang?: string, schoolSlug?: string }>();
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const currentLang = (lang === 'en' ? 'en' : 'fr') as 'fr' | 'en';
+  const t = (key: keyof typeof translations['fr']) => translations[currentLang][key];
 
   // Auth Form States
   const [username, setUsername] = useState('');
@@ -82,7 +130,7 @@ export const PortailEcole: React.FC = () => {
          if (Array.isArray(data)) {
            setSchools(data);
          } else {
-           setFetchError("Le format de données reçu est incorrect.");
+           setFetchError(t('dataError'));
          }
       })
       .catch(err => {
@@ -101,7 +149,7 @@ export const PortailEcole: React.FC = () => {
       const schoolSlugToSend = isGlobalAccess ? '' : selectedSchool;
       
       if (!isGlobalAccess && !selectedSchool) {
-        setError("Veuillez sélectionner un établissement ou cocher l'accès global.");
+        setError(t('errorValidation'));
         setLoading(false);
         return;
       }
@@ -109,12 +157,12 @@ export const PortailEcole: React.FC = () => {
       // Appeler le login avec le paramètre 'school'
       const ok = await login(username, password, schoolSlugToSend, 'school');
       if (!ok) {
-        setError('Identifiants incorrects.');
+        setError(t('incorrectCreds'));
       } else {
         navigate(`/${lang}/`, { replace: true });
       }
     } catch (err: any) {
-      const msg: string = err?.message || err?.error || "Une erreur est survenue.";
+      const msg: string = err?.message || err?.error || (lang === 'en' ? "An error occurred." : "Une erreur est survenue.");
       if (msg.startsWith('TRIAL_EXPIRED:')) {
         const schoolName = msg.split(':')[1] || '';
         setTrialExpiredSchool(schoolName);
@@ -145,8 +193,8 @@ export const PortailEcole: React.FC = () => {
               onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
             />
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Portail Établissement</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm mt-1 font-medium">Éspace réservé à l'administration de l'école.</p>
+          <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">{t('portalTitle')}</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm mt-1 font-medium">{t('portalSubtitle')}</p>
         </div>
 
         {/* Formulaire */}
@@ -154,7 +202,7 @@ export const PortailEcole: React.FC = () => {
           
           {fetchError && (
             <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-2xl text-xs text-center font-bold portal-animate-item">
-              Erreur réseau: {fetchError}
+              {t('networkError')}{fetchError}
             </div>
           )}
 
@@ -170,7 +218,7 @@ export const PortailEcole: React.FC = () => {
                 />
               </div>
               <div className="min-w-0 text-left flex-1">
-                <p className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Établissement</p>
+                <p className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">{t('schoolLabel')}</p>
                 <p className="font-bold text-slate-800 dark:text-white text-sm truncate font-black">
                   {schools.find(s => s.slug === schoolSlug)?.name}
                 </p>
@@ -184,7 +232,7 @@ export const PortailEcole: React.FC = () => {
                 }}
                 className="text-[10px] font-black uppercase text-slate-400 hover:text-rose-500 transition-colors shrink-0"
               >
-                Changer
+                {t('change')}
               </button>
             </div>
           ) : (
@@ -199,7 +247,7 @@ export const PortailEcole: React.FC = () => {
                   }} 
                   className="accent-amber-500 rounded" 
                 />
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Accès Global (SuperAdmin / Créateur)</span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{t('globalAccess')}</span>
               </label>
 
               {!isGlobalAccess && (
@@ -211,7 +259,7 @@ export const PortailEcole: React.FC = () => {
                     onChange={(e) => setSelectedSchool(e.target.value)} 
                     required={!isGlobalAccess}
                   >
-                    <option value="" disabled className="dark:bg-slate-800">-- Sélectionnez votre école --</option>
+                    <option value="" disabled className="dark:bg-slate-800">{t('selectSchool')}</option>
                     {schools.map(s => <option key={s.slug} value={s.slug} className="dark:bg-slate-800">{s.name}</option>)}
                   </select>
                 </div>
@@ -225,7 +273,7 @@ export const PortailEcole: React.FC = () => {
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
               <input 
                 type="text" 
-                placeholder="Email ou Téléphone portable" 
+                placeholder={t('usernamePlaceholder')} 
                 className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-2xl text-xs md:text-sm focus:outline-none transition-colors text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
                 value={username} 
                 onChange={(e) => setUsername(e.target.value)} 
@@ -237,7 +285,7 @@ export const PortailEcole: React.FC = () => {
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
               <input 
                 type="password" 
-                placeholder="Mot de passe" 
+                placeholder={t('passwordPlaceholder')} 
                 className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-2xl text-xs md:text-sm focus:outline-none transition-colors text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
@@ -245,14 +293,14 @@ export const PortailEcole: React.FC = () => {
               />
             </div>
             <div className="flex items-center justify-end w-full text-xs px-1">
-              <button type="button" onClick={() => navigate(`/${lang}/mot-de-passe-oublie-ecole`)} className="text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-500 font-medium transition-colors">Mot de passe oublié ?</button>
+              <button type="button" onClick={() => navigate(`/${lang}/mot-de-passe-oublie-ecole`)} className="text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-500 font-medium transition-colors">{t('forgotPassword')}</button>
             </div>
           </div>
 
           {trialExpiredSchool && (
             <div className="p-3.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl text-left">
-              <p className="text-amber-600 dark:text-amber-400 font-extrabold text-xs">⏰ Période d'essai expirée</p>
-              <p className="text-slate-600 dark:text-slate-400 text-[10px] mt-1 font-medium">"{trialExpiredSchool}" doit régler son abonnement auprès du SuperAdmin pour réactiver l'accès.</p>
+              <p className="text-amber-600 dark:text-amber-400 font-extrabold text-xs">{t('trialExpired')}</p>
+              <p className="text-slate-600 dark:text-slate-400 text-[10px] mt-1 font-medium">"{trialExpiredSchool}"{t('trialExpiredSuffix')}</p>
             </div>
           )}
 
@@ -267,7 +315,7 @@ export const PortailEcole: React.FC = () => {
             disabled={loading} 
             className="w-full py-4 bg-amber-500 text-slate-900 font-black text-xs md:text-sm uppercase tracking-wider rounded-2xl shadow-[0_8px_24px_rgba(245,158,11,0.25)] hover:bg-amber-400 hover:shadow-[0_12px_30px_rgba(245,158,11,0.35)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4 portal-animate-item cursor-pointer"
           >
-            {loading ? 'Connexion en cours...' : 'Se connecter'}
+            {loading ? t('connecting') : t('loginBtn')}
           </button>
         </form>
 
@@ -277,7 +325,7 @@ export const PortailEcole: React.FC = () => {
             onClick={() => navigate(`/${lang}/creer-compte`)} 
             className="text-xs font-bold text-amber-600 hover:text-amber-500 flex items-center justify-center gap-1.5 transition-colors group cursor-pointer"
           >
-            <span>Inscrire un nouvel établissement</span>
+            <span>{t('registerSchool')}</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </button>
 
@@ -285,7 +333,7 @@ export const PortailEcole: React.FC = () => {
             onClick={() => navigate(`/${lang}/login`)} 
             className="text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors pt-2 border-t border-slate-100 dark:border-slate-800 cursor-pointer"
           >
-            Accéder à l'espace Parent d'élève
+            {t('accessParent')}
           </button>
         </div>
 

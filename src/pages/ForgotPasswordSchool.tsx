@@ -3,6 +3,35 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Mail, Store, ArrowLeft, Send } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
+const translations = {
+  fr: {
+    title: "Mot de passe oublié",
+    subtitle: "Saisissez l'e-mail de votre compte pour recevoir un lien de réinitialisation.",
+    errorValidation: "Veuillez sélectionner un établissement et saisir votre adresse e-mail.",
+    errorOccurred: "Une erreur est survenue.",
+    successMessage: "Lien de réinitialisation envoyé.",
+    errorServer: "Erreur de connexion au serveur.",
+    selectSchool: "-- Sélectionnez votre école --",
+    emailPlaceholder: "Adresse e-mail",
+    sending: "Envoi...",
+    sendLink: "Envoyer le lien",
+    backBtn: "Retour à la connexion",
+  },
+  en: {
+    title: "Forgot Password",
+    subtitle: "Enter your account email to receive a password reset link.",
+    errorValidation: "Please select a school and enter your email address.",
+    errorOccurred: "An error occurred.",
+    successMessage: "Reset link sent.",
+    errorServer: "Server connection error.",
+    selectSchool: "-- Select your school --",
+    emailPlaceholder: "Email address",
+    sending: "Sending...",
+    sendLink: "Send link",
+    backBtn: "Back to login",
+  }
+};
+
 export const ForgotPasswordSchool: React.FC = () => {
   const navigate = useNavigate();
   const { lang = 'fr' } = useParams<{ lang?: string }>();
@@ -12,6 +41,9 @@ export const ForgotPasswordSchool: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  const currentLang = (lang === 'en' ? 'en' : 'fr') as 'fr' | 'en';
+  const t = (key: keyof typeof translations['fr']) => translations[currentLang][key];
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/schools`)
@@ -28,7 +60,7 @@ export const ForgotPasswordSchool: React.FC = () => {
     setMessage('');
 
     if (!selectedSchool || !email) {
-      setError('Veuillez sélectionner un établissement et saisir votre adresse e-mail.');
+      setError(t('errorValidation'));
       return;
     }
 
@@ -42,12 +74,12 @@ export const ForgotPasswordSchool: React.FC = () => {
       const data = await response.json();
       
       if (!response.ok) {
-        setError(data.error || 'Une erreur est survenue.');
+        setError(data.error || t('errorOccurred'));
       } else {
-        setMessage(data.message || 'Lien de réinitialisation envoyé.');
+        setMessage(data.message || t('successMessage'));
       }
     } catch (err) {
-      setError('Erreur de connexion au serveur.');
+      setError(t('errorServer'));
     } finally {
       setLoading(false);
     }
@@ -61,8 +93,8 @@ export const ForgotPasswordSchool: React.FC = () => {
           <div className="w-16 h-16 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 text-blue-500 dark:text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/10">
             <Mail className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Mot de passe oublié</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Saisissez l'e-mail de votre compte pour recevoir un lien de réinitialisation.</p>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{t('title')}</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">{t('subtitle')}</p>
         </div>
 
         {message ? (
@@ -74,7 +106,7 @@ export const ForgotPasswordSchool: React.FC = () => {
               onClick={() => navigate(`/${lang}/portail-ecole`)}
               className="w-full py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm rounded-2xl transition border border-slate-200 dark:border-slate-700"
             >
-              Retour à la connexion
+              {t('backBtn')}
             </button>
           </div>
         ) : (
@@ -87,7 +119,7 @@ export const ForgotPasswordSchool: React.FC = () => {
                 onChange={(e) => setSelectedSchool(e.target.value)} 
                 required
               >
-                <option value="" disabled className="dark:bg-slate-800">-- Sélectionnez votre école --</option>
+                <option value="" disabled className="dark:bg-slate-800">{t('selectSchool')}</option>
                 {schools.map(s => <option key={s.slug} value={s.slug} className="dark:bg-slate-800">{s.name}</option>)}
               </select>
             </div>
@@ -96,7 +128,7 @@ export const ForgotPasswordSchool: React.FC = () => {
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
               <input 
                 type="email" 
-                placeholder="Adresse e-mail" 
+                placeholder={t('emailPlaceholder')} 
                 className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-2xl text-sm focus:outline-none transition-colors text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
@@ -111,7 +143,7 @@ export const ForgotPasswordSchool: React.FC = () => {
               disabled={loading} 
               className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-black text-sm uppercase tracking-wider rounded-2xl shadow-[0_8px_24px_rgba(59,130,246,0.3)] hover:shadow-[0_12px_30px_rgba(59,130,246,0.4)] dark:shadow-none transition-all flex items-center justify-center gap-2 mt-4 active:scale-[0.98] disabled:opacity-50 fps-item cursor-pointer"
             >
-              {loading ? 'Envoi...' : 'Envoyer le lien'}
+              {loading ? t('sending') : t('sendLink')}
               {!loading && <Send className="w-4 h-4" />}
             </button>
             
@@ -121,7 +153,7 @@ export const ForgotPasswordSchool: React.FC = () => {
               className="w-full py-2 text-slate-500 dark:text-slate-450 text-xs font-bold flex items-center justify-center gap-2 mt-2 hover:text-slate-700 dark:hover:text-slate-300 transition fps-item"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              Retour à la connexion
+              {t('backBtn')}
             </button>
           </form>
         )}

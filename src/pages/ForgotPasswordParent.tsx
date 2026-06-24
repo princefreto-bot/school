@@ -2,9 +2,27 @@ import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, UserX } from 'lucide-react';
 
+const translations = {
+  fr: {
+    title: "Mot de passe oublié ?",
+    instructions1: "Pour des raisons de sécurité, nous ne permettons pas la réinitialisation directe du mot de passe pour les comptes parents.",
+    instructions2: "Veuillez demander au directeur de votre établissement de supprimer votre compte actuel afin que vous puissiez en créer un nouveau avec un nouveau mot de passe.",
+    backBtn: "Retour à la connexion",
+  },
+  en: {
+    title: "Forgot Password?",
+    instructions1: "For security reasons, we do not allow direct password resets for parent accounts.",
+    instructions2: "Please ask your school's principal to delete your current account so that you can create a new one with a new password.",
+    backBtn: "Back to login",
+  }
+};
+
 export const ForgotPasswordParent: React.FC = () => {
   const navigate = useNavigate();
   const { lang = 'fr' } = useParams<{ lang?: string }>();
+
+  const currentLang = (lang === 'en' ? 'en' : 'fr') as 'fr' | 'en';
+  const t = (key: keyof typeof translations['fr']) => translations[currentLang][key];
 
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-rose-50/50 via-white to-amber-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center p-4 font-['Poppins'] relative overflow-y-auto">
@@ -14,13 +32,13 @@ export const ForgotPasswordParent: React.FC = () => {
           <UserX className="w-8 h-8" />
         </div>
         
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-4">Mot de passe oublié ?</h1>
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-4">{t('title')}</h1>
         
         <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-8">
-          Pour des raisons de sécurité, nous ne permettons pas la réinitialisation directe du mot de passe pour les comptes parents. 
+          {t('instructions1')}
           <br /><br />
           <span className="font-bold text-slate-700 dark:text-slate-350">
-            Veuillez demander au directeur de votre établissement de supprimer votre compte actuel afin que vous puissiez en créer un nouveau avec un nouveau mot de passe.
+            {t('instructions2')}
           </span>
         </p>
 
@@ -29,7 +47,7 @@ export const ForgotPasswordParent: React.FC = () => {
           className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white font-black text-sm uppercase tracking-wider rounded-2xl shadow-[0_8px_24px_rgba(245,158,11,0.3)] hover:shadow-[0_12px_30px_rgba(245,158,11,0.4)] dark:shadow-none transition-all flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          Retour à la connexion
+          {t('backBtn')}
         </button>
       </div>
     </div>

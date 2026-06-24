@@ -2,15 +2,97 @@
 // PAGE D'INSCRIPTION ÉTABLISSEMENT — Épurée & Rectangulaire
 // ============================================================
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { GraduationCap, ArrowLeft, Mail, School, User, Phone, Lock } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+
+const translations = {
+  fr: {
+    back: "Retour",
+    schoolAccountCreation: "Création Compte Établissement",
+    joinTitle: "Rejoignez DGhubSchool",
+    joinSubtitle: "Inscrivez votre école et commencez à digitaliser votre gestion scolaire dès aujourd'hui.",
+    acceptConsentError: "Vous devez accepter les conditions d'utilisation et la politique de confidentialité.",
+    slugRequired: "Le code d'établissement (slug) est requis.",
+    registerError: "Une erreur est survenue lors de l'inscription.",
+    sectionSchoolInfo: "1. Informations de l'Établissement",
+    schoolNameLabel: "Nom de l'école *",
+    schoolNamePlaceholder: "Ex: C.S. YZOMACAMB",
+    schoolSlugLabel: "Code unique d'école (Slug) *",
+    schoolSlugPlaceholder: "Uniquement lettres et chiffres",
+    schoolSlugDesc: "Sert d'identifiant technique (ex: csyzomacamb). Sans espace ni caractères spéciaux.",
+    schoolAddressLabel: "Adresse de l'établissement",
+    schoolAddressPlaceholder: "Ex: Agoé BKS, Lomé, Togo",
+    schoolPhoneLabel: "Téléphone de l'école",
+    schoolPhonePlaceholder: "Ex: +228 90 00 00 00",
+    sectionAdminInfo: "2. Directeur / Administrateur",
+    adminNameLabel: "Nom complet du Directeur *",
+    adminNamePlaceholder: "Ex: Koffi MENSAN",
+    adminPhoneLabel: "Numéro mobile du Directeur *",
+    adminPhonePlaceholder: "Ex: +228 99 99 99 99",
+    adminEmailLabel: "Adresse Email Réelle * (Pour validation gratuite)",
+    adminEmailPlaceholder: "directeur@ecole.com",
+    adminEmailDesc: "Un code de confirmation y sera envoyé immédiatement.",
+    adminPasswordLabel: "Mot de passe Administrateur *",
+    adminPasswordPlaceholder: "Minimum 6 caractères",
+    cguText: "J'accepte les ",
+    cguLink: "Conditions Générales d'Utilisation",
+    cguSuffix: " de la plateforme. *",
+    privacyText: "J'autorise la collecte et le traitement sécurisé des données selon la ",
+    privacyLink: "Politique de Confidentialité",
+    privacySuffix: " (conforme IPDCP). *",
+    marketingText: "J'accepte de recevoir des actus et conseils d'optimisation scolaire d'YZO. (Optionnel)",
+    processing: "Traitement en cours...",
+    submitRequest: "Envoyer la demande d'admission",
+  },
+  en: {
+    back: "Back",
+    schoolAccountCreation: "School Account Creation",
+    joinTitle: "Join DGhubSchool",
+    joinSubtitle: "Register your school and start digitizing your school management today.",
+    acceptConsentError: "You must accept the terms of use and the privacy policy.",
+    slugRequired: "The school code (slug) is required.",
+    registerError: "An error occurred during registration.",
+    sectionSchoolInfo: "1. School Information",
+    schoolNameLabel: "School Name *",
+    schoolNamePlaceholder: "e.g. C.S. YZOMACAMB",
+    schoolSlugLabel: "Unique School Code (Slug) *",
+    schoolSlugPlaceholder: "Letters and numbers only",
+    schoolSlugDesc: "Used as a technical identifier (e.g. csyzomacamb). No spaces or special characters.",
+    schoolAddressLabel: "School Address",
+    schoolAddressPlaceholder: "e.g. Agoé BKS, Lomé, Togo",
+    schoolPhoneLabel: "School Phone Number",
+    schoolPhonePlaceholder: "e.g. +228 90 00 00 00",
+    sectionAdminInfo: "2. Principal / Administrator",
+    adminNameLabel: "Principal's Full Name *",
+    adminNamePlaceholder: "e.g. Koffi MENSAN",
+    adminPhoneLabel: "Principal's Mobile Number *",
+    adminPhonePlaceholder: "e.g. +228 99 99 99 99",
+    adminEmailLabel: "Real Email Address * (For free validation)",
+    adminEmailPlaceholder: "principal@school.com",
+    adminEmailDesc: "A confirmation code will be sent there immediately.",
+    adminPasswordLabel: "Administrator Password *",
+    adminPasswordPlaceholder: "Minimum 6 characters",
+    cguText: "I accept the ",
+    cguLink: "Terms and Conditions of Use",
+    cguSuffix: " of the platform. *",
+    privacyText: "I authorize the secure collection and processing of data according to the ",
+    privacyLink: "Privacy Policy",
+    privacySuffix: " (IPDCP compliant). *",
+    marketingText: "I accept to receive news and school optimization tips from YZO. (Optional)",
+    processing: "Processing...",
+    submitRequest: "Submit Admission Request",
+  }
+};
 
 export const CreerCompte: React.FC = () => {
   const navigate = useNavigate();
   const { lang = 'fr' } = useParams<{ lang?: string }>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const currentLang = (lang === 'en' ? 'en' : 'fr') as 'fr' | 'en';
+  const t = (key: keyof typeof translations['fr']) => translations[currentLang][key];
 
   // Form States
   const [name, setName] = useState('');
@@ -41,12 +123,12 @@ export const CreerCompte: React.FC = () => {
     setError('');
     
     if (!acceptedTerms || !acceptedPrivacy) {
-      setError("Vous devez accepter les conditions d'utilisation et la politique de confidentialité.");
+      setError(t('acceptConsentError'));
       return;
     }
 
     if (!slug) {
-      setError("Le code d'établissement (slug) est requis.");
+      setError(t('slugRequired'));
       return;
     }
 
@@ -73,7 +155,7 @@ export const CreerCompte: React.FC = () => {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Une erreur est survenue lors de l'inscription.");
+        throw new Error(data.error || t('registerError'));
       }
 
       // Redirection vers l'écran de confirmation d'e-mail avec l'état
@@ -101,10 +183,10 @@ export const CreerCompte: React.FC = () => {
             className="flex items-center gap-2 text-slate-400 hover:text-amber-500 transition-colors text-sm font-bold"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Retour</span>
+            <span>{t('back')}</span>
           </button>
           <div className="flex items-center gap-2 bg-amber-50 text-amber-600 font-extrabold uppercase text-[10px] tracking-widest px-3 py-1 rounded-none border border-amber-100">
-            Création Compte Établissement
+            {t('schoolAccountCreation')}
           </div>
         </div>
 
@@ -114,8 +196,8 @@ export const CreerCompte: React.FC = () => {
               <img src="/logo.svg" className="w-full h-full object-contain" alt="DGhubSchool" />
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-black text-slate-950 tracking-tight">Rejoignez DGhubSchool</h1>
-            <p className="text-slate-500 text-xs md:text-sm mt-1 font-medium">Inscrivez votre école et commencez à digitaliser votre gestion scolaire dès aujourd'hui.</p>
+            <h1 className="text-2xl md:text-3xl font-black text-slate-950 tracking-tight uppercase">{t('joinTitle')}</h1>
+            <p className="text-slate-500 text-xs md:text-sm mt-1 font-medium">{t('joinSubtitle')}</p>
           </div>
 
           {error && (
@@ -125,16 +207,16 @@ export const CreerCompte: React.FC = () => {
           )}
 
           <div className="space-y-4">
-            <h2 className="text-sm font-extrabold uppercase tracking-wider text-amber-600 border-l-2 border-amber-500 pl-2">1. Informations de l'Établissement</h2>
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-amber-600 border-l-2 border-amber-500 pl-2">{t('sectionSchoolInfo')}</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Nom de l'école *</label>
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">{t('schoolNameLabel')}</label>
                 <div className="relative">
                   <School className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input 
                     type="text" 
-                    placeholder="Ex: C.S. YZOMACAMB" 
+                    placeholder={t('schoolNamePlaceholder')} 
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-none text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                     value={name} 
                     onChange={(e) => setName(e.target.value)} 
@@ -144,28 +226,28 @@ export const CreerCompte: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Code unique d'école (Slug) *</label>
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">{t('schoolSlugLabel')}</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">@</span>
                   <input 
                     type="text" 
-                    placeholder="Uniquement lettres et chiffres" 
+                    placeholder={t('schoolSlugPlaceholder')} 
                     className="w-full pl-8 pr-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-none text-sm focus:outline-none transition-colors font-bold text-amber-600"
                     value={slug} 
                     onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))} 
                     required 
                   />
                 </div>
-                <p className="text-[9px] text-slate-400 font-medium">Sert d'identifiant technique (ex: csyzomacamb). Sans espace ni caractères spéciaux.</p>
+                <p className="text-[9px] text-slate-400 font-medium">{t('schoolSlugDesc')}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Adresse de l'établissement</label>
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">{t('schoolAddressLabel')}</label>
                 <input 
                   type="text" 
-                  placeholder="Ex: Agoé BKS, Lomé, Togo" 
+                  placeholder={t('schoolAddressPlaceholder')} 
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-none text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                   value={address} 
                   onChange={(e) => setAddress(e.target.value)} 
@@ -173,10 +255,10 @@ export const CreerCompte: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Téléphone de l'école</label>
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">{t('schoolPhoneLabel')}</label>
                 <input 
                   type="tel" 
-                  placeholder="Ex: +228 90 00 00 00" 
+                  placeholder={t('schoolPhonePlaceholder')} 
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-none text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                   value={phone} 
                   onChange={(e) => setPhone(e.target.value)} 
@@ -186,16 +268,16 @@ export const CreerCompte: React.FC = () => {
           </div>
 
           <div className="space-y-4 pt-2">
-            <h2 className="text-sm font-extrabold uppercase tracking-wider text-amber-600 border-l-2 border-amber-500 pl-2">2. Directeur / Administrateur</h2>
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-amber-600 border-l-2 border-amber-500 pl-2">{t('sectionAdminInfo')}</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Nom complet du Directeur *</label>
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">{t('adminNameLabel')}</label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input 
                     type="text" 
-                    placeholder="Ex: Koffi MENSAN" 
+                    placeholder={t('adminNamePlaceholder')} 
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-none text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                     value={adminNom} 
                     onChange={(e) => setAdminNom(e.target.value)} 
@@ -205,12 +287,12 @@ export const CreerCompte: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Numéro mobile du Directeur *</label>
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">{t('adminPhoneLabel')}</label>
                 <div className="relative">
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input 
                     type="tel" 
-                    placeholder="Ex: +228 99 99 99 99" 
+                    placeholder={t('adminPhonePlaceholder')} 
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-none text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                     value={adminTelephone} 
                     onChange={(e) => setAdminTelephone(e.target.value)} 
@@ -222,28 +304,28 @@ export const CreerCompte: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Adresse Email Réelle * (Pour validation gratuite)</label>
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">{t('adminEmailLabel')}</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input 
                     type="email" 
-                    placeholder="directeur@ecole.com" 
+                    placeholder={t('adminEmailPlaceholder')} 
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-none text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                     value={email} 
                     onChange={(e) => setEmail(e.target.value)} 
                     required 
                   />
                 </div>
-                <p className="text-[9px] text-slate-400 font-medium">Un code de confirmation y sera envoyé immédiatement.</p>
+                <p className="text-[9px] text-slate-400 font-medium">{t('adminEmailDesc')}</p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Mot de passe Administrateur *</label>
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">{t('adminPasswordLabel')}</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input 
                     type="password" 
-                    placeholder="Minimum 6 caractères" 
+                    placeholder={t('adminPasswordPlaceholder')} 
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-none text-sm focus:outline-none transition-colors text-slate-800 placeholder-slate-400"
                     value={adminPassword} 
                     onChange={(e) => setAdminPassword(e.target.value)} 
@@ -265,7 +347,7 @@ export const CreerCompte: React.FC = () => {
                 required 
               />
               <span className="text-[10px] md:text-xs text-slate-500 leading-snug font-medium">
-                J'accepte les <a href="/#/conditions-utilisation" target="_blank" className="font-bold text-slate-855 text-amber-600 hover:underline">Conditions Générales d'Utilisation</a> de la plateforme. <span className="text-rose-500">*</span>
+                {t('cguText')}<Link to={`/${lang}/conditions-utilisation`} target="_blank" className="font-bold text-slate-855 text-amber-600 hover:underline">{t('cguLink')}</Link>{t('cguSuffix')}
               </span>
             </label>
 
@@ -278,7 +360,7 @@ export const CreerCompte: React.FC = () => {
                 required 
               />
               <span className="text-[10px] md:text-xs text-slate-500 leading-snug font-medium">
-                J'autorise la collecte et le traitement sécurisé des données selon la <a href="/#/confidentialite" target="_blank" className="font-bold text-slate-855 text-amber-600 hover:underline">Politique de Confidentialité</a> (conforme IPDCP). <span className="text-rose-500">*</span>
+                {t('privacyText')}<Link to={`/${lang}/confidentialite`} target="_blank" className="font-bold text-slate-855 text-amber-600 hover:underline">{t('privacyLink')}</Link>{t('privacySuffix')}
               </span>
             </label>
 
@@ -290,7 +372,7 @@ export const CreerCompte: React.FC = () => {
                 className="mt-1 accent-amber-500 rounded-none scale-95" 
               />
               <span className="text-[10px] md:text-xs text-slate-500 leading-snug font-medium">
-                J'accepte de recevoir des actus et conseils d'optimisation scolaire d'YZO. <span className="text-slate-400">(Optionnel)</span>
+                {t('marketingText')}
               </span>
             </label>
           </div>
@@ -300,7 +382,7 @@ export const CreerCompte: React.FC = () => {
             disabled={loading} 
             className="w-full py-4 bg-amber-500 text-slate-900 font-black text-xs md:text-sm uppercase tracking-wider rounded-none shadow-xl shadow-amber-500/10 hover:bg-amber-400 active:scale-[0.98] transition flex items-center justify-center gap-2 mt-4 cursor-pointer"
           >
-            {loading ? 'Traitement en cours...' : "Envoyer la demande d'admission"}
+            {loading ? t('processing') : t('submitRequest')}
           </button>
         </form>
       </div>
