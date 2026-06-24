@@ -183,6 +183,117 @@ const PageContent: React.FC = () => {
 
 import { useGridToggle } from './hooks/useGridToggle';
 
+const pageMetadata: Record<string, Record<string, { title: string; description: string }>> = {
+  fr: {
+    home: {
+      title: "DGhubSchool — Plateforme de Gestion Scolaire et Financière en Ligne",
+      description: "DGhubSchool est la solution moderne et complète en ligne pour la gestion de votre établissement d'enseignement. Suivez les inscriptions des élèves, organisez les classes et les enseignants, gérez le recouvrement des frais scolaires, et automatisez la génération des reçus financiers et des bulletins scolaires en format PDF."
+    },
+    features: {
+      title: "Fonctionnalités DGhubSchool — Gestion Administrative et Financière",
+      description: "Découvrez les fonctionnalités avancées de DGhubSchool : enregistrement des paiements, recouvrement des frais, génération de reçus PDF, saisie de notes, édition automatisée de bulletins scolaires et portail parents complet."
+    },
+    pricing: {
+      title: "Tarifs DGhubSchool — Plans d'Abonnement Flexibles et Période d'Essai",
+      description: "Consultez les tarifs de DGhubSchool. Nous proposons des forfaits mensuels et annuels transparents, adaptés à la taille et au nombre d'élèves de votre école, avec une période d'essai gratuite sans engagement."
+    },
+    'a-propos': {
+      title: "À Propos de DGhubSchool — Notre Mission pour l'Éducation",
+      description: "En savoir plus sur l'équipe derrière DGhubSchool. Nous développons des outils innovants pour simplifier la gestion des écoles et améliorer la communication avec les parents."
+    },
+    newsroom: {
+      title: "Newsroom DGhubSchool — Actualités et Mises à Jour",
+      description: "Suivez les dernières actualités, guides de gestion scolaire, et nouveautés sur la plateforme DGhubSchool."
+    },
+    'centre-aide': {
+      title: "Centre d'Aide DGhubSchool — Support et Tutoriels",
+      description: "Trouvez des réponses à toutes vos questions sur DGhubSchool. Consultez nos guides d'utilisation, FAQ et contactez notre support technique."
+    },
+    login: {
+      title: "Connexion — DGhubSchool",
+      description: "Connectez-vous à votre espace DGhubSchool pour gérer votre établissement scolaire, vos finances ou suivre la scolarité de vos enfants."
+    },
+    'creer-compte': {
+      title: "Créer un Compte École — DGhubSchool",
+      description: "Inscrivez votre établissement sur DGhubSchool dès aujourd'hui et commencez à digitaliser vos opérations administratives et financières."
+    },
+    confidentialite: {
+      title: "Politique de Confidentialité — DGhubSchool",
+      description: "Consultez notre politique de confidentialité pour comprendre comment DGhubSchool protège et gère les données personnelles des élèves, parents et écoles."
+    },
+    'conditions-utilisation': {
+      title: "Conditions Générales d'Utilisation — DGhubSchool",
+      description: "Lisez les conditions d'utilisation de la plateforme DGhubSchool régissant l'accès à nos services de gestion scolaire."
+    },
+    'partager-mon-histoire': {
+      title: "Partager mon Histoire avec DGhubSchool",
+      description: "Partagez votre expérience d'utilisation de DGhubSchool et témoignez de l'impact de notre plateforme sur la gestion de votre école."
+    },
+    'activation-licence': {
+      title: "Activation de Licence — DGhubSchool",
+      description: "Activez la licence annuelle de votre école sur DGhubSchool pour débloquer toutes les fonctionnalités premium de gestion scolaire."
+    },
+    'portail-ecole': {
+      title: "Portail École — Accès DGhubSchool",
+      description: "Recherchez et accédez directement à l'espace de connexion dédié de votre établissement scolaire sur DGhubSchool."
+    }
+  },
+  en: {
+    home: {
+      title: "DGhubSchool — School and Financial Management Online Platform",
+      description: "DGhubSchool is the modern and complete online solution for school administration and financial management. Track student enrollment, manage tuition fee collection, and automate the generation of receipts and PDF report cards."
+    },
+    features: {
+      title: "DGhubSchool Features — Administrative and Financial Tools",
+      description: "Explore all the advanced features of DGhubSchool: tuition tracking, automated billing, PDF receipt generation, grades entry, automated report card creation, and parent portal."
+    },
+    pricing: {
+      title: "DGhubSchool Pricing — Flexible SaaS Plans and Free Trial",
+      description: "Check out our transparent subscription plans for DGhubSchool. We offer monthly and annual pricing scaled to your school's size, with a risk-free 30-day trial period."
+    },
+    'a-propos': {
+      title: "About DGhubSchool — Our Mission for Modern Education",
+      description: "Learn about the team and story behind DGhubSchool. We design innovative cloud software solutions to simplify school administration and strengthen parent-school communication."
+    },
+    newsroom: {
+      title: "Newsroom and Updates — DGhubSchool Press and Blog",
+      description: "Read the latest news from DGhubSchool. Get platform announcements, product updates, partnership news, and expert articles on administrative and financial management in schools."
+    },
+    'centre-aide': {
+      title: "Help Center and Technical Support — DGhubSchool Documentation",
+      description: "Need help? Search the DGhubSchool help center for user documentation, step-by-step setup tutorials, FAQs, and to contact our dedicated customer support team."
+    },
+    login: {
+      title: "Login — DGhubSchool",
+      description: "Log in to your DGhubSchool space to manage your school, finances, or track your children's schooling."
+    },
+    'creer-compte': {
+      title: "Create a School Account — DGhubSchool",
+      description: "Create an account for your educational institution on DGhubSchool. Sign up in minutes to start your risk-free 30-day free trial and digitize your school."
+    },
+    confidentialite: {
+      title: "Privacy Policy and Data Protection — DGhubSchool",
+      description: "Read the privacy policy of DGhubSchool. Learn how we collect, store, secure, and process personal data for schools, students, parents, and teachers."
+    },
+    'conditions-utilisation': {
+      title: "Terms of Service (ToS) — DGhubSchool User Agreement",
+      description: "Review the terms of service of the DGhubSchool platform governing use of our SaaS software by schools, parents, teachers, and staff members."
+    },
+    'partager-mon-histoire': {
+      title: "Share Your Success Story — DGhubSchool Testimonials",
+      description: "Share your experience with DGhubSchool. Tell us how our software helped your school improve fee collections, automate report cards, and simplify operations."
+    },
+    'activation-licence': {
+      title: "School License Activation — DGhubSchool Annual Plan",
+      description: "Activate your school's annual subscription on DGhubSchool. Enter your activation code or complete your payment online to access all platform features."
+    },
+    'portail-ecole': {
+      title: "Partner Schools Directory — DGhubSchool Portal Access",
+      description: "Find the custom login page of your educational institution on DGhubSchool. Use our directory or search tool to access your dedicated school portal."
+    }
+  }
+};
+
 export function App() {
   useGridToggle();
   const isAuthenticated = useStore((s) => s.isAuthenticated);
@@ -276,6 +387,34 @@ export function App() {
     updateHreflang('fr', `https://dghubschool.com/fr${pagePath}`);
     updateHreflang('en', `https://dghubschool.com/en${pagePath}`);
     updateHreflang('x-default', `https://dghubschool.com/fr${pagePath}`);
+
+    // Mettre à jour le titre du document et les meta tags de description/OG/Twitter
+    const pageKey = pagePath.replace(/^\//, '') || 'home';
+    const meta = pageMetadata[currentLang]?.[pageKey] || pageMetadata[currentLang]?.home;
+    if (meta) {
+      document.title = meta.title;
+
+      const updateMeta = (name: string, content: string, isProperty = false) => {
+        const selector = isProperty ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+        let el = document.querySelector(selector);
+        if (!el) {
+          el = document.createElement('meta');
+          if (isProperty) {
+            el.setAttribute('property', name);
+          } else {
+            el.setAttribute('name', name);
+          }
+          document.head.appendChild(el);
+        }
+        el.setAttribute('content', content);
+      };
+
+      updateMeta('description', meta.description);
+      updateMeta('og:title', meta.title, true);
+      updateMeta('twitter:title', meta.title);
+      updateMeta('og:description', meta.description, true);
+      updateMeta('twitter:description', meta.description);
+    }
   }, [location.pathname]);
 
   // Redirect logic to add default lang prefix if missing

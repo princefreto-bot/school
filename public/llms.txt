@@ -1,0 +1,25 @@
+# DGhubSchool
+
+> Cloud platform for school administration, academic tracking, and financial management.
+
+## Core Features
+- **Student & Enrollment Management**: Registration, student cards, directories.
+- **Financial & Tuition Collection**: Fee setup, automated billing, installment tracking, and timestamped PDF receipt generation.
+- **Academic & Grades Management**: Edit class structures, manage grades, and generate customized PDF report cards.
+- **Communication & Portal Access**: Dedicated interfaces for administrators, teachers, and parents (with real-time updates and push notifications).
+- **Security & Reliability**: Built on Supabase and PostgreSQL, fully secured with JWT, role-based permissions, and HSTS.
+
+## URLs & Navigation
+- [Home Page](/fr) - Main presentation of the platform in French.
+- [Features](/fr/features) - Detailed breakdown of modules.
+- [Pricing](/fr/pricing) - SaaS subscription plans and trials.
+- [School Portal](/fr/portail-ecole) - Custom portal directory for schools.
+- [Login](/fr/login) - User authentication portal.
+- [Create Account](/fr/creer-compte) - Register new educational institutions.
+- [Help Center](/fr/centre-aide) - Documentation and user guides.
+- [About Us](/fr/a-propos) - Mission statement and company updates.
+- [Newsroom](/fr/newsroom) - Press releases, articles, and product blogs.
+- [Privacy Policy](/fr/confidentialite) - Compliance and data protection details.
+- [Terms of Service](/fr/conditions-utilisation) - SaaS subscription agreement.
+- [Activation License](/fr/activation-licence) - School registration activation keys.
+- [Share Story](/fr/partager-mon-histoire) - User testimonials and school success stories.
