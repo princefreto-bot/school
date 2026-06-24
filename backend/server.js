@@ -37,13 +37,32 @@ if (process.env.NODE_ENV === 'production') {
         }
         next();
     });
-
-    // Activer HSTS (Strict-Transport-Security) pour forcer la sécurité
-    app.use((req, res, next) => {
-        res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
-        next();
-    });
 }
+
+// Activer les en-têtes de sécurité (HSTS, CSP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
+app.use((req, res, next) => {
+    if (process.env.NODE_ENV === 'production') {
+        res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    }
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    
+    const supabaseUrl = process.env.SUPABASE_URL || 'https://mbsiocggltzdssfpsqqi.supabase.co';
+    const backupSupabaseUrl = 'https://kbvyyzgulxjzmdyqfcyj.supabase.co';
+    
+    const csp = [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.sheetjs.com",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com",
+        `img-src 'self' data: blob: ${supabaseUrl} ${backupSupabaseUrl}`,
+        `connect-src 'self' ${supabaseUrl} ${backupSupabaseUrl} ws: wss: http://localhost:* http://127.0.0.1:*`
+    ].join('; ');
+    
+    res.setHeader('Content-Security-Policy', csp);
+    next();
+});
 
 // Middleware globaux
 const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -311,7 +330,7 @@ if (fs.existsSync(frontendDir)) {
                         title: "Politique de Confidentialité — DGhubSchool",
                         description: "Consultez notre politique de confidentialité pour comprendre comment DGhubSchool protège et gère les données personnelles des élèves, parents et écoles.",
                         h1: "Politique de Confidentialité et Engagement de Sécurité",
-                        p: "Chez DGhubSchool, nous considérons que la protection des données personnelles de nos utilisateurs est une priorité absolue. Cette politique de confidentialité détaille en toute transparence la manière dont nous collectons, stockons, traitons et protégeons les informations confidentielles des établissements scolaires, des élèves, des enseignants et des parents d'élèves. Nous utilisons des technologies de cryptage avancées (SSL/TLS) pour sécuriser toutes les transmissions de données et collaborons avec des hébergeurs certifiés de premier plan (Supabase et PostgreSQL) pour garantir l'intégrité de nos bases de données. Nous ne vendons ni ne partageons jamais vos informations à des tiers à des fins publicitaires. Les données collectées (noms, inscriptions, paiements scolaires, notes académiques) sont uniquement utilisées pour fournir et améliorer les services de gestion scolaire demandés par votre établissement. Vous disposez d'un droit permanent d'accès, de rectification et de suppression de vos données personnelles conformément aux réglementations internationales en vigueur."
+                        p: "Chez DGhubSchool, nous considérons que la protection des données personnelles de nos utilisateurs est une priorité absolue. Cette politique de confidentialité détaille en toute transparence la manière dont nous collectons, stockons, traitons et protégeons les informations confidentielles des établissements scolaires, des élèves, des enseignants et des parents d'élèves. Nous utilisons des technologies de cryptage avancées (SSL/TLS) pour sécuriser toutes les transmissions de données et collaborons avec des hébergeurs certifiés de premier plan sur une infrastructure cloud sécurisée pour garantir l'intégrité de nos bases de données. Nous ne vendons ni ne partageons jamais vos informations à des tiers à des fins publicitaires. Les données collectées (noms, inscriptions, paiements scolaires, notes académiques) sont uniquement utilisées pour fournir et améliorer les services de gestion scolaire demandés par votre établissement. Vous disposez d'un droit permanent d'accès, de rectification et de suppression de vos données personnelles conformément aux réglementations internationales en vigueur."
                     },
                     'conditions-utilisation': {
                         title: "Conditions Générales d'Utilisation — DGhubSchool",
@@ -391,7 +410,7 @@ if (fs.existsSync(frontendDir)) {
                         title: "Privacy Policy and Data Protection — DGhubSchool",
                         description: "Read the privacy policy of DGhubSchool. Learn how we collect, store, secure, and process personal data for schools, students, parents, and teachers.",
                         h1: "DGhubSchool Privacy Policy & Data Security Commitments",
-                        p: "At DGhubSchool, protecting the personal and financial data of our users is our utmost priority. This privacy policy explains how we collect, store, process, and protect information provided by educational institutions, students, teachers, and parents. We implement advanced SSL/TLS encryption for all data transmission and work with industry-leading, certified database providers (Supabase and PostgreSQL) to guarantee data integrity. We never sell or share your data with third parties for marketing. The data collected (names, grades, tuition logs) is used solely to provide and improve the school management services requested by your institution. Under international data protection laws, you retain full rights to access, correct, or delete your personal data. We are committed to maintaining a transparent, highly secure environment for all users. Our systems are audited regularly to keep up with modern compliance standards, assuring the highest level of security."
+                        p: "At DGhubSchool, protecting the personal and financial data of our users is our utmost priority. This privacy policy explains how we collect, store, process, and protect information provided by educational institutions, students, teachers, and parents. We implement advanced SSL/TLS encryption for all data transmission and work with industry-leading, certified cloud hosting providers on a secure infrastructure to guarantee data integrity. We never sell or share your data with third parties for marketing. The data collected (names, grades, tuition logs) is used solely to provide and improve the school management services requested by your institution. Under international data protection laws, you retain full rights to access, correct, or delete your personal data. We are committed to maintaining a transparent, highly secure environment for all users. Our systems are audited regularly to keep up with modern compliance standards, assuring the highest level of security."
                     },
                     'conditions-utilisation': {
                         title: "Terms of Service (ToS) — DGhubSchool User Agreement",
@@ -442,17 +461,44 @@ if (fs.existsSync(frontendDir)) {
                 const alternateFr = `https://dghubschool.com/fr${pagePathClean}`;
                 const alternateEn = `https://dghubschool.com/en${pagePathClean}`;
                 
-                let modifiedHtml = htmlContent;
+                const pageKey = pagePathClean.replace(/^\//, '') || 'home';
                 
-                // 1. Remplacer l'attribut lang de html
-                modifiedHtml = modifiedHtml.replace('<html lang="fr">', `<html lang="${currentLang}">`);
+                let structuredData = `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "DGhubSchool",
+      "url": "https://dghubschool.com",
+      "logo": "https://dghubschool.com/logo.png"
+    }
+    </script>`;
                 
-                // 2. Injecter canonical et hreflangs dans le head
+                if (pageKey === 'home') {
+                    structuredData += `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "DGhubSchool",
+      "operatingSystem": "All",
+      "applicationCategory": "EducationalApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>`;
+                }
+
+                // 2. Injecter canonical, hreflangs et JSON-LD dans le head
                 const seoTags = `
     <link rel="canonical" href="${canonicalUrl}" />
     <link rel="alternate" hreflang="fr" href="${alternateFr}" />
     <link rel="alternate" hreflang="en" href="${alternateEn}" />
     <link rel="alternate" hreflang="x-default" href="${alternateFr}" />
+    ${structuredData}
   </head>`;
                 modifiedHtml = modifiedHtml.replace('</head>', seoTags);
                 
@@ -467,7 +513,6 @@ if (fs.existsSync(frontendDir)) {
                 );
 
                 // 4. Injecter les métadonnées spécifiques à la page (Titre, description, contenu fallback)
-                const pageKey = pagePathClean.replace(/^\//, '') || 'home';
                 const meta = pageMetadata[currentLang]?.[pageKey] || pageMetadata[currentLang]?.home;
 
                 if (meta) {

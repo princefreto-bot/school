@@ -167,7 +167,7 @@ export const Pricing: React.FC = () => {
       ],
       buttonText: t.contactUs,
       popular: false,
-      ctaAction: () => window.location.href = `mailto:contact@dghubschool.com?subject=Demande%20Tarif%20Sur%20Mesure%20(>2000%20eleves)&body=Langue:${lang}`,
+      ctaAction: () => window.location.href = `mailto:support@dghubschool.com?subject=Demande%20Tarif%20Sur%20Mesure%20(>2000%20eleves)&body=Langue:${lang}`,
       borderColor: "border-slate-200 dark:border-slate-800"
     }
   ];

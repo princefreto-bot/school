@@ -544,7 +544,7 @@ export function App() {
               Se déconnecter
             </button>
             <a
-              href="mailto:contact@dghubschool.com"
+              href="mailto:support@dghubschool.com"
               className="text-xs font-bold text-slate-400 hover:text-amber-500 transition-colors uppercase tracking-wider block pt-2"
             >
               Contacter le support

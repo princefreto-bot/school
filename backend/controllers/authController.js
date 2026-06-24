@@ -543,6 +543,12 @@ async function verifySchoolEmail(req, res) {
         const { error: rpcErr } = await supabase.rpc('create_school_tables', { school_slug: school.slug });
         if (rpcErr) throw rpcErr;
 
+        // Activer les politiques RLS sur les nouvelles tables
+        const { error: rlsErr } = await supabase.rpc('enable_rls_for_school', { school_slug: school.slug });
+        if (rlsErr) {
+            console.error(`⚠️ Erreur d'activation RLS pour ${school.slug}:`, rlsErr.message);
+        }
+
         // Attente initiale de 2s pour le rechargement de schéma REST de Supabase
         await new Promise(r => setTimeout(r, 2000));
 

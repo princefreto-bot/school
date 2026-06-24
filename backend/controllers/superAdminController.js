@@ -166,6 +166,12 @@ async function createSchool(req, res) {
         const { error: rpcErr } = await supabase.rpc('create_school_tables', { school_slug: cleanSlug });
         if (rpcErr) throw rpcErr;
 
+        // Activer les politiques RLS sur les nouvelles tables
+        const { error: rlsErr } = await supabase.rpc('enable_rls_for_school', { school_slug: cleanSlug });
+        if (rlsErr) {
+            console.error(`⚠️ Erreur d'activation RLS pour ${cleanSlug}:`, rlsErr.message);
+        }
+
         // Attendre que la base recharge son schéma (1s par sécurité)
         await new Promise(r => setTimeout(r, 1000));
 
