@@ -1,10 +1,86 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Send, CheckCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+
+interface SubmitStoryTranslations {
+  back: string;
+  title: string;
+  subtitle: string;
+  successTitle: string;
+  successDesc: string;
+  successBtn: string;
+  labelName: string;
+  placeholderName: string;
+  labelRole: string;
+  selectRole: string;
+  rolePrincipal: string;
+  roleParent: string;
+  roleTeacher: string;
+  roleOther: string;
+  labelSchool: string;
+  placeholderSchool: string;
+  labelText: string;
+  placeholderText: string;
+  btnSubmit: string;
+  errorSend: string;
+  errorGeneral: string;
+}
+
+const translations: Record<'fr' | 'en', SubmitStoryTranslations> = {
+  fr: {
+    back: "Retour",
+    title: "Partagez votre histoire",
+    subtitle: "Comment DGhubSchool vous aide au quotidien ? Racontez-nous !",
+    successTitle: "Merci !",
+    successDesc: "Votre témoignage a bien été reçu. Il sera examiné par notre équipe avant d'être publié.",
+    successBtn: "Retour à l'accueil",
+    labelName: "Votre Nom Complet",
+    placeholderName: "Ex: Jean Dupont",
+    labelRole: "Votre Rôle",
+    selectRole: "Sélectionnez un rôle",
+    rolePrincipal: "Directeur / Fondateur",
+    roleParent: "Parent d'élève",
+    roleTeacher: "Enseignant",
+    roleOther: "Autre",
+    labelSchool: "Nom de l'école (Optionnel)",
+    placeholderSchool: "Ex: Complexe Scolaire Les Étoiles",
+    labelText: "Votre Témoignage",
+    placeholderText: "Racontez-nous comment la plateforme vous aide...",
+    btnSubmit: "Envoyer mon témoignage",
+    errorSend: "Erreur lors de l'envoi",
+    errorGeneral: "Une erreur est survenue. Veuillez réessayer."
+  },
+  en: {
+    back: "Back",
+    title: "Share your story",
+    subtitle: "How does DGhubSchool help you daily? Tell us!",
+    successTitle: "Thank you!",
+    successDesc: "Your story has been received. It will be reviewed by our team before being published.",
+    successBtn: "Back to home",
+    labelName: "Your Full Name",
+    placeholderName: "e.g., John Doe",
+    labelRole: "Your Role",
+    selectRole: "Select a role",
+    rolePrincipal: "Principal / Founder",
+    roleParent: "Parent",
+    roleTeacher: "Teacher",
+    roleOther: "Other",
+    labelSchool: "School Name (Optional)",
+    placeholderSchool: "e.g., Stars School Complex",
+    labelText: "Your Story",
+    placeholderText: "Tell us how the platform helps you...",
+    btnSubmit: "Send my story",
+    errorSend: "Error during sending",
+    errorGeneral: "An error occurred. Please try again."
+  }
+};
 
 export const SubmitStory: React.FC = () => {
   const navigate = useNavigate();
+  const { lang = 'fr' } = useParams<{ lang?: string }>();
+  const activeLang = (lang === 'fr' || lang === 'en') ? lang : 'fr';
+  const t = translations[activeLang];
   const theme = useStore((s) => s.theme);
   
   const [formData, setFormData] = useState({
@@ -34,12 +110,12 @@ export const SubmitStory: React.FC = () => {
       });
       
       if (!response.ok) {
-        throw new Error("Erreur lors de l'envoi");
+        throw new Error(t.errorSend);
       }
       
       setIsSuccess(true);
     } catch (err: any) {
-      setError("Une erreur est survenue. Veuillez réessayer.");
+      setError(t.errorGeneral);
     } finally {
       setIsSubmitting(false);
     }
@@ -52,15 +128,15 @@ export const SubmitStory: React.FC = () => {
           <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-500/10 rounded-full mb-4">
             <CheckCircle className="w-10 h-10 text-emerald-500" />
           </div>
-          <h1 className="text-3xl font-black tracking-tight">Merci !</h1>
+          <h1 className="text-3xl font-black tracking-tight">{t.successTitle}</h1>
           <p className="text-slate-500">
-            Votre témoignage a bien été reçu. Il sera examiné par notre équipe avant d'être publié.
+            {t.successDesc}
           </p>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate(`/${activeLang}`)}
             className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-xl transition-colors mt-8"
           >
-            Retour à l'accueil
+            {t.successBtn}
           </button>
         </div>
       </div>
@@ -76,16 +152,16 @@ export const SubmitStory: React.FC = () => {
           className={`flex items-center gap-2 font-semibold ${theme === 'dark' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Retour</span>
+          <span>{t.back}</span>
         </button>
         <div className="font-black text-xl tracking-tight">DGhubSchool</div>
       </nav>
 
       <main className="max-w-2xl mx-auto px-4 pt-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-black tracking-tight mb-4">Partagez votre histoire</h1>
+          <h1 className="text-4xl font-black tracking-tight mb-4">{t.title}</h1>
           <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-            Comment DGhubSchool vous aide au quotidien ? Racontez-nous !
+            {t.subtitle}
           </p>
         </div>
 
@@ -93,54 +169,54 @@ export const SubmitStory: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             
             <div className="space-y-2">
-              <label className="text-sm font-bold uppercase tracking-widest text-slate-500">Votre Nom Complet</label>
+              <label className="text-sm font-bold uppercase tracking-widest text-slate-500">{t.labelName}</label>
               <input
                 type="text"
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
-                placeholder="Ex: Jean Dupont"
+                placeholder={t.placeholderName}
                 className={`w-full p-4 rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'} focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all`}
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold uppercase tracking-widest text-slate-500">Votre Rôle</label>
+                <label className="text-sm font-bold uppercase tracking-widest text-slate-500">{t.labelRole}</label>
                 <select
                   required
                   value={formData.role}
                   onChange={(e) => setFormData({...formData, role: e.target.value})}
                   className={`w-full p-4 rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'} focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all`}
                 >
-                  <option value="" disabled>Sélectionnez un rôle</option>
-                  <option value="Directeur/Fondateur">Directeur / Fondateur</option>
-                  <option value="Parent d'élève">Parent d'élève</option>
-                  <option value="Enseignant">Enseignant</option>
-                  <option value="Autre">Autre</option>
+                  <option value="" disabled>{t.selectRole}</option>
+                  <option value="Directeur/Fondateur">{t.rolePrincipal}</option>
+                  <option value="Parent d'élève">{t.roleParent}</option>
+                  <option value="Enseignant">{t.roleTeacher}</option>
+                  <option value="Autre">{t.roleOther}</option>
                 </select>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold uppercase tracking-widest text-slate-500">Nom de l'école (Optionnel)</label>
+                <label className="text-sm font-bold uppercase tracking-widest text-slate-500">{t.labelSchool}</label>
                 <input
                   type="text"
                   value={formData.school_name}
                   onChange={(e) => setFormData({...formData, school_name: e.target.value})}
-                  placeholder="Ex: Complexe Scolaire Les Étoiles"
+                  placeholder={t.placeholderSchool}
                   className={`w-full p-4 rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'} focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all`}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold uppercase tracking-widest text-slate-500">Votre Témoignage</label>
+              <label className="text-sm font-bold uppercase tracking-widest text-slate-500">{t.labelText}</label>
               <textarea
                 required
                 rows={5}
                 value={formData.content}
                 onChange={(e) => setFormData({...formData, content: e.target.value})}
-                placeholder="Racontez-nous comment la plateforme vous aide..."
+                placeholder={t.placeholderText}
                 className={`w-full p-4 rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'} focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all resize-none`}
               />
             </div>
@@ -162,7 +238,7 @@ export const SubmitStory: React.FC = () => {
               ) : (
                 <>
                   <Send className="w-5 h-5" />
-                  <span>Envoyer mon témoignage</span>
+                  <span>{t.btnSubmit}</span>
                 </>
               )}
             </button>
