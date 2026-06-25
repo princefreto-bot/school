@@ -440,6 +440,7 @@ if (fs.existsSync(frontendDir)) {
             };
 
             const serveHtml = (htmlContent) => {
+                let modifiedHtml = htmlContent;
                 const pathname = req.path;
                 const parts = pathname.split('/');
                 let currentLang = 'fr';
