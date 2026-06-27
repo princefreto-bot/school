@@ -55,6 +55,25 @@ export const LandingPage: React.FC = () => {
         }
       })
       .catch(err => console.error("Erreur récupération témoignages:", err));
+
+    // Scroll animation observer
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+        }
+      });
+    }, {
+      threshold: 0.05,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    const elements = document.querySelectorAll('.reveal-on-scroll');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => {
+      elements.forEach((el) => observer.unobserve(el));
+    };
   }, []);
 
   const texts = {
@@ -225,28 +244,28 @@ export const LandingPage: React.FC = () => {
       title: t.paymentTracking,
       description: t.paymentDesc,
       badge: t.paymentBadge,
-      className: "md:col-span-2 bg-slate-900 text-white border-slate-800 rounded-3xl"
+      className: "md:col-span-2 bg-slate-900 text-white border-slate-800 rounded-xl"
     },
     {
       icon: <BookOpen className="w-8 h-8 text-amber-500" />,
       title: t.bulletinsTitle,
       description: t.bulletinsDesc,
       badge: t.bulletinsBadge,
-      className: "bg-white text-slate-800 border-slate-200 rounded-3xl"
+      className: "bg-white text-slate-800 border-slate-200 rounded-xl"
     },
     {
       icon: <Users className="w-8 h-8 text-amber-500" />,
       title: t.parentsTitle,
       description: t.parentsDesc,
       badge: t.parentsBadge,
-      className: "bg-white text-slate-800 border-slate-200 rounded-3xl"
+      className: "bg-white text-slate-800 border-slate-200 rounded-xl"
     },
     {
       icon: <QrCode className="w-8 h-8 text-amber-500" />,
       title: t.qrCardsTitle,
       description: t.qrCardsDesc,
       badge: t.qrCardsBadge,
-      className: "md:col-span-2 bg-slate-900 text-white border-slate-800 rounded-3xl"
+      className: "md:col-span-2 bg-slate-900 text-white border-slate-800 rounded-xl"
     }
   ];
 
@@ -255,7 +274,7 @@ export const LandingPage: React.FC = () => {
       <style>{`
         @keyframes scan {
           0% { transform: translateY(10%); }
-          50% { transform: translateY(800%); }
+          50% { transform: translateY(700%); }
           100% { transform: translateY(10%); }
         }
         .animate-scan {
@@ -274,19 +293,38 @@ export const LandingPage: React.FC = () => {
         .animate-fade-in-up {
           animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
+        
+        /* Scroll reveal styles */
+        .reveal-on-scroll {
+          opacity: 0;
+          transform: translateY(25px);
+          transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+          will-change: opacity, transform;
+        }
+        .reveal-on-scroll.revealed {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+        .delay-400 { transition-delay: 400ms; }
       `}</style>
 
       <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vh] bg-amber-500/5 rounded-none blur-[120px] pointer-events-none" />
       <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vh] bg-amber-500/5 rounded-none blur-[120px] pointer-events-none" />
 
+      {/* ── HEADER / NAVIGATION FLOAT ET GLASSMORPHIC AVEC BORDS RÉDUITS ────────────────────────────── */}
       <header className="sticky top-4 z-50 mx-auto w-full max-w-7xl px-4 md:px-8">
-        <div className="border border-slate-200/80 bg-white/75 backdrop-blur-md rounded-2xl shadow-lg shadow-slate-100/50 transition-all duration-300">
-          <nav className="w-full flex items-center justify-between p-3.5 px-6">
+        <div className="border border-slate-200/80 bg-white/75 backdrop-blur-md rounded-xl shadow-lg shadow-slate-100/50 transition-all duration-300">
+          <nav className="w-full flex items-center justify-between p-3 px-6">
+            {/* Logo */}
             <div className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl select-none cursor-pointer" onClick={() => navigate(`/${lang}`)}>
               <img src="/logo.svg" className="w-8 h-8 object-contain" alt="Logo" />
               <span className="text-amber-600">DGhub<span className="text-slate-900">School</span></span>
             </div>
 
+            {/* Liens Navigation - Desktop */}
             <div className="hidden md:flex items-center gap-8 text-xs font-black tracking-wider text-slate-500">
               <button onClick={() => navigate(`/${lang}/features`)} className="hover:text-amber-500 transition-colors cursor-pointer relative py-1 group/item">
                 {t.features}
@@ -306,11 +344,12 @@ export const LandingPage: React.FC = () => {
               </a>
             </div>
 
+            {/* Boutons Actions - Desktop */}
             <div className="hidden md:flex items-center gap-4">
               {isAuthenticated ? (
                 <button 
                   onClick={() => navigate(`/${lang}/app`)}
-                  className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black tracking-widest px-5 py-3 rounded-xl border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer"
+                  className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black tracking-widest px-5 py-3 rounded-lg border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer"
                 >
                   {t.accessPortals}
                 </button>
@@ -324,7 +363,7 @@ export const LandingPage: React.FC = () => {
                   </button>
                   <button 
                     onClick={() => navigate(`/${lang}/creer-compte`)}
-                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black tracking-widest px-5 py-3 rounded-xl border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer"
+                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black tracking-widest px-5 py-3 rounded-lg border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer"
                   >
                     {t.createSchool}
                   </button>
@@ -332,6 +371,7 @@ export const LandingPage: React.FC = () => {
               )}
             </div>
 
+            {/* Toggle Menu - Mobile */}
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 text-slate-600 hover:text-amber-500 transition-colors"
@@ -341,8 +381,9 @@ export const LandingPage: React.FC = () => {
             </button>
           </nav>
 
+          {/* Menu Mobile */}
           {mobileMenuOpen && (
-            <div className="md:hidden border-t border-slate-100 bg-white p-5 space-y-4 flex flex-col rounded-b-2xl animate-in fade-in slide-in-from-top-4 duration-200">
+            <div className="md:hidden border-t border-slate-100 bg-white p-5 space-y-4 flex flex-col rounded-b-xl animate-in fade-in slide-in-from-top-4 duration-200">
               <button 
                 onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/features`); }}
                 className="text-sm font-bold text-slate-700 hover:text-amber-500 transition-colors py-2 text-left cursor-pointer"
@@ -372,7 +413,7 @@ export const LandingPage: React.FC = () => {
                 {isAuthenticated ? (
                   <button 
                     onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/app`); }}
-                    className="w-full text-center py-3 text-sm font-black tracking-wider bg-amber-500 text-slate-950 rounded-xl border border-amber-600 shadow-md"
+                    className="w-full text-center py-3 text-sm font-black tracking-wider bg-amber-500 text-slate-950 rounded-lg border border-amber-600 shadow-md"
                   >
                     {t.accessPortals}
                   </button>
@@ -380,13 +421,13 @@ export const LandingPage: React.FC = () => {
                   <>
                     <button 
                       onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/login`); }}
-                      className="w-full text-center py-3 text-sm font-black tracking-wider text-slate-700 border border-slate-200 rounded-xl"
+                      className="w-full text-center py-3 text-sm font-black tracking-wider text-slate-700 border border-slate-200 rounded-lg"
                     >
                       {t.login}
                     </button>
                     <button 
                       onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/creer-compte`); }}
-                      className="w-full text-center py-3 text-sm font-black tracking-wider bg-amber-500 text-slate-950 rounded-xl border border-amber-600 shadow-md"
+                      className="w-full text-center py-3 text-sm font-black tracking-wider bg-amber-500 text-slate-950 rounded-lg border border-amber-600 shadow-md"
                     >
                       {t.createSchool}
                     </button>
@@ -399,18 +440,17 @@ export const LandingPage: React.FC = () => {
       </header>
 
       <main className="flex-grow flex flex-col">
+      {/* ── SECTION HERO 2-COLONNES CÔTE-À-CÔTE PREMIUM ──────────────────────────────────── */}
       <section className="relative z-10 max-w-7xl mx-auto w-full px-4 md:px-8 pt-12 md:pt-20 pb-20 flex-grow">
+        {/* Stickers décoratifs Hero */}
         <StickerStar className="absolute top-10 left-4 hidden md:block animate-pulse" style={{ animationDuration: '4s' }} />
         <StickerHeart className="absolute bottom-16 right-4 hidden md:block" style={{ transform: 'rotate(12deg)' }} />
         <StickerSparkle className="absolute top-20 left-[48%] hidden lg:block" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center text-center lg:text-left">
+          {/* Hero Content (Left) */}
           <div className="lg:col-span-7 space-y-6 md:space-y-8 animate-fade-in-up">
-            <div className="inline-flex items-center gap-2 bg-amber-500/10 text-amber-700 text-[10px] md:text-xs font-black px-4 py-1.5 rounded-full border border-amber-500/20 shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
-              <span>{lang === 'fr' ? 'La plateforme scolaire préférée en Afrique de l\'Ouest' : 'West Africa\'s preferred school platform'}</span>
-            </div>
-
+            {/* Titre Principal */}
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.12]">
               {t.heroTitlePart1}
               <span className="relative text-amber-600 inline-block px-1 select-none">
@@ -420,15 +460,17 @@ export const LandingPage: React.FC = () => {
               {t.heroTitlePart2}
             </h1>
 
+            {/* Sous-titre */}
             <p className="text-sm md:text-base lg:text-lg text-slate-500 max-w-2xl lg:mx-0 mx-auto leading-relaxed">
               {t.heroSubtitle}
             </p>
 
+            {/* Actions Hero */}
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto lg:justify-start justify-center">
               {isAuthenticated ? (
                 <button 
                   onClick={() => navigate(`/${lang}/app`)}
-                  className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group"
+                  className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group"
                 >
                   {t.accessPortals}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -437,14 +479,14 @@ export const LandingPage: React.FC = () => {
                 <>
                   <button 
                     onClick={() => navigate(`/${lang}/creer-compte`)}
-                    className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group"
+                    className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group"
                   >
                     {t.createSchoolFree}
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
                   <button 
                     onClick={() => navigate(`/${lang}/login`)}
-                    className="w-full sm:w-auto bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-slate-200 active:scale-[0.98] transition-all hover:border-slate-300 cursor-pointer"
+                    className="w-full sm:w-auto bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-slate-200 active:scale-[0.98] transition-all hover:border-slate-300 cursor-pointer"
                   >
                     {t.accessPortals}
                   </button>
@@ -452,6 +494,7 @@ export const LandingPage: React.FC = () => {
               )}
             </div>
 
+            {/* Témoignage rapide sous les boutons */}
             <div className="flex items-center gap-4 lg:justify-start justify-center pt-6 border-t border-slate-100 max-w-lg lg:mx-0 mx-auto">
               <div className="flex -space-x-2.5">
                 <div className="w-9 h-9 rounded-full bg-slate-800 border-2 border-white flex items-center justify-center text-[10px] font-black text-white">CI</div>
@@ -467,11 +510,14 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Hero Visual Mockup side-by-side (Right) */}
           <div className="lg:col-span-5 relative flex justify-center w-full">
+            {/* Lueur de fond diffuse */}
             <div className="absolute top-1/2 left-1/2 w-[350px] h-[350px] -translate-x-1/2 -translate-y-1/2 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none -z-10 animate-pulse" style={{ animationDuration: '6s' }} />
 
-            <div className="w-full max-w-lg border border-slate-200 bg-slate-50 p-2.5 rounded-2xl shadow-2xl relative overflow-hidden group hover:scale-[1.01] hover:border-amber-500/20 transition-all duration-300">
-              <div className="w-full bg-slate-950 text-white rounded-t-xl p-3.5 text-left font-mono text-[9px] flex items-center justify-between border-b border-slate-800 select-none">
+            {/* Laptop Mockup with reduced corners */}
+            <div className="w-full max-w-lg border border-slate-200 bg-slate-50 p-2.5 rounded-xl shadow-2xl relative overflow-hidden group hover:scale-[1.01] hover:border-amber-500/20 transition-all duration-300">
+              <div className="w-full bg-slate-950 text-white rounded-t-lg p-3 text-left font-mono text-[9px] flex items-center justify-between border-b border-slate-800 select-none">
                 <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full bg-red-500" />
                   <div className="w-2 h-2 rounded-full bg-yellow-500" />
@@ -482,7 +528,7 @@ export const LandingPage: React.FC = () => {
                   <span className="text-[9px] text-slate-500">＋</span>
                 </div>
               </div>
-              <div className="w-full aspect-[16/10] bg-white border-t border-slate-100 flex items-center justify-center rounded-b-xl overflow-hidden relative">
+              <div className="w-full aspect-[16/10] bg-white border-t border-slate-100 flex items-center justify-center rounded-b-lg overflow-hidden relative">
                 <img 
                   src="/dashboard_preview.png" 
                   alt={t.realTimeDashboard} 
@@ -494,14 +540,16 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="absolute -bottom-8 -left-4 w-40 hidden md:block border-4 border-slate-950 bg-slate-950 p-1.5 rounded-[2.2rem] shadow-2xl z-20 hover:-translate-y-2 transition-all duration-300">
-              <div className="w-full aspect-[9/16] bg-slate-900 rounded-[1.8rem] overflow-hidden relative">
-                <img src="/student_card_preview.png" className="w-full h-full object-cover bg-slate-50 p-1.5" alt="Parent View Preview" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 to-transparent pointer-events-none" />
+            {/* Floating Smartphone Mockup with corrected framing (object-contain bg-white to avoid cropping horizontal student card) */}
+            <div className="absolute -bottom-8 -left-4 w-40 hidden md:block border-4 border-slate-950 bg-slate-950 p-1.5 rounded-xl shadow-2xl z-20 hover:-translate-y-2 transition-all duration-300">
+              <div className="w-full aspect-[9/16] bg-slate-50 rounded-lg overflow-hidden relative flex items-center justify-center p-3 border border-slate-900">
+                <img src="/student_card_preview.png" className="w-full h-auto object-contain bg-white rounded-lg shadow-sm border border-slate-100" alt="Parent View Preview" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/5 to-transparent pointer-events-none" />
               </div>
             </div>
 
-            <div className="absolute -top-6 -right-6 bg-white border border-slate-200 p-3.5 px-4 rounded-2xl shadow-lg z-20 hidden md:block hover:scale-105 transition-transform">
+            {/* Floating Live Badge */}
+            <div className="absolute -top-6 -right-6 bg-white border border-slate-200 p-3.5 px-4 rounded-xl shadow-lg z-20 hidden md:block hover:scale-105 transition-transform">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-50 animate-ping" />
                 <span className="text-[10px] font-black uppercase tracking-wider text-slate-800">{lang === 'fr' ? 'Activité Live' : 'Live Activity'}</span>
@@ -512,6 +560,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* ── SECTION MARQUEES ────────────────────────────────── */}
       <section className="bg-slate-950 py-10 overflow-hidden relative border-y border-slate-900 font-['Poppins']">
         <div className="absolute inset-0 opacity-5 pointer-events-none" />
         
@@ -563,11 +612,13 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* ── SECTION CLOUD VS LOCAL CÔTE-À-CÔTE AVEC MOCKUPS PREMIUM ET SCROLL ANIMATION ────────────────────────────── */}
       <section className="bg-slate-50 py-24 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8">
-              <span className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-indigo-200">
+            {/* Contenu (Gauche) */}
+            <div className="space-y-8 reveal-on-scroll">
+              <span className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-lg border border-indigo-200">
                 <Shield className="w-3.5 h-3.5 text-indigo-600" />
                 Sécurité & Fiabilité
               </span>
@@ -580,7 +631,7 @@ export const LandingPage: React.FC = () => {
               
               <ul className="space-y-5 mt-8">
                 <li className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 shadow-sm">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0 shadow-sm">
                     <Check className="w-5 h-5 text-emerald-600" />
                   </div>
                   <div>
@@ -589,7 +640,7 @@ export const LandingPage: React.FC = () => {
                   </div>
                 </li>
                 <li className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 shadow-sm">
+                  <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 shadow-sm">
                     <Check className="w-5 h-5 text-amber-600" />
                   </div>
                   <div>
@@ -598,7 +649,7 @@ export const LandingPage: React.FC = () => {
                   </div>
                 </li>
                 <li className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0 shadow-sm">
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center shrink-0 shadow-sm">
                     <Check className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
@@ -609,11 +660,13 @@ export const LandingPage: React.FC = () => {
               </ul>
             </div>
             
-            <div className="relative flex justify-center items-center">
+            {/* Double Mockup (Droite) - Well framed using tablet frame instead of smartphone */}
+            <div className="relative flex justify-center items-center reveal-on-scroll delay-200">
               <div className="absolute w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none -z-10" />
               
-              <div className="w-full max-w-md border border-slate-200 bg-slate-950 p-2 rounded-2xl shadow-2xl overflow-hidden group hover:scale-[1.01] transition-transform duration-300">
-                <div className="w-full bg-slate-900 text-slate-400 rounded-t-xl p-2 px-3 text-left font-mono text-[9px] flex items-center justify-between border-b border-slate-800 select-none">
+              {/* Main Desktop Cloud Mockup with reduced borders */}
+              <div className="w-full max-w-md border border-slate-200 bg-slate-950 p-2 rounded-xl shadow-2xl overflow-hidden group hover:scale-[1.01] transition-transform duration-300">
+                <div className="w-full bg-slate-900 text-slate-400 rounded-t-lg p-2 px-3 text-left font-mono text-[9px] flex items-center justify-between border-b border-slate-800 select-none">
                   <div className="flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
                     <div className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
@@ -621,15 +674,16 @@ export const LandingPage: React.FC = () => {
                     <span className="text-[8px] text-slate-500 ml-2">dghubschool.com/cloud-dashboard</span>
                   </div>
                 </div>
-                <div className="w-full aspect-[16/10] bg-slate-900 rounded-b-xl overflow-hidden relative">
-                  <img src="/DASH10.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Cloud Dashboard Dashboard" />
+                <div className="w-full aspect-[16/10] bg-slate-900 rounded-b-lg overflow-hidden relative">
+                  <img src="/DASH10.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Cloud Dashboard" />
                 </div>
               </div>
 
-              <div className="absolute -bottom-10 -right-4 w-36 border-4 border-slate-950 bg-slate-950 p-1.5 rounded-[1.8rem] shadow-2xl z-20 hover:-translate-y-2 transition-all duration-300">
-                <div className="w-full aspect-[9/16] bg-slate-900 rounded-[1.4rem] overflow-hidden relative">
-                  <img src="/DASH13.png" className="w-full h-full object-cover" alt="Mobile sync preview" />
-                  <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              {/* Overlapping tablet mockup (aspect-4/3) instead of smartphone to keep desktop dashboard screenshot well framed */}
+              <div className="absolute -bottom-10 -right-4 w-44 border-4 border-slate-950 bg-slate-950 p-1.5 rounded-xl shadow-2xl z-20 hover:-translate-y-2 transition-all duration-300">
+                <div className="w-full aspect-[4/3] bg-slate-900 rounded-lg overflow-hidden relative">
+                  <img src="/DASH13.png" className="w-full h-full object-cover" alt="Tablet sync preview" />
+                  <div className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
                 </div>
               </div>
             </div>
@@ -637,9 +691,10 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* ── SECTION EXPÉRIENCE PARENTS CÔTE-À-CÔTE AVEC SCROLL ANIMATION ─────────────────────── */}
       <section className="bg-white py-24 relative overflow-hidden border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="text-center mb-16 space-y-4 max-w-3xl mx-auto">
+          <div className="text-center mb-16 space-y-4 max-w-3xl mx-auto reveal-on-scroll">
             <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight">
               {(t as any).parentsFocusTitle}
             </h2>
@@ -649,11 +704,12 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-            <div className="lg:col-span-5 flex justify-center relative">
+            {/* Visual Phone Mockup (Gauche) - Reduced borders */}
+            <div className="lg:col-span-5 flex justify-center relative reveal-on-scroll">
               <div className="absolute w-[250px] h-[250px] bg-amber-500/5 rounded-full blur-[80px] pointer-events-none -z-10" />
               
-              <div className="w-64 border-4 border-slate-950 bg-slate-950 p-2 rounded-[2.5rem] shadow-2xl relative z-10 transform lg:-rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-300">
-                <div className="w-full aspect-[9/16] bg-slate-50 rounded-[2.1rem] overflow-hidden relative p-4 flex flex-col justify-between border border-slate-900">
+              <div className="w-64 border-4 border-slate-950 bg-slate-950 p-2 rounded-2xl shadow-2xl relative z-10 transform lg:-rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-300">
+                <div className="w-full aspect-[9/16] bg-slate-55 rounded-xl overflow-hidden relative p-4 flex flex-col justify-between border border-slate-900">
                   <div className="w-full flex items-center justify-between border-b border-slate-100 pb-2">
                     <div className="flex items-center gap-1.5">
                       <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center">
@@ -664,10 +720,12 @@ export const LandingPage: React.FC = () => {
                     <span className="text-[8px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">Live</span>
                   </div>
                   
+                  {/* Mock parent screen content - well framed with object-contain card */}
                   <div className="flex-grow flex flex-col justify-center items-center py-4 space-y-4">
                     <img src="/student_card_preview.png" className="w-full max-h-32 object-contain rounded-lg shadow-sm border border-slate-100 bg-white" alt="Student Card Preview" />
                     
-                    <div className="w-full bg-slate-900 text-white p-3 rounded-xl text-[9px] shadow-md border border-slate-800 space-y-1">
+                    {/* Simulated push notification card */}
+                    <div className="w-full bg-slate-900 text-white p-3 rounded-lg text-[9px] shadow-md border border-slate-800 space-y-1">
                       <div className="flex justify-between items-center opacity-70">
                         <span className="font-bold flex items-center gap-1"><Bell className="w-2.5 h-2.5 text-amber-500" /> Notification</span>
                         <span>{lang === 'fr' ? 'À l\'instant' : 'Just now'}</span>
@@ -678,16 +736,17 @@ export const LandingPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="w-full bg-slate-100 text-center py-2 rounded-xl text-[8px] font-black text-slate-600 uppercase tracking-widest">
+                  <div className="w-full bg-slate-100 text-center py-2 rounded-lg text-[8px] font-black text-slate-600 uppercase tracking-widest">
                     {lang === 'fr' ? 'Accès Parent Sécurisé' : 'Secure Parent Access'}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="lg:col-span-7 space-y-6">
-              <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6.5 hover:-translate-y-1 hover:border-amber-500/20 transition-all duration-300 flex gap-5 items-start">
-                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center shrink-0 shadow-sm">
+            {/* Feature Accordion Cards (Droite) - Reduced borders */}
+            <div className="lg:col-span-7 space-y-6 reveal-on-scroll delay-200">
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-6 flex gap-5 items-start hover:-translate-y-1 hover:border-amber-500/20 transition-all duration-300">
+                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
                   <BookOpen className="w-6 h-6" />
                 </div>
                 <div>
@@ -696,8 +755,8 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
               
-              <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6.5 hover:-translate-y-1 hover:border-amber-500/20 transition-all duration-300 flex gap-5 items-start">
-                <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center shrink-0 shadow-sm">
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-6 flex gap-5 items-start hover:-translate-y-1 hover:border-amber-500/20 transition-all duration-300">
+                <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
                   <Bell className="w-6 h-6 animate-bounce" />
                 </div>
                 <div>
@@ -706,8 +765,8 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
               
-              <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6.5 hover:-translate-y-1 hover:border-amber-500/20 transition-all duration-300 flex gap-5 items-start">
-                <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0 shadow-sm">
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-6 flex gap-5 items-start hover:-translate-y-1 hover:border-amber-500/20 transition-all duration-300">
+                <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
                   <CreditCard className="w-6 h-6" />
                 </div>
                 <div>
@@ -720,11 +779,13 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* ── SECTION APERÇUS RÉELS ALTERNÉS (SCREENSHOTS) AVEC SCROLL ANIMATION ────────────────── */}
       <section className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-24 space-y-28">
+        {/* Stickers décoratifs Screenshots */}
         <StickerCurvedArrow className="absolute top-12 right-[20%] hidden md:block" style={{ transform: 'rotate(-15deg)' }} />
         <StickerWave className="absolute bottom-16 left-8 hidden lg:block" />
 
-        <div className="text-center mb-16 space-y-4">
+        <div className="text-center mb-16 space-y-4 reveal-on-scroll">
           <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
             {t.screenshotsTitle}
           </div>
@@ -736,7 +797,8 @@ export const LandingPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        {/* Ligne 1: Cartes Scolaires (Texte Gauche, Image Droite avec Simulation Scan Laser) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center reveal-on-scroll">
           <div className="lg:col-span-5 space-y-6">
             <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded-full inline-block">
               Sécurité & QR Code
@@ -750,27 +812,33 @@ export const LandingPage: React.FC = () => {
           <div className="lg:col-span-7 flex justify-center relative">
             <div className="absolute w-[300px] h-[300px] bg-amber-500/5 rounded-full blur-[80px] pointer-events-none -z-10" />
             
-            <div className="w-full max-w-lg bg-slate-950 border border-slate-800 p-3 rounded-3xl shadow-2xl relative overflow-hidden group">
-              <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 flex items-center justify-center relative">
+            {/* Conteneur Scanner with reduced borders */}
+            <div className="w-full max-w-lg bg-slate-950 border border-slate-800 p-3 rounded-xl shadow-2xl relative overflow-hidden group">
+              <div className="w-full aspect-[4/3] rounded-lg overflow-hidden bg-slate-900 border border-slate-800 flex items-center justify-center relative">
                 <img src="/student_card_preview.png" alt="Cartes scolaires officielles avec QR Code" className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async" />
                 
+                {/* Laser de Scan Interactif en CSS */}
                 <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent shadow-[0_0_12px_#f59e0b] opacity-80 animate-scan pointer-events-none" />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        {/* Ligne 2: Bulletins (Image Gauche, Texte Droite) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center reveal-on-scroll">
+          {/* Image Gauche */}
           <div className="lg:col-span-7 flex justify-center lg:order-1 order-2 relative">
             <div className="absolute w-[300px] h-[300px] bg-amber-500/5 rounded-full blur-[80px] pointer-events-none -z-10" />
             
-            <div className="w-full max-w-lg bg-slate-50 border border-slate-200 p-3 rounded-3xl shadow-2xl relative overflow-hidden group hover:scale-[1.01] transition-transform duration-300">
-              <div className="w-full bg-white rounded-2xl p-2.5 shadow-sm border border-slate-100 flex items-center justify-center relative">
+            {/* Document preview style with reduced borders */}
+            <div className="w-full max-w-lg bg-slate-50 border border-slate-200 p-3 rounded-xl shadow-2xl relative overflow-hidden group hover:scale-[1.01] transition-transform duration-300">
+              <div className="w-full bg-white rounded-lg p-2.5 shadow-sm border border-slate-100 flex items-center justify-center relative">
                 <img src="/report_card_preview.png" alt="Bulletins de notes officiels" className="w-full h-full object-contain max-h-[380px] group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
 
+          {/* Texte Droite */}
           <div className="lg:col-span-5 space-y-6 lg:order-2 order-1">
             <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded-full inline-block">
               Académie & Bulletins
@@ -783,7 +851,9 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* ── SECTION FEATURES (BENTO GRID) AVEC SCROLL ANIMATION ────────────────── */}
       <section id="features" className="bg-slate-50 border-y border-slate-200 py-20 relative">
+        {/* Stickers décoratifs Bento */}
         <StickerStar className="absolute top-12 right-12 hidden md:block" style={{ transform: 'rotate(15deg) scale(0.8)', opacity: 0.5 }} />
         <StickerCheck className="absolute bottom-16 left-8 hidden lg:block" style={{ transform: 'rotate(-8deg)' }} />
         <StickerNote className="absolute top-20 left-6 hidden xl:block" style={{ transform: 'rotate(-3deg)' }}>
@@ -791,7 +861,8 @@ export const LandingPage: React.FC = () => {
         </StickerNote>
 
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="text-center mb-16 space-y-4">
+          {/* En-tête Section */}
+          <div className="text-center mb-16 space-y-4 reveal-on-scroll">
             <h2 className="text-xs font-black uppercase tracking-widest text-amber-600">{t.features}</h2>
             <h3 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase">
               {t.bentoTitle}
@@ -801,17 +872,19 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
+          {/* Bento Grid with staggered scroll reveals & reduced borders */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {features.map((feat, idx) => (
               <div 
                 key={idx} 
-                className={`border p-6 md:p-8 rounded-3xl shadow-sm flex flex-col justify-between transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:border-amber-500/40 relative overflow-hidden group ${feat.className}`}
+                className={`border p-6 md:p-8 rounded-xl shadow-sm flex flex-col justify-between transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:border-amber-500/40 relative overflow-hidden group reveal-on-scroll delay-${(idx + 1) * 100} ${feat.className}`}
               >
+                {/* Lueur de survol subtile interne */}
                 <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                 <div>
                   <div className="flex justify-between items-start mb-6">
-                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl inline-block group-hover:scale-110 transition-transform duration-300">
+                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg inline-block group-hover:scale-110 transition-transform duration-300">
                       {feat.icon}
                     </div>
                     <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full">
@@ -831,36 +904,40 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* ── SECTION STATS / PRUVE SOCIALE AVEC SCROLL ANIMATION ─────────────────── */}
       <section id="stats" className="bg-white py-20 relative">
+        {/* Stickers décoratifs Stats */}
         <StickerCircle className="absolute top-8 left-[10%] hidden md:block" />
         <StickerSparkle className="absolute bottom-12 right-[15%] hidden lg:block" />
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20 max-w-5xl mx-auto">
+          {/* Chiffres clés with scroll reveal & reduced borders */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20 max-w-5xl mx-auto reveal-on-scroll">
             {stats.map((stat, index) => (
-              <div key={index} className="p-6 bg-slate-50 border border-slate-100 rounded-3xl hover:bg-slate-50/50 hover:shadow-md transition duration-300">
+              <div key={index} className="p-6 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-50/50 hover:shadow-md transition duration-300">
                 <span className="block text-3xl md:text-5xl font-black text-amber-600 mb-2 select-none tracking-tight">
                   {stat.value}
                 </span>
-                <span className="text-[10px] md:text-xs font-black text-slate-550 uppercase tracking-widest">
+                <span className="text-[10px] md:text-xs font-black text-slate-555 uppercase tracking-widest">
                   {stat.label}
                 </span>
               </div>
             ))}
           </div>
 
+          {/* Témoignages Dynamiques with scroll reveal & reduced borders */}
           {testimonials.length > 0 && (
-            <div className="max-w-4xl mx-auto space-y-12">
+            <div className="max-w-4xl mx-auto space-y-12 reveal-on-scroll delay-200">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {testimonials.map((tItem) => (
-                  <div key={tItem.id} className="bg-slate-50 border border-slate-200 rounded-3xl p-8 text-left relative shadow-sm hover:shadow-md transition-shadow">
+                  <div key={tItem.id} className="bg-slate-50 border border-slate-200 rounded-xl p-8 text-left relative shadow-sm hover:shadow-md transition-shadow">
                     <div className="text-5xl text-amber-500 font-serif leading-none absolute top-4 left-6 opacity-20">“</div>
                     <p className="text-sm md:text-base font-medium text-slate-700 leading-relaxed italic relative z-10 pt-4 mb-6">
                       "{tItem.content}"
                     </p>
                     <div className="space-y-1 relative z-10">
                       <p className="text-sm font-black tracking-tight text-slate-900">{tItem.name}</p>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-550">
                         {tItem.role} {tItem.school_name ? `— ${tItem.school_name}` : ''}
                       </p>
                     </div>
@@ -870,7 +947,8 @@ export const LandingPage: React.FC = () => {
             </div>
           )}
 
-          <div className="mt-12">
+          {/* Bouton Partager mon histoire */}
+          <div className="mt-12 reveal-on-scroll delay-300">
             <button
               onClick={() => navigate(`/${lang}/partager-mon-histoire`)}
               className="bg-white hover:bg-slate-50 text-slate-900 border-2 border-slate-200 text-xs font-black uppercase tracking-widest px-8 py-4 rounded-xl transition-all inline-flex items-center gap-2 cursor-pointer shadow-sm hover:shadow active:scale-95"
@@ -882,9 +960,10 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* ── SECTION PRICING AVEC SCROLL ANIMATION ────────────────────────────────── */}
       <section id="pricing" className="bg-slate-50 border-t border-slate-200 py-20">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="text-center mb-16 space-y-4">
+          <div className="text-center mb-16 space-y-4 reveal-on-scroll">
             <h2 className="text-xs font-black uppercase tracking-widest text-amber-600">{t.pricingTitle}</h2>
             <h3 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase">
               {t.pricingSubtitle}
@@ -894,10 +973,13 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="relative max-w-sm mx-auto group">
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-600/10 rounded-[2rem] blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+          {/* Card Pricing Premium with reduced borders & scroll reveal */}
+          <div className="relative max-w-sm mx-auto group reveal-on-scroll delay-200">
+            {/* Lueur d'ambiance */}
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-600/10 rounded-xl blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
             
-            <div className="relative bg-white border-2 border-slate-200/80 p-8 rounded-[2rem] shadow-xl hover:shadow-2xl hover:border-amber-500/30 transition-all duration-300 overflow-hidden">
+            <div className="relative bg-white border-2 border-slate-200/80 p-8 rounded-xl shadow-xl hover:shadow-2xl hover:border-amber-500/30 transition-all duration-300 overflow-hidden">
+              {/* Populaire badge */}
               <div className="absolute top-6 right-[-36px] rotate-45 bg-amber-500 border-y border-amber-600 text-[8px] font-black uppercase tracking-widest text-slate-900 py-1.5 px-12 text-center select-none shadow-sm">
                 {t.freeTrialBadge}
               </div>
@@ -910,25 +992,25 @@ export const LandingPage: React.FC = () => {
 
               <ul className="space-y-3.5 text-xs text-slate-600 mb-8 border-t border-slate-100 pt-6">
                 <li className="flex items-center gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+                  <div className="w-5 h-5 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
                     <Check className="w-3.5 h-3.5 text-emerald-500" />
                   </div>
                   <span>{lang === 'fr' ? 'Gestion de la caisse et reçus SMS' : 'Cash management and SMS receipts'}</span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+                  <div className="w-5 h-5 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
                     <Check className="w-3.5 h-3.5 text-emerald-500" />
                   </div>
                   <span>{lang === 'fr' ? 'Bulletins et notes illimités' : 'Unlimited grade books and reports'}</span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+                  <div className="w-5 h-5 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
                     <Check className="w-3.5 h-3.5 text-emerald-500" />
                   </div>
                   <span>{lang === 'fr' ? 'Accès complet parents, élèves et profs' : 'Full access for parents, students, and teachers'}</span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+                  <div className="w-5 h-5 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
                     <Check className="w-3.5 h-3.5 text-emerald-500" />
                   </div>
                   <span>{lang === 'fr' ? 'Support dédié via WhatsApp' : 'Dedicated support via WhatsApp'}</span>
@@ -937,7 +1019,7 @@ export const LandingPage: React.FC = () => {
 
               <button 
                 onClick={() => navigate(`/${lang}/creer-compte`)}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs uppercase tracking-widest py-4 rounded-xl border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs uppercase tracking-widest py-4 rounded-lg border border-amber-600 shadow-md active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 {t.trialBtn}
                 <ArrowUpRight className="w-4 h-4" />
@@ -947,9 +1029,10 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* ── SECTION NEWSROOM (ACTUALITÉS & AVANCÉES) AVEC SCROLL ANIMATION ── */}
       <section id="newsroom" className="bg-slate-50 dark:bg-slate-900/10 border-t border-slate-200/60 dark:border-slate-900 py-20 relative">
         <div className="max-w-7xl mx-auto px-6 md:px-8">
-          <div className="text-center mb-16 space-y-4">
+          <div className="text-center mb-16 space-y-4 reveal-on-scroll">
             <span className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200/40 dark:border-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
               {t.newsroomTitle}
             </span>
@@ -961,8 +1044,9 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 max-w-3xl mx-auto">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+          <div className="grid grid-cols-1 gap-8 max-w-3xl mx-auto reveal-on-scroll delay-200">
+            {/* News 3 */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
               <div className="space-y-4">
                 <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full inline-block">
                   {t.newsroomBadge}
@@ -974,7 +1058,7 @@ export const LandingPage: React.FC = () => {
                   {t.newsroomCardDesc}
                 </p>
               </div>
-              <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-slate-550 uppercase tracking-widest">
                 <span>{t.newsroomDate}</span>
                 <span 
                   onClick={() => navigate(`/${lang}/newsroom`)}
@@ -988,12 +1072,15 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* ── SECTION FINAL CTA BENTO-STYLE PREMIUM AVEC SCROLL ANIMATION ────────────────────────────── */}
       <section className="bg-white py-20 text-center relative overflow-hidden">
+        {/* Stickers CTA */}
         <StickerHeart className="absolute top-12 left-[12%] hidden md:block" style={{ transform: 'rotate(-10deg)', opacity: 0.5 }} />
         <StickerBang className="absolute bottom-12 right-[12%] hidden md:block animate-bounce" style={{ animationDuration: '3s' }} />
 
         <div className="max-w-5xl mx-auto px-4 md:px-8">
-          <div className="bg-slate-950 text-white rounded-[2.5rem] p-12 md:p-20 relative overflow-hidden shadow-2xl border border-slate-900 group">
+          <div className="bg-slate-950 text-white rounded-xl p-12 md:p-20 relative overflow-hidden shadow-2xl border border-slate-900 group reveal-on-scroll">
+            {/* Lueur de fond animée */}
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-amber-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none group-hover:bg-amber-500/15 transition-colors duration-500" />
             <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-indigo-500/10 rounded-full blur-[80px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
             
@@ -1006,10 +1093,10 @@ export const LandingPage: React.FC = () => {
               </p>
               <button 
                 onClick={() => navigate(`/${lang}/creer-compte`)}
-                className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-xl border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all inline-flex items-center gap-2 cursor-pointer"
+                className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5.5 rounded-lg border border-amber-600 shadow-xl shadow-amber-500/20 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-3 cursor-pointer group/btn"
               >
                 {t.createSchoolBtn}
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4.5 h-4.5 group-hover/btn:translate-x-1.5 transition-transform duration-300" />
               </button>
             </div>
           </div>
