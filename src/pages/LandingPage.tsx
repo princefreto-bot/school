@@ -224,7 +224,6 @@ export const LandingPage: React.FC = () => {
   const heroProofRef = useRef<HTMLDivElement>(null);
   const heroBgRef = useRef<HTMLDivElement>(null);
   const heroFloatPhoneRef = useRef<HTMLDivElement>(null);
-  const heroLiveRef = useRef<HTMLDivElement>(null);
   const cloudTextRef = useRef<HTMLDivElement>(null);
   const cloudMockupRef = useRef<HTMLDivElement>(null);
   const parentsTitleRef = useRef<HTMLDivElement>(null);
@@ -275,8 +274,7 @@ export const LandingPage: React.FC = () => {
         .from(heroCTARef.current, { opacity: 0, y: 30, duration: 0.8 }, 0.7)
         .from(heroProofRef.current, { opacity: 0, y: 20, duration: 0.7 }, 0.9)
         .from(heroBgRef.current, { opacity: 0, scale: 1.08, duration: 1.5, ease: 'power2.out' }, 0.2)
-        .from(heroFloatPhoneRef.current, { opacity: 0, x: -30, y: 20, duration: 0.8 }, 1.0)
-        .from(heroLiveRef.current, { opacity: 0, x: 20, scale: 0.9, duration: 0.6 }, 1.2);
+        .from(heroFloatPhoneRef.current, { opacity: 0, x: -30, y: 20, duration: 0.8 }, 1.0);
 
       // HERO Parallax
       if (heroRef.current) {
@@ -294,13 +292,7 @@ export const LandingPage: React.FC = () => {
             scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 1.5 },
           });
         }
-        if (heroLiveRef.current) {
-          gsap.to(heroLiveRef.current, {
-            y: -80,
-            ease: 'none',
-            scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 2 },
-          });
-        }
+
       }
 
       // CLOUD section
@@ -330,12 +322,7 @@ export const LandingPage: React.FC = () => {
           scrollTrigger: { trigger: parentsTitleRef.current, start: 'top 95%' },
         });
       }
-      if (parentsPhoneRef.current) {
-        gsap.from(parentsPhoneRef.current, {
-          opacity: 0, x: -50, rotateY: 15, duration: 1, ease: 'power3.out',
-          scrollTrigger: { trigger: parentsPhoneRef.current, start: 'top 95%' },
-        });
-      }
+
       if (parentsCardsRef.current) {
         const cards = parentsCardsRef.current.children;
         gsap.from(cards, {
@@ -357,30 +344,10 @@ export const LandingPage: React.FC = () => {
           scrollTrigger: { trigger: scan1TextRef.current, start: 'top 95%' },
         });
       }
-      if (scan1ImgRef.current) {
-        gsap.from(scan1ImgRef.current, {
-          opacity: 0, x: 50, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: scan1ImgRef.current, start: 'top 95%' },
-        });
-        gsap.to(scan1ImgRef.current, {
-          y: -30, ease: 'none',
-          scrollTrigger: { trigger: scan1ImgRef.current, start: 'top bottom', end: 'bottom top', scrub: 2 },
-        });
-      }
       if (scan2TextRef.current) {
         gsap.from(scan2TextRef.current, {
           opacity: 0, x: 50, duration: 0.9, ease: 'power3.out',
           scrollTrigger: { trigger: scan2TextRef.current, start: 'top 95%' },
-        });
-      }
-      if (scan2ImgRef.current) {
-        gsap.from(scan2ImgRef.current, {
-          opacity: 0, x: -50, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: scan2ImgRef.current, start: 'top 95%' },
-        });
-        gsap.to(scan2ImgRef.current, {
-          y: -30, ease: 'none',
-          scrollTrigger: { trigger: scan2ImgRef.current, start: 'top bottom', end: 'bottom top', scrub: 2 },
         });
       }
 
@@ -541,7 +508,7 @@ export const LandingPage: React.FC = () => {
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <div
             ref={heroBgRef}
-            className="absolute inset-0 bg-cover opacity-[0.14]"
+            className="absolute inset-0 bg-cover opacity-[0.45]"
             style={{
               backgroundImage: "url('/dashboard_preview.png')",
               backgroundPosition: 'center top',
@@ -596,11 +563,7 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Floating live activity badge on desktop */}
-        <div ref={heroLiveRef} className="absolute top-24 right-12 bg-white border border-slate-200 p-3.5 px-4 rounded-xl shadow-lg z-20 hidden lg:block hover:scale-105 transition-transform">
-          <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" /><span className="text-[10px] font-black uppercase tracking-wider text-slate-800">{t.liveBadge}</span></div>
-          <p className="text-[10px] text-slate-400 mt-1">{t.liveSub}</p>
-        </div>
+
       </section>
 
       {/* ═══════════════════════════════════════════════════════════

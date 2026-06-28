@@ -359,21 +359,9 @@ const FeatureRow: React.FC<FeatureRowProps> = ({ feature, index, isReversed }) =
       const imgDir = isReversed ? 60 : -60;
       const textDir = isReversed ? -50 : 50;
 
-      gsap.from(image, {
-        opacity: 0, x: imgDir, duration: 1, ease: 'power3.out',
-        scrollTrigger: { trigger: row, start: 'top 85%' },
-      });
-
       gsap.from(text, {
         opacity: 0, x: textDir, duration: 1, ease: 'power3.out', delay: 0.15,
         scrollTrigger: { trigger: row, start: 'top 85%' },
-      });
-
-      // Parallax on image
-      gsap.to(image, {
-        y: -25,
-        ease: 'none',
-        scrollTrigger: { trigger: row, start: 'top bottom', end: 'bottom top', scrub: 2 },
       });
 
       // Stagger bullet points
