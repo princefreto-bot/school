@@ -20,6 +20,8 @@ import {
   Shield,
   Bell,
   ArrowUpRight,
+  Phone,
+  Activity,
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import { BACKEND_URL } from '../config';
