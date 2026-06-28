@@ -429,10 +429,58 @@ export const LandingPage: React.FC = () => {
   ];
 
   const features = [
-    { icon: <CreditCard className="w-8 h-8 text-amber-500" />, title: t.paymentTracking, description: t.paymentDesc, badge: t.paymentBadge, className: "md:col-span-2 bg-slate-900 text-white border-slate-800" },
-    { icon: <BookOpen className="w-8 h-8 text-amber-500" />, title: t.bulletinsTitle, description: t.bulletinsDesc, badge: t.bulletinsBadge, className: "bg-white text-slate-800 border-slate-200" },
-    { icon: <Users className="w-8 h-8 text-amber-500" />, title: t.parentsTitle, description: t.parentsDesc, badge: t.parentsBadge, className: "bg-white text-slate-800 border-slate-200" },
-    { icon: <QrCode className="w-8 h-8 text-amber-500" />, title: t.qrCardsTitle, description: t.qrCardsDesc, badge: t.qrCardsBadge, className: "md:col-span-2 bg-slate-900 text-white border-slate-800" },
+    {
+      icon: <CreditCard className="w-6 h-6 text-amber-500" />,
+      title: t.paymentTracking,
+      description: t.paymentDesc,
+      badge: t.paymentBadge,
+      color: "#F59E0B",
+      points: [
+        lang === 'fr' ? 'Enregistrement multi-modes (espèces, chèques, virements)' : 'Multi-mode recording (cash, checks, transfers)',
+        lang === 'fr' ? 'Recalcul instantané du solde et journal de caisse' : 'Instant balance recalculation & cash journal',
+        lang === 'fr' ? 'Envoi automatisé de reçus PDF + SMS aux parents' : 'Automated PDF + SMS receipt sent to parents',
+        lang === 'fr' ? 'Export comptable Excel en un clic' : 'One-click Excel accounting export',
+      ]
+    },
+    {
+      icon: <BookOpen className="w-6 h-6 text-amber-500" />,
+      title: t.bulletinsTitle,
+      description: t.bulletinsDesc,
+      badge: t.bulletinsBadge,
+      color: "#10B981",
+      points: [
+        lang === 'fr' ? 'Saisie intuitive des notes par les enseignants' : 'Intuitive grade entry by teachers',
+        lang === 'fr' ? 'Calcul automatisé des moyennes de classe et rangs' : 'Automated calculation of averages and ranks',
+        lang === 'fr' ? 'Bulletins PDF officiels prêts à être signés' : 'Official PDF report cards ready to sign',
+        lang === 'fr' ? 'Zéro calcul manuel, zéro erreur de transcription' : 'Zero manual calculations, zero transcription errors',
+      ]
+    },
+    {
+      icon: <Users className="w-6 h-6 text-amber-500" />,
+      title: t.parentsTitle,
+      description: t.parentsDesc,
+      badge: t.parentsBadge,
+      color: "#3B82F6",
+      points: [
+        lang === 'fr' ? 'Portail parents accessible en ligne et sur mobile' : 'Parent portal accessible online and on mobile',
+        lang === 'fr' ? 'Alertes instantanées d\'absences ou de retards' : 'Instant absence or lateness alerts',
+        lang === 'fr' ? 'Consultation en temps réel des notes et devoirs' : 'Real-time check of grades and homework',
+        lang === 'fr' ? 'Suivi transparent du solde de scolarité' : 'Transparent tracking of tuition balance',
+      ]
+    },
+    {
+      icon: <QrCode className="w-6 h-6 text-amber-500" />,
+      title: t.qrCardsTitle,
+      description: t.qrCardsDesc,
+      badge: t.qrCardsBadge,
+      color: "#8B5CF6",
+      points: [
+        lang === 'fr' ? 'Cartes d\'identité scolaires uniques avec QR Code' : 'Unique student ID cards with QR Code',
+        lang === 'fr' ? 'Scan d\'entrée et sortie en moins de 2 secondes' : 'Entry and exit scan in under 2 seconds',
+        lang === 'fr' ? 'Notification immédiate des parents par SMS/Push' : 'Immediate parent notification via SMS/Push',
+        lang === 'fr' ? 'Historique d\'assiduité accessible 24h/24' : 'Attendance history accessible 24/7',
+      ]
+    },
   ];
 
   return (
@@ -503,12 +551,12 @@ export const LandingPage: React.FC = () => {
       <main className="flex-grow flex flex-col">
 
       {/* ── HERO ── */}
-      <section ref={heroRef} className="relative z-10 w-full overflow-hidden pt-16 md:pt-28 pb-20 md:pb-32 flex-grow flex items-center justify-center">
+      <section ref={heroRef} className="relative z-10 w-full overflow-hidden pt-16 md:pt-24 pb-20 md:pb-32 flex-grow flex items-center justify-center">
         {/* Background Image Container with Parallax and Overlay */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <div
             ref={heroBgRef}
-            className="absolute inset-0 bg-cover opacity-[0.45]"
+            className="absolute inset-0 bg-cover opacity-[0.25]"
             style={{
               backgroundImage: "url('/dashboard_preview.png')",
               backgroundPosition: 'center top',
@@ -519,51 +567,63 @@ export const LandingPage: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/85 to-white" />
         </div>
 
-        <div className="max-w-5xl mx-auto w-full px-4 md:px-8 text-center relative z-10 space-y-8">
-          <h1 ref={heroTitleRef} className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.1] max-w-4xl mx-auto">
-            {t.heroTitlePart1}
-            <span className="relative text-amber-600 inline-block px-1">{t.heroTitleHighlight}</span>
-            {t.heroTitlePart2}
-          </h1>
-          <p ref={heroSubRef} className="text-sm md:text-base lg:text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">{t.heroSubtitle}</p>
-          
-          <div ref={heroCTARef} className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
-            {isAuthenticated ? (
-              <button onClick={() => navigate(`/${lang}/app`)} className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group">
-                {t.accessPortals} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-            ) : (
-              <>
-                <button onClick={() => navigate(`/${lang}/creer-compte`)} className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group">
-                  {t.createSchoolFree} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
-                <button onClick={() => navigate(`/${lang}/login`)} className="w-full sm:w-auto bg-white/80 backdrop-blur hover:bg-slate-50 text-slate-800 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-slate-200 active:scale-[0.98] transition-all cursor-pointer">{t.accessPortals}</button>
-              </>
-            )}
-          </div>
+        <div className="max-w-7xl mx-auto w-full px-4 md:px-12 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left text column */}
+            <div className="lg:col-span-7 space-y-8 text-center lg:text-left flex flex-col justify-center">
+              <h1 ref={heroTitleRef} className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.1] max-w-4xl">
+                {t.heroTitlePart1}
+                <span className="relative text-amber-600 inline-block px-1">{t.heroTitleHighlight}</span>
+                {t.heroTitlePart2}
+              </h1>
+              <p ref={heroSubRef} className="text-sm md:text-base lg:text-lg text-slate-600 max-w-3xl leading-relaxed">{t.heroSubtitle}</p>
+              
+              <div ref={heroCTARef} className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center max-w-md lg:max-w-none">
+                {isAuthenticated ? (
+                  <button onClick={() => navigate(`/${lang}/app`)} className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group">
+                    {t.accessPortals} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                ) : (
+                  <>
+                    <button onClick={() => navigate(`/${lang}/creer-compte`)} className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group">
+                      {t.createSchoolFree} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                    <button onClick={() => navigate(`/${lang}/login`)} className="w-full sm:w-auto bg-white/80 backdrop-blur hover:bg-slate-50 text-slate-800 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-slate-200 active:scale-[0.98] transition-all cursor-pointer">{t.accessPortals}</button>
+                  </>
+                )}
+              </div>
 
-          <div ref={heroProofRef} className="flex items-center gap-4 justify-center pt-8 border-t border-slate-100 max-w-md mx-auto">
-            <div className="flex -space-x-2.5">
-              <div className="w-9 h-9 rounded-full bg-slate-800 border-2 border-white flex items-center justify-center text-[10px] font-black text-white">CI</div>
-              <div className="w-9 h-9 rounded-full bg-amber-500 border-2 border-white flex items-center justify-center text-[10px] font-black text-slate-950">SN</div>
-              <div className="w-9 h-9 rounded-full bg-slate-950 border-2 border-white flex items-center justify-center text-[10px] font-black text-white">BF</div>
+              <div ref={heroProofRef} className="flex items-center gap-4 justify-center lg:justify-start pt-8 border-t border-slate-100 max-w-md lg:max-w-none">
+                <div className="flex -space-x-2.5">
+                  <div className="w-9 h-9 rounded-full bg-slate-800 border-2 border-white flex items-center justify-center text-[10px] font-black text-white">CI</div>
+                  <div className="w-9 h-9 rounded-full bg-amber-500 border-2 border-white flex items-center justify-center text-[10px] font-black text-slate-950">SN</div>
+                  <div className="w-9 h-9 rounded-full bg-slate-950 border-2 border-white flex items-center justify-center text-[10px] font-black text-white">BF</div>
+                </div>
+                <div className="text-left">
+                  <div className="flex items-center text-amber-500 gap-0.5">{[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-current" />)}</div>
+                  <p className="text-[10px] font-black text-slate-800 tracking-wide uppercase">{t.recommended}</p>
+                </div>
+              </div>
             </div>
-            <div className="text-left">
-              <div className="flex items-center text-amber-500 gap-0.5">{[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-current" />)}</div>
-              <p className="text-[10px] font-black text-slate-800 tracking-wide uppercase">{t.recommended}</p>
+
+            {/* Right mockup column */}
+            <div ref={heroFloatPhoneRef} className="lg:col-span-5 relative flex items-center justify-center mt-12 lg:mt-0 select-none">
+              {/* Background gradient shape */}
+              <div className="absolute w-72 h-72 md:w-[450px] md:h-[450px] bg-gradient-to-tr from-amber-500/10 to-indigo-500/5 rounded-full blur-3xl -z-10" />
+              
+              <div className="relative w-full max-w-md aspect-[4/3] flex items-center justify-center">
+                {/* Main large mockup (Dashboard) */}
+                <div className="absolute inset-0 bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-2 rotate-[-2deg] hover:rotate-0 transition-transform duration-500">
+                  <img src="/dashboard_preview.png" className="w-full h-full object-cover rounded-xl" alt="Dashboard" />
+                </div>
+                {/* Floating front mockup (Student Card) */}
+                <div className="absolute -bottom-6 -right-6 w-44 aspect-[9/16] bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-1.5 rotate-[5deg] hover:rotate-0 transition-transform duration-500 hover:scale-105">
+                  <img src="/student_card_preview.png" className="w-full h-full object-contain rounded-xl bg-white" alt="Student Card" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Floating phone mockup on desktop */}
-        <div ref={heroFloatPhoneRef} className="absolute bottom-6 left-12 w-44 hidden lg:block z-20 hover:-translate-y-2 transition-all duration-300 real-phone-mockup">
-          <div className="real-phone-mockup-buttons" />
-          <div className="real-phone-screen aspect-[9/16] p-1 flex items-center justify-center bg-white">
-            <img src="/student_card_preview.png" className="w-full h-auto object-contain bg-white rounded-lg shadow-sm border border-slate-100" alt="Student Card" />
-          </div>
-        </div>
-
-
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
@@ -592,49 +652,247 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          CLOUD VS LOCAL — Slide-in + Parallax Mockup
+          FONCTIONNALITÉS — Grille des domaines (Inspiré d'esiba.tg)
           ═══════════════════════════════════════════════════════════ */}
-      <section className="bg-slate-50 py-24 relative overflow-hidden content-lazy">
-        <MorphBlob color="rgba(99,102,241,0.05)" size={450} style={{ top: '20%', right: '-5%' }} speed={14} />
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div ref={cloudTextRef} className="space-y-8">
-              <span className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-lg border border-indigo-200">
-                <Shield className="w-3.5 h-3.5 text-indigo-600" />{t.securityLabel}
-              </span>
-              <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight leading-tight">{t.cloudTitle}</h2>
-              <p className="text-slate-600 text-sm md:text-base leading-relaxed">{t.cloudDesc}</p>
-              <ul className="space-y-5 mt-8">
-                {[t.cloudPoint1, t.cloudPoint2, t.cloudPoint3].map((point, i) => (
-                  <li key={i} className="flex items-start gap-4">
-                    <div className={`w-10 h-10 rounded-lg ${['bg-emerald-100', 'bg-amber-100', 'bg-blue-100'][i]} flex items-center justify-center shrink-0 shadow-sm`}>
-                      <Check className={`w-5 h-5 ${['text-emerald-600', 'text-amber-600', 'text-blue-600'][i]}`} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-slate-900">{point.split(':')[0]}</h3>
-                      <p className="text-sm text-slate-500">{point.split(':')[1]}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div ref={cloudMockupRef} className="relative flex justify-center items-center py-12">
-              <div className="relative w-72 h-72 flex items-center justify-center">
-                {/* Outer spinning dashed sync circle */}
-                <div className="absolute inset-0 border-2 border-dashed border-indigo-500/20 rounded-full animate-[spin_30s_linear_infinite]" />
-                {/* Inner counter-rotating dashed circle */}
-                <div className="absolute inset-6 border border-dashed border-indigo-500/30 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
-                {/* Main continuous active loading circle */}
-                <div className="absolute inset-12 border-4 border-indigo-500/10 border-t-indigo-500 border-r-indigo-500/50 rounded-full animate-spin" />
-                {/* Pulsing Central Cloud Device */}
-                <div className="relative z-10 w-28 h-28 bg-gradient-to-tr from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl shadow-indigo-500/40 hover:scale-105 transition-transform duration-300">
-                  <Shield className="w-12 h-12 text-white animate-pulse" />
+      <section className="bg-white py-24 relative overflow-hidden content-lazy border-b border-slate-100">
+        <MorphBlob color="rgba(245,158,11,0.03)" size={400} style={{ top: '10%', right: '5%' }} speed={11} />
+        <div className="max-w-7xl mx-auto px-4 md:px-12 relative z-10">
+          <div className="text-center mb-16 space-y-4 max-w-3xl mx-auto">
+            <span className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
+              ⚙️ {t.features}
+            </span>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight">
+              {lang === 'fr' ? 'Choisissez le parcours qui vous correspond' : 'Choose the path that fits you best'}
+            </h2>
+            <p className="text-slate-500 text-sm md:text-base">
+              {lang === 'fr' 
+                ? 'DGhubSchool centralise toutes les opérations de votre établissement en ligne pour un pilotage fluide et sans accroc.'
+                : 'DGhubSchool centralizes all your school operations online for smooth and seamless management.'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, idx) => (
+              <div 
+                key={idx} 
+                className="bg-slate-50/50 border border-slate-200/60 rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 hover:border-amber-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/5 group"
+              >
+                <div className="space-y-4">
+                  {/* Icon wrapper with glow on hover */}
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-transform duration-300 group-hover:scale-110" style={{ backgroundColor: `${feature.color}15`, color: feature.color }}>
+                    {feature.icon}
+                  </div>
+                  
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                      {feature.badge}
+                    </span>
+                    <h3 className="text-lg font-black text-slate-950 group-hover:text-amber-600 transition-colors">
+                      {feature.title}
+                    </h3>
+                  </div>
+
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
-                {/* Floating data syncing dots */}
-                <div className="absolute top-10 left-16 w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
-                <div className="absolute bottom-12 right-20 w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping [animation-delay:0.7s]" />
+
+                <div className="mt-6 pt-4 border-t border-slate-200/50 space-y-3">
+                  <div className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
+                    {lang === 'fr' ? 'Fonctionnalités clés' : 'Key capabilities'}
+                  </div>
+                  <ul className="space-y-2">
+                    {feature.points.map((pt, pIdx) => (
+                      <li key={pIdx} className="flex items-start gap-2 text-[11px] text-slate-600 leading-snug">
+                        <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                        <span>{pt}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="row mt-16 justify-center max-w-3xl mx-auto text-center space-y-6">
+            <h3 className="text-xl md:text-2xl font-black text-slate-950">
+              {lang === 'fr' 
+                ? 'Besoin d\'un module sur mesure pour votre établissement ?' 
+                : 'Need a custom module tailored to your school?'}
+            </h3>
+            <p className="text-xs md:text-sm text-slate-500 leading-relaxed">
+              {lang === 'fr' 
+                ? 'Quel que soit votre objectif de gestion, DGhubSchool s\'engage à vous garantir un support réactif et des développements adaptés aux réalités de votre terrain.'
+                : 'Whatever your management goals, DGhubSchool is committed to guaranteeing responsive support and custom upgrades adapted to your realities.'}
+            </p>
+            <div className="pt-2">
+              <button 
+                onClick={() => navigate(`/${lang}/features`)} 
+                className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-lg border border-amber-600 shadow-lg shadow-amber-500/10 active:scale-95 transition-all inline-flex items-center gap-2 cursor-pointer"
+              >
+                <span>{lang === 'fr' ? 'Explorer toutes les fonctionnalités' : 'Explore all features'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════
+          POURQUOI CHOISIR DGhubSchool — Stats 2x2 + Risques Cloud (Inspiré d'esiba.tg)
+          ═══════════════════════════════════════════════════════════ */}
+      <section className="bg-slate-50 py-24 relative overflow-hidden content-lazy border-b border-slate-200/80">
+        <MorphBlob color="rgba(99,102,241,0.05)" size={450} style={{ top: '20%', right: '-5%' }} speed={14} />
+        <div className="max-w-7xl mx-auto px-4 md:px-12 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            
+            {/* Left Column: 2x2 grid of odometer counters */}
+            <div className="lg:col-span-6">
+              <div ref={statsSectionRef} className="grid grid-cols-2 gap-6 md:gap-8 max-w-lg mx-auto">
+                {stats.map((stat, index) => (
+                  <div key={index} className="p-6 bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                    <AnimatedCounter value={stat.value} className="block text-3xl md:text-5xl font-black text-amber-600 mb-2 select-none tracking-tight" />
+                    <span className="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-widest leading-normal block">{stat.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
+
+            {/* Right Column: Why choose us text + Local risks description */}
+            <div ref={cloudTextRef} className="lg:col-span-6 space-y-8">
+              <div className="space-y-4">
+                <span className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-lg border border-indigo-200">
+                  <Shield className="w-3.5 h-3.5 text-indigo-600" />{t.securityLabel}
+                </span>
+                <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight leading-tight">
+                  {t.cloudTitle}
+                </h2>
+                <p className="text-slate-600 text-sm md:text-base leading-relaxed">
+                  {t.cloudDesc}
+                </p>
+              </div>
+
+              {/* Specific features checklists (Europe/AUF equivalent layout) */}
+              <div className="feature-style-4 space-y-6">
+                {[
+                  { title: t.cloudPoint1.split(':')[0], desc: t.cloudPoint1.split(':')[1], icon: Check, color: 'emerald' },
+                  { title: t.cloudPoint2.split(':')[0], desc: t.cloudPoint2.split(':')[1], icon: Check, color: 'amber' },
+                  { title: t.cloudPoint3.split(':')[0], desc: t.cloudPoint3.split(':')[1], icon: Check, color: 'blue' },
+                ].map((point, i) => {
+                  const Icon = point.icon;
+                  return (
+                    <div key={i} className="bg-white border border-slate-200/60 rounded-xl p-5 flex gap-4 items-start hover:-translate-y-0.5 hover:border-indigo-500/20 transition-all duration-300 shadow-sm">
+                      <div className={`w-10 h-10 rounded-lg bg-${point.color}-100 text-${point.color}-600 flex items-center justify-center shrink-0 shadow-sm`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-slate-900 text-sm">{point.title}</h4>
+                        <p className="text-xs text-slate-500 mt-1">{point.desc}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════
+          A PROPOS — Collage d'images + Grille 2x2 (Inspiré d'esiba.tg)
+          ═══════════════════════════════════════════════════════════ */}
+      <section className="bg-white py-24 relative overflow-hidden border-t border-slate-100 content-lazy">
+        <MorphBlob color="rgba(99,102,241,0.03)" size={400} style={{ bottom: '10%', left: '-5%' }} speed={12} />
+        <div className="max-w-7xl mx-auto px-4 md:px-12 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            
+            {/* Left Collage Column */}
+            <div className="lg:col-span-6 flex justify-center relative select-none">
+              <div className="relative w-full max-w-lg aspect-[4/3.5] flex items-center justify-center">
+                {/* Collage Image 1 (top-left, tilted) */}
+                <div className="absolute top-0 left-4 w-[48%] aspect-[4/3] rounded-2xl shadow-xl overflow-hidden rotate-[-6deg] border-2 border-white bg-slate-50 hover:rotate-0 transition-transform duration-500 z-10">
+                  <img className="w-full h-full object-cover p-2 bg-white" src="/report_card_preview.png" alt="Report Card Collage" />
+                  <div className="absolute top-2 left-2 w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center shadow-md">
+                    <BookOpen className="w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Collage Image 2 (top-right) */}
+                <div className="absolute top-8 right-4 w-[52%] aspect-[3/4] rounded-2xl shadow-xl overflow-hidden rotate-[4deg] border-2 border-white bg-slate-50 hover:rotate-0 transition-transform duration-500 z-20">
+                  <img className="w-full h-full object-contain p-2 bg-white" src="/student_card_preview.png" alt="Student Card Collage" />
+                </div>
+
+                {/* Collage Image 3 (bottom-wide) */}
+                <div className="absolute bottom-4 left-4 w-[75%] aspect-[16/10] rounded-2xl shadow-2xl overflow-hidden rotate-[-2deg] border-2 border-white bg-slate-50 hover:rotate-0 transition-transform duration-500 z-30">
+                  <img className="w-full h-full object-cover rounded-xl" src="/dashboard_preview.png" alt="Dashboard Collage" />
+                  
+                  {/* Floating active school count badge */}
+                  <div className="absolute -bottom-2 -right-2 bg-amber-500 text-slate-950 rounded-2xl p-4.5 shadow-2xl flex items-center gap-3.5 border-2 border-white transform translate-x-2 translate-y-2 hover:scale-105 transition-transform duration-300">
+                    <div className="w-10 h-10 rounded-xl bg-slate-950/10 flex items-center justify-center">
+                      <Users className="w-5 h-5 text-slate-950" />
+                    </div>
+                    <div className="text-left">
+                      <h6 className="text-sm font-black leading-none">+15 Écoles</h6>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-800 block mt-1">Partenaires Actives</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Text / Features Column */}
+            <div className="lg:col-span-6 space-y-8">
+              <div className="space-y-4">
+                <span className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
+                  💡 {lang === 'fr' ? 'À propos de nous' : 'About us'}
+                </span>
+                <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight leading-tight">
+                  {lang === 'fr' 
+                    ? 'Une plateforme de gestion à la pointe de la technologie' 
+                    : 'A state-of-the-art management platform'}
+                </h2>
+                <p className="text-slate-600 text-sm md:text-base leading-relaxed">
+                  {lang === 'fr'
+                    ? 'DGhubSchool est conçu sur mesure pour s\'adapter parfaitement aux réalités des établissements en Afrique de l\'Ouest. Une plateforme cloud-native légère, sécurisée et optimisée pour s\'exécuter sans accroc même sur des connexions mobiles 2G.'
+                    : 'DGhubSchool is custom-built to match the realities of West African schools. A lightweight, secure, and cloud-native platform optimized to run seamlessly even on 2G mobile connections.'}
+                </p>
+              </div>
+
+              {/* 2x2 Feature Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {[
+                  { icon: BookOpen, title: lang === 'fr' ? 'Outils de qualité' : 'Quality tools', desc: lang === 'fr' ? 'Bulletins conformes DRE et calculs instantanés.' : 'DRE-compliant reports and instant averages.' },
+                  { icon: Phone, title: lang === 'fr' ? 'Support WhatsApp dédié' : 'Dedicated WhatsApp support', desc: lang === 'fr' ? 'Une équipe d\'assistance réactive disponible 24h/24.' : 'A responsive support team available 24/7.' },
+                  { icon: Shield, title: lang === 'fr' ? 'Zéro perte de données' : 'Zero data loss', desc: lang === 'fr' ? 'Sauvegardes cloud automatisées quotidiennes.' : 'Daily automated secure cloud backups.' },
+                  { icon: Activity, title: lang === 'fr' ? 'Interface intuitive' : 'Intuitive interface', desc: lang === 'fr' ? 'Prise en main en 2 secondes, sans formation technique.' : 'Get started in 2 seconds, no technical training needed.' },
+                ].map((item, idx) => {
+                  const IconComponent = item.icon;
+                  return (
+                    <div key={idx} className="flex gap-4 items-start">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 shadow-sm">
+                        <IconComponent className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-slate-900 text-sm">{item.title}</h4>
+                        <p className="text-xs text-slate-500 mt-1">{item.desc}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="pt-4">
+                <button 
+                  onClick={() => navigate(`/${lang}/a-propos`)} 
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-lg border border-slate-950 shadow-md active:scale-95 transition-all inline-flex items-center gap-2 cursor-pointer"
+                >
+                  <span>{lang === 'fr' ? 'En savoir plus sur nous' : 'Learn more about us'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
@@ -760,43 +1018,58 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          STATS — Animated Counters
+          TEMOIGNAGES — Les directeurs en parlent (Inspiré d'esiba.tg)
           ═══════════════════════════════════════════════════════════ */}
-      <section id="stats" className="bg-white py-20 relative content-lazy">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
-          <div ref={statsSectionRef} className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20 max-w-5xl mx-auto">
-            {stats.map((stat, index) => (
-              <div key={index} className="p-6 bg-slate-50 border border-slate-100 rounded-xl hover:shadow-md transition duration-300">
-                <AnimatedCounter value={stat.value} className="block text-3xl md:text-5xl font-black text-amber-600 mb-2 select-none tracking-tight" />
-                <span className="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-widest">{stat.label}</span>
-              </div>
-            ))}
-          </div>
+      {testimonials.length > 0 && (
+        <section id="testimonials" className="bg-white py-24 relative overflow-hidden border-t border-slate-100 content-lazy">
+          <MorphBlob color="rgba(245,158,11,0.02)" size={350} style={{ bottom: '5%', right: '5%' }} speed={7} />
+          <div className="max-w-7xl mx-auto px-4 md:px-12 relative z-10">
+            <div className="text-center mb-16 space-y-4 max-w-3xl mx-auto">
+              <span className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
+                💬 {lang === 'fr' ? 'Témoignages' : 'Testimonials'}
+              </span>
+              <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight">
+                {lang === 'fr' ? 'Les directeurs en parlent' : 'What school leaders are saying'}
+              </h2>
+              <p className="text-slate-500 text-sm md:text-base">
+                {lang === 'fr' 
+                  ? 'Découvrez les retours d\'expérience de ceux qui gèrent leur école au quotidien avec DGhubSchool.'
+                  : 'Discover how school principals manage their daily administration with DGhubSchool.'}
+              </p>
+            </div>
 
-          {testimonials.length > 0 && (
-            <div className="max-w-4xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {testimonials.map((tItem) => (
-                  <div key={tItem.id} className="bg-slate-50 border border-slate-200 rounded-xl p-8 text-left relative shadow-sm hover:shadow-md transition-shadow">
-                    <div className="text-5xl text-amber-500 font-serif leading-none absolute top-4 left-6 opacity-20">"</div>
-                    <p className="text-sm md:text-base font-medium text-slate-700 leading-relaxed italic relative z-10 pt-4 mb-6">"{tItem.content}"</p>
-                    <div className="space-y-1 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+              {testimonials.map((tItem) => (
+                <div key={tItem.id} className="bg-slate-50 border border-slate-200/80 rounded-2xl p-8 text-left relative shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+                  <div className="text-5xl text-amber-500 font-serif leading-none absolute top-4 left-6 opacity-20">"</div>
+                  <p className="text-sm md:text-base font-medium text-slate-700 leading-relaxed italic relative z-10 pt-4 mb-6">"{tItem.content}"</p>
+                  
+                  <div className="flex items-center gap-3 mt-6 pt-4 border-t border-slate-200/50 relative z-10">
+                    <div className="w-10 h-10 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center text-xs font-black text-amber-750 uppercase">
+                      {tItem.name.substring(0, 2)}
+                    </div>
+                    <div className="space-y-0.5">
                       <p className="text-sm font-black tracking-tight text-slate-900">{tItem.name}</p>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{tItem.role} {tItem.school_name ? `— ${tItem.school_name}` : ''}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        {tItem.role} {tItem.school_name ? `— ${tItem.school_name}` : ''}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
 
-          <div className="mt-12">
-            <button onClick={() => navigate(`/${lang}/partager-mon-histoire`)} className="bg-white hover:bg-slate-50 text-slate-900 border-2 border-slate-200 text-xs font-black uppercase tracking-widest px-8 py-4 rounded-xl transition-all inline-flex items-center gap-2 cursor-pointer shadow-sm hover:shadow active:scale-95">
-              <Star className="w-4 h-4 text-amber-500" />{t.shareStory}
-            </button>
+            <div className="mt-12 text-center">
+              <button 
+                onClick={() => navigate(`/${lang}/partager-mon-histoire`)} 
+                className="bg-white hover:bg-slate-50 text-slate-900 border-2 border-slate-200 text-xs font-black uppercase tracking-widest px-8 py-4 rounded-xl transition-all inline-flex items-center gap-2 cursor-pointer shadow-sm hover:shadow active:scale-95"
+              >
+                <Star className="w-4 h-4 text-amber-500" />{t.shareStory}
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ═══════════════════════════════════════════════════════════
           PRICING — Scale-in + Glow
@@ -804,8 +1077,8 @@ export const LandingPage: React.FC = () => {
       <section id="pricing" className="bg-slate-50 border-t border-slate-200 py-20 content-lazy">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div ref={pricingTitleRef} className="text-center mb-16 space-y-4">
-            <h2 className="text-xs font-black uppercase tracking-widest text-amber-600">{t.pricingTitle}</h2>
-            <h3 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase">{t.pricingSubtitle}</h3>
+            <span className="text-xs font-black uppercase tracking-widest text-amber-600 block mb-2">{t.pricingTitle}</span>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase">{t.pricingSubtitle}</h2>
             <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm">{t.pricingDesc}</p>
           </div>
           <div ref={pricingCardRef} className="relative max-w-sm mx-auto group">
@@ -840,7 +1113,7 @@ export const LandingPage: React.FC = () => {
         <div ref={newsroomRef} className="max-w-7xl mx-auto px-6 md:px-8">
           <div className="text-center mb-16 space-y-4">
             <span className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200/40 text-amber-700 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full">{t.newsroomTitle}</span>
-            <h3 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase">{t.newsroomSub}</h3>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase">{t.newsroomSub}</h2>
             <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm">{t.newsroomDesc}</p>
           </div>
           <div className="grid grid-cols-1 gap-8 max-w-3xl mx-auto">
@@ -860,20 +1133,78 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          FINAL CTA — Inverse Parallax
+          FINAL CTA SPLIT CARDS (Inspiré d'esiba.tg)
           ═══════════════════════════════════════════════════════════ */}
-      <section className="bg-white py-20 text-center relative overflow-hidden content-lazy">
-        <div className="max-w-5xl mx-auto px-4 md:px-8">
-          <div ref={ctaRef} className="bg-slate-950 text-white rounded-xl p-12 md:p-20 relative overflow-hidden shadow-2xl border border-slate-900 group">
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-amber-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none group-hover:bg-amber-500/15 transition-colors duration-500" />
-            <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-indigo-500/10 rounded-full blur-[80px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
-            <div className="relative z-10 space-y-8 max-w-2xl mx-auto">
-              <h2 className="text-3xl md:text-5xl font-black tracking-tight uppercase leading-tight">{t.readyTitle}</h2>
-              <p className="text-slate-400 text-xs md:text-sm leading-relaxed font-medium">{t.readyDesc}</p>
-              <button onClick={() => navigate(`/${lang}/creer-compte`)} className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-amber-600 shadow-xl shadow-amber-500/20 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-3 cursor-pointer group/btn">
-                {t.createSchoolBtn} <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1.5 transition-transform duration-300" />
-              </button>
+      <section className="bg-white py-20 relative content-lazy border-t border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 md:px-12">
+          <div ref={ctaRef} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            {/* Left Card - Get Started */}
+            <div className="relative overflow-hidden bg-slate-950 text-white rounded-2xl p-8 md:p-12 shadow-xl border border-slate-900 group flex flex-col justify-between h-80 lg:h-96">
+              {/* Decorative shapes */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-[60px] pointer-events-none group-hover:bg-amber-500/15 transition-colors duration-500" />
+              
+              <div className="space-y-4 relative z-10">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-full inline-block">
+                  🚀 {lang === 'fr' ? 'Lancement' : 'Get Started'}
+                </span>
+                <h3 className="text-xl md:text-3xl font-black uppercase tracking-tight leading-snug">
+                  {lang === 'fr' 
+                    ? 'Envie de moderniser votre établissement ?' 
+                    : 'Want to modernize your institution?'}
+                </h3>
+                <p className="text-xs md:text-sm text-slate-400 leading-relaxed font-medium max-w-sm">
+                  {lang === 'fr'
+                    ? 'Rejoignez les directeurs d\'écoles qui ont abandonné les calculs manuels et les files d\'attente. Essai gratuit de 40 jours.'
+                    : 'Join school leaders who have left manual calculations and cash lines behind. 40 days free trial.'}
+                </p>
+              </div>
+
+              <div className="pt-6 relative z-10 text-left">
+                <button 
+                  onClick={() => navigate(`/${lang}/creer-compte`)} 
+                  className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-lg border border-amber-600 shadow-xl shadow-amber-500/15 active:scale-[0.98] transition-all inline-flex items-center gap-2 cursor-pointer"
+                >
+                  <span>{lang === 'fr' ? 'Lancer mon école gratuitement' : 'Launch my school for free'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
+
+            {/* Right Card - Contact / Community */}
+            <div className="relative overflow-hidden bg-indigo-950 text-white rounded-2xl p-8 md:p-12 shadow-xl border border-indigo-900 group flex flex-col justify-between h-80 lg:h-96">
+              {/* Decorative shapes */}
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/15 rounded-full blur-[60px] pointer-events-none group-hover:bg-indigo-500/20 transition-colors duration-500" />
+              
+              <div className="space-y-4 relative z-10">
+                <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-1.5 rounded-full inline-block">
+                  💬 {lang === 'fr' ? 'Support WhatsApp' : 'WhatsApp Support'}
+                </span>
+                <h3 className="text-xl md:text-3xl font-black uppercase tracking-tight leading-snug">
+                  {lang === 'fr' 
+                    ? 'Une question ou besoin d\'une démo ?' 
+                    : 'Any questions or need a demo?'}
+                </h3>
+                <p className="text-xs md:text-sm text-indigo-200 leading-relaxed font-medium max-w-sm">
+                  {lang === 'fr'
+                    ? 'Notre équipe est à votre écoute pour une présentation sur mesure en direct ou pour vous guider lors de vos premiers pas.'
+                    : 'Our team is here to give you a custom live presentation or guide you through your first steps.'}
+                </p>
+              </div>
+
+              <div className="pt-6 relative z-10 text-left">
+                <a 
+                  href="https://wa.me/22890814178"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-white hover:bg-slate-100 text-indigo-950 text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-lg border border-slate-200 shadow-xl active:scale-[0.98] transition-all inline-flex items-center gap-2 cursor-pointer"
+                >
+                  <span>{lang === 'fr' ? 'Contacter notre support client' : 'Contact our customer support'}</span>
+                  <ArrowUpRight className="w-4 h-4 text-indigo-950" />
+                </a>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
