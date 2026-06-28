@@ -259,6 +259,7 @@ export type AppPage =
   | 'gestion_annees_scolaires'
   | 'saisie_notes'
   | 'bulletins'
+  | 'rapports_academiques'
   | 'parent_dashboard'
   | 'parent_historique'
   | 'parent_recus'
@@ -308,5 +309,8 @@ export interface Note {
   noteClasse: number | null; // ex: Interrogations (sur 20)
   noteDevoir: number | null; // ex: Devoirs surveillés
   noteCompo: number | null;  // ex: Composition
+  rank?: string;
+  highestNote?: number | null;
+  lowestNote?: number | null;
 }
 

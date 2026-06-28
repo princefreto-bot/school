@@ -44,6 +44,7 @@ const GestionAnneesScolaires = lazy(() => import('./pages/GestionAnneesScolaires
 const SaisieNotes = lazy(() => import('./pages/SaisieNotes' /* */).then(m => ({ default: m.SaisieNotes })));
 const Bulletins = lazy(() => import('./pages/Bulletins').then(m => ({ default: m.Bulletins })));
 const VerificationRecu = lazy(() => import('./pages/VerificationRecu').then(m => ({ default: m.VerificationRecu })));
+const RapportsAcademiques = lazy(() => import('./pages/RapportsAcademiques').then(m => ({ default: m.RapportsAcademiques })));
 const HistoriqueActivites = lazy(() => import('./pages/HistoriqueActivites').then(m => ({ default: m.HistoriqueActivites })));
 const ParentDashboard = lazy(() => import('./pages/parent/ParentDashboard').then(m => ({ default: m.ParentDashboard })));
 const ParentHistorique = lazy(() => import('./pages/parent/ParentHistorique').then(m => ({ default: m.ParentHistorique })));
@@ -160,6 +161,7 @@ const PageContent: React.FC = () => {
     case 'selection_enseignant': return <SelectionEnseignant />;
     case 'bulletins': return <Bulletins />;
     case 'verification_recu': return <VerificationRecu />;
+    case 'rapports_academiques': return <RapportsAcademiques />;
     case 'historique_activites': return <HistoriqueActivites />;
     case 'parent_dashboard': return <ParentDashboard />;
     case 'parent_historique': return <ParentHistorique />;

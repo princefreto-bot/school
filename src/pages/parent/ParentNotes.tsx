@@ -161,6 +161,25 @@ export const ParentNotes: React.FC = () => {
                                                                 <span className="text-[10px] ml-1 opacity-50">/20</span>
                                                             </div>
                                                         </div>
+
+                                                        <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-xs">
+                                                            <div className="bg-slate-50/50 dark:bg-slate-800/20 rounded-xl p-2">
+                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter mb-0.5">Rang</p>
+                                                                <p className="font-black text-blue-600 dark:text-blue-400">{note?.rank || '--'}</p>
+                                                            </div>
+                                                            <div className="bg-emerald-50/20 dark:bg-emerald-500/5 rounded-xl p-2">
+                                                                <p className="text-[8px] font-black text-emerald-600 dark:bg-emerald-500 uppercase tracking-tighter mb-0.5">Plus Forte</p>
+                                                                <p className="font-bold text-emerald-600 dark:text-emerald-400">
+                                                                    {typeof note?.highestNote === 'number' ? note.highestNote.toFixed(2) : '--'}
+                                                                </p>
+                                                            </div>
+                                                            <div className="bg-rose-50/20 dark:bg-rose-500/5 rounded-xl p-2">
+                                                                <p className="text-[8px] font-black text-rose-600 dark:bg-rose-500 uppercase tracking-tighter mb-0.5">Plus Faible</p>
+                                                                <p className="font-bold text-rose-600 dark:text-rose-400">
+                                                                    {typeof note?.lowestNote === 'number' ? note.lowestNote.toFixed(2) : '--'}
+                                                                </p>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             );

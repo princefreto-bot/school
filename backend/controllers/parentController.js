@@ -498,15 +498,134 @@ async function getParentData(req, res) {
                 .select('*')
                 .in('eleve_id', activeStudentIds)
                 .eq('academic_year_id', academicYearId);
-            notes = (dbNotes || []).map(n => ({
-                id: n.id,
-                eleveId: n.eleve_id,
-                matiereId: n.matiere_id,
-                periode: n.periode,
-                noteClasse: n.note_classe !== undefined ? Number(n.note_classe) : null,
-                noteDevoir: n.note_devoir !== undefined ? Number(n.note_devoir) : null,
-                noteCompo: n.note_compo !== undefined ? Number(n.note_compo) : null
-            }));
+
+            // Calculer les statistiques de classe (Plus forte note, plus faible note, rang)
+            const classes = Array.from(new Set(students.map(s => s.classe)));
+            let allClassNotes = [];
+            const studentIdToClasse = {};
+
+            const calculateFinalAvg = (note) => {
+                if (!note) return null;
+                const nc = note.note_classe !== null && note.note_classe !== undefined ? Number(note.note_classe) : null;
+                const nd = note.note_devoir !== null && note.note_devoir !== undefined ? Number(note.note_devoir) : null;
+                const compo = note.note_compo !== null && note.note_compo !== undefined ? Number(note.note_compo) : null;
+
+                let moyClasse = null;
+                const notesEval = [nc, nd].filter(v => v !== null);
+                if (notesEval.length > 0) {
+                    moyClasse = notesEval.reduce((a, b) => a + b, 0) / notesEval.length;
+                }
+
+                const hasMoy = typeof moyClasse === 'number';
+                const hasCompo = typeof compo === 'number';
+
+                if (hasMoy && hasCompo) {
+                    return (moyClasse + compo) / 2;
+                } else if (hasMoy) {
+                    return moyClasse;
+                } else if (hasCompo) {
+                    return compo;
+                }
+                return null;
+            };
+
+            const formatRang = (rank) => {
+                if (rank === 1) return '1er';
+                return `${rank}ème`;
+            };
+
+            if (classes.length > 0) {
+                const { data: allClassStudents } = await supabase
+                    .from(`students_${schoolSlug}`)
+                    .select('id, classe')
+                    .in('classe', classes)
+                    .eq('academic_year_id', academicYearId);
+                
+                if (allClassStudents && allClassStudents.length > 0) {
+                    allClassStudents.forEach(s => {
+                        studentIdToClasse[s.id] = s.classe;
+                    });
+                    const classStudentIds = allClassStudents.map(s => s.id);
+                    const { data: dbAllClassNotes } = await supabase
+                        .from(`notes_${schoolSlug}`)
+                        .select('*')
+                        .in('eleve_id', classStudentIds)
+                        .eq('academic_year_id', academicYearId);
+                    allClassNotes = dbAllClassNotes || [];
+                }
+            }
+
+            const classAverages = {}; // classAverages[classe][matiereId][periode] = [{ eleveId, avg }]
+            allClassNotes.forEach(n => {
+                const studentClasse = studentIdToClasse[n.eleve_id];
+                if (!studentClasse) return;
+                const avg = calculateFinalAvg(n);
+                if (avg === null) return;
+
+                if (!classAverages[studentClasse]) classAverages[studentClasse] = {};
+                if (!classAverages[studentClasse][n.matiere_id]) classAverages[studentClasse][n.matiere_id] = {};
+                if (!classAverages[studentClasse][n.matiere_id][n.periode]) classAverages[studentClasse][n.matiere_id][n.periode] = [];
+
+                classAverages[studentClasse][n.matiere_id][n.periode].push({
+                    eleveId: n.eleve_id,
+                    avg: Number(avg.toFixed(2))
+                });
+            });
+
+            // Sort averages in descending order
+            Object.keys(classAverages).forEach(cls => {
+                Object.keys(classAverages[cls]).forEach(matId => {
+                    Object.keys(classAverages[cls][matId]).forEach(per => {
+                        classAverages[cls][matId][per].sort((a, b) => b.avg - a.avg);
+                    });
+                });
+            });
+
+            notes = (dbNotes || []).map(n => {
+                const child = students.find(s => s.id === n.eleve_id);
+                const childClasse = child ? child.classe : null;
+                
+                let rank = '--';
+                let highestNote = null;
+                let lowestNote = null;
+
+                if (childClasse && classAverages[childClasse] && classAverages[childClasse][n.matiere_id] && classAverages[childClasse][n.matiere_id][n.periode]) {
+                    const list = classAverages[childClasse][n.matiere_id][n.periode];
+                    const avgs = list.map(item => item.avg);
+                    if (avgs.length > 0) {
+                        highestNote = Math.max(...avgs);
+                        lowestNote = Math.min(...avgs);
+                    }
+                    
+                    const childAvg = calculateFinalAvg(n);
+                    if (childAvg !== null) {
+                        // Determine rank considering ex-aequo
+                        let rankNum = 1;
+                        for (let i = 0; i < list.length; i++) {
+                            if (i > 0 && list[i].avg < list[i - 1].avg) {
+                                rankNum = i + 1;
+                            }
+                            if (list[i].eleveId === n.eleve_id) {
+                                rank = formatRang(rankNum);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                return {
+                    id: n.id,
+                    eleveId: n.eleve_id,
+                    matiereId: n.matiere_id,
+                    periode: n.periode,
+                    noteClasse: n.note_classe !== undefined && n.note_classe !== null ? Number(n.note_classe) : null,
+                    noteDevoir: n.note_devoir !== undefined && n.note_devoir !== null ? Number(n.note_devoir) : null,
+                    noteCompo: n.note_compo !== undefined && n.note_compo !== null ? Number(n.note_compo) : null,
+                    rank,
+                    highestNote,
+                    lowestNote
+                };
+            });
 
             // Récupérer toutes les matières
             const { data: dbMatieres } = await supabase
