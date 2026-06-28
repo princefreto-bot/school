@@ -16,19 +16,19 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
     ],
     directeur_general: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'parametres', 'recouvrement', 'scan_information',
+        'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins'
     ],
     admin: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'parametres', 'recouvrement', 'scan_information',
+        'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins'
     ],
     directeur: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
-        'parametres', 'recouvrement', 'scan_information',
+        'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins'
     ],
@@ -80,17 +80,17 @@ const ROLE_ACTIONS: Record<Role, ActionType[]> = {
     directeur_general: [
         'modifier_parametres', 'ajouter_eleve', 'modifier_eleve', 'supprimer_eleve',
         'ajouter_paiement', 'generer_recu', 'exporter_donnees', 'importer_donnees',
-        'voir_historique', 'supprimer_parent'
+        'voir_historique', 'supprimer_parent', 'scan_presence', 'generer_carte'
     ],
     admin: [
         'modifier_parametres', 'ajouter_eleve', 'modifier_eleve', 'supprimer_eleve',
         'ajouter_paiement', 'generer_recu', 'exporter_donnees', 'importer_donnees',
-        'voir_historique', 'supprimer_parent'
+        'voir_historique', 'supprimer_parent', 'scan_presence', 'generer_carte'
     ],
     directeur: [
         'modifier_parametres', 'ajouter_eleve', 'modifier_eleve', 'supprimer_eleve',
         'ajouter_paiement', 'generer_recu', 'exporter_donnees', 'importer_donnees',
-        'voir_historique', 'supprimer_parent'
+        'voir_historique', 'supprimer_parent', 'scan_presence', 'generer_carte'
     ],
     comptable: [
         'ajouter_paiement', 'generer_recu', 'exporter_donnees', 'ajouter_eleve',

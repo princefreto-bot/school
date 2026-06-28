@@ -1,0 +1,8 @@
+# DGhubSchool Security Contact
+Contact: mailto:security@dghubschool.com
+Contact: https://wa.me/22872473027
+Expires: 2027-06-28T12:00:00.000Z
+Preferred-Languages: fr, en
+Canonical: https://dghubschool.com/.well-known/security.txt
+Acknowledgement: https://dghubschool.com/acknowledgements
+Policy: https://dghubschool.com/security-policy

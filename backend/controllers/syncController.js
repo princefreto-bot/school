@@ -22,7 +22,8 @@ async function syncFromFrontend(req, res) {
         const { data: yearRow } = await supabase.from('academic_years').select('id').eq('school_slug', schoolSlug).eq('name', yearName).single();
         if (yearRow) {
             academicYearId = yearRow.id;
-        } else {
+        } else if (appSettings && appSettings.schoolYear === yearName) {
+            // Uniquement si l'utilisateur est en train de configurer/créer explicitement cette année via les paramètres
             const { data: newRow } = await supabase.from('academic_years').insert({
                 school_slug: schoolSlug,
                 name: yearName,
@@ -332,6 +333,18 @@ async function syncFromFrontend(req, res) {
                     console.error('❌ [Sync POST] Erreur sauvegarde appSettings:', settingsErr.message);
                 } else {
                     console.log('✅ [Sync POST] appSettings sauvegardés avec succès !');
+                    if (appSettings.schoolYear) {
+                        // Mettre toutes les années de cette école à non-active
+                        await supabase.from('academic_years')
+                            .update({ is_current: false })
+                            .eq('school_slug', schoolSlug);
+                        // Mettre l'année active à active
+                        await supabase.from('academic_years')
+                            .update({ is_current: true })
+                            .eq('school_slug', schoolSlug)
+                            .eq('name', appSettings.schoolYear);
+                        console.log(`✅ [Sync POST] Année scolaire active mise à jour dans public.academic_years : ${appSettings.schoolYear}`);
+                    }
                 }
             } catch (settingsErr) {
                 console.error('❌ [Sync POST] Exception appSettings:', settingsErr);
@@ -452,12 +465,20 @@ async function syncToFrontend(req, res) {
         if (yearRow) {
             academicYearId = yearRow.id;
         } else {
-            const { data: newRow } = await supabase.from('academic_years').insert({
-                school_slug: schoolSlug,
-                name: yearName,
-                is_current: true
-            }).select('id').single();
-            if (newRow) academicYearId = newRow.id;
+            // Uniquement si l'école a déjà des années enregistrées (sécurité rétrocompatibilité)
+            const { count, error: countErr } = await supabase
+                .from('academic_years')
+                .select('id', { count: 'exact', head: true })
+                .eq('school_slug', schoolSlug);
+
+            if (!countErr && count > 0) {
+                const { data: newRow } = await supabase.from('academic_years').insert({
+                    school_slug: schoolSlug,
+                    name: yearName,
+                    is_current: true
+                }).select('id').single();
+                if (newRow) academicYearId = newRow.id;
+            }
         }
     }
 

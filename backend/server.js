@@ -57,7 +57,10 @@ app.use((req, res, next) => {
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         `img-src 'self' data: blob: ${supabaseUrl} ${backupSupabaseUrl}`,
-        `connect-src 'self' ${supabaseUrl} ${backupSupabaseUrl} ws: wss: http://localhost:* http://127.0.0.1:*`
+        `connect-src 'self' ${supabaseUrl} ${backupSupabaseUrl} ws: wss: http://localhost:* http://127.0.0.1:*`,
+        "object-src 'none'",
+        "base-uri 'self'",
+        "frame-ancestors 'self'"
     ].join('; ');
     
     res.setHeader('Content-Security-Policy', csp);

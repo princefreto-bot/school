@@ -82,7 +82,8 @@ export const Footer: React.FC = () => {
           items: [
             { label: "Notre histoire", path: "/a-propos" },
             { label: "Actualités", path: "/#newsroom" },
-            { label: "Nous contacter", path: "https://wa.me/22872473027", external: true }
+            { label: "Nous contacter (WhatsApp)", path: "https://wa.me/22872473027", external: true },
+            { label: "Nous écrire par email", path: "mailto:support@dghubschool.com", external: true }
           ]
         }
       }
@@ -123,7 +124,8 @@ export const Footer: React.FC = () => {
           items: [
             { label: "Our story", path: "/a-propos" },
             { label: "News", path: "/#newsroom" },
-            { label: "Contact us", path: "https://wa.me/22872473027", external: true }
+            { label: "Contact us (WhatsApp)", path: "https://wa.me/22872473027", external: true },
+            { label: "Email our support", path: "mailto:support@dghubschool.com", external: true }
           ]
         }
       }

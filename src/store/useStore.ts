@@ -1130,6 +1130,17 @@ export const useStore = create<AppState>()(
           }
           if (Array.isArray(data.academicYears)) {
             set({ academicYears: data.academicYears });
+            
+            // Si l'année active n'existe plus dans la liste des années scolaires valides sur le cloud,
+            // on bascule automatiquement sur l'année en cours (isCurrent: true) ou la première disponible.
+            if (data.academicYears.length > 0) {
+              const currentActiveYearExists = data.academicYears.some((y: any) => y.name === get().schoolYear);
+              if (!currentActiveYearExists) {
+                const defaultYear = data.academicYears.find((y: any) => y.isCurrent) || data.academicYears[0];
+                console.log(`🔄 [Store] L'année active '${get().schoolYear}' n'existe plus sur le serveur. Bascule sur '${defaultYear.name}'.`);
+                set({ schoolYear: defaultYear.name });
+              }
+            }
           }
           // Récupération des données académiques
           if (Array.isArray(data.matieres)) {

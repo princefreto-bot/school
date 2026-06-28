@@ -22,6 +22,7 @@ import {
   ArrowUpRight,
   Phone,
   Activity,
+  Mail,
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import { BACKEND_URL } from '../config';
@@ -1051,15 +1052,22 @@ export const LandingPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="pt-6 relative z-10 text-left">
+              <div className="pt-6 relative z-10 flex flex-col sm:flex-row gap-4">
                 <a 
                   href="https://wa.me/22872473027"
                   target="_blank"
                   rel="noreferrer"
-                  className="bg-white hover:bg-slate-100 text-indigo-950 text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-lg border border-slate-200 shadow-xl active:scale-[0.98] transition-all inline-flex items-center gap-2 cursor-pointer"
+                  className="bg-white hover:bg-slate-100 text-indigo-950 text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-lg border border-slate-200 shadow-xl active:scale-[0.98] transition-all inline-flex items-center gap-2 cursor-pointer justify-center"
                 >
-                  <span>{lang === 'fr' ? 'Contacter notre support client' : 'Contact our customer support'}</span>
+                  <span>{lang === 'fr' ? 'Contacter support' : 'Contact Support'}</span>
                   <ArrowUpRight className="w-4 h-4 text-indigo-950" />
+                </a>
+                <a 
+                  href="mailto:support@dghubschool.com"
+                  className="bg-indigo-900 hover:bg-indigo-850 text-white text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-lg border border-indigo-700 shadow-xl active:scale-[0.98] transition-all inline-flex items-center gap-2 cursor-pointer justify-center"
+                >
+                  <span>{lang === 'fr' ? 'Nous écrire par email' : 'Write to us by email'}</span>
+                  <Mail className="w-4 h-4 text-white" />
                 </a>
               </div>
             </div>

@@ -328,6 +328,61 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const theme = useStore((s) => s.theme);
   const toggleTheme = useStore((s) => s.toggleTheme);
   const updateAllSettings = useStore((s) => s.updateAllSettings);
+  const academicYears = useStore((s) => s.academicYears) || [];
+  const settings = useStore((s) => s.settings);
+  const lastSyncTimestamp = useStore((s) => s.lastSyncTimestamp);
+
+  const [newYearName, setNewYearName] = useState(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    return month >= 5 ? `${year}-${year + 1}` : `${year - 1}-${year}`;
+  });
+  const [yearError, setYearError] = useState('');
+  const [yearLoading, setYearLoading] = useState(false);
+
+  const handleCreateYear = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setYearError('');
+
+    if (!newYearName.trim()) {
+      setYearError("Le nom de l'année scolaire est requis.");
+      return;
+    }
+
+    const years = newYearName.match(/\b\d{4}\b/g);
+    if (!years || years.length !== 2) {
+      setYearError("Le format de l'année scolaire doit être YYYY-YYYY (ex: 2026-2027).");
+      return;
+    }
+
+    const start = parseInt(years[0], 10);
+    const end = parseInt(years[1], 10);
+    if (Math.abs(end - start) > 1) {
+      setYearError("L'intervalle de l'année scolaire ne peut pas dépasser 1 an.");
+      return;
+    }
+
+    setYearLoading(true);
+    try {
+      await updateAllSettings({ ...settings, schoolYear: newYearName });
+    } catch (err) {
+      setYearError("Erreur lors de la création.");
+    } finally {
+      setYearLoading(false);
+    }
+  };
+
+  const isParent = user?.role === 'parent';
+  const isCreator = user?.role === 'creator';
+  const isSchoolAdmin = user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general';
+  
+  const showYearOverlay = 
+    !isParent && 
+    !isCreator && 
+    user?.role !== 'superadmin' && 
+    lastSyncTimestamp > 0 && 
+    academicYears.length === 0;
 
   useEffect(() => {
     if (theme === 'dark') document.documentElement.classList.add('dark');
@@ -383,8 +438,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   const isSyncing = useStore((s) => s.isSyncing);
   const nonSoldes = students.filter((s) => s.status !== 'Soldé').length;
-  const isParent = user?.role === 'parent';
-  const isCreator = user?.role === 'creator';
   const baseNavItems = isCreator ? CREATOR_NAV_ITEMS : (isParent ? PARENT_NAV_ITEMS : NAV_ITEMS);
   const filteredItems = getFilteredNavItems(user?.role, baseNavItems) as Omit<NavItem, 'badge'>[];
 
@@ -603,6 +656,78 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 <LogOut className="w-4 h-4" /> Se déconnecter
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Overlay d'Initialisation de l'Année Scolaire (Plein écran) ── */}
+      {!showOverlay && showYearOverlay && (
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-slate-900/60 backdrop-blur-xl p-4 font-sans select-text">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-none shadow-2xl p-8 text-center space-y-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+            <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent pointer-events-none" />
+            
+            <div className="flex justify-center">
+              <div className="w-16 h-16 bg-indigo-500/10 border border-indigo-500/35 rounded-none flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-lg shadow-indigo-500/5">
+                <Calendar className="w-8 h-8" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                Initialisation de l'Année
+              </h2>
+              <p className="text-xs text-indigo-500 dark:text-indigo-400 font-bold uppercase tracking-widest">
+                DGhubSchool — Configuration
+              </p>
+            </div>
+
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              Bienvenue sur votre espace d'établissement ! Pour commencer à utiliser la plateforme, vous devez configurer votre première année scolaire.
+            </p>
+
+            {isSchoolAdmin ? (
+              <form onSubmit={handleCreateYear} className="space-y-4 text-left">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                    Année Scolaire (Format YYYY-YYYY)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ex: 2026-2027"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-none text-sm focus:outline-none transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400 font-bold"
+                    value={newYearName}
+                    onChange={(e) => setNewYearName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                {yearError && (
+                  <div className="p-3 bg-rose-50 border border-rose-100 text-rose-500 text-xs font-bold text-center">
+                    {yearError}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={yearLoading}
+                  className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-xs font-bold uppercase tracking-wider py-3.5 rounded-none transition-all shadow-md active:scale-98"
+                >
+                  {yearLoading ? 'Création...' : "Créer l'année scolaire"}
+                </button>
+              </form>
+            ) : (
+              <div className="space-y-4">
+                <div className="p-4 bg-amber-500/5 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold rounded-none leading-relaxed">
+                  Aucune année scolaire n'est configurée pour cet établissement. Veuillez contacter le directeur pour initialiser l'année de départ.
+                </div>
+                <button
+                  onClick={logout}
+                  className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-250 text-xs font-bold uppercase tracking-wider py-3.5 rounded-none transition-all shadow-sm active:scale-98"
+                >
+                  <LogOut className="w-4 h-4" /> Se déconnecter
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
