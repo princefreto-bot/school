@@ -623,7 +623,7 @@ export const LandingPage: React.FC = () => {
       {/* ═══════════════════════════════════════════════════════════
           CLOUD VS LOCAL — Slide-in + Parallax Mockup
           ═══════════════════════════════════════════════════════════ */}
-      <section className="bg-slate-50 py-24 relative overflow-hidden">
+      <section className="bg-slate-50 py-24 relative overflow-hidden content-lazy">
         <MorphBlob color="rgba(99,102,241,0.05)" size={450} style={{ top: '20%', right: '-5%' }} speed={14} />
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -653,11 +653,11 @@ export const LandingPage: React.FC = () => {
                   <div className="w-1.5 h-1.5 rounded-full bg-red-500" /><div className="w-1.5 h-1.5 rounded-full bg-yellow-500" /><div className="w-1.5 h-1.5 rounded-full bg-green-500" />
                   <span className="text-[8px] text-slate-500 ml-2">dghubschool.com/cloud</span>
                 </div>
-                <div className="w-full aspect-[16/10] bg-slate-900 rounded-b-lg overflow-hidden"><img src="/DASH10.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Cloud Dashboard" /></div>
+                <div className="w-full aspect-[16/10] bg-slate-900 rounded-b-lg overflow-hidden"><img src="/DASH10.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Cloud Dashboard" loading="lazy" /></div>
               </div>
               <div className="absolute -bottom-10 -right-4 w-44 z-20 hover:-translate-y-2 transition-all duration-300 real-tablet-mockup">
                 <div className="real-tablet-screen aspect-[4/3] bg-slate-900 overflow-hidden relative">
-                  <img src="/DASH13.png" className="w-full h-full object-cover" alt="Tablet sync" />
+                  <img src="/DASH13.png" className="w-full h-full object-cover" alt="Tablet sync" loading="lazy" />
                   <div className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
                 </div>
               </div>
@@ -669,7 +669,7 @@ export const LandingPage: React.FC = () => {
       {/* ═══════════════════════════════════════════════════════════
           PARENTS — 3D Rotate Phone + Stagger Cards
           ═══════════════════════════════════════════════════════════ */}
-      <section className="bg-white py-24 relative overflow-hidden border-t border-slate-100">
+      <section className="bg-white py-24 relative overflow-hidden border-t border-slate-100 content-lazy">
         <MorphBlob color="rgba(245,158,11,0.05)" size={400} style={{ bottom: '5%', left: '0%' }} speed={10} />
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div ref={parentsTitleRef} className="text-center mb-16 space-y-4 max-w-3xl mx-auto">
@@ -689,7 +689,7 @@ export const LandingPage: React.FC = () => {
                     <span className="text-[8px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">Live</span>
                   </div>
                   <div className="flex-grow flex flex-col justify-center items-center py-4 space-y-4">
-                    <img src="/student_card_preview.png" className="w-full max-h-32 object-contain rounded-lg shadow-sm border border-slate-100 bg-white" alt="Student Card" />
+                    <img src="/student_card_preview.png" className="w-full max-h-32 object-contain rounded-lg shadow-sm border border-slate-100 bg-white" alt="Student Card" loading="lazy" />
                     <div className="w-full bg-slate-900 text-white p-3 rounded-lg text-[9px] shadow-md border border-slate-800 space-y-1">
                       <div className="flex justify-between items-center opacity-70">
                         <span className="font-bold flex items-center gap-1"><Bell className="w-2.5 h-2.5 text-amber-500" /> {t.notifLabel}</span>
@@ -729,7 +729,7 @@ export const LandingPage: React.FC = () => {
       {/* ═══════════════════════════════════════════════════════════
           SCREENSHOTS — Alternating Slide-in + Parallax
           ═══════════════════════════════════════════════════════════ */}
-      <section className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-24 space-y-28">
+      <section className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-24 space-y-28 content-lazy">
         <div ref={screenshotsTitleRef} className="text-center mb-16 space-y-4">
           <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full">{t.screenshotsTitle}</div>
           <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight">{t.discoverFeatures}</h2>
@@ -773,7 +773,7 @@ export const LandingPage: React.FC = () => {
       {/* ═══════════════════════════════════════════════════════════
           ACCÈS FONCTIONNALITÉS — Redirection simple
           ═══════════════════════════════════════════════════════════ */}
-      <section id="features" className="bg-slate-50 border-y border-slate-200 py-16 relative overflow-hidden text-center">
+      <section id="features" className="bg-slate-50 border-y border-slate-200 py-16 relative overflow-hidden text-center content-lazy">
         <MorphBlob color="rgba(245,158,11,0.03)" size={350} style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} speed={8} />
         <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 space-y-6">
           <span className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
@@ -792,7 +792,7 @@ export const LandingPage: React.FC = () => {
           <div className="pt-4">
             <button 
               onClick={() => navigate(`/${lang}/features`)} 
-              className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-lg border border-amber-600 shadow-lg shadow-amber-500/10 active:scale-95 transition-all inline-flex items-center gap-2.5 cursor-pointer"
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-lg border border-amber-600 shadow-lg shadow-amber-500/10 active:scale-95 transition-all inline-flex items-center gap-2.5 cursor-pointer animate-pulse"
             >
               <span>{lang === 'fr' ? 'Découvrir toutes les fonctionnalités' : 'Discover all features'}</span>
               <ArrowRight className="w-4 h-4" />
@@ -804,7 +804,7 @@ export const LandingPage: React.FC = () => {
       {/* ═══════════════════════════════════════════════════════════
           STATS — Animated Counters
           ═══════════════════════════════════════════════════════════ */}
-      <section id="stats" className="bg-white py-20 relative">
+      <section id="stats" className="bg-white py-20 relative content-lazy">
         <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
           <div ref={statsSectionRef} className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20 max-w-5xl mx-auto">
             {stats.map((stat, index) => (
@@ -843,7 +843,7 @@ export const LandingPage: React.FC = () => {
       {/* ═══════════════════════════════════════════════════════════
           PRICING — Scale-in + Glow
           ═══════════════════════════════════════════════════════════ */}
-      <section id="pricing" className="bg-slate-50 border-t border-slate-200 py-20">
+      <section id="pricing" className="bg-slate-50 border-t border-slate-200 py-20 content-lazy">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div ref={pricingTitleRef} className="text-center mb-16 space-y-4">
             <h2 className="text-xs font-black uppercase tracking-widest text-amber-600">{t.pricingTitle}</h2>
@@ -878,7 +878,7 @@ export const LandingPage: React.FC = () => {
       {/* ═══════════════════════════════════════════════════════════
           NEWSROOM
           ═══════════════════════════════════════════════════════════ */}
-      <section id="newsroom" className="bg-slate-50 border-t border-slate-200/60 py-20 relative">
+      <section id="newsroom" className="bg-slate-50 border-t border-slate-200/60 py-20 relative content-lazy">
         <div ref={newsroomRef} className="max-w-7xl mx-auto px-6 md:px-8">
           <div className="text-center mb-16 space-y-4">
             <span className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200/40 text-amber-700 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full">{t.newsroomTitle}</span>
@@ -904,7 +904,7 @@ export const LandingPage: React.FC = () => {
       {/* ═══════════════════════════════════════════════════════════
           FINAL CTA — Inverse Parallax
           ═══════════════════════════════════════════════════════════ */}
-      <section className="bg-white py-20 text-center relative overflow-hidden">
+      <section className="bg-white py-20 text-center relative overflow-hidden content-lazy">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           <div ref={ctaRef} className="bg-slate-950 text-white rounded-xl p-12 md:p-20 relative overflow-hidden shadow-2xl border border-slate-900 group">
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-amber-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none group-hover:bg-amber-500/15 transition-colors duration-500" />

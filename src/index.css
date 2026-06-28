@@ -2760,4 +2760,26 @@ select {
   border: 1.5px solid rgba(0, 0, 0, 0.08);
 }
 
+/* ── Performance Optimizations ── */
+.content-lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: 10px 800px;
+}
+
+/* Smooth Scrolling & Text Rendering */
+html {
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* GPU acceleration hooks to prevent layout shifting/jank */
+.gpu-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+
 
