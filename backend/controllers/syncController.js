@@ -23,13 +23,27 @@ async function syncFromFrontend(req, res) {
         if (yearRow) {
             academicYearId = yearRow.id;
         } else if (appSettings && appSettings.schoolYear === yearName) {
-            // Uniquement si l'utilisateur est en train de configurer/créer explicitement cette année via les paramètres
-            const { data: newRow } = await supabase.from('academic_years').insert({
-                school_slug: schoolSlug,
-                name: yearName,
-                is_current: true
-            }).select('id').single();
-            if (newRow) academicYearId = newRow.id;
+            // Sécurité : Compter le nombre d'années scolaires existantes pour l'école
+            const { count, error: countErr } = await supabase
+                .from('academic_years')
+                .select('id', { count: 'exact', head: true })
+                .eq('school_slug', schoolSlug);
+
+            const isNewSchool = !countErr && count === 0;
+            const isAdmin = ['admin', 'directeur', 'directeur_general'].includes(role);
+
+            // N'autoriser la création que si c'est la toute première initialisation (nouvelle école)
+            // OU si la demande provient d'un administrateur/directeur
+            if (isNewSchool || isAdmin) {
+                const { data: newRow } = await supabase.from('academic_years').insert({
+                    school_slug: schoolSlug,
+                    name: yearName,
+                    is_current: true
+                }).select('id').single();
+                if (newRow) academicYearId = newRow.id;
+            } else {
+                console.warn(`🔒 [Sync POST] Tentative non autorisée de création d'année scolaire par le rôle: ${role}`);
+            }
         }
     }
 
@@ -464,21 +478,6 @@ async function syncToFrontend(req, res) {
         const { data: yearRow } = await supabase.from('academic_years').select('id').eq('school_slug', schoolSlug).eq('name', yearName).single();
         if (yearRow) {
             academicYearId = yearRow.id;
-        } else {
-            // Uniquement si l'école a déjà des années enregistrées (sécurité rétrocompatibilité)
-            const { count, error: countErr } = await supabase
-                .from('academic_years')
-                .select('id', { count: 'exact', head: true })
-                .eq('school_slug', schoolSlug);
-
-            if (!countErr && count > 0) {
-                const { data: newRow } = await supabase.from('academic_years').insert({
-                    school_slug: schoolSlug,
-                    name: yearName,
-                    is_current: true
-                }).select('id').single();
-                if (newRow) academicYearId = newRow.id;
-            }
         }
     }
 
