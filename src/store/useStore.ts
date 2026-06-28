@@ -422,6 +422,7 @@ export const useStore = create<AppState>()(
               schoolLogo: result.user.school_logo || null,
               schoolStamp: null,
               schoolName: result.user.school_name || 'Établissement',
+              lastSyncTimestamp: 0, // Reset pour forcer la synchronisation cloud
             });
 
             set({ user: loggedUser, isAuthenticated: true, currentPage: targetPage });
@@ -462,7 +463,8 @@ export const useStore = create<AppState>()(
           announcementReads: [],
           matieres: [],
           classeMatieres: [],
-          notes: []
+          notes: [],
+          lastSyncTimestamp: 0 // Reset pour la prochaine session
         });
       },
 
