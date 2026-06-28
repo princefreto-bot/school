@@ -101,7 +101,7 @@ const TEXTS = {
     parentsFocus2Desc: "Notifications en temps réel pour les absences, retards et rappels de paiements via SMS et Push.",
     parentsFocus3: "Reçus Numériques",
     parentsFocus3Desc: "Accès instantané aux reçus de paiement numérisés dès leur enregistrement par l'école.",
-    recommended: 'Recommandé par +150 directeurs',
+    recommended: 'Recommandé par +15 directeurs',
     liveBadge: 'Activité Live',
     liveSub: 'Reçus SMS envoyés 24h/24',
     secBadge: 'Sécurité & QR Code',
@@ -189,7 +189,7 @@ const TEXTS = {
     parentsFocus2Desc: "Real-time notifications for absences, lateness, and payment reminders via SMS and Push.",
     parentsFocus3: "Digital Receipts",
     parentsFocus3Desc: "Instant access to digitized payment receipts as soon as they are recorded by the school.",
-    recommended: 'Recommended by +150 principals',
+    recommended: 'Recommended by +15 principals',
     liveBadge: 'Live Activity',
     liveSub: 'SMS receipts sent 24/7',
     scrollExplore: 'Scroll to explore',
@@ -769,29 +769,32 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          BENTO GRID — Scale-in stagger
+          ACCÈS FONCTIONNALITÉS — Redirection simple
           ═══════════════════════════════════════════════════════════ */}
-      <section id="features" className="bg-slate-50 border-y border-slate-200 py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div ref={bentoTitleRef} className="text-center mb-16 space-y-4">
-            <h2 className="text-xs font-black uppercase tracking-widest text-amber-600">{t.features}</h2>
-            <h3 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase">{t.bentoTitle}</h3>
-            <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm">{t.bentoDesc}</p>
-          </div>
-          <div ref={bentoGridRef} className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {features.map((feat, idx) => (
-              <div key={idx} className={`border p-6 md:p-8 rounded-xl shadow-sm flex flex-col justify-between transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:border-amber-500/40 relative overflow-hidden group ${feat.className}`}>
-                <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div>
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg inline-block group-hover:scale-110 transition-transform duration-300">{feat.icon}</div>
-                    <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full">{feat.badge}</span>
-                  </div>
-                  <h3 className="text-lg md:text-xl font-black uppercase tracking-tight mb-3 group-hover:text-amber-500 transition-colors">{feat.title}</h3>
-                  <p className="text-xs md:text-sm opacity-80 leading-relaxed font-medium">{feat.description}</p>
-                </div>
-              </div>
-            ))}
+      <section id="features" className="bg-slate-50 border-y border-slate-200 py-16 relative overflow-hidden text-center">
+        <MorphBlob color="rgba(245,158,11,0.03)" size={350} style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} speed={8} />
+        <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 space-y-6">
+          <span className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
+            ⚙️ {t.features}
+          </span>
+          <h3 ref={bentoTitleRef} className="text-2xl md:text-4xl font-black text-slate-950 tracking-tight uppercase max-w-2xl mx-auto leading-tight">
+            {lang === 'fr' 
+              ? "Tout ce dont votre école a besoin, dans un seul outil complet" 
+              : "Everything your school needs, in one comprehensive tool"}
+          </h3>
+          <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm leading-relaxed">
+            {lang === 'fr' 
+              ? "De la gestion de la caisse aux bulletins scolaires, en passant par le portail parents et le contrôle d'accès QR code." 
+              : "From cash management and grade reports to the parent portal and QR code access control."}
+          </p>
+          <div className="pt-4">
+            <button 
+              onClick={() => navigate(`/${lang}/features`)} 
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-lg border border-amber-600 shadow-lg shadow-amber-500/10 active:scale-95 transition-all inline-flex items-center gap-2.5 cursor-pointer"
+            >
+              <span>{lang === 'fr' ? 'Découvrir toutes les fonctionnalités' : 'Discover all features'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </section>
