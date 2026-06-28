@@ -647,19 +647,21 @@ export const LandingPage: React.FC = () => {
                 ))}
               </ul>
             </div>
-            <div ref={cloudMockupRef} className="relative flex justify-center items-center">
-              <div className="w-full max-w-md border border-slate-200 bg-slate-950 p-2 rounded-xl shadow-2xl overflow-hidden group hover:scale-[1.01] transition-transform duration-300">
-                <div className="w-full bg-slate-900 text-slate-400 rounded-t-lg p-2 px-3 text-left font-mono text-[9px] flex items-center gap-1.5 border-b border-slate-800 select-none">
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-500" /><div className="w-1.5 h-1.5 rounded-full bg-yellow-500" /><div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                  <span className="text-[8px] text-slate-500 ml-2">dghubschool.com/cloud</span>
+            <div ref={cloudMockupRef} className="relative flex justify-center items-center py-12">
+              <div className="relative w-72 h-72 flex items-center justify-center">
+                {/* Outer spinning dashed sync circle */}
+                <div className="absolute inset-0 border-2 border-dashed border-indigo-500/20 rounded-full animate-[spin_30s_linear_infinite]" />
+                {/* Inner counter-rotating dashed circle */}
+                <div className="absolute inset-6 border border-dashed border-indigo-500/30 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
+                {/* Main continuous active loading circle */}
+                <div className="absolute inset-12 border-4 border-indigo-500/10 border-t-indigo-500 border-r-indigo-500/50 rounded-full animate-spin" />
+                {/* Pulsing Central Cloud Device */}
+                <div className="relative z-10 w-28 h-28 bg-gradient-to-tr from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl shadow-indigo-500/40 hover:scale-105 transition-transform duration-300">
+                  <Shield className="w-12 h-12 text-white animate-pulse" />
                 </div>
-                <div className="w-full aspect-[16/10] bg-slate-900 rounded-b-lg overflow-hidden"><img src="/DASH10.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Cloud Dashboard" loading="lazy" /></div>
-              </div>
-              <div className="absolute -bottom-10 -right-4 w-44 z-20 hover:-translate-y-2 transition-all duration-300 real-tablet-mockup">
-                <div className="real-tablet-screen aspect-[4/3] bg-slate-900 overflow-hidden relative">
-                  <img src="/DASH13.png" className="w-full h-full object-cover" alt="Tablet sync" loading="lazy" />
-                  <div className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                </div>
+                {/* Floating data syncing dots */}
+                <div className="absolute top-10 left-16 w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
+                <div className="absolute bottom-12 right-20 w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping [animation-delay:0.7s]" />
               </div>
             </div>
           </div>
@@ -677,29 +679,14 @@ export const LandingPage: React.FC = () => {
             <p className="text-slate-500 text-sm md:text-base">{t.parentsFocusDesc}</p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-            <div ref={parentsPhoneRef} className="lg:col-span-5 flex justify-center relative" style={{ perspective: '800px' }}>
-              <div className="w-64 z-10 transform lg:-rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-300 real-phone-mockup">
-                <div className="real-phone-mockup-buttons" />
-                <div className="real-phone-screen aspect-[9/16] p-4 flex flex-col justify-between bg-slate-50 pt-8">
-                  <div className="w-full flex items-center justify-between border-b border-slate-100 pb-2">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center"><Users className="w-3 h-3 text-amber-600" /></div>
-                      <span className="text-[9px] font-black text-slate-800">Portail Parents</span>
-                    </div>
-                    <span className="text-[8px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">Live</span>
-                  </div>
-                  <div className="flex-grow flex flex-col justify-center items-center py-4 space-y-4">
-                    <img src="/student_card_preview.png" className="w-full max-h-32 object-contain rounded-lg shadow-sm border border-slate-100 bg-white" alt="Student Card" loading="lazy" />
-                    <div className="w-full bg-slate-900 text-white p-3 rounded-lg text-[9px] shadow-md border border-slate-800 space-y-1">
-                      <div className="flex justify-between items-center opacity-70">
-                        <span className="font-bold flex items-center gap-1"><Bell className="w-2.5 h-2.5 text-amber-500" /> {t.notifLabel}</span>
-                        <span>{t.justNow}</span>
-                      </div>
-                      <p className="font-medium text-slate-200 leading-snug">{t.parentNotif}</p>
-                    </div>
-                  </div>
-                  <div className="w-full bg-slate-100 text-center py-2 rounded-lg text-[8px] font-black text-slate-600 uppercase tracking-widest">{t.parentAccess}</div>
-                </div>
+            <div ref={parentsPhoneRef} className="lg:col-span-5 flex justify-center relative perspective-container">
+              <div className="w-full max-w-sm rounded-2xl incline-3d-image overflow-hidden bg-white">
+                <img 
+                  src="/DASH4.png" 
+                  className="w-full h-auto object-cover" 
+                  alt="Espace Familial" 
+                  loading="lazy" 
+                />
               </div>
             </div>
             <div ref={parentsCardsRef} className="lg:col-span-7 space-y-6">
