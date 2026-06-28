@@ -581,8 +581,9 @@ export const LandingPage: React.FC = () => {
                 <img src="/dashboard_preview.png" alt={t.realTimeDashboard} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" fetchPriority="high" />
               </div>
             </div>
-            <div ref={heroFloatPhoneRef} className="absolute -bottom-8 -left-4 w-40 hidden md:block border-4 border-slate-950 bg-slate-950 p-1.5 rounded-xl shadow-2xl z-20 hover:-translate-y-2 transition-all duration-300">
-              <div className="w-full aspect-[9/16] bg-slate-50 rounded-lg overflow-hidden relative flex items-center justify-center p-3 border border-slate-900">
+            <div ref={heroFloatPhoneRef} className="absolute -bottom-8 -left-4 w-40 hidden md:block z-20 hover:-translate-y-2 transition-all duration-300 real-phone-mockup">
+              <div className="real-phone-mockup-buttons" />
+              <div className="real-phone-screen aspect-[9/16] p-1 flex items-center justify-center bg-white">
                 <img src="/student_card_preview.png" className="w-full h-auto object-contain bg-white rounded-lg shadow-sm border border-slate-100" alt="Student Card" />
               </div>
             </div>
@@ -654,8 +655,8 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <div className="w-full aspect-[16/10] bg-slate-900 rounded-b-lg overflow-hidden"><img src="/DASH10.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Cloud Dashboard" /></div>
               </div>
-              <div className="absolute -bottom-10 -right-4 w-44 border-4 border-slate-950 bg-slate-950 p-1.5 rounded-xl shadow-2xl z-20 hover:-translate-y-2 transition-all duration-300">
-                <div className="w-full aspect-[4/3] bg-slate-900 rounded-lg overflow-hidden relative">
+              <div className="absolute -bottom-10 -right-4 w-44 z-20 hover:-translate-y-2 transition-all duration-300 real-tablet-mockup">
+                <div className="real-tablet-screen aspect-[4/3] bg-slate-900 overflow-hidden relative">
                   <img src="/DASH13.png" className="w-full h-full object-cover" alt="Tablet sync" />
                   <div className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
                 </div>
@@ -677,8 +678,9 @@ export const LandingPage: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             <div ref={parentsPhoneRef} className="lg:col-span-5 flex justify-center relative" style={{ perspective: '800px' }}>
-              <div className="w-64 border-4 border-slate-950 bg-slate-950 p-2 rounded-2xl shadow-2xl relative z-10 transform lg:-rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-300">
-                <div className="w-full aspect-[9/16] bg-slate-50 rounded-xl overflow-hidden relative p-4 flex flex-col justify-between border border-slate-900">
+              <div className="w-64 z-10 transform lg:-rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-300 real-phone-mockup">
+                <div className="real-phone-mockup-buttons" />
+                <div className="real-phone-screen aspect-[9/16] p-4 flex flex-col justify-between bg-slate-50 pt-8">
                   <div className="w-full flex items-center justify-between border-b border-slate-100 pb-2">
                     <div className="flex items-center gap-1.5">
                       <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center"><Users className="w-3 h-3 text-amber-600" /></div>
