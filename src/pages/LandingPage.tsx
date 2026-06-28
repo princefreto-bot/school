@@ -296,13 +296,13 @@ export const LandingPage: React.FC = () => {
       if (cloudTextRef.current) {
         gsap.from(cloudTextRef.current, {
           opacity: 0, x: -60, duration: 1, ease: 'power3.out',
-          scrollTrigger: { trigger: cloudTextRef.current, start: 'top 85%' },
+          scrollTrigger: { trigger: cloudTextRef.current, start: 'top 95%' },
         });
       }
       if (cloudMockupRef.current) {
         gsap.from(cloudMockupRef.current, {
           opacity: 0, x: 60, duration: 1, ease: 'power3.out',
-          scrollTrigger: { trigger: cloudMockupRef.current, start: 'top 85%' },
+          scrollTrigger: { trigger: cloudMockupRef.current, start: 'top 95%' },
         });
         // Parallax on cloud mockup
         gsap.to(cloudMockupRef.current, {
@@ -316,20 +316,20 @@ export const LandingPage: React.FC = () => {
       if (parentsTitleRef.current) {
         gsap.from(parentsTitleRef.current, {
           opacity: 0, y: 40, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: parentsTitleRef.current, start: 'top 88%' },
+          scrollTrigger: { trigger: parentsTitleRef.current, start: 'top 95%' },
         });
       }
       if (parentsPhoneRef.current) {
         gsap.from(parentsPhoneRef.current, {
           opacity: 0, x: -50, rotateY: 15, duration: 1, ease: 'power3.out',
-          scrollTrigger: { trigger: parentsPhoneRef.current, start: 'top 85%' },
+          scrollTrigger: { trigger: parentsPhoneRef.current, start: 'top 95%' },
         });
       }
       if (parentsCardsRef.current) {
         const cards = parentsCardsRef.current.children;
         gsap.from(cards, {
           opacity: 0, x: 50, duration: 0.8, stagger: 0.15, ease: 'power3.out',
-          scrollTrigger: { trigger: parentsCardsRef.current, start: 'top 85%' },
+          scrollTrigger: { trigger: parentsCardsRef.current, start: 'top 95%' },
         });
       }
 
@@ -337,19 +337,19 @@ export const LandingPage: React.FC = () => {
       if (screenshotsTitleRef.current) {
         gsap.from(screenshotsTitleRef.current, {
           opacity: 0, y: 40, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: screenshotsTitleRef.current, start: 'top 88%' },
+          scrollTrigger: { trigger: screenshotsTitleRef.current, start: 'top 95%' },
         });
       }
       if (scan1TextRef.current) {
         gsap.from(scan1TextRef.current, {
           opacity: 0, x: -50, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: scan1TextRef.current, start: 'top 85%' },
+          scrollTrigger: { trigger: scan1TextRef.current, start: 'top 95%' },
         });
       }
       if (scan1ImgRef.current) {
         gsap.from(scan1ImgRef.current, {
           opacity: 0, x: 50, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: scan1ImgRef.current, start: 'top 85%' },
+          scrollTrigger: { trigger: scan1ImgRef.current, start: 'top 95%' },
         });
         gsap.to(scan1ImgRef.current, {
           y: -30, ease: 'none',
@@ -359,13 +359,13 @@ export const LandingPage: React.FC = () => {
       if (scan2TextRef.current) {
         gsap.from(scan2TextRef.current, {
           opacity: 0, x: 50, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: scan2TextRef.current, start: 'top 85%' },
+          scrollTrigger: { trigger: scan2TextRef.current, start: 'top 95%' },
         });
       }
       if (scan2ImgRef.current) {
         gsap.from(scan2ImgRef.current, {
           opacity: 0, x: -50, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: scan2ImgRef.current, start: 'top 85%' },
+          scrollTrigger: { trigger: scan2ImgRef.current, start: 'top 95%' },
         });
         gsap.to(scan2ImgRef.current, {
           y: -30, ease: 'none',
@@ -377,14 +377,14 @@ export const LandingPage: React.FC = () => {
       if (bentoTitleRef.current) {
         gsap.from(bentoTitleRef.current, {
           opacity: 0, y: 40, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: bentoTitleRef.current, start: 'top 88%' },
+          scrollTrigger: { trigger: bentoTitleRef.current, start: 'top 98%' },
         });
       }
       if (bentoGridRef.current) {
         const cards = bentoGridRef.current.children;
         gsap.from(cards, {
           opacity: 0, scale: 0.9, y: 30, duration: 0.7, stagger: 0.12, ease: 'power3.out',
-          scrollTrigger: { trigger: bentoGridRef.current, start: 'top 85%' },
+          scrollTrigger: { trigger: bentoGridRef.current, start: 'top 98%' },
         });
       }
 
@@ -392,7 +392,7 @@ export const LandingPage: React.FC = () => {
       if (statsSectionRef.current) {
         gsap.from(statsSectionRef.current, {
           opacity: 0, y: 40, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: statsSectionRef.current, start: 'top 88%' },
+          scrollTrigger: { trigger: statsSectionRef.current, start: 'top 95%' },
         });
       }
 
@@ -400,13 +400,13 @@ export const LandingPage: React.FC = () => {
       if (pricingTitleRef.current) {
         gsap.from(pricingTitleRef.current, {
           opacity: 0, y: 40, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: pricingTitleRef.current, start: 'top 88%' },
+          scrollTrigger: { trigger: pricingTitleRef.current, start: 'top 95%' },
         });
       }
       if (pricingCardRef.current) {
         gsap.from(pricingCardRef.current, {
           opacity: 0, scale: 0.92, y: 30, duration: 1, ease: 'power3.out',
-          scrollTrigger: { trigger: pricingCardRef.current, start: 'top 85%' },
+          scrollTrigger: { trigger: pricingCardRef.current, start: 'top 95%' },
         });
       }
 
@@ -414,7 +414,7 @@ export const LandingPage: React.FC = () => {
       if (newsroomRef.current) {
         gsap.from(newsroomRef.current, {
           opacity: 0, y: 40, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: newsroomRef.current, start: 'top 88%' },
+          scrollTrigger: { trigger: newsroomRef.current, start: 'top 95%' },
         });
       }
 
@@ -422,7 +422,7 @@ export const LandingPage: React.FC = () => {
       if (ctaRef.current) {
         gsap.from(ctaRef.current, {
           opacity: 0, scale: 0.95, y: 30, duration: 1, ease: 'power3.out',
-          scrollTrigger: { trigger: ctaRef.current, start: 'top 85%' },
+          scrollTrigger: { trigger: ctaRef.current, start: 'top 95%' },
         });
         // Inverse parallax on CTA
         gsap.to(ctaRef.current, {
@@ -432,7 +432,15 @@ export const LandingPage: React.FC = () => {
       }
     });
 
-    return () => ctx.revert();
+    // Refresh ScrollTrigger positions after page fully loads and layout stabilizes
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 1000);
+
+    return () => {
+      ctx.revert();
+      clearTimeout(refreshTimer);
+    };
   }, []);
 
   const stats = [
