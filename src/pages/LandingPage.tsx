@@ -222,7 +222,7 @@ export const LandingPage: React.FC = () => {
   const heroSubRef = useRef<HTMLParagraphElement>(null);
   const heroCTARef = useRef<HTMLDivElement>(null);
   const heroProofRef = useRef<HTMLDivElement>(null);
-  const heroMockupRef = useRef<HTMLDivElement>(null);
+  const heroBgRef = useRef<HTMLDivElement>(null);
   const heroFloatPhoneRef = useRef<HTMLDivElement>(null);
   const heroLiveRef = useRef<HTMLDivElement>(null);
   const cloudTextRef = useRef<HTMLDivElement>(null);
@@ -274,22 +274,33 @@ export const LandingPage: React.FC = () => {
         .from(heroSubRef.current, { opacity: 0, y: 40, duration: 0.9 }, 0.5)
         .from(heroCTARef.current, { opacity: 0, y: 30, duration: 0.8 }, 0.7)
         .from(heroProofRef.current, { opacity: 0, y: 20, duration: 0.7 }, 0.9)
-        .from(heroMockupRef.current, { opacity: 0, scale: 0.92, y: 30, duration: 1.1 }, 0.4)
+        .from(heroBgRef.current, { opacity: 0, scale: 1.08, duration: 1.5, ease: 'power2.out' }, 0.2)
         .from(heroFloatPhoneRef.current, { opacity: 0, x: -30, y: 20, duration: 0.8 }, 1.0)
         .from(heroLiveRef.current, { opacity: 0, x: 20, scale: 0.9, duration: 0.6 }, 1.2);
 
       // HERO Parallax
       if (heroRef.current) {
-        gsap.to(heroMockupRef.current, {
-          y: -60,
-          ease: 'none',
-          scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 1.5 },
-        });
-        gsap.to(heroFloatPhoneRef.current, {
-          y: -30,
-          ease: 'none',
-          scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 2 },
-        });
+        if (heroBgRef.current) {
+          gsap.to(heroBgRef.current, {
+            y: 80,
+            ease: 'none',
+            scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: true },
+          });
+        }
+        if (heroFloatPhoneRef.current) {
+          gsap.to(heroFloatPhoneRef.current, {
+            y: -50,
+            ease: 'none',
+            scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 1.5 },
+          });
+        }
+        if (heroLiveRef.current) {
+          gsap.to(heroLiveRef.current, {
+            y: -80,
+            ease: 'none',
+            scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 2 },
+          });
+        }
       }
 
       // CLOUD section
@@ -464,14 +475,10 @@ export const LandingPage: React.FC = () => {
         .animate-scan { animation: scan 4s linear infinite; }
       `}</style>
 
-      {/* ── MORPH BLOBS (Parallax background decorations) ── */}
-      <MorphBlob color="rgba(245,158,11,0.06)" size={600} style={{ top: '-5%', left: '-10%' }} speed={10} />
-      <MorphBlob color="rgba(99,102,241,0.04)" size={500} style={{ bottom: '10%', right: '-8%' }} speed={12} />
-
       {/* ── HEADER ── */}
-      <header className="sticky top-4 z-50 mx-auto w-full max-w-7xl px-4 md:px-8">
-        <div className="border border-slate-200/80 bg-white/75 backdrop-blur-md rounded-xl shadow-lg shadow-slate-100/50">
-          <nav className="w-full flex items-center justify-between p-3 px-6">
+      <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/75 backdrop-blur-md shadow-sm">
+        <div className="w-full px-4 md:px-12">
+          <nav className="w-full flex items-center justify-between p-3 px-2">
             <div className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl select-none cursor-pointer" onClick={() => navigate(`/${lang}`)}>
               <img src="/logo.svg" className="w-8 h-8 object-contain" alt="Logo" />
               <span>DGhub<span className="text-slate-900">School</span></span>
@@ -507,7 +514,7 @@ export const LandingPage: React.FC = () => {
             </button>
           </nav>
           {mobileMenuOpen && (
-            <div className="md:hidden border-t border-slate-100 bg-white p-5 space-y-4 flex flex-col rounded-b-xl">
+            <div className="md:hidden border-t border-slate-100 bg-white pb-5 pt-4 space-y-4 flex flex-col">
               <button onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/features`); }} className="text-sm font-bold text-slate-700 hover:text-amber-500 py-2 text-left cursor-pointer">{t.features}</button>
               <button onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/pricing`); }} className="text-sm font-bold text-slate-700 hover:text-amber-500 py-2 text-left cursor-pointer">{t.pricing}</button>
               <button onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/a-propos`); }} className="text-sm font-bold text-slate-700 hover:text-amber-500 py-2 text-left cursor-pointer">{t.about}</button>
@@ -528,70 +535,71 @@ export const LandingPage: React.FC = () => {
 
       <main className="flex-grow flex flex-col">
 
-      {/* ═══════════════════════════════════════════════════════════
-          HERO — Multi-layer Parallax + Staggered Entrance
-          ═══════════════════════════════════════════════════════════ */}
-      <section ref={heroRef} className="relative z-10 max-w-7xl mx-auto w-full px-4 md:px-8 pt-12 md:pt-20 pb-20 flex-grow">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center text-center lg:text-left">
-          <div className="lg:col-span-7 space-y-6 md:space-y-8">
-            <h1 ref={heroTitleRef} className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.12]">
-              {t.heroTitlePart1}
-              <span className="relative text-amber-600 inline-block px-1">{t.heroTitleHighlight}</span>
-              {t.heroTitlePart2}
-            </h1>
-            <p ref={heroSubRef} className="text-sm md:text-base lg:text-lg text-slate-500 max-w-2xl lg:mx-0 mx-auto leading-relaxed">{t.heroSubtitle}</p>
-            <div ref={heroCTARef} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto lg:justify-start justify-center">
-              {isAuthenticated ? (
-                <button onClick={() => navigate(`/${lang}/app`)} className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group">
-                  {t.accessPortals} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+      {/* ── HERO ── */}
+      <section ref={heroRef} className="relative z-10 w-full overflow-hidden pt-16 md:pt-28 pb-20 md:pb-32 flex-grow flex items-center justify-center">
+        {/* Background Image Container with Parallax and Overlay */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <div
+            ref={heroBgRef}
+            className="absolute inset-0 bg-cover opacity-[0.14]"
+            style={{
+              backgroundImage: "url('/dashboard_preview.png')",
+              backgroundPosition: 'center top',
+              transform: 'scale(1.05)',
+            }}
+          />
+          {/* Subtle overlay to ensure high contrast for the text */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/85 to-white" />
+        </div>
+
+        <div className="max-w-5xl mx-auto w-full px-4 md:px-8 text-center relative z-10 space-y-8">
+          <h1 ref={heroTitleRef} className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.1] max-w-4xl mx-auto">
+            {t.heroTitlePart1}
+            <span className="relative text-amber-600 inline-block px-1">{t.heroTitleHighlight}</span>
+            {t.heroTitlePart2}
+          </h1>
+          <p ref={heroSubRef} className="text-sm md:text-base lg:text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">{t.heroSubtitle}</p>
+          
+          <div ref={heroCTARef} className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
+            {isAuthenticated ? (
+              <button onClick={() => navigate(`/${lang}/app`)} className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group">
+                {t.accessPortals} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            ) : (
+              <>
+                <button onClick={() => navigate(`/${lang}/creer-compte`)} className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group">
+                  {t.createSchoolFree} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
-              ) : (
-                <>
-                  <button onClick={() => navigate(`/${lang}/creer-compte`)} className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-amber-600 shadow-xl shadow-amber-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer group">
-                    {t.createSchoolFree} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                  <button onClick={() => navigate(`/${lang}/login`)} className="w-full sm:w-auto bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-slate-200 active:scale-[0.98] transition-all cursor-pointer">{t.accessPortals}</button>
-                </>
-              )}
-            </div>
-            <div ref={heroProofRef} className="flex items-center gap-4 lg:justify-start justify-center pt-6 border-t border-slate-100 max-w-lg lg:mx-0 mx-auto">
-              <div className="flex -space-x-2.5">
-                <div className="w-9 h-9 rounded-full bg-slate-800 border-2 border-white flex items-center justify-center text-[10px] font-black text-white">CI</div>
-                <div className="w-9 h-9 rounded-full bg-amber-500 border-2 border-white flex items-center justify-center text-[10px] font-black text-slate-950">SN</div>
-                <div className="w-9 h-9 rounded-full bg-slate-950 border-2 border-white flex items-center justify-center text-[10px] font-black text-white">BF</div>
-              </div>
-              <div className="text-left">
-                <div className="flex items-center text-amber-500 gap-0.5">{[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-current" />)}</div>
-                <p className="text-[10px] font-black text-slate-800 tracking-wide uppercase">{t.recommended}</p>
-              </div>
-            </div>
+                <button onClick={() => navigate(`/${lang}/login`)} className="w-full sm:w-auto bg-white/80 backdrop-blur hover:bg-slate-50 text-slate-800 text-xs font-black uppercase tracking-widest px-8 py-5 rounded-lg border border-slate-200 active:scale-[0.98] transition-all cursor-pointer">{t.accessPortals}</button>
+              </>
+            )}
           </div>
 
-          {/* Hero Visual — Parallax mockup */}
-          <div className="lg:col-span-5 relative flex justify-center w-full">
-            <MorphBlob color="rgba(245,158,11,0.1)" size={350} style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} speed={8} />
-            <div ref={heroMockupRef} className="w-full max-w-lg border border-slate-200 bg-slate-50 p-2.5 rounded-xl shadow-2xl relative overflow-hidden group hover:scale-[1.01] hover:border-amber-500/20 transition-all duration-300">
-              <div className="w-full bg-slate-950 text-white rounded-t-lg p-3 text-left font-mono text-[9px] flex items-center justify-between border-b border-slate-800 select-none">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-red-500" /><div className="w-2 h-2 rounded-full bg-yellow-500" /><div className="w-2 h-2 rounded-full bg-green-500" />
-                  <span className="text-slate-500 text-[9px] ml-2">dghubschool.com/dashboard</span>
-                </div>
-              </div>
-              <div className="w-full aspect-[16/10] bg-white rounded-b-lg overflow-hidden relative">
-                <img src="/dashboard_preview.png" alt={t.realTimeDashboard} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" fetchPriority="high" />
-              </div>
+          <div ref={heroProofRef} className="flex items-center gap-4 justify-center pt-8 border-t border-slate-100 max-w-md mx-auto">
+            <div className="flex -space-x-2.5">
+              <div className="w-9 h-9 rounded-full bg-slate-800 border-2 border-white flex items-center justify-center text-[10px] font-black text-white">CI</div>
+              <div className="w-9 h-9 rounded-full bg-amber-500 border-2 border-white flex items-center justify-center text-[10px] font-black text-slate-950">SN</div>
+              <div className="w-9 h-9 rounded-full bg-slate-950 border-2 border-white flex items-center justify-center text-[10px] font-black text-white">BF</div>
             </div>
-            <div ref={heroFloatPhoneRef} className="absolute -bottom-8 -left-4 w-40 hidden md:block z-20 hover:-translate-y-2 transition-all duration-300 real-phone-mockup">
-              <div className="real-phone-mockup-buttons" />
-              <div className="real-phone-screen aspect-[9/16] p-1 flex items-center justify-center bg-white">
-                <img src="/student_card_preview.png" className="w-full h-auto object-contain bg-white rounded-lg shadow-sm border border-slate-100" alt="Student Card" />
-              </div>
-            </div>
-            <div ref={heroLiveRef} className="absolute -top-6 -right-6 bg-white border border-slate-200 p-3.5 px-4 rounded-xl shadow-lg z-20 hidden md:block hover:scale-105 transition-transform">
-              <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" /><span className="text-[10px] font-black uppercase tracking-wider text-slate-800">{t.liveBadge}</span></div>
-              <p className="text-[10px] text-slate-400 mt-1">{t.liveSub}</p>
+            <div className="text-left">
+              <div className="flex items-center text-amber-500 gap-0.5">{[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-current" />)}</div>
+              <p className="text-[10px] font-black text-slate-800 tracking-wide uppercase">{t.recommended}</p>
             </div>
           </div>
+        </div>
+
+        {/* Floating phone mockup on desktop */}
+        <div ref={heroFloatPhoneRef} className="absolute bottom-6 left-12 w-44 hidden lg:block z-20 hover:-translate-y-2 transition-all duration-300 real-phone-mockup">
+          <div className="real-phone-mockup-buttons" />
+          <div className="real-phone-screen aspect-[9/16] p-1 flex items-center justify-center bg-white">
+            <img src="/student_card_preview.png" className="w-full h-auto object-contain bg-white rounded-lg shadow-sm border border-slate-100" alt="Student Card" />
+          </div>
+        </div>
+
+        {/* Floating live activity badge on desktop */}
+        <div ref={heroLiveRef} className="absolute top-24 right-12 bg-white border border-slate-200 p-3.5 px-4 rounded-xl shadow-lg z-20 hidden lg:block hover:scale-105 transition-transform">
+          <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" /><span className="text-[10px] font-black uppercase tracking-wider text-slate-800">{t.liveBadge}</span></div>
+          <p className="text-[10px] text-slate-400 mt-1">{t.liveSub}</p>
         </div>
       </section>
 

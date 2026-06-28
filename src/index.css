@@ -2242,8 +2242,13 @@ select {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1400px;
-  margin: 0 auto;
+  transition: padding 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .features-nav-v2 {
+    padding: 14px 48px;
+  }
 }
 
 .features-logo-v2 {
@@ -2353,7 +2358,7 @@ select {
 
 /* ── Main Features Container ── */
 .features-main-v2 {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 40px 24px 80px;
 }
@@ -2800,6 +2805,16 @@ html {
   box-shadow: 
     -18px 28px 50px rgba(0, 0, 0, 0.22),
     -4px 10px 18px rgba(0, 0, 0, 0.14);
+}
+
+@media (max-width: 768px) {
+  .incline-3d-image {
+    transform: none !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+  }
+  .incline-3d-image:hover {
+    transform: scale(1.01) !important;
+  }
 }
 
 
