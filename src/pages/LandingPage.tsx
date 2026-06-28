@@ -275,151 +275,20 @@ export const LandingPage: React.FC = () => {
         .from(heroSubRef.current, { opacity: 0, y: 40, duration: 0.9 }, 0.5)
         .from(heroCTARef.current, { opacity: 0, y: 30, duration: 0.8 }, 0.7)
         .from(heroProofRef.current, { opacity: 0, y: 20, duration: 0.7 }, 0.9)
-        .from(heroBgRef.current, { opacity: 0, scale: 1.08, duration: 1.5, ease: 'power2.out' }, 0.2)
         .from(heroFloatPhoneRef.current, { opacity: 0, x: -30, y: 20, duration: 0.8 }, 1.0);
 
       // HERO Parallax
-      if (heroRef.current) {
-        if (heroBgRef.current) {
-          gsap.to(heroBgRef.current, {
-            y: 80,
-            ease: 'none',
-            scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: true },
-          });
-        }
-        if (heroFloatPhoneRef.current) {
-          gsap.to(heroFloatPhoneRef.current, {
-            y: -50,
-            ease: 'none',
-            scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 1.5 },
-          });
-        }
-
-      }
-
-      // CLOUD section
-      if (cloudTextRef.current) {
-        gsap.from(cloudTextRef.current, {
-          opacity: 0, x: -60, duration: 1, ease: 'power3.out',
-          scrollTrigger: { trigger: cloudTextRef.current, start: 'top 95%' },
-        });
-      }
-      if (cloudMockupRef.current) {
-        gsap.from(cloudMockupRef.current, {
-          opacity: 0, x: 60, duration: 1, ease: 'power3.out',
-          scrollTrigger: { trigger: cloudMockupRef.current, start: 'top 95%' },
-        });
-        // Parallax on cloud mockup
-        gsap.to(cloudMockupRef.current, {
-          y: -40,
+      if (heroRef.current && heroFloatPhoneRef.current) {
+        gsap.to(heroFloatPhoneRef.current, {
+          y: -50,
           ease: 'none',
-          scrollTrigger: { trigger: cloudMockupRef.current, start: 'top bottom', end: 'bottom top', scrub: 2 },
-        });
-      }
-
-      // PARENTS section
-      if (parentsTitleRef.current) {
-        gsap.from(parentsTitleRef.current, {
-          opacity: 0, y: 40, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: parentsTitleRef.current, start: 'top 95%' },
-        });
-      }
-
-      if (parentsCardsRef.current) {
-        const cards = parentsCardsRef.current.children;
-        gsap.from(cards, {
-          opacity: 0, x: 50, duration: 0.8, stagger: 0.15, ease: 'power3.out',
-          scrollTrigger: { trigger: parentsCardsRef.current, start: 'top 95%' },
-        });
-      }
-
-      // SCREENSHOTS section
-      if (screenshotsTitleRef.current) {
-        gsap.from(screenshotsTitleRef.current, {
-          opacity: 0, y: 40, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: screenshotsTitleRef.current, start: 'top 95%' },
-        });
-      }
-      if (scan1TextRef.current) {
-        gsap.from(scan1TextRef.current, {
-          opacity: 0, x: -50, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: scan1TextRef.current, start: 'top 95%' },
-        });
-      }
-      if (scan2TextRef.current) {
-        gsap.from(scan2TextRef.current, {
-          opacity: 0, x: 50, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: scan2TextRef.current, start: 'top 95%' },
-        });
-      }
-
-      // BENTO Grid
-      if (bentoTitleRef.current) {
-        gsap.from(bentoTitleRef.current, {
-          opacity: 0, y: 40, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: bentoTitleRef.current, start: 'top 98%' },
-        });
-      }
-      if (bentoGridRef.current) {
-        const cards = bentoGridRef.current.children;
-        gsap.from(cards, {
-          opacity: 0, scale: 0.9, y: 30, duration: 0.7, stagger: 0.12, ease: 'power3.out',
-          scrollTrigger: { trigger: bentoGridRef.current, start: 'top 98%' },
-        });
-      }
-
-      // STATS
-      if (statsSectionRef.current) {
-        gsap.from(statsSectionRef.current, {
-          opacity: 0, y: 40, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: statsSectionRef.current, start: 'top 95%' },
-        });
-      }
-
-      // PRICING
-      if (pricingTitleRef.current) {
-        gsap.from(pricingTitleRef.current, {
-          opacity: 0, y: 40, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: pricingTitleRef.current, start: 'top 95%' },
-        });
-      }
-      if (pricingCardRef.current) {
-        gsap.from(pricingCardRef.current, {
-          opacity: 0, scale: 0.92, y: 30, duration: 1, ease: 'power3.out',
-          scrollTrigger: { trigger: pricingCardRef.current, start: 'top 95%' },
-        });
-      }
-
-      // NEWSROOM
-      if (newsroomRef.current) {
-        gsap.from(newsroomRef.current, {
-          opacity: 0, y: 40, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: newsroomRef.current, start: 'top 95%' },
-        });
-      }
-
-      // CTA
-      if (ctaRef.current) {
-        gsap.from(ctaRef.current, {
-          opacity: 0, scale: 0.95, y: 30, duration: 1, ease: 'power3.out',
-          scrollTrigger: { trigger: ctaRef.current, start: 'top 95%' },
-        });
-        // Inverse parallax on CTA
-        gsap.to(ctaRef.current, {
-          y: -20, ease: 'none',
-          scrollTrigger: { trigger: ctaRef.current, start: 'top bottom', end: 'bottom top', scrub: 2 },
+          scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 1.5 },
         });
       }
     });
 
-    // Refresh ScrollTrigger positions after page fully loads and layout stabilizes
-    const refreshTimer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 1000);
-
     return () => {
       ctx.revert();
-      clearTimeout(refreshTimer);
     };
   }, []);
 
@@ -554,20 +423,8 @@ export const LandingPage: React.FC = () => {
 
       {/* ── HERO ── */}
       <section ref={heroRef} className="relative z-10 w-full overflow-hidden pt-16 md:pt-24 pb-20 md:pb-32 flex-grow flex items-center justify-center">
-        {/* Background Image Container with Parallax and Overlay */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div
-            ref={heroBgRef}
-            className="absolute inset-0 bg-cover opacity-[0.25]"
-            style={{
-              backgroundImage: "url('/dashboard_preview.png')",
-              backgroundPosition: 'center top',
-              transform: 'scale(1.05)',
-            }}
-          />
-          {/* Subtle overlay to ensure high contrast for the text */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/85 to-white" />
-        </div>
+        {/* Background Overlay */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-slate-50/60 via-slate-50/40 to-white" />
 
         <div className="max-w-7xl mx-auto w-full px-4 md:px-12 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
