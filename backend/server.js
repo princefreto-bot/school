@@ -58,6 +58,7 @@ app.use((req, res, next) => {
         "font-src 'self' https://fonts.gstatic.com",
         `img-src 'self' data: blob: ${supabaseUrl} ${backupSupabaseUrl}`,
         `connect-src 'self' ${supabaseUrl} ${backupSupabaseUrl} ws: wss: http://localhost:* http://127.0.0.1:*`,
+        "frame-src 'self' https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com",
         "object-src 'none'",
         "base-uri 'self'",
         "frame-ancestors 'self'"

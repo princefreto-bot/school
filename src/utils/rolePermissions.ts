@@ -18,19 +18,19 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
-        'gestion_academique', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins'
+        'gestion_academique', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins', 'rapports_academiques'
     ],
     admin: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
-        'gestion_academique', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins'
+        'gestion_academique', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins', 'rapports_academiques'
     ],
     directeur: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
-        'gestion_academique', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins'
+        'gestion_academique', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins', 'rapports_academiques'
     ],
     comptable: [
         'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
@@ -44,11 +44,11 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
     ],
     proviseur: [
         'dashboard', 'eleves', 'analyses', 'chat', 'scan_information',
-        'gestion_academique', 'saisie_notes', 'bulletins'
+        'gestion_academique', 'saisie_notes', 'bulletins', 'rapports_academiques'
     ],
     censeur: [
         'dashboard', 'eleves', 'analyses', 'chat', 'scan_information',
-        'gestion_academique', 'saisie_notes', 'bulletins'
+        'gestion_academique', 'saisie_notes', 'bulletins', 'rapports_academiques'
     ],
     parent: [
         'parent_dashboard', 'parent_historique', 'parent_recus',
