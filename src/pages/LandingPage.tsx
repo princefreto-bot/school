@@ -466,7 +466,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Right mockup column */}
-            <div ref={heroFloatPhoneRef} className="lg:col-span-5 relative flex items-center justify-center mt-12 lg:mt-0 select-none">
+            <div ref={heroFloatPhoneRef} className="lg:col-span-5 relative flex items-center justify-center mt-12 lg:mt-0 select-none px-4">
               {/* Background gradient shape */}
               <div className="absolute w-72 h-72 md:w-[450px] md:h-[450px] bg-gradient-to-tr from-amber-500/10 to-indigo-500/5 rounded-full blur-3xl -z-10" />
               
@@ -475,8 +475,8 @@ export const LandingPage: React.FC = () => {
                 <div className="absolute inset-0 bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-2 rotate-[-2deg] hover:rotate-0 transition-transform duration-500">
                   <img src="/dashboard_preview.png" className="w-full h-full object-cover rounded-xl" alt="Dashboard" />
                 </div>
-                {/* Floating front mockup (Student Card) */}
-                <div className="absolute -bottom-6 -right-6 w-44 aspect-[9/16] bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-1.5 rotate-[5deg] hover:rotate-0 transition-transform duration-500 hover:scale-105">
+                {/* Floating front mockup (Student QR Card) - Responsive size and positions */}
+                <div className="absolute -bottom-4 -right-4 w-32 sm:w-44 aspect-[9/16] bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-1.5 rotate-[5deg] hover:rotate-0 transition-transform duration-500 hover:scale-105 z-10">
                   <img src="/student_card_preview.png" className="w-full h-full object-contain rounded-xl bg-white" alt="Student Card" />
                 </div>
               </div>
@@ -667,7 +667,7 @@ export const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
             
             {/* Left Collage Column */}
-            <div className="lg:col-span-6 flex justify-center relative select-none">
+            <div className="lg:col-span-6 flex justify-center relative select-none px-4">
               <div className="relative w-full max-w-lg aspect-[4/3.5] flex items-center justify-center">
                 {/* Collage Image 1 (top-left, tilted) */}
                 <div className="absolute top-0 left-4 w-[48%] aspect-[4/3] rounded-2xl shadow-xl overflow-hidden rotate-[-6deg] border-2 border-white bg-slate-50 hover:rotate-0 transition-transform duration-500 z-10">
@@ -686,14 +686,14 @@ export const LandingPage: React.FC = () => {
                 <div className="absolute bottom-4 left-4 w-[75%] aspect-[16/10] rounded-2xl shadow-2xl overflow-hidden rotate-[-2deg] border-2 border-white bg-slate-50 hover:rotate-0 transition-transform duration-500 z-30">
                   <img className="w-full h-full object-cover rounded-xl" src="/dashboard_preview.png" alt="Dashboard Collage" />
                   
-                  {/* Floating active school count badge */}
-                  <div className="absolute -bottom-2 -right-2 bg-amber-500 text-slate-950 rounded-2xl p-4.5 shadow-2xl flex items-center gap-3.5 border-2 border-white transform translate-x-2 translate-y-2 hover:scale-105 transition-transform duration-300">
-                    <div className="w-10 h-10 rounded-xl bg-slate-950/10 flex items-center justify-center">
-                      <Users className="w-5 h-5 text-slate-950" />
+                  {/* Floating active school count badge - responsive padding and placement */}
+                  <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-amber-500 text-slate-950 rounded-2xl p-3 sm:p-4.5 shadow-2xl flex items-center gap-2 sm:gap-3.5 border-2 border-white transform translate-x-1 translate-y-1 sm:translate-x-2 sm:translate-y-2 hover:scale-105 transition-transform duration-300">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-950/10 flex items-center justify-center shrink-0">
+                      <Users className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-slate-950" />
                     </div>
                     <div className="text-left">
-                      <h6 className="text-sm font-black leading-none">+15 Écoles</h6>
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-800 block mt-1">Partenaires Actives</span>
+                      <h6 className="text-xs sm:text-sm font-black leading-none">+15 Écoles</h6>
+                      <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-slate-800 block mt-1">Partenaires Actives</span>
                     </div>
                   </div>
                 </div>
@@ -999,7 +999,7 @@ export const LandingPage: React.FC = () => {
           <div ref={ctaRef} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             {/* Left Card - Get Started */}
-            <div className="relative overflow-hidden bg-slate-950 text-white rounded-2xl p-8 md:p-12 shadow-xl border border-slate-900 group flex flex-col justify-between h-80 lg:h-96">
+            <div className="relative overflow-hidden bg-slate-950 text-white rounded-2xl p-8 md:p-12 shadow-xl border border-slate-900 group flex flex-col justify-between min-h-[22rem] lg:h-96">
               {/* Decorative shapes */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-[60px] pointer-events-none group-hover:bg-amber-500/15 transition-colors duration-500" />
               
@@ -1031,7 +1031,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Right Card - Contact / Community */}
-            <div className="relative overflow-hidden bg-indigo-950 text-white rounded-2xl p-8 md:p-12 shadow-xl border border-indigo-900 group flex flex-col justify-between h-80 lg:h-96">
+            <div className="relative overflow-hidden bg-indigo-950 text-white rounded-2xl p-8 md:p-12 shadow-xl border border-indigo-900 group flex flex-col justify-between min-h-[22rem] lg:h-96">
               {/* Decorative shapes */}
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/15 rounded-full blur-[60px] pointer-events-none group-hover:bg-indigo-500/20 transition-colors duration-500" />
               
