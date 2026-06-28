@@ -731,6 +731,27 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           </div>
         </div>
       )}
+
+      {/* ── Overlay de Chargement Initial Minimaliste ── */}
+      {isSyncing && lastSyncTimestamp === 0 && (
+        <div className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-xl font-sans select-none pointer-events-auto">
+          <div className="text-center space-y-5 animate-in fade-in zoom-in-95 duration-350">
+            <div className="flex justify-center">
+              <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/25 rounded-none flex items-center justify-center text-amber-500 shadow-lg shadow-amber-500/5">
+                <RefreshCw className="w-8 h-8 animate-spin" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="text-sm font-black text-slate-100 uppercase tracking-wider">
+                Chargement de vos données...
+              </h3>
+              <p className="text-[10px] text-amber-500 font-bold uppercase tracking-widest animate-pulse">
+                DGhubSchool — Synchronisation Cloud
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

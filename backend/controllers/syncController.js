@@ -496,19 +496,38 @@ async function syncToFrontend(req, res) {
             return data || [];
         };
 
-        const students = await fetchTable('students', 'nom', true, true);
-        const payments = await fetchTable('payments', 'date', false, true);
-        const presences = await fetchTable('presences', 'date', false, true);
-        const logs = await fetchTable('activity_logs', 'date_heure', false, true);
-        const links = await fetchTable('parent_student');
-        const announcements = await fetchTable('announcements', 'created_at');
-        const dbMatieres = await fetchTable('matieres', null, false, true);
-        const dbClasseMatieres = await fetchTable('classe_matieres', null, false, true);
-        const dbNotes = await fetchTable('notes', null, false, true);
-        const announcementReads = await fetchTable('announcement_reads');
-        const { data: academicYearsData } = await supabase.from('academic_years').select('*').eq('school_slug', schoolSlug).order('name', { ascending: false });
-        
-        const { data: appSettings, error: settingsError } = await supabase.from(tbl('app_settings')).select('*').single();
+        const [
+            students,
+            payments,
+            presences,
+            logs,
+            links,
+            announcements,
+            dbMatieres,
+            dbClasseMatieres,
+            dbNotes,
+            announcementReads,
+            academicYearsRes,
+            settingsRes
+        ] = await Promise.all([
+            fetchTable('students', 'nom', true, true),
+            fetchTable('payments', 'date', false, true),
+            fetchTable('presences', 'date', false, true),
+            fetchTable('activity_logs', 'date_heure', false, true),
+            fetchTable('parent_student'),
+            fetchTable('announcements', 'created_at'),
+            fetchTable('matieres', null, false, true),
+            fetchTable('classe_matieres', null, false, true),
+            fetchTable('notes', null, false, true),
+            fetchTable('announcement_reads'),
+            supabase.from('academic_years').select('*').eq('school_slug', schoolSlug).order('name', { ascending: false }),
+            supabase.from(tbl('app_settings')).select('*').single()
+        ]);
+
+        const academicYearsData = academicYearsRes.data || [];
+        const appSettings = settingsRes.data;
+        const settingsError = settingsRes.error;
+
         console.log('🎨 [Sync GET] appSettings from DB:', {
             found: !!appSettings,
             error: settingsError?.message || null,
