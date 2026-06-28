@@ -18,11 +18,15 @@ export interface ClassAcademicStats {
     periods: Record<string, {
         successCount: number;
         successRate: number;
+        failureCount: number;
+        failureRate: number;
         average: number;
     }>;
     annual: {
         successCount: number;
         successRate: number;
+        failureCount: number;
+        failureRate: number;
         average: number;
     };
 }
@@ -59,7 +63,13 @@ export const computeAcademicStats = (
             ? ['SEMESTRE 1', 'SEMESTRE 2']
             : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'];
 
-        const periodStats: Record<string, { successCount: number; successRate: number; average: number }> = {};
+        const periodStats: Record<string, { 
+            successCount: number; 
+            successRate: number; 
+            failureCount: number; 
+            failureRate: number; 
+            average: number; 
+        }> = {};
         const studentPeriodAverages: Record<string, Record<string, number>> = {};
 
         // Initialiser l'historique des moyennes par élève
@@ -74,7 +84,7 @@ export const computeAcademicStats = (
             );
 
             if (classNotes.length === 0) {
-                periodStats[period] = { successCount: 0, successRate: 0, average: 0 };
+                periodStats[period] = { successCount: 0, successRate: 0, failureCount: 0, failureRate: 0, average: 0 };
                 return;
             }
 
@@ -93,6 +103,8 @@ export const computeAcademicStats = (
             
             const successCount = activeBulletins.filter(b => b.moyenneGenerale >= 10).length;
             const successRate = totalActive > 0 ? (successCount / totalActive) * 100 : 0;
+            const failureCount = totalActive - successCount;
+            const failureRate = totalActive > 0 ? (failureCount / totalActive) * 100 : 0;
             const average = totalActive > 0 ? activeBulletins.reduce((sum, b) => sum + b.moyenneGenerale, 0) / totalActive : 0;
 
             activeBulletins.forEach(b => {
@@ -102,6 +114,8 @@ export const computeAcademicStats = (
             periodStats[period] = {
                 successCount,
                 successRate: parseFloat(successRate.toFixed(2)),
+                failureCount,
+                failureRate: parseFloat(failureRate.toFixed(2)),
                 average: parseFloat(average.toFixed(2))
             };
         });
@@ -124,6 +138,8 @@ export const computeAcademicStats = (
         });
 
         const annualSuccessRate = annualTotalActive > 0 ? (annualSuccessCount / annualTotalActive) * 100 : 0;
+        const annualFailureCount = annualTotalActive - annualSuccessCount;
+        const annualFailureRate = annualTotalActive > 0 ? (annualFailureCount / annualTotalActive) * 100 : 0;
         const annualAverage = annualTotalActive > 0 ? annualSum / annualTotalActive : 0;
 
         return {
@@ -134,6 +150,8 @@ export const computeAcademicStats = (
             annual: {
                 successCount: annualSuccessCount,
                 successRate: parseFloat(annualSuccessRate.toFixed(2)),
+                failureCount: annualFailureCount,
+                failureRate: parseFloat(annualFailureRate.toFixed(2)),
                 average: parseFloat(annualAverage.toFixed(2))
             }
         };
@@ -256,10 +274,16 @@ export const generateAcademicReportPDF = (
         const collegeRows = collegeStats.map(c => [
             c.classe.toUpperCase(),
             c.effectif.toString(),
-            c.periods['TRIMESTRE 1'] ? `${c.periods['TRIMESTRE 1'].successCount} (${c.periods['TRIMESTRE 1'].successRate}%)` : '0 (0%)',
-            c.periods['TRIMESTRE 2'] ? `${c.periods['TRIMESTRE 2'].successCount} (${c.periods['TRIMESTRE 2'].successRate}%)` : '0 (0%)',
-            c.periods['TRIMESTRE 3'] ? `${c.periods['TRIMESTRE 3'].successCount} (${c.periods['TRIMESTRE 3'].successRate}%)` : '0 (0%)',
-            `${c.annual.successCount} (${c.annual.successRate}%)`
+            c.periods['TRIMESTRE 1'] 
+                ? `Réu: ${c.periods['TRIMESTRE 1'].successCount} (${c.periods['TRIMESTRE 1'].successRate}%)\nÉch: ${c.periods['TRIMESTRE 1'].failureCount} (${c.periods['TRIMESTRE 1'].failureRate}%)`
+                : 'Réu: 0 (0%)\nÉch: 0 (0%)',
+            c.periods['TRIMESTRE 2'] 
+                ? `Réu: ${c.periods['TRIMESTRE 2'].successCount} (${c.periods['TRIMESTRE 2'].successRate}%)\nÉch: ${c.periods['TRIMESTRE 2'].failureCount} (${c.periods['TRIMESTRE 2'].failureRate}%)`
+                : 'Réu: 0 (0%)\nÉch: 0 (0%)',
+            c.periods['TRIMESTRE 3'] 
+                ? `Réu: ${c.periods['TRIMESTRE 3'].successCount} (${c.periods['TRIMESTRE 3'].successRate}%)\nÉch: ${c.periods['TRIMESTRE 3'].failureCount} (${c.periods['TRIMESTRE 3'].failureRate}%)`
+                : 'Réu: 0 (0%)\nÉch: 0 (0%)',
+            `Réu: ${c.annual.successCount} (${c.annual.successRate}%)\nÉch: ${c.annual.failureCount} (${c.annual.failureRate}%)`
         ]);
 
         autoTable(doc, {
@@ -268,8 +292,8 @@ export const generateAcademicReportPDF = (
             body: collegeRows,
             theme: 'plain',
             styles: { 
-                fontSize: 9, 
-                cellPadding: 4, 
+                fontSize: 8, 
+                cellPadding: 3, 
                 font: 'times',
                 textColor: [0, 0, 0],
                 lineColor: [0, 0, 0],
@@ -304,9 +328,13 @@ export const generateAcademicReportPDF = (
         const lyceeRows = lyceeStats.map(c => [
             c.classe.toUpperCase(),
             c.effectif.toString(),
-            c.periods['SEMESTRE 1'] ? `${c.periods['SEMESTRE 1'].successCount} (${c.periods['SEMESTRE 1'].successRate}%)` : '0 (0%)',
-            c.periods['SEMERE 2'] || c.periods['SEMESTRE 2'] ? `${(c.periods['SEMESTRE 2'] || c.periods['SEMESTRE 2']).successCount} (${(c.periods['SEMESTRE 2'] || c.periods['SEMESTRE 2']).successRate}%)` : '0 (0%)',
-            `${c.annual.successCount} (${c.annual.successRate}%)`
+            c.periods['SEMESTRE 1'] 
+                ? `Réu: ${c.periods['SEMESTRE 1'].successCount} (${c.periods['SEMESTRE 1'].successRate}%)\nÉch: ${c.periods['SEMESTRE 1'].failureCount} (${c.periods['SEMESTRE 1'].failureRate}%)`
+                : 'Réu: 0 (0%)\nÉch: 0 (0%)',
+            (c.periods['SEMESTRE 2'] || c.periods['SEMERE 2']) 
+                ? `Réu: ${(c.periods['SEMESTRE 2'] || c.periods['SEMERE 2']).successCount} (${(c.periods['SEMESTRE 2'] || c.periods['SEMERE 2']).successRate}%)\nÉch: ${(c.periods['SEMESTRE 2'] || c.periods['SEMERE 2']).failureCount} (${(c.periods['SEMESTRE 2'] || c.periods['SEMERE 2']).failureRate}%)`
+                : 'Réu: 0 (0%)\nÉch: 0 (0%)',
+            `Réu: ${c.annual.successCount} (${c.annual.successRate}%)\nÉch: ${c.annual.failureCount} (${c.annual.failureRate}%)`
         ]);
 
         autoTable(doc, {
@@ -315,8 +343,8 @@ export const generateAcademicReportPDF = (
             body: lyceeRows,
             theme: 'plain',
             styles: { 
-                fontSize: 9, 
-                cellPadding: 4, 
+                fontSize: 8, 
+                cellPadding: 3, 
                 font: 'times',
                 textColor: [0, 0, 0],
                 lineColor: [0, 0, 0],

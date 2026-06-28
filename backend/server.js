@@ -56,7 +56,7 @@ app.use((req, res, next) => {
         "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.sheetjs.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
-        `img-src 'self' data: blob: ${supabaseUrl} ${backupSupabaseUrl}`,
+        `img-src 'self' data: blob: ${supabaseUrl} ${backupSupabaseUrl} https://img.youtube.com https://i.ytimg.com`,
         `connect-src 'self' ${supabaseUrl} ${backupSupabaseUrl} ws: wss: http://localhost:* http://127.0.0.1:*`,
         "frame-src 'self' https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com",
         "object-src 'none'",

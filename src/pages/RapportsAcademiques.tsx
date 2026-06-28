@@ -44,7 +44,23 @@ export const RapportsAcademiques: React.FC = () => {
         if (activeClassesWithAverages.length === 0) return 0;
         const totalRatesSum = activeClassesWithAverages.reduce((sum, s) => sum + s.annual.successRate, 0);
         return parseFloat((totalRatesSum / activeClassesWithAverages.length).toFixed(2));
-    }, [stats]);
+    }, [stats]);    const renderStatsCell = (periodData?: { successCount: number; successRate: number; failureCount: number; failureRate: number }, isRight = false) => {
+        const success = periodData?.successCount || 0;
+        const successPct = periodData?.successRate || 0;
+        const failure = periodData?.failureCount || 0;
+        const failurePct = periodData?.failureRate || 0;
+        
+        return (
+            <div className={`text-xs space-y-0.5 ${isRight ? 'text-right' : ''}`}>
+                <div className="font-semibold text-emerald-600 dark:text-emerald-450">
+                    Réu: <span className="font-black text-slate-900 dark:text-white">{success}</span> <span className="text-slate-400">({successPct}%)</span>
+                </div>
+                <div className="font-semibold text-rose-500 dark:text-rose-455">
+                    Éch: <span className="font-black text-slate-700 dark:text-slate-300">{failure}</span> <span className="text-slate-400">({failurePct}%)</span>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className="space-y-6 max-w-6xl mx-auto pb-20 animate-slideUp">
@@ -67,7 +83,7 @@ export const RapportsAcademiques: React.FC = () => {
                             Analysez les taux de réussite par classe et téléchargez le bilan officiel imprimable en noir et blanc.
                         </p>
                     </div>
-
+ 
                     <button
                         onClick={handleDownloadPDF}
                         disabled={stats.length === 0}
@@ -78,22 +94,22 @@ export const RapportsAcademiques: React.FC = () => {
                     </button>
                 </div>
             </div>
-
+ 
             {/* ── KPIs ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="border border-slate-900/10 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 rounded-[24px] flex items-center justify-between group hover:border-slate-400 dark:hover:border-slate-600 transition-colors shadow-sm">
                     <div>
-                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Effectif Total (Collège & Lycée)</p>
+                        <p className="text-[10px] font-black text-slate-445 dark:text-slate-500 uppercase tracking-widest mb-1">Effectif Total (Collège & Lycée)</p>
                         <p className="text-3xl font-black tracking-tighter text-slate-950 dark:text-white">{totalStudentsCount} élèves</p>
                     </div>
                     <div className="w-12 h-12 rounded-[1rem] bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700">
                         <BookOpen className="w-6 h-6 text-slate-600 dark:text-slate-400" />
                     </div>
                 </div>
-
+ 
                 <div className="border border-slate-900/10 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 rounded-[24px] flex items-center justify-between group hover:border-slate-400 dark:hover:border-slate-600 transition-colors shadow-sm">
                     <div>
-                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Taux de Réussite Annuel Global</p>
+                        <p className="text-[10px] font-black text-slate-445 dark:text-slate-500 uppercase tracking-widest mb-1">Taux de Réussite Annuel Global</p>
                         <p className="text-3xl font-black tracking-tighter text-slate-950 dark:text-white">{overallSuccessRate}%</p>
                     </div>
                     <div className="w-12 h-12 rounded-[1rem] bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700">
@@ -101,7 +117,7 @@ export const RapportsAcademiques: React.FC = () => {
                     </div>
                 </div>
             </div>
-
+ 
             {/* ── TABS ── */}
             <div className="flex gap-2 p-1.5 bg-slate-100 dark:bg-slate-900/50 rounded-2xl border border-slate-200/50 dark:border-slate-800 w-fit">
                 <button
@@ -127,7 +143,7 @@ export const RapportsAcademiques: React.FC = () => {
                     Lycée (Semestres)
                 </button>
             </div>
-
+ 
             {/* ── TABLE PREVIEW — BLACK & WHITE ÉPURÉ ── */}
             <div className="border border-slate-900/10 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[28px] p-6 sm:p-8 shadow-sm">
                 
@@ -139,7 +155,7 @@ export const RapportsAcademiques: React.FC = () => {
                         Session {schoolYear}
                     </span>
                 </div>
-
+ 
                 <div className="overflow-x-auto">
                     {activeTab === 'college' ? (
                         collegeStats.length === 0 ? (
@@ -152,10 +168,10 @@ export const RapportsAcademiques: React.FC = () => {
                                     <tr className="border-b border-slate-905 dark:border-slate-800">
                                         <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Classe</th>
                                         <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Effectif</th>
-                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Trimestre 1 (Réussite)</th>
-                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Trimestre 2 (Réussite)</th>
-                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Trimestre 3 (Réussite)</th>
-                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest text-right">Taux Annuel</th>
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Trimestre 1</th>
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Trimestre 2</th>
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Trimestre 3</th>
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest text-right">Bilan Annuel</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
@@ -163,29 +179,17 @@ export const RapportsAcademiques: React.FC = () => {
                                         <tr key={c.classe} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                                             <td className="py-4 px-4 font-black text-slate-900 dark:text-white">{c.classe.toUpperCase()}</td>
                                             <td className="py-4 px-4 font-bold text-slate-500">{c.effectif} élèves</td>
-                                            <td className="py-4 px-4 font-bold">
-                                                {c.periods['TRIMESTRE 1']?.successCount || 0}
-                                                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal ml-1">
-                                                    ({c.periods['TRIMESTRE 1']?.successRate || 0}%)
-                                                </span>
+                                            <td className="py-4 px-4">
+                                                {renderStatsCell(c.periods['TRIMESTRE 1'])}
                                             </td>
-                                            <td className="py-4 px-4 font-bold">
-                                                {c.periods['TRIMESTRE 2']?.successCount || 0}
-                                                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal ml-1">
-                                                    ({c.periods['TRIMESTRE 2']?.successRate || 0}%)
-                                                </span>
+                                            <td className="py-4 px-4">
+                                                {renderStatsCell(c.periods['TRIMESTRE 2'])}
                                             </td>
-                                            <td className="py-4 px-4 font-bold">
-                                                {c.periods['TRIMESTRE 3']?.successCount || 0}
-                                                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal ml-1">
-                                                    ({c.periods['TRIMESTRE 3']?.successRate || 0}%)
-                                                </span>
+                                            <td className="py-4 px-4">
+                                                {renderStatsCell(c.periods['TRIMESTRE 3'])}
                                             </td>
-                                            <td className="py-4 px-4 text-right font-black text-slate-950 dark:text-white">
-                                                {c.annual.successCount}
-                                                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal ml-1">
-                                                    ({c.annual.successRate}%)
-                                                </span>
+                                            <td className="py-4 px-4">
+                                                {renderStatsCell(c.annual, true)}
                                             </td>
                                         </tr>
                                     ))}
@@ -203,9 +207,9 @@ export const RapportsAcademiques: React.FC = () => {
                                     <tr className="border-b border-slate-905 dark:border-slate-800">
                                         <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Classe</th>
                                         <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Effectif</th>
-                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Semestre 1 (Réussite)</th>
-                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Semestre 2 (Réussite)</th>
-                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest text-right">Taux Annuel</th>
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Semestre 1</th>
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Semestre 2</th>
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest text-right">Bilan Annuel</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
@@ -213,23 +217,14 @@ export const RapportsAcademiques: React.FC = () => {
                                         <tr key={c.classe} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                                             <td className="py-4 px-4 font-black text-slate-900 dark:text-white">{c.classe.toUpperCase()}</td>
                                             <td className="py-4 px-4 font-bold text-slate-500">{c.effectif} élèves</td>
-                                            <td className="py-4 px-4 font-bold">
-                                                {c.periods['SEMESTRE 1']?.successCount || 0}
-                                                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal ml-1">
-                                                    ({c.periods['SEMESTRE 1']?.successRate || 0}%)
-                                                </span>
+                                            <td className="py-4 px-4">
+                                                {renderStatsCell(c.periods['SEMESTRE 1'])}
                                             </td>
-                                            <td className="py-4 px-4 font-bold">
-                                                {c.periods['SEMESTRE 2']?.successCount || 0}
-                                                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal ml-1">
-                                                    ({c.periods['SEMESTRE 2']?.successRate || 0}%)
-                                                </span>
+                                            <td className="py-4 px-4">
+                                                {renderStatsCell(c.periods['SEMESTRE 2'] || c.periods['SEMERE 2'])}
                                             </td>
-                                            <td className="py-4 px-4 text-right font-black text-slate-950 dark:text-white">
-                                                {c.annual.successCount}
-                                                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal ml-1">
-                                                    ({c.annual.successRate}%)
-                                                </span>
+                                            <td className="py-4 px-4">
+                                                {renderStatsCell(c.annual, true)}
                                             </td>
                                         </tr>
                                     ))}
@@ -239,7 +234,7 @@ export const RapportsAcademiques: React.FC = () => {
                     )}
                 </div>
             </div>
-
+ 
         </div>
     );
 };
