@@ -37,6 +37,16 @@ export const MorphBlob: React.FC<MorphBlobProps> = ({
     const path = pathRef.current;
     if (!path) return;
 
+    // Detect mobile or low performance preference to bypass continuous rendering loop
+    const isMobileOrLowEnd = typeof window !== 'undefined' && (
+      window.innerWidth < 768 ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+
+    if (isMobileOrLowEnd) {
+      return;
+    }
+
     let currentIndex = 0;
 
     const morphToNext = () => {

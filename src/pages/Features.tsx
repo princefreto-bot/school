@@ -347,6 +347,13 @@ const FeatureRow: React.FC<FeatureRowProps> = ({ feature, index, isReversed }) =
     const points = pointsRef.current;
     if (!row || !image || !text) return;
 
+    const isMobileOrLowEnd = typeof window !== 'undefined' && (
+      window.innerWidth < 768 ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+
+    if (isMobileOrLowEnd) return;
+
     const ctx = gsap.context(() => {
       // Directional reveal: image slides from its side, text from opposite
       const imgDir = isReversed ? 60 : -60;
@@ -496,6 +503,13 @@ export const Features: React.FC = () => {
 
   // GSAP animations
   useEffect(() => {
+    const isMobileOrLowEnd = typeof window !== 'undefined' && (
+      window.innerWidth < 768 ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+
+    if (isMobileOrLowEnd) return;
+
     const ctx = gsap.context(() => {
       // Hero entrance
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });

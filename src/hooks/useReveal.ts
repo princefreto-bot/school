@@ -34,6 +34,22 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>(options: UseRe
     const el = ref.current;
     if (!el) return;
 
+    // Detect mobile or reduced motion preference to bypass heavy animations
+    const isMobileOrLowEnd = typeof window !== 'undefined' && (
+      window.innerWidth < 768 ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+
+    if (isMobileOrLowEnd) {
+      if (mode === 'stagger-children') {
+        const children = el.children;
+        gsap.set(children, { opacity: 1, y: 0, x: 0, scale: 1 });
+      } else {
+        gsap.set(el, { opacity: 1, y: 0, x: 0, scale: 1 });
+      }
+      return;
+    }
+
     let fromVars: gsap.TweenVars = { opacity: 0 };
     const toVars: gsap.TweenVars = { opacity: 1, duration, delay, ease: 'power3.out' };
 
@@ -107,3 +123,4 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>(options: UseRe
 
   return ref;
 }
+

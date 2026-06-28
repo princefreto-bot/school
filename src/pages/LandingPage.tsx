@@ -259,6 +259,13 @@ export const LandingPage: React.FC = () => {
 
   // ── GSAP Master Timeline ──
   useEffect(() => {
+    const isMobileOrLowEnd = typeof window !== 'undefined' && (
+      window.innerWidth < 768 ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+
+    if (isMobileOrLowEnd) return;
+
     const ctx = gsap.context(() => {
       // HERO entrance animation
       const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
