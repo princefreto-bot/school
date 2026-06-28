@@ -1053,7 +1053,7 @@ export const LandingPage: React.FC = () => {
 
               <div className="pt-6 relative z-10 text-left">
                 <a 
-                  href="https://wa.me/22890814178"
+                  href="https://wa.me/22872473027"
                   target="_blank"
                   rel="noreferrer"
                   className="bg-white hover:bg-slate-100 text-indigo-950 text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-lg border border-slate-200 shadow-xl active:scale-[0.98] transition-all inline-flex items-center gap-2 cursor-pointer"
