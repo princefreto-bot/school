@@ -1,16 +1,22 @@
 // ============================================================
-// PAGE FONCTIONNALITÉS — Layout alterné Image / Description
-// Animations au défilement via IntersectionObserver
+// PAGE FONCTIONNALITÉS — Immersive Parallax + GSAP ScrollTrigger
+// Réécriture complète avec animations directionnelles,
+// parallax différentiel, et line-draw separators
 // ============================================================
 import React, { useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   ArrowLeft, ArrowRight,
   Users, CreditCard, SearchCheck,
   FolderOpen, History, MessageSquare,
-  Megaphone, Database, Settings, CreditCard as CardIcon
+  Megaphone, Database, Settings, CreditCard as CardIcon,
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
+import { MorphBlob } from '../components/MorphBlob';
+
+gsap.registerPlugin(ScrollTrigger);
 
 // ── Définition des 10 fonctionnalités ──────────────────────
 const featuresFr = [
@@ -328,75 +334,125 @@ interface FeatureRowProps {
 
 const FeatureRow: React.FC<FeatureRowProps> = ({ feature, index, isReversed }) => {
   const rowRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+  const separatorRef = useRef<HTMLDivElement>(null);
+  const pointsRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
-    const el = rowRef.current;
-    if (!el) return;
+    const row = rowRef.current;
+    const image = imageRef.current;
+    const text = textRef.current;
+    const separator = separatorRef.current;
+    const points = pointsRef.current;
+    if (!row || !image || !text) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add('feat-visible');
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+    const ctx = gsap.context(() => {
+      // Directional reveal: image slides from its side, text from opposite
+      const imgDir = isReversed ? 60 : -60;
+      const textDir = isReversed ? -50 : 50;
+
+      gsap.from(image, {
+        opacity: 0, x: imgDir, duration: 1, ease: 'power3.out',
+        scrollTrigger: { trigger: row, start: 'top 85%' },
+      });
+
+      gsap.from(text, {
+        opacity: 0, x: textDir, duration: 1, ease: 'power3.out', delay: 0.15,
+        scrollTrigger: { trigger: row, start: 'top 85%' },
+      });
+
+      // Parallax on image
+      gsap.to(image, {
+        y: -25,
+        ease: 'none',
+        scrollTrigger: { trigger: row, start: 'top bottom', end: 'bottom top', scrub: 2 },
+      });
+
+      // Stagger bullet points
+      if (points && points.children.length > 0) {
+        gsap.from(points.children, {
+          opacity: 0, scale: 0.85, y: 15,
+          duration: 0.5, stagger: 0.1, ease: 'back.out(1.5)',
+          scrollTrigger: { trigger: points, start: 'top 90%' },
+        });
+      }
+
+      // Draw-line separator animation
+      if (separator) {
+        gsap.from(separator, {
+          scaleX: 0,
+          duration: 0.8,
+          ease: 'power2.inOut',
+          scrollTrigger: { trigger: separator, start: 'top 95%' },
+        });
+      }
+    });
+
+    return () => ctx.revert();
+  }, [isReversed]);
 
   const Icon = feature.icon;
 
   return (
-    <div
-      ref={rowRef}
-      className={`feat-row ${isReversed ? 'feat-row--reversed' : ''}`}
-      style={{ '--feat-color': feature.color } as React.CSSProperties}
-    >
-      {/* ── Image Side ── */}
-      <div className="feat-image-wrap">
-        <div className="feat-image-inner">
-          {/* Badge numéro */}
-          <div className="feat-number">
-            {String(index + 1).padStart(2, '0')}
+    <>
+      <div
+        ref={rowRef}
+        className={`feat-row-v2 ${isReversed ? 'feat-row-v2--reversed' : ''}`}
+        style={{ '--feat-color': feature.color } as React.CSSProperties}
+      >
+        {/* ── Image Side ── */}
+        <div ref={imageRef} className="feat-image-wrap-v2">
+          <div className="feat-image-inner-v2">
+            {/* Badge numéro */}
+            <div className="feat-number-v2" style={{ color: feature.color, borderColor: feature.color }}>
+              {String(index + 1).padStart(2, '0')}
+            </div>
+            <img
+              src={feature.image}
+              alt={feature.title}
+              className="feat-image-v2"
+              loading="lazy"
+            />
+            {/* Glow effect */}
+            <div className="feat-image-glow-v2" style={{ background: `${feature.color}15` }} />
           </div>
-          <img
-            src={feature.image}
-            alt={feature.title}
-            className="feat-image"
-            loading="lazy"
-          />
-          {/* Glow effect */}
-          <div className="feat-image-glow" style={{ background: `${feature.color}20` }} />
-        </div>
-      </div>
-
-      {/* ── Text Side ── */}
-      <div className="feat-text-wrap">
-        {/* Badge */}
-        <div className="feat-badge" style={{ color: feature.color, borderColor: `${feature.color}30`, background: `${feature.color}10` }}>
-          <Icon size={13} />
-          <span>{feature.badge}</span>
         </div>
 
-        {/* Title */}
-        <h2 className="feat-title">{feature.title}</h2>
+        {/* ── Text Side ── */}
+        <div ref={textRef} className="feat-text-wrap-v2">
+          {/* Badge */}
+          <div className="feat-badge-v2" style={{ color: feature.color, borderColor: `${feature.color}30`, background: `${feature.color}10` }}>
+            <Icon size={13} />
+            <span>{feature.badge}</span>
+          </div>
 
-        {/* Description */}
-        <p className="feat-description">{feature.description}</p>
+          {/* Title */}
+          <h2 className="feat-title-v2">{feature.title}</h2>
 
-        {/* Points */}
-        <ul className="feat-points">
-          {feature.points.map((point, i) => (
-            <li key={i} className="feat-point">
-              <span className="feat-point-dot" style={{ background: feature.color }} />
-              <span>{point}</span>
-            </li>
-          ))}
-        </ul>
+          {/* Description */}
+          <p className="feat-description-v2">{feature.description}</p>
+
+          {/* Points */}
+          <ul ref={pointsRef} className="feat-points-v2">
+            {feature.points.map((point, i) => (
+              <li key={i} className="feat-point-v2">
+                <span className="feat-point-dot-v2" style={{ background: feature.color }} />
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
-    </div>
+      {/* Draw-line separator */}
+      {index < 9 && (
+        <div
+          ref={separatorRef}
+          className="feat-separator-v2"
+          style={{ transformOrigin: isReversed ? 'right center' : 'left center' }}
+        />
+      )}
+    </>
   );
 };
 
@@ -407,6 +463,12 @@ export const Features: React.FC = () => {
 
   const features = lang === 'en' ? featuresEn : featuresFr;
 
+  const heroRef = useRef<HTMLElement>(null);
+  const heroTitleRef = useRef<HTMLHeadingElement>(null);
+  const heroSubRef = useRef<HTMLParagraphElement>(null);
+  const heroScrollRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+
   const texts = {
     fr: {
       back: 'Accueil',
@@ -416,6 +478,7 @@ export const Features: React.FC = () => {
       ctaTitle: 'Prêt à transformer votre école ?',
       ctaDesc: 'Démarrez votre essai gratuit de 40 jours et découvrez toutes ces fonctionnalités en action.',
       ctaBtn: 'Démarrer mon essai gratuit',
+      scrollExplore: 'Défilez pour explorer',
     },
     en: {
       back: 'Home',
@@ -425,18 +488,44 @@ export const Features: React.FC = () => {
       ctaTitle: 'Ready to transform your school?',
       ctaDesc: 'Start your free 40-day trial and discover all these features in action.',
       ctaBtn: 'Start my free trial',
+      scrollExplore: 'Scroll to explore',
     },
   };
 
-  const t = texts[lang] ?? texts.fr;
+  const t = texts[lang as keyof typeof texts] ?? texts.fr;
+
+  // GSAP animations
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Hero entrance
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      tl.from(heroTitleRef.current, { opacity: 0, y: 50, duration: 1 }, 0.2)
+        .from(heroSubRef.current, { opacity: 0, y: 30, duration: 0.8 }, 0.5)
+        .from(heroScrollRef.current, { opacity: 0, y: 20, duration: 0.6 }, 0.8);
+
+      // CTA section
+      if (ctaRef.current) {
+        gsap.from(ctaRef.current, {
+          opacity: 0, scale: 0.95, y: 30, duration: 1, ease: 'power3.out',
+          scrollTrigger: { trigger: ctaRef.current, start: 'top 85%' },
+        });
+        gsap.to(ctaRef.current, {
+          y: -15, ease: 'none',
+          scrollTrigger: { trigger: ctaRef.current, start: 'top bottom', end: 'bottom top', scrub: 2 },
+        });
+      }
+    });
+
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <div className="features-page">
+    <div className="features-page-v2">
       {/* ── Header ── */}
-      <header className="features-header">
-        <nav className="features-nav">
+      <header className="features-header-v2">
+        <nav className="features-nav-v2">
           <div
-            className="features-logo"
+            className="features-logo-v2"
             onClick={() => navigate(`/${lang}`)}
           >
             <img src="/logo.svg" className="w-8 h-8 object-contain" alt="Logo" />
@@ -444,7 +533,7 @@ export const Features: React.FC = () => {
           </div>
           <button
             onClick={() => navigate(`/${lang}`)}
-            className="features-back-btn"
+            className="features-back-btn-v2"
           >
             <ArrowLeft size={16} />
             <span>{t.back}</span>
@@ -453,57 +542,52 @@ export const Features: React.FC = () => {
       </header>
 
       {/* ── Hero ── */}
-      <section className="features-hero">
-        <div className="features-hero-inner">
-          <div className="features-hero-badge">
+      <section ref={heroRef} className="features-hero-v2">
+        <MorphBlob color="rgba(245,158,11,0.06)" size={550} style={{ top: '-20%', left: '-15%' }} speed={10} />
+        <MorphBlob color="rgba(99,102,241,0.04)" size={400} style={{ bottom: '-15%', right: '-10%' }} speed={14} />
+        <div className="features-hero-inner-v2">
+          <div className="features-hero-badge-v2">
             {t.badge}
           </div>
-          <h1 className="features-hero-title">{t.title}</h1>
-          <p className="features-hero-subtitle">{t.subtitle}</p>
+          <h1 ref={heroTitleRef} className="features-hero-title-v2">{t.title}</h1>
+          <p ref={heroSubRef} className="features-hero-subtitle-v2">{t.subtitle}</p>
 
           {/* Scroll indicator */}
-          <div className="features-scroll-indicator">
-            <div className="features-scroll-dot" />
-            <span>{lang === 'fr' ? 'Défilez pour explorer' : 'Scroll to explore'}</span>
+          <div ref={heroScrollRef} className="features-scroll-indicator-v2">
+            <div className="features-scroll-dot-v2" />
+            <span>{t.scrollExplore}</span>
           </div>
         </div>
-
-        {/* Decorative blobs */}
-        <div className="feat-blob feat-blob-1" />
-        <div className="feat-blob feat-blob-2" />
       </section>
 
       {/* ── Features List ── */}
-      <main className="features-main">
+      <main className="features-main-v2">
         {features.map((feature, index) => (
-          <React.Fragment key={index}>
-            <FeatureRow
-              feature={feature}
-              index={index}
-              isReversed={index % 2 !== 0}
-            />
-            {/* Separateur subtil entre les items (sauf dernier) */}
-            {index < features.length - 1 && (
-              <div className="feat-separator" />
-            )}
-          </React.Fragment>
+          <FeatureRow
+            key={index}
+            feature={feature}
+            index={index}
+            isReversed={index % 2 !== 0}
+          />
         ))}
       </main>
 
-      {/* ── CTA Section ── */}
-      <section className="features-cta-section">
-        <div className="features-cta-inner">
-          <h2 className="features-cta-title">{t.ctaTitle}</h2>
-          <p className="features-cta-desc">{t.ctaDesc}</p>
-          <button
-            onClick={() => navigate(`/${lang}/creer-compte`)}
-            className="features-cta-btn"
-          >
-            <span>{t.ctaBtn}</span>
-            <ArrowRight size={18} />
-          </button>
+      {/* ── CTA Section — Inverse Parallax ── */}
+      <section className="features-cta-section-v2">
+        <div ref={ctaRef} className="features-cta-card-v2">
+          <div className="features-cta-glow-v2" />
+          <div className="features-cta-inner-v2">
+            <h2 className="features-cta-title-v2">{t.ctaTitle}</h2>
+            <p className="features-cta-desc-v2">{t.ctaDesc}</p>
+            <button
+              onClick={() => navigate(`/${lang}/creer-compte`)}
+              className="features-cta-btn-v2"
+            >
+              <span>{t.ctaBtn}</span>
+              <ArrowRight size={18} />
+            </button>
+          </div>
         </div>
-        <div className="feat-blob feat-blob-cta" />
       </section>
 
       <Footer />
