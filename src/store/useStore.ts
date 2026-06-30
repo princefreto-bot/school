@@ -670,7 +670,7 @@ export const useStore = create<AppState>()(
       // ── Paramètres ───────────────────────────────────────
       schoolName: 'Établissement Scolaire',
       setSchoolName: (name) => set({ schoolName: name }),
-      schoolYear: '2025-2026',
+      schoolYear: '2024-2025',
       setSchoolYear: (year) => set({ schoolYear: year }),
       messageRemerciement:
         "Nous vous remercions sincèrement pour votre ponctualité dans le règlement de la scolarité. Votre soutien contribue au bon fonctionnement de notre établissement.",
@@ -726,12 +726,12 @@ export const useStore = create<AppState>()(
       settings: {
         seuilDeuxiemeTranche: 70,
         schoolName: 'Établissement Scolaire',
-        schoolYear: '2025-2026',
+        schoolYear: '2024-2025',
         messageRemerciement: "Nous vous remercions sincèrement pour votre ponctualité dans le règlement de la scolarité. Votre soutien contribue au bon fonctionnement de notre établissement.",
         messageRappel: "Nous vous rappelons cordialement que le règlement du solde de scolarité est attendu. Veuillez régulariser votre situation dans les meilleurs délais.",
         currency: 'FCFA',
         nomEcole: 'Établissement Scolaire',
-        anneScolaire: '2025-2026',
+        anneScolaire: '2024-2025',
         adresse: 'Adresse de l\'établissement',
         telephone: '+229 XX XX XX XX',
         email: 'contact@ecole.ci',

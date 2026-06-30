@@ -25,6 +25,6 @@ export function getAuthHeaders(): Record<string, string> {
     return {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        'x-academic-year': schoolYear || '2025-2026'
+        'x-academic-year': schoolYear || '2024-2025'
     };
 }
