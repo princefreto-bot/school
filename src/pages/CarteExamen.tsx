@@ -365,20 +365,16 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
         ctx.fillStyle = '#d21034'; // Rouge
         ctx.fillRect(detailsX, ribbonY + 4, ribbonW, 2);
 
-        // 7. Bande colorée d'examen (Arrondie pour un design non linéaire)
+        // 7. Titre Examen professionnel et sobre (sans fond coloré entouré)
         ctx.save();
-        ctx.fillStyle = examColor;
-        drawRoundRect(ctx, detailsX, 152, ribbonW, 42, 8);
-        ctx.fill();
-        
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
-        ctx.fillText(`CARTE DE CANDIDAT — EXAMEN : ${exam || 'OFFICIEL'}`, detailsX + ribbonW / 2, 152 + 27);
+        ctx.fillStyle = '#0f172a';
+        ctx.textAlign = 'left';
+        ctx.font = 'bold 18px Helvetica, Arial, sans-serif';
+        ctx.fillText(`CARTE DE CANDIDAT — EXAMEN : ${exam || 'OFFICIEL'}`, detailsX, 172);
         ctx.restore();
 
         // 8. Informations de l'élève (Textes agrandis pour une lisibilité parfaite)
-        let detailsY = 226;
+        let detailsY = 214;
         const lineSpacing = 32;
 
         ctx.save();
@@ -487,7 +483,7 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
         // PIED DE PAGE : Signature, Cachet, Sceau
         // ==========================================
         const sigX = 830;
-        const sigY = 460;
+        const sigY = 445;
 
         // 1. Sceau Officiel de l'État (bas gauche de la colonne droite)
         if (showSealOnCards && officialSeal) {
@@ -495,40 +491,40 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
             if (sealImg) {
                 ctx.save();
                 ctx.globalAlpha = 0.95;
-                ctx.drawImage(sealImg, detailsX + 5, 470, 100, 100);
+                ctx.drawImage(sealImg, detailsX + 5, 460, 110, 110);
                 ctx.restore();
             }
         }
 
-        // 2. Cachet de l'établissement - GRAND et superposé de manière réaliste (X = 720, Y = 430, Taille = 150x150)
+        // 2. Cachet de l'établissement - TRÈS GRAND et superposé de manière réaliste
         if (showStampOnCards && schoolStamp) {
             const stampImg = await loadImage(schoolStamp);
             if (stampImg) {
                 ctx.save();
-                ctx.globalAlpha = 0.82; // Transparence d'encre pour laisser deviner l'écriture en dessous
-                ctx.drawImage(stampImg, sigX - 110, sigY - 30, 150, 150);
+                ctx.globalAlpha = 0.82; // Transparence d'encre
+                ctx.drawImage(stampImg, sigX - 120, sigY - 45, 175, 175);
                 ctx.restore();
             }
         }
 
-        // 3. Signature du Directeur
+        // 3. Signature du Directeur - AGRANDIE pour fitter parfaitement
         if (showSignatureOnCards && directorSignature) {
             const sigImg = await loadImage(directorSignature);
             if (sigImg) {
-                ctx.drawImage(sigImg, sigX - 80, sigY + 5, 160, 55);
+                ctx.drawImage(sigImg, sigX - 100, sigY + 5, 200, 75);
             }
         }
 
-        // 4. Textes d'autorité
+        // 4. Textes d'autorité décalés vers le bas pour ne pas chevaucher
         ctx.save();
         ctx.textAlign = 'center';
         ctx.fillStyle = '#0f172a';
         ctx.font = 'bold 12px Helvetica, Arial, sans-serif';
-        ctx.fillText(directorName ? `M. ${directorName}` : 'Le Directeur', sigX, sigY + 80);
+        ctx.fillText(directorName ? `M. ${directorName}` : 'Le Directeur', sigX, sigY + 95);
 
         ctx.fillStyle = '#64748b';
         ctx.font = '600 11px Helvetica, Arial, sans-serif';
-        ctx.fillText(directorTitle || 'Directeur', sigX, sigY + 95);
+        ctx.fillText(directorTitle || 'Directeur', sigX, sigY + 110);
         ctx.restore();
     };
 
