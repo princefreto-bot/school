@@ -511,7 +511,7 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
         if (showSignatureOnCards && directorSignature) {
             const sigImg = await loadImage(directorSignature);
             if (sigImg) {
-                ctx.drawImage(sigImg, sigX - 100, sigY + 5, 200, 75);
+                ctx.drawImage(sigImg, sigX - 110, sigY, 220, 85);
             }
         }
 
@@ -519,12 +519,12 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
         ctx.save();
         ctx.textAlign = 'center';
         ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
-        ctx.fillText(directorName ? `M. ${directorName}` : 'Le Directeur', sigX, sigY + 100);
+        ctx.font = 'bold 20px Helvetica, Arial, sans-serif';
+        ctx.fillText(directorName ? `M. ${directorName}` : 'Le Directeur', sigX, sigY + 110);
 
-        ctx.fillStyle = '#64748b';
-        ctx.font = 'bold 13px Helvetica, Arial, sans-serif';
-        ctx.fillText(directorTitle || 'Directeur', sigX, sigY + 118);
+        ctx.fillStyle = '#475569';
+        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.fillText(directorTitle || 'Directeur', sigX, sigY + 130);
         ctx.restore();
     };
 
