@@ -25,6 +25,9 @@ export interface Student {
   adsn?: string;
   statutElv?: 'NOUVEAU' | 'ANCIEN' | 'REDOUBLANT';
   dateNaissance?: string;
+  lieuNaissance?: string;
+  nationalite?: string;
+  numeroTable?: string;
   acteNaissanceUrl?: string;
   photoUrl?: string;  // Photo passeport de l'élève (base64 data URL)
   cycle: Cycle;
@@ -107,6 +110,13 @@ export interface AppSettings extends AdminSettings {
   schoolEmail?: string; // Utilisé dans pdfUtils.ts
   academicYear?: string; // Utilisé dans pdfUtils.ts
   tranches?: Tranche[];
+  directorSignature?: string | null;
+  directorName?: string;
+  directorTitle?: string;
+  showStampOnCards?: boolean;
+  showSignatureOnCards?: boolean;
+  showStampOnBulletins?: boolean;
+  showSignatureOnBulletins?: boolean;
 }
 
 export interface DashboardStats {
@@ -252,6 +262,7 @@ export type AppPage =
   | 'scan_sortie'
   | 'scan_information'
   | 'carte_scolaire'
+  | 'carte_examen'
   | 'verification_recu'
   | 'historique_activites'
   | 'annonces'

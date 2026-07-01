@@ -20,6 +20,20 @@ export interface AppState {
   setSchoolLogo: (logo: string | null) => void;
   schoolStamp: string | null;       // Sceau de l'école
   setSchoolStamp: (stamp: string | null) => void;
+  directorSignature: string | null;
+  setDirectorSignature: (sig: string | null) => void;
+  directorName: string;
+  setDirectorName: (name: string) => void;
+  directorTitle: string;
+  setDirectorTitle: (title: string) => void;
+  showStampOnCards: boolean;
+  setShowStampOnCards: (v: boolean) => void;
+  showSignatureOnCards: boolean;
+  setShowSignatureOnCards: (v: boolean) => void;
+  showStampOnBulletins: boolean;
+  setShowStampOnBulletins: (v: boolean) => void;
+  showSignatureOnBulletins: boolean;
+  setShowSignatureOnBulletins: (v: boolean) => void;
   tranches: any[];
   setTranches: (tranches: any[]) => void;
 
@@ -107,7 +121,14 @@ export interface AppState {
     schoolCurrency?: string,
     countryName?: string,
     countryMotto?: string,
-    ministereName?: string
+    ministereName?: string,
+    directorSignature?: string | null,
+    directorName?: string,
+    directorTitle?: string,
+    showStampOnCards?: boolean,
+    showSignatureOnCards?: boolean,
+    showStampOnBulletins?: boolean,
+    showSignatureOnBulletins?: boolean
   }) => Promise<void>;
   settings: AppSettings;
   updateSettings: (settings: AppSettings) => void;
@@ -694,6 +715,20 @@ export const useStore = create<AppState>()(
       setCountryMotto: (motto) => set({ countryMotto: motto }),
       ministereName: "Ministère de l'Éducation Nationale",
       setMinistereName: (name) => set({ ministereName: name }),
+      directorSignature: null,
+      setDirectorSignature: (sig) => set({ directorSignature: sig }),
+      directorName: '',
+      setDirectorName: (name) => set({ directorName: name }),
+      directorTitle: 'Directeur',
+      setDirectorTitle: (title) => set({ directorTitle: title }),
+      showStampOnCards: true,
+      setShowStampOnCards: (v) => set({ showStampOnCards: v }),
+      showSignatureOnCards: true,
+      setShowSignatureOnCards: (v) => set({ showSignatureOnCards: v }),
+      showStampOnBulletins: true,
+      setShowStampOnBulletins: (v) => set({ showStampOnBulletins: v }),
+      showSignatureOnBulletins: true,
+      setShowSignatureOnBulletins: (v) => set({ showSignatureOnBulletins: v }),
 
       updateAllSettings: async (newSettings) => {
         console.log('💾 [Store] Saving all settings to cloud...', Object.keys(newSettings));
@@ -981,7 +1016,14 @@ export const useStore = create<AppState>()(
                 schoolCurrency: appSettings.schoolCurrency || 'FCFA',
                 countryName: appSettings.countryName || 'République Togolaise',
                 countryMotto: appSettings.countryMotto || 'Travail - Liberté - Patrie',
-                ministereName: appSettings.ministereName || 'Ministère de l\'Éducation Nationale'
+                ministereName: appSettings.ministereName || 'Ministère de l\'Éducation Nationale',
+                directorSignature: appSettings.directorSignature || null,
+                directorName: appSettings.directorName || '',
+                directorTitle: appSettings.directorTitle || 'Directeur',
+                showStampOnCards: appSettings.showStampOnCards !== undefined ? appSettings.showStampOnCards : true,
+                showSignatureOnCards: appSettings.showSignatureOnCards !== undefined ? appSettings.showSignatureOnCards : true,
+                showStampOnBulletins: appSettings.showStampOnBulletins !== undefined ? appSettings.showStampOnBulletins : true,
+                showSignatureOnBulletins: appSettings.showSignatureOnBulletins !== undefined ? appSettings.showSignatureOnBulletins : true
               });
               console.log(`🎨 [Sync Parent] Paramètres appliqués ! Logo: ${!!appSettings.schoolLogo}`);
             }
@@ -1091,6 +1133,13 @@ export const useStore = create<AppState>()(
               countryName: data.appSettings.countryName || get().countryName,
               countryMotto: data.appSettings.countryMotto || get().countryMotto,
               ministereName: data.appSettings.ministereName || get().ministereName,
+              directorSignature: data.appSettings.directorSignature !== undefined ? data.appSettings.directorSignature : get().directorSignature,
+              directorName: data.appSettings.directorName !== undefined ? data.appSettings.directorName : get().directorName,
+              directorTitle: data.appSettings.directorTitle !== undefined ? data.appSettings.directorTitle : get().directorTitle,
+              showStampOnCards: data.appSettings.showStampOnCards !== undefined ? data.appSettings.showStampOnCards : get().showStampOnCards,
+              showSignatureOnCards: data.appSettings.showSignatureOnCards !== undefined ? data.appSettings.showSignatureOnCards : get().showSignatureOnCards,
+              showStampOnBulletins: data.appSettings.showStampOnBulletins !== undefined ? data.appSettings.showStampOnBulletins : get().showStampOnBulletins,
+              showSignatureOnBulletins: data.appSettings.showSignatureOnBulletins !== undefined ? data.appSettings.showSignatureOnBulletins : get().showSignatureOnBulletins,
               ...(data.appSettings.cycleSchedules ? { cycleSchedules: data.appSettings.cycleSchedules } : {}),
               ...(data.appSettings.tranches ? { tranches: data.appSettings.tranches } : {}),
             });
@@ -1365,6 +1414,14 @@ export const useStore = create<AppState>()(
         isAuthenticated: state.isAuthenticated,
         appName: state.appName,
         schoolLogo: state.schoolLogo,
+        schoolStamp: state.schoolStamp,
+        directorSignature: state.directorSignature,
+        directorName: state.directorName,
+        directorTitle: state.directorTitle,
+        showStampOnCards: state.showStampOnCards,
+        showSignatureOnCards: state.showSignatureOnCards,
+        showStampOnBulletins: state.showStampOnBulletins,
+        showSignatureOnBulletins: state.showSignatureOnBulletins,
         parents: state.parents || [],
         presences: state.presences || [],
         activityLogs: (state.activityLogs || []).slice(0, 500),

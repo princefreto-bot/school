@@ -39,6 +39,7 @@ const ScanPresence = lazy(() => import('./pages/ScanPresence').then(m => ({ defa
 const ScanSortie = lazy(() => import('./pages/ScanSortie').then(m => ({ default: m.ScanSortie })));
 const ScanInformation = lazy(() => import('./pages/ScanInformation'));
 const CarteScolaire = lazy(() => import('./pages/CarteScolaire').then(m => ({ default: m.CarteScolaire })));
+const CarteExamen = lazy(() => import('./pages/CarteExamen').then(m => ({ default: m.CarteExamen })));
 const GestionAcademique = lazy(() => import('./pages/GestionAcademique' /* */).then(m => ({ default: m.GestionAcademique })));
 const GestionAnneesScolaires = lazy(() => import('./pages/GestionAnneesScolaires').then(m => ({ default: m.GestionAnneesScolaires })));
 const SaisieNotes = lazy(() => import('./pages/SaisieNotes' /* */).then(m => ({ default: m.SaisieNotes })));
@@ -155,6 +156,7 @@ const PageContent: React.FC = () => {
     case 'scan_sortie': return <ScanSortie />;
     case 'scan_information': return <ScanInformation />;
     case 'carte_scolaire': return <CarteScolaire />;
+    case 'carte_examen': return <CarteExamen />;
     case 'gestion_academique': return <GestionAcademique />;
     case 'gestion_annees_scolaires': return <GestionAnneesScolaires />;
     case 'saisie_notes': return <SaisieNotes />;

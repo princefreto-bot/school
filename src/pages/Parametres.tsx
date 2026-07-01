@@ -14,6 +14,13 @@ export const Parametres: React.FC = () => {
   const appName = useStore((s) => s.appName);
   const schoolLogo = useStore((s) => s.schoolLogo);
   const schoolStamp = useStore((s) => s.schoolStamp);
+  const directorSignature = useStore((s) => s.directorSignature);
+  const directorName = useStore((s) => s.directorName);
+  const directorTitle = useStore((s) => s.directorTitle);
+  const showStampOnCards = useStore((s) => s.showStampOnCards);
+  const showSignatureOnCards = useStore((s) => s.showSignatureOnCards);
+  const showStampOnBulletins = useStore((s) => s.showStampOnBulletins);
+  const showSignatureOnBulletins = useStore((s) => s.showSignatureOnBulletins);
   const user = useStore((s) => s.user);
   const academicYears = useStore((s) => s.academicYears) || [];
 
@@ -39,6 +46,12 @@ export const Parametres: React.FC = () => {
   const [localCountryName, setLocalCountryName] = useState(countryName);
   const [localCountryMotto, setLocalCountryMotto] = useState(countryMotto);
   const [localMinistereName, setLocalMinistereName] = useState(ministereName);
+  const [localDirectorName, setLocalDirectorName] = useState(directorName || '');
+  const [localDirectorTitle, setLocalDirectorTitle] = useState(directorTitle || 'Directeur');
+  const [localShowStampOnCards, setLocalShowStampOnCards] = useState(showStampOnCards !== undefined ? showStampOnCards : true);
+  const [localShowSignatureOnCards, setLocalShowSignatureOnCards] = useState(showSignatureOnCards !== undefined ? showSignatureOnCards : true);
+  const [localShowStampOnBulletins, setLocalShowStampOnBulletins] = useState(showStampOnBulletins !== undefined ? showStampOnBulletins : true);
+  const [localShowSignatureOnBulletins, setLocalShowSignatureOnBulletins] = useState(showSignatureOnBulletins !== undefined ? showSignatureOnBulletins : true);
   const [saved, setSaved] = useState(false);
   
   const [logoPreview, setLogoPreview] = useState<string | null>(schoolLogo);
@@ -48,6 +61,10 @@ export const Parametres: React.FC = () => {
   const [stampPreview, setStampPreview] = useState<string | null>(schoolStamp);
   const [stampError, setStampError] = useState('');
   const stampFileRef = useRef<HTMLInputElement>(null);
+
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(directorSignature);
+  const [signatureError, setSignatureError] = useState('');
+  const signatureFileRef = useRef<HTMLInputElement>(null);
 
   const cycleSchedules = useStore((s) => s.cycleSchedules);
   const setCycleSchedules = useStore((s) => s.setCycleSchedules);
@@ -143,6 +160,48 @@ export const Parametres: React.FC = () => {
     if (stampFileRef.current) stampFileRef.current.value = '';
   };
 
+  const handleSignatureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSignatureError('');
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setSignatureError('Le fichier doit être une image (PNG, JPG, SVG).');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setSignatureError('L\'image ne doit pas dépasser 2 Mo.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const base64 = ev.target?.result as string;
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 200;
+        let w = img.width;
+        let h = img.height;
+        if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
+        else { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, w, h);
+        const resized = canvas.toDataURL('image/png', 0.9);
+        setSignaturePreview(resized);
+      };
+      img.src = base64;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeSignature = () => {
+    setSignaturePreview(null);
+    if (signatureFileRef.current) signatureFileRef.current.value = '';
+  };
+
   const updateAllSettings = useStore((s) => s.updateAllSettings);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -164,7 +223,14 @@ export const Parametres: React.FC = () => {
       schoolCurrency: localCurrency,
       countryName: localCountryName,
       countryMotto: localCountryMotto,
-      ministereName: localMinistereName
+      ministereName: localMinistereName,
+      directorSignature: signaturePreview,
+      directorName: localDirectorName,
+      directorTitle: localDirectorTitle,
+      showStampOnCards: localShowStampOnCards,
+      showSignatureOnCards: localShowSignatureOnCards,
+      showStampOnBulletins: localShowStampOnBulletins,
+      showSignatureOnBulletins: localShowSignatureOnBulletins
     });
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -238,9 +304,31 @@ export const Parametres: React.FC = () => {
                         </div>
                         <p className="text-[10px] text-slate-400 mt-1">Pour changer d'année scolaire, utilisez le menu "Années Scolaires".</p>
                     </div>
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                            Nom du Directeur
+                        </label>
+                        <input
+                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                            value={localDirectorName}
+                            onChange={(e) => setLocalDirectorName(e.target.value)}
+                            placeholder="Ex : M. KOFFI Yao"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                            Fonction du Directeur
+                        </label>
+                        <input
+                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                            value={localDirectorTitle}
+                            onChange={(e) => setLocalDirectorTitle(e.target.value)}
+                            placeholder="Ex : Directeur Général"
+                        />
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-100 dark:border-slate-800/60">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-100 dark:border-slate-800/60">
                     <div>
                         <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">
                             Logo de l'établissement
@@ -293,6 +381,85 @@ export const Parametres: React.FC = () => {
                                 {stampError && <p className="mt-2 text-[10px] font-bold text-rose-500">{stampError}</p>}
                             </div>
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">
+                            Signature du Directeur
+                        </label>
+                        <div className="flex items-center gap-4">
+                            <div className="shrink-0 w-20 h-20 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 overflow-hidden relative group">
+                                {signaturePreview ? (
+                                <>
+                                    <img src={signaturePreview} alt="Signature" className="w-full h-full object-contain p-2" />
+                                    <button type="button" onClick={removeSignature} className="absolute inset-0 bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                                    <X className="w-5 h-5" />
+                                    </button>
+                                </>
+                                ) : (
+                                <Image className="w-6 h-6 text-slate-300 dark:text-slate-600" />
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <input ref={signatureFileRef} type="file" accept="image/png" className="hidden" id="signature-upload" onChange={handleSignatureUpload} />
+                                <label htmlFor="signature-upload" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/10 text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 rounded-xl text-[11px] font-black uppercase tracking-widest cursor-pointer transition-colors border border-transparent hover:border-indigo-200 dark:hover:border-indigo-500/30">
+                                <Upload className="w-3.5 h-3.5" /> Signature PNG
+                                </label>
+                                {signatureError && <p className="mt-2 text-[10px] font-bold text-rose-500">{signatureError}</p>}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60 space-y-4">
+                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <Shield className="w-3.5 h-3.5 text-indigo-500" /> Options de Signature et Cachet
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label className="flex items-center gap-3 cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                checked={localShowStampOnCards}
+                                onChange={(e) => setLocalShowStampOnCards(e.target.checked)}
+                                className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 focus:ring-opacity-25"
+                            />
+                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                Afficher le cachet sur les cartes scolaires
+                            </span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                checked={localShowSignatureOnCards}
+                                onChange={(e) => setLocalShowSignatureOnCards(e.target.checked)}
+                                className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 focus:ring-opacity-25"
+                            />
+                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                Afficher la signature du directeur sur les cartes scolaires
+                            </span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                checked={localShowStampOnBulletins}
+                                onChange={(e) => setLocalShowStampOnBulletins(e.target.checked)}
+                                className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 focus:ring-opacity-25"
+                            />
+                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                Afficher le cachet sur les bulletins
+                            </span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                checked={localShowSignatureOnBulletins}
+                                onChange={(e) => setLocalShowSignatureOnBulletins(e.target.checked)}
+                                className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 focus:ring-opacity-25"
+                            />
+                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                Afficher la signature du directeur sur les bulletins
+                            </span>
+                        </label>
                     </div>
                 </div>
 

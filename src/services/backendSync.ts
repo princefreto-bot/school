@@ -43,11 +43,13 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
         messageRemerciement, messageRappel, 
         schoolLogo, schoolStamp, cycleSchedules, tranches,
         schoolMotto, schoolBp, schoolTelephone, schoolAddress, schoolCurrency,
-        countryName, countryMotto, ministereName
+        countryName, countryMotto, ministereName,
+        directorSignature, directorName, directorTitle,
+        showStampOnCards, showSignatureOnCards, showStampOnBulletins, showSignatureOnBulletins
     } = store;
     
     // Si l'un des paramètres de configuration est fourni, on envoie appSettings
-    if (appName !== undefined || schoolName !== undefined || schoolLogo !== undefined || schoolStamp !== undefined || cycleSchedules !== undefined || tranches !== undefined || schoolMotto !== undefined || schoolBp !== undefined || schoolTelephone !== undefined || schoolAddress !== undefined || schoolCurrency !== undefined || countryName !== undefined || countryMotto !== undefined || ministereName !== undefined) {
+    if (appName !== undefined || schoolName !== undefined || schoolLogo !== undefined || schoolStamp !== undefined || cycleSchedules !== undefined || tranches !== undefined || schoolMotto !== undefined || schoolBp !== undefined || schoolTelephone !== undefined || schoolAddress !== undefined || schoolCurrency !== undefined || countryName !== undefined || countryMotto !== undefined || ministereName !== undefined || directorSignature !== undefined || directorName !== undefined || directorTitle !== undefined || showStampOnCards !== undefined || showSignatureOnCards !== undefined || showStampOnBulletins !== undefined || showSignatureOnBulletins !== undefined) {
         payload.appSettings = {
             appName,
             schoolName,
@@ -65,7 +67,14 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
             schoolCurrency,
             countryName,
             countryMotto,
-            ministereName
+            ministereName,
+            directorSignature,
+            directorName,
+            directorTitle,
+            showStampOnCards,
+            showSignatureOnCards,
+            showStampOnBulletins,
+            showSignatureOnBulletins
         };
     }
 

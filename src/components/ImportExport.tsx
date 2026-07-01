@@ -176,8 +176,12 @@ export const ImportExport = () => {
                 <li>• Colonne J: DÉJÀ PAYÉ</li>
                 <li>• Colonne K: RESTANT (ou "SOLDE")</li>
                 <li>• Colonne L: REÇU</li>
+                <li>• Colonne M: DATE DE NAISSANCE (Ex: 15/08/2012)</li>
+                <li>• Colonne N: LIEU DE NAISSANCE</li>
+                <li>• Colonne O: NATIONALITÉ</li>
+                <li>• Colonne P: N° DE TABLE (Optionnel)</li>
               </ul>
-              <p className="text-xs text-blue-600 mt-2">* Les données commencent à la ligne 1</p>
+              <p className="text-xs text-blue-600 mt-2">* Les données commencent à la ligne 1 (la ligne d'en-tête est ignorée si elle contient 'MATRICULE' ou 'NOM')</p>
             </div>
           </div>
         </div>

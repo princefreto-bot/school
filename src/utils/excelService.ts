@@ -107,6 +107,11 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
             existingStudent = existingMap.get(key);
           }
           
+          const dateNaissance = row[12] ? String(row[12]).trim() : undefined;
+          const lieuNaissance = row[13] ? String(row[13]).trim() : undefined;
+          const nationalite = row[14] ? String(row[14]).trim() : undefined;
+          const numeroTable = row[15] ? String(row[15]).trim() : undefined;
+
           const studentId = existingStudent ? existingStudent.id : generateId();
           const student: Student = {
             id: studentId,
@@ -135,7 +140,11 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
               recu: recu || 'Import initial',
               methode: 'Espèces',
               reference: 'Import initial'
-            }] : [])
+            }] : []),
+            dateNaissance: dateNaissance || existingStudent?.dateNaissance,
+            lieuNaissance: lieuNaissance || existingStudent?.lieuNaissance,
+            nationalite: nationalite || existingStudent?.nationalite,
+            numeroTable: numeroTable || existingStudent?.numeroTable
           };
           
           studentsMap.set(key, student);
@@ -165,7 +174,11 @@ export const exportToExcel = (students: Student[], filename: string = 'eleves.xl
     'ÉCOLAGE': s.ecolage,
     'DÉJÀ PAYÉ': s.dejaPaye,
     'RESTANT': s.restant === 0 ? 'SOLDÉ' : s.restant,
-    'REÇU': s.recu
+    'REÇU': s.recu,
+    'DATE DE NAISSANCE': s.dateNaissance || '',
+    'LIEU DE NAISSANCE': s.lieuNaissance || '',
+    'NATIONALITÉ': s.nationalite || '',
+    'N° DE TABLE': s.numeroTable || ''
   }));
   
   const worksheet = XLSX.utils.json_to_sheet(data);
@@ -176,7 +189,8 @@ export const exportToExcel = (students: Student[], filename: string = 'eleves.xl
   const colWidths = [
     { wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 10 },
     { wch: 15 }, { wch: 6 }, { wch: 12 }, { wch: 25 },
-    { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 15 }
+    { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 15 },
+    { wch: 20 }, { wch: 20 }, { wch: 15 }, { wch: 15 }
   ];
   worksheet['!cols'] = colWidths;
   
