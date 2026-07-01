@@ -235,4 +235,66 @@ async function uploadSchoolAsset(req, res) {
     }
 }
 
-module.exports = { uploadStudentPhoto, deleteStudentPhoto, uploadSchoolAsset };
+/**
+ * DELETE /api/settings/remove-asset
+ * Body JSON: { assetType: "logo" | "stamp" | "seal" | "signature" }
+ * Supprime l'image du Storage Supabase ET met la colonne DB à null.
+ */
+async function removeSchoolAsset(req, res) {
+    if (!req.user) {
+        return res.status(401).json({ error: 'Authentification requise.' });
+    }
+
+    const { role, schoolSlug } = req.user;
+    const { assetType } = req.body;
+
+    if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
+        return res.status(403).json({ error: 'Permission insuffisante.' });
+    }
+
+    if (!schoolSlug) {
+        return res.status(403).json({ error: 'Compte non associé à un établissement.' });
+    }
+
+    if (!assetType || !['logo', 'stamp', 'seal', 'signature'].includes(assetType)) {
+        return res.status(400).json({ error: 'Type d\'asset invalide (logo, stamp, seal, signature).' });
+    }
+
+    // Mapping assetType → colonne DB
+    const columnMap = {
+        logo: 'school_logo',
+        stamp: 'school_stamp',
+        seal: 'official_seal',
+        signature: 'director_signature'
+    };
+    const dbColumn = columnMap[assetType];
+    const tbl = `app_settings_${schoolSlug}`;
+    const client = supabaseAdmin || supabase;
+
+    try {
+        // 1. Supprimer tous les fichiers du Storage pour cet asset
+        for (const ext of ['jpg', 'jpeg', 'png', 'webp', 'svg']) {
+            await client.storage.from(BUCKET_NAME).remove([`${schoolSlug}/assets/${assetType}.${ext}`]);
+        }
+
+        // 2. Mettre à null la colonne DB
+        const { error: dbErr } = await client
+            .from(tbl)
+            .update({ [dbColumn]: null, updated_at: new Date().toISOString() })
+            .eq('id', 'global_settings');
+
+        if (dbErr) {
+            console.error(`❌ [Asset Remove] DB update error for ${assetType}:`, dbErr.message);
+            return res.status(500).json({ error: 'Erreur mise à jour DB: ' + dbErr.message });
+        }
+
+        console.log(`✅ [Asset Remove] ${assetType} supprimé du Storage et mis à null en DB (école: ${schoolSlug})`);
+        return res.json({ success: true, assetType });
+
+    } catch (err) {
+        console.error('💥 [Asset Remove] Unexpected error:', err.message);
+        return res.status(500).json({ error: 'Erreur interne: ' + err.message });
+    }
+}
+
+module.exports = { uploadStudentPhoto, deleteStudentPhoto, uploadSchoolAsset, removeSchoolAsset };

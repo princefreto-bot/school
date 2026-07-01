@@ -11,9 +11,7 @@ async function getPublicSettings(req, res) {
     try {
         return res.json({
             appName: 'Portail Éducation',
-            schoolName: 'Bienvenue',
-            schoolLogo: null,
-            schoolStamp: null
+            schoolName: 'Bienvenue'
         });
     } catch (err) {
         console.error('Error fetching public settings:', err.message);

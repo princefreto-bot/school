@@ -1312,8 +1312,9 @@ export const useStore = create<AppState>()(
                 appName: get().appName && get().appName !== 'DGhubSchool' ? get().appName : (data.appName || get().appName),
                 schoolName: get().schoolName && get().schoolName !== 'Établissement Scolaire' ? get().schoolName : (data.schoolName || get().schoolName),
                 schoolYear: data.schoolYear || get().schoolYear,
-                schoolLogo: data.schoolLogo !== null && data.schoolLogo !== undefined ? data.schoolLogo : get().schoolLogo,
-                schoolStamp: data.schoolStamp !== null && data.schoolStamp !== undefined ? data.schoolStamp : get().schoolStamp,
+                // Ne mettre à jour les images que si la réponse les contient explicitement
+                ...('schoolLogo' in data && { schoolLogo: data.schoolLogo }),
+                ...('schoolStamp' in data && { schoolStamp: data.schoolStamp }),
                 tranches: data.tranches || get().tranches
               });
               console.log('✅ [Settings] App state updated with cloud settings.');

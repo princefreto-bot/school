@@ -121,9 +121,18 @@ export const Parametres: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  const removeLogo = () => {
+  const removeLogo = async () => {
     setLogoPreview(null);
     if (fileRef.current) fileRef.current.value = '';
+    useStore.setState({ schoolLogo: null });
+    try {
+      const token = localStorage.getItem('parent_token');
+      await fetch(`${API_BASE_URL}/settings/remove-asset`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ assetType: 'logo' })
+      });
+    } catch (err) { console.warn('remove logo error', err); }
   };
 
   const handleStampUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,9 +172,18 @@ export const Parametres: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  const removeStamp = () => {
+  const removeStamp = async () => {
     setStampPreview(null);
     if (stampFileRef.current) stampFileRef.current.value = '';
+    useStore.setState({ schoolStamp: null });
+    try {
+      const token = localStorage.getItem('parent_token');
+      await fetch(`${API_BASE_URL}/settings/remove-asset`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ assetType: 'stamp' })
+      });
+    } catch (err) { console.warn('remove stamp error', err); }
   };
 
   const handleSignatureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,9 +223,18 @@ export const Parametres: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  const removeSignature = () => {
+  const removeSignature = async () => {
     setSignaturePreview(null);
     if (signatureFileRef.current) signatureFileRef.current.value = '';
+    useStore.setState({ directorSignature: null });
+    try {
+      const token = localStorage.getItem('parent_token');
+      await fetch(`${API_BASE_URL}/settings/remove-asset`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ assetType: 'signature' })
+      });
+    } catch (err) { console.warn('remove signature error', err); }
   };
 
   const handleSealUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -247,9 +274,18 @@ export const Parametres: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  const removeSeal = () => {
+  const removeSeal = async () => {
     setSealPreview(null);
     if (sealFileRef.current) sealFileRef.current.value = '';
+    useStore.setState({ officialSeal: null });
+    try {
+      const token = localStorage.getItem('parent_token');
+      await fetch(`${API_BASE_URL}/settings/remove-asset`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ assetType: 'seal' })
+      });
+    } catch (err) { console.warn('remove seal error', err); }
   };
 
   const updateAllSettings = useStore((s) => s.updateAllSettings);
