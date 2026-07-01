@@ -519,12 +519,12 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
         ctx.save();
         ctx.textAlign = 'center';
         ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 12px Helvetica, Arial, sans-serif';
-        ctx.fillText(directorName ? `M. ${directorName}` : 'Le Directeur', sigX, sigY + 95);
+        ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
+        ctx.fillText(directorName ? `M. ${directorName}` : 'Le Directeur', sigX, sigY + 100);
 
         ctx.fillStyle = '#64748b';
-        ctx.font = '600 11px Helvetica, Arial, sans-serif';
-        ctx.fillText(directorTitle || 'Directeur', sigX, sigY + 110);
+        ctx.font = 'bold 13px Helvetica, Arial, sans-serif';
+        ctx.fillText(directorTitle || 'Directeur', sigX, sigY + 118);
         ctx.restore();
     };
 

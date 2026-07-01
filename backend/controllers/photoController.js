@@ -151,4 +151,88 @@ async function deleteStudentPhoto(req, res) {
     }
 }
 
-module.exports = { uploadStudentPhoto, deleteStudentPhoto };
+/**
+ * POST /api/settings/upload-asset
+ * Body JSON: { assetType: "logo" | "stamp" | "seal" | "signature", imageBase64: "data:image/png;base64,..." }
+ */
+async function uploadSchoolAsset(req, res) {
+    if (!req.user) {
+        return res.status(401).json({ error: 'Authentification requise.' });
+    }
+
+    const { role, schoolSlug } = req.user;
+    const { assetType, imageBase64 } = req.body;
+
+    if (!['admin', 'directeur', 'directeur_general', 'comptable'].includes(role)) {
+        return res.status(403).json({ error: 'Permission insuffisante.' });
+    }
+
+    if (!schoolSlug) {
+        return res.status(403).json({ error: 'Compte non associé à un établissement.' });
+    }
+
+    if (!assetType || !['logo', 'stamp', 'seal', 'signature'].includes(assetType)) {
+        return res.status(400).json({ error: 'Type d\'asset invalide (logo, stamp, seal, signature attendus).' });
+    }
+
+    if (!imageBase64 || typeof imageBase64 !== 'string') {
+        return res.status(400).json({ error: 'Image base64 manquante.' });
+    }
+
+    try {
+        const matches = imageBase64.match(/^data:image\/(\w+);base64,(.+)$/);
+        if (!matches) {
+            return res.status(400).json({ error: 'Format base64 invalide.' });
+        }
+
+        const imageFormat = matches[1];
+        const base64Data  = matches[2];
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+
+        if (imageBuffer.length > 3 * 1024 * 1024) {
+            return res.status(413).json({ error: 'Image trop grande (max 3 MB).' });
+        }
+
+        const filePath    = `${schoolSlug}/assets/${assetType}.${imageFormat}`;
+        const contentType = `image/${imageFormat}`;
+        const client = supabaseAdmin || supabase;
+
+        // Clean previous assets of different extensions to avoid pollution
+        for (const ext of ['jpg', 'jpeg', 'png', 'webp', 'svg']) {
+            if (ext !== imageFormat) {
+                await client.storage.from(BUCKET_NAME).remove([`${schoolSlug}/assets/${assetType}.${ext}`]);
+            }
+        }
+
+        const { data: uploadData, error: uploadError } = await client.storage
+            .from(BUCKET_NAME)
+            .upload(filePath, imageBuffer, {
+                contentType,
+                upsert: true
+            });
+
+        if (uploadError) {
+            console.error('❌ [Asset] Storage upload error:', uploadError.message);
+            return res.status(500).json({ error: 'Erreur upload Storage: ' + uploadError.message });
+        }
+
+        const { data: urlData } = client.storage
+            .from(BUCKET_NAME)
+            .getPublicUrl(filePath);
+
+        const publicUrl = urlData.publicUrl;
+        console.log(`%c[Asset] Uploaded school asset ${assetType} to storage: ${publicUrl}`, 'color: green');
+
+        return res.json({
+            success: true,
+            publicUrl,
+            assetType
+        });
+
+    } catch (err) {
+        console.error('💥 [Asset] Unexpected error:', err.message);
+        return res.status(500).json({ error: 'Erreur interne: ' + err.message });
+    }
+}
+
+module.exports = { uploadStudentPhoto, deleteStudentPhoto, uploadSchoolAsset };

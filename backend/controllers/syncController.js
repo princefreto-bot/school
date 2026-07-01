@@ -341,6 +341,15 @@ async function syncFromFrontend(req, res) {
                     country_name: appSettings.countryName,
                     country_motto: appSettings.countryMotto,
                     ministere_name: appSettings.ministereName,
+                    director_signature: appSettings.directorSignature,
+                    official_seal: appSettings.officialSeal,
+                    director_name: appSettings.directorName,
+                    director_title: appSettings.directorTitle,
+                    show_stamp_on_cards: appSettings.showStampOnCards !== undefined ? appSettings.showStampOnCards : true,
+                    show_signature_on_cards: appSettings.showSignatureOnCards !== undefined ? appSettings.showSignatureOnCards : true,
+                    show_seal_on_cards: appSettings.showSealOnCards !== undefined ? appSettings.showSealOnCards : true,
+                    show_stamp_on_bulletins: appSettings.showStampOnBulletins !== undefined ? appSettings.showStampOnBulletins : true,
+                    show_signature_on_bulletins: appSettings.showSignatureOnBulletins !== undefined ? appSettings.showSignatureOnBulletins : true,
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'id' });
                 if (settingsErr) {
@@ -604,7 +613,16 @@ async function syncToFrontend(req, res) {
                 schoolCurrency: appSettings.school_currency,
                 countryName: appSettings.country_name,
                 countryMotto: appSettings.country_motto,
-                ministereName: appSettings.ministere_name
+                ministereName: appSettings.ministere_name,
+                directorSignature: appSettings.director_signature,
+                officialSeal: appSettings.official_seal,
+                directorName: appSettings.director_name,
+                directorTitle: appSettings.director_title,
+                showStampOnCards: appSettings.show_stamp_on_cards,
+                showSignatureOnCards: appSettings.show_signature_on_cards,
+                showSealOnCards: appSettings.show_seal_on_cards,
+                showStampOnBulletins: appSettings.show_stamp_on_bulletins,
+                showSignatureOnBulletins: appSettings.show_signature_on_bulletins
             } : null,
             announcements: (announcements || []).map(a => ({
                 id: a.id,

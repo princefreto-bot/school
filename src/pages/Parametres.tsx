@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useStore } from '../store/useStore';
+import { API_BASE_URL } from '../config';
 import {
   Save, School, MessageSquare, Shield, Info,
   Upload, X, Image, Clock, Plus, Calendar, Trash2, Database, AlertCircle, Layers
@@ -253,9 +254,41 @@ export const Parametres: React.FC = () => {
 
   const updateAllSettings = useStore((s) => s.updateAllSettings);
 
+  const uploadAssetIfBase64 = async (assetType: 'logo' | 'stamp' | 'seal' | 'signature', currentPreview: string | null) => {
+    if (!currentPreview || !currentPreview.startsWith('data:image/')) {
+      return currentPreview;
+    }
+    try {
+      const token = localStorage.getItem('parent_token');
+      const res = await fetch(`${API_BASE_URL}/settings/upload-asset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ assetType, imageBase64: currentPreview })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.publicUrl;
+      } else {
+        console.error(`Failed to upload ${assetType} to storage`);
+      }
+    } catch (err) {
+      console.error(`Error uploading ${assetType} to storage:`, err);
+    }
+    return currentPreview;
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    // L'année scolaire est maintenant gérée dans la page GestionAnneesScolaires
+    setSaved(false);
+
+    // Téléverser les images en base64 vers le stockage Supabase en premier
+    const logoUrl = await uploadAssetIfBase64('logo', logoPreview);
+    const stampUrl = await uploadAssetIfBase64('stamp', stampPreview);
+    const sealUrl = await uploadAssetIfBase64('seal', sealPreview);
+    const signatureUrl = await uploadAssetIfBase64('signature', signaturePreview);
 
     await updateAllSettings({
       schoolName: localSchool,
@@ -263,8 +296,8 @@ export const Parametres: React.FC = () => {
       messageRemerciement: localRem,
       messageRappel: localRap,
       appName: localAppName,
-      schoolLogo: logoPreview,
-      schoolStamp: stampPreview,
+      schoolLogo: logoUrl,
+      schoolStamp: stampUrl,
       schoolMotto: localMotto,
       schoolBp: localBp,
       schoolTelephone: localTelephone,
@@ -273,8 +306,8 @@ export const Parametres: React.FC = () => {
       countryName: localCountryName,
       countryMotto: localCountryMotto,
       ministereName: localMinistereName,
-      directorSignature: signaturePreview,
-      officialSeal: sealPreview,
+      directorSignature: signatureUrl,
+      officialSeal: sealUrl,
       directorName: localDirectorName,
       directorTitle: localDirectorTitle,
       showStampOnCards: localShowStampOnCards,
@@ -283,6 +316,12 @@ export const Parametres: React.FC = () => {
       showStampOnBulletins: localShowStampOnBulletins,
       showSignatureOnBulletins: localShowSignatureOnBulletins
     });
+
+    setLogoPreview(logoUrl);
+    setStampPreview(stampUrl);
+    setSealPreview(sealUrl);
+    setSignaturePreview(signatureUrl);
+
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
@@ -356,22 +395,22 @@ export const Parametres: React.FC = () => {
                         <p className="text-[10px] text-slate-400 mt-1">Pour changer d'année scolaire, utilisez le menu "Années Scolaires".</p>
                     </div>
                     <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
-                            Nom du Directeur
+                        <label className="block text-[11px] font-black text-indigo-600 dark:text-indigo-400 mb-2.5 uppercase tracking-widest">
+                            Nom du Directeur (Affiché sur cartes et bulletins)
                         </label>
                         <input
-                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-4 text-base font-extrabold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm"
                             value={localDirectorName}
                             onChange={(e) => setLocalDirectorName(e.target.value)}
                             placeholder="Ex : M. KOFFI Yao"
                         />
                     </div>
                     <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                        <label className="block text-[11px] font-black text-indigo-600 dark:text-indigo-400 mb-2.5 uppercase tracking-widest">
                             Fonction du Directeur
                         </label>
                         <input
-                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-4 text-base font-extrabold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm"
                             value={localDirectorTitle}
                             onChange={(e) => setLocalDirectorTitle(e.target.value)}
                             placeholder="Ex : Directeur Général"
