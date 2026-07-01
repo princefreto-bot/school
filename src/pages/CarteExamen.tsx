@@ -161,6 +161,80 @@ export const CarteExamen: React.FC = () => {
         });
     };
 
+// Dessiner des rectangles arrondis (pour les photos et badges)
+const drawRoundRect = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) => {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+};
+
+// Dessin de vagues et courbes fluides (High-Security Guilloche / Vagues nationales)
+const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number, color: string) => {
+    ctx.save();
+    
+    // Fond de base dégradé subtil
+    const baseGrad = ctx.createLinearGradient(0, 0, w, h);
+    baseGrad.addColorStop(0, '#ffffff');
+    baseGrad.addColorStop(0.6, '#fafafb');
+    baseGrad.addColorStop(1, '#f8fafc');
+    ctx.fillStyle = baseGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Vague 1 : Grande courbe organique au bas de la carte
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    ctx.bezierCurveTo(w * 0.25, h * 0.82, w * 0.5, h * 0.98, w * 0.75, h * 0.85);
+    ctx.bezierCurveTo(w * 0.88, h * 0.78, w * 0.95, h * 0.85, w, h * 0.8);
+    ctx.lineTo(w, h);
+    ctx.closePath();
+    const grad1 = ctx.createLinearGradient(w * 0.3, h * 0.8, w, h);
+    grad1.addColorStop(0, color + '07'); // Couleur primaire très transparente
+    grad1.addColorStop(0.7, color + '15');
+    grad1.addColorStop(1, color + '28');  // Légèrement plus opaque au coin droit
+    ctx.fillStyle = grad1;
+    ctx.fill();
+
+    // Vague 2 : Courbe fluide en haut à droite
+    ctx.beginPath();
+    ctx.moveTo(w * 0.45, 0);
+    ctx.bezierCurveTo(w * 0.65, h * 0.22, w * 0.8, 0, w, h * 0.18);
+    ctx.lineTo(w, 0);
+    ctx.closePath();
+    const grad2 = ctx.createLinearGradient(w * 0.6, 0, w, h * 0.18);
+    grad2.addColorStop(0, color + '0c');
+    grad2.addColorStop(1, color + '18');
+    ctx.fillStyle = grad2;
+    ctx.fill();
+
+    // Vague 3 : Lignes sinueuses de sécurité (Guilloche)
+    ctx.strokeStyle = color + '22'; // Couleur d'examen transparente
+    ctx.lineWidth = 1.6;
+    
+    // Ligne 1
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.76);
+    ctx.bezierCurveTo(w * 0.25, h * 0.61, w * 0.5, h * 0.91, w * 0.75, h * 0.71);
+    ctx.bezierCurveTo(w * 0.88, h * 0.61, w * 0.95, h * 0.81, w, h * 0.74);
+    ctx.stroke();
+
+    // Ligne 2 (parallèle)
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.79);
+    ctx.bezierCurveTo(w * 0.25, h * 0.64, w * 0.5, h * 0.94, w * 0.75, h * 0.74);
+    ctx.bezierCurveTo(w * 0.88, h * 0.64, w * 0.95, h * 0.84, w, h * 0.77);
+    ctx.stroke();
+
+    ctx.restore();
+};
+
     // Générer le Canvas haute résolution pour une carte
     const renderCardCanvas = async (canvas: HTMLCanvasElement, student: Student) => {
         const ctx = canvas.getContext('2d');
@@ -174,11 +248,10 @@ export const CarteExamen: React.FC = () => {
         const exam = getExamenForClasse(student.classe);
         const examColor = exam ? EXAM_COLORS[exam].primary : '#64748B';
 
-        // 1. Fond blanc
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, w, h);
+        // 1. Fond et vagues dynamiques
+        drawBackgroundWaves(ctx, w, h, examColor);
 
-        // 2. Texture de sécurité anti-contrefaçon
+        // 2. Texture de sécurité anti-contrefaçon (légère)
         drawSecurityTexture(ctx, w, h);
 
         // 3. Dessiner le filigrane du logo s'il existe
@@ -186,7 +259,7 @@ export const CarteExamen: React.FC = () => {
             const logoImg = await loadImage(schoolLogo);
             if (logoImg) {
                 ctx.save();
-                ctx.globalAlpha = 0.07;
+                ctx.globalAlpha = 0.06;
                 ctx.drawImage(logoImg, w / 2 - 200, h / 2 - 200, 400, 400);
                 ctx.restore();
             }
@@ -201,26 +274,28 @@ export const CarteExamen: React.FC = () => {
         const photoH = 531;
         const photoY = (h - photoH) / 2; // Centrage vertical (environ 53px de marge)
 
-        // Ombre portée de la photo d'identité
+        // Ombre portée et coins arrondis pour la photo d'identité
         ctx.save();
-        ctx.shadowColor = 'rgba(15, 23, 42, 0.12)';
-        ctx.shadowBlur = 12;
+        ctx.shadowColor = 'rgba(15, 23, 42, 0.15)';
+        ctx.shadowBlur = 16;
         ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 6;
-        ctx.fillStyle = '#f8fafc';
-        ctx.fillRect(photoX, photoY, photoW, photoH);
+        ctx.shadowOffsetY = 8;
+        
+        ctx.fillStyle = '#ffffff';
+        drawRoundRect(ctx, photoX, photoY, photoW, photoH, 12);
+        ctx.fill();
+        
         ctx.strokeStyle = '#e2e8f0';
         ctx.lineWidth = 6;
-        ctx.strokeRect(photoX, photoY, photoW, photoH);
+        ctx.stroke();
         ctx.restore();
 
         if (student.photoUrl) {
             const studentPhoto = await loadImage(student.photoUrl);
             if (studentPhoto) {
                 ctx.save();
-                // Clip pour assurer des coins propres et éviter les débordements
-                ctx.beginPath();
-                ctx.rect(photoX + 3, photoY + 3, photoW - 6, photoH - 6);
+                // Clip pour assurer des coins propres et arrondis de 12px
+                drawRoundRect(ctx, photoX + 3, photoY + 3, photoW - 6, photoH - 6, 9);
                 ctx.clip();
                 ctx.drawImage(studentPhoto, photoX + 3, photoY + 3, photoW - 6, photoH - 6);
                 ctx.restore();
@@ -228,6 +303,8 @@ export const CarteExamen: React.FC = () => {
         } else {
             // Dessin avatar par défaut
             ctx.save();
+            drawRoundRect(ctx, photoX + 3, photoY + 3, photoW - 6, photoH - 6, 9);
+            ctx.clip();
             ctx.fillStyle = '#f1f5f9';
             ctx.fillRect(photoX + 3, photoY + 3, photoW - 6, photoH - 6);
             ctx.fillStyle = '#94a3b8';
@@ -274,7 +351,7 @@ export const CarteExamen: React.FC = () => {
         ctx.save();
         ctx.fillStyle = examColor;
         ctx.textAlign = 'left';
-        ctx.font = 'black 25px Helvetica, Arial, sans-serif';
+        ctx.font = 'black 26px Helvetica, Arial, sans-serif';
         ctx.fillText((schoolName || 'ÉTABLISSEMENT SCOLAIRE').toUpperCase(), detailsX, 122);
         ctx.restore();
 
@@ -288,10 +365,11 @@ export const CarteExamen: React.FC = () => {
         ctx.fillStyle = '#d21034'; // Rouge
         ctx.fillRect(detailsX, ribbonY + 4, ribbonW, 2);
 
-        // 7. Bande colorée d'examen
+        // 7. Bande colorée d'examen (Arrondie pour un design non linéaire)
         ctx.save();
         ctx.fillStyle = examColor;
-        ctx.fillRect(detailsX, 152, ribbonW, 42);
+        drawRoundRect(ctx, detailsX, 152, ribbonW, 42, 8);
+        ctx.fill();
         
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
@@ -299,8 +377,8 @@ export const CarteExamen: React.FC = () => {
         ctx.fillText(`CARTE DE CANDIDAT — EXAMEN : ${exam || 'OFFICIEL'}`, detailsX + ribbonW / 2, 152 + 27);
         ctx.restore();
 
-        // 8. Informations de l'élève (Textes plus grands et très lisibles)
-        let detailsY = 224;
+        // 8. Informations de l'élève (Textes agrandis pour une lisibilité parfaite)
+        let detailsY = 226;
         const lineSpacing = 32;
 
         ctx.save();
@@ -308,99 +386,100 @@ export const CarteExamen: React.FC = () => {
 
         // Ligne 1 : Nom
         ctx.fillStyle = '#64748b';
-        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
         ctx.fillText('Nom :', detailsX, detailsY);
         ctx.fillStyle = '#0f172a';
-        ctx.font = 'black 19px Helvetica, Arial, sans-serif';
+        ctx.font = 'black 20px Helvetica, Arial, sans-serif';
         ctx.fillText(student.nom.toUpperCase(), detailsX + 55, detailsY);
 
         detailsY += lineSpacing;
 
         // Ligne 2 : Prénoms
         ctx.fillStyle = '#64748b';
-        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
         ctx.fillText('Prénom(s) :', detailsX, detailsY);
         ctx.fillStyle = '#0f172a';
-        ctx.font = 'black 19px Helvetica, Arial, sans-serif';
-        ctx.fillText(student.prenom, detailsX + 90, detailsY);
+        ctx.font = 'black 20px Helvetica, Arial, sans-serif';
+        ctx.fillText(student.prenom, detailsX + 95, detailsY);
 
         detailsY += lineSpacing;
 
         // Ligne 3 : Date et Lieu de naissance
         ctx.fillStyle = '#64748b';
-        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
         ctx.fillText('Né(e) le :', detailsX, detailsY);
         ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 17px Helvetica, Arial, sans-serif';
-        ctx.fillText(student.dateNaissance || '—', detailsX + 70, detailsY);
+        ctx.font = 'bold 18px Helvetica, Arial, sans-serif';
+        ctx.fillText(student.dateNaissance || '—', detailsX + 75, detailsY);
 
         const dateWidth = ctx.measureText(student.dateNaissance || '—').width;
         ctx.fillStyle = '#64748b';
-        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
-        ctx.fillText('à', detailsX + 70 + dateWidth + 10, detailsY);
+        ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
+        ctx.fillText('à', detailsX + 75 + dateWidth + 10, detailsY);
         ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 17px Helvetica, Arial, sans-serif';
-        ctx.fillText(student.lieuNaissance || '—', detailsX + 70 + dateWidth + 28, detailsY);
+        ctx.font = 'bold 18px Helvetica, Arial, sans-serif';
+        ctx.fillText(student.lieuNaissance || '—', detailsX + 75 + dateWidth + 28, detailsY);
 
         detailsY += lineSpacing;
 
         // Ligne 4 : Sexe et Nationalité
         ctx.fillStyle = '#64748b';
-        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
         ctx.fillText('Sexe :', detailsX, detailsY);
         ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 17px Helvetica, Arial, sans-serif';
+        ctx.font = 'bold 18px Helvetica, Arial, sans-serif';
         ctx.fillText(student.sexe, detailsX + 55, detailsY);
 
         ctx.fillStyle = '#64748b';
-        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
-        ctx.fillText('Nationalité :', detailsX + 110, detailsY);
+        ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
+        ctx.fillText('Nationalité :', detailsX + 115, detailsY);
         ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 17px Helvetica, Arial, sans-serif';
-        ctx.fillText(student.nationalite || 'Togolaise', detailsX + 205, detailsY);
+        ctx.font = 'bold 18px Helvetica, Arial, sans-serif';
+        ctx.fillText(student.nationalite || 'Togolaise', detailsX + 215, detailsY);
 
         detailsY += lineSpacing;
 
         // Ligne 5 : Classe et Matricule
         ctx.fillStyle = '#64748b';
-        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
         ctx.fillText('Classe :', detailsX, detailsY);
         
-        // Petit badge pour la classe
+        // Petit badge arrondi pour la classe
         ctx.fillStyle = '#0f172a';
         ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
         const classVal = student.classe;
         const classValWidth = ctx.measureText(classVal).width;
-        ctx.fillRect(detailsX + 65, detailsY - 17, classValWidth + 12, 22);
+        drawRoundRect(ctx, detailsX + 70, detailsY - 17, classValWidth + 12, 22, 5);
+        ctx.fill();
         ctx.fillStyle = '#ffffff';
-        ctx.fillText(classVal, detailsX + 71, detailsY - 1);
+        ctx.fillText(classVal, detailsX + 76, detailsY - 1);
 
         ctx.fillStyle = '#64748b';
-        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
-        ctx.fillText('Matricule :', detailsX + 155 + classValWidth, detailsY);
-        ctx.fillStyle = '#0f172a';
         ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
-        ctx.fillText(student.id.substring(0, 10).toUpperCase(), detailsX + 240 + classValWidth, detailsY);
+        ctx.fillText('Matricule :', detailsX + 165 + classValWidth, detailsY);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 17px Helvetica, Arial, sans-serif';
+        ctx.fillText(student.id.substring(0, 10).toUpperCase(), detailsX + 255 + classValWidth, detailsY);
 
         detailsY += lineSpacing + 4;
 
-        // Ligne 6 : N° de table (Très grand pour lisibilité optimale sur table d'examen)
+        // Ligne 6 : N° de table (Très grand, lisibilité optimale)
         ctx.fillStyle = examColor;
-        ctx.font = 'black 17px Helvetica, Arial, sans-serif';
+        ctx.font = 'black 19px Helvetica, Arial, sans-serif';
         ctx.fillText('N° DE TABLE :', detailsX, detailsY);
         ctx.fillStyle = student.numeroTable ? '#0f172a' : '#ef4444';
-        ctx.font = 'black 22px Helvetica, Arial, sans-serif';
-        ctx.fillText(student.numeroTable || 'À SAISIR', detailsX + 125, detailsY);
+        ctx.font = 'black 24px Helvetica, Arial, sans-serif';
+        ctx.fillText(student.numeroTable || 'À SAISIR', detailsX + 135, detailsY);
 
         detailsY += lineSpacing;
 
         // Ligne 7 : Année scolaire
         ctx.fillStyle = '#64748b';
-        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
         ctx.fillText('Année scolaire :', detailsX, detailsY);
         ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
-        ctx.fillText(schoolYear, detailsX + 125, detailsY);
+        ctx.font = 'bold 17px Helvetica, Arial, sans-serif';
+        ctx.fillText(schoolYear, detailsX + 135, detailsY);
 
         ctx.restore();
 
@@ -421,13 +500,13 @@ export const CarteExamen: React.FC = () => {
             }
         }
 
-        // 2. Cachet de l'établissement (bas droit, sous la signature)
+        // 2. Cachet de l'établissement - GRAND et superposé de manière réaliste (X = 720, Y = 430, Taille = 150x150)
         if (showStampOnCards && schoolStamp) {
             const stampImg = await loadImage(schoolStamp);
             if (stampImg) {
                 ctx.save();
-                ctx.globalAlpha = 0.85;
-                ctx.drawImage(stampImg, sigX - 90, sigY - 20, 110, 110);
+                ctx.globalAlpha = 0.82; // Transparence d'encre pour laisser deviner l'écriture en dessous
+                ctx.drawImage(stampImg, sigX - 110, sigY - 30, 150, 150);
                 ctx.restore();
             }
         }
