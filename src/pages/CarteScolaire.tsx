@@ -33,124 +33,282 @@ const CarteEleve: React.FC<CarteProps> = ({
     nom, prenom, classe, id, telephone, schoolName, schoolYear, schoolLogo, photoUrl,
 }) => {
     const nomComplet = `${prenom} ${nom}`.toUpperCase();
+    const initials = `${prenom.charAt(0)}${nom.charAt(0)}`;
 
     return (
         <div style={{
-            width: 320, height: 204, // Proportions 85x54mm (approx)
-            background: 'white',
-            borderRadius: 0, overflow: 'hidden',
-            position: 'relative', fontFamily: '"Poppins", sans-serif',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
+            width: 340, height: 215,
+            borderRadius: 16,
+            overflow: 'hidden',
+            position: 'relative',
+            fontFamily: '"Poppins", sans-serif',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15)',
             userSelect: 'none',
-            border: '1px solid #000000'
+            background: '#0F172A',
         }}>
-            {/* Guilloche effect minimalist dots */}
-            <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: 'radial-gradient(#0F172A 1px, transparent 0)', backgroundSize: '10px 10px' }} />
-            
-            {/* Logo en filigrane (Watermark) */}
-            {schoolLogo && (
+            {/* ── Bande diagonale dorée principale ── */}
+            <div style={{
+                position: 'absolute',
+                top: -30, left: -20,
+                width: 220, height: 280,
+                background: 'linear-gradient(145deg, #1E293B 0%, #0F172A 60%)',
+                transform: 'skewX(-8deg)',
+                zIndex: 1,
+            }} />
+
+            {/* ── Accent diagonal doré ── */}
+            <div style={{
+                position: 'absolute',
+                top: 0, right: 0,
+                width: '55%', height: '100%',
+                background: 'linear-gradient(135deg, #1a1035 0%, #12082a 40%, #0d0620 100%)',
+                clipPath: 'polygon(15% 0, 100% 0, 100% 100%, 0% 100%)',
+                zIndex: 1,
+            }} />
+
+            {/* ── Ligne diagonale accent or ── */}
+            <div style={{
+                position: 'absolute',
+                top: 0, left: '40%',
+                width: 3, height: '100%',
+                background: 'linear-gradient(180deg, #F59E0B 0%, #EAB308 50%, #D97706 100%)',
+                transform: 'skewX(-8deg)',
+                zIndex: 5,
+                boxShadow: '0 0 12px rgba(234,179,8,0.5)',
+            }} />
+
+            {/* ── Micro-pattern guilloche (fond gauche) ── */}
+            <div style={{
+                position: 'absolute', inset: 0, zIndex: 2, opacity: 0.04,
+                backgroundImage: 'repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%)',
+                backgroundSize: '8px 8px',
+            }} />
+
+            {/* ── Cercles décoratifs ── */}
+            <div style={{
+                position: 'absolute', top: -40, left: -40,
+                width: 130, height: 130,
+                borderRadius: '50%',
+                border: '1.5px solid rgba(234,179,8,0.15)',
+                zIndex: 3,
+            }} />
+            <div style={{
+                position: 'absolute', top: -25, left: -25,
+                width: 100, height: 100,
+                borderRadius: '50%',
+                border: '1px solid rgba(234,179,8,0.1)',
+                zIndex: 3,
+            }} />
+            <div style={{
+                position: 'absolute', bottom: -30, right: 10,
+                width: 80, height: 80,
+                borderRadius: '50%',
+                border: '1px solid rgba(139,92,246,0.2)',
+                zIndex: 3,
+            }} />
+
+            {/* ── HEADER GAUCHE : Logo + Nom école ── */}
+            <div style={{
+                position: 'absolute', top: 0, left: 0, width: '42%', height: 52,
+                display: 'flex', alignItems: 'center', gap: 8, padding: '0 14px',
+                zIndex: 10,
+            }}>
+                {/* Logo box */}
                 <div style={{
-                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                    width: 140, height: 140, opacity: 0.22, zIndex: 2, pointerEvents: 'none'
+                    width: 34, height: 34, borderRadius: 8,
+                    background: schoolLogo ? 'white' : 'linear-gradient(135deg, #EAB308, #F59E0B)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: 3, flexShrink: 0,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
                 }}>
-                    <img src={schoolLogo} style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'grayscale(1)' }} />
+                    {schoolLogo
+                        ? <img src={schoolLogo} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                        : <span style={{ color: '#0F172A', fontWeight: 900, fontSize: 11 }}>ID</span>
+                    }
                 </div>
-            )}
-            {/* Header (Bannière économe en encre) */}
-            <div style={{
-                position: 'absolute', top: 0, left: 0, width: '100%', height: 49,
-                background: 'white', borderBottom: '2.5px solid #EAB308', 
-                display: 'flex', alignItems: 'center', padding: '0 15px', zIndex: 10
-            }}>
-            <div style={{ width: 44, height: 38, background: '#0F172A', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 3 }}>
-                   {schoolLogo ? <img src={schoolLogo} style={{ maxWidth:'100%', maxHeight:'100%', objectFit:'contain' }} /> : <span style={{ color:'white', fontWeight:900, fontSize:10 }}>ID</span>}
-                </div>
-                <div style={{ marginLeft: 12, marginRight: 12, flex: 1, minWidth: 0 }}>
-                    <h2 style={{
-                        color: '#0F172A', margin: 0,
-                        fontSize: schoolName.length > 25 ? 8 : schoolName.length > 15 ? 9 : 11,
-                        fontWeight: 900, textTransform: 'uppercase', lineHeight: 1,
-                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
-                    }}>{schoolName}</h2>
-                    <p style={{ color: '#EAB308', margin: '2px 0 0 0', fontSize: 7, fontWeight: 700 }}>
-                        OFFICIEL {schoolYear} <span style={{ color: '#64748B', fontWeight: 600 }}>· CARTES Scolaire</span>
-                    </p>
-                </div>
-            </div>
-
-            {/* 3. Photo Passeport (Position fixée au mm près) */}
-            <div style={{
-                position: 'absolute', top: 64, left: 48, // PhotoX=13mm -> 48px
-                width: 68, height: 82, // 18x22mm
-                borderRadius: 0, overflow: 'hidden',
-                border: '1.5px solid #0F172A',
-                background: '#F1F5F9', zIndex: 10
-            }}>
-                {photoUrl ? (
-                    <img src={photoUrl} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94A3B8' }}>
-                         <User size={24} />
+                <div style={{ minWidth: 0 }}>
+                    <div style={{
+                        color: '#FFFFFF', fontWeight: 900, lineHeight: 1.1,
+                        fontSize: schoolName.length > 22 ? 7 : schoolName.length > 14 ? 8 : 9.5,
+                        textTransform: 'uppercase',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        maxWidth: 110,
+                    }}>{schoolName}</div>
+                    <div style={{ color: '#EAB308', fontSize: 6, fontWeight: 700, marginTop: 1 }}>
+                        CARTE SCOLAIRE
                     </div>
-                )}
-                {/* Sceau de sécurité photo */}
-                <div style={{ position: 'absolute', bottom: 4, right: 4, width: 10, height: 10, background: '#EAB308', borderRadius: '50%', border: '1.5px solid white' }} />
+                </div>
             </div>
 
-            {/* 4. Texte (Identité) */}
+            {/* ── Ligne dorée sous le header ── */}
             <div style={{
-                position: 'absolute', top: 64, left: 126, width: 95, // infoStartX=34mm -> 126px
-                display: 'flex', flexDirection: 'column', zIndex: 10
+                position: 'absolute', top: 52, left: 0, width: '43%', height: 1.5,
+                background: 'linear-gradient(90deg, rgba(234,179,8,0.8), transparent)',
+                zIndex: 10,
+            }} />
+
+            {/* ── Année scolaire (badge) ── */}
+            <div style={{
+                position: 'absolute', top: 60, left: 14,
+                background: 'rgba(234,179,8,0.12)',
+                border: '1px solid rgba(234,179,8,0.4)',
+                borderRadius: 6, padding: '2px 8px',
+                zIndex: 10,
             }}>
-                <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 2 }}>Nom & Prénoms</p>
-                <h3 style={{
-                    color: '#0F172A', margin: 0, marginBottom: 12, fontWeight: 900, 
-                    fontSize: nomComplet.length > 30 ? 9 : nomComplet.length > 20 ? 11 : 13,
-                    lineHeight: 1.1, textTransform: 'uppercase',
-                    maxHeight: 34, overflow: 'hidden',
-                    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical'
+                <span style={{ color: '#EAB308', fontSize: 6.5, fontWeight: 800 }}>AN. {schoolYear}</span>
+            </div>
+
+            {/* ── Photo élève ── */}
+            <div style={{
+                position: 'absolute', top: 80, left: 14,
+                width: 76, height: 95,
+                zIndex: 12,
+            }}>
+                {/* Cadre photo avec effet */}
+                <div style={{
+                    width: '100%', height: '100%',
+                    borderRadius: 10,
+                    overflow: 'hidden',
+                    border: '2.5px solid #EAB308',
+                    background: '#1E293B',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
+                }}>
+                    {photoUrl ? (
+                        <img src={photoUrl} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                        <div style={{
+                            width: '100%', height: '100%',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            background: 'linear-gradient(145deg, #1E293B, #0F172A)',
+                            color: '#EAB308', fontSize: 28, fontWeight: 900,
+                        }}>
+                            {initials}
+                        </div>
+                    )}
+                </div>
+                {/* Pastille dorée sécurité */}
+                <div style={{
+                    position: 'absolute', bottom: -4, right: -4,
+                    width: 16, height: 16, borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #F59E0B, #EAB308)',
+                    border: '2px solid #0F172A',
+                    zIndex: 13, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 2px 6px rgba(234,179,8,0.5)',
+                }}>
+                    <span style={{ color: '#0F172A', fontSize: 7, fontWeight: 900 }}>✓</span>
+                </div>
+            </div>
+
+            {/* ── COLONNE DROITE : Informations élève ── */}
+            <div style={{
+                position: 'absolute', top: 14, right: 12, width: '52%',
+                display: 'flex', flexDirection: 'column', gap: 0,
+                zIndex: 10, paddingLeft: 14,
+            }}>
+                {/* Label */}
+                <div style={{
+                    color: 'rgba(139,92,246,0.9)', fontSize: 6, fontWeight: 800,
+                    textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 4,
+                }}>
+                    Identité Élève
+                </div>
+
+                {/* Nom complet */}
+                <div style={{
+                    color: '#FFFFFF', fontWeight: 900,
+                    fontSize: nomComplet.length > 28 ? 9 : nomComplet.length > 18 ? 11 : 13,
+                    lineHeight: 1.15, textTransform: 'uppercase',
+                    maxHeight: 38, overflow: 'hidden',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    marginBottom: 10,
+                    textShadow: '0 1px 4px rgba(0,0,0,0.5)',
                 }}>
                     {nomComplet}
-                </h3>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <div>
-                        <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 1 }}>Classe</p>
-                        <span style={{
-                            background: '#0F172A', color: 'white', fontSize: 11, fontWeight: 900, 
-                            padding: '3px 12px', borderRadius: 0, display: 'inline-block'
-                        }}>
-                            {classe}
-                        </span>
+                </div>
+
+                {/* Classe badge */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                    <div style={{
+                        background: 'linear-gradient(135deg, #EAB308, #F59E0B)',
+                        borderRadius: 7, padding: '3px 10px',
+                        boxShadow: '0 3px 10px rgba(234,179,8,0.35)',
+                    }}>
+                        <span style={{ color: '#0F172A', fontSize: 12, fontWeight: 900 }}>{classe}</span>
                     </div>
-                    <div>
-                        <p style={{ fontSize: 6, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', marginBottom: 1 }}>Contact</p>
-                        <span style={{ fontSize: 9, fontWeight: 900, color: '#0F172A' }}>{telephone || '71517633'}</span>
+                    <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10 }}>·</span>
+                </div>
+
+                {/* Ligne séparatrice */}
+                <div style={{
+                    width: '80%', height: 1,
+                    background: 'linear-gradient(90deg, rgba(234,179,8,0.4), transparent)',
+                    marginBottom: 8,
+                }} />
+
+                {/* Matricule */}
+                <div style={{ marginBottom: 6 }}>
+                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 }}>Matricule</div>
+                    <div style={{
+                        color: 'rgba(255,255,255,0.85)', fontSize: 7.5, fontWeight: 800,
+                        fontFamily: 'monospace', letterSpacing: 0.5,
+                        background: 'rgba(255,255,255,0.06)', borderRadius: 5, padding: '2px 6px',
+                        display: 'inline-block',
+                    }}>
+                        {id.slice(0, 14).toUpperCase()}
+                    </div>
+                </div>
+
+                {/* Contact */}
+                <div>
+                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 }}>Contact</div>
+                    <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 9, fontWeight: 800 }}>
+                        {telephone || '—'}
                     </div>
                 </div>
             </div>
 
-            {/* 5. QR Code (Position fixée) */}
+            {/* ── QR Code ── */}
             <div style={{
-                position: 'absolute', top: 68, left: 226, // qrX=60mm -> 222px
-                width: 79, height: 79, background: 'white', borderRadius: 0, padding: 5,
+                position: 'absolute', bottom: 22, right: 10,
+                width: 64, height: 64,
+                background: '#FFFFFF',
+                borderRadius: 8,
+                padding: 4,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                border: '1px solid #E2E8F0', zIndex: 10
+                zIndex: 12,
+                boxShadow: '0 4px 14px rgba(0,0,0,0.5)',
             }}>
-                <QRCodeCanvas value={id} size={60} level="H" bgColor="#FFFFFF" fgColor="#0F172A" />
-                <p style={{ fontSize: 5, color: '#94A3B8', marginTop: 4, fontWeight: 900, textTransform: 'uppercase' }}>Scan Sécurisé</p>
+                <QRCodeCanvas value={id} size={48} level="H" bgColor="#FFFFFF" fgColor="#0F172A" />
+                <p style={{ fontSize: 4, color: '#94A3B8', marginTop: 2, fontWeight: 900, textTransform: 'uppercase' }}>Scan</p>
             </div>
 
-            {/* Footer (Pied de page économe) */}
+            {/* ── FOOTER ── */}
             <div style={{
-                position: 'absolute', bottom: 0, left: 0, width: '100%', height: 26,
-                background: '#000000', borderTop: '1.5px solid #EAB308', zIndex: 11, 
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                position: 'absolute', bottom: 0, left: 0, width: '100%', height: 18,
+                background: 'linear-gradient(90deg, #EAB308 0%, #F59E0B 40%, #1E293B 60%)',
+                zIndex: 15,
+                display: 'flex', alignItems: 'center', paddingLeft: 14, paddingRight: 80,
             }}>
-                <p style={{ color: '#FFFFFF', fontSize: 7.5, fontWeight: 700, margin: 0, textAlign: 'center', padding: '0 10px' }}>
-                    Si cette carte ne vous appartient pas, veuillez la retourner à l'administration.
+                <p style={{
+                    color: '#0F172A', fontSize: 6, fontWeight: 800, margin: 0,
+                    textTransform: 'uppercase', letterSpacing: 0.5,
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                }}>
+                    Retourner à l'administration si trouvée • {schoolName}
                 </p>
             </div>
+
+            {/* ── Watermark logo ── */}
+            {schoolLogo && (
+                <div style={{
+                    position: 'absolute', top: '50%', left: '20%', transform: 'translate(-50%, -50%)',
+                    width: 90, height: 90, opacity: 0.07, zIndex: 4, pointerEvents: 'none',
+                }}>
+                    <img src={schoolLogo} style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'grayscale(1) invert(1)' }} />
+                </div>
+            )}
         </div>
     );
 };
@@ -221,6 +379,7 @@ const resizeLogoForPDF = (src: string, size: number): Promise<string> => {
 
 // ============================================================
 // GÉNÉRATION PDF — 8 cartes par page A4 (2 colonnes × 4 lignes)
+// Design identique à la carte écran : fond sombre, bande or diagonale
 // ============================================================
 const generateCartesPDF = async (
     students: Array<{ id: string; nom: string; prenom: string; classe: string; telephone: string; photoUrl?: string }>,
@@ -229,251 +388,311 @@ const generateCartesPDF = async (
     schoolLogo: string | null,
     onProgress: (n: number) => void,
 ): Promise<void> => {
-    if (!students.length) {
-        throw new Error('Aucun élève sélectionné');
-    }
+    if (!students.length) throw new Error('Aucun élève sélectionné');
 
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const bannerH = 13;
 
     // ── Mise en page ────────────────────────────────────────
-    const cardW   = 85;   // mm (ISO 7810 ID-1)
-    const cardH   = 54;   // mm (ISO 7810 ID-1)
+    const cardW   = 85;
+    const cardH   = 54;
     const cols    = 2;
     const rowsMax = 4;
     const pageW   = 210;
     const pageH   = 297;
-    const gapX    = 6;    // 6mm entre colonnes
-    const gapY    = 8;    // 8mm entre lignes
-    const marginX = (pageW - cols * cardW - (cols - 1) * gapX) / 2;  // centrage horizontal
-    const marginY = (pageH - rowsMax * cardH - (rowsMax - 1) * gapY) / 2; // centrage vertical
+    const gapX    = 6;
+    const gapY    = 8;
+    const marginX = (pageW - cols * cardW - (cols - 1) * gapX) / 2;
+    const marginY = (pageH - rowsMax * cardH - (rowsMax - 1) * gapY) / 2;
 
     // ── Logo pré-traité ─────────────────────────────────────
     let logoData = '';
     if (schoolLogo && schoolLogo.startsWith('data:image')) {
-        // 120px ≈ 10mm à 300dpi — assez grand pour être net
         logoData = await resizeLogoForPDF(schoolLogo, 120);
     }
 
     const total = students.length;
     let cardIndex = 0;
 
+    // Couleurs du design
+    const C = {
+        dark:   [15,  23,  42 ] as [number,number,number],
+        slate:  [30,  41,  59 ] as [number,number,number],
+        purple: [18,  8,   42 ] as [number,number,number],
+        gold:   [234, 179, 8  ] as [number,number,number],
+        goldHi: [245, 158, 11 ] as [number,number,number],
+        white:  [255, 255, 255] as [number,number,number],
+        dim:    [148, 163, 184] as [number,number,number],
+        silver: [200, 200, 200] as [number,number,number],
+        violet: [139, 92,  246] as [number,number,number],
+        dimDark:[71,  85,  105] as [number,number,number],
+    };
+
+    const gs = (opacity: number) => {
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity }));
+    };
+
     for (const student of students) {
         const posOnPage = cardIndex % (cols * rowsMax);
-        if (posOnPage === 0 && cardIndex > 0) {
-            doc.addPage();
+        if (posOnPage === 0 && cardIndex > 0) doc.addPage();
+
+        const col = posOnPage % cols;
+        const row = Math.floor(posOnPage / cols);
+        const x   = marginX + col * (cardW + gapX);
+        const y   = marginY + row * (cardH + gapY);
+
+        // ══════════════════════════════════════════════════════
+        // 1. FOND PRINCIPAL — côté gauche sombre
+        // ══════════════════════════════════════════════════════
+        doc.setFillColor(...C.dark);
+        doc.roundedRect(x, y, cardW, cardH, 2, 2, 'F');
+
+        // Zone gauche légèrement plus claire (slate)
+        doc.setFillColor(...C.slate);
+        doc.rect(x, y, cardW * 0.46, cardH, 'F');
+
+        // Zone droite — fond violet sombre
+        doc.setFillColor(...C.purple);
+        doc.rect(x + cardW * 0.52, y, cardW * 0.48, cardH, 'F');
+
+        // Re-appliquer le fond dark sur le card pour les angles arrondis
+        doc.setDrawColor(...C.dark);
+        doc.setLineWidth(0.1);
+        doc.roundedRect(x, y, cardW, cardH, 2, 2, 'S');
+
+        // ── Micro guilloche diagonal (gauche) ────────────────
+        doc.setDrawColor(255, 255, 255);
+        doc.setLineWidth(0.04);
+        for (let i = 0; i < cardH; i += 3) {
+            gs(0.04);
+            doc.line(x, y + i, x + cardW * 0.45, y + i + 1.5);
         }
+        gs(1);
 
-        const col  = posOnPage % cols;
-        const row  = Math.floor(posOnPage / cols);
-        const x    = marginX + col * (cardW + gapX);
-        const y    = marginY + row * (cardH + gapY);
+        // ── Bande diagonale or (séparation) ─────────────────
+        const sepX = x + cardW * 0.48;
+        doc.setFillColor(...C.gold);
+        doc.rect(sepX - 0.8, y, 1.8, cardH, 'F');
+        doc.setFillColor(...C.goldHi);
+        doc.rect(sepX - 1.5, y, 0.6, cardH, 'F');
 
-        // ── Fond de la carte (Économe en encre - Bords 90°) ─────
-        doc.setFillColor(255, 255, 255);
-        doc.rect(x, y, cardW, cardH, 'F');
-        doc.setDrawColor(0, 0, 0);
-        doc.setLineWidth(0.2);
-        doc.rect(x, y, cardW, cardH, 'S');
+        // ── Cercles décoratifs coin supérieur gauche ─────────
+        doc.setDrawColor(...C.gold);
+        doc.setLineWidth(0.3);
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 0.15 }));
+        doc.circle(x - 5, y - 5, 14, 'S');
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 0.1 }));
+        doc.circle(x - 5, y - 5, 10, 'S');
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 1 }));
+        doc.setLineWidth(0.1);
 
-        // Guilloche subtile (Lignes en zigzag légères)
-        doc.setDrawColor(241, 245, 249);
-        doc.setLineWidth(0.05);
-        for(let i=0; i<cardH; i+=4) {
-            doc.line(x, y+i, x+cardW, y+i+2);
-        }
+        // ══════════════════════════════════════════════════════
+        // 2. HEADER GAUCHE — Logo + Nom école
+        // ══════════════════════════════════════════════════════
+        const hH       = 14;
+        const logoBoxW = 9;
+        const logoBoxH = 9;
+        const logoBoxX = x + 3.5;
+        const logoBoxY = y + (hH - logoBoxH) / 2;
 
-        // Ligne de bannière d'en-tête (Or)
-        doc.setDrawColor(234, 179, 8);
-        doc.setLineWidth(0.6);
-        doc.line(x, y + bannerH, x + cardW, y + bannerH);
+        doc.setFillColor(...C.white);
+        doc.roundedRect(logoBoxX, logoBoxY, logoBoxW, logoBoxH, 1.5, 1.5, 'F');
 
-        // ── Logo filigrane (Watermark) ────────────────────────
         if (logoData) {
-            const wmSize = 45;
-            doc.saveGraphicsState();
-            // @ts-ignore
-            doc.setGState(new doc.GState({ opacity: 0.22 }));
-            doc.addImage(logoData, 'PNG', x + (cardW - wmSize)/2, y + (cardH - wmSize)/2, wmSize, wmSize);
-            doc.restoreGraphicsState();
-        }
-
-        // ── Logo Frame ────────────────────────────────────
-        const logoMM_W = 12;
-        const logoMM_H = 10;
-        const logoX   = x + 4;
-        const logoY   = y + (bannerH - logoMM_H) / 2;
-
-        doc.setFillColor(255, 255, 255);
-        doc.roundedRect(logoX - 0.5, logoY - 0.5, logoMM_W + 1, logoMM_H + 1, 1, 1, 'F');
-        doc.setDrawColor(234, 179, 8);
-        doc.setLineWidth(0.2);
-        doc.roundedRect(logoX - 0.5, logoY - 0.5, logoMM_W + 1, logoMM_H + 1, 1, 1, 'S');
-
-        if (logoData) {
-            doc.addImage(logoData, 'PNG', logoX, logoY, logoMM_W, logoMM_H);
+            doc.addImage(logoData, 'PNG', logoBoxX + 0.5, logoBoxY + 0.5, logoBoxW - 1, logoBoxH - 1);
         } else {
-            doc.setFillColor(15, 23, 42);
-            doc.roundedRect(logoX, logoY, logoMM_W, logoMM_H, 1, 1, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(4);
+            doc.setFillColor(...C.gold);
+            doc.roundedRect(logoBoxX, logoBoxY, logoBoxW, logoBoxH, 1.5, 1.5, 'F');
+            doc.setTextColor(...C.dark);
+            doc.setFontSize(4.5);
             doc.setFont('helvetica', 'bold');
-            doc.text('ID', logoX + logoMM_W / 2, logoY + 6, { align: 'center' });
+            doc.text('ID', logoBoxX + logoBoxW / 2, logoBoxY + 6, { align: 'center' });
         }
 
-        // ── Titre établissement (Texte sombre pour fond blanc) ─────────────
-        const txtX      = logoX + logoMM_W + 4;
-        const maxNameW  = cardW - logoMM_W - 10;
-        doc.setTextColor(15, 23, 42); // Bleu nuit (clair)
-        let schoolFontSize = 7;
-        const schoolLine = (schoolName || 'ÉCOLE').toUpperCase();
-        doc.setFontSize(schoolFontSize);
-        let schoolTextWidth = doc.getTextWidth(schoolLine);
-        // Ajuster dynamiquement la taille du texte de l'école pour éviter de dépasser
-        while (schoolTextWidth > maxNameW && schoolFontSize > 4.5) {
-            schoolFontSize -= 0.5;
-            doc.setFontSize(schoolFontSize);
-            schoolTextWidth = doc.getTextWidth(schoolLine);
-        }
-        let finalSchoolLine = schoolLine;
-        if (schoolTextWidth > maxNameW) {
-            while (doc.getTextWidth(finalSchoolLine + '...') > maxNameW && finalSchoolLine.length > 5) {
-                finalSchoolLine = finalSchoolLine.slice(0, -1);
-            }
-            finalSchoolLine += '...';
-        }
-        doc.text(finalSchoolLine, txtX, y + 5);
-        
-        doc.setFontSize(4.5);
+        const schoolTxtX = logoBoxX + logoBoxW + 2.5;
+        const maxSchoolW = cardW * 0.44 - logoBoxW - 6;
+        let sLine = (schoolName || 'ÉCOLE').toUpperCase();
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(234, 179, 8);
-        doc.text(`OFFICIEL ${schoolYear}`, txtX, y + 8.5);
-        
-        doc.setTextColor(148, 163, 184);
-        doc.setFont('helvetica', 'normal');
-        doc.text(' • IDENTITÉ SCOLAIRE', txtX + doc.getTextWidth(`OFFICIEL ${schoolYear}`) + 1, y + 8.5);
+        let sFS = 6.5;
+        doc.setFontSize(sFS);
+        while (doc.getTextWidth(sLine) > maxSchoolW && sFS > 4) { sFS -= 0.4; doc.setFontSize(sFS); }
+        if (doc.getTextWidth(sLine) > maxSchoolW) {
+            while (doc.getTextWidth(sLine + '...') > maxSchoolW && sLine.length > 4) sLine = sLine.slice(0, -1);
+            sLine += '...';
+        }
+        doc.setTextColor(...C.white);
+        doc.text(sLine, schoolTxtX, y + 5.5);
 
-        // ── QR Code Frame ─────────────────────────────────
-        const qrMM    = 21;
-        const qrX     = x + cardW - qrMM - 4;
-        const qrY     = y + bannerH + 5;
-        const qrPad   = 1.5;
+        doc.setFontSize(3.8);
+        doc.setTextColor(...C.gold);
+        doc.text('CARTE SCOLAIRE', schoolTxtX, y + 9.5);
 
-        // Conteneur blanc
-        doc.setFillColor(255, 255, 255);
-        doc.rect(qrX - qrPad, qrY - qrPad, qrMM + qrPad * 2, qrMM + qrPad * 2, 'F');
-        
-        doc.setDrawColor(226, 232, 240);
-        doc.setLineWidth(0.2);
-        doc.rect(qrX - qrPad, qrY - qrPad, qrMM + qrPad * 2, qrMM + qrPad * 2, 'S');
+        // Ligne or sous le header
+        doc.setDrawColor(...C.gold);
+        doc.setLineWidth(0.3);
+        gs(0.65);
+        doc.line(x, y + hH, x + cardW * 0.47, y + hH);
+        gs(1);
 
-        const qrDataURL = await buildQRDataURL(student.id);
-        doc.addImage(qrDataURL, 'PNG', qrX, qrY, qrMM, qrMM, undefined, 'NONE');
 
-        doc.setTextColor(148, 163, 184);
+        // Badge année scolaire
+        const bX = x + 3.5;
+        const bY = y + hH + 2;
+        doc.setFillColor(...C.gold);
+        gs(0.13);
+        doc.roundedRect(bX, bY, 22, 4, 1, 1, 'F');
+        gs(1);
+        doc.setDrawColor(...C.gold);
+        doc.setLineWidth(0.18);
+        doc.roundedRect(bX, bY, 22, 4, 1, 1, 'S');
+        doc.setTextColor(...C.gold);
         doc.setFontSize(3.5);
         doc.setFont('helvetica', 'bold');
-        doc.text("SCAN SÉCURISÉ", qrX + qrMM / 2, qrY + qrMM + 3, { align: 'center' });
+        doc.text(`AN. ${schoolYear}`, bX + 11, bY + 2.8, { align: 'center' });
 
-        // ── Photo passeport ──────────────────────────────
-        const photoOffsetX = 13; 
-        const photoW = 18;
-        const photoH = 22;
-        const photoY = y + bannerH + 4;
+        // ── 6. PHOTO ÉLÈVE ──────────────────────────────────────────
+        const phW = 20;
+        const phH = 26;
+        const phX = x + 3.5;
+        const phY = y + hH + 8;
 
-        // Cadre photo (90°)
-        doc.setFillColor(241, 245, 249);
-        doc.rect(x + photoOffsetX, photoY, photoW, photoH, 'F');
-        doc.setDrawColor(15, 23, 42);
-        doc.setLineWidth(0.4);
-        doc.rect(x + photoOffsetX, photoY, photoW, photoH, 'S');
+        doc.setFillColor(...C.slate);
+        doc.roundedRect(phX, phY, phW, phH, 2, 2, 'F');
+        doc.setDrawColor(...C.gold);
+        doc.setLineWidth(0.55);
+        doc.roundedRect(phX, phY, phW, phH, 2, 2, 'S');
 
         if (student.photoUrl) {
             try {
                 const b64 = await imageUrlToBase64(student.photoUrl);
-                if (b64) {
-                    doc.addImage(b64, 'JPEG', x + photoOffsetX + 0.2, photoY + 0.2, photoW - 0.4, photoH - 0.4);
-                }
-            } catch (err) {
-                console.warn('Erreur chargement photo PDF:', err);
-            }
+                if (b64) doc.addImage(b64, 'JPEG', phX + 0.4, phY + 0.4, phW - 0.8, phH - 0.8);
+            } catch { /* silencieux */ }
+        } else {
+            const initials = `${student.prenom.charAt(0)}${student.nom.charAt(0)}`.toUpperCase();
+            doc.setTextColor(...C.gold);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.text(initials, phX + phW / 2, phY + phH / 2 + 3, { align: 'center' });
         }
 
-        // ── Sceau de sécurité photo
-        doc.setFillColor(234, 179, 8);
-        doc.circle(x + photoOffsetX + photoW - 2, photoY + photoH - 2, 1.5, 'F');
-        doc.setDrawColor(255, 255, 255);
-        doc.setLineWidth(0.1);
-        doc.circle(x + photoOffsetX + photoW - 2, photoY + photoH - 2, 1.5, 'S');
-
-        // ── Infos Élève : Nom ────────────────────────────
-        const infoStartX = x + photoOffsetX + photoW + 4;
-        const nameMaxW   = cardW - qrMM - photoW - 19;
-        const fullName   = `${student.prenom} ${student.nom}`.toUpperCase();
-        
-        doc.setTextColor(100, 116, 139);
-        doc.setFontSize(4);
+        // Pastille sécurité
+        doc.setFillColor(...C.gold);
+        doc.circle(phX + phW - 1, phY + phH - 1, 2, 'F');
+        doc.setTextColor(...C.dark);
+        doc.setFontSize(3);
         doc.setFont('helvetica', 'bold');
-        doc.text("NOM & PRÉNOMS", infoStartX, photoY + 1);
+        doc.text('OK', phX + phW - 1, phY + phH - 0.3, { align: 'center' });
 
-        doc.setTextColor(15, 23, 42);
+        // ── 7. INFORMATIONS ÉLÈVE (colonne droite) ──────────────────
+        const iX    = x + cardW * 0.54;
+        const iMaxW = cardW * 0.42;
+
+        doc.setTextColor(...C.violet);
+        doc.setFontSize(3.3);
         doc.setFont('helvetica', 'bold');
-        let studentFontSize = 9;
-        if (fullName.length > 25) studentFontSize = 6.5;
-        else if (fullName.length > 18) studentFontSize = 8;
-        doc.setFontSize(studentFontSize);
-        const nameLines = doc.splitTextToSize(fullName, nameMaxW);
-        const finalLines = nameLines.slice(0, 2); // Limiter à 2 lignes maximum pour éviter le chevauchement
-        doc.text(finalLines, infoStartX, photoY + 5);
+        doc.text('IDENTITE ELEVE', iX, y + 5.2);
 
-        // ── Tags (Classe & Contact) ─────────────────────────────────
-        const tagY = photoY + 13;
-        
-        doc.setTextColor(100, 116, 139);
-        doc.setFontSize(3.5);
-        doc.text("CLASSE", infoStartX, tagY);
-        
-        doc.setFillColor(15, 23, 42);
-        doc.rect(infoStartX, tagY + 1, 22, 5.5, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(7);
+        const fullName = `${student.prenom} ${student.nom}`.toUpperCase();
+        doc.setTextColor(...C.white);
+        let nFS = 8;
+        if (fullName.length > 25) nFS = 5.5;
+        else if (fullName.length > 18) nFS = 6.5;
+        doc.setFontSize(nFS);
+        const nLines = doc.splitTextToSize(fullName, iMaxW);
+        doc.text(nLines.slice(0, 2), iX, y + 10.5);
+
+        // Badge classe
+        const tY = y + 21;
+        doc.setFontSize(6.5);
+        const cW = Math.max(doc.getTextWidth(student.classe) + 5, 13);
+        doc.setFillColor(...C.gold);
+        doc.roundedRect(iX, tY, cW, 5.5, 1.5, 1.5, 'F');
+        doc.setTextColor(...C.dark);
         doc.setFont('helvetica', 'bold');
-        doc.text(student.classe, infoStartX + 11, tagY + 5.1, { align: 'center' });
+        doc.text(student.classe, iX + cW / 2, tY + 4, { align: 'center' });
 
-        const phoneY = tagY + 10;
-        doc.setTextColor(100, 116, 139);
-        doc.setFontSize(3.5);
-        doc.text("CONTACT", infoStartX, phoneY);
-        doc.setTextColor(15, 23, 42);
-        doc.setFontSize(5);
-        doc.text(student.telephone || '71517633', infoStartX, phoneY + 4);
+        // Séparateur or
+        doc.setDrawColor(...C.gold);
+        doc.setLineWidth(0.18);
+        gs(0.35);
+        doc.line(iX, tY + 7.5, iX + iMaxW * 0.7, tY + 7.5);
+        gs(1);
 
-        // ── Pied de page ──────────────────────────
-        const footerH = 7;
-        doc.setFillColor(0, 0, 0);
-        doc.rect(x, y + cardH - footerH, cardW, footerH, 'F');
-        doc.setDrawColor(234, 179, 8);
-        doc.setLineWidth(0.4);
-        doc.line(x, y + cardH - footerH, x + cardW, y + cardH - footerH);
-
-        doc.setTextColor(255, 255, 255);
+        // Matricule
+        doc.setTextColor(...C.dim);
+        doc.setFontSize(3);
+        doc.setFont('helvetica', 'bold');
+        doc.text('MATRICULE', iX, tY + 11.5);
+        const matStr = student.id.slice(0, 12).toUpperCase();
         doc.setFontSize(4.5);
-        doc.setFont('helvetica', 'bold');
-        const disclaimer = "Si cette carte ne vous appartient pas, veuillez la retourner à l'administration.";
-        doc.text(disclaimer, x + cardW / 2, y + cardH - 2.5, { align: 'center' });
+        const mW = doc.getTextWidth(matStr) + 2.5;
+        doc.setFillColor(...C.white);
+        gs(0.06);
+        doc.roundedRect(iX, tY + 12.3, mW, 3.5, 0.8, 0.8, 'F');
+        gs(1);
+        doc.setTextColor(...C.silver);
+        doc.text(matStr, iX + 1.2, tY + 15.2);
 
-        // Progression
+        // Contact
+        doc.setTextColor(...C.dim);
+        doc.setFontSize(3);
+        doc.setFont('helvetica', 'bold');
+        doc.text('CONTACT', iX, tY + 20);
+        doc.setTextColor(...C.silver);
+        doc.setFontSize(5);
+        doc.text(student.telephone || '—', iX, tY + 23.5);
+
+        // ── 8. QR CODE ──────────────────────────────────────────────
+        const qrMM  = 16;
+        const qrPad = 1;
+        const qrX2  = x + cardW - qrMM - qrPad * 2 - 2;
+        const qrY2  = y + cardH - qrMM - qrPad * 2 - 5.5;
+
+        doc.setFillColor(...C.white);
+        doc.roundedRect(qrX2, qrY2, qrMM + qrPad * 2, qrMM + qrPad * 2, 1.5, 1.5, 'F');
+
+        const qrDataURL = await buildQRDataURL(student.id);
+        doc.addImage(qrDataURL, 'PNG', qrX2 + qrPad, qrY2 + qrPad, qrMM, qrMM, undefined, 'NONE');
+
+        doc.setTextColor(...C.dim);
+        doc.setFontSize(3);
+        doc.setFont('helvetica', 'bold');
+        doc.text('SCAN', qrX2 + qrPad + qrMM / 2, qrY2 + qrMM + qrPad * 2 + 1, { align: 'center' });
+
+        // ── 9. FOOTER dégradé or / slate ────────────────────────────
+        const fH = 5;
+        const fY = y + cardH - fH;
+
+        doc.setFillColor(...C.gold);
+        doc.rect(x, fY, cardW * 0.50, fH, 'F');
+        doc.setFillColor(...C.slate);
+        doc.rect(x + cardW * 0.50, fY, cardW * 0.50, fH, 'F');
+        doc.setDrawColor(...C.dark);
+        doc.setLineWidth(0.08);
+        doc.roundedRect(x, y, cardW, cardH, 2, 2, 'S');
+
+        let fTxt = `Retourner a l'admin si trouvee  •  ${schoolName.toUpperCase()}`;
+        const maxFW = cardW * 0.47;
+        doc.setFontSize(3);
+        doc.setFont('helvetica', 'bold');
+        while (doc.getTextWidth(fTxt) > maxFW && fTxt.length > 8) fTxt = fTxt.slice(0, -1);
+        doc.setTextColor(...C.dark);
+        doc.text(fTxt, x + 3, fY + 3.3);
+
         cardIndex++;
         onProgress(Math.round((cardIndex / total) * 100));
     }
 
-    // ── Pied de page (toutes les pages) ───────────────────
+    // Numérotation de pages
     const nbPages = doc.getNumberOfPages();
     for (let p = 1; p <= nbPages; p++) {
         doc.setPage(p);
-        doc.setFontSize(5.5);
+        doc.setFontSize(5);
         doc.setFont('helvetica', 'normal');
-        doc.setTextColor(160, 160, 160);
+        doc.setTextColor(120, 120, 120);
         doc.text(
             `Cartes scolaires ${schoolYear} — ${schoolName} — Page ${p}/${nbPages}`,
             105, 293, { align: 'center' }
