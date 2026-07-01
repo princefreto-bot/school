@@ -18,8 +18,10 @@ export interface AppState {
   setAppName: (name: string) => void;
   schoolLogo: string | null;        // base64 de l'image PNG
   setSchoolLogo: (logo: string | null) => void;
-  schoolStamp: string | null;       // Sceau de l'école
+  schoolStamp: string | null;       // Cachet de l'école
   setSchoolStamp: (stamp: string | null) => void;
+  officialSeal: string | null;      // Sceau officiel
+  setOfficialSeal: (seal: string | null) => void;
   directorSignature: string | null;
   setDirectorSignature: (sig: string | null) => void;
   directorName: string;
@@ -30,6 +32,8 @@ export interface AppState {
   setShowStampOnCards: (v: boolean) => void;
   showSignatureOnCards: boolean;
   setShowSignatureOnCards: (v: boolean) => void;
+  showSealOnCards: boolean;
+  setShowSealOnCards: (v: boolean) => void;
   showStampOnBulletins: boolean;
   setShowStampOnBulletins: (v: boolean) => void;
   showSignatureOnBulletins: boolean;
@@ -123,10 +127,12 @@ export interface AppState {
     countryMotto?: string,
     ministereName?: string,
     directorSignature?: string | null,
+    officialSeal?: string | null,
     directorName?: string,
     directorTitle?: string,
     showStampOnCards?: boolean,
     showSignatureOnCards?: boolean,
+    showSealOnCards?: boolean,
     showStampOnBulletins?: boolean,
     showSignatureOnBulletins?: boolean
   }) => Promise<void>;
@@ -313,6 +319,8 @@ export const useStore = create<AppState>()(
       setSchoolLogo: (logo) => set({ schoolLogo: logo }),
       schoolStamp: null,
       setSchoolStamp: (stamp) => set({ schoolStamp: stamp }),
+      officialSeal: null,
+      setOfficialSeal: (seal) => set({ officialSeal: seal }),
       tranches: [],
       setTranches: (tranches) => {
         set({ tranches });
@@ -725,6 +733,8 @@ export const useStore = create<AppState>()(
       setShowStampOnCards: (v) => set({ showStampOnCards: v }),
       showSignatureOnCards: true,
       setShowSignatureOnCards: (v) => set({ showSignatureOnCards: v }),
+      showSealOnCards: true,
+      setShowSealOnCards: (v) => set({ showSealOnCards: v }),
       showStampOnBulletins: true,
       setShowStampOnBulletins: (v) => set({ showStampOnBulletins: v }),
       showSignatureOnBulletins: true,
@@ -1018,10 +1028,12 @@ export const useStore = create<AppState>()(
                 countryMotto: appSettings.countryMotto || 'Travail - Liberté - Patrie',
                 ministereName: appSettings.ministereName || 'Ministère de l\'Éducation Nationale',
                 directorSignature: appSettings.directorSignature || null,
+                officialSeal: appSettings.officialSeal || null,
                 directorName: appSettings.directorName || '',
                 directorTitle: appSettings.directorTitle || 'Directeur',
                 showStampOnCards: appSettings.showStampOnCards !== undefined ? appSettings.showStampOnCards : true,
                 showSignatureOnCards: appSettings.showSignatureOnCards !== undefined ? appSettings.showSignatureOnCards : true,
+                showSealOnCards: appSettings.showSealOnCards !== undefined ? appSettings.showSealOnCards : true,
                 showStampOnBulletins: appSettings.showStampOnBulletins !== undefined ? appSettings.showStampOnBulletins : true,
                 showSignatureOnBulletins: appSettings.showSignatureOnBulletins !== undefined ? appSettings.showSignatureOnBulletins : true
               });
@@ -1134,10 +1146,12 @@ export const useStore = create<AppState>()(
               countryMotto: data.appSettings.countryMotto || get().countryMotto,
               ministereName: data.appSettings.ministereName || get().ministereName,
               directorSignature: data.appSettings.directorSignature !== undefined ? data.appSettings.directorSignature : get().directorSignature,
+              officialSeal: data.appSettings.officialSeal !== undefined ? data.appSettings.officialSeal : get().officialSeal,
               directorName: data.appSettings.directorName !== undefined ? data.appSettings.directorName : get().directorName,
               directorTitle: data.appSettings.directorTitle !== undefined ? data.appSettings.directorTitle : get().directorTitle,
               showStampOnCards: data.appSettings.showStampOnCards !== undefined ? data.appSettings.showStampOnCards : get().showStampOnCards,
               showSignatureOnCards: data.appSettings.showSignatureOnCards !== undefined ? data.appSettings.showSignatureOnCards : get().showSignatureOnCards,
+              showSealOnCards: data.appSettings.showSealOnCards !== undefined ? data.appSettings.showSealOnCards : get().showSealOnCards,
               showStampOnBulletins: data.appSettings.showStampOnBulletins !== undefined ? data.appSettings.showStampOnBulletins : get().showStampOnBulletins,
               showSignatureOnBulletins: data.appSettings.showSignatureOnBulletins !== undefined ? data.appSettings.showSignatureOnBulletins : get().showSignatureOnBulletins,
               ...(data.appSettings.cycleSchedules ? { cycleSchedules: data.appSettings.cycleSchedules } : {}),
@@ -1415,11 +1429,13 @@ export const useStore = create<AppState>()(
         appName: state.appName,
         schoolLogo: state.schoolLogo,
         schoolStamp: state.schoolStamp,
+        officialSeal: state.officialSeal,
         directorSignature: state.directorSignature,
         directorName: state.directorName,
         directorTitle: state.directorTitle,
         showStampOnCards: state.showStampOnCards,
         showSignatureOnCards: state.showSignatureOnCards,
+        showSealOnCards: state.showSealOnCards,
         showStampOnBulletins: state.showStampOnBulletins,
         showSignatureOnBulletins: state.showSignatureOnBulletins,
         parents: state.parents || [],

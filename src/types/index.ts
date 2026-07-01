@@ -111,10 +111,12 @@ export interface AppSettings extends AdminSettings {
   academicYear?: string; // Utilisé dans pdfUtils.ts
   tranches?: Tranche[];
   directorSignature?: string | null;
+  officialSeal?: string | null;
   directorName?: string;
   directorTitle?: string;
   showStampOnCards?: boolean;
   showSignatureOnCards?: boolean;
+  showSealOnCards?: boolean;
   showStampOnBulletins?: boolean;
   showSignatureOnBulletins?: boolean;
 }

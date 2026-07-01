@@ -14,11 +14,13 @@ export const Parametres: React.FC = () => {
   const appName = useStore((s) => s.appName);
   const schoolLogo = useStore((s) => s.schoolLogo);
   const schoolStamp = useStore((s) => s.schoolStamp);
+  const officialSeal = useStore((s) => s.officialSeal);
   const directorSignature = useStore((s) => s.directorSignature);
   const directorName = useStore((s) => s.directorName);
   const directorTitle = useStore((s) => s.directorTitle);
   const showStampOnCards = useStore((s) => s.showStampOnCards);
   const showSignatureOnCards = useStore((s) => s.showSignatureOnCards);
+  const showSealOnCards = useStore((s) => s.showSealOnCards);
   const showStampOnBulletins = useStore((s) => s.showStampOnBulletins);
   const showSignatureOnBulletins = useStore((s) => s.showSignatureOnBulletins);
   const user = useStore((s) => s.user);
@@ -50,6 +52,7 @@ export const Parametres: React.FC = () => {
   const [localDirectorTitle, setLocalDirectorTitle] = useState(directorTitle || 'Directeur');
   const [localShowStampOnCards, setLocalShowStampOnCards] = useState(showStampOnCards !== undefined ? showStampOnCards : true);
   const [localShowSignatureOnCards, setLocalShowSignatureOnCards] = useState(showSignatureOnCards !== undefined ? showSignatureOnCards : true);
+  const [localShowSealOnCards, setLocalShowSealOnCards] = useState(showSealOnCards !== undefined ? showSealOnCards : true);
   const [localShowStampOnBulletins, setLocalShowStampOnBulletins] = useState(showStampOnBulletins !== undefined ? showStampOnBulletins : true);
   const [localShowSignatureOnBulletins, setLocalShowSignatureOnBulletins] = useState(showSignatureOnBulletins !== undefined ? showSignatureOnBulletins : true);
   const [saved, setSaved] = useState(false);
@@ -65,6 +68,10 @@ export const Parametres: React.FC = () => {
   const [signaturePreview, setSignaturePreview] = useState<string | null>(directorSignature);
   const [signatureError, setSignatureError] = useState('');
   const signatureFileRef = useRef<HTMLInputElement>(null);
+
+  const [sealPreview, setSealPreview] = useState<string | null>(officialSeal);
+  const [sealError, setSealError] = useState('');
+  const sealFileRef = useRef<HTMLInputElement>(null);
 
   const cycleSchedules = useStore((s) => s.cycleSchedules);
   const setCycleSchedules = useStore((s) => s.setCycleSchedules);
@@ -202,6 +209,48 @@ export const Parametres: React.FC = () => {
     if (signatureFileRef.current) signatureFileRef.current.value = '';
   };
 
+  const handleSealUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSealError('');
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setSealError('Le fichier doit être une image (PNG, JPG, SVG).');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setSealError('L\'image ne doit pas dépasser 2 Mo.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const base64 = ev.target?.result as string;
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 200;
+        let w = img.width;
+        let h = img.height;
+        if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
+        else { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, w, h);
+        const resized = canvas.toDataURL('image/png', 0.9);
+        setSealPreview(resized);
+      };
+      img.src = base64;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeSeal = () => {
+    setSealPreview(null);
+    if (sealFileRef.current) sealFileRef.current.value = '';
+  };
+
   const updateAllSettings = useStore((s) => s.updateAllSettings);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -225,10 +274,12 @@ export const Parametres: React.FC = () => {
       countryMotto: localCountryMotto,
       ministereName: localMinistereName,
       directorSignature: signaturePreview,
+      officialSeal: sealPreview,
       directorName: localDirectorName,
       directorTitle: localDirectorTitle,
       showStampOnCards: localShowStampOnCards,
       showSignatureOnCards: localShowSignatureOnCards,
+      showSealOnCards: localShowSealOnCards,
       showStampOnBulletins: localShowStampOnBulletins,
       showSignatureOnBulletins: localShowSignatureOnBulletins
     });
@@ -358,13 +409,13 @@ export const Parametres: React.FC = () => {
 
                     <div>
                         <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">
-                            Sceau / Cachet
+                            Cachet de l'établissement
                         </label>
                         <div className="flex items-center gap-4">
                             <div className="shrink-0 w-20 h-20 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 overflow-hidden relative group">
                                 {stampPreview ? (
                                 <>
-                                    <img src={stampPreview} alt="Sceau aperçu" className="w-full h-full object-contain p-2" />
+                                    <img src={stampPreview} alt="Cachet" className="w-full h-full object-contain p-2" />
                                     <button type="button" onClick={removeStamp} className="absolute inset-0 bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
                                     <X className="w-5 h-5" />
                                     </button>
@@ -376,9 +427,36 @@ export const Parametres: React.FC = () => {
                             <div className="flex-1">
                                 <input ref={stampFileRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" className="hidden" id="stamp-upload" onChange={handleStampUpload} />
                                 <label htmlFor="stamp-upload" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/10 text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 rounded-xl text-[11px] font-black uppercase tracking-widest cursor-pointer transition-colors border border-transparent hover:border-indigo-200 dark:hover:border-indigo-500/30">
-                                <Upload className="w-3.5 h-3.5" /> Modifier Sceau
+                                <Upload className="w-3.5 h-3.5" /> Modifier Cachet
                                 </label>
                                 {stampError && <p className="mt-2 text-[10px] font-bold text-rose-500">{stampError}</p>}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">
+                            Sceau Officiel (République / Ministère)
+                        </label>
+                        <div className="flex items-center gap-4">
+                            <div className="shrink-0 w-20 h-20 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 overflow-hidden relative group">
+                                {sealPreview ? (
+                                <>
+                                    <img src={sealPreview} alt="Sceau" className="w-full h-full object-contain p-2" />
+                                    <button type="button" onClick={removeSeal} className="absolute inset-0 bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                                    <X className="w-5 h-5" />
+                                    </button>
+                                </>
+                                ) : (
+                                <Image className="w-6 h-6 text-slate-300 dark:text-slate-600" />
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <input ref={sealFileRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" className="hidden" id="seal-upload" onChange={handleSealUpload} />
+                                <label htmlFor="seal-upload" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/10 text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 rounded-xl text-[11px] font-black uppercase tracking-widest cursor-pointer transition-colors border border-transparent hover:border-indigo-200 dark:hover:border-indigo-500/30">
+                                <Upload className="w-3.5 h-3.5" /> Sceau PNG
+                                </label>
+                                {sealError && <p className="mt-2 text-[10px] font-bold text-rose-500">{sealError}</p>}
                             </div>
                         </div>
                     </div>
@@ -424,7 +502,18 @@ export const Parametres: React.FC = () => {
                                 className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 focus:ring-opacity-25"
                             />
                             <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                Afficher le cachet sur les cartes scolaires
+                                Afficher le cachet de l'établissement sur les cartes scolaires
+                            </span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                checked={localShowSealOnCards}
+                                onChange={(e) => setLocalShowSealOnCards(e.target.checked)}
+                                className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 focus:ring-opacity-25"
+                            />
+                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                Afficher le sceau officiel sur les cartes scolaires
                             </span>
                         </label>
                         <label className="flex items-center gap-3 cursor-pointer select-none">

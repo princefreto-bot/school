@@ -102,6 +102,8 @@ export const CarteExamen: React.FC = () => {
     const directorTitle = useStore((s) => s.directorTitle);
     const showStampOnCards = useStore((s) => s.showStampOnCards);
     const showSignatureOnCards = useStore((s) => s.showSignatureOnCards);
+    const officialSeal = useStore((s) => s.officialSeal);
+    const showSealOnCards = useStore((s) => s.showSealOnCards);
 
     // Filtres et Recherche
     const [search, setSearch] = useState('');
@@ -190,180 +192,257 @@ export const CarteExamen: React.FC = () => {
             }
         }
 
-        // 4. En-tête : Drapeau du Togo
-        drawTogoFlag(ctx, 35, 30, 80, 50);
+        // ==========================================
+        // COLONNE GAUCHE : Photo d'identité (3.5 cm x 4.5 cm)
+        // ==========================================
+        // A 300 DPI, 35mm x 45mm correspond à 414px x 531px. Centré verticalement.
+        const photoX = 40;
+        const photoW = 414;
+        const photoH = 531;
+        const photoY = (h - photoH) / 2; // Centrage vertical (environ 53px de marge)
 
-        // 5. En-tête : Textes officiels
-        ctx.fillStyle = '#0f172a';
-        ctx.textAlign = 'center';
-        ctx.font = 'bold 18px Helvetica, Arial, sans-serif';
-        ctx.fillText('RÉPUBLIQUE TOGOLAISE', w / 2, 45);
-
-        ctx.fillStyle = '#475569';
-        ctx.font = '600 11px Helvetica, Arial, sans-serif';
-        ctx.fillText('MINISTÈRE DES ENSEIGNEMENTS PRIMAIRE, SECONDAIRE,', w / 2, 63);
-        ctx.fillText("TECHNIQUE ET DE L'ARTISANAT", w / 2, 77);
-
-        // Nom de l'école
-        ctx.fillStyle = examColor;
-        ctx.font = 'black 22px Helvetica, Arial, sans-serif';
-        ctx.fillText((schoolName || 'ÉTABLISSEMENT SCOLAIRE').toUpperCase(), w / 2, 110);
-
-        // 6. En-tête : Logo de l'école (à droite)
-        if (schoolLogo) {
-            const logoImg = await loadImage(schoolLogo);
-            if (logoImg) {
-                ctx.drawImage(logoImg, w - 120, 25, 85, 85);
-            }
-        } else {
-            // Placeholder logo
-            ctx.fillStyle = '#f1f5f9';
-            ctx.fillRect(w - 120, 25, 85, 85);
-            ctx.strokeStyle = '#cbd5e1';
-            ctx.strokeRect(w - 120, 25, 85, 85);
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = 'bold 12px sans-serif';
-            ctx.fillText('LOGO', w - 77, 72);
-        }
-
-        // Ligne de séparation colorée
-        ctx.fillStyle = examColor;
-        ctx.fillRect(35, 128, w - 70, 3);
-
-        // 7. Partie centrale : Photo de l'élève (120px x 150px = 192px x 240px)
-        const photoX = 35;
-        const photoY = 150;
-        const photoW = 180;
-        const photoH = 225;
-
-        // Ombre portée de la photo
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-        ctx.shadowBlur = 10;
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 4;
+        // Ombre portée de la photo d'identité
+        ctx.save();
+        ctx.shadowColor = 'rgba(15, 23, 42, 0.12)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 6;
         ctx.fillStyle = '#f8fafc';
         ctx.fillRect(photoX, photoY, photoW, photoH);
         ctx.strokeStyle = '#e2e8f0';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 6;
         ctx.strokeRect(photoX, photoY, photoW, photoH);
-        ctx.shadowColor = 'transparent'; // reset shadow
+        ctx.restore();
 
         if (student.photoUrl) {
             const studentPhoto = await loadImage(student.photoUrl);
             if (studentPhoto) {
-                ctx.drawImage(studentPhoto, photoX + 2, photoY + 2, photoW - 4, photoH - 4);
+                ctx.save();
+                // Clip pour assurer des coins propres et éviter les débordements
+                ctx.beginPath();
+                ctx.rect(photoX + 3, photoY + 3, photoW - 6, photoH - 6);
+                ctx.clip();
+                ctx.drawImage(studentPhoto, photoX + 3, photoY + 3, photoW - 6, photoH - 6);
+                ctx.restore();
             }
         } else {
             // Dessin avatar par défaut
-            ctx.fillStyle = '#e2e8f0';
-            ctx.fillRect(photoX + 2, photoY + 2, photoW - 4, photoH - 4);
+            ctx.save();
+            ctx.fillStyle = '#f1f5f9';
+            ctx.fillRect(photoX + 3, photoY + 3, photoW - 6, photoH - 6);
             ctx.fillStyle = '#94a3b8';
             ctx.textAlign = 'center';
-            ctx.font = 'bold 36px Helvetica';
+            ctx.font = 'bold 64px Helvetica, Arial, sans-serif';
             ctx.fillText(
                 `${student.prenom.charAt(0)}${student.nom.charAt(0)}`.toUpperCase(), 
                 photoX + photoW / 2, 
-                photoY + photoH / 2 + 12
+                photoY + photoH / 2 + 20
             );
+            ctx.restore();
         }
 
-        // 8. Partie centrale : Détails élève
+        // ==========================================
+        // COLONNE DROITE : Identité & Éléments Officiels
+        // ==========================================
+        const detailsX = 480;
+
+        // 4. En-tête : Drapeau du Togo
+        drawTogoFlag(ctx, detailsX, 35, 70, 44);
+
+        // 5. En-tête : Textes officiels
+        ctx.save();
+        ctx.fillStyle = '#0f172a';
         ctx.textAlign = 'left';
-        const detailsX = 240;
-        let detailsY = 175;
-        const lineSpacing = 28;
+        ctx.font = 'bold 17px Helvetica, Arial, sans-serif';
+        ctx.fillText('RÉPUBLIQUE TOGOLAISE', detailsX + 85, 52);
 
-        const infoFields = [
-            { label: 'Nom :', value: student.nom.toUpperCase() },
-            { label: 'Prénom(s) :', value: student.prenom },
-            { label: 'Date de naissance :', value: student.dateNaissance || '—' },
-            { label: 'Lieu de naissance :', value: student.lieuNaissance || '—' },
-            { label: 'Sexe :', value: student.sexe },
-            { label: 'Nationalité :', value: student.nationalite || 'Togolaise' },
-            { label: 'Classe :', value: student.classe, isBadge: true },
-            { label: 'N° Matricule :', value: student.id.substring(0, 10).toUpperCase() },
-            { label: 'N° de table :', value: student.numeroTable || 'À Saisir', isTable: true },
-            { label: 'Année scolaire :', value: schoolYear },
-        ];
+        ctx.fillStyle = '#475569';
+        ctx.font = '600 10.5px Helvetica, Arial, sans-serif';
+        ctx.fillText('MINISTÈRE DES ENSEIGNEMENTS PRIMAIRE, SECONDAIRE,', detailsX + 85, 68);
+        ctx.fillText("TECHNIQUE ET DE L'ARTISANAT", detailsX + 85, 80);
+        ctx.restore();
 
-        infoFields.forEach((field) => {
-            // Dessiner le label
-            ctx.fillStyle = '#64748b';
-            ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
-            ctx.fillText(field.label, detailsX, detailsY);
-
-            const labelWidth = ctx.measureText(field.label).width;
-
-            // Dessiner la valeur
-            if (field.isBadge) {
-                // Fond de badge pour la classe
-                ctx.save();
-                ctx.fillStyle = '#0f172a';
-                ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
-                const valWidth = ctx.measureText(field.value).width;
-                ctx.fillRect(detailsX + labelWidth + 8, detailsY - 16, valWidth + 16, 22);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText(field.value, detailsX + labelWidth + 16, detailsY);
-                ctx.restore();
-            } else if (field.isTable) {
-                ctx.fillStyle = field.value === 'À Saisir' ? '#ef4444' : '#0f172a';
-                ctx.font = 'bold 17px Helvetica, Arial, sans-serif';
-                ctx.fillText(field.value, detailsX + labelWidth + 10, detailsY);
-            } else {
-                ctx.fillStyle = '#0f172a';
-                ctx.font = '600 15px Helvetica, Arial, sans-serif';
-                ctx.fillText(field.value, detailsX + labelWidth + 10, detailsY);
+        // Logo de l'école (en haut à droite de la colonne droite)
+        if (schoolLogo) {
+            const logoImg = await loadImage(schoolLogo);
+            if (logoImg) {
+                ctx.drawImage(logoImg, w - 120, 35, 80, 80);
             }
+        }
 
-            detailsY += lineSpacing;
-        });
-
-        // 9. Bande inférieure : Bande d'Examen colorée
-        const bannerH = 75;
-        const bannerY = h - bannerH;
-
+        // Nom de l'école (COLLÈGE/ÉTABLISSEMENT)
+        ctx.save();
         ctx.fillStyle = examColor;
-        ctx.fillRect(0, bannerY, w, bannerH);
+        ctx.textAlign = 'left';
+        ctx.font = 'black 25px Helvetica, Arial, sans-serif';
+        ctx.fillText((schoolName || 'ÉTABLISSEMENT SCOLAIRE').toUpperCase(), detailsX, 122);
+        ctx.restore();
 
-        // Texte principal dans la bande
+        // 6. Ligne de séparation : Ruban aux couleurs nationales du Togo (Vert, Jaune, Rouge)
+        const ribbonY = 138;
+        const ribbonW = w - detailsX - 40;
+        ctx.fillStyle = '#006a4e'; // Vert
+        ctx.fillRect(detailsX, ribbonY, ribbonW, 2);
+        ctx.fillStyle = '#ffc72c'; // Jaune
+        ctx.fillRect(detailsX, ribbonY + 2, ribbonW, 2);
+        ctx.fillStyle = '#d21034'; // Rouge
+        ctx.fillRect(detailsX, ribbonY + 4, ribbonW, 2);
+
+        // 7. Bande colorée d'examen
+        ctx.save();
+        ctx.fillStyle = examColor;
+        ctx.fillRect(detailsX, 152, ribbonW, 42);
+        
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
-        ctx.font = 'black 22px Helvetica, Arial, sans-serif';
-        ctx.fillText("CARTE SCOLAIRE D'EXAMEN", w / 2, bannerY + 32);
+        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.fillText(`CARTE DE CANDIDAT — EXAMEN : ${exam || 'OFFICIEL'}`, detailsX + ribbonW / 2, 152 + 27);
+        ctx.restore();
 
+        // 8. Informations de l'élève (Textes plus grands et très lisibles)
+        let detailsY = 224;
+        const lineSpacing = 32;
+
+        ctx.save();
+        ctx.textAlign = 'left';
+
+        // Ligne 1 : Nom
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.fillText('Nom :', detailsX, detailsY);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'black 19px Helvetica, Arial, sans-serif';
+        ctx.fillText(student.nom.toUpperCase(), detailsX + 55, detailsY);
+
+        detailsY += lineSpacing;
+
+        // Ligne 2 : Prénoms
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.fillText('Prénom(s) :', detailsX, detailsY);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'black 19px Helvetica, Arial, sans-serif';
+        ctx.fillText(student.prenom, detailsX + 90, detailsY);
+
+        detailsY += lineSpacing;
+
+        // Ligne 3 : Date et Lieu de naissance
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.fillText('Né(e) le :', detailsX, detailsY);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 17px Helvetica, Arial, sans-serif';
+        ctx.fillText(student.dateNaissance || '—', detailsX + 70, detailsY);
+
+        const dateWidth = ctx.measureText(student.dateNaissance || '—').width;
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.fillText('à', detailsX + 70 + dateWidth + 10, detailsY);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 17px Helvetica, Arial, sans-serif';
+        ctx.fillText(student.lieuNaissance || '—', detailsX + 70 + dateWidth + 28, detailsY);
+
+        detailsY += lineSpacing;
+
+        // Ligne 4 : Sexe et Nationalité
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.fillText('Sexe :', detailsX, detailsY);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 17px Helvetica, Arial, sans-serif';
+        ctx.fillText(student.sexe, detailsX + 55, detailsY);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.fillText('Nationalité :', detailsX + 110, detailsY);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 17px Helvetica, Arial, sans-serif';
+        ctx.fillText(student.nationalite || 'Togolaise', detailsX + 205, detailsY);
+
+        detailsY += lineSpacing;
+
+        // Ligne 5 : Classe et Matricule
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.fillText('Classe :', detailsX, detailsY);
+        
+        // Petit badge pour la classe
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        const classVal = student.classe;
+        const classValWidth = ctx.measureText(classVal).width;
+        ctx.fillRect(detailsX + 65, detailsY - 17, classValWidth + 12, 22);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(classVal, detailsX + 71, detailsY - 1);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.fillText('Matricule :', detailsX + 155 + classValWidth, detailsY);
+        ctx.fillStyle = '#0f172a';
         ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
-        ctx.fillText(`EXAMEN : ${exam || 'OFFICIEL'}`, w / 2, bannerY + 58);
+        ctx.fillText(student.id.substring(0, 10).toUpperCase(), detailsX + 240 + classValWidth, detailsY);
 
-        // 10. Cachet et Signature
-        const sigX = 820;
-        const sigY = 430;
+        detailsY += lineSpacing + 4;
 
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#475569';
-        ctx.font = 'bold 13px Helvetica, Arial, sans-serif';
-        ctx.fillText('Signature du Directeur', sigX, sigY);
+        // Ligne 6 : N° de table (Très grand pour lisibilité optimale sur table d'examen)
+        ctx.fillStyle = examColor;
+        ctx.font = 'black 17px Helvetica, Arial, sans-serif';
+        ctx.fillText('N° DE TABLE :', detailsX, detailsY);
+        ctx.fillStyle = student.numeroTable ? '#0f172a' : '#ef4444';
+        ctx.font = 'black 22px Helvetica, Arial, sans-serif';
+        ctx.fillText(student.numeroTable || 'À SAISIR', detailsX + 125, detailsY);
 
-        // Dessiner la signature si activée
-        if (showSignatureOnCards && directorSignature) {
-            const sigImg = await loadImage(directorSignature);
-            if (sigImg) {
-                ctx.drawImage(sigImg, sigX - 90, sigY + 5, 180, 60);
+        detailsY += lineSpacing;
+
+        // Ligne 7 : Année scolaire
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 15px Helvetica, Arial, sans-serif';
+        ctx.fillText('Année scolaire :', detailsX, detailsY);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
+        ctx.fillText(schoolYear, detailsX + 125, detailsY);
+
+        ctx.restore();
+
+        // ==========================================
+        // PIED DE PAGE : Signature, Cachet, Sceau
+        // ==========================================
+        const sigX = 830;
+        const sigY = 460;
+
+        // 1. Sceau Officiel de l'État (bas gauche de la colonne droite)
+        if (showSealOnCards && officialSeal) {
+            const sealImg = await loadImage(officialSeal);
+            if (sealImg) {
+                ctx.save();
+                ctx.globalAlpha = 0.95;
+                ctx.drawImage(sealImg, detailsX + 5, 470, 100, 100);
+                ctx.restore();
             }
         }
 
-        // Dessiner le cachet si activé
+        // 2. Cachet de l'établissement (bas droit, sous la signature)
         if (showStampOnCards && schoolStamp) {
             const stampImg = await loadImage(schoolStamp);
             if (stampImg) {
                 ctx.save();
                 ctx.globalAlpha = 0.85;
-                // Décaler le cachet légèrement sur la signature
-                ctx.drawImage(stampImg, sigX - 160, sigY - 20, 110, 110);
+                ctx.drawImage(stampImg, sigX - 90, sigY - 20, 110, 110);
                 ctx.restore();
             }
         }
 
-        // Textes Directeur en bas
+        // 3. Signature du Directeur
+        if (showSignatureOnCards && directorSignature) {
+            const sigImg = await loadImage(directorSignature);
+            if (sigImg) {
+                ctx.drawImage(sigImg, sigX - 80, sigY + 5, 160, 55);
+            }
+        }
+
+        // 4. Textes d'autorité
+        ctx.save();
+        ctx.textAlign = 'center';
         ctx.fillStyle = '#0f172a';
         ctx.font = 'bold 12px Helvetica, Arial, sans-serif';
         ctx.fillText(directorName ? `M. ${directorName}` : 'Le Directeur', sigX, sigY + 80);
@@ -371,6 +450,7 @@ export const CarteExamen: React.FC = () => {
         ctx.fillStyle = '#64748b';
         ctx.font = '600 11px Helvetica, Arial, sans-serif';
         ctx.fillText(directorTitle || 'Directeur', sigX, sigY + 95);
+        ctx.restore();
     };
 
     // Déclencher le rendu écran du Canvas de prévisualisation
@@ -380,7 +460,7 @@ export const CarteExamen: React.FC = () => {
         if (student) {
             renderCardCanvas(canvasRef.current, student);
         }
-    }, [previewStudentId, students, schoolLogo, schoolStamp, directorSignature, directorName, directorTitle, showStampOnCards, showSignatureOnCards]);
+    }, [previewStudentId, students, schoolLogo, schoolStamp, officialSeal, directorSignature, directorName, directorTitle, showStampOnCards, showSignatureOnCards, showSealOnCards]);
 
     // Télécharger la carte en tant que PNG
     const downloadPNG = async (student: Student) => {
