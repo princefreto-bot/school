@@ -10,7 +10,8 @@ export const Bulletins: React.FC = () => {
         currentPeriode, students, matieres, classeMatieres, notes,
         schoolName, schoolLogo, schoolStamp, schoolYear,
         schoolMotto, schoolBp, schoolTelephone, schoolAddress, schoolCurrency,
-        countryName, countryMotto, ministereName
+        countryName, countryMotto, ministereName,
+        showStampOnBulletins
     } = useStore();
 
     const classesList = Array.from(new Set(students.map(s => s.classe))).sort();
@@ -143,7 +144,7 @@ export const Bulletins: React.FC = () => {
                                 data={b}
                                 schoolName={schoolName}
                                 schoolLogo={schoolLogo}
-                                schoolStamp={schoolStamp}
+                                schoolStamp={showStampOnBulletins ? schoolStamp : null}
                                 schoolYear={schoolYear}
                                 studentPhoto={b.eleve.photoUrl || null}
                                 schoolMotto={schoolMotto}
