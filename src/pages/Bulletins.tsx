@@ -144,7 +144,7 @@ export const Bulletins: React.FC = () => {
                                 data={b}
                                 schoolName={schoolName}
                                 schoolLogo={schoolLogo}
-                                schoolStamp={showStampOnBulletins ? schoolStamp : null}
+                                schoolStamp={showStampOnBulletins !== false ? schoolStamp : null}
                                 schoolYear={schoolYear}
                                 studentPhoto={b.eleve.photoUrl || null}
                                 schoolMotto={schoolMotto}

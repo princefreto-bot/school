@@ -1031,11 +1031,11 @@ export const useStore = create<AppState>()(
                 officialSeal: appSettings.officialSeal || null,
                 directorName: appSettings.directorName || '',
                 directorTitle: appSettings.directorTitle || 'Directeur',
-                showStampOnCards: appSettings.showStampOnCards !== undefined ? appSettings.showStampOnCards : true,
-                showSignatureOnCards: appSettings.showSignatureOnCards !== undefined ? appSettings.showSignatureOnCards : true,
-                showSealOnCards: appSettings.showSealOnCards !== undefined ? appSettings.showSealOnCards : true,
-                showStampOnBulletins: appSettings.showStampOnBulletins !== undefined ? appSettings.showStampOnBulletins : true,
-                showSignatureOnBulletins: appSettings.showSignatureOnBulletins !== undefined ? appSettings.showSignatureOnBulletins : true
+                showStampOnCards: appSettings.showStampOnCards ?? true,
+                showSignatureOnCards: appSettings.showSignatureOnCards ?? true,
+                showSealOnCards: appSettings.showSealOnCards ?? true,
+                showStampOnBulletins: appSettings.showStampOnBulletins ?? true,
+                showSignatureOnBulletins: appSettings.showSignatureOnBulletins ?? true
               });
               console.log(`🎨 [Sync Parent] Paramètres appliqués ! Logo: ${!!appSettings.schoolLogo}`);
             }
@@ -1149,11 +1149,11 @@ export const useStore = create<AppState>()(
               officialSeal: data.appSettings.officialSeal !== undefined ? data.appSettings.officialSeal : get().officialSeal,
               directorName: data.appSettings.directorName !== undefined ? data.appSettings.directorName : get().directorName,
               directorTitle: data.appSettings.directorTitle !== undefined ? data.appSettings.directorTitle : get().directorTitle,
-              showStampOnCards: data.appSettings.showStampOnCards !== undefined ? data.appSettings.showStampOnCards : get().showStampOnCards,
-              showSignatureOnCards: data.appSettings.showSignatureOnCards !== undefined ? data.appSettings.showSignatureOnCards : get().showSignatureOnCards,
-              showSealOnCards: data.appSettings.showSealOnCards !== undefined ? data.appSettings.showSealOnCards : get().showSealOnCards,
-              showStampOnBulletins: data.appSettings.showStampOnBulletins !== undefined ? data.appSettings.showStampOnBulletins : get().showStampOnBulletins,
-              showSignatureOnBulletins: data.appSettings.showSignatureOnBulletins !== undefined ? data.appSettings.showSignatureOnBulletins : get().showSignatureOnBulletins,
+              showStampOnCards: data.appSettings.showStampOnCards ?? get().showStampOnCards,
+              showSignatureOnCards: data.appSettings.showSignatureOnCards ?? get().showSignatureOnCards,
+              showSealOnCards: data.appSettings.showSealOnCards ?? get().showSealOnCards,
+              showStampOnBulletins: data.appSettings.showStampOnBulletins ?? get().showStampOnBulletins,
+              showSignatureOnBulletins: data.appSettings.showSignatureOnBulletins ?? get().showSignatureOnBulletins,
               ...(data.appSettings.cycleSchedules ? { cycleSchedules: data.appSettings.cycleSchedules } : {}),
               ...(data.appSettings.tranches ? { tranches: data.appSettings.tranches } : {}),
             });
