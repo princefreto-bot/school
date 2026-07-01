@@ -37,7 +37,7 @@ const CarteEleve: React.FC<CarteProps> = ({
 
     return (
         <div style={{
-            width: 340, height: 215,
+            width: 360, height: 228,
             borderRadius: 16,
             overflow: 'hidden',
             position: 'relative',
@@ -129,12 +129,12 @@ const CarteEleve: React.FC<CarteProps> = ({
                 <div style={{ minWidth: 0 }}>
                     <div style={{
                         color: '#FFFFFF', fontWeight: 900, lineHeight: 1.1,
-                        fontSize: schoolName.length > 22 ? 7 : schoolName.length > 14 ? 8 : 9.5,
+                        fontSize: schoolName.length > 22 ? 8.5 : schoolName.length > 14 ? 10 : 12,
                         textTransform: 'uppercase',
                         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                        maxWidth: 110,
+                        maxWidth: 115,
                     }}>{schoolName}</div>
-                    <div style={{ color: '#EAB308', fontSize: 6, fontWeight: 700, marginTop: 1 }}>
+                    <div style={{ color: '#EAB308', fontSize: 8, fontWeight: 700, marginTop: 1 }}>
                         CARTE SCOLAIRE
                     </div>
                 </div>
@@ -155,13 +155,13 @@ const CarteEleve: React.FC<CarteProps> = ({
                 borderRadius: 6, padding: '2px 8px',
                 zIndex: 10,
             }}>
-                <span style={{ color: '#EAB308', fontSize: 6.5, fontWeight: 800 }}>AN. {schoolYear}</span>
+                <span style={{ color: '#EAB308', fontSize: 8, fontWeight: 800 }}>AN. {schoolYear}</span>
             </div>
 
             {/* ── Photo élève ── */}
             <div style={{
-                position: 'absolute', top: 80, left: 14,
-                width: 76, height: 95,
+                position: 'absolute', top: 84, left: 14,
+                width: 80, height: 100,
                 zIndex: 12,
             }}>
                 {/* Cadre photo avec effet */}
@@ -195,7 +195,7 @@ const CarteEleve: React.FC<CarteProps> = ({
                     zIndex: 13, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     boxShadow: '0 2px 6px rgba(234,179,8,0.5)',
                 }}>
-                    <span style={{ color: '#0F172A', fontSize: 7, fontWeight: 900 }}>✓</span>
+                    <span style={{ color: '#0F172A', fontSize: 8, fontWeight: 900 }}>✓</span>
                 </div>
             </div>
 
@@ -207,8 +207,8 @@ const CarteEleve: React.FC<CarteProps> = ({
             }}>
                 {/* Label */}
                 <div style={{
-                    color: 'rgba(139,92,246,0.9)', fontSize: 6, fontWeight: 800,
-                    textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 4,
+                    color: 'rgba(139,92,246,0.9)', fontSize: 7.5, fontWeight: 800,
+                    textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 5,
                 }}>
                     Identité Élève
                 </div>
@@ -216,9 +216,9 @@ const CarteEleve: React.FC<CarteProps> = ({
                 {/* Nom complet */}
                 <div style={{
                     color: '#FFFFFF', fontWeight: 900,
-                    fontSize: nomComplet.length > 28 ? 9 : nomComplet.length > 18 ? 11 : 13,
+                    fontSize: nomComplet.length > 28 ? 10.5 : nomComplet.length > 18 ? 13 : 15,
                     lineHeight: 1.15, textTransform: 'uppercase',
-                    maxHeight: 38, overflow: 'hidden',
+                    maxHeight: 42, overflow: 'hidden',
                     display: '-webkit-box',
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical',
@@ -235,7 +235,7 @@ const CarteEleve: React.FC<CarteProps> = ({
                         borderRadius: 7, padding: '3px 10px',
                         boxShadow: '0 3px 10px rgba(234,179,8,0.35)',
                     }}>
-                        <span style={{ color: '#0F172A', fontSize: 12, fontWeight: 900 }}>{classe}</span>
+                        <span style={{ color: '#0F172A', fontSize: 14, fontWeight: 900 }}>{classe}</span>
                     </div>
                     <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10 }}>·</span>
                 </div>
@@ -249,21 +249,22 @@ const CarteEleve: React.FC<CarteProps> = ({
 
                 {/* Matricule */}
                 <div style={{ marginBottom: 6 }}>
-                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 }}>Matricule</div>
+                    <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 7, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 }}>Matricule</div>
                     <div style={{
-                        color: 'rgba(255,255,255,0.85)', fontSize: 7.5, fontWeight: 800,
-                        fontFamily: 'monospace', letterSpacing: 0.5,
-                        background: 'rgba(255,255,255,0.06)', borderRadius: 5, padding: '2px 6px',
-                        display: 'inline-block',
+                        color: 'rgba(255,255,255,0.88)', fontSize: 8.5, fontWeight: 800,
+                        fontFamily: 'monospace', letterSpacing: 0.6,
+                        background: 'rgba(255,255,255,0.06)', borderRadius: 5, padding: '3px 7px',
+                        display: 'inline-block', maxWidth: '100%',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                     }}>
-                        {id.slice(0, 14).toUpperCase()}
+                        {id.toUpperCase()}
                     </div>
                 </div>
 
                 {/* Contact */}
                 <div>
-                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 }}>Contact</div>
-                    <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 9, fontWeight: 800 }}>
+                    <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 7, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 }}>Contact</div>
+                    <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: 800 }}>
                         {telephone || '—'}
                     </div>
                 </div>
@@ -280,8 +281,8 @@ const CarteEleve: React.FC<CarteProps> = ({
                 zIndex: 12,
                 boxShadow: '0 4px 14px rgba(0,0,0,0.5)',
             }}>
-                <QRCodeCanvas value={id} size={48} level="H" bgColor="#FFFFFF" fgColor="#0F172A" />
-                <p style={{ fontSize: 4, color: '#94A3B8', marginTop: 2, fontWeight: 900, textTransform: 'uppercase' }}>Scan</p>
+                <QRCodeCanvas value={id} size={52} level="H" bgColor="#FFFFFF" fgColor="#0F172A" />
+                <p style={{ fontSize: 5, color: '#94A3B8', marginTop: 2, fontWeight: 900, textTransform: 'uppercase' }}>Scan</p>
             </div>
 
             {/* ── FOOTER ── */}
@@ -292,7 +293,7 @@ const CarteEleve: React.FC<CarteProps> = ({
                 display: 'flex', alignItems: 'center', paddingLeft: 14, paddingRight: 80,
             }}>
                 <p style={{
-                    color: '#0F172A', fontSize: 6, fontWeight: 800, margin: 0,
+                    color: '#0F172A', fontSize: 7, fontWeight: 800, margin: 0,
                     textTransform: 'uppercase', letterSpacing: 0.5,
                     whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                 }}>
@@ -591,28 +592,28 @@ const generateCartesPDF = async (
         const iMaxW = cardW * 0.42;
 
         doc.setTextColor(...C.violet);
-        doc.setFontSize(3.3);
+        doc.setFontSize(4.5);
         doc.setFont('helvetica', 'bold');
         doc.text('IDENTITE ELEVE', iX, y + 5.2);
 
         const fullName = `${student.prenom} ${student.nom}`.toUpperCase();
         doc.setTextColor(...C.white);
-        let nFS = 8;
-        if (fullName.length > 25) nFS = 5.5;
-        else if (fullName.length > 18) nFS = 6.5;
+        let nFS = 10;
+        if (fullName.length > 25) nFS = 7;
+        else if (fullName.length > 18) nFS = 8;
         doc.setFontSize(nFS);
         const nLines = doc.splitTextToSize(fullName, iMaxW);
         doc.text(nLines.slice(0, 2), iX, y + 10.5);
 
         // Badge classe
         const tY = y + 21;
-        doc.setFontSize(6.5);
+        doc.setFontSize(8);
         const cW = Math.max(doc.getTextWidth(student.classe) + 5, 13);
         doc.setFillColor(...C.gold);
         doc.roundedRect(iX, tY, cW, 5.5, 1.5, 1.5, 'F');
         doc.setTextColor(...C.dark);
         doc.setFont('helvetica', 'bold');
-        doc.text(student.classe, iX + cW / 2, tY + 4, { align: 'center' });
+        doc.text(student.classe, iX + cW / 2, tY + 4.2, { align: 'center' });
 
         // Séparateur or
         doc.setDrawColor(...C.gold);
@@ -623,26 +624,26 @@ const generateCartesPDF = async (
 
         // Matricule
         doc.setTextColor(...C.dim);
-        doc.setFontSize(3);
+        doc.setFontSize(4);
         doc.setFont('helvetica', 'bold');
         doc.text('MATRICULE', iX, tY + 11.5);
-        const matStr = student.id.slice(0, 12).toUpperCase();
-        doc.setFontSize(4.5);
+        const matStr = student.id.toUpperCase();
+        doc.setFontSize(6);
         const mW = doc.getTextWidth(matStr) + 2.5;
         doc.setFillColor(...C.white);
         gs(0.06);
-        doc.roundedRect(iX, tY + 12.3, mW, 3.5, 0.8, 0.8, 'F');
+        doc.roundedRect(iX, tY + 12.3, mW, 3.8, 0.8, 0.8, 'F');
         gs(1);
         doc.setTextColor(...C.silver);
-        doc.text(matStr, iX + 1.2, tY + 15.2);
+        doc.text(matStr, iX + 1.2, tY + 15.3);
 
         // Contact
         doc.setTextColor(...C.dim);
-        doc.setFontSize(3);
+        doc.setFontSize(4);
         doc.setFont('helvetica', 'bold');
         doc.text('CONTACT', iX, tY + 20);
         doc.setTextColor(...C.silver);
-        doc.setFontSize(5);
+        doc.setFontSize(7);
         doc.text(student.telephone || '—', iX, tY + 23.5);
 
         // ── 8. QR CODE ──────────────────────────────────────────────
