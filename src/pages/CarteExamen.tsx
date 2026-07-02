@@ -453,9 +453,9 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
         ctx.fillStyle = '#64748b';
         ctx.font = 'bold 16px Helvetica, Arial, sans-serif';
         ctx.fillText('Matricule :', detailsX + 165 + classValWidth, detailsY);
-        ctx.fillStyle = '#0f172a';
+        ctx.fillStyle = student.adsn ? '#0f172a' : '#ef4444';
         ctx.font = 'bold 17px Helvetica, Arial, sans-serif';
-        ctx.fillText(student.id.substring(0, 10).toUpperCase(), detailsX + 255 + classValWidth, detailsY);
+        ctx.fillText(student.adsn ? student.adsn.toUpperCase() : 'À PRÉCISER', detailsX + 255 + classValWidth, detailsY);
 
         detailsY += lineSpacing + 4;
 
