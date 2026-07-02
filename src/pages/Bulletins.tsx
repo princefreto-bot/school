@@ -11,7 +11,7 @@ export const Bulletins: React.FC = () => {
         schoolName, schoolLogo, schoolStamp, schoolYear,
         schoolMotto, schoolBp, schoolTelephone, schoolAddress, schoolCurrency,
         countryName, countryMotto, ministereName,
-        showStampOnBulletins
+        showStampOnBulletins, officialSeal
     } = useStore();
 
     const classesList = Array.from(new Set(students.map(s => s.classe))).sort();
@@ -144,6 +144,7 @@ export const Bulletins: React.FC = () => {
                                 data={b}
                                 schoolName={schoolName}
                                 schoolLogo={schoolLogo}
+                                officialSeal={showStampOnBulletins !== false ? officialSeal : null}
                                 schoolStamp={showStampOnBulletins !== false ? schoolStamp : null}
                                 schoolYear={schoolYear}
                                 studentPhoto={b.eleve.photoUrl || null}

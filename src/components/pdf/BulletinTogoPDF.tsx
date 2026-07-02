@@ -5,6 +5,7 @@ interface BulletinTogoPDFProps {
     data: BulletinEleveResultat;
     schoolName: string;
     schoolLogo: string | null;
+    officialSeal?: string | null;
     schoolStamp?: string | null;
     schoolYear: string;
     studentPhoto?: string | null;
@@ -26,7 +27,7 @@ const getDateFr = (): string => {
 };
 
 export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFProps>(
-    ({ data, schoolName, schoolLogo, schoolStamp, schoolYear, studentPhoto,
+    ({ data, schoolName, schoolLogo, officialSeal, schoolStamp, schoolYear, studentPhoto,
        schoolMotto = 'Travail-Rigueur-Succès',
        schoolBp = '80159',
        schoolTelephone = '+228 90 17 79 66 / 99 41 40 47',
@@ -62,10 +63,10 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
 
                         {/* 1. SCEAU (Extrême Gauche) */}
                         <div className="flex-shrink-0 flex justify-start" style={{ width: '26mm' }}>
-                            {schoolStamp ? (
+                            {officialSeal ? (
                                 <img
-                                    src={schoolStamp}
-                                    alt="Sceau"
+                                    src={officialSeal}
+                                    alt="Sceau Officiel"
                                     style={{ width: '24mm', height: '24mm', objectFit: 'contain' }}
                                 />
                             ) : (
