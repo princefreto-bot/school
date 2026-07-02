@@ -7,6 +7,9 @@ interface BulletinTogoPDFProps {
     schoolLogo: string | null;
     officialSeal?: string | null;
     schoolStamp?: string | null;
+    directorSignature?: string | null;
+    showStampOnBulletins?: boolean;
+    showSignatureOnBulletins?: boolean;
     schoolYear: string;
     studentPhoto?: string | null;
     schoolMotto?: string;
@@ -27,7 +30,8 @@ const getDateFr = (): string => {
 };
 
 export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFProps>(
-    ({ data, schoolName, schoolLogo, officialSeal, schoolStamp, schoolYear, studentPhoto,
+    ({ data, schoolName, schoolLogo, officialSeal, schoolStamp, directorSignature, 
+       showStampOnBulletins, showSignatureOnBulletins, schoolYear, studentPhoto,
        schoolMotto = 'Travail-Rigueur-Succès',
        schoolBp = '80159',
        schoolTelephone = '+228 90 17 79 66 / 99 41 40 47',
@@ -61,17 +65,17 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                 <div className="mb-2">
                     <div className="flex justify-between items-start py-1 gap-2 border-b border-black pb-2">
 
-                        {/* 1. SCEAU (Extrême Gauche) */}
+                        {/* 1. SCEAU OFFICIEL (Extrême Gauche) */}
                         <div className="flex-shrink-0 flex justify-start" style={{ width: '26mm' }}>
-                            {(officialSeal || schoolStamp) ? (
+                            {officialSeal ? (
                                 <img
-                                    src={(officialSeal || schoolStamp) as string}
+                                    src={officialSeal}
                                     alt="Sceau Officiel"
                                     style={{ width: '24mm', height: '24mm', objectFit: 'contain' }}
                                 />
                             ) : (
                                 <div className="w-[24mm] h-[24mm] flex flex-col items-center justify-center opacity-30 border border-dashed border-gray-300">
-                                    <span className="text-[10px] font-bold">SCEAU</span>
+                                    <span className="text-[10px] font-bold text-center">SCEAU<br/>OFFICIEL</span>
                                 </div>
                             )}
                         </div>
@@ -465,7 +469,21 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                     </div>
                     <div className="border-[1.5px] border-black relative" style={{ height: '15mm' }}>
                         <div className="text-[8px] font-black uppercase text-center border-b-[1.5px] border-black" style={{ padding: '2px' }}>LE DIRECTEUR / PROVISEUR</div>
-                        <p className="italic text-gray-400 font-normal absolute bottom-1 w-full left-0 text-center text-[7.5px]">Sceau et signature</p>
+                        
+                        <div className="absolute inset-0 top-[15px] flex items-center justify-center pointer-events-none">
+                            {/* Cachet de l'établissement */}
+                            {showStampOnBulletins && schoolStamp && (
+                                <img src={schoolStamp} alt="Cachet" className="w-[12mm] h-[12mm] object-contain opacity-80" style={{ transform: 'rotate(-5deg) translateX(-6mm)' }} />
+                            )}
+                            {/* Signature du directeur */}
+                            {showSignatureOnBulletins && directorSignature && (
+                                <img src={directorSignature} alt="Signature" className="w-[14mm] h-[14mm] object-contain" style={{ transform: 'translateX(2mm)' }} />
+                            )}
+                        </div>
+
+                        {(!showStampOnBulletins || !schoolStamp) && (!showSignatureOnBulletins || !directorSignature) && (
+                            <p className="italic text-gray-400 font-normal absolute bottom-1 w-full left-0 text-center text-[7.5px]">Cachet et signature</p>
+                        )}
                     </div>
                 </div>
 
