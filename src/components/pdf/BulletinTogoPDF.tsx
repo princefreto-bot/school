@@ -63,9 +63,9 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
 
                         {/* 1. SCEAU (Extrême Gauche) */}
                         <div className="flex-shrink-0 flex justify-start" style={{ width: '26mm' }}>
-                            {officialSeal ? (
+                            {(officialSeal || schoolStamp) ? (
                                 <img
-                                    src={officialSeal}
+                                    src={(officialSeal || schoolStamp) as string}
                                     alt="Sceau Officiel"
                                     style={{ width: '24mm', height: '24mm', objectFit: 'contain' }}
                                 />
