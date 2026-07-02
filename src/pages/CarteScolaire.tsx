@@ -27,10 +27,11 @@ interface CarteProps {
     schoolYear: string;
     schoolLogo: string | null;
     photoUrl?: string | null;
+    adsn?: string | null;
 }
 
 const CarteEleve: React.FC<CarteProps> = ({
-    nom, prenom, classe, id, telephone, schoolName, schoolYear, schoolLogo, photoUrl,
+    nom, prenom, classe, id, telephone, schoolName, schoolYear, schoolLogo, photoUrl, adsn
 }) => {
     const nomComplet = `${prenom} ${nom}`.toUpperCase();
     const initials = `${prenom.charAt(0)}${nom.charAt(0)}`;
@@ -257,7 +258,7 @@ const CarteEleve: React.FC<CarteProps> = ({
                         display: 'inline-block', maxWidth: '100%',
                         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                     }}>
-                        {id.toUpperCase()}
+                        {adsn ? adsn.toUpperCase() : 'À PRÉCISER'}
                     </div>
                 </div>
 
@@ -383,7 +384,7 @@ const resizeLogoForPDF = (src: string, size: number): Promise<string> => {
 // Design identique à la carte écran : fond sombre, bande or diagonale
 // ============================================================
 const generateCartesPDF = async (
-    students: Array<{ id: string; nom: string; prenom: string; classe: string; telephone: string; photoUrl?: string }>,
+    students: Array<{ id: string; nom: string; prenom: string; classe: string; telephone: string; photoUrl?: string; adsn?: string }>,
     schoolName: string,
     schoolYear: string,
     schoolLogo: string | null,
@@ -627,7 +628,7 @@ const generateCartesPDF = async (
         doc.setFontSize(4);
         doc.setFont('helvetica', 'bold');
         doc.text('MATRICULE', iX, tY + 11.5);
-        const matStr = student.id.toUpperCase();
+        const matStr = student.adsn ? student.adsn.toUpperCase() : 'À PRÉCISER';
         doc.setFontSize(6);
         const mW = doc.getTextWidth(matStr) + 2.5;
         doc.setFillColor(...C.white);
@@ -920,6 +921,7 @@ export const CarteScolaire: React.FC = () => {
                                             telephone={s.telephone}
                                             schoolName={schoolName} schoolYear={schoolYear} schoolLogo={schoolLogo}
                                             photoUrl={s.photoUrl}
+                                            adsn={s.adsn}
                                         />
                                     </div>
                                 </div>

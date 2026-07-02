@@ -883,7 +883,7 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
                                         </td>
                                         {/* Matricule */}
                                         <td className="px-6 py-4 font-bold text-slate-600 dark:text-slate-400 text-xs">
-                                            {student.id.substring(0, 10).toUpperCase()}
+                                            {student.adsn ? student.adsn.toUpperCase() : 'À PRÉCISER'}
                                         </td>
                                         {/* Nom */}
                                         <td className="px-6 py-4">
@@ -1071,7 +1071,7 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
                                             <div className="bg-slate-50 dark:bg-slate-850 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 text-xs space-y-2">
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-400 font-semibold">N° Matricule :</span>
-                                                    <span className="font-bold text-slate-800 dark:text-slate-200">{s.id.substring(0, 10).toUpperCase()}</span>
+                                                    <span className="font-bold text-slate-800 dark:text-slate-200">{s.adsn ? s.adsn.toUpperCase() : 'À PRÉCISER'}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-400 font-semibold">N° de Table :</span>
