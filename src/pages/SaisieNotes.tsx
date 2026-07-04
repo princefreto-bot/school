@@ -58,18 +58,22 @@ export const SaisieNotes: React.FC = () => {
 
     // Local state for grades being edited (stored as strings to allow typing decimals like "12.")
     const [draftNotes, setDraftNotes] = useState<Record<string, Record<string, string>>>({});
+    const isDirtyRef = React.useRef(false);
     const prevSelectionRef = React.useRef<string>('');
 
-    // Charge les notes existantes dans le brouillon UNIQUEMENT quand la sélection change
+    // Charge les notes existantes dans le brouillon quand la sélection, les élèves ou les notes du store changent
     React.useEffect(() => {
         const selectionKey = `${selectedClasse}|${selectedMatiereId}|${currentPeriode}`;
 
-        // Ne rien faire si la sélection n'a pas changé
-        if (selectionKey === prevSelectionRef.current) return;
-        
-        // Avant de changer, on pourrait sauvegarder les notes de la sélection précédente
-        // Mais pour simplifier, on se concentre sur le chargement ici.
-        prevSelectionRef.current = selectionKey;
+        // Si la sélection a changé, on n'est plus "dirty", on peut recharger
+        if (selectionKey !== prevSelectionRef.current) {
+            prevSelectionRef.current = selectionKey;
+            isDirtyRef.current = false;
+        }
+
+        // Si des modifications locales sont en cours (dirty), on ne recharge pas depuis le store
+        // afin de ne pas écraser la saisie active de l'utilisateur.
+        if (isDirtyRef.current) return;
 
         if (!selectedClasse || !selectedMatiereId) {
             setDraftNotes({});
@@ -88,14 +92,14 @@ export const SaisieNotes: React.FC = () => {
             };
         });
         setDraftNotes(newDrafts);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedClasse, selectedMatiereId, currentPeriode]); // Retiré classStudents pour éviter les resets intempestifs
+    }, [selectedClasse, selectedMatiereId, currentPeriode, classStudents, useStore((s) => s.notes)]);
 
     const handleNoteChange = (studentId: string, field: 'noteClasse' | 'noteDevoir' | 'noteCompo', value: string) => {
         // Validation basique (on autorise chiffres, point, virgule)
         const cleanedValue = value.replace(',', '.');
         if (cleanedValue !== '' && !/^\d*\.?\d*$/.test(cleanedValue)) return;
 
+        isDirtyRef.current = true;
         setDraftNotes(prev => ({
             ...prev,
             [studentId]: {
@@ -141,6 +145,7 @@ export const SaisieNotes: React.FC = () => {
         if (batch.length > 0) {
             // 1. Sauvegarder localement
             useStore.getState().upsertNotes(batch);
+            isDirtyRef.current = false;
             
             // 2. Synchroniser vers le cloud (une seule fois, après toutes les notes)
             setSaveStatus('💾 Sauvegarde en cours...');
@@ -155,7 +160,7 @@ export const SaisieNotes: React.FC = () => {
                     setSaveStatus('✅ Notes enregistrées et synchronisées !');
                     console.log('✅ [Notes] Sync cloud réussie, résultat:', result);
                 } else {
-                    setSaveStatus('⚠️ Sauvé localement, le serveur n\'a pas répondu');
+                    setSaveStatus('⚠️ Sauvé localement, mais échec de la synchronisation cloud');
                     console.warn('⚠️ [Notes] syncToBackend a retourné null');
                 }
             } catch (err) {

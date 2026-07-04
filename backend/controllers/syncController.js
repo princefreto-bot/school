@@ -133,7 +133,11 @@ async function syncFromFrontend(req, res) {
 
             for (let i = 0; i < studentData.length; i += CHUNK_SIZE) {
                 const chunk = studentData.slice(i, i + CHUNK_SIZE);
-                await supabase.from(tbl('students')).upsert(chunk, { onConflict: 'id' });
+                const { error: chunkErr } = await supabase.from(tbl('students')).upsert(chunk, { onConflict: 'id' });
+                if (chunkErr) {
+                    console.error('❌ [Sync POST] Erreur students:', chunkErr.message);
+                    return res.status(500).json({ error: 'Erreur lors de la synchronisation des élèves: ' + chunkErr.message });
+                }
             }
 
             // --- Auto-liaison des parents par numéro de téléphone ---
@@ -202,7 +206,11 @@ async function syncFromFrontend(req, res) {
             if (allPayments.length > 0) {
                 for (let i = 0; i < allPayments.length; i += CHUNK_SIZE) {
                     const chunk = allPayments.slice(i, i + CHUNK_SIZE);
-                    await supabase.from(tbl('payments')).upsert(chunk, { onConflict: 'id' });
+                    const { error: chunkErr } = await supabase.from(tbl('payments')).upsert(chunk, { onConflict: 'id' });
+                    if (chunkErr) {
+                        console.error('❌ [Sync POST] Erreur payments:', chunkErr.message);
+                        return res.status(500).json({ error: 'Erreur lors de la synchronisation des paiements: ' + chunkErr.message });
+                    }
                 }
             }
 
@@ -252,7 +260,11 @@ async function syncFromFrontend(req, res) {
             }));
             for (let i = 0; i < presenceData.length; i += CHUNK_SIZE) {
                 const chunk = presenceData.slice(i, i + CHUNK_SIZE);
-                await supabase.from(tbl('presences')).upsert(chunk, { onConflict: 'id' });
+                const { error: chunkErr } = await supabase.from(tbl('presences')).upsert(chunk, { onConflict: 'id' });
+                if (chunkErr) {
+                    console.error('❌ [Sync POST] Erreur presences:', chunkErr.message);
+                    return res.status(500).json({ error: 'Erreur lors de la synchronisation des présences: ' + chunkErr.message });
+                }
             }
 
             // --- 3b. Notifier les parents pour les Pointages NOUVEAUX ---
@@ -295,7 +307,11 @@ async function syncFromFrontend(req, res) {
             }));
             for (let i = 0; i < logData.length; i += CHUNK_SIZE) {
                 const chunk = logData.slice(i, i + CHUNK_SIZE);
-                await supabase.from(tbl('activity_logs')).upsert(chunk, { onConflict: 'id' });
+                const { error: chunkErr } = await supabase.from(tbl('activity_logs')).upsert(chunk, { onConflict: 'id' });
+                if (chunkErr) {
+                    console.error('❌ [Sync POST] Erreur activity_logs:', chunkErr.message);
+                    return res.status(500).json({ error: 'Erreur lors de la synchronisation des logs d\'activité: ' + chunkErr.message });
+                }
             }
         }
 
@@ -354,6 +370,7 @@ async function syncFromFrontend(req, res) {
                 }, { onConflict: 'id' });
                 if (settingsErr) {
                     console.error('❌ [Sync POST] Erreur sauvegarde appSettings:', settingsErr.message);
+                    return res.status(500).json({ error: 'Erreur lors de la synchronisation des paramètres: ' + settingsErr.message });
                 } else {
                     console.log('✅ [Sync POST] appSettings sauvegardés avec succès !');
                     if (appSettings.schoolYear) {
@@ -386,6 +403,7 @@ async function syncFromFrontend(req, res) {
                 const { error: matErr } = await supabase.from(tbl('matieres')).upsert(matieresData, { onConflict: 'id' });
                 if (matErr) {
                     console.error('❌ [Sync POST] Erreur matieres:', matErr.message);
+                    return res.status(500).json({ error: 'Erreur lors de la synchronisation des matières: ' + matErr.message });
                 } else {
                     console.log(`✅ [Sync POST] ${matieresData.length} matières sync.`);
                 }
@@ -407,6 +425,7 @@ async function syncFromFrontend(req, res) {
                 const { error: cmErr } = await supabase.from(tbl('classe_matieres')).upsert(cmData, { onConflict: 'id' });
                 if (cmErr) {
                     console.error('❌ [Sync POST] Erreur classeMatieres:', cmErr.message);
+                    return res.status(500).json({ error: 'Erreur lors de la synchronisation des liaisons classe-matière: ' + cmErr.message });
                 } else {
                     console.log(`✅ [Sync POST] ${cmData.length} classe-matières sync.`);
                 }
@@ -433,17 +452,13 @@ async function syncFromFrontend(req, res) {
                     }));
                     const { error: chunkErr } = await supabase.from(tbl('notes')).upsert(chunk, { onConflict: 'id' });
                     if (chunkErr) {
-                        notesErr = chunkErr;
-                        console.error(`❌ [Sync POST] Erreur notes (chunk ${i}-${i+chunk.length}):`, chunkErr.message, chunkErr.details);
+                        console.error(`❌ [Sync POST] Erreur notes:`, chunkErr.message);
+                        return res.status(500).json({ error: 'Erreur lors de la synchronisation des notes: ' + chunkErr.message });
                     } else {
                         notesOk += chunk.length;
                     }
                 }
-                if (notesErr) {
-                    console.error(`❌ [Sync POST] ${notesOk}/${notes.length} notes sauvées, erreurs sur le reste.`);
-                } else {
-                    console.log(`✅ [Sync POST] ${notesOk} notes synchronisées avec succès !`);
-                }
+                console.log(`✅ [Sync POST] ${notesOk} notes synchronisées avec succès !`);
             } catch (notesException) {
                 console.error('❌ [Sync POST] Exception notes:', notesException);
             }
