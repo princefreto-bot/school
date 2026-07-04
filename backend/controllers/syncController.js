@@ -509,14 +509,36 @@ async function syncToFrontend(req, res) {
 
     try {
         const fetchTable = async (name, orderField = null, ascending = false, filterByYear = false) => {
-            let q = supabase.from(tbl(name)).select('*');
-            if (filterByYear && academicYearId) {
-                q = q.eq('academic_year_id', academicYearId);
+            let allData = [];
+            let from = 0;
+            const limit = 1000;
+            let hasMore = true;
+
+            while (hasMore) {
+                let q = supabase.from(tbl(name)).select('*').range(from, from + limit - 1);
+                if (filterByYear && academicYearId) {
+                    q = q.eq('academic_year_id', academicYearId);
+                }
+                if (orderField) q = q.order(orderField, { ascending });
+                
+                const { data, error } = await q;
+                if (error) {
+                    if (error.code === '42P01') return []; // Table not found
+                    throw error;
+                }
+                
+                if (data && data.length > 0) {
+                    allData.push(...data);
+                    if (data.length < limit) {
+                        hasMore = false;
+                    } else {
+                        from += limit;
+                    }
+                } else {
+                    hasMore = false;
+                }
             }
-            if (orderField) q = q.order(orderField, { ascending });
-            const { data, error } = await q;
-            if (error && error.code !== '42P01') throw error;
-            return data || [];
+            return allData;
         };
 
         const [

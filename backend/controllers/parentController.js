@@ -546,12 +546,30 @@ async function getParentData(req, res) {
                         studentIdToClasse[s.id] = s.classe;
                     });
                     const classStudentIds = allClassStudents.map(s => s.id);
-                    const { data: dbAllClassNotes } = await supabase
-                        .from(`notes_${schoolSlug}`)
-                        .select('*')
-                        .in('eleve_id', classStudentIds)
-                        .eq('academic_year_id', academicYearId);
-                    allClassNotes = dbAllClassNotes || [];
+                    let fetchedClassNotes = [];
+                    let from = 0;
+                    const limit = 1000;
+                    let hasMore = true;
+                    while (hasMore) {
+                        const { data: chunk, error } = await supabase
+                            .from(`notes_${schoolSlug}`)
+                            .select('*')
+                            .in('eleve_id', classStudentIds)
+                            .eq('academic_year_id', academicYearId)
+                            .range(from, from + limit - 1);
+                        if (error) throw error;
+                        if (chunk && chunk.length > 0) {
+                            fetchedClassNotes.push(...chunk);
+                            if (chunk.length < limit) {
+                                hasMore = false;
+                            } else {
+                                from += limit;
+                            }
+                        } else {
+                            hasMore = false;
+                        }
+                    }
+                    allClassNotes = fetchedClassNotes;
                 }
             }
 
