@@ -61,6 +61,14 @@ export const SaisieNotes: React.FC = () => {
     const isDirtyRef = React.useRef(false);
     const prevSelectionRef = React.useRef<string>('');
 
+    // Déclencher un rechargement forcé du cloud lors de la sélection pour s'assurer que les données sont fraîches
+    React.useEffect(() => {
+        if (selectedClasse && selectedMatiereId) {
+            console.log(`📥 [SaisieNotes] Chargement forcé des notes pour la classe ${selectedClasse} et la matière ${selectedMatiereId}...`);
+            useStore.getState().fetchAllFromBackend(true);
+        }
+    }, [selectedClasse, selectedMatiereId, currentPeriode]);
+
     // Charge les notes existantes dans le brouillon quand la sélection, les élèves ou les notes du store changent
     React.useEffect(() => {
         const selectionKey = `${selectedClasse}|${selectedMatiereId}|${currentPeriode}`;
@@ -172,6 +180,26 @@ export const SaisieNotes: React.FC = () => {
         }
         
         setTimeout(() => setSaveStatus(null), 3000);
+    };
+
+    const calculateMoyenne = (draft: Record<string, string> | undefined) => {
+        if (!draft) return '--';
+        const nC = draft.noteClasse === '' ? null : parseFloat(draft.noteClasse);
+        const nD = draft.noteDevoir === '' ? null : parseFloat(draft.noteDevoir);
+        const nCp = draft.noteCompo === '' ? null : parseFloat(draft.noteCompo);
+
+        let moyClasseMat: number | null = null;
+        const notesEvaluations = [nC, nD].filter(x => x !== null && !isNaN(x)) as number[];
+        if (notesEvaluations.length > 0) {
+            moyClasseMat = notesEvaluations.reduce((a,b) => a+b, 0) / notesEvaluations.length;
+        }
+
+        const paramPourMoyenne = [moyClasseMat, nCp].filter(x => x !== null && !isNaN(x as any)) as number[];
+        if (paramPourMoyenne.length > 0) {
+            const avgMatiere = paramPourMoyenne.reduce((a,b) => a+b, 0) / paramPourMoyenne.length;
+            return avgMatiere.toFixed(2);
+        }
+        return '--';
     };
 
     return (
@@ -287,6 +315,7 @@ export const SaisieNotes: React.FC = () => {
                                     <th className="p-4 font-bold text-blue-600 w-40 text-center">Interro. (/20)</th>
                                     <th className="p-4 font-bold text-indigo-600 w-40 text-center">Devoir (/20)</th>
                                     <th className="p-4 font-bold text-purple-600 w-40 text-center">Compo. (/20)</th>
+                                    <th className="p-4 font-bold text-emerald-600 w-40 text-center">Moyenne (/20)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -326,11 +355,14 @@ export const SaisieNotes: React.FC = () => {
                                                 placeholder="--"
                                             />
                                         </td>
+                                        <td className="p-4 text-center font-bold text-emerald-600 text-lg">
+                                            {calculateMoyenne(draftNotes[student.id])}
+                                        </td>
                                     </tr>
                                 ))}
                                 {classStudents.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className="p-8 text-center text-gray-500 font-semibold">
+                                        <td colSpan={6} className="p-8 text-center text-gray-500 font-semibold">
                                             Aucun élève trouvé dans cette classe.
                                         </td>
                                     </tr>
@@ -386,6 +418,12 @@ export const SaisieNotes: React.FC = () => {
                                             placeholder="--"
                                         />
                                     </div>
+                                </div>
+                                <div className="flex justify-between items-center pt-2 border-t border-dashed border-slate-100 dark:border-slate-800/40">
+                                    <span className="text-xs font-semibold text-slate-500">Moyenne calculée :</span>
+                                    <span className="text-sm font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-lg">
+                                        {calculateMoyenne(draftNotes[student.id])} / 20
+                                    </span>
                                 </div>
                             </div>
                         ))}
