@@ -331,6 +331,9 @@ export const LandingPage: React.FC = () => {
         @keyframes scan { 0% { transform: translateY(0%); } 50% { transform: translateY(220px); } 100% { transform: translateY(0%); } }
         .animate-scan { animation: scan 3s linear infinite; }
         .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .animate-marquee { animation: marquee 22s linear infinite; }
+        .animate-marquee:hover { animation-play-state: paused; }
       `}</style>
 
       {/* ── HEADER ── */}
@@ -391,6 +394,30 @@ export const LandingPage: React.FC = () => {
         </div>
       </header>
 
+      {/* ── SCROLLING IMAGE BANNER ── */}
+      <div className="w-full overflow-hidden bg-white border-b border-slate-200/80 relative" style={{ height: '200px' }}>
+        {/* Gradient overlays left/right for seamless fade */}
+        <div className="absolute left-0 top-0 h-full w-24 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)' }} />
+        <div className="absolute right-0 top-0 h-full w-24 z-10 pointer-events-none" style={{ background: 'linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)' }} />
+        {/* Marquee track — duplicated to create infinite loop */}
+        <div className="animate-marquee flex items-center gap-4 h-full" style={{ width: 'max-content' }}>
+          {/* First set */}
+          <img src="/KIDS.webp" alt="Kids at school" className="h-full w-auto object-cover rounded-xl shadow-md shrink-0" style={{ maxHeight: '180px' }} />
+          <img src="/kids1.webp" alt="Kids at school 2" className="h-full w-auto object-cover rounded-xl shadow-md shrink-0" style={{ maxHeight: '180px' }} />
+          <img src="/KIDS.webp" alt="Kids at school" className="h-full w-auto object-cover rounded-xl shadow-md shrink-0" style={{ maxHeight: '180px' }} />
+          <img src="/kids1.webp" alt="Kids at school 2" className="h-full w-auto object-cover rounded-xl shadow-md shrink-0" style={{ maxHeight: '180px' }} />
+          <img src="/KIDS.webp" alt="Kids at school" className="h-full w-auto object-cover rounded-xl shadow-md shrink-0" style={{ maxHeight: '180px' }} />
+          <img src="/kids1.webp" alt="Kids at school 2" className="h-full w-auto object-cover rounded-xl shadow-md shrink-0" style={{ maxHeight: '180px' }} />
+          {/* Duplicate set for seamless loop */}
+          <img src="/KIDS.webp" alt="Kids at school" className="h-full w-auto object-cover rounded-xl shadow-md shrink-0" style={{ maxHeight: '180px' }} />
+          <img src="/kids1.webp" alt="Kids at school 2" className="h-full w-auto object-cover rounded-xl shadow-md shrink-0" style={{ maxHeight: '180px' }} />
+          <img src="/KIDS.webp" alt="Kids at school" className="h-full w-auto object-cover rounded-xl shadow-md shrink-0" style={{ maxHeight: '180px' }} />
+          <img src="/kids1.webp" alt="Kids at school 2" className="h-full w-auto object-cover rounded-xl shadow-md shrink-0" style={{ maxHeight: '180px' }} />
+          <img src="/KIDS.webp" alt="Kids at school" className="h-full w-auto object-cover rounded-xl shadow-md shrink-0" style={{ maxHeight: '180px' }} />
+          <img src="/kids1.webp" alt="Kids at school 2" className="h-full w-auto object-cover rounded-xl shadow-md shrink-0" style={{ maxHeight: '180px' }} />
+        </div>
+      </div>
+
       <main className="flex-grow flex flex-col">
 
         {/* ── HERO SECTION ── */}
@@ -440,7 +467,7 @@ export const LandingPage: React.FC = () => {
                 
                 <div className="relative w-full max-w-md aspect-[4/3] flex items-center justify-center">
                   <div className="absolute inset-0 bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-2 rotate-[-2deg] hover:rotate-0 transition-transform duration-500 ease-out">
-                    <img src="/dashboard_preview.png" className="w-full h-full object-cover rounded-xl" alt="Dashboard" />
+                    <img src="/dashboard_preview.webp" className="w-full h-full object-cover rounded-xl" alt="Dashboard" />
                   </div>
                   <div className="absolute -bottom-4 -right-4 w-32 sm:w-44 aspect-[9/16] bg-white border border-slate-200/80 rounded-2xl shadow-2xl p-1.5 rotate-[5deg] hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out z-10">
                     <img src="/student_card_preview.png" className="w-full h-full object-contain rounded-xl bg-white" alt="Student Card" />
@@ -779,7 +806,7 @@ export const LandingPage: React.FC = () => {
               <div className="lg:col-span-6 flex justify-center relative select-none px-4">
                 <div className="relative w-full max-w-lg aspect-[4/3.5] flex items-center justify-center">
                   <div className="absolute top-0 left-4 w-[48%] aspect-[4/3] rounded-2xl shadow-xl overflow-hidden rotate-[-6deg] border-2 border-white bg-slate-50 hover:rotate-0 transition-transform duration-500 z-10">
-                    <img className="w-full h-full object-cover p-2 bg-white" src="/report_card_preview.png" alt="Report Card Collage" />
+                    <img className="w-full h-full object-cover p-2 bg-white" src="/report_card_preview.webp" alt="Report Card Collage" />
                     <div className="absolute top-2 left-2 w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center shadow-md">
                       <BookOpen className="w-4 h-4" />
                     </div>
@@ -790,7 +817,7 @@ export const LandingPage: React.FC = () => {
                   </div>
 
                   <div className="absolute bottom-4 left-4 w-[75%] aspect-[16/10] rounded-2xl shadow-2xl overflow-hidden rotate-[-2deg] border-2 border-white bg-slate-50 hover:rotate-0 transition-transform duration-500 z-30">
-                    <img className="w-full h-full object-cover rounded-xl" src="/dashboard_preview.png" alt="Dashboard Collage" />
+                    <img className="w-full h-full object-cover rounded-xl" src="/dashboard_preview.webp" alt="Dashboard Collage" />
                     <div className="absolute -bottom-2 -right-2 bg-amber-500 text-slate-950 rounded-2xl p-4 shadow-2xl flex items-center gap-3 border-2 border-white hover:scale-105 transition-transform duration-300">
                       <div className="w-8 h-8 rounded-lg bg-slate-950/10 flex items-center justify-center shrink-0">
                         <Users className="w-4.5 h-4.5 text-slate-950" />
@@ -919,7 +946,7 @@ export const LandingPage: React.FC = () => {
             <div ref={scan2ImgRef} className="lg:col-span-7 flex justify-center lg:order-1 order-2 relative">
               <div className="w-full max-w-lg bg-slate-50 border border-slate-200 p-3 rounded-xl shadow-2xl relative overflow-hidden group hover:scale-[1.01] transition-transform duration-300">
                 <div className="w-full bg-white rounded-lg p-2.5 shadow-sm border border-slate-100 flex items-center justify-center">
-                  <img src="/report_card_preview.png" alt={t.academicsTitle} className="w-full h-full object-contain max-h-[380px] group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy" />
+                  <img src="/report_card_preview.webp" alt={t.academicsTitle} className="w-full h-full object-contain max-h-[380px] group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy" />
                 </div>
               </div>
             </div>

@@ -51,7 +51,7 @@ const featuresFr = [
     ],
   },
   {
-    image: '/DASH6.png',
+    image: '/DASH6.webp',
     icon: SearchCheck,
     color: '#3B82F6',
     title: 'Vérification des Informations Élève',
@@ -66,7 +66,7 @@ const featuresFr = [
     ],
   },
   {
-    image: '/DASH8.png',
+    image: '/DASH8.webp',
     icon: FolderOpen,
     color: '#8B5CF6',
     title: 'Centre de Documents',
@@ -81,7 +81,7 @@ const featuresFr = [
     ],
   },
   {
-    image: '/DASH10.png',
+    image: '/DASH10.webp',
     icon: History,
     color: '#F97316',
     title: 'Historiques & Activités',
@@ -96,7 +96,7 @@ const featuresFr = [
     ],
   },
   {
-    image: '/DASH11.png',
+    image: '/DASH11.webp',
     icon: MessageSquare,
     color: '#06B6D4',
     title: 'Messagerie Intégrée',
@@ -111,7 +111,7 @@ const featuresFr = [
     ],
   },
   {
-    image: '/DASH12.png',
+    image: '/DASH12.webp',
     icon: Megaphone,
     color: '#EC4899',
     title: 'Annonces & Actualités',
@@ -126,7 +126,7 @@ const featuresFr = [
     ],
   },
   {
-    image: '/DASH13.png',
+    image: '/DASH13.webp',
     icon: Database,
     color: '#14B8A6',
     title: 'Base de Données Centralisée',
@@ -141,7 +141,7 @@ const featuresFr = [
     ],
   },
   {
-    image: '/DASH14.png',
+    image: '/DASH14.webp',
     icon: Settings,
     color: '#6366F1',
     title: 'Paramètres du Système',
@@ -156,7 +156,7 @@ const featuresFr = [
     ],
   },
   {
-    image: '/DASH15.png',
+    image: '/DASH15.webp',
     icon: CardIcon,
     color: '#F59E0B',
     title: 'Carte Scolaire Numérique',
@@ -204,7 +204,7 @@ const featuresEn = [
     ],
   },
   {
-    image: '/DASH6.png',
+    image: '/DASH6.webp',
     icon: SearchCheck,
     color: '#3B82F6',
     title: 'Student Information Verification',
@@ -219,7 +219,7 @@ const featuresEn = [
     ],
   },
   {
-    image: '/DASH8.png',
+    image: '/DASH8.webp',
     icon: FolderOpen,
     color: '#8B5CF6',
     title: 'Document Center',
@@ -234,7 +234,7 @@ const featuresEn = [
     ],
   },
   {
-    image: '/DASH10.png',
+    image: '/DASH10.webp',
     icon: History,
     color: '#F97316',
     title: 'History & Activity Logs',
@@ -249,7 +249,7 @@ const featuresEn = [
     ],
   },
   {
-    image: '/DASH11.png',
+    image: '/DASH11.webp',
     icon: MessageSquare,
     color: '#06B6D4',
     title: 'Integrated Messaging',
@@ -264,7 +264,7 @@ const featuresEn = [
     ],
   },
   {
-    image: '/DASH12.png',
+    image: '/DASH12.webp',
     icon: Megaphone,
     color: '#EC4899',
     title: 'Announcements & News',
@@ -279,7 +279,7 @@ const featuresEn = [
     ],
   },
   {
-    image: '/DASH13.png',
+    image: '/DASH13.webp',
     icon: Database,
     color: '#14B8A6',
     title: 'Centralized Database',
@@ -294,7 +294,7 @@ const featuresEn = [
     ],
   },
   {
-    image: '/DASH14.png',
+    image: '/DASH14.webp',
     icon: Settings,
     color: '#6366F1',
     title: 'System Settings',
@@ -309,7 +309,7 @@ const featuresEn = [
     ],
   },
   {
-    image: '/DASH15.png',
+    image: '/DASH15.webp',
     icon: CardIcon,
     color: '#F59E0B',
     title: 'Digital School ID Card',
