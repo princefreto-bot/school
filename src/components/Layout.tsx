@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { parseResponse, getAuthHeaders } from '../services/apiHelpers';
 import { useStore } from '../store/useStore';
 import { AppPage } from '../types';
@@ -286,8 +286,8 @@ const SidebarContent: React.FC<{
         )}
       </div>
 
-      <a
-        href="/#/confidentialite"
+      <Link
+        to="/fr/confidentialite"
         target="_blank"
         rel="noopener noreferrer"
         className={`group w-full flex items-center ${collapsed ? 'justify-center p-3' : 'px-4 py-3.5'} gap-3 rounded-[20px] text-slate-400 hover:bg-white/5 hover:text-amber-500 transition-all duration-300 active:scale-[0.98] mb-1`}
@@ -295,7 +295,7 @@ const SidebarContent: React.FC<{
       >
         <Shield className="w-[18px] h-[18px] group-hover:scale-110 transition-transform duration-300 text-amber-500" />
         {!collapsed && <span className="text-[13px] font-bold tracking-wide">Confidentialité</span>}
-      </a>
+      </Link>
 
       <button
         onClick={logout}

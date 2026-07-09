@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BACKEND_URL } from '../config';
 import { ArrowLeft, Send, CheckCircle } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStore } from '../store/useStore';
@@ -100,7 +101,6 @@ export const SubmitStory: React.FC = () => {
     setError(null);
     
     try {
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
       const response = await fetch(`${BACKEND_URL}/api/testimonials`, {
         method: 'POST',
         headers: {

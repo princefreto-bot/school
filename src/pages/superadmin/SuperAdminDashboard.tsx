@@ -400,7 +400,7 @@ const CreateSchoolModal: React.FC<CreateSchoolModalProps> = ({ onClose, onCreate
                   required
                 />
                 <span className="text-sm text-slate-300 leading-tight">
-                  J'accepte les <a href="/#/conditions-utilisation" target="_blank" className="text-amber-500 font-bold hover:underline">Conditions Générales d'Utilisation</a>. <span className="text-red-500">*</span>
+                  J'accepte les <a href="/fr/conditions-utilisation" target="_blank" className="text-amber-500 font-bold hover:underline">Conditions Générales d'Utilisation</a>. <span className="text-red-500">*</span>
                 </span>
               </label>
 
@@ -413,7 +413,7 @@ const CreateSchoolModal: React.FC<CreateSchoolModalProps> = ({ onClose, onCreate
                   required
                 />
                 <span className="text-sm text-slate-300 leading-tight">
-                  J'autorise le traitement des données conformément à la <a href="/#/confidentialite" target="_blank" className="text-amber-500 font-bold hover:underline">Politique de Confidentialité</a>. <span className="text-red-500">*</span>
+                  J'autorise le traitement des données conformément à la <a href="/fr/confidentialite" target="_blank" className="text-amber-500 font-bold hover:underline">Politique de Confidentialité</a>. <span className="text-red-500">*</span>
                 </span>
               </label>
             </div>

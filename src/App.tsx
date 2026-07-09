@@ -94,6 +94,12 @@ const RedirectToApp: React.FC = () => {
   return <Navigate to={`/${lang}/app`} replace />;
 };
 
+// Redirige vers un sous-chemin en préservant le préfixe de langue courant
+const RedirectWithLang: React.FC<{ to: string }> = ({ to }) => {
+  const { lang = 'fr' } = useParams<{ lang?: string }>();
+  return <Navigate to={`/${lang}${to}`} replace />;
+};
+
 
 const PageContent: React.FC = () => {
   const currentPage = useStore((s) => s.currentPage);
@@ -513,6 +519,9 @@ export function App() {
   const subscriptionBlockedMessage = useStore((s) => s.subscriptionBlockedMessage);
   const logout = useStore((s) => s.logout);
 
+  // Détermination de la langue courante pour les navigations post-logout
+  const currentLang = location.pathname.split('/')[1] === 'en' ? 'en' : 'fr';
+
   if (isAuthenticated && subscriptionBlockedMessage) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 font-['Poppins']">
@@ -532,7 +541,7 @@ export function App() {
             <button
               onClick={() => {
                 logout();
-                navigate('/pricing');
+                navigate(`/${currentLang}/pricing`);
               }}
               className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black uppercase tracking-widest text-xs rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer"
             >
@@ -541,7 +550,7 @@ export function App() {
             <button
               onClick={() => {
                 logout();
-                navigate('/login');
+                navigate(`/${currentLang}/login`);
               }}
               className="w-full py-3 bg-slate-900 hover:bg-black dark:bg-slate-800 dark:hover:bg-slate-700 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer"
             >
@@ -573,11 +582,11 @@ export function App() {
                 <ParentCourses />
               </Suspense>
             ) : (
-              <Navigate to="/" replace />
+              <RedirectToLogin />
             )
           } 
         />
-        <Route path="/:lang/parent/courses" element={<Navigate to="/parent/exercices" replace />} />
+        <Route path="/:lang/parent/courses" element={<RedirectWithLang to="/parent/exercices" />} />
         <Route 
           path="/:lang/parent/kids-place" 
           element={

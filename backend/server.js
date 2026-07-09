@@ -258,9 +258,9 @@ if (fs.existsSync(frontendDir)) {
 
     // Pour toutes les autres routes, on renvoie index.html (React Router)
     app.get('*', (req, res) => {
-        // Redirection HTTP 302 de la racine vers /fr pour éviter le duplicate content
+        // Redirection permanente 301 de la racine vers /fr pour éviter le duplicate content
         if (req.path === '/') {
-            return res.redirect(302, '/fr');
+            return res.redirect(301, '/fr');
         }
 
         // Redirection 301 pour les fichiers sitemap et robots avec slash final
