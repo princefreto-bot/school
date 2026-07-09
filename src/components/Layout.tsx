@@ -492,11 +492,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         {/* ── Mobile Sidebar Overlay ── */}
         {sidebarOpen && (
           <div className="fixed inset-0 z-[100] lg:hidden">
-            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-fadeIn" onClick={() => setSidebarOpen(false)} />
-            <aside className="absolute left-0 top-0 bottom-0 w-[280px] p-4 animate-slideRight">
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-overlay" onClick={() => setSidebarOpen(false)} />
+            <aside className="absolute left-0 top-0 bottom-0 w-[280px] p-4 animate-mobileSidebar">
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="absolute -right-12 top-6 w-10 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white"
+                className="absolute -right-12 top-6 w-10 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:bg-white/20 active:scale-95"
               >
                 <X size={20} />
               </button>
@@ -593,15 +593,15 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 <button
                   key={item.id}
                   onClick={() => setCurrentPage(item.id)}
-                  className="relative flex flex-col items-center justify-center w-full h-full gap-1"
+                  className={`bottom-nav-item relative flex flex-col items-center justify-center w-full h-full gap-1 ${active ? 'active' : ''}`}
                 >
                   {active && (
                     <div className="absolute top-0 w-8 h-1 bg-amber-500 rounded-b-full shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
                   )}
-                  <div className={`p-2 rounded-xl transition-all duration-300 ${active ? 'bg-amber-500/10 text-amber-500 scale-110' : 'text-slate-400'}`}>
+                  <div className={`p-2 rounded-xl transition-all duration-200 ${active ? 'bg-amber-500/10 text-amber-500 scale-110' : 'text-slate-400'}`}>
                     {item.icon}
                     {(item as any).badge != null && (item as any).badge > 0 && (
-                      <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-white dark:border-slate-900 rounded-full flex items-center justify-center text-white text-[9px] font-black">
+                      <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 border-2 border-white dark:border-slate-900 rounded-full flex items-center justify-center text-white text-[9px] font-black badge-pop">
                         {(item as any).badge > 9 ? '9+' : (item as any).badge}
                       </span>
                     )}

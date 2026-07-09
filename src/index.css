@@ -2819,4 +2819,357 @@ html {
 
 
 
+/* ============================================================
+   FLUIDITY SYSTEM — DGhubSchool v4
+   GPU-composited animations · Micro-interactions · Page transitions
+   ============================================================ */
 
+/* ── Page Transition ── */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition-running {
+  animation: page-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+/* ── LoadingSpinner premium ── */
+@keyframes spin-smooth {
+  to { transform: rotate(360deg); }
+}
+@keyframes spinner-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.9); }
+}
+
+.spinner-ring {
+  width: 32px;
+  height: 32px;
+  border: 2.5px solid rgba(244, 180, 0, 0.15);
+  border-top-color: #F4B400;
+  border-radius: 50%;
+  animation: spin-smooth 700ms linear infinite;
+  will-change: transform;
+}
+
+.spinner-ring-sm {
+  width: 18px;
+  height: 18px;
+  border-width: 2px;
+}
+
+.spinner-ring-lg {
+  width: 48px;
+  height: 48px;
+  border-width: 3px;
+}
+
+/* ── Button micro-interactions ── */
+.btn-fluid {
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition:
+    background-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 150ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 120ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 150ms ease;
+}
+.btn-fluid:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.btn-fluid:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+/* Ripple effect on click */
+.btn-fluid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(255,255,255,0.18) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 400ms ease;
+  pointer-events: none;
+}
+.btn-fluid:active::before {
+  opacity: 1;
+  transition: opacity 0ms;
+}
+
+/* ── Card hover lift (GPU) ── */
+.card-fluid {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition:
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 220ms ease,
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
+}
+.card-fluid:hover {
+  transform: translateY(-2px) translateZ(0);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Sidebar items smooth ── */
+.sidebar-item-fluid {
+  transform: translateZ(0);
+  transition:
+    background-color 120ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 120ms ease,
+    transform 100ms ease;
+  will-change: background-color;
+}
+.sidebar-item-fluid:hover {
+  transform: translateX(2px) translateZ(0);
+}
+.sidebar-item-fluid.active {
+  transform: translateX(3px) translateZ(0);
+}
+
+/* ── Slide animations ── */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-slideUp    { animation: slideUp    350ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slideDown  { animation: slideDown  300ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slideRight { animation: slideRight 350ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slideLeft  { animation: slideLeft  350ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-zoomIn     { animation: zoomIn     320ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-fadeIn     { animation: fadeIn     250ms ease both; }
+
+/* Stagger delays */
+.delay-50  { animation-delay: 50ms; }
+.delay-100 { animation-delay: 100ms; }
+.delay-150 { animation-delay: 150ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-250 { animation-delay: 250ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+
+/* ── Mobile sidebar slide ── */
+@keyframes mobileSidebarIn {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-mobileSidebar { animation: mobileSidebarIn 280ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-overlay       { animation: overlayIn 200ms ease both; }
+
+/* ── Toast / Notification pop ── */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-8px) scale(0.97); }
+}
+
+.animate-toastIn  { animation: toastIn  280ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-toastOut { animation: toastOut 200ms ease forwards; }
+
+/* ── Modal fluide ── */
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.animate-modalIn {
+  animation: modalIn 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+/* ── Skeleton shimmer amélioré ── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton-fluid {
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.04) 25%,
+    rgba(0,0,0,0.08) 50%,
+    rgba(0,0,0,0.04) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: var(--r-md);
+}
+.dark .skeleton-fluid {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 800px 100%;
+}
+
+/* ── Focus ring accessible ── */
+:focus-visible {
+  outline: 2px solid #F4B400;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Input focus smooth ── */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: #F4B400;
+  box-shadow: 0 0 0 3px rgba(244, 180, 0, 0.18);
+  transition: box-shadow 150ms ease, border-color 150ms ease;
+}
+
+/* ── Sidebar collapse transition optimisée ── */
+.sidebar-transition {
+  transition: width 350ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: width;
+  transform: translateZ(0);
+}
+
+/* ── Topbar blur optimisé ── */
+.topbar-blur {
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  transform: translateZ(0);
+}
+
+/* ── Scroll smooth for content areas ── */
+.scroll-smooth-area {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* ── Table row hover fluide ── */
+.tr-fluid {
+  transition: background-color 100ms ease;
+  will-change: background-color;
+}
+.tr-fluid:hover {
+  background-color: rgba(244, 180, 0, 0.03);
+}
+.dark .tr-fluid:hover {
+  background-color: rgba(244, 180, 0, 0.05);
+}
+
+/* ── Badge appear animation ── */
+@keyframes badgePop {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.badge-pop { animation: badgePop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+/* ── Number counter animation ── */
+@keyframes numberIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.number-in { animation: numberIn 400ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* ── Reduce motion — accessibilité ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .page-transition-running {
+    animation: none;
+  }
+}
+
+/* ── Prevent transition on initial load ── */
+.no-transition * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* ── GPU layer for fixed elements ── */
+.sidebar,
+.topbar,
+nav[class*="fixed"] {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* ── Image lazy load blur-in ── */
+@keyframes imageFadeIn {
+  from { opacity: 0; filter: blur(6px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+img.lazy-loaded {
+  animation: imageFadeIn 350ms ease both;
+}
+
+/* ── Sync button spin ── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin { animation: spin 700ms linear infinite; }
+
+/* ── Bottom nav transition ── */
+.bottom-nav-item {
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateZ(0);
+}
+.bottom-nav-item.active {
+  transform: translateY(-2px) translateZ(0);
+}
+
+/* ── Scrollbar thin premium ── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+.dark * {
+  scrollbar-color: rgba(71, 85, 105, 0.4) transparent;
+}

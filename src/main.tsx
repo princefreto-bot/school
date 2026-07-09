@@ -4,6 +4,14 @@ if (import.meta.env.PROD) {
   console.debug = () => {};
 }
 
+// Empêche les transitions de s'exécuter lors du chargement initial
+document.documentElement.classList.add('no-transition');
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    document.documentElement.classList.remove('no-transition');
+  });
+});
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";

@@ -573,7 +573,7 @@ export const Eleves: React.FC = () => {
                 </tr>
               ) : (
                 filtered.map((s) => (
-                  <tr key={s.id} className="group/row hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                  <tr key={s.id} className="tr-fluid group/row">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         <button

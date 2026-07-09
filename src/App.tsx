@@ -75,7 +75,10 @@ const CookieConsent = lazy(() => import('./components/CookieConsent').then(m => 
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center p-12">
-    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+    <div className="flex flex-col items-center gap-3">
+      <div className="spinner-ring" />
+      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider animate-pulse">Chargement...</span>
+    </div>
   </div>
 );
 
@@ -108,9 +111,11 @@ const PageContent: React.FC = () => {
   // SuperAdmin: uniquement ses pages
   if (user?.role === 'superadmin') {
     return (
-      <Suspense fallback={<LoadingSpinner />}>
-        <SuperAdminDashboard />
-      </Suspense>
+      <div key="superadmin" className="page-transition-running">
+        <Suspense fallback={<LoadingSpinner />}>
+          <SuperAdminDashboard />
+        </Suspense>
+      </div>
     );
   }
 
@@ -150,45 +155,53 @@ const PageContent: React.FC = () => {
     }
   }
 
-  switch (currentPage) {
-    case 'dashboard': return <Dashboard />;
-    case 'eleves': return <Eleves />;
-    case 'paiements': return <Paiements />;
-    case 'analyses': return <Analyses />;
-    case 'recouvrement': return <Recouvrement />;
-    case 'documents': return <Documents />;
-    case 'parametres': return <Parametres />;
-    case 'scan_presence': return <ScanPresence />;
-    case 'scan_sortie': return <ScanSortie />;
-    case 'scan_information': return <ScanInformation />;
-    case 'carte_scolaire': return <CarteScolaire />;
-    case 'carte_examen': return <CarteExamen />;
-    case 'gestion_academique': return <GestionAcademique />;
-    case 'gestion_annees_scolaires': return <GestionAnneesScolaires />;
-    case 'saisie_notes': return <SaisieNotes />;
-    case 'selection_enseignant': return <SelectionEnseignant />;
-    case 'bulletins': return <Bulletins />;
-    case 'verification_recu': return <VerificationRecu />;
-    case 'rapports_academiques': return <RapportsAcademiques />;
-    case 'historique_activites': return <HistoriqueActivites />;
-    case 'parent_dashboard': return <ParentDashboard />;
-    case 'parent_historique': return <ParentHistorique />;
-    case 'parent_recus': return <ParentRecus />;
-    case 'parent_badges': return <ParentBadges />;
-    case 'parent_messages': return <ParentMessages />;
-    case 'parent_notes': return <ParentNotes />;
-    case 'parent_courses': return <ParentCourses />;
-    case 'parent_parametres': return <ParentSettings />;
-    case 'parents_list': return <ParentsList />;
-    case 'import_export': return <ImportExport />;
-    case 'chat': return <ChatWindow />;
-    case 'annonces': return <Annonces />;
-    case 'superadmin_dashboard':
-    case 'superadmin_schools':
-    case 'superadmin_billing':
-      return <SuperAdminDashboard />;
-    default: return user?.role === 'parent' ? <ParentDashboard /> : <Dashboard />;
-  }
+  return (
+    <div key={currentPage} className="page-transition-running">
+      <Suspense fallback={<LoadingSpinner />}>
+        {(() => {
+          switch (currentPage) {
+            case 'dashboard': return <Dashboard />;
+            case 'eleves': return <Eleves />;
+            case 'paiements': return <Paiements />;
+            case 'analyses': return <Analyses />;
+            case 'recouvrement': return <Recouvrement />;
+            case 'documents': return <Documents />;
+            case 'parametres': return <Parametres />;
+            case 'scan_presence': return <ScanPresence />;
+            case 'scan_sortie': return <ScanSortie />;
+            case 'scan_information': return <ScanInformation />;
+            case 'carte_scolaire': return <CarteScolaire />;
+            case 'carte_examen': return <CarteExamen />;
+            case 'gestion_academique': return <GestionAcademique />;
+            case 'gestion_annees_scolaires': return <GestionAnneesScolaires />;
+            case 'saisie_notes': return <SaisieNotes />;
+            case 'selection_enseignant': return <SelectionEnseignant />;
+            case 'bulletins': return <Bulletins />;
+            case 'verification_recu': return <VerificationRecu />;
+            case 'rapports_academiques': return <RapportsAcademiques />;
+            case 'historique_activites': return <HistoriqueActivites />;
+            case 'parent_dashboard': return <ParentDashboard />;
+            case 'parent_historique': return <ParentHistorique />;
+            case 'parent_recus': return <ParentRecus />;
+            case 'parent_badges': return <ParentBadges />;
+            case 'parent_messages': return <ParentMessages />;
+            case 'parent_notes': return <ParentNotes />;
+            case 'parent_courses': return <ParentCourses />;
+            case 'parent_parametres': return <ParentSettings />;
+            case 'parents_list': return <ParentsList />;
+            case 'import_export': return <ImportExport />;
+            case 'chat': return <ChatWindow />;
+            case 'annonces': return <Annonces />;
+            case 'superadmin_dashboard':
+            case 'superadmin_schools':
+            case 'superadmin_billing':
+              return <SuperAdminDashboard />;
+            default: return user?.role === 'parent' ? <ParentDashboard /> : <Dashboard />;
+          }
+        })()}
+      </Suspense>
+    </div>
+  );
 };
 
 import { useGridToggle } from './hooks/useGridToggle';
