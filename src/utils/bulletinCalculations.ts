@@ -342,10 +342,16 @@ export const calculerBulletinsClasse = (
             effectif: b.effectifClasse
         });
 
-        // Calcul de la moyenne annuelle à partir des détails
+        // Calcul de la moyenne annuelle à partir des détails (divisé par 3 pour le T3, 2 pour le S2)
         if (b.periodesDetails && b.periodesDetails.length > 1) {
+            let dividend = b.periodesDetails.length;
+            if (b.periode === 'TRIMESTRE 3') {
+                dividend = 3;
+            } else if (b.periode === 'SEMESTRE 2') {
+                dividend = 2;
+            }
             const sum = b.periodesDetails.reduce((acc, curr) => acc + curr.moyenne, 0);
-            b.moyenneAnnuelle = parseFloat((sum / b.periodesDetails.length).toFixed(2));
+            b.moyenneAnnuelle = parseFloat((sum / dividend).toFixed(2));
             b.periodesIncluses = b.periodesDetails.map(d => d.periode);
         }
     });
