@@ -4,10 +4,11 @@ import { BulletinTogoPDF } from '../components/pdf/BulletinTogoPDF';
 import { calculerBulletinsClasse, BulletinEleveResultat } from '../utils/bulletinCalculations';
 import { useReactToPrint } from 'react-to-print';
 import { FileSpreadsheet, Printer, Users, Award, ShieldCheck } from 'lucide-react';
+import { PeriodeType } from '../types';
 
 export const Bulletins: React.FC = () => {
     const { 
-        currentPeriode, students, matieres, classeMatieres, notes,
+        currentPeriode, setCurrentPeriode, students, matieres, classeMatieres, notes,
         schoolName, schoolLogo, schoolStamp, schoolYear,
         schoolMotto, schoolBp, schoolTelephone, schoolAddress, schoolCurrency,
         countryName, countryMotto, ministereName,
@@ -20,6 +21,25 @@ export const Bulletins: React.FC = () => {
     const [simulerPeriodes, setSimulerPeriodes] = useState(false);
     const [editableSchoolYear, setEditableSchoolYear] = useState('');
     const [bulletinsCalcules, setBulletinsCalcules] = useState<BulletinEleveResultat[]>([]);
+
+    const selectedClassObj = students.find(s => s.classe === selectedClasse);
+    const selectedCycle = selectedClassObj?.cycle;
+    const availablePeriods = selectedCycle 
+        ? (selectedCycle === 'Lycée' 
+            ? ['SEMESTRE 1', 'SEMESTRE 2'] as PeriodeType[]
+            : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'] as PeriodeType[])
+        : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3', 'SEMESTRE 1', 'SEMESTRE 2'] as PeriodeType[];
+
+    React.useEffect(() => {
+        if (selectedClasse) {
+            const cycle = students.find(s => s.classe === selectedClasse)?.cycle || 'Collège';
+            const isLycee = cycle === 'Lycée';
+            const allowed = isLycee ? ['SEMESTRE 1', 'SEMESTRE 2'] : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'];
+            if (!allowed.includes(currentPeriode)) {
+                setCurrentPeriode(allowed[0] as PeriodeType);
+            }
+        }
+    }, [selectedClasse, students, currentPeriode, setCurrentPeriode]);
 
     React.useEffect(() => {
         if (schoolYear) {
@@ -87,6 +107,18 @@ export const Bulletins: React.FC = () => {
                     >
                         <option value="">Sélectionner une classe...</option>
                         {classesList.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                </div>
+
+                {/* Sélecteur de Période Académique */}
+                <div className="flex-1 min-w-[180px]">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Période Académique</label>
+                    <select
+                        value={currentPeriode}
+                        onChange={(e) => setCurrentPeriode(e.target.value as PeriodeType)}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 font-bold text-gray-800"
+                    >
+                        {availablePeriods.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                 </div>
 
@@ -171,7 +203,7 @@ export const Bulletins: React.FC = () => {
                 </div>
             )}
 
-            {/* DIV INVISIBLE CONTENANT TOUS LES BULLETINS POUR IMPRESSION */}
+            {/* DIV INVISIBLE CONTENANT TOUS BULLETINS POUR IMPRESSION */}
             <div className="hidden">
                 <div ref={printRef} className="print-container">
                     {bulletinsCalcules.map((b) => (

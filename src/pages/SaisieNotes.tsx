@@ -41,6 +41,25 @@ export const SaisieNotes: React.FC = () => {
     const [saisieMode, setSaisieMode] = useState<'matieres' | 'moyenne_generale'>('matieres');
     const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
+    const selectedClassObj = students.find(s => s.classe === selectedClasse);
+    const selectedCycle = selectedClassObj?.cycle;
+    const availablePeriods = selectedCycle 
+        ? (selectedCycle === 'Lycée' 
+            ? ['SEMESTRE 1', 'SEMESTRE 2'] as PeriodeType[]
+            : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'] as PeriodeType[])
+        : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3', 'SEMESTRE 1', 'SEMESTRE 2'] as PeriodeType[];
+
+    React.useEffect(() => {
+        if (selectedClasse) {
+            const cycle = students.find(s => s.classe === selectedClasse)?.cycle || 'Collège';
+            const isLycee = cycle === 'Lycée';
+            const allowed = isLycee ? ['SEMESTRE 1', 'SEMESTRE 2'] : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'];
+            if (!allowed.includes(currentPeriode)) {
+                setCurrentPeriode(allowed[0] as PeriodeType);
+            }
+        }
+    }, [selectedClasse, students, currentPeriode, setCurrentPeriode]);
+
     // Filter students for the selected class
     const classStudents = useMemo(() => {
         return students.filter(s => s.classe === selectedClasse).sort((a,b) => a.nom.localeCompare(b.nom));
@@ -277,7 +296,7 @@ export const SaisieNotes: React.FC = () => {
                         onChange={(e) => setCurrentPeriode(e.target.value as PeriodeType)}
                         className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 font-bold text-gray-800"
                     >
-                        {periods.map(p => <option key={p} value={p}>{p}</option>)}
+                        {availablePeriods.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                 </div>
                 <div className="flex-1 min-w-[200px]">
