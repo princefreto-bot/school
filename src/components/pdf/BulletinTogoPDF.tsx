@@ -236,6 +236,13 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                         </tr>
                     </thead>
                     <tbody>
+                        {data.categories.length === 0 && (
+                            <tr>
+                                <td colSpan={12} className="border-[1.5px] border-black p-4 text-center italic font-bold text-gray-500 text-[10px]">
+                                    Détails des matières non renseignés (Moyenne générale saisie directement)
+                                </td>
+                            </tr>
+                        )}
                         {data.categories.map((cat) => (
                             <React.Fragment key={cat.categorie}>
                                 <tr className="bg-gray-100 font-bold">
@@ -292,12 +299,12 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                     {/* COLONNE GAUCHE : Résultats et Statistiques */}
                     <div style={{ borderRight: '1.5px solid black', display: 'flex', flexDirection: 'column', flex: 1 }}>
 
-                        {/* 1. TABLEAU DES RÉSULTATS (HORIZONTAL 6 COLONNES - Demande USER) */}
+                        {/* 1. TABLEAU DES RÉSULTATS (HORIZONTAL 8 OU 6 COLONNES) */}
                         <div style={{ display: 'flex', flexDirection: 'column', borderBottom: '1.5px solid black' }}>
-                            {/* LIGNE 1 : EN-TÊTES (6 COLONNES) */}
+                            {/* LIGNE 1 : EN-TÊTES */}
                             <div style={{ 
                                 display: 'grid', 
-                                gridTemplateColumns: 'repeat(6, 1fr)', 
+                                gridTemplateColumns: data.periode.includes('TRIMESTRE') ? 'repeat(8, 1fr)' : 'repeat(6, 1fr)', 
                                 background: '#e5e5e5', 
                                 borderBottom: '1.5px solid black',
                                 textAlign: 'center',
@@ -314,6 +321,8 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                                                 <div style={{ padding: '2px', borderRight: '1px solid black' }}>TRIM.2</div>
                                                 <div style={{ padding: '2px', borderRight: '1px solid black' }}>RANG</div>
                                                 <div style={{ padding: '2px', borderRight: '1px solid black' }}>TRIM.3</div>
+                                                <div style={{ padding: '2px', borderRight: '1px solid black' }}>RANG</div>
+                                                <div style={{ padding: '2px', borderRight: '1px solid black' }}>MOY. ANN</div>
                                                 <div style={{ padding: '2px' }}>RANG</div>
                                             </>
                                         );
@@ -332,10 +341,10 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                                 })()}
                             </div>
 
-                            {/* LIGNE 2 : VALEURS (6 COLONNES) */}
+                            {/* LIGNE 2 : VALEURS */}
                             <div style={{ 
                                 display: 'grid', 
-                                gridTemplateColumns: 'repeat(6, 1fr)', 
+                                gridTemplateColumns: data.periode.includes('TRIMESTRE') ? 'repeat(8, 1fr)' : 'repeat(6, 1fr)', 
                                 textAlign: 'center',
                                 fontWeight: '900',
                                 fontSize: '10.5px'
@@ -361,7 +370,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                                         );
                                         nodes.push(
                                             <div key={`${pName}-rang`} style={{ 
-                                                padding: '4px 2px', borderRight: idx === 2 && isTrim ? 'none' : (idx === 1 && !isTrim ? '1px solid black' : '1px solid black'), 
+                                                padding: '4px 2px', borderRight: '1px solid black', 
                                                 color: '#1e40af', background: isCurrent ? '#eff6ff' : 'transparent' 
                                             }}>
                                                 {detail ? detail.rang : '-'}
@@ -369,19 +378,17 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                                         );
                                     });
 
-                                    // Si semestre, ajouter Moyenne Annuelle pour remplir les 6 colonnes
-                                    if (!isTrim) {
-                                        nodes.push(
-                                            <div key="moy-ann" style={{ padding: '4px 2px', borderRight: '1px solid black', color: '#4338ca', background: '#f5f3ff' }}>
-                                                {data.moyenneAnnuelle ? data.moyenneAnnuelle.toFixed(2) : '-'}
-                                            </div>
-                                        );
-                                        nodes.push(
-                                            <div key="rang-ann" style={{ padding: '4px 2px', color: '#4338ca', background: '#f5f3ff' }}>
-                                                {data.rangAnnuel || '-'}
-                                            </div>
-                                        );
-                                    }
+                                    // Ajouter Moyenne Annuelle et Rang Annuel
+                                    nodes.push(
+                                        <div key="moy-ann" style={{ padding: '4px 2px', borderRight: '1px solid black', color: '#4338ca', background: '#f5f3ff' }}>
+                                            {data.moyenneAnnuelle ? data.moyenneAnnuelle.toFixed(2) : '-'}
+                                        </div>
+                                    );
+                                    nodes.push(
+                                        <div key="rang-ann" style={{ padding: '4px 2px', color: '#4338ca', background: '#f5f3ff' }}>
+                                            {data.rangAnnuel || '-'}
+                                        </div>
+                                    );
 
                                     return nodes;
                                 })()}
@@ -398,6 +405,18 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                                 <span className="uppercase text-[11px] font-black text-black">Rang :</span>
                                 <span className="font-black text-[14px] text-blue-800 leading-none">{data.rangGeneral} <span className="text-[10px] font-normal text-gray-500">/ {data.effectifClasse}</span></span>
                             </div>
+                            {data.moyenneAnnuelle !== undefined && data.moyenneAnnuelle !== null && (
+                                <>
+                                    <div className="flex justify-between items-end border-b border-gray-200 pb-0.5">
+                                        <span className="uppercase text-[11px] font-black text-purple-900">Moyenne Annuelle :</span>
+                                        <span className="font-black text-[14px] text-purple-900 leading-none">{data.moyenneAnnuelle.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between items-end border-b border-gray-200 pb-0.5 mb-1">
+                                        <span className="uppercase text-[11px] font-black text-purple-950">Rang Annuel :</span>
+                                        <span className="font-black text-[14px] text-purple-950 leading-none">{data.rangAnnuel || '-'} <span className="text-[10px] font-normal text-gray-500">/ {data.effectifClasse}</span></span>
+                                    </div>
+                                </>
+                            )}
                             <div className="flex justify-between items-end border-b border-gray-200 pb-0.5">
                                 <span className="text-[10px] font-bold text-gray-800">Plus forte moyenne :</span>
                                 <span className="font-black text-[12.5px] text-emerald-700 leading-none">{data.moyenneMax.toFixed(2)}</span>

@@ -17,6 +17,7 @@ export const Bulletins: React.FC = () => {
 
     const classesList = Array.from(new Set(students.map(s => s.classe))).sort();
     const [selectedClasse, setSelectedClasse] = useState('');
+    const [simulerPeriodes, setSimulerPeriodes] = useState(false);
     const [bulletinsCalcules, setBulletinsCalcules] = useState<BulletinEleveResultat[]>([]);
 
     // Component ref for printing
@@ -44,7 +45,8 @@ export const Bulletins: React.FC = () => {
             matieres, 
             classeMatieres, 
             notes,
-            useStore.getState().presences
+            useStore.getState().presences,
+            simulerPeriodes
         );
         setBulletinsCalcules(resultats);
     };
@@ -80,6 +82,20 @@ export const Bulletins: React.FC = () => {
                         {classesList.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                 </div>
+
+                {/* Case à cocher Simulation */}
+                <div className="flex items-center pb-2.5">
+                    <label className="flex items-center gap-2 text-sm font-bold text-gray-700 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={simulerPeriodes}
+                            onChange={(e) => setSimulerPeriodes(e.target.checked)}
+                            className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500"
+                        />
+                        Simuler T3/S2 à partir de T1/S1 si vides
+                    </label>
+                </div>
+
                 <button
                     onClick={validerCalcul}
                     disabled={!selectedClasse}
