@@ -18,7 +18,14 @@ export const Bulletins: React.FC = () => {
     const classesList = Array.from(new Set(students.map(s => s.classe))).sort();
     const [selectedClasse, setSelectedClasse] = useState('');
     const [simulerPeriodes, setSimulerPeriodes] = useState(false);
+    const [editableSchoolYear, setEditableSchoolYear] = useState('');
     const [bulletinsCalcules, setBulletinsCalcules] = useState<BulletinEleveResultat[]>([]);
+
+    React.useEffect(() => {
+        if (schoolYear) {
+            setEditableSchoolYear(schoolYear);
+        }
+    }, [schoolYear]);
 
     // Component ref for printing
     const printRef = useRef<HTMLDivElement>(null);
@@ -71,7 +78,7 @@ export const Bulletins: React.FC = () => {
 
             {/* Outils de génération */}
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-wrap gap-4 items-end">
-                <div className="flex-1 min-w-[200px]">
+                <div className="flex-1 min-w-[180px]">
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Classe</label>
                     <select
                         value={selectedClasse}
@@ -81,6 +88,18 @@ export const Bulletins: React.FC = () => {
                         <option value="">Sélectionner une classe...</option>
                         {classesList.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
+                </div>
+
+                {/* Saisie personnalisée de l'année scolaire */}
+                <div className="flex-1 min-w-[150px]">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Année Scolaire</label>
+                    <input
+                        type="text"
+                        value={editableSchoolYear}
+                        onChange={(e) => setEditableSchoolYear(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 font-bold text-gray-800"
+                        placeholder="Ex: 2025-2026"
+                    />
                 </div>
 
                 {/* Case à cocher Simulation */}
@@ -166,7 +185,7 @@ export const Bulletins: React.FC = () => {
                                 directorSignature={directorSignature}
                                 showStampOnBulletins={showStampOnBulletins}
                                 showSignatureOnBulletins={showSignatureOnBulletins}
-                                schoolYear={schoolYear}
+                                schoolYear={editableSchoolYear}
                                 studentPhoto={b.eleve.photoUrl || null}
                                 schoolMotto={schoolMotto}
                                 schoolBp={schoolBp}
