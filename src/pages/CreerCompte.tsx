@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { GraduationCap, ArrowLeft, Mail, School, User, Phone, Lock } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { SchoolContract } from '../components/SchoolContract';
 
 const translations = {
   fr: {
@@ -106,6 +107,8 @@ export const CreerCompte: React.FC = () => {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
+  const [showContractModal, setShowContractModal] = useState(false);
+  const [contractAccepted, setContractAccepted] = useState(false);
 
   // Auto-générer le code d'établissement (slug) à partir du nom
   useEffect(() => {
@@ -132,6 +135,15 @@ export const CreerCompte: React.FC = () => {
       return;
     }
 
+    if (!contractAccepted) {
+      setShowContractModal(true);
+      return;
+    }
+
+    executeRegistration();
+  };
+
+  const executeRegistration = async () => {
     setLoading(true);
 
     try {
@@ -386,6 +398,17 @@ export const CreerCompte: React.FC = () => {
           </button>
         </form>
       </div>
+      <SchoolContract 
+        isOpen={showContractModal} 
+        onClose={() => setShowContractModal(false)}
+        onAccept={() => {
+            setShowContractModal(false);
+            setContractAccepted(true);
+            setTimeout(() => {
+                executeRegistration();
+            }, 0);
+        }}
+      />
     </div>
   );
 };

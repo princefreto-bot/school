@@ -131,6 +131,7 @@ app.use('/api/personnel', require('./routes/personnel'));
 app.use('/api/superadmin', require('./routes/superAdmin')); // 👑 Routes propriétaire SaaS
 app.use('/api/creator', require('./routes/creator'));
 app.use('/api/documents', require('./routes/document'));
+app.use('/api/withdrawals', require('./routes/withdrawal'));
 
 // Route publique pour lister les écoles dans le login
 app.get('/api/schools', async (req, res) => {

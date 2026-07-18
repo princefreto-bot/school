@@ -77,7 +77,7 @@ export const ParentDashboard: React.FC = () => {
     const parentGraceRemaining = useMemo(() => {
         if (!user?.created_at) return 0;
         const creationDate = new Date(user.created_at);
-        const expiryDate = new Date(creationDate.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 jours
+        const expiryDate = new Date(creationDate.getTime() + 60 * 24 * 60 * 60 * 1000); // 60 jours
         const diffTime = expiryDate.getTime() - new Date().getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         return diffDays;

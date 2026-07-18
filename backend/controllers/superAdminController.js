@@ -2,11 +2,12 @@
 // SUPERADMIN CONTROLLER — Tableau de bord SaaS global
 // Accessible UNIQUEMENT au propriétaire de la plateforme
 // ============================================================
-const { supabase } = require('../utils/supabase');
+const { supabase, supabaseAdmin } = require('../utils/supabase');
 const Joi = require('joi');
 const crypto = require('crypto');
 
 const PRICE_PER_STUDENT = 2000; // FCFA
+const WITHDRAWAL_PROOFS_BUCKET = 'withdrawal-proofs';
 
 // ── GET /api/superadmin/schools ─────────────────────────────────
 // Liste toutes les écoles inscrites avec leurs stats
@@ -143,10 +144,10 @@ async function createSchool(req, res) {
             address: validatedData.address || null,
             phone: validatedData.phone || null,
             email: validatedData.email || null,
-            status: 'trial',
+            status: 'active',
             is_email_verified: true,
             is_approved: true,
-            trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // +1 mois
+            trial_ends_at: new Date(Date.now() + 36500 * 24 * 60 * 60 * 1000).toISOString(), // +100 ans
             accepted_terms: validatedData.accepted_terms,
             accepted_privacy_policy: validatedData.accepted_privacy_policy,
             marketing_consent: validatedData.marketing_consent,
@@ -494,4 +495,137 @@ async function deleteExpense(req, res) {
     }
 }
 
-module.exports = { getAllSchools, createSchool, updateSchoolStatus, updateSchool, deleteSchool, getGlobalStats, impersonateSchool, approveSchool, getExpenses, addExpense, deleteExpense };
+// ── RETRAITS DES ÉCOLES (RISTOURNES) ────────────────────────────
+
+// GET /api/superadmin/withdrawals?status=pending
+async function getWithdrawals(req, res) {
+    const { status } = req.query;
+    try {
+        let query = supabase
+            .from('school_withdrawals')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (status) {
+            query = query.eq('status', status);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return res.json(data);
+    } catch (err) {
+        return res.status(500).json({ error: 'Erreur getWithdrawals: ' + err.message });
+    }
+}
+
+// PATCH /api/superadmin/withdrawals/:id/approve
+async function approveWithdrawal(req, res) {
+    const { id } = req.params;
+    const { adminProofImageUrl } = req.body;
+
+    try {
+        const { data: withdrawal, error } = await supabase
+            .from('school_withdrawals')
+            .update({
+                status: 'approved',
+                admin_proof_image_url: adminProofImageUrl || null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        console.log(`💰 Retrait ${id} (école "${withdrawal.school_slug}") approuvé par le SuperAdmin`);
+
+        return res.json({
+            message: `Retrait de ${withdrawal.amount} F approuvé avec succès.`,
+            withdrawal
+        });
+    } catch (err) {
+        console.error('SuperAdmin approveWithdrawal Error:', err.message);
+        return res.status(500).json({ error: 'Erreur approbation retrait: ' + err.message });
+    }
+}
+
+// PATCH /api/superadmin/withdrawals/:id/reject
+async function rejectWithdrawal(req, res) {
+    const { id } = req.params;
+
+    try {
+        const { data: withdrawal, error } = await supabase
+            .from('school_withdrawals')
+            .update({
+                status: 'rejected',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        console.log(`🚫 Retrait ${id} (école "${withdrawal.school_slug}") rejeté par le SuperAdmin`);
+
+        return res.json({
+            message: `Retrait de ${withdrawal.amount} F rejeté.`,
+            withdrawal
+        });
+    } catch (err) {
+        console.error('SuperAdmin rejectWithdrawal Error:', err.message);
+        return res.status(500).json({ error: 'Erreur rejet retrait: ' + err.message });
+    }
+}
+
+// POST /api/superadmin/withdrawals/upload-proof
+// Body JSON: { imageBase64: "data:image/jpeg;base64,..." }
+// Upload la preuve de dépôt du SuperAdmin (capture du virement effectué à l'école).
+async function uploadWithdrawalAdminProof(req, res) {
+    const { imageBase64 } = req.body;
+
+    if (!imageBase64 || typeof imageBase64 !== 'string') {
+        return res.status(400).json({ error: 'Image base64 manquante.' });
+    }
+
+    try {
+        const matches = imageBase64.match(/^data:image\/(\w+);base64,(.+)$/);
+        if (!matches) {
+            return res.status(400).json({ error: 'Format base64 invalide. Attendu: data:image/...;base64,...' });
+        }
+
+        const imageFormat = matches[1];
+        const base64Data = matches[2];
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+
+        if (imageBuffer.length > 3 * 1024 * 1024) {
+            return res.status(413).json({ error: 'Image trop grande. Maximum 3 MB.' });
+        }
+
+        const filePath = `admin/${Date.now()}.${imageFormat}`;
+        const contentType = `image/${imageFormat}`;
+        const client = supabaseAdmin || supabase;
+
+        const { error: uploadError } = await client.storage
+            .from(WITHDRAWAL_PROOFS_BUCKET)
+            .upload(filePath, imageBuffer, { contentType, upsert: true });
+
+        if (uploadError) {
+            console.error('❌ [Withdrawal Admin Proof] Storage upload error:', uploadError.message);
+            return res.status(500).json({ error: 'Erreur upload Storage: ' + uploadError.message });
+        }
+
+        const { data: urlData } = client.storage.from(WITHDRAWAL_PROOFS_BUCKET).getPublicUrl(filePath);
+
+        return res.json({ success: true, proofUrl: urlData.publicUrl });
+    } catch (err) {
+        console.error('💥 [Withdrawal Admin Proof] Unexpected error:', err.message);
+        return res.status(500).json({ error: 'Erreur interne: ' + err.message });
+    }
+}
+
+module.exports = {
+    getAllSchools, createSchool, updateSchoolStatus, updateSchool, deleteSchool, getGlobalStats,
+    impersonateSchool, approveSchool, getExpenses, addExpense, deleteExpense,
+    getWithdrawals, approveWithdrawal, rejectWithdrawal, uploadWithdrawalAdminProof
+};

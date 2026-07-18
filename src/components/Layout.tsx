@@ -10,7 +10,7 @@ import {
   Bell, ChevronRight, Target, Award, MessageSquare,
   ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone,
   BookOpen, Edit3, FileSpreadsheet, Sun, Moon, Calendar,
-  PanelLeftClose, PanelLeftOpen, RefreshCw, Shield
+  PanelLeftClose, PanelLeftOpen, RefreshCw, Shield, Wallet
 } from 'lucide-react';
 
 import { SupportModal } from './SupportModal';
@@ -24,6 +24,7 @@ const NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'eleves',               label: 'Élèves',            icon: <Users className="w-[18px] h-[18px]" /> },
   { id: 'parents_list',         label: 'Parents',           icon: <Users className="w-[18px] h-[18px]" /> },
   { id: 'paiements',            label: 'Paiements',         icon: <CreditCard className="w-[18px] h-[18px]" /> },
+  { id: 'retraits',             label: 'Retraits',          icon: <Wallet className="w-[18px] h-[18px]" /> },
   { id: 'recouvrement',         label: 'Recouvrement',      icon: <Target className="w-[18px] h-[18px]" /> },
   { id: 'scan_presence',        label: 'Scan Présence',     icon: <ScanLine className="w-[18px] h-[18px]" /> },
   { id: 'scan_sortie',          label: 'Scan Sortie',       icon: <ScanLine className="w-[18px] h-[18px]" /> },
@@ -66,6 +67,7 @@ const NAV_GROUPS: Record<string, string> = {
   eleves: 'Gestion',
   parents_list: 'Gestion',
   paiements: 'Finance',
+  retraits: 'Finance',
   recouvrement: 'Finance',
   scan_presence: 'Présences',
   scan_sortie: 'Présences',

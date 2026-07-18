@@ -295,9 +295,6 @@ async function login(req, res) {
         if (school.status === 'suspended') {
             return res.status(403).json({ error: "L'accès à cet établissement est suspendu." });
         }
-        if (school.status === 'trial' && new Date(school.trial_ends_at) < new Date()) {
-            return res.status(402).json({ error: 'trial_expired', message: "La période d'essai est terminée." });
-        }
 
         // ── 3. Chercher l'utilisateur dans la table de l'établissement (par téléphone OU email) ──
         const { data: user, error } = await supabase
@@ -470,7 +467,7 @@ async function registerSchoolRequest(req, res) {
             address: address || null,
             phone: phone || null,
             email: email.trim().toLowerCase(),
-            status: 'trial',
+            status: 'active',
             is_email_verified: false,
             email_verification_code: code,
             email_verification_expires: expiresAt,
@@ -594,11 +591,12 @@ async function verifySchoolEmail(req, res) {
         if (adminErr) throw adminErr;
 
         // 5. Activer l'école définitivement (email vérifié, is_approved = true)
-        const trialEndsAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(); // +90 jours d'essai gratuit
+        // Les écoles sont 100% gratuites, on met une date dans très longtemps
+        const trialEndsAt = new Date(Date.now() + 36500 * 24 * 60 * 60 * 1000).toISOString(); // +100 ans
         const { error: updateErr } = await supabase
             .from('schools')
             .update({
-                status: 'trial',
+                status: 'active',
                 trial_ends_at: trialEndsAt,
                 is_email_verified: true,
                 email_verification_code: null,

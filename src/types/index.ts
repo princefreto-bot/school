@@ -256,6 +256,7 @@ export type AppPage =
   | 'dashboard'
   | 'eleves'
   | 'paiements'
+  | 'retraits'
   | 'analyses'
   | 'documents'
   | 'parametres'

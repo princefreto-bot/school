@@ -32,9 +32,7 @@ export const Pricing: React.FC = () => {
       perYear: "par an / par école",
       perYearCustom: "Tarif personnalisé",
       contactUs: "Nous Contacter",
-      activateBtn: "Activer mon école",
-      complianceWarningTitle: "⚠️ Avertissement de conformité :",
-      complianceWarningDesc: "Le nombre d'élèves enregistrés est vérifié automatiquement. Si un établissement souscrit à une formule inférieure à son effectif réel d'inscriptions, tout son écosystème administratif et académique sera verrouillé jusqu'à la mise à niveau de la licence.",
+      activateBtn: "Créer mon école",
       parentPlanBadge: "Pour les Parents d'Élèves",
       parentPlanTitle: "Abonnement Suivi Élève",
       parentPlanPeriod: "par élève / par an",
@@ -55,9 +53,7 @@ export const Pricing: React.FC = () => {
       perYear: "per year / per school",
       perYearCustom: "Custom Pricing",
       contactUs: "Contact Us",
-      activateBtn: "Activate my school",
-      complianceWarningTitle: "⚠️ Compliance Warning:",
-      complianceWarningDesc: "The number of registered students is verified automatically. If a school subscribes to a plan below its actual enrollment, its entire administrative and academic system will be locked until the license is upgraded.",
+      activateBtn: "Créer mon école",
       parentPlanBadge: "For Parents",
       parentPlanTitle: "Student Tracking Subscription",
       parentPlanPeriod: "per student / per year",
@@ -73,182 +69,93 @@ export const Pricing: React.FC = () => {
 
   const schoolPlans = [
     {
-      name: lang === 'fr' ? "Licence Standard" : "Standard License",
-      limit: lang === 'fr' ? "Moins de 500 élèves" : "Under 500 students",
-      price: "50 000 F CFA",
-      period: t.perYear,
-      description: lang === 'fr' ? "Pour les petites écoles de moins de 500 élèves inscrits." : "For small schools with less than 500 registered students.",
+      name: lang === 'fr' ? "Licence Établissement" : "School License",
+      limit: lang === 'fr' ? "Nombre d'élèves illimité" : "Unlimited students",
+      price: lang === 'fr' ? "100% GRATUIT" : "100% FREE",
+      period: lang === 'fr' ? "À vie" : "Lifetime",
+      description: lang === 'fr' ? "Un accès total et gratuit à l'écosystème DGhubSchool pour tous les établissements, sans aucune restriction." : "Full and free access to the DGhubSchool ecosystem for all schools, with no restrictions.",
       features: lang === 'fr' ? [
-        "Accès complet à la console d'administration (tableau de bord en temps réel, indicateurs de performance, vue globale)",
-        "Espace enseignant pour la saisie des notes & moyennes pondérées par coefficient",
-        "Impression et édition des bulletins officiels DRE au format PDF prêts à imprimer",
-        "Système de pointage présence par scan QR Code (entrée/sortie en < 2s)",
-        "Génération de cartes d'identité scolaires avec photo passeport et QR Code crypté",
-        "Configuration des frais de scolarité personnalisés par classe et par tranche"
+        "Accès complet à la console d'administration et aux statistiques en temps réel",
+        "Espace enseignant (notes, moyennes pondérées, appels)",
+        "Génération des bulletins officiels DRE au format PDF",
+        "Système de pointage présence par scan QR Code",
+        "Gestion des classes, des inscriptions et de la scolarité",
+        "Capacité d'élèves illimitée dans le système",
+        "Hébergement Cloud dédié, sauvegardes et sécurité"
       ] : [
-        "Full access to the administration console (real-time dashboard, KPIs, global overview)",
-        "Teacher portal for grading & weighted averages by coefficient",
-        "Printing and editing of official DRE report cards in print-ready PDF format",
-        "QR Code attendance system (entry/exit scan in < 2s)",
-        "Student ID card generation with passport photo and encrypted QR Code",
-        "Custom school fees configuration by class and installment"
+        "Full access to the administration console and real-time statistics",
+        "Teacher portal (grades, weighted averages, attendance)",
+        "Official DRE report cards generation in PDF format",
+        "QR Code attendance tracking system",
+        "Management of classes, enrollments and school fees",
+        "Unlimited student capacity in the system",
+        "Dedicated Cloud hosting, backups and security"
       ],
-      buttonText: t.activateBtn,
-      popular: false,
-      ctaAction: () => window.location.href = "https://zwhhrrbi.mychariow.co/prd_g2q3747l/checkout",
-      borderColor: "border-slate-200 dark:border-slate-800"
-    },
-    {
-      name: lang === 'fr' ? "Licence Intermédiaire" : "Intermediate License",
-      limit: lang === 'fr' ? "Entre 500 et 1000 élèves" : "Between 500 and 1000 students",
-      price: "100 000 F CFA",
-      period: t.perYear,
-      description: lang === 'fr' ? "Pour les écoles de taille moyenne comptant entre 500 et 1000 élèves." : "For mid-size schools with 500 to 1000 students.",
-      features: lang === 'fr' ? [
-        "Toutes les fonctionnalités de la formule Standard incluses",
-        "Capacité d'inscription de 500 à 1 000 élèves avec gestion multi-classes",
-        "Support technique prioritaire WhatsApp & téléphone (délai de réponse < 2h)",
-        "Rapports financiers automatisés : bilans mensuels, journal de caisse, export Excel/CSV",
-        "Envoi de messages groupés SMS/Push aux parents (relances, annonces, convocations)"
-      ] : [
-        "All features of the Standard plan included",
-        "Enrollment capacity from 500 to 1,000 students with multi-class management",
-        "Priority technical support via WhatsApp & phone (response time < 2h)",
-        "Automated financial reports: monthly statements, cash journal, Excel/CSV export",
-        "Batch SMS/Push messages to parents (reminders, announcements, summons)"
-      ],
-      buttonText: t.activateBtn,
+      buttonText: lang === 'fr' ? "Créer mon compte gratuitement" : "Create my free account",
       popular: true,
-      ctaAction: () => window.location.href = "https://zwhhrrbi.mychariow.co/prd_j0i0tpq5/checkout",
-      borderColor: "border-amber-500 shadow-amber-500/10 shadow-lg"
-    },
-    {
-      name: lang === 'fr' ? "Licence Avancée" : "Advanced License",
-      limit: lang === 'fr' ? "Entre 1000 et 2000 élèves" : "Between 1000 and 2000 students",
-      price: "150 000 F CFA",
-      period: t.perYear,
-      description: lang === 'fr' ? "Pour les grands établissements scolaires comptant entre 1000 et 2000 élèves." : "For large school establishments with 1000 to 2000 students.",
-      features: lang === 'fr' ? [
-        "Toutes les fonctionnalités de la formule Intermédiaire incluses",
-        "Capacité d'inscription de 1 000 à 2 000 élèves avec classes illimitées",
-        "Support dédié 24h/24 & 7j/7 par WhatsApp, téléphone et email",
-        "Sauvegardes automatiques quotidiennes des données (historique 90 jours)",
-        "Accès à l'historique complet d'activités de l'administration (journal d'audit)"
-      ] : [
-        "All features of the Intermediate plan included",
-        "Enrollment capacity from 1,000 to 2,000 students with unlimited classes",
-        "24/7 dedicated support via WhatsApp, phone, and email",
-        "Daily automatic data backups (90-day history)",
-        "Access to the complete administration activity history (audit log)"
-      ],
-      buttonText: t.activateBtn,
-      popular: false,
-      ctaAction: () => window.location.href = "https://zwhhrrbi.mychariow.co/prd_8m8dqral/checkout",
-      borderColor: "border-slate-200 dark:border-slate-800"
-    },
-    {
-      name: lang === 'fr' ? "Licence Sur Mesure" : "Custom License",
-      limit: lang === 'fr' ? "Plus de 2000 élèves" : "Over 2000 students",
-      price: lang === 'fr' ? "Sur Devis" : "Custom Quote",
-      period: t.perYearCustom,
-      description: lang === 'fr' ? "Pour les très grands complexes de plus de 2000 élèves." : "For very large complexes and school networks with over 2000 students.",
-      features: lang === 'fr' ? [
-        "Toutes les fonctionnalités de la formule Avancée incluses",
-        "Capacité d'élèves illimitée dans le système (sans plafond)",
-        "Hébergement Cloud dédié, isolé et haute performance (SLA 99.9%)",
-        "Personnalisation graphique complète des bulletins (logo, couleurs, mise en page de l'établissement)",
-        "Formation sur site de vos équipes administratives + accompagnement de déploiement"
-      ] : [
-        "All features of the Advanced plan included",
-        "Unlimited student capacity in the system (no ceiling)",
-        "Dedicated, isolated high-performance Cloud hosting (SLA 99.9%)",
-        "Full graphical customization of report cards (logo, colors, school layout)",
-        "On-site training for your administrative team + deployment support"
-      ],
-      buttonText: t.contactUs,
-      popular: false,
-      ctaAction: () => window.location.href = `mailto:support@dghubschool.com?subject=Demande%20Tarif%20Sur%20Mesure%20(>2000%20eleves)&body=Langue:${lang}`,
-      borderColor: "border-slate-200 dark:border-slate-800"
+      ctaAction: () => navigate(`/${lang}/creer-compte-ecole`),
+      borderColor: "border-amber-500 shadow-amber-500/20 shadow-xl"
     }
   ];
 
   const parentPlan = {
     type: t.parentPlanBadge,
     name: t.parentPlanTitle,
-    price: "1 500 F CFA",
-    period: t.parentPlanPeriod,
-    description: t.parentPlanDesc,
+    price: "2 100 F CFA",
+    period: lang === 'fr' ? "par élève" : "per student",
+    description: lang === 'fr' 
+      ? "Contribution de 2 100 F payable en 3 tranches de 700 F/mois. 60 jours d'essai gratuit !" 
+      : "Contribution of 2,100 F payable in 3 installments of 700 F/month. 60 days free trial!",
     features: lang === 'fr' ? [
-      "Notification instantanée (Push & SMS) à chaque note saisie par un enseignant — avec la matière, la note et la moyenne actualisée",
-      "Alertes en temps réel de présence (Scan QR à l'arrivée / au départ) avec l'heure exacte et le nom de l'élève",
-      "Suivi transparent des versements de scolarité : montant versé, solde restant, historique des reçus PDF",
-      "Accès à la bibliothèque d'exercices scolaires, eBooks et quiz interactifs (Sésamath, Khan Academy, etc.)",
-      "Messagerie interne bidirectionnelle avec la vie scolaire : envoi de messages à l'administration et aux enseignants"
+      "60 jours d'essai gratuit sans engagement",
+      "Paiement flexible en 3 tranches de 700 F CFA",
+      "Notification instantanée (Push & SMS) à chaque note et présence",
+      "Suivi transparent des versements de scolarité",
+      "Accès complet au dossier scolaire et à la messagerie"
     ] : [
-      "Instant notification (Push & SMS) on every grade entered by a teacher — with subject, grade, and updated average",
-      "Real-time attendance alerts (QR Scan on arrival / departure) with exact time and student name",
-      "Transparent tracking of school fee payments: amount paid, remaining balance, PDF receipt history",
-      "Access to academic exercise library, eBooks and interactive quizzes (Sesamath, Khan Academy, etc.)",
-      "Bidirectional internal messaging with school life: send messages to administration and teachers"
+      "60-day free trial with no commitment",
+      "Flexible payment in 3 installments of 700 F CFA",
+      "Instant notification (Push & SMS) for each grade and attendance",
+      "Transparent tracking of school fee payments",
+      "Full access to academic record and messaging"
     ],
-    buttonText: t.parentPlanBtn,
-    ctaAction: () => window.location.href = "https://zwhhrrbi.mychariow.co/prd_u611otjw/checkout"
+    buttonText: lang === 'fr' ? "Démarrer l'essai (60j)" : "Start free trial",
+    ctaAction: () => navigate(`/${lang}/parents/login`)
   };
-
-  const packs = [
-    {
-      title: lang === 'fr' ? "Tarif Individuel" : "Individual Rate",
-      sub: lang === 'fr' ? "1 Élève" : "1 Student",
-      price: "1 500 F CFA",
-      desc: lang === 'fr' ? "par élève et par an" : "per student and per year"
-    },
-    {
-      title: lang === 'fr' ? "Pack Famille Réduit" : "Reduced Family Pack",
-      sub: lang === 'fr' ? "3 Élèves" : "3 Students",
-      price: "4 000 F CFA",
-      desc: lang === 'fr' ? "au lieu de 4 500 F CFA / an" : "instead of 4,500 F CFA / year"
-    },
-    {
-      title: lang === 'fr' ? "Pack Grande Famille" : "Large Family Pack",
-      sub: lang === 'fr' ? "5 Élèves" : "5 Students",
-      price: "7 000 F CFA",
-      desc: lang === 'fr' ? "au lieu de 7 500 F CFA / an" : "instead of 7,500 F CFA / year"
-    }
-  ];
 
   const faqs = lang === 'fr' ? [
     {
-      q: "Comment est facturé l'établissement ?",
-      a: "L'école souscrit à une formule annuelle selon son effectif réel d'élèves (Moins de 500, 500-1000, 1000-2000, ou Plus de 2000). Cette licence annuelle unique permet d'activer tous les portails de gestion administrative, académique et financière."
+      q: "Combien coûte DGhubSchool pour un établissement ?",
+      a: "C'est 100% GRATUIT ! La création de compte établissement et l'utilisation de la plateforme avec un nombre illimité d'élèves sont totalement gratuites."
     },
     {
-      q: "Que se passe-t-il si mon établissement dépasse sa limite d'élèves ?",
-      a: "Afin de garantir l'équité, si le nombre réel d'élèves inscrits dans votre école dépasse la limite autorisée par votre formule actuelle, l'accès à l'écosystème de l'établissement est temporairement suspendu. Vous devrez simplement mettre à niveau (upgrade) votre formule pour débloquer immédiatement l'accès."
+      q: "Comment fonctionne l'essai pour les parents ?",
+      a: "Les parents bénéficient de 60 jours d'essai gratuit dès la création de leur compte. Ils peuvent découvrir et utiliser la plateforme sans aucune restriction pendant cette période."
     },
     {
-      q: "Who pays the 1,500 F CFA contribution?",
-      a: "Cette contribution est payée annuellement par les parents d'élèves lors de leur première connexion. Elle donne accès au suivi en temps réel (SMS, push, notes, présences, exercices). Des packs famille dégressifs sont proposés automatiquement pour les fratries."
+      q: "Comment se déroule le paiement de la contribution parentale ?",
+      a: "La contribution est de 2 100 F CFA par élève. Elle est payable en 3 tranches souples de 700 F CFA par mois. Vous disposez d'un délai maximum de 3 mois pour solder la totalité."
     },
     {
-      q: "Y a-t-il des frais mensuels ou cachés ?",
-      a: "Non. DGhubSchool fonctionne exclusivement sur un modèle d'activation et de contribution annuelle. Aucun abonnement mensuel ni frais masqué n'est appliqué."
+      q: "Que se passe-t-il si la totalité n'est pas réglée à temps ?",
+      a: "Si les 2 100 F CFA ne sont pas soldés au bout du délai maximum (les 60 jours d'essai + le délai de grâce des tranches), l'accès au compte parent sera bloqué jusqu'au règlement de la somme."
     }
   ] : [
     {
-      q: "How is the school billed?",
-      a: "The school subscribes to an annual formula according to its actual enrollment of students (Under 500, 500-1000, 1000-2000, or Over 2000). This single annual license activates all administrative, academic, and financial management portals."
+      q: "How much does DGhubSchool cost for a school?",
+      a: "It's 100% FREE! School account creation and platform usage with unlimited students are completely free."
     },
     {
-      q: "What happens if my school exceeds its student limit?",
-      a: "To ensure fairness, if the actual number of registered students in your school exceeds the limit allowed by your current plan, access to the school ecosystem is temporarily suspended. You will simply need to upgrade your plan to unlock access immediately."
+      q: "How does the parent trial work?",
+      a: "Parents get a 60-day free trial upon account creation. They can discover and use the platform without any restriction during this period."
     },
     {
-      q: "Who pays the 1,500 F CFA parental contribution?",
-      a: "This contribution is paid annually by parents during their first login. It grants access to real-time tracking (SMS, push notifications, grades, attendance, exercises). Decreasing family packs are automatically offered for siblings."
+      q: "How is the parental contribution paid?",
+      a: "The contribution is 2,100 F CFA per student. It is payable in 3 flexible installments of 700 F CFA per month. You have a maximum of 3 months to settle the total amount."
     },
     {
-      q: "Are there any monthly or hidden fees?",
-      a: "No. DGhubSchool operates exclusively on an annual activation and contribution model. No monthly subscriptions or hidden fees are applied."
+      q: "What happens if the total is not paid on time?",
+      a: "If the 2,100 F CFA is not settled after the maximum timeframe, access to the parent account will be locked until the payment is completed."
     }
   ];
 
@@ -331,40 +238,40 @@ export const Pricing: React.FC = () => {
 
         {activeTab === 'school' ? (
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch justify-center">
+              {/* Only rendering one plan now for the free school offer */}
+              <div className="lg:col-start-2">
               {schoolPlans.map((plan, idx) => (
                 <div
                   key={idx}
-                  className={`bg-white dark:bg-slate-900 border p-6 rounded-3xl flex flex-col justify-between relative transition-all hover:shadow-xl ${plan.borderColor}`}
+                  className={`bg-white dark:bg-slate-900 border p-8 rounded-3xl flex flex-col justify-between relative transition-all hover:shadow-xl ${plan.borderColor}`}
                 >
-                  {plan.popular && (
-                    <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-amber-500 text-slate-950 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-md">
-                      {t.recommended}
-                    </div>
-                  )}
+                  <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-amber-500 text-slate-950 text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-md">
+                    100% GRATUIT
+                  </div>
                   <div>
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">
                       {plan.limit}
                     </span>
-                    <h3 className="text-lg font-black text-slate-950 dark:text-white uppercase tracking-wide mb-2">
+                    <h3 className="text-xl font-black text-slate-950 dark:text-white uppercase tracking-wide mb-2">
                       {plan.name}
                     </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed min-h-[48px]">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
                       {plan.description}
                     </p>
                     <div className="mb-6 border-b border-slate-100 dark:border-slate-800 pb-5">
-                      <span className="text-2xl md:text-3xl font-black text-slate-950 dark:text-white tracking-tight">
+                      <span className="text-4xl md:text-5xl font-black text-emerald-500 tracking-tight">
                         {plan.price}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-bold block mt-0.5 uppercase">
+                      <span className="text-xs text-slate-400 font-bold block mt-1 uppercase">
                         {plan.period}
                       </span>
                     </div>
 
-                    <ul className="space-y-3 mb-6">
+                    <ul className="space-y-4 mb-8">
                       {plan.features.map((feat, fidx) => (
-                        <li key={fidx} className="flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                          <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                        <li key={fidx} className="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                          <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
                           <span>{feat}</span>
                         </li>
                       ))}
@@ -373,24 +280,13 @@ export const Pricing: React.FC = () => {
 
                   <button
                     onClick={plan.ctaAction}
-                    className={`w-full py-3.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all active:scale-[0.98] cursor-pointer ${
-                      plan.popular
-                        ? "bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-md border border-amber-600"
-                        : "bg-slate-900 hover:bg-black dark:bg-slate-800 dark:hover:bg-slate-700 text-white border border-transparent"
-                    }`}
+                    className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black uppercase tracking-widest text-xs rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer"
                   >
                     {plan.buttonText}
                   </button>
                 </div>
               ))}
-            </div>
-
-            {/* Sub-warning for schools */}
-            <div className="mt-8 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200/40 dark:border-red-900/30 rounded-2xl max-w-4xl mx-auto flex items-center gap-3 text-red-800 dark:text-red-400 text-xs">
-              <Landmark className="w-5 h-5 shrink-0" />
-              <p className="font-semibold leading-relaxed">
-                ⚠️ <b>{t.complianceWarningTitle}</b> {t.complianceWarningDesc}
-              </p>
+              </div>
             </div>
           </div>
         ) : (
@@ -439,34 +335,7 @@ export const Pricing: React.FC = () => {
         )}
       </section>
 
-      {/* Fratrie / Packs Section */}
-      <section className="pricing-animate-in relative z-10 bg-slate-100 dark:bg-slate-900/50 border-y border-slate-200/50 dark:border-slate-800/80 py-16">
-        {/* Sticker */}
-        <StickerCheck className="absolute top-8 right-8 hidden md:block" style={{ opacity: 0.5 }} />
-        <StickerWave className="absolute bottom-6 left-[15%] hidden lg:block" />
-
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h3 className="text-xl md:text-3xl font-black text-slate-950 dark:text-white uppercase tracking-tight mb-2">
-              {t.degressiveTitle}
-            </h3>
-            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400">
-              {t.degressiveSubtitle}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {packs.map((pack, idx) => (
-              <div key={idx} className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 p-6 rounded-2xl text-center shadow-sm">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">{pack.title}</span>
-                <span className="text-sm font-black text-slate-900 dark:text-white block mb-3">{pack.sub}</span>
-                <span className="text-2xl font-black text-amber-500 tracking-tight block">{pack.price}</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block font-medium">{pack.desc}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Removed Packs Section */}
 
       {/* FAQ Section */}
       <section className="pricing-animate-in bg-white dark:bg-slate-950 py-16">

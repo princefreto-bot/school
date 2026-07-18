@@ -118,7 +118,7 @@ async function getPayments(req, res) {
             if (!parentCreatedAt) return false;
             const createdDate = new Date(parentCreatedAt);
             const daysSinceCreation = (new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
-            return daysSinceCreation <= 14;
+            return daysSinceCreation <= 60;
         })();
 
         // Sécurité : Licence requise (sauf pendant la période de grâce)
@@ -805,29 +805,20 @@ async function getLicensePricing(req, res) {
             count = students ? students.length : 0;
         }
 
-        let totalPrice = 0;
-        let originalPrice = count * 1500;
-        
-        if (count === 1) {
-            totalPrice = 1500;
-        } else if (count === 2) {
-            totalPrice = 3000;
-        } else if (count === 3) {
-            totalPrice = 4000;
-        } else if (count === 4) {
-            totalPrice = 5500;
-        } else if (count >= 5) {
-            totalPrice = 7000;
-        }
-
-        const discount = originalPrice - totalPrice;
+        let totalPrice = count * 2100;
+        let originalPrice = totalPrice;
+        const discount = 0;
 
         return res.json({
             count,
             totalPrice,
             originalPrice,
             discount,
-            pricePerChild: count > 0 ? Math.round(totalPrice / count) : 1500
+            pricePerChild: 2100,
+            trancheInfo: {
+                trancheCount: 3,
+                trancheAmount: 700
+            }
         });
     } catch (err) {
         return res.status(500).json({ error: err.message });

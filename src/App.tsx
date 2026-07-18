@@ -31,6 +31,7 @@ const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.N
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 const Eleves = lazy(() => import('./pages/Eleves').then(m => ({ default: m.Eleves })));
 const Paiements = lazy(() => import('./pages/Paiements').then(m => ({ default: m.Paiements })));
+const Retraits = lazy(() => import('./pages/Retraits').then(m => ({ default: m.Retraits })));
 const Analyses = lazy(() => import('./pages/Analyses').then(m => ({ default: m.Analyses })));
 const Documents = lazy(() => import('./pages/Documents').then(m => ({ default: m.Documents })));
 const Parametres = lazy(() => import('./pages/Parametres').then(m => ({ default: m.Parametres })));
@@ -163,6 +164,7 @@ const PageContent: React.FC = () => {
             case 'dashboard': return <Dashboard />;
             case 'eleves': return <Eleves />;
             case 'paiements': return <Paiements />;
+            case 'retraits': return <Retraits />;
             case 'analyses': return <Analyses />;
             case 'recouvrement': return <Recouvrement />;
             case 'documents': return <Documents />;

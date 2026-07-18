@@ -15,25 +15,25 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'creator_dashboard'
     ],
     directeur_general: [
-        'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
+        'dashboard', 'eleves', 'paiements', 'retraits', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire', 'carte_examen',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins', 'rapports_academiques'
     ],
     admin: [
-        'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
+        'dashboard', 'eleves', 'paiements', 'retraits', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire', 'carte_examen',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins', 'rapports_academiques'
     ],
     directeur: [
-        'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
+        'dashboard', 'eleves', 'paiements', 'retraits', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire', 'carte_examen',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins', 'rapports_academiques'
     ],
     comptable: [
-        'dashboard', 'eleves', 'paiements', 'analyses', 'documents',
+        'dashboard', 'eleves', 'paiements', 'retraits', 'analyses', 'documents',
         'recouvrement', 'verification_recu', 'import_export', 'chat', 'scan_information'
     ],
     superviseur: [

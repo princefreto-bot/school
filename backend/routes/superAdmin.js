@@ -14,7 +14,11 @@ const {
     approveSchool,
     getExpenses,
     addExpense,
-    deleteExpense
+    deleteExpense,
+    getWithdrawals,
+    approveWithdrawal,
+    rejectWithdrawal,
+    uploadWithdrawalAdminProof
 } = require('../controllers/superAdminController');
 
 const {
@@ -49,5 +53,11 @@ router.delete('/creators/:id/link/:schoolId', authenticateToken, requireSuperAdm
 router.get('/expenses', authenticateToken, requireSuperAdmin, getExpenses);
 router.post('/expenses', authenticateToken, requireSuperAdmin, addExpense);
 router.delete('/expenses/:id', authenticateToken, requireSuperAdmin, deleteExpense);
+
+// ── RÉSÉRVÉ SUPERADMIN : RETRAITS DES ÉCOLES (RISTOURNES) ──
+router.get('/withdrawals', authenticateToken, requireSuperAdmin, getWithdrawals);
+router.patch('/withdrawals/:id/approve', authenticateToken, requireSuperAdmin, approveWithdrawal);
+router.patch('/withdrawals/:id/reject', authenticateToken, requireSuperAdmin, rejectWithdrawal);
+router.post('/withdrawals/upload-proof', authenticateToken, requireSuperAdmin, uploadWithdrawalAdminProof);
 
 module.exports = router;
