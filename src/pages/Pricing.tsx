@@ -93,7 +93,7 @@ export const Pricing: React.FC = () => {
       ],
       buttonText: lang === 'fr' ? "Créer mon compte gratuitement" : "Create my free account",
       popular: true,
-      ctaAction: () => navigate(`/${lang}/creer-compte-ecole`),
+      ctaAction: () => navigate(`/${lang}/creer-compte`),
       borderColor: "border-amber-500 shadow-amber-500/20 shadow-xl"
     }
   ];
