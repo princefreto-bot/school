@@ -6,6 +6,7 @@ import {
   Upload, X, Image, Clock, Plus, Calendar, Trash2, Database, AlertCircle, Layers
 } from 'lucide-react';
 import { GestionPersonnel } from '../components/GestionPersonnel';
+import { SchoolBackups } from '../components/SchoolBackups';
 
 export const Parametres: React.FC = () => {
   const schoolName = useStore((s) => s.schoolName);
@@ -934,6 +935,11 @@ export const Parametres: React.FC = () => {
                         {scheduleSaved ? 'Enregistré' : 'Enregistrer'}
                     </button>
                 </div>
+            )}
+
+            {/* ── SAUVEGARDES ────────────────────────────── */}
+            {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
+                <SchoolBackups />
             )}
 
             {/* ── COMPTE UTILISATEUR ────────────────────────────── */}

@@ -132,6 +132,7 @@ app.use('/api/superadmin', require('./routes/superAdmin')); // 👑 Routes propr
 app.use('/api/creator', require('./routes/creator'));
 app.use('/api/documents', require('./routes/document'));
 app.use('/api/withdrawals', require('./routes/withdrawal'));
+app.use('/api/backups', require('./routes/backup'));
 
 // Route publique pour lister les écoles dans le login
 app.get('/api/schools', async (req, res) => {
@@ -605,6 +606,12 @@ const server = app.listen(PORT, () => {
     console.log(`💬 Routes actives: /api/auth, /api/parent, /api/students, /api/admissions, /api/sync, /api/chat, /api/notifications, /api/announcements`);
     console.log(`🏥 Health check: /api/health`);
     console.log(`${'='.repeat(60)}\n`);
+
+    // Sauvegardes automatiques quotidiennes — uniquement en production pour
+    // ne pas tourner à chaque redémarrage en dev.
+    if (process.env.NODE_ENV === 'production') {
+        require('./services/backupService').start();
+    }
 });
 
 // Gestion des erreurs de démarrage
