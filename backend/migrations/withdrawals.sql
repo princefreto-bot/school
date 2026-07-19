@@ -1,4 +1,6 @@
--- Migrations pour le système de retraits des écoles
+-- Migration pour le système de retraits des écoles
+-- Toute l'autorisation est déjà gérée par le backend (middleware Express +
+-- clé service_role) ; pas de RLS ici, cohérent avec le reste des tables du projet.
 CREATE TABLE IF NOT EXISTS public.school_withdrawals (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     school_slug TEXT NOT NULL,
@@ -11,27 +13,3 @@ CREATE TABLE IF NOT EXISTS public.school_withdrawals (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
-
--- Sécurité RLS
-ALTER TABLE public.school_withdrawals ENABLE ROW LEVEL SECURITY;
-
--- Les écoles peuvent voir leurs propres demandes
-CREATE POLICY "Schools can view their own withdrawals"
-    ON public.school_withdrawals FOR SELECT
-    USING (auth.uid() IN (
-        SELECT id FROM public.profiles WHERE role = 'school_admin' AND school_slug = school_withdrawals.school_slug
-    ));
-
--- Les écoles peuvent créer des demandes
-CREATE POLICY "Schools can insert their own withdrawals"
-    ON public.school_withdrawals FOR INSERT
-    WITH CHECK (auth.uid() IN (
-        SELECT id FROM public.profiles WHERE role = 'school_admin' AND school_slug = school_withdrawals.school_slug
-    ));
-
--- Les super admins peuvent tout faire
-CREATE POLICY "SuperAdmins can do everything on withdrawals"
-    ON public.school_withdrawals FOR ALL
-    USING (auth.uid() IN (
-        SELECT id FROM public.profiles WHERE role = 'superadmin'
-    ));

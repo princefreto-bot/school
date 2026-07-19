@@ -257,6 +257,7 @@ export type AppPage =
   | 'eleves'
   | 'paiements'
   | 'retraits'
+  | 'comptabilite'
   | 'analyses'
   | 'documents'
   | 'parametres'

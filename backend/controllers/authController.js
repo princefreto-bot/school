@@ -546,6 +546,12 @@ async function verifySchoolEmail(req, res) {
             console.error(`⚠️ Erreur d'activation RLS pour ${school.slug}:`, rlsErr.message);
         }
 
+        // Provisionner les tables de comptabilité (plan comptable, journal)
+        const { error: accountingRpcErr } = await supabase.rpc('create_accounting_tables', { school_slug: school.slug });
+        if (accountingRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement comptable pour ${school.slug}:`, accountingRpcErr.message);
+        }
+
         // Attente initiale de 2s pour le rechargement de schéma REST de Supabase
         await new Promise(r => setTimeout(r, 2000));
 

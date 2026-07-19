@@ -181,6 +181,12 @@ async function createSchool(req, res) {
             console.error(`⚠️ Erreur d'activation RLS pour ${cleanSlug}:`, rlsErr.message);
         }
 
+        // Provisionner les tables de comptabilité (plan comptable, journal)
+        const { error: accountingRpcErr } = await supabase.rpc('create_accounting_tables', { school_slug: cleanSlug });
+        if (accountingRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement comptable pour ${cleanSlug}:`, accountingRpcErr.message);
+        }
+
         // Attendre que la base recharge son schéma (1s par sécurité)
         await new Promise(r => setTimeout(r, 1000));
 

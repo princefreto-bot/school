@@ -1,5 +1,6 @@
 const { supabase } = require('../utils/supabase');
 const { sendPushNotification } = require('../utils/webPush');
+const { postPaymentsToLedger } = require('./accountingController');
 
 /**
  * POST /api/sync
@@ -204,6 +205,13 @@ async function syncFromFrontend(req, res) {
                 }
             });
             if (allPayments.length > 0) {
+                // Déterminer AVANT l'upsert quels paiements sont réellement nouveaux,
+                // pour ne comptabiliser en écriture que ceux-là (jamais deux fois).
+                const paymentIds = allPayments.map(p => p.id);
+                const { data: alreadyExisting } = await supabase.from(tbl('payments')).select('id').in('id', paymentIds);
+                const existingIdSet = new Set((alreadyExisting || []).map(p => p.id));
+                const newPayments = allPayments.filter(p => !existingIdSet.has(p.id));
+
                 for (let i = 0; i < allPayments.length; i += CHUNK_SIZE) {
                     const chunk = allPayments.slice(i, i + CHUNK_SIZE);
                     const { error: chunkErr } = await supabase.from(tbl('payments')).upsert(chunk, { onConflict: 'id' });
@@ -211,6 +219,12 @@ async function syncFromFrontend(req, res) {
                         console.error('❌ [Sync POST] Erreur payments:', chunkErr.message);
                         return res.status(500).json({ error: 'Erreur lors de la synchronisation des paiements: ' + chunkErr.message });
                     }
+                }
+
+                // Comptabilisation automatique (best-effort, ne bloque jamais la réponse de sync).
+                if (schoolSlug && newPayments.length > 0) {
+                    const studentsById = Object.fromEntries(students.map(s => [s.id, s]));
+                    postPaymentsToLedger(schoolSlug, newPayments, studentsById).catch(() => {});
                 }
             }
 
