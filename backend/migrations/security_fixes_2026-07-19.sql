@@ -41,3 +41,15 @@ REVOKE EXECUTE ON FUNCTION public.drop_school_tables(text) FROM PUBLIC;
 
 -- 4. search_path mutable sur create_school_tables (drop_school_tables l'avait déjà).
 ALTER FUNCTION public.create_school_tables(text) SET search_path = public;
+
+-- 5. testimonials avait une policy publique d'INSERT avec with_check à `true` sans
+--    aucune restriction — n'importe qui pouvait poser is_approved:true directement
+--    via l'API REST de Supabase et publier un faux témoignage en contournant
+--    entièrement la modération (POST /api/testimonials, server.js, force déjà
+--    is_approved:false et n'est jamais utilisé par le frontend en direct).
+--    admission_requests_insert_public : table non référencée nulle part dans le
+--    code (backend ni frontend), 0 ligne — exposition publique inutile retirée,
+--    table conservée intacte.
+DROP POLICY IF EXISTS "Allow public insert on testimonials" ON public.testimonials;
+DROP POLICY IF EXISTS "Allow public select on approved testimonials" ON public.testimonials;
+DROP POLICY IF EXISTS "admission_requests_insert_public" ON public.admission_requests;
