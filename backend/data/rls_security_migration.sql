@@ -2,6 +2,13 @@
 -- SQL MIGRATION: Row Level Security (RLS) Enforcements
 -- Execute this script in the Supabase SQL Editor
 -- ============================================================
+-- ⚠️ SUPERSEDED (2026-07-19) — jamais exécuté, et de toute façon basé sur
+-- auth.jwt()/auth.uid() de Supabase Auth, un système que cette app n'utilise
+-- pas (authentification maison via JWT + clé service_role, aucun client
+-- Supabase côté frontend). Ces policies ne matcheraient jamais rien.
+-- Le vrai correctif (RLS sans policy, backend-only) est dans
+-- backend/migrations/security_fixes_2026-07-19.sql, déjà appliqué en prod.
+-- Conservé ici pour l'historique uniquement — ne pas exécuter tel quel.
 
 -- 1. Enable RLS and define secure policies on global/system tables
 
