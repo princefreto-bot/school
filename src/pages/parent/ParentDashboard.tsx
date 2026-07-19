@@ -10,6 +10,7 @@ import {
 import { LinkStudentModal } from '../../components/LinkStudentModal';
 import { SupportModal } from '../../components/SupportModal';
 import { LicenseLockScreen } from '../../components/LicenseLockScreen';
+import { ParentTodaySchedule } from '../../components/ParentTodaySchedule';
 import { chatApi } from '../../services/chatApi';
 import { API_BASE_URL } from '../../config';
 import { getAuthHeaders } from '../../services/apiHelpers';
@@ -516,6 +517,8 @@ export const ParentDashboard: React.FC = () => {
                         </div>
                     </div>
                 </div>
+
+                <ParentTodaySchedule kids={children} />
 
                 {/* ── Tableau dossiers scolaires ── */}
                 <div className="bg-white dark:bg-slate-900 rounded-3xl sm:rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden mt-6 pb-20">

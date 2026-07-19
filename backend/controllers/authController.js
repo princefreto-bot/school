@@ -558,6 +558,12 @@ async function verifySchoolEmail(req, res) {
             console.error(`⚠️ Erreur de provisionnement paie pour ${school.slug}:`, payrollRpcErr.message);
         }
 
+        // Provisionner les tables d'emploi du temps
+        const { error: timetableRpcErr } = await supabase.rpc('create_timetable_tables', { school_slug: school.slug });
+        if (timetableRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement emploi du temps pour ${school.slug}:`, timetableRpcErr.message);
+        }
+
         // Attente initiale de 2s pour le rechargement de schéma REST de Supabase
         await new Promise(r => setTimeout(r, 2000));
 

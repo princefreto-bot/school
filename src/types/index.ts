@@ -259,6 +259,7 @@ export type AppPage =
   | 'retraits'
   | 'comptabilite'
   | 'paie'
+  | 'emploi_du_temps'
   | 'analyses'
   | 'documents'
   | 'parametres'
@@ -289,6 +290,7 @@ export type AppPage =
   | 'chat'
   | 'gestion_personnel'
   | 'selection_enseignant'
+  | 'mon_planning'
   // ── Pages SuperAdmin (propriétaire SaaS) ──
   | 'superadmin_dashboard'
   | 'superadmin_schools'

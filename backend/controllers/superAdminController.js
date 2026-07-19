@@ -193,6 +193,12 @@ async function createSchool(req, res) {
             console.error(`⚠️ Erreur de provisionnement paie pour ${cleanSlug}:`, payrollRpcErr.message);
         }
 
+        // Provisionner les tables d'emploi du temps
+        const { error: timetableRpcErr } = await supabase.rpc('create_timetable_tables', { school_slug: cleanSlug });
+        if (timetableRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement emploi du temps pour ${cleanSlug}:`, timetableRpcErr.message);
+        }
+
         // Attendre que la base recharge son schéma (1s par sécurité)
         await new Promise(r => setTimeout(r, 1000));
 
