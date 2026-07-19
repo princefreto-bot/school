@@ -12,6 +12,9 @@ const isCapacitor = Capacitor.isNativePlatform();
 // Sur le sous-domaine app.dghubschool.com, on saute la vitrine (LandingPage) et on va
 // directement au login/dashboard — même logique que pour l'app mobile Capacitor.
 const isAppSubdomain = typeof window !== 'undefined' && window.location.hostname.startsWith('app.');
+// En prod web (hors Capacitor, hors sous-domaine app.), login et app doivent vivre
+// exclusivement sur app.dghubschool.com — voir RedirectToAppDomain ci-dessous.
+const shouldRedirectToAppDomain = import.meta.env.PROD && !isCapacitor && !isAppSubdomain;
 
 
 
@@ -99,6 +102,16 @@ const RedirectToLogin: React.FC = () => {
 const RedirectToApp: React.FC = () => {
   const { lang = 'fr' } = useParams<{ lang?: string }>();
   return <Navigate to={`/${lang}/app`} replace />;
+};
+
+// Redirige (navigation externe, changement de domaine) vers le même chemin sur
+// app.dghubschool.com. Utilisé pour que login/app ne vivent que sur ce sous-domaine.
+const RedirectToAppDomain: React.FC = () => {
+  const location = useLocation();
+  React.useEffect(() => {
+    window.location.replace(`https://app.dghubschool.com${location.pathname}${location.search}`);
+  }, [location.pathname, location.search]);
+  return <LoadingSpinner />;
 };
 
 // Redirige vers un sous-chemin en préservant le préfixe de langue courant
@@ -627,21 +640,24 @@ export function App() {
         <Route path="/:lang/reset-password" element={<Suspense fallback={<LoadingSpinner />}><ResetPassword /></Suspense>} />
         <Route path="/:lang/activation-licence" element={<Suspense fallback={<LoadingSpinner />}><ActivationLicence /></Suspense>} />
         <Route path="/:lang/partager-mon-histoire" element={<Suspense fallback={<LoadingSpinner />}><SubmitStory /></Suspense>} />
-        <Route 
-          path="/:lang/login" 
+        <Route
+          path="/:lang/login"
           element={
+            shouldRedirectToAppDomain ? <RedirectToAppDomain /> :
             isAuthenticated ? <RedirectToApp /> : <Suspense fallback={<LoadingSpinner />}><Login /></Suspense>
-          } 
+          }
         />
-        <Route 
-          path="/:lang/login/:schoolSlug" 
+        <Route
+          path="/:lang/login/:schoolSlug"
           element={
+            shouldRedirectToAppDomain ? <RedirectToAppDomain /> :
             isAuthenticated ? <RedirectToApp /> : <Suspense fallback={<LoadingSpinner />}><Login /></Suspense>
-          } 
+          }
         />
-        <Route 
-          path="/:lang/app" 
+        <Route
+          path="/:lang/app"
           element={
+            shouldRedirectToAppDomain ? <RedirectToAppDomain /> :
             isAuthenticated ? (
               <Layout>
                 <Suspense fallback={<LoadingSpinner />}>
