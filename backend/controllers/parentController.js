@@ -22,6 +22,44 @@ async function resolveAcademicYearId(schoolSlug, req) {
 }
 
 /**
+ * Détermine si le compte parent est verrouillé : au moins un enfant lié n'a pas de
+ * licence active, et la période de grâce de 14 jours (depuis la création du compte
+ * parent) est dépassée. Un seul enfant impayé verrouille tout le compte, pas seulement
+ * les données de cet enfant — même règle que l'écran de verrouillage du frontend.
+ */
+async function getParentLockState(schoolSlug, parentId) {
+    const { data: parentProfile } = await supabase
+        .from(`profiles_${schoolSlug}`)
+        .select('created_at')
+        .eq('id', parentId)
+        .single();
+
+    const parentCreatedAt = parentProfile?.created_at;
+    const isWithinGracePeriod = (() => {
+        if (!parentCreatedAt) return false;
+        const daysSinceCreation = (new Date().getTime() - new Date(parentCreatedAt).getTime()) / (1000 * 60 * 60 * 24);
+        return daysSinceCreation <= 14;
+    })();
+
+    const { data: links } = await supabase
+        .from(`parent_student_${schoolSlug}`)
+        .select('student_id')
+        .eq('parent_id', parentId);
+    const studentIds = (links || []).map(l => l.student_id);
+
+    let hasUnlicensedChild = false;
+    if (studentIds.length > 0) {
+        const { data: linkedStudents } = await supabase
+            .from(`students_${schoolSlug}`)
+            .select('license_status')
+            .in('id', studentIds);
+        hasUnlicensedChild = (linkedStudents || []).some(s => (s.license_status || 'inactive') !== 'active');
+    }
+
+    return { locked: hasUnlicensedChild && !isWithinGracePeriod, isWithinGracePeriod };
+}
+
+/**
  * GET /api/parent/dashboard
  */
 async function getDashboard(req, res) {
@@ -106,23 +144,10 @@ async function getPayments(req, res) {
 
         if (sErr) throw sErr;
 
-        // Vérifier la période de grâce de 14 jours pour le parent
-        const { data: parentProfile } = await supabase
-            .from(`profiles_${schoolSlug}`)
-            .select('created_at')
-            .eq('id', parentId)
-            .single();
-
-        const parentCreatedAt = parentProfile?.created_at;
-        const isWithinGracePeriod = (() => {
-            if (!parentCreatedAt) return false;
-            const createdDate = new Date(parentCreatedAt);
-            const daysSinceCreation = (new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
-            return daysSinceCreation <= 14;
-        })();
-
-        // Sécurité : Licence requise (sauf pendant la période de grâce)
-        if ((student.license_status || 'inactive') !== 'active' && !isWithinGracePeriod) {
+        // Sécurité : compte verrouillé si un enfant lié (celui-ci ou un autre) n'a pas
+        // soldé sa licence au-delà de la période de grâce.
+        const { locked } = await getParentLockState(schoolSlug, parentId);
+        if (locked) {
             return res.status(402).json({ error: 'license_required', message: 'Licence active requise.' });
         }
 
@@ -149,6 +174,11 @@ async function getBadges(req, res) {
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
+        const { locked } = await getParentLockState(schoolSlug, parentId);
+        if (locked) {
+            return res.status(402).json({ error: 'license_required', message: 'Licence active requise.' });
+        }
+
         const academicYearId = await resolveAcademicYearId(schoolSlug, req);
 
         const { data: badges, error } = await supabase
@@ -341,22 +371,10 @@ async function getPresences(req, res) {
 
         if (sErr) throw sErr;
 
-        // Vérifier la période de grâce de 14 jours pour le parent
-        const { data: parentProfile } = await supabase
-            .from(`profiles_${schoolSlug}`)
-            .select('created_at')
-            .eq('id', parentId)
-            .single();
-
-        const parentCreatedAt = parentProfile?.created_at;
-        const isWithinGracePeriod = (() => {
-            if (!parentCreatedAt) return false;
-            const createdDate = new Date(parentCreatedAt);
-            const daysSinceCreation = (new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
-            return daysSinceCreation <= 14;
-        })();
-
-        if ((student.license_status || 'inactive') !== 'active' && !isWithinGracePeriod) {
+        // Sécurité : compte verrouillé si un enfant lié (celui-ci ou un autre) n'a pas
+        // soldé sa licence au-delà de la période de grâce.
+        const { locked } = await getParentLockState(schoolSlug, parentId);
+        if (locked) {
             return res.status(402).json({ error: 'license_required', message: 'Licence active requise.' });
         }
 
@@ -396,19 +414,7 @@ async function getParentData(req, res) {
         
         const studentIds = (links || []).map(l => l.student_id);
 
-        const { data: parentProfile } = await supabase
-            .from(`profiles_${schoolSlug}`)
-            .select('created_at')
-            .eq('id', parentId)
-            .single();
-
-        const parentCreatedAt = parentProfile?.created_at;
-        const isWithinGracePeriod = (() => {
-            if (!parentCreatedAt) return false;
-            const createdDate = new Date(parentCreatedAt);
-            const daysSinceCreation = (new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
-            return daysSinceCreation <= 14;
-        })();
+        const { locked } = await getParentLockState(schoolSlug, parentId);
 
         // 1. Annonces de l'école
         const { data: announcements } = await supabase
@@ -481,9 +487,9 @@ async function getParentData(req, res) {
                 historiquesPaiements: []
             }));
 
-            activeStudentIds = (dbStudents || [])
-                .filter(s => (s.license_status || 'inactive') === 'active' || isWithinGracePeriod)
-                .map(s => s.id);
+            // Compte verrouillé = aucune donnée académique (notes, badges) pour aucun enfant,
+            // même ceux dont la licence individuelle est active — même règle que le frontend.
+            activeStudentIds = locked ? [] : (dbStudents || []).map(s => s.id);
         }
 
         // 6. Données Académiques (pour le relevé de notes)

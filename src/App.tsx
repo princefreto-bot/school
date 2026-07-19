@@ -124,6 +124,7 @@ const RedirectWithLang: React.FC<{ to: string }> = ({ to }) => {
 const PageContent: React.FC = () => {
   const currentPage = useStore((s) => s.currentPage);
   const user = useStore((s) => s.user);
+  const students = useStore((s) => s.students);
 
   // SuperAdmin: uniquement ses pages
   if (user?.role === 'superadmin') {
@@ -149,6 +150,17 @@ const PageContent: React.FC = () => {
   if (user?.role === 'parent') {
     const parentPages = ['parent_dashboard', 'parent_historique', 'parent_recus', 'parent_badges', 'chat', 'annonces', 'parent_notes', 'parent_courses', 'parent_parametres'];
     if (!parentPages.includes(currentPage as any)) {
+      return <ParentDashboard />;
+    }
+
+    // Verrou de licence : si au moins un enfant lié n'a pas de licence active et que la
+    // période de grâce de 14 jours est dépassée, on bloque TOUTE l'interface parent (pas
+    // seulement le tableau de bord) — ParentDashboard affiche alors lui-même l'écran de
+    // verrouillage non-fermable par-dessus son propre contenu flouté.
+    const graceExpiryMs = user.created_at ? new Date(user.created_at).getTime() + 14 * 24 * 60 * 60 * 1000 : 0;
+    const isWithinGracePeriod = Date.now() < graceExpiryMs;
+    const hasUnlicensedChild = students.some((s) => (s.licenseStatus || 'inactive') !== 'active');
+    if (hasUnlicensedChild && !isWithinGracePeriod && currentPage !== 'parent_dashboard') {
       return <ParentDashboard />;
     }
   }
