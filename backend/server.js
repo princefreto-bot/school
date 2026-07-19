@@ -562,7 +562,11 @@ if (fs.existsSync(frontendDir)) {
                         `<p id="seo-description">${meta.p}</p>`
                     );
                 }
-                
+
+                // Empêche le navigateur/CDN de mettre en cache la coquille HTML : elle doit
+                // toujours référencer les derniers bundles JS/CSS hachés par Vite. Les assets
+                // eux-mêmes (servis par express.static plus haut) restent cachables sans risque.
+                res.setHeader('Cache-Control', 'no-store');
                 res.send(modifiedHtml);
             };
 
