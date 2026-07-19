@@ -9,6 +9,9 @@ import { Routes, Route, Navigate, useNavigate, useLocation, useParams } from 're
 import { Capacitor } from '@capacitor/core';
 
 const isCapacitor = Capacitor.isNativePlatform();
+// Sur le sous-domaine app.dghubschool.com, on saute la vitrine (LandingPage) et on va
+// directement au login/dashboard — même logique que pour l'app mobile Capacitor.
+const isAppSubdomain = typeof window !== 'undefined' && window.location.hostname.startsWith('app.');
 
 
 
@@ -651,10 +654,10 @@ export function App() {
             )
           } 
         />
-        <Route 
-          path="/:lang" 
+        <Route
+          path="/:lang"
           element={
-            isCapacitor ? (
+            (isCapacitor || isAppSubdomain) ? (
               isAuthenticated ? (
                 <Layout>
                   <Suspense fallback={<LoadingSpinner />}>
@@ -668,7 +671,7 @@ export function App() {
             ) : (
               <Suspense fallback={<LoadingSpinner />}><LandingPage /></Suspense>
             )
-          } 
+          }
         />
 
         {/* Non-prefixed fallback routes to prevent blank screen collisions */}

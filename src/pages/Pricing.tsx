@@ -104,22 +104,22 @@ export const Pricing: React.FC = () => {
     price: "2 100 F CFA",
     period: lang === 'fr' ? "par élève" : "per student",
     description: lang === 'fr' 
-      ? "Contribution de 2 100 F payable en 3 tranches de 700 F/mois. 60 jours d'essai gratuit !" 
-      : "Contribution of 2,100 F payable in 3 installments of 700 F/month. 60 days free trial!",
+      ? "Contribution de 2 100 F payable en 3 tranches de 700 F/mois. 14 jours d'essai gratuit !"
+      : "Contribution of 2,100 F payable in 3 installments of 700 F/month. 14 days free trial!",
     features: lang === 'fr' ? [
-      "60 jours d'essai gratuit sans engagement",
+      "14 jours d'essai gratuit sans engagement",
       "Paiement flexible en 3 tranches de 700 F CFA",
       "Notification instantanée (Push & SMS) à chaque note et présence",
       "Suivi transparent des versements de scolarité",
       "Accès complet au dossier scolaire et à la messagerie"
     ] : [
-      "60-day free trial with no commitment",
+      "14-day free trial with no commitment",
       "Flexible payment in 3 installments of 700 F CFA",
       "Instant notification (Push & SMS) for each grade and attendance",
       "Transparent tracking of school fee payments",
       "Full access to academic record and messaging"
     ],
-    buttonText: lang === 'fr' ? "Démarrer l'essai (60j)" : "Start free trial",
+    buttonText: lang === 'fr' ? "Démarrer l'essai (14j)" : "Start free trial",
     ctaAction: () => navigate(`/${lang}/parents/login`)
   };
 
@@ -130,7 +130,7 @@ export const Pricing: React.FC = () => {
     },
     {
       q: "Comment fonctionne l'essai pour les parents ?",
-      a: "Les parents bénéficient de 60 jours d'essai gratuit dès la création de leur compte. Ils peuvent découvrir et utiliser la plateforme sans aucune restriction pendant cette période."
+      a: "Les parents bénéficient de 14 jours d'essai gratuit dès la création de leur compte. Ils peuvent découvrir et utiliser la plateforme sans aucune restriction pendant cette période."
     },
     {
       q: "Comment se déroule le paiement de la contribution parentale ?",
@@ -138,7 +138,7 @@ export const Pricing: React.FC = () => {
     },
     {
       q: "Que se passe-t-il si la totalité n'est pas réglée à temps ?",
-      a: "Si les 2 100 F CFA ne sont pas soldés au bout du délai maximum (les 60 jours d'essai + le délai de grâce des tranches), l'accès au compte parent sera bloqué jusqu'au règlement de la somme."
+      a: "Si les 2 100 F CFA ne sont pas soldés au bout du délai maximum (les 14 jours d'essai + le délai de grâce des tranches), l'accès au compte parent sera bloqué jusqu'au règlement de la somme."
     }
   ] : [
     {
@@ -147,7 +147,7 @@ export const Pricing: React.FC = () => {
     },
     {
       q: "How does the parent trial work?",
-      a: "Parents get a 60-day free trial upon account creation. They can discover and use the platform without any restriction during this period."
+      a: "Parents get a 14-day free trial upon account creation. They can discover and use the platform without any restriction during this period."
     },
     {
       q: "How is the parental contribution paid?",

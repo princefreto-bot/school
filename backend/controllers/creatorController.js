@@ -5,7 +5,7 @@ const { supabase } = require('../utils/supabase');
 const bcrypt = require('bcryptjs');
 const Joi = require('joi');
 
-const PRICE_PER_STUDENT = 2000; // FCFA (Prix de la licence)
+const PRICE_PER_STUDENT = 2100; // FCFA (Prix de la licence)
 
 // ── GET /api/creator/dashboard ─────────────────────────────────
 // Statistiques pour le créateur connecté

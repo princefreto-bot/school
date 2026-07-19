@@ -91,7 +91,7 @@ export const SchoolContract: React.FC<SchoolContractProps> = ({ isOpen, onClose,
                         <p>
                             En contrepartie de la gratuité du système pour l'établissement, le modèle économique de l'entité DGHUBSCHOOL repose exclusivement sur les contributions des parents d'élèves.
                             <br/><br/>
-                            - Les parents bénéficient d'une période d'essai gratuit de <strong>60 jours</strong> à compter de leur inscription.
+                            - Les parents bénéficient d'une période d'essai gratuit de <strong>14 jours</strong> à compter de leur inscription.
                             <br/>
                             - Au-delà de cette période, l'accès complet au compte parent est conditionné au paiement d'un forfait de <strong>2100 FCFA</strong> par élève et par an.
                             <br/>

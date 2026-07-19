@@ -6,7 +6,7 @@ const { supabase, supabaseAdmin } = require('../utils/supabase');
 const Joi = require('joi');
 const crypto = require('crypto');
 
-const PRICE_PER_STUDENT = 2000; // FCFA
+const PRICE_PER_STUDENT = 2100; // FCFA
 const WITHDRAWAL_PROOFS_BUCKET = 'withdrawal-proofs';
 
 // ── GET /api/superadmin/schools ─────────────────────────────────
@@ -24,14 +24,21 @@ async function getAllSchools(req, res) {
         const schoolsWithStats = await Promise.all(
             schools.map(async (school) => {
                 let studentCount = 0;
+                let activeStudentCount = 0;
                 let userCount = 0;
-                
+
                 try {
                     const { count: sCount } = await supabase
                         .from(`students_${school.slug}`)
                         .select('*', { count: 'exact', head: true });
                     studentCount = sCount || 0;
-                    
+
+                    const { count: actCount } = await supabase
+                        .from(`students_${school.slug}`)
+                        .select('*', { count: 'exact', head: true })
+                        .eq('license_status', 'active');
+                    activeStudentCount = actCount || 0;
+
                     const { count: uCount } = await supabase
                         .from(`profiles_${school.slug}`)
                         .select('*', { count: 'exact', head: true });
@@ -43,8 +50,9 @@ async function getAllSchools(req, res) {
                 return {
                     ...school,
                     student_count: studentCount || 0,
+                    active_student_count: activeStudentCount || 0,
                     user_count: userCount || 0,
-                    revenue: (studentCount || 0) * PRICE_PER_STUDENT,
+                    revenue: activeStudentCount * PRICE_PER_STUDENT,
                     trial_days_left: school.status === 'trial'
                         ? Math.max(0, Math.ceil((new Date(school.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24)))
                         : 0
@@ -291,6 +299,7 @@ async function getGlobalStats(req, res) {
             .from('schools').select('slug, status, trial_ends_at').eq('is_email_verified', true);
 
         let totalStudents = 0;
+        let totalActiveStudents = 0;
         let totalUsers = 0;
         let totalParents = 0;
 
@@ -298,9 +307,11 @@ async function getGlobalStats(req, res) {
             for (let s of schools) {
                 try {
                     const { count: sCount } = await supabase.from(`students_${s.slug}`).select('*', { count: 'exact', head: true });
+                    const { count: actCount } = await supabase.from(`students_${s.slug}`).select('*', { count: 'exact', head: true }).eq('license_status', 'active');
                     const { count: uCount } = await supabase.from(`profiles_${s.slug}`).select('*', { count: 'exact', head: true });
                     const { count: pCount } = await supabase.from(`profiles_${s.slug}`).select('*', { count: 'exact', head: true }).eq('role', 'parent');
                     totalStudents += (sCount || 0);
+                    totalActiveStudents += (actCount || 0);
                     totalUsers += (uCount || 0);
                     totalParents += (pCount || 0);
                 } catch(e) {}
@@ -323,9 +334,10 @@ async function getGlobalStats(req, res) {
             suspended_schools: suspendedCount,
             expired_trials: expiredTrials,
             total_students: totalStudents || 0,
+            total_active_students: totalActiveStudents || 0,
             total_users: totalUsers || 0,
             total_parents: totalParents || 0,
-            total_revenue: (totalStudents || 0) * PRICE_PER_STUDENT,
+            total_revenue: totalActiveStudents * PRICE_PER_STUDENT,
             price_per_student: PRICE_PER_STUDENT,
             currency: 'FCFA'
         });

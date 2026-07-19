@@ -118,7 +118,7 @@ async function getPayments(req, res) {
             if (!parentCreatedAt) return false;
             const createdDate = new Date(parentCreatedAt);
             const daysSinceCreation = (new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
-            return daysSinceCreation <= 60;
+            return daysSinceCreation <= 14;
         })();
 
         // Sécurité : Licence requise (sauf pendant la période de grâce)
