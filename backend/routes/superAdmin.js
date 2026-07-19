@@ -21,6 +21,8 @@ const {
     uploadWithdrawalAdminProof
 } = require('../controllers/superAdminController');
 
+const { getConfig: getPayrollConfig, updateConfig: updatePayrollConfig } = require('../controllers/payrollController');
+
 const {
     getAllCreators,
     createCreator,
@@ -59,5 +61,9 @@ router.get('/withdrawals', authenticateToken, requireSuperAdmin, getWithdrawals)
 router.patch('/withdrawals/:id/approve', authenticateToken, requireSuperAdmin, approveWithdrawal);
 router.patch('/withdrawals/:id/reject', authenticateToken, requireSuperAdmin, rejectWithdrawal);
 router.post('/withdrawals/upload-proof', authenticateToken, requireSuperAdmin, uploadWithdrawalAdminProof);
+
+// ── RÉSÉRVÉ SUPERADMIN : CONFIGURATION LÉGALE DE LA PAIE (taux nationaux) ──
+router.get('/payroll-config', authenticateToken, requireSuperAdmin, getPayrollConfig);
+router.patch('/payroll-config', authenticateToken, requireSuperAdmin, updatePayrollConfig);
 
 module.exports = router;

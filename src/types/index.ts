@@ -258,6 +258,7 @@ export type AppPage =
   | 'paiements'
   | 'retraits'
   | 'comptabilite'
+  | 'paie'
   | 'analyses'
   | 'documents'
   | 'parametres'

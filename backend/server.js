@@ -134,6 +134,7 @@ app.use('/api/documents', require('./routes/document'));
 app.use('/api/withdrawals', require('./routes/withdrawal'));
 app.use('/api/backups', require('./routes/backup'));
 app.use('/api/accounting', require('./routes/accounting'));
+app.use('/api/payroll', require('./routes/payroll'));
 
 // Route publique pour lister les écoles dans le login
 app.get('/api/schools', async (req, res) => {

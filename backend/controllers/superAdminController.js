@@ -187,6 +187,12 @@ async function createSchool(req, res) {
             console.error(`⚠️ Erreur de provisionnement comptable pour ${cleanSlug}:`, accountingRpcErr.message);
         }
 
+        // Provisionner les tables de paie du personnel
+        const { error: payrollRpcErr } = await supabase.rpc('create_payroll_tables', { school_slug: cleanSlug });
+        if (payrollRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement paie pour ${cleanSlug}:`, payrollRpcErr.message);
+        }
+
         // Attendre que la base recharge son schéma (1s par sécurité)
         await new Promise(r => setTimeout(r, 1000));
 

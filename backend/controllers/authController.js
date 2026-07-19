@@ -552,6 +552,12 @@ async function verifySchoolEmail(req, res) {
             console.error(`⚠️ Erreur de provisionnement comptable pour ${school.slug}:`, accountingRpcErr.message);
         }
 
+        // Provisionner les tables de paie du personnel
+        const { error: payrollRpcErr } = await supabase.rpc('create_payroll_tables', { school_slug: school.slug });
+        if (payrollRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement paie pour ${school.slug}:`, payrollRpcErr.message);
+        }
+
         // Attente initiale de 2s pour le rechargement de schéma REST de Supabase
         await new Promise(r => setTimeout(r, 2000));
 
