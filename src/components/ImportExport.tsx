@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useStore } from '../store/useStore';
+import { syncToBackend } from '../services/backendSync';
 import { importExcel, exportToExcel, exportNonSoldesToExcel, exportClassToExcel } from '../utils/excelService';
 import { CLASSES_BY_CYCLE as CLASSES } from '../data/classConfig';
 import { 
@@ -63,7 +64,6 @@ export const ImportExport = () => {
         const setIsSyncing = useStore.getState().setIsSyncing;
         setIsSyncing(true);
         setMessage({ type: 'success', text: `Mise à jour du serveur (${replace ? 'Mode Remplacement' : 'Mode Fusion'})...` });
-        const { syncToBackend } = await import('../services/backendSync');
         const currentState = useStore.getState();
         
         // ATTENTION : On n'envoie JAMAIS replace=true au backend depuis le fichier Excel
@@ -283,8 +283,7 @@ export const ImportExport = () => {
                       setImporting(true);
                       setMessage({ type: 'success', text: 'Nettoyage du Cloud en cours...' });
                       try {
-                        const { syncToBackend } = await import('../services/backendSync');
-                        const state = useStore.getState();
+                                        const state = useStore.getState();
                         const result = await syncToBackend(state, true); // true = replace
                         if (result) {
                           setMessage({ type: 'success', text: 'Cloud nettoyé et synchronisé avec succès !' });

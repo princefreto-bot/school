@@ -8,7 +8,7 @@ import { API_BASE_URL, BACKEND_URL } from '../config';
 import { getEcolage, getCycle } from '../data/classConfig';
 import { v4 as uuid } from '../utils/uuid';
 import { createActivityLog } from '../utils/activityLogger';
-import { syncToBackend, fetchFromBackend } from '../services/backendSync';
+import { syncToBackend, fetchFromBackend, deleteAcademicYearBackend } from '../services/backendSync';
 import { chatApi } from '../services/chatApi';
 import { getAuthHeaders } from '../services/apiHelpers';
 
@@ -761,7 +761,6 @@ export const useStore = create<AppState>()(
         }
       },
       deleteAcademicYear: async (yearId: string) => {
-        const { deleteAcademicYearBackend } = await import('../services/backendSync');
         const success = await deleteAcademicYearBackend(yearId);
         if (success) {
             set({ academicYears: get().academicYears.filter(y => y.id !== yearId) });

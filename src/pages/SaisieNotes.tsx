@@ -4,6 +4,7 @@ import { Edit3, Save, CheckCircle2, User, LogOut, Download, Upload, AlertTriangl
 import { Note, PeriodeType } from '../types';
 import { v4 as uuid } from '../utils/uuid';
 import { exportNotesTemplate, importNotesFromExcel } from '../utils/notesExcelService';
+import { syncToBackend } from '../services/backendSync';
 
 export const SaisieNotes: React.FC = () => {
     const currentPeriode = useStore((s) => s.currentPeriode);
@@ -219,7 +220,6 @@ export const SaisieNotes: React.FC = () => {
             try {
                 const allNotes = useStore.getState().notes;
                 console.log(`📤 [Notes] Envoi de ${allNotes.length} notes vers le cloud...`);
-                const { syncToBackend } = await import('../services/backendSync');
                 const result = await syncToBackend({ notes: allNotes });
                 // Mettre à jour le timestamp pour bloquer le polling pendant 55s
                 useStore.setState({ lastSyncTimestamp: Date.now() });
