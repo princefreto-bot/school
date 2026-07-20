@@ -161,6 +161,7 @@ export const CreerCompte: React.FC = () => {
           admin_password: adminPassword,
           accepted_terms: acceptedTerms,
           accepted_privacy_policy: acceptedPrivacy,
+          contract_accepted: contractAccepted,
           marketing_consent: marketingConsent
         })
       });

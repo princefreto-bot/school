@@ -53,7 +53,7 @@ export const APropos: React.FC = () => {
       statsAPI: "Disponibilité plateforme",
       statsSupport: "Support disponible",
       ctaTitle: "Votre école a déjà attendu trop longtemps.",
-      ctaDesc: "40 jours gratuits pour tester la plateforme avec vos vraies données, vos vrais élèves. Aucune carte bancaire requise. Si vous n'êtes pas convaincu, vous ne payez rien.",
+      ctaDesc: "Première année gratuite pour tester la plateforme avec vos vraies données, vos vrais élèves. Aucune carte bancaire requise.",
       ctaBtn: "Lancer mon école gratuitement"
     },
     en: {
@@ -80,7 +80,7 @@ export const APropos: React.FC = () => {
       statsAPI: "Platform uptime",
       statsSupport: "Support available",
       ctaTitle: "Your school has already waited long enough.",
-      ctaDesc: "40 days free to test the platform with your real data, your real students. No credit card required. If you're not convinced, you pay nothing.",
+      ctaDesc: "Free first year to test the platform with your real data, your real students. No credit card required.",
       ctaBtn: "Launch my school for free"
     }
   };

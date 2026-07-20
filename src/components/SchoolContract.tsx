@@ -72,56 +72,101 @@ export const SchoolContract: React.FC<SchoolContractProps> = ({ isOpen, onClose,
                 >
                     <div className="prose prose-sm max-w-none prose-slate prose-headings:font-black prose-headings:text-slate-900 prose-headings:uppercase prose-a:text-blue-600">
                         <h3 className="text-xl mb-4">Conditions Générales d'Utilisation et de Partenariat</h3>
-                        
+
+                        <p>
+                            Entre l'entité <strong>DGHUBSCHOOL</strong>, prestataire de services numériques, représentée par <strong>M. Yiagnigni Mohamed</strong> (ci-après « le Prestataire »), et l'établissement scolaire créant un compte sur la plateforme DGHUBSCHOOL (ci-après « l'École » ou « le Partenaire »), il a été convenu ce qui suit :
+                        </p>
+
+                        <p>
+                            DGHUBSCHOOL est une plateforme numérique de gestion scolaire : inscriptions, scolarité, notes et bulletins conformes DRE, présence par carte à QR Code, comptabilité en partie double, paie du personnel, emploi du temps, et un espace de suivi quotidien pour les parents d'élèves (paiements, notes, présences, messagerie).
+                        </p>
+
                         <p className="font-semibold text-slate-900">
-                            En créant un compte sur la plateforme DGHUBSCHOOL, vous acceptez de vous conformer aux termes et conditions énoncés ci-dessous.
+                            Le présent contrat ne comporte aucun engagement financier pour l'École en dehors de la licence décrite à l'Article 5.1 ; il précise les engagements du Prestataire ainsi que quelques règles d'usage nécessaires au bon fonctionnement du service.
                         </p>
 
-                        <h4>1. Objet</h4>
+                        <h4>Article 1 — Objet</h4>
                         <p>
-                            Le présent contrat définit les conditions dans lesquelles l'entité DGHUBSCHOOL met à la disposition de l'Établissement (ci-après désigné "l'École") un accès gratuit à son logiciel de gestion scolaire.
+                            Le présent contrat définit les conditions dans lesquelles l'entité DGHUBSCHOOL met à la disposition de l'École un accès à sa plateforme de gestion scolaire.
                         </p>
 
-                        <h4>2. Gratuité de la Plateforme pour l'École</h4>
+                        <h4>Article 2 — Durée</h4>
                         <p>
-                            La création du compte établissement et l'utilisation de toutes les fonctionnalités d'administration, de gestion des notes, de présence et de communication sont <strong>totalement gratuites</strong> pour l'École. DGHUBSCHOOL ne facturera aucun frais de licence ou de maintenance à l'établissement.
+                            Le présent contrat est conclu pour une durée indéterminée à compter de la création du compte établissement. L'École peut cesser d'utiliser la plateforme à tout moment, sans préavis ni pénalité. Le Prestataire peut suspendre l'accès en cas de manquement grave aux présentes conditions ou à la réglementation en vigueur, après notification préalable à l'École, sauf urgence liée à la sécurité des données.
                         </p>
 
-                        <h4>3. Modèle Économique (Comptes Parents)</h4>
+                        <h4>Article 3 — Engagements du Prestataire</h4>
+                        <p>Le Prestataire s'engage à :</p>
+                        <ul>
+                            <li>Mettre à disposition, sans limite du nombre d'élèves, l'ensemble des fonctionnalités de gestion : élèves et scolarité, notes et bulletins conformes DRE, présence par scan QR Code, comptabilité, paie du personnel, emploi du temps, messagerie et alertes automatiques ;</li>
+                            <li>Assurer un support par WhatsApp et par email pour accompagner l'École dans la prise en main de la plateforme ;</li>
+                            <li>Ne jamais rendre possible qu'un parent consulte les informations d'un enfant qui n'est pas le sien ;</li>
+                            <li>Traiter toutes les données de l'École et de ses élèves de manière strictement confidentielle et sécurisée, conformément à la réglementation togolaise sur la protection des données personnelles ;</li>
+                            <li>Réaliser une sauvegarde automatique quotidienne des données de l'École, conservée 30 jours ;</li>
+                            <li>Ne rien faire qui puisse nuire, directement ou indirectement, à l'image de l'École ;</li>
+                            <li>Permettre à l'École de demander le retrait de sa part due directement depuis son espace d'administration, à tout moment ;</li>
+                            <li>Respecter la clé de répartition des revenus décrite à l'Article 5.</li>
+                        </ul>
+
+                        <h4>Article 4 — Engagements de l'École</h4>
+                        <p>L'École s'engage à :</p>
+                        <ul>
+                            <li>Fournir des informations exactes et à jour sur l'établissement et son personnel administratif ;</li>
+                            <li>Ne pas partager ses identifiants administrateur avec des personnes non autorisées ;</li>
+                            <li>Utiliser la plateforme dans le respect de la législation togolaise relative à la protection des données personnelles des élèves ;</li>
+                            <li>Être responsable de la validité et de la légalité des documents qu'elle télécharge sur la plateforme (actes de naissance, reçus, photos d'élèves).</li>
+                        </ul>
+
+                        <h4>Article 5 — Modèle économique</h4>
+
+                        <p><strong>5.1 — Accès École</strong></p>
                         <p>
-                            En contrepartie de la gratuité du système pour l'établissement, le modèle économique de l'entité DGHUBSCHOOL repose exclusivement sur les contributions des parents d'élèves.
-                            <br/><br/>
-                            - Les parents bénéficient d'une période d'essai gratuit de <strong>14 jours</strong> à compter de leur inscription.
-                            <br/>
-                            - Au-delà de cette période, l'accès complet au compte parent est conditionné au paiement d'un forfait de <strong>2100 FCFA</strong> par élève et par an.
-                            <br/>
-                            - Ce paiement peut être effectué en trois (3) tranches de <strong>700 FCFA</strong>. 
+                            La création du compte établissement et l'utilisation de l'ensemble des fonctionnalités d'administration sont <strong>gratuites pendant la première année</strong> suivant la création du compte. À compter de la 2<sup>e</sup> année, l'accès de l'École est conditionné au paiement d'une licence de <strong>[MONTANT À PRÉCISER] FCFA par élève et par an</strong>, payable en <strong>[MODALITÉS DE TRANCHES À PRÉCISER]</strong>. Les modalités de paiement (dont les liens ou moyens de paiement acceptés) seront communiquées à l'École avant la fin de sa première année d'utilisation. Si cette licence n'est pas réglée à l'échéance, l'accès de l'École pourra être suspendu jusqu'au règlement, sans que cela ne constitue une rupture du présent contrat ni n'engage de pénalité au-delà du montant dû.
                         </p>
 
-                        <h4>4. Reversement et Part de l'École</h4>
+                        <p><strong>5.2 — Comptes Parents</strong></p>
                         <p>
-                            Dans un esprit de partenariat gagnant-gagnant, l'entité DGHUBSCHOOL s'engage à reverser à l'École une ristourne financière sur les paiements effectués par les parents de ses élèves.
-                            <br/><br/>
-                            L'École obtiendra sa part, fixée à <strong>700 FCFA par élève</strong>, <em>si et seulement si</em> les parents soldent la totalité des 2100 FCFA sur la plateforme.
+                            Le modèle économique du Prestataire repose également sur la contribution des comptes parents, indépendamment du paiement décrit au 5.1 :
                         </p>
+                        <ul>
+                            <li>Les parents bénéficient d'une période de grâce de <strong>14 jours</strong> après inscription pour consulter les informations de leurs enfants ;</li>
+                            <li>Passé ce délai, l'accès complet du compte parent est conditionné à l'activation d'une licence de <strong>2 100 FCFA</strong> par élève et par an, payable en trois (3) tranches de <strong>700 FCFA</strong>.</li>
+                        </ul>
 
-                        <h4>5. Retraits des Ristournes</h4>
+                        <p><strong>5.3 — Reversement à l'École</strong></p>
                         <p>
-                            L'École pourra formuler une demande de retrait directement depuis son espace d'administration pour la part qui lui est due. Le retrait nécessite de fournir les informations nécessaires (nom, numéro de compte/mobile) et de joindre les pièces justificatives demandées.
+                            Indépendamment du paiement décrit au 5.1, le Prestataire reverse à l'École <strong>un tiers (700 FCFA)</strong> de chaque licence parent soldée en totalité (§5.2). Ce montant appartient à l'École ; la manière dont elle en dispose (répartition interne, réinvestissement, etc.) relève de sa seule décision.
                         </p>
 
-                        <h4>6. Données et Confidentialité</h4>
+                        <h4>Article 6 — Retraits</h4>
                         <p>
-                            L'entité DGHUBSCHOOL s'engage à traiter toutes les données scolaires de manière strictement confidentielle et sécurisée. 
-                            <br/>Contact : contact@dghubschool.com | Web : www.dghubschool.com
+                            L'École peut demander, à tout moment, le retrait de la part qui lui est due directement depuis son espace d'administration, en indiquant le nom et le numéro du bénéficiaire ainsi qu'une pièce justificative si demandée. Les demandes sont traitées par le Prestataire dans les meilleurs délais.
                         </p>
 
-                        <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl mt-8">
-                            <h4 className="text-amber-800 m-0 mb-2">Clauses supplémentaires (En attente)</h4>
-                            <p className="text-amber-700/80 m-0 italic">
-                                * L'entité DGHUBSCHOOL se réserve le droit de mettre à jour ce contrat. Les clauses définitives fournies ultérieurement par DGHUBSCHOOL viendront compléter et remplacer ce texte.*
-                            </p>
-                        </div>
+                        <h4>Article 7 — Confiance et bonne foi</h4>
+                        <p>
+                            Les parties déclarent avoir librement consenti au présent contrat. Toute relation afférente doit être marquée du sceau de la confiance et présumée de bonne foi, sans exclure les vérifications nécessaires pour éviter toute erreur préjudiciable au partenariat.
+                        </p>
+
+                        <h4>Article 8 — Règlement des litiges</h4>
+                        <p>
+                            Tout litige relatif à l'exécution ou à l'interprétation du présent contrat fera l'objet d'un règlement amiable entre les parties. En cas d'échec, le litige sera soumis au Centre d'Arbitrage, de Médiation et de Conciliation du Togo (CAMECO-Togo), selon l'ordre suivant : (1) commission de médiation, (2) procédure d'arbitrage dont les parties définiront les conditions.
+                        </p>
+
+                        <h4>Article 9 — Modification du contrat</h4>
+                        <p>
+                            Le Prestataire peut faire évoluer les présentes conditions pour accompagner l'évolution de la plateforme. Toute modification substantielle sera notifiée à l'École par email ou depuis son espace d'administration avant son entrée en vigueur.
+                        </p>
+
+                        <h4>Article 10 — Entrée en vigueur</h4>
+                        <p>
+                            Le présent contrat entre en vigueur dès son acceptation par l'École lors de la création de son compte établissement.
+                        </p>
+
+                        <p className="text-xs text-slate-500">
+                            Contact : contact@dghubschool.com | support@dghubschool.com<br/>
+                            WhatsApp : +228 72 47 30 27 | Web : www.dghubschool.com
+                        </p>
                     </div>
                 </div>
 

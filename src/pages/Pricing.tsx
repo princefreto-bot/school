@@ -71,9 +71,9 @@ export const Pricing: React.FC = () => {
     {
       name: lang === 'fr' ? "Licence Établissement" : "School License",
       limit: lang === 'fr' ? "Nombre d'élèves illimité" : "Unlimited students",
-      price: lang === 'fr' ? "100% GRATUIT" : "100% FREE",
-      period: lang === 'fr' ? "À vie" : "Lifetime",
-      description: lang === 'fr' ? "Un accès total et gratuit à l'écosystème DGhubSchool pour tous les établissements, sans aucune restriction." : "Full and free access to the DGhubSchool ecosystem for all schools, with no restrictions.",
+      price: lang === 'fr' ? "GRATUIT LA 1ÈRE ANNÉE" : "FREE FOR YEAR 1",
+      period: lang === 'fr' ? "Puis tarif par élève dès l'an 2" : "Then per-student fee from year 2",
+      description: lang === 'fr' ? "Un accès total à l'écosystème DGhubSchool, gratuit pendant la première année. À partir de la 2ème année, un tarif par élève s'applique (modalités communiquées aux établissements)." : "Full access to the DGhubSchool ecosystem, free for the first year. From year 2, a per-student fee applies (details shared with schools).",
       features: lang === 'fr' ? [
         "Accès complet à la console d'administration et aux statistiques en temps réel",
         "Espace enseignant (notes, moyennes pondérées, appels)",
@@ -136,7 +136,7 @@ export const Pricing: React.FC = () => {
   const faqs = lang === 'fr' ? [
     {
       q: "Combien coûte DGhubSchool pour un établissement ?",
-      a: "C'est 100% GRATUIT ! La création de compte établissement et l'utilisation de la plateforme avec un nombre illimité d'élèves sont totalement gratuites."
+      a: "La création de compte établissement et l'utilisation de la plateforme avec un nombre illimité d'élèves sont totalement gratuites pendant la première année. À partir de la 2ème année, un tarif par élève s'applique — les modalités exactes sont communiquées aux établissements avant la fin de leur première année."
     },
     {
       q: "Comment fonctionne l'essai pour les parents ?",
@@ -153,7 +153,7 @@ export const Pricing: React.FC = () => {
   ] : [
     {
       q: "How much does DGhubSchool cost for a school?",
-      a: "It's 100% FREE! School account creation and platform usage with unlimited students are completely free."
+      a: "School account creation and platform usage with unlimited students are completely free for the first year. From year 2, a per-student fee applies — the exact terms are shared with schools before the end of their first year."
     },
     {
       q: "How does the parent trial work?",
@@ -256,8 +256,8 @@ export const Pricing: React.FC = () => {
                   key={idx}
                   className={`bg-white dark:bg-slate-900 border p-8 rounded-3xl flex flex-col justify-between relative transition-all hover:shadow-xl ${plan.borderColor}`}
                 >
-                  <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-amber-500 text-slate-950 text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-md">
-                    100% GRATUIT
+                  <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-amber-500 text-slate-950 text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-md whitespace-nowrap">
+                    {lang === 'fr' ? '1ère année gratuite' : 'Free year 1'}
                   </div>
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">

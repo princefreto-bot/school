@@ -85,12 +85,12 @@ const TEXTS = {
     documentsLabel: "Documents générés",
     networkLabel: "Disponibilité",
     pricingTitle: "💡 Tarification",
-    pricingSubtitle: "100% GRATUIT pour les établissements",
-    pricingDesc: "Créez votre compte établissement gratuitement. Aucun frais, aucune carte bancaire requise.",
-    freeTrialBadge: "100% Gratuit",
+    pricingSubtitle: "GRATUIT la 1ère année pour les établissements",
+    pricingDesc: "Créez votre compte établissement gratuitement. Aucun frais la première année, aucune carte bancaire requise.",
+    freeTrialBadge: "1ère année gratuite",
     singleFormula: "Formule Unique Tout Inclus",
-    daysTrial: "Gratuit à vie",
-    afterTrial: "La gestion de votre établissement (caisse, bulletins, etc.) est totalement gratuite.",
+    daysTrial: "Gratuit la 1ère année",
+    afterTrial: "La gestion de votre établissement (caisse, bulletins, etc.) est gratuite pendant la première année. À partir de la 2ème année, un tarif par élève s'applique.",
     trialBtn: "Créer mon école gratuitement",
     newsroomTitle: "📢 Actualités",
     newsroomSub: "Ce qui change chez DGhubSchool",
@@ -105,7 +105,7 @@ const TEXTS = {
     newsroomDate2: "Juillet 2026",
     viewAllNews: "Lire toutes les actualités",
     readyTitle: "Votre école mérite mieux qu'Excel.",
-    readyDesc: "Rejoignez les directeurs d'Afrique de l'Ouest qui ont arrêté les calculs manuels, les files d'attente à la caisse et les bulletins imprimés à la dernière minute. Créez votre compte gratuitement, sans engagement.",
+    readyDesc: "Rejoignez les directeurs d'Afrique de l'Ouest qui ont arrêté les calculs manuels, les files d'attente à la caisse et les bulletins imprimés à la dernière minute. Créez votre compte gratuitement, sans engagement, avec une première année offerte.",
     createSchoolBtn: "Lancer mon école gratuitement",
     cloudTitle: "Oubliez les serveurs locaux. Passez au Cloud.",
     cloudDesc: "La majorité des écoles utilisent encore des systèmes installés sur des ordinateurs locaux. Résultat : virus, disques durs grillés, perte totale des données scolaires et inaccessibilité à distance. Avec DGhubSchool, vos données sont sauvegardées en temps réel sur des serveurs Cloud ultra-sécurisés.",
@@ -188,12 +188,12 @@ const TEXTS = {
     documentsLabel: "Documents generated",
     networkLabel: "Uptime",
     pricingTitle: "💡 Pricing",
-    pricingSubtitle: "100% FREE for schools",
-    pricingDesc: "Create your school account for free. No fees, no credit card required.",
-    freeTrialBadge: "100% Free",
+    pricingSubtitle: "FREE for schools in year 1",
+    pricingDesc: "Create your school account for free. No fees in year 1, no credit card required.",
+    freeTrialBadge: "Free year 1",
     singleFormula: "Single All-Inclusive Plan",
-    daysTrial: "Free for life",
-    afterTrial: "Managing your school (cashier, reports, etc.) is completely free.",
+    daysTrial: "Free for year 1",
+    afterTrial: "Managing your school (cashier, reports, etc.) is free for the first year. From year 2, a per-student fee applies.",
     trialBtn: "Create my school for free",
     newsroomTitle: "📢 News",
     newsroomSub: "What's changing at DGhubSchool",
@@ -208,7 +208,7 @@ const TEXTS = {
     newsroomDate2: "July 2026",
     viewAllNews: "Read all news",
     readyTitle: "Your school deserves better than Excel.",
-    readyDesc: "Join school principals across West Africa who have stopped manual calculations, cashier queues and last-minute printed report cards. Create your account for free, no commitment.",
+    readyDesc: "Join school principals across West Africa who have stopped manual calculations, cashier queues and last-minute printed report cards. Create your account for free, no commitment, with a free first year.",
     createSchoolBtn: "Launch my school for free",
     cloudTitle: "Forget local servers. Switch to the Cloud.",
     cloudDesc: "Most schools still use systems installed on local computers. Result: viruses, dead hard drives, total loss of school data, and lack of remote access. With DGhubSchool, your data is backed up in real-time on ultra-secure Cloud servers.",
@@ -1227,8 +1227,8 @@ export const LandingPage: React.FC = () => {
                   </h3>
                   <p className="text-xs md:text-sm text-slate-400 leading-relaxed font-medium max-w-sm">
                     {lang === 'fr'
-                      ? 'Rejoignez les directeurs d\'écoles qui ont abandonné les calculs manuels et les files d\'attente. Gratuit à vie, aucune carte bancaire requise.'
-                      : 'Join school leaders who have left manual calculations and cash lines behind. Free for life, no credit card required.'}
+                      ? 'Rejoignez les directeurs d\'écoles qui ont abandonné les calculs manuels et les files d\'attente. Gratuit la 1ère année, aucune carte bancaire requise.'
+                      : 'Join school leaders who have left manual calculations and cash lines behind. Free for year 1, no credit card required.'}
                   </p>
                 </div>
                 <div className="pt-6 relative z-10 text-left">

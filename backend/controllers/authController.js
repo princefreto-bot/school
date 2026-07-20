@@ -60,6 +60,9 @@ const schoolRegisterSchema = Joi.object({
     accepted_privacy_policy: Joi.boolean().valid(true).required().messages({
         'any.only': 'Vous devez accepter la politique de confidentialité.'
     }),
+    contract_accepted: Joi.boolean().valid(true).required().messages({
+        'any.only': 'Vous devez accepter le contrat de partenariat.'
+    }),
     marketing_consent: Joi.boolean().default(false)
 });
 
@@ -412,7 +415,7 @@ async function registerSchoolRequest(req, res) {
         return res.status(400).json({ error: validationError.details.map(d => d.message).join(', ') });
     }
 
-    const { name, slug, address, phone, email, admin_nom, admin_telephone, admin_password, accepted_terms, accepted_privacy_policy, marketing_consent } = validatedData;
+    const { name, slug, address, phone, email, admin_nom, admin_telephone, admin_password, accepted_terms, accepted_privacy_policy, contract_accepted, marketing_consent } = validatedData;
 
     try {
         const cleanSlug = slug.trim().toLowerCase();
@@ -476,6 +479,7 @@ async function registerSchoolRequest(req, res) {
             temp_admin_password: hashedPassword,
             accepted_terms,
             accepted_privacy_policy,
+            contract_accepted_at: contract_accepted ? consentedAt : null,
             marketing_consent,
             consented_at: consentedAt,
             signup_ip_hash: ipHash
