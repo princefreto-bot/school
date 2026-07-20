@@ -158,6 +158,143 @@ export const computeAcademicStats = (
     });
 };
 
+export interface SubjectAcademicStats {
+    matiereId: string;
+    matiereName: string;
+    cycle: string;
+    periods: Record<string, {
+        successCount: number;
+        successRate: number;
+        failureCount: number;
+        failureRate: number;
+        average: number;
+        effectif: number;
+    }>;
+    annual: {
+        successCount: number;
+        successRate: number;
+        failureCount: number;
+        failureRate: number;
+        average: number;
+        effectif: number;
+    };
+}
+
+/**
+ * Calcule le taux de réussite PAR MATIÈRE (et non par classe) pour le Collège
+ * et le Lycée. Réutilise calculerBulletinsClasse (déjà appelé pour le calcul
+ * par classe) pour obtenir la moyenne de chaque élève dans chaque matière,
+ * puis regroupe par matière au lieu de par classe. Le calcul annuel moyenne
+ * d'abord les moyennes de périodes de CHAQUE élève dans la matière, puis
+ * vérifie le seuil de 10/20 — même logique que le cumul annuel par classe,
+ * pour rester cohérent (pas une simple moyenne de toutes les notes de période
+ * mises bout à bout, qui favoriserait les matières avec plus de périodes
+ * renseignées).
+ */
+export const computeSubjectAcademicStats = (
+    students: Student[],
+    matieres: Matiere[],
+    classeMatieres: ClasseMatiere[],
+    notes: Note[]
+): SubjectAcademicStats[] => {
+    const academicClasses = Array.from(new Set(students.map(s => s.classe)))
+        .filter(classe => {
+            const cycle = students.find(s => s.classe === classe)?.cycle;
+            return cycle === 'Collège' || cycle === 'Lycée';
+        });
+
+    const result: SubjectAcademicStats[] = [];
+
+    (['Collège', 'Lycée'] as const).forEach(cycle => {
+        const cycleClasses = academicClasses.filter(classe => students.find(s => s.classe === classe)?.cycle === cycle);
+        if (cycleClasses.length === 0) return;
+
+        const periodsToCheck: PeriodeType[] = cycle === 'Lycée'
+            ? ['SEMESTRE 1', 'SEMESTRE 2']
+            : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'];
+
+        // matiereId -> nom + { period -> { studentId -> moyenneMatiere } }
+        const bySubject: Record<string, { name: string; perPeriod: Record<string, Record<string, number>> }> = {};
+
+        periodsToCheck.forEach(period => {
+            cycleClasses.forEach(classe => {
+                const classStudents = students.filter(s => s.classe === classe);
+                const hasNotes = notes.some(n => n.periode === period && classStudents.some(s => s.id === n.eleveId));
+                if (!hasNotes) return;
+
+                const bulletins = calculerBulletinsClasse(classe, period, students, matieres, classeMatieres, notes, []);
+                bulletins.forEach(b => {
+                    b.categories.forEach(cat => {
+                        cat.lignes.forEach(ligne => {
+                            if (ligne.moyenneMatiere === null) return;
+                            const mid = ligne.matiere.id;
+                            if (!bySubject[mid]) bySubject[mid] = { name: ligne.matiere.nom, perPeriod: {} };
+                            if (!bySubject[mid].perPeriod[period]) bySubject[mid].perPeriod[period] = {};
+                            bySubject[mid].perPeriod[period][b.eleve.id] = ligne.moyenneMatiere;
+                        });
+                    });
+                });
+            });
+        });
+
+        Object.entries(bySubject).forEach(([matiereId, data]) => {
+            const periodStats: SubjectAcademicStats['periods'] = {};
+            const studentPeriodAverages: Record<string, number[]> = {};
+
+            periodsToCheck.forEach(period => {
+                const studentValues = data.perPeriod[period] || {};
+                const values = Object.values(studentValues);
+                const effectif = values.length;
+                const successCount = values.filter(v => v >= 10).length;
+                const failureCount = effectif - successCount;
+
+                Object.entries(studentValues).forEach(([studentId, val]) => {
+                    if (!studentPeriodAverages[studentId]) studentPeriodAverages[studentId] = [];
+                    studentPeriodAverages[studentId].push(val);
+                });
+
+                periodStats[period] = {
+                    successCount,
+                    successRate: effectif > 0 ? parseFloat(((successCount / effectif) * 100).toFixed(2)) : 0,
+                    failureCount,
+                    failureRate: effectif > 0 ? parseFloat(((failureCount / effectif) * 100).toFixed(2)) : 0,
+                    average: effectif > 0 ? parseFloat((values.reduce((a, b) => a + b, 0) / effectif).toFixed(2)) : 0,
+                    effectif
+                };
+            });
+
+            let annualSuccessCount = 0;
+            let annualSum = 0;
+            const annualEffectif = Object.keys(studentPeriodAverages).length;
+
+            Object.values(studentPeriodAverages).forEach(vals => {
+                const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+                annualSum += avg;
+                if (avg >= 10) annualSuccessCount++;
+            });
+
+            const annualFailureCount = annualEffectif - annualSuccessCount;
+
+            result.push({
+                matiereId,
+                matiereName: data.name,
+                cycle,
+                periods: periodStats,
+                annual: {
+                    successCount: annualSuccessCount,
+                    successRate: annualEffectif > 0 ? parseFloat(((annualSuccessCount / annualEffectif) * 100).toFixed(2)) : 0,
+                    failureCount: annualFailureCount,
+                    failureRate: annualEffectif > 0 ? parseFloat(((annualFailureCount / annualEffectif) * 100).toFixed(2)) : 0,
+                    average: annualEffectif > 0 ? parseFloat((annualSum / annualEffectif).toFixed(2)) : 0,
+                    effectif: annualEffectif
+                }
+            });
+        });
+    });
+
+    return result.sort((a, b) => a.matiereName.localeCompare(b.matiereName));
+};
+
 /**
  * Génère le PDF en Noir et Blanc épuré.
  */

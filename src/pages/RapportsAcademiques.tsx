@@ -1,7 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../store/useStore';
-import { FileText, Download, Award, ShieldCheck, BookOpen, Layers } from 'lucide-react';
-import { computeAcademicStats, generateAcademicReportPDF } from '../utils/academicReportGenerator';
+import { FileText, Download, Award, ShieldCheck, BookOpen, Layers, GraduationCap, UserX } from 'lucide-react';
+import { computeAcademicStats, computeSubjectAcademicStats, generateAcademicReportPDF } from '../utils/academicReportGenerator';
+import { computeAbsenceTrend, filterSchoolDays } from '../services/attendanceAnalyticsService';
+import {
+    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from 'recharts';
 
 export const RapportsAcademiques: React.FC = () => {
     const {
@@ -9,6 +13,7 @@ export const RapportsAcademiques: React.FC = () => {
         matieres,
         classeMatieres,
         notes,
+        presences,
         schoolName,
         schoolLogo,
         schoolStamp,
@@ -24,6 +29,19 @@ export const RapportsAcademiques: React.FC = () => {
 
     const collegeStats = useMemo(() => stats.filter(s => s.cycle === 'Collège'), [stats]);
     const lyceeStats = useMemo(() => stats.filter(s => s.cycle === 'Lycée'), [stats]);
+
+    // Taux de réussite par matière (nouveau, en complément du taux par classe ci-dessus)
+    const subjectStats = useMemo(() => {
+        return computeSubjectAcademicStats(students, matieres, classeMatieres, notes);
+    }, [students, matieres, classeMatieres, notes]);
+
+    const collegeSubjectStats = useMemo(() => subjectStats.filter(s => s.cycle === 'Collège'), [subjectStats]);
+    const lyceeSubjectStats = useMemo(() => subjectStats.filter(s => s.cycle === 'Lycée'), [subjectStats]);
+
+    // Tendance des absences sur les 14 derniers jours (tous cycles confondus)
+    const absenceTrend = useMemo(() => {
+        return filterSchoolDays(computeAbsenceTrend(students, presences, 14));
+    }, [students, presences]);
 
     const handleDownloadPDF = () => {
         generateAcademicReportPDF(
@@ -234,7 +252,96 @@ export const RapportsAcademiques: React.FC = () => {
                     )}
                 </div>
             </div>
- 
+
+            {/* ── TAUX DE RÉUSSITE PAR MATIÈRE ── */}
+            <div className="border border-slate-900/10 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[28px] p-6 sm:p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center border border-indigo-500/20">
+                        <GraduationCap className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight">Taux de Réussite par Matière</h3>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-450">
+                            {activeTab === 'college' ? 'Collège' : 'Lycée'} — toutes classes confondues
+                        </p>
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    {(() => {
+                        const rows = activeTab === 'college' ? collegeSubjectStats : lyceeSubjectStats;
+                        const periodKeys = activeTab === 'college'
+                            ? ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3']
+                            : ['SEMESTRE 1', 'SEMESTRE 2'];
+
+                        if (rows.length === 0) {
+                            return (
+                                <div className="text-center py-12 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
+                                    <p className="text-sm font-bold text-slate-400">Aucune note disponible pour calculer ce taux.</p>
+                                </div>
+                            );
+                        }
+
+                        return (
+                            <table className="w-full text-sm text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-slate-905 dark:border-slate-800">
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Matière</th>
+                                        {periodKeys.map(p => (
+                                            <th key={p} className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">{p}</th>
+                                        ))}
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest text-right">Bilan Annuel</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                                    {rows.map(s => (
+                                        <tr key={s.matiereId} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                            <td className="py-4 px-4 font-black text-slate-900 dark:text-white">{s.matiereName}</td>
+                                            {periodKeys.map(p => (
+                                                <td key={p} className="py-4 px-4">{renderStatsCell(s.periods[p])}</td>
+                                            ))}
+                                            <td className="py-4 px-4">{renderStatsCell(s.annual, true)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        );
+                    })()}
+                </div>
+            </div>
+
+            {/* ── TENDANCE DES ABSENCES ── */}
+            <div className="border border-slate-900/10 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[28px] p-6 sm:p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-xl flex items-center justify-center border border-rose-500/20">
+                        <UserX className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight">Tendance des Absences</h3>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-450">Derniers jours de classe (tous cycles)</p>
+                    </div>
+                </div>
+
+                {absenceTrend.length === 0 ? (
+                    <div className="h-[200px] flex items-center justify-center text-slate-400 text-sm font-bold bg-slate-50 dark:bg-slate-800/50 rounded-[20px]">
+                        Aucun scan de présence enregistré récemment.
+                    </div>
+                ) : (
+                    <ResponsiveContainer width="100%" height={220}>
+                        <LineChart data={absenceTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} opacity={0.5} />
+                            <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} />
+                            <YAxis tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} domain={[0, 100]} />
+                            <Tooltip
+                                formatter={(value?: number) => [`${value || 0}%`, 'Taux d\'absence']}
+                                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', fontWeight: 700 }}
+                            />
+                            <Line type="monotone" dataKey="absenceRate" name="absenceRate" stroke="#f43f5e" strokeWidth={3} dot={{ r: 4, fill: '#f43f5e' }} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                )}
+            </div>
+
         </div>
     );
 };
