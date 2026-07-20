@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useStore } from '../store/useStore';
-import { Edit3, Save, CheckCircle2, User, LogOut } from 'lucide-react';
+import { Edit3, Save, CheckCircle2, User, LogOut, Download, Upload, AlertTriangle } from 'lucide-react';
 import { Note, PeriodeType } from '../types';
 import { v4 as uuid } from '../utils/uuid';
+import { exportNotesTemplate, importNotesFromExcel } from '../utils/notesExcelService';
 
 export const SaisieNotes: React.FC = () => {
     const currentPeriode = useStore((s) => s.currentPeriode);
@@ -81,6 +82,40 @@ export const SaisieNotes: React.FC = () => {
     const isDirtyRef = React.useRef(false);
     const prevSelectionRef = React.useRef<string>('');
 
+    // ── Import Excel ─────────────────────────────────────────
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [importFeedback, setImportFeedback] = useState<{ matchedCount: number; errors: string[] } | null>(null);
+    const [importing, setImporting] = useState(false);
+
+    const currentMatiereLabel = saisieMode === 'moyenne_generale'
+        ? 'Moyenne Generale'
+        : (availableMatieres.find(item => item.mat!.id === selectedMatiereId)?.mat?.nom || '');
+
+    const handleDownloadTemplate = () => {
+        exportNotesTemplate(classStudents, draftNotes, selectedClasse, currentMatiereLabel, saisieMode);
+    };
+
+    const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = ''; // Permet de réimporter le même fichier après correction
+        if (!file) return;
+
+        setImporting(true);
+        setImportFeedback(null);
+        try {
+            const result = await importNotesFromExcel(file, classStudents, saisieMode);
+            if (result.matchedCount > 0) {
+                isDirtyRef.current = true;
+                setDraftNotes(prev => ({ ...prev, ...result.updates }));
+            }
+            setImportFeedback({ matchedCount: result.matchedCount, errors: result.errors });
+        } catch (err) {
+            setImportFeedback({ matchedCount: 0, errors: [(err as Error).message] });
+        } finally {
+            setImporting(false);
+        }
+    };
+
     // Déclencher un rechargement forcé du cloud lors de la sélection pour s'assurer que les données sont fraîches
     React.useEffect(() => {
         const targetMatiereId = saisieMode === 'moyenne_generale' ? 'moyenne_generale' : selectedMatiereId;
@@ -99,6 +134,7 @@ export const SaisieNotes: React.FC = () => {
         if (selectionKey !== prevSelectionRef.current) {
             prevSelectionRef.current = selectionKey;
             isDirtyRef.current = false;
+            setImportFeedback(null);
         }
 
         // Si des modifications locales sont en cours (dirty), on ne recharge pas depuis le store
@@ -333,18 +369,54 @@ export const SaisieNotes: React.FC = () => {
             {/* Table de Saisie */}
             {selectedClasse && (saisieMode === 'moyenne_generale' || selectedMatiereId) ? (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-fade-in">
-                    <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50">
+                    <div className="flex flex-wrap justify-between items-center gap-3 p-4 border-b border-gray-100 bg-gray-50">
                         <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
                             Effectif de la classe : <span className="text-rose-600 bg-rose-100 px-2 py-0.5 rounded-md">{classStudents.length}</span>
                         </div>
-                        <button
-                            onClick={handleSave}
-                            className="bg-rose-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-rose-700 shadow-md transition-all active:scale-95"
-                        >
-                            <Save className="w-5 h-5" />
-                            {saisieMode === 'moyenne_generale' ? 'Enregistrer les moyennes' : 'Enregistrer les notes'}
-                        </button>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={handleFileSelected} className="hidden" />
+                            <button
+                                onClick={handleDownloadTemplate}
+                                title="Télécharger un modèle Excel pré-rempli avec les élèves de cette classe"
+                                className="bg-white text-gray-700 border border-gray-200 px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-gray-100 transition-all active:scale-95"
+                            >
+                                <Download className="w-4 h-4" />
+                                Modèle Excel
+                            </button>
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={importing}
+                                title="Importer les notes depuis un fichier Excel rempli"
+                                className="bg-white text-gray-700 border border-gray-200 px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-gray-100 transition-all active:scale-95 disabled:opacity-50"
+                            >
+                                <Upload className="w-4 h-4" />
+                                {importing ? 'Import en cours...' : 'Importer Excel'}
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                className="bg-rose-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-rose-700 shadow-md transition-all active:scale-95"
+                            >
+                                <Save className="w-5 h-5" />
+                                {saisieMode === 'moyenne_generale' ? 'Enregistrer les moyennes' : 'Enregistrer les notes'}
+                            </button>
+                        </div>
                     </div>
+
+                    {importFeedback && (
+                        <div className={`p-3 text-sm font-semibold space-y-1.5 ${importFeedback.errors.length > 0 ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-700'}`}>
+                            <div className="flex items-center justify-center gap-2">
+                                {importFeedback.errors.length > 0 ? <AlertTriangle className="w-5 h-5 shrink-0" /> : <CheckCircle2 className="w-5 h-5 shrink-0" />}
+                                {importFeedback.matchedCount} note(s) chargée(s) depuis le fichier — vérifiez le tableau puis cliquez sur "Enregistrer" pour confirmer.
+                                {importFeedback.errors.length > 0 && ` ${importFeedback.errors.length} ligne(s) ignorée(s).`}
+                            </div>
+                            {importFeedback.errors.length > 0 && (
+                                <ul className="text-xs font-medium text-amber-700 list-disc list-inside max-h-32 overflow-y-auto max-w-2xl mx-auto">
+                                    {importFeedback.errors.slice(0, 20).map((err, i) => <li key={i}>{err}</li>)}
+                                    {importFeedback.errors.length > 20 && <li>... et {importFeedback.errors.length - 20} autre(s).</li>}
+                                </ul>
+                            )}
+                        </div>
+                    )}
 
                     {saveStatus && (
                         <div className="p-3 bg-green-50 text-green-700 font-semibold flex items-center justify-center gap-2 text-sm">
