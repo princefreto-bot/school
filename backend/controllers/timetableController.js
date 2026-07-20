@@ -37,10 +37,11 @@ function overlaps(startA, endA, startB, endB) {
 
 /**
  * Vérifie qu'un créneau ne chevauche pas un créneau existant pour la même
- * classe OU le même enseignant, le même jour. `excludeId` sert lors d'une
- * modification pour ignorer le créneau qu'on est en train de modifier.
+ * classe, le même enseignant, OU la même salle (si renseignée des deux côtés),
+ * le même jour. `excludeId` sert lors d'une modification pour ignorer le
+ * créneau qu'on est en train de modifier.
  */
-async function findConflict(schoolSlug, { classe, enseignantNom, jourSemaine, heureDebut, heureFin, academicYearId, excludeId }) {
+async function findConflict(schoolSlug, { classe, enseignantNom, salle, jourSemaine, heureDebut, heureFin, academicYearId, excludeId }) {
     let query = supabase
         .from(`timetable_slots_${schoolSlug}`)
         .select('*')
@@ -55,9 +56,11 @@ async function findConflict(schoolSlug, { classe, enseignantNom, jourSemaine, he
     for (const slot of (sameDay || [])) {
         const sameClasse = slot.classe === classe;
         const sameEnseignant = enseignantNom && slot.enseignant_nom && slot.enseignant_nom === enseignantNom;
-        if (!sameClasse && !sameEnseignant) continue;
+        const sameSalle = salle && slot.salle && slot.salle === salle;
+        if (!sameClasse && !sameEnseignant && !sameSalle) continue;
         if (overlaps(heureDebut, heureFin, slot.heure_debut, slot.heure_fin)) {
-            return { slot, reason: sameClasse ? 'classe' : 'enseignant' };
+            const reason = sameClasse ? 'classe' : sameEnseignant ? 'enseignant' : 'salle';
+            return { slot, reason };
         }
     }
     return null;
@@ -138,14 +141,15 @@ async function createSlot(req, res) {
         const academicYearId = await resolveAcademicYearId(schoolSlug, req);
 
         const conflict = await findConflict(schoolSlug, {
-            classe, enseignantNom, jourSemaine, heureDebut, heureFin, academicYearId
+            classe, enseignantNom, salle, jourSemaine, heureDebut, heureFin, academicYearId
         });
         if (conflict) {
-            return res.status(409).json({
-                error: conflict.reason === 'classe'
-                    ? `Conflit : la classe ${classe} a déjà un créneau le ${JOURS[jourSemaine]} de ${conflict.slot.heure_debut} à ${conflict.slot.heure_fin}.`
-                    : `Conflit : ${enseignantNom} a déjà un créneau le ${JOURS[jourSemaine]} de ${conflict.slot.heure_debut} à ${conflict.slot.heure_fin}.`
-            });
+            const messages = {
+                classe: `Conflit : la classe ${classe} a déjà un créneau le ${JOURS[jourSemaine]} de ${conflict.slot.heure_debut} à ${conflict.slot.heure_fin}.`,
+                enseignant: `Conflit : ${enseignantNom} a déjà un créneau le ${JOURS[jourSemaine]} de ${conflict.slot.heure_debut} à ${conflict.slot.heure_fin}.`,
+                salle: `Conflit : la salle ${salle} est déjà occupée le ${JOURS[jourSemaine]} de ${conflict.slot.heure_debut} à ${conflict.slot.heure_fin}.`
+            };
+            return res.status(409).json({ error: messages[conflict.reason] });
         }
 
         const { data, error } = await supabase
