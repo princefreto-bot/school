@@ -11,14 +11,23 @@
 --     nouvelle école n'avait encore été créée depuis ce correctif)
 --
 -- ⚠️ Taux légaux togolais stockés dans payroll_tax_config (modifiables, jamais en
--- dur dans le code) — sourcés par recherche web, à confirmer avec un expert-
--- comptable avant usage réel : CNSS (Décret loi sécu sociale, cnss.tg) 17,5%
+-- dur dans le code), à faire valider une dernière fois par un expert-comptable
+-- avant le premier bulletin réel : CNSS (Décret loi sécu sociale, cnss.tg) 17,5%
 -- employeur + 4% salarié ; AMU (Décret N°2023-096/PR du 04/10/2023, CNSS/INAM)
 -- 5% employeur + 5% salarié ; IRPP barème 2026 à 8 tranches (art. 74 CGI),
 -- abattement 28% plafonné à 10M FCFA/an, déduction 10 000 FCFA/mois/personne à
 -- charge (max 6). Moteur de calcul vérifié au FCFA près contre un exemple
 -- sourcé (salaire 300 000 FCFA/mois, 3 personnes à charge → IRPP annuel
 -- 32 940 FCFA).
+--
+-- Correctif du 2026-07-20 (migration update_irpp_bracket_boundary_21m_2026) :
+-- la frontière entre les tranches à 30% et 35% était à 20 000 000 FCFA/an dans
+-- le seed initial ci-dessous ; la synthèse 2026 fournie par l'utilisateur la
+-- situe à 21 000 000 FCFA/an (tranche 30% élargie à 15 000 001–21 000 000).
+-- Le seed CREATE TABLE ci-dessous a été mis à jour en conséquence pour rester
+-- cohérent avec la ligne réellement en base — toutes les autres valeurs
+-- (CNSS, AMU, les 6 premières tranches IRPP, abattement, déduction par
+-- personne à charge) étaient déjà exactes, aucun autre changement.
 --
 -- Piège rencontré : gen_random_uuid() (pg_catalog, toujours résolu) doit être
 -- utilisé à la place de uuid_generate_v4() (schéma extensions) dans toute
@@ -43,14 +52,14 @@ CREATE TABLE IF NOT EXISTS public.payroll_tax_config (
         {"min": 6000000, "max": 9000000, "rate": 15},
         {"min": 9000000, "max": 12000000, "rate": 20},
         {"min": 12000000, "max": 15000000, "rate": 25},
-        {"min": 15000000, "max": 20000000, "rate": 30},
-        {"min": 20000000, "max": null, "rate": 35}
+        {"min": 15000000, "max": 21000000, "rate": 30},
+        {"min": 21000000, "max": null, "rate": 35}
     ]'::jsonb,
     allowance_rate DECIMAL NOT NULL DEFAULT 28,
     allowance_cap DECIMAL NOT NULL DEFAULT 10000000,
     dependent_deduction_monthly DECIMAL NOT NULL DEFAULT 10000,
     max_dependents INT NOT NULL DEFAULT 6,
-    source_note TEXT DEFAULT 'Taux de référence (recherche web, à confirmer avec un expert-comptable). CNSS/AMU : Décret N°2023-096/PR (04/10/2023). IRPP : barème 2026, art. 74 CGI.',
+    source_note TEXT DEFAULT 'Taux 2026 (CNSS/AMU : Décret N°2023-096/PR du 04/10/2023 ; IRPP : barème progressif art. 74 CGI). À faire valider une dernière fois par un expert-comptable avant tout premier bulletin réel.',
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 INSERT INTO public.payroll_tax_config (id) VALUES ('default') ON CONFLICT (id) DO NOTHING;
