@@ -32,7 +32,7 @@ const translations: Record<'fr' | 'en', ConditionsTranslations> = {
     backHome: "Retour à l'accueil",
     badge: "📄 Contrat de Service",
     title: "Conditions générales d'utilisation",
-    lastUpdated: "Dernière mise à jour : 18 Juillet 2026",
+    lastUpdated: "Dernière mise à jour : 20 Juillet 2026",
     highlightText: "L'utilisation du Service implique l'acceptation pleine et entière de ces conditions d'utilisation. Si vous agissez au nom d'un établissement scolaire, vous garantissez disposer des pouvoirs nécessaires pour l'engager juridiquement.",
     secPreambleTitle: "Préambule",
     secPreambleItem1: <><strong>« Nous »</strong> se réfère à la plateforme <strong>DGhubSchool</strong>.</>,
@@ -49,13 +49,13 @@ const translations: Record<'fr' | 'en', ConditionsTranslations> = {
     sec3BoxItem2Parent: <><strong>Comptes Parents</strong> : Bénéficient d'une période de grâce de <strong>14 jours</strong> après inscription pour lier et consulter les informations de leurs enfants, avant l'activation requise d'une licence de <strong>2 100 FCFA par élève et par an</strong>, payable en trois tranches de <strong>700 FCFA</strong>.</>,
     sec3Warning: "Si la contribution parentale n'est pas soldée à l'issue de la période de grâce et du délai accordé pour les tranches, l'accès au compte parent concerné sera automatiquement suspendu jusqu'au règlement de la somme due.",
     sec4Title: "4. Maintenance & Support",
-    sec4Text: "Bien que nous nous efforcions de maintenir une disponibilité continue (avec un objectif de 99.9% de disponibilité réseau), nous ne garantissons pas un accès ininterrompu. Le Service peut subir des opérations de maintenance. Notre équipe technique s'engage à assurer un support continu et à communiquer sur les interruptions à l'avance dans la mesure du possible."
+    sec4Text: "Bien que nous nous efforcions de maintenir une disponibilité continue (avec un objectif de 99.9% de disponibilité réseau), nous ne garantissons pas un accès ininterrompu. Le Service peut subir des opérations de maintenance. Notre équipe technique s'engage à assurer un support continu et à communiquer sur les interruptions à l'avance dans la mesure du possible. Les données de chaque établissement font l'objet d'une sauvegarde automatique quotidienne, conservée 30 jours, sans que cela constitue une garantie absolue contre toute perte de données."
   },
   en: {
     backHome: "Back to home",
     badge: "📄 Terms of Service",
     title: "General Terms & Conditions",
-    lastUpdated: "Last updated: July 18, 2026",
+    lastUpdated: "Last updated: July 20, 2026",
     highlightText: "The use of the Service implies the full and complete acceptance of these terms of use. If you act on behalf of a school, you warrant that you have the necessary authority to legally bind it.",
     secPreambleTitle: "Preamble",
     secPreambleItem1: <><strong>\"We\"</strong> refers to the <strong>DGhubSchool</strong> platform.</>,
@@ -72,7 +72,7 @@ const translations: Record<'fr' | 'en', ConditionsTranslations> = {
     sec3BoxItem2Parent: <><strong>Parent Accounts</strong>: Benefit from a grace period of <strong>14 days</strong> after registration to link and view their children's information, before a license activation of <strong>2,100 FCFA per student per year</strong> is required, payable in three installments of <strong>700 FCFA</strong>.</>,
     sec3Warning: "If the parental contribution is not settled by the end of the grace period and the installment deadline, access to the parent account concerned will be automatically suspended until the amount due is paid.",
     sec4Title: "4. Maintenance & Support",
-    sec4Text: "While we strive to maintain continuous availability (with a target of 99.9% network uptime), we do not guarantee uninterrupted access. The Service may undergo maintenance operations. Our technical team is committed to providing ongoing support and communicating interruptions in advance whenever possible."
+    sec4Text: "While we strive to maintain continuous availability (with a target of 99.9% network uptime), we do not guarantee uninterrupted access. The Service may undergo maintenance operations. Our technical team is committed to providing ongoing support and communicating interruptions in advance whenever possible. Each school's data is automatically backed up daily and retained for 30 days, though this does not constitute an absolute guarantee against data loss."
   }
 };
 

@@ -48,6 +48,8 @@ const featuresFr = [
       'Génération de reçus PDF instantanés',
       'Suivi des tranches et impayés',
       'Export Excel/CSV des rapports financiers',
+      'Comptabilité en partie double : balance, bilan, compte de résultat',
+      'Rappels de paiement automatiques aux parents en retard',
     ],
   },
   {
@@ -153,6 +155,8 @@ const featuresFr = [
       'Gestion des rôles et permissions',
       'Paramètres des tranches de paiement',
       'Personnalisation des coefficients',
+      'Paie du personnel : calcul automatique CNSS, AMU et IRPP',
+      'Emploi du temps avec détection automatique des conflits',
     ],
   },
   {
@@ -201,6 +205,8 @@ const featuresEn = [
       'Instant PDF receipt generation',
       'Installment and unpaid tracking',
       'Excel/CSV financial report export',
+      'Double-entry accounting: trial balance, balance sheet, income statement',
+      'Automatic payment reminders for overdue parents',
     ],
   },
   {
@@ -306,6 +312,8 @@ const featuresEn = [
       'Role and permission management',
       'Payment installment settings',
       'Coefficient customization',
+      'Payroll with automatic CNSS, AMU and IRPP tax calculation',
+      'Timetable builder with automatic conflict detection',
     ],
   },
   {
@@ -471,8 +479,8 @@ export const Features: React.FC = () => {
       title: 'Tout ce dont votre école a besoin',
       subtitle: 'Découvrez comment DGhubSchool modernise chaque aspect de la gestion scolaire — de la scolarité aux paiements, en passant par la sécurité et la communication.',
       ctaTitle: 'Prêt à transformer votre école ?',
-      ctaDesc: 'Démarrez votre essai gratuit de 40 jours et découvrez toutes ces fonctionnalités en action.',
-      ctaBtn: 'Démarrer mon essai gratuit',
+      ctaDesc: 'Créez votre compte établissement gratuitement, à vie, sans engagement, et découvrez toutes ces fonctionnalités en action.',
+      ctaBtn: 'Créer mon compte gratuitement',
       scrollExplore: 'Défilez pour explorer',
     },
     en: {
@@ -481,8 +489,8 @@ export const Features: React.FC = () => {
       title: 'Everything your school needs',
       subtitle: 'Discover how DGhubSchool modernizes every aspect of school management — from academics and payments to security and communication.',
       ctaTitle: 'Ready to transform your school?',
-      ctaDesc: 'Start your free 40-day trial and discover all these features in action.',
-      ctaBtn: 'Start my free trial',
+      ctaDesc: 'Create your school account for free, for life, no commitment, and discover all these features in action.',
+      ctaBtn: 'Create my free account',
       scrollExplore: 'Scroll to explore',
     },
   };

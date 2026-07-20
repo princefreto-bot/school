@@ -80,16 +80,24 @@ export const Pricing: React.FC = () => {
         "Génération des bulletins officiels DRE au format PDF",
         "Système de pointage présence par scan QR Code",
         "Gestion des classes, des inscriptions et de la scolarité",
+        "Comptabilité en partie double (dépenses, balance, bilan, compte de résultat)",
+        "Paie du personnel avec calcul automatique CNSS, AMU et IRPP",
+        "Emploi du temps avec détection automatique des conflits",
+        "Rappels de paiement automatiques aux parents en retard",
         "Capacité d'élèves illimitée dans le système",
-        "Hébergement Cloud dédié, sauvegardes et sécurité"
+        "Hébergement Cloud dédié, sauvegardes quotidiennes automatiques et sécurité"
       ] : [
         "Full access to the administration console and real-time statistics",
         "Teacher portal (grades, weighted averages, attendance)",
         "Official DRE report cards generation in PDF format",
         "QR Code attendance tracking system",
         "Management of classes, enrollments and school fees",
+        "Double-entry accounting (expenses, trial balance, balance sheet, income statement)",
+        "Payroll with automatic CNSS, AMU and IRPP tax calculation",
+        "Timetable builder with automatic conflict detection",
+        "Automatic payment reminders for overdue parents",
         "Unlimited student capacity in the system",
-        "Dedicated Cloud hosting, backups and security"
+        "Dedicated Cloud hosting, automatic daily backups and security"
       ],
       buttonText: lang === 'fr' ? "Créer mon compte gratuitement" : "Create my free account",
       popular: true,
