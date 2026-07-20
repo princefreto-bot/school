@@ -199,6 +199,12 @@ async function createSchool(req, res) {
             console.error(`⚠️ Erreur de provisionnement emploi du temps pour ${cleanSlug}:`, timetableRpcErr.message);
         }
 
+        // Provisionner les tables/colonnes des rappels de paiement automatiques
+        const { error: reminderRpcErr } = await supabase.rpc('create_reminder_tables', { school_slug: cleanSlug });
+        if (reminderRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement rappels pour ${cleanSlug}:`, reminderRpcErr.message);
+        }
+
         // Attendre que la base recharge son schéma (1s par sécurité)
         await new Promise(r => setTimeout(r, 1000));
 

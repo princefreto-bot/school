@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { GestionPersonnel } from '../components/GestionPersonnel';
 import { SchoolBackups } from '../components/SchoolBackups';
+import { AutoReminderSettings } from '../components/AutoReminderSettings';
 
 export const Parametres: React.FC = () => {
   const schoolName = useStore((s) => s.schoolName);
@@ -940,6 +941,11 @@ export const Parametres: React.FC = () => {
             {/* ── SAUVEGARDES ────────────────────────────── */}
             {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
                 <SchoolBackups />
+            )}
+
+            {/* ── ALERTES DE RETARD AUTOMATIQUES ────────────────────────────── */}
+            {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
+                <AutoReminderSettings />
             )}
 
             {/* ── COMPTE UTILISATEUR ────────────────────────────── */}

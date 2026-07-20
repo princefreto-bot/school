@@ -614,6 +614,7 @@ const server = app.listen(PORT, () => {
     // ne pas tourner à chaque redémarrage en dev.
     if (process.env.NODE_ENV === 'production') {
         require('./services/backupService').start();
+        require('./services/reminderService').start();
     }
 });
 

@@ -564,6 +564,12 @@ async function verifySchoolEmail(req, res) {
             console.error(`⚠️ Erreur de provisionnement emploi du temps pour ${school.slug}:`, timetableRpcErr.message);
         }
 
+        // Provisionner les tables/colonnes des rappels de paiement automatiques
+        const { error: reminderRpcErr } = await supabase.rpc('create_reminder_tables', { school_slug: school.slug });
+        if (reminderRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement rappels pour ${school.slug}:`, reminderRpcErr.message);
+        }
+
         // Attente initiale de 2s pour le rechargement de schéma REST de Supabase
         await new Promise(r => setTimeout(r, 2000));
 
