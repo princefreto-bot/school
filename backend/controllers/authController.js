@@ -570,6 +570,12 @@ async function verifySchoolEmail(req, res) {
             console.error(`⚠️ Erreur de provisionnement rappels pour ${school.slug}:`, reminderRpcErr.message);
         }
 
+        // Provisionner la table de sondage de satisfaction parent
+        const { error: satisfactionRpcErr } = await supabase.rpc('create_satisfaction_tables', { school_slug: school.slug });
+        if (satisfactionRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement satisfaction pour ${school.slug}:`, satisfactionRpcErr.message);
+        }
+
         // Attente initiale de 2s pour le rechargement de schéma REST de Supabase
         await new Promise(r => setTimeout(r, 2000));
 

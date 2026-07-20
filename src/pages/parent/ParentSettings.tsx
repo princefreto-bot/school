@@ -3,6 +3,7 @@ import { useStore } from '../../store/useStore';
 import { getAuthHeaders } from '../../services/apiHelpers';
 import { API_BASE_URL } from '../../config';
 import { Settings, Calendar, Check, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { ParentSatisfactionSurvey } from '../../components/ParentSatisfactionSurvey';
 
 interface AcademicYear {
   id: string;
@@ -156,6 +157,9 @@ export const ParentSettings: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* ── SONDAGE DE SATISFACTION ── */}
+      <ParentSatisfactionSurvey />
 
       {/* ── FOOTER INFORMATION ── */}
       <div className="flex items-center gap-3 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl text-indigo-600 dark:text-indigo-400 text-xs font-semibold max-w-[600px] mx-auto">

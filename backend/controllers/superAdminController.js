@@ -225,6 +225,12 @@ async function createSchool(req, res) {
             console.error(`⚠️ Erreur de provisionnement rappels pour ${cleanSlug}:`, reminderRpcErr.message);
         }
 
+        // Provisionner la table de sondage de satisfaction parent
+        const { error: satisfactionRpcErr } = await supabase.rpc('create_satisfaction_tables', { school_slug: cleanSlug });
+        if (satisfactionRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement satisfaction pour ${cleanSlug}:`, satisfactionRpcErr.message);
+        }
+
         // Attendre que la base recharge son schéma (1s par sécurité)
         await new Promise(r => setTimeout(r, 1000));
 

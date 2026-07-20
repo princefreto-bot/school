@@ -8,6 +8,7 @@ import {
 import { GestionPersonnel } from '../components/GestionPersonnel';
 import { SchoolBackups } from '../components/SchoolBackups';
 import { AutoReminderSettings } from '../components/AutoReminderSettings';
+import { ParentSatisfactionOverview } from '../components/ParentSatisfactionOverview';
 
 export const Parametres: React.FC = () => {
   const schoolName = useStore((s) => s.schoolName);
@@ -946,6 +947,11 @@ export const Parametres: React.FC = () => {
             {/* ── ALERTES DE RETARD AUTOMATIQUES ────────────────────────────── */}
             {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
                 <AutoReminderSettings />
+            )}
+
+            {/* ── SATISFACTION DES PARENTS ────────────────────────────── */}
+            {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
+                <ParentSatisfactionOverview />
             )}
 
             {/* ── COMPTE UTILISATEUR ────────────────────────────── */}
