@@ -295,6 +295,94 @@ export const computeSubjectAcademicStats = (
     return result.sort((a, b) => a.matiereName.localeCompare(b.matiereName));
 };
 
+export interface PerformanceAlert {
+    studentId: string;
+    studentName: string;
+    classe: string;
+    cycle: string;
+    previousPeriod: string;
+    previousAverage: number;
+    currentPeriod: string;
+    currentAverage: number;
+    delta: number; // négatif = baisse
+    crossedToFailing: boolean;
+}
+
+/**
+ * Détecte les élèves dont la moyenne générale a chuté entre les deux dernières
+ * périodes AYANT des notes saisies (pas forcément T1→T2 : si seuls T2 et T3 ont
+ * des notes, la comparaison se fait entre ces deux-là). Un élève est signalé si
+ * sa moyenne baisse d'au moins `threshold` points, OU s'il passe d'admis (≥10)
+ * à recalé (<10) même avec une baisse plus faible. Trié du plus sévère au
+ * moins sévère.
+ */
+export const computePerformanceDeclineAlerts = (
+    students: Student[],
+    matieres: Matiere[],
+    classeMatieres: ClasseMatiere[],
+    notes: Note[],
+    threshold: number = 2
+): PerformanceAlert[] => {
+    const alerts: PerformanceAlert[] = [];
+
+    const academicClasses = Array.from(new Set(students.map(s => s.classe)))
+        .filter(classe => {
+            const cycle = students.find(s => s.classe === classe)?.cycle;
+            return cycle === 'Collège' || cycle === 'Lycée';
+        });
+
+    academicClasses.forEach(classe => {
+        const classStudents = students.filter(s => s.classe === classe);
+        const cycle = classStudents[0]?.cycle as string;
+        const periodsToCheck: PeriodeType[] = cycle === 'Lycée'
+            ? ['SEMESTRE 1', 'SEMESTRE 2']
+            : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'];
+
+        const periodsWithData = periodsToCheck.filter(period =>
+            notes.some(n => n.periode === period && classStudents.some(s => s.id === n.eleveId))
+        );
+        if (periodsWithData.length < 2) return;
+
+        const prevPeriod = periodsWithData[periodsWithData.length - 2];
+        const currPeriod = periodsWithData[periodsWithData.length - 1];
+
+        const prevBulletins = calculerBulletinsClasse(classe, prevPeriod, students, matieres, classeMatieres, notes, []);
+        const currBulletins = calculerBulletinsClasse(classe, currPeriod, students, matieres, classeMatieres, notes, []);
+
+        const prevByStudent = new Map(
+            prevBulletins.filter(b => b.totalCoefsGeneral > 0).map(b => [b.eleve.id, b.moyenneGenerale])
+        );
+
+        currBulletins
+            .filter(b => b.totalCoefsGeneral > 0)
+            .forEach(b => {
+                const prevAvg = prevByStudent.get(b.eleve.id);
+                if (prevAvg === undefined) return;
+
+                const currAvg = b.moyenneGenerale;
+                const delta = currAvg - prevAvg;
+                const crossedToFailing = prevAvg >= 10 && currAvg < 10;
+
+                if (delta <= -threshold || crossedToFailing) {
+                    alerts.push({
+                        studentId: b.eleve.id,
+                        studentName: `${b.eleve.nom} ${b.eleve.prenom}`,
+                        classe,
+                        cycle,
+                        previousPeriod: prevPeriod,
+                        previousAverage: parseFloat(prevAvg.toFixed(2)),
+                        currentPeriod: currPeriod,
+                        currentAverage: parseFloat(currAvg.toFixed(2)),
+                        delta: parseFloat(delta.toFixed(2)),
+                        crossedToFailing
+                    });
+                }
+            });
+    });
+
+    return alerts.sort((a, b) => a.delta - b.delta);
+};
+
 /**
  * Génère le PDF en Noir et Blanc épuré.
  */

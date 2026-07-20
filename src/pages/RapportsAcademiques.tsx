@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../store/useStore';
-import { FileText, Download, Award, ShieldCheck, BookOpen, Layers, GraduationCap, UserX } from 'lucide-react';
-import { computeAcademicStats, computeSubjectAcademicStats, generateAcademicReportPDF } from '../utils/academicReportGenerator';
+import { FileText, Download, Award, ShieldCheck, BookOpen, Layers, GraduationCap, UserX, TrendingDown } from 'lucide-react';
+import { computeAcademicStats, computeSubjectAcademicStats, computePerformanceDeclineAlerts, generateAcademicReportPDF } from '../utils/academicReportGenerator';
 import { computeAbsenceTrend, filterSchoolDays } from '../services/attendanceAnalyticsService';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -42,6 +42,11 @@ export const RapportsAcademiques: React.FC = () => {
     const absenceTrend = useMemo(() => {
         return filterSchoolDays(computeAbsenceTrend(students, presences, 14));
     }, [students, presences]);
+
+    // Alertes de baisse de performance (comparaison des deux dernières périodes ayant des notes)
+    const performanceAlerts = useMemo(() => {
+        return computePerformanceDeclineAlerts(students, matieres, classeMatieres, notes);
+    }, [students, matieres, classeMatieres, notes]);
 
     const handleDownloadPDF = () => {
         generateAcademicReportPDF(
@@ -135,7 +140,45 @@ export const RapportsAcademiques: React.FC = () => {
                     </div>
                 </div>
             </div>
- 
+
+            {/* ── ALERTES DE BAISSE DE PERFORMANCE ── */}
+            {performanceAlerts.length > 0 && (
+                <div className="border border-rose-500/20 bg-rose-50/50 dark:bg-rose-950/10 rounded-[28px] p-6 sm:p-8 shadow-sm">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-xl flex items-center justify-center border border-rose-500/20">
+                            <TrendingDown className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight">
+                                Alertes de Baisse de Performance
+                                <span className="ml-2 text-xs font-black text-rose-600 bg-rose-100 dark:bg-rose-500/20 dark:text-rose-400 px-2.5 py-0.5 rounded-full align-middle">{performanceAlerts.length}</span>
+                            </h3>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-450">Élèves dont la moyenne a chuté entre les deux dernières périodes</p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2.5 max-h-96 overflow-y-auto">
+                        {performanceAlerts.map(a => (
+                            <div key={a.studentId} className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                                <div className="min-w-0">
+                                    <p className="font-black text-slate-900 dark:text-white truncate">{a.studentName}</p>
+                                    <p className="text-xs font-bold text-slate-450 uppercase tracking-wide">{a.classe} · {a.previousPeriod} → {a.currentPeriod}</p>
+                                </div>
+                                <div className="flex items-center gap-3 shrink-0">
+                                    <div className="text-right">
+                                        <p className="text-xs text-slate-400 font-bold">{a.previousAverage}/20 → <span className="text-slate-900 dark:text-white">{a.currentAverage}/20</span></p>
+                                        {a.crossedToFailing && <p className="text-[10px] font-black text-rose-600 uppercase tracking-wide">Passe sous la moyenne</p>}
+                                    </div>
+                                    <span className="text-sm font-black text-rose-600 bg-rose-100 dark:bg-rose-500/20 dark:text-rose-400 px-3 py-1.5 rounded-xl">
+                                        {a.delta}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* ── TABS ── */}
             <div className="flex gap-2 p-1.5 bg-slate-100 dark:bg-slate-900/50 rounded-2xl border border-slate-200/50 dark:border-slate-800 w-fit">
                 <button
