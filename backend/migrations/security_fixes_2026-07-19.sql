@@ -9,6 +9,51 @@
 --   - restrict_security_definer_functions_and_fix_search_path
 --   - revoke_execute_from_public_on_school_table_functions
 
+-- ============================================================
+-- Suite (2026-07-20) : audit de sécurité final couvrant les Phases 0-4
+-- (sauvegardes, comptabilité, paie, emploi du temps, rappels automatiques).
+-- Migrations réelles : revoke_execute_from_public_on_phase1to4_functions,
+-- revoke_execute_from_anon_authenticated_phase1to4_functions.
+--
+-- Les fonctions create_accounting_tables / create_payroll_tables /
+-- create_timetable_tables / create_reminder_tables / ensure_reminder_settings_columns
+-- avaient EXECUTE accordé à PUBLIC *et* explicitement à anon/authenticated
+-- (comportement par défaut de Supabase sur les nouvelles fonctions du schéma
+-- public) — contrairement à create_school_tables/drop_school_tables, corrigées
+-- le 2026-07-19. Risque réel faible (fonctions SECURITY INVOKER, et anon/
+-- authenticated n'ont que USAGE, pas CREATE, sur le schéma public — un appel RPC
+-- direct aurait échoué avec une erreur de permission), mais corrigé par cohérence
+-- avec le reste du schéma. Aucun impact fonctionnel : le backend appelle toujours
+-- ces fonctions via service_role, qui conserve l'accès.
+REVOKE EXECUTE ON FUNCTION public.create_accounting_tables(text) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.create_payroll_tables(text) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.create_timetable_tables(text) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.create_reminder_tables(text) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.ensure_reminder_settings_columns(text) FROM PUBLIC, anon, authenticated;
+
+-- ⚠️ Trouvé mais PAS corrigé (nécessite confirmation, touche des documents
+-- financiers réels — retraits/ristournes et dépenses école) : les buckets Storage
+-- "expense-proofs" et "withdrawal-proofs" sont publics (public=true), et le
+-- backend renvoie leur URL publique brute (getPublicUrl) affichée telle quelle
+-- dans Retraits.tsx / Comptabilite.tsx. N'importe qui connaissant/devinant le
+-- chemin exact ({schoolSlug}/{timestamp_ms}.{ext}) peut lire ces justificatifs
+-- sans authentification — school_slug n'est pas secret, et l'horodatage en
+-- millisecondes est bruteforçable sur une fenêtre de temps plausible (aucune
+-- limitation de débit sur l'endpoint public Storage de Supabase). Comparer au
+-- bucket "school-backups" (Phase 0), correctement privé + URLs signées
+-- (backupController.js). Correctif proposé, en attente de validation utilisateur
+-- avant application (changement de bucket + migration des URLs déjà stockées) :
+--   1. ALTER bucket expense-proofs / withdrawal-proofs → public = false
+--   2. accountingController.js / withdrawalController.js : remplacer
+--      getPublicUrl() par createSignedUrl() généré à la demande (comme
+--      backupController.js), et stocker le storage path plutôt que l'URL
+--      publique pour les nouveaux justificatifs.
+--   3. Frontend (Retraits.tsx, Comptabilite.tsx) : demander une URL signée à
+--      l'affichage au lieu d'utiliser l'URL stockée directement.
+--   4. Justificatifs déjà uploadés : leurs URLs publiques resteront valides tant
+--      que le bucket est public ; il faut soit les re-uploader dans un nouveau
+--      chemin privé, soit accepter qu'elles restent accessibles à l'ancienne URL.
+
 -- 1. Bucket Storage "student-documents" (actes de naissance, bulletins...) avait
 --    des policies PUBLIQUES en SELECT/INSERT/UPDATE/DELETE — n'importe qui pouvait
 --    lire, modifier ou supprimer les documents de n'importe quel élève, de
