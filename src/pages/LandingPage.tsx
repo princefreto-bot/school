@@ -23,6 +23,9 @@ import {
   Phone,
   Activity,
   Mail,
+  Landmark,
+  Banknote,
+  CalendarClock,
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import { BACKEND_URL } from '../config';
@@ -45,7 +48,7 @@ const TEXTS = {
     heroTitlePart1: "Fini les files d'attente. Gérez ",
     heroTitleHighlight: "votre école en 2 secondes",
     heroTitlePart2: " depuis votre téléphone.",
-    heroSubtitle: "Centralisez vos encaissements de scolarité (espèces, chèques, virements) avec enregistrement de reçus physiques pour notifier les parents instantanément, éditez les bulletins PDF conformes DRE en un clic, pointez les entrées/sorties par scan QR et offrez aux parents un tableau de bord live — le tout sans Excel, sans file d'attente, même en connexion 2G.",
+    heroSubtitle: "Centralisez vos encaissements de scolarité, votre comptabilité et la paie du personnel, éditez les bulletins PDF conformes DRE en un clic, pointez les entrées/sorties par scan QR et offrez aux parents un tableau de bord live — le tout sans Excel, sans file d'attente, même en connexion 2G.",
     realTimeDashboard: "Tableau de bord en temps réel",
     screenshotsTitle: "📸 La plateforme en images",
     discoverFeatures: "Ce que voient vos directeurs, parents et élèves",
@@ -68,6 +71,15 @@ const TEXTS = {
     qrCardsTitle: "Présences par QR Code",
     qrCardsDesc: "Chaque élève dispose d'une carte avec QR Code unique. Le gardien scanne à l'entrée : en moins de 2 secondes le parent est notifié par SMS ou notification push. L'historique d'assiduité est consultable 24h/24 par le directeur comme par le parent.",
     qrCardsBadge: "🔐 Sécurité",
+    accountingTitle: "Comptabilité en partie double",
+    accountingDesc: "Enregistrez vos dépenses, DGhubSchool tient le journal comptable, la balance, le bilan et le compte de résultat automatiquement — chaque paiement de scolarité s'y comptabilise seul. Fini les cahiers de comptes tenus à la main.",
+    accountingBadge: "📊 Comptabilité",
+    payrollTitle: "Paie du personnel automatisée",
+    payrollDesc: "Calculez les bulletins de salaire de vos enseignants et employés en un clic : cotisations CNSS, AMU et impôt sur le revenu (IRPP) appliqués automatiquement selon le barème en vigueur. Zéro calcul manuel, zéro erreur de charges sociales.",
+    payrollBadge: "💵 Paie",
+    timetableTitle: "Emploi du temps intelligent",
+    timetableDesc: "Construisez l'emploi du temps de chaque classe et détectez automatiquement les conflits d'enseignant ou de salle avant qu'ils ne posent problème. Les enseignants et les parents consultent le planning à jour depuis leur espace.",
+    timetableBadge: "🗓️ Emploi du Temps",
     partnersLabel: "Établissements actifs",
     studentsLabel: "Élèves suivis",
     documentsLabel: "Documents générés",
@@ -87,13 +99,17 @@ const TEXTS = {
     newsroomCardTitle: "Isolation des données par établissement",
     newsroomCardDesc: "Chaque école dispose de son propre espace de données totalement isolé. Aucun directeur ne peut voir les données d'un autre établissement. Vos informations financières et académiques restent hermétiquement protégées.",
     newsroomDate: "Juin 2026",
+    newsroomBadge2: "🚀 Nouveauté",
+    newsroomCardTitle2: "Comptabilité, paie et emploi du temps arrivent sur DGhubSchool",
+    newsroomCardDesc2: "Nouveau ce mois-ci : comptabilité en partie double, paie du personnel avec calcul automatique des cotisations, emploi du temps avec détection de conflits, sauvegardes automatiques quotidiennes, rappels de paiement automatiques et import Excel des notes. Tout inclus, toujours gratuit.",
+    newsroomDate2: "Juillet 2026",
     viewAllNews: "Lire toutes les actualités",
     readyTitle: "Votre école mérite mieux qu'Excel.",
-    readyDesc: "Rejoignez les directeurs d'Afrique de l'Ouest qui ont arrêté les calculs manuels, les files d'attente à la caisse et les bulletins imprimés à la dernière minute. Votre essai gratuit de 40 jours commence maintenant.",
+    readyDesc: "Rejoignez les directeurs d'Afrique de l'Ouest qui ont arrêté les calculs manuels, les files d'attente à la caisse et les bulletins imprimés à la dernière minute. Créez votre compte gratuitement, sans engagement.",
     createSchoolBtn: "Lancer mon école gratuitement",
     cloudTitle: "Oubliez les serveurs locaux. Passez au Cloud.",
     cloudDesc: "La majorité des écoles utilisent encore des systèmes installés sur des ordinateurs locaux. Résultat : virus, disques durs grillés, perte totale des données scolaires et inaccessibilité à distance. Avec DGhubSchool, vos données sont sauvegardées en temps réel sur des serveurs Cloud ultra-sécurisés.",
-    cloudPoint1: "Zéro risque de perte : Sauvegardes automatisées 24/7.",
+    cloudPoint1: "Zéro risque de perte : Sauvegarde automatique quotidienne, conservée 30 jours.",
     cloudPoint2: "Accessibilité mondiale : Gérez votre école depuis n'importe où.",
     cloudPoint3: "Zéro maintenance : Pas de serveur à acheter ou réparer.",
     parentsFocusTitle: "Impliquez les parents comme jamais auparavant",
@@ -113,6 +129,8 @@ const TEXTS = {
     shareStory: 'Partager mon histoire',
     cashMgmt: 'Gestion de la caisse et reçus SMS',
     unlimitedBulletins: 'Bulletins et notes illimités',
+    accountingPayroll: 'Comptabilité en partie double et paie automatisée',
+    timetableReminders: 'Emploi du temps et rappels de paiement automatiques',
     fullAccess: 'Accès complet parents, élèves et profs',
     whatsappSupport: 'Support dédié via WhatsApp',
     parentNotif: 'Koffi Yao est entré en classe. Scan à 07:42.',
@@ -133,7 +151,7 @@ const TEXTS = {
     heroTitlePart1: "No more queues. Run ",
     heroTitleHighlight: "your entire school in 2 seconds",
     heroTitlePart2: " from your phone.",
-    heroSubtitle: "Centralize your tuition collections (cash, checks, transfers) with physical receipt recording to notify parents instantly, produce DRE-compliant PDF report cards in one click, track entries and exits by QR scan, and give parents a live dashboard — all without Excel, without queuing, even on a 2G connection.",
+    heroSubtitle: "Centralize your tuition collections, accounting and staff payroll, produce DRE-compliant PDF report cards in one click, track entries and exits by QR scan, and give parents a live dashboard — all without Excel, without queuing, even on a 2G connection.",
     realTimeDashboard: "Real-time dashboard",
     screenshotsTitle: "📸 The platform in pictures",
     discoverFeatures: "What your principals, parents and students see",
@@ -156,6 +174,15 @@ const TEXTS = {
     qrCardsTitle: "Attendance by QR Code",
     qrCardsDesc: "Every student has a card with a unique QR Code. The security guard scans at entry: in under 2 seconds the parent is notified by SMS or push notification. The attendance history is accessible 24/7 by both the principal and the parent.",
     qrCardsBadge: "🔐 Security",
+    accountingTitle: "Double-entry accounting",
+    accountingDesc: "Record your expenses, DGhubSchool keeps the ledger, trial balance, balance sheet and income statement automatically — every tuition payment posts itself. No more hand-kept account books.",
+    accountingBadge: "📊 Accounting",
+    payrollTitle: "Automated staff payroll",
+    payrollDesc: "Generate teacher and staff payslips in one click: social security (CNSS), health insurance (AMU) and income tax withholdings applied automatically per the current schedule. Zero manual calculation, zero payroll tax errors.",
+    payrollBadge: "💵 Payroll",
+    timetableTitle: "Smart timetable builder",
+    timetableDesc: "Build each class's weekly schedule and automatically catch teacher or room conflicts before they become a problem. Teachers and parents check the up-to-date schedule from their own space.",
+    timetableBadge: "🗓️ Timetable",
     partnersLabel: "Active schools",
     studentsLabel: "Students tracked",
     documentsLabel: "Documents generated",
@@ -175,13 +202,17 @@ const TEXTS = {
     newsroomCardTitle: "Data isolation by school",
     newsroomCardDesc: "Each school has its own completely isolated data space. No principal can see another school's data. Your financial and academic information remains hermetically protected.",
     newsroomDate: "June 2026",
+    newsroomBadge2: "🚀 New",
+    newsroomCardTitle2: "Accounting, payroll and timetable arrive on DGhubSchool",
+    newsroomCardDesc2: "New this month: double-entry accounting, staff payroll with automatic tax calculation, a timetable builder with conflict detection, automatic daily backups, automatic payment reminders, and bulk Excel grade import. All included, still free.",
+    newsroomDate2: "July 2026",
     viewAllNews: "Read all news",
     readyTitle: "Your school deserves better than Excel.",
-    readyDesc: "Join school principals across West Africa who have stopped manual calculations, cashier queues and last-minute printed report cards. Your free 40-day trial starts now.",
+    readyDesc: "Join school principals across West Africa who have stopped manual calculations, cashier queues and last-minute printed report cards. Create your account for free, no commitment.",
     createSchoolBtn: "Launch my school for free",
     cloudTitle: "Forget local servers. Switch to the Cloud.",
     cloudDesc: "Most schools still use systems installed on local computers. Result: viruses, dead hard drives, total loss of school data, and lack of remote access. With DGhubSchool, your data is backed up in real-time on ultra-secure Cloud servers.",
-    cloudPoint1: "Zero risk of loss: 24/7 automated backups.",
+    cloudPoint1: "Zero risk of loss: automatic daily backup, kept for 30 days.",
     cloudPoint2: "Global accessibility: Manage your school from anywhere.",
     cloudPoint3: "Zero maintenance: No servers to buy or repair.",
     parentsFocusTitle: "Engage parents like never before",
@@ -199,6 +230,8 @@ const TEXTS = {
     shareStory: 'Share my story',
     cashMgmt: 'Cash management and SMS receipts',
     unlimitedBulletins: 'Unlimited grade books and reports',
+    accountingPayroll: 'Double-entry accounting and automated payroll',
+    timetableReminders: 'Timetable builder and automatic payment reminders',
     fullAccess: 'Full access for parents, students, and teachers',
     whatsappSupport: 'Dedicated support via WhatsApp',
     parentNotif: 'Koffi Yao arrived at school. Scanned at 07:42.',
@@ -491,9 +524,9 @@ export const LandingPage: React.FC = () => {
         <section className="bg-slate-950 py-10 overflow-hidden relative border-y border-slate-900">
           <div className="space-y-4">
             {[
-              ['Numérisation', 'Code QR', 'Historique', 'Annonces SMS', 'Caisse', 'Export Excel'],
-              ['Recouvrement', 'Bulletins PDF', 'Format DRE', 'Espace Parents', 'Absences', 'Retards', 'Messagerie'],
-              ['Cloud Sécurisé', 'Zéro Perte', 'Performance Active', 'Tableaux de bord', 'Multi-Années'],
+              ['Numérisation', 'Code QR', 'Historique', 'Annonces SMS', 'Caisse', 'Export Excel', 'Import Excel Notes'],
+              ['Recouvrement', 'Bulletins PDF', 'Format DRE', 'Espace Parents', 'Absences', 'Retards', 'Messagerie', 'Rappels Automatiques'],
+              ['Cloud Sécurisé', 'Zéro Perte', 'Sauvegardes Auto', 'Tableaux de bord', 'Multi-Années', 'Comptabilité', 'Paie Automatisée', 'Emploi du Temps'],
             ].map((row, rowIdx) => (
               <div key={rowIdx} className="flex overflow-hidden">
                 <div className={`${rowIdx % 2 === 0 ? 'animate-marquee-left' : 'animate-marquee-right'} hover-pause flex gap-3 items-center`}>
@@ -622,6 +655,80 @@ export const LandingPage: React.FC = () => {
                     lang === 'fr' ? 'Scan rapide en moins de 2 secondes' : 'Fast scanning under 2 seconds',
                     lang === 'fr' ? 'Notification SMS automatique immédiate' : 'Immediate automated SMS notification',
                     lang === 'fr' ? 'Historique d\'assiduité complet sécurisé' : 'Full secure attendance logbook',
+                  ].map((pt, pIdx) => (
+                    <div key={pIdx} className="flex items-start gap-2 text-xs text-slate-600 leading-snug">
+                      <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                      <span>{pt}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-slate-50/50 border border-slate-200/60 rounded-2xl p-8 flex flex-col justify-between hover:shadow-xl hover:border-indigo-500/25 transition-all duration-300 group cursor-pointer">
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shadow-sm">
+                      <Landmark className="w-6 h-6" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-200/50 px-3 py-1 rounded-full">{t.accountingBadge}</span>
+                  </div>
+                  <h3 className="text-xl font-black text-slate-950 group-hover:text-indigo-600 transition-colors font-jakarta mb-3">{t.accountingTitle}</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium mb-6">{t.accountingDesc}</p>
+                </div>
+                <div className="pt-6 border-t border-slate-200/50 space-y-3">
+                  {[
+                    lang === 'fr' ? 'Balance, bilan et compte de résultat automatiques' : 'Automatic trial balance, balance sheet & income statement',
+                    lang === 'fr' ? 'Paiements de scolarité comptabilisés seuls' : 'Tuition payments post themselves',
+                  ].map((pt, pIdx) => (
+                    <div key={pIdx} className="flex items-center gap-2 text-xs text-slate-600 leading-snug">
+                      <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <span>{pt}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-slate-50/50 border border-slate-200/60 rounded-2xl p-8 flex flex-col justify-between hover:shadow-xl hover:border-teal-500/25 transition-all duration-300 group cursor-pointer">
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-teal-500/10 text-teal-600 flex items-center justify-center shadow-sm">
+                      <Banknote className="w-6 h-6" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-200/50 px-3 py-1 rounded-full">{t.payrollBadge}</span>
+                  </div>
+                  <h3 className="text-xl font-black text-slate-950 group-hover:text-teal-600 transition-colors font-jakarta mb-3">{t.payrollTitle}</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium mb-6">{t.payrollDesc}</p>
+                </div>
+                <div className="pt-6 border-t border-slate-200/50 space-y-3">
+                  {[
+                    lang === 'fr' ? 'Calcul automatique CNSS, AMU et IRPP' : 'Automatic CNSS, AMU and income tax calculation',
+                    lang === 'fr' ? 'Bulletins de salaire prêts à imprimer' : 'Payslips ready to print',
+                  ].map((pt, pIdx) => (
+                    <div key={pIdx} className="flex items-center gap-2 text-xs text-slate-600 leading-snug">
+                      <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <span>{pt}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="md:col-span-3 bg-slate-50/50 border border-slate-200/60 rounded-2xl p-8 flex flex-col md:flex-row md:items-center gap-8 hover:shadow-xl hover:border-rose-500/25 transition-all duration-300 group cursor-pointer">
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shadow-sm shrink-0">
+                      <CalendarClock className="w-6 h-6" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-200/50 px-3 py-1 rounded-full">{t.timetableBadge}</span>
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-black text-slate-950 group-hover:text-rose-600 transition-colors font-jakarta mb-3">{t.timetableTitle}</h3>
+                  <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-medium">{t.timetableDesc}</p>
+                </div>
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 md:pl-8 md:border-l border-slate-200/50">
+                  {[
+                    lang === 'fr' ? 'Détection automatique des conflits de créneaux' : 'Automatic scheduling conflict detection',
+                    lang === 'fr' ? 'Consultation par les enseignants et les parents' : 'Visible to teachers and parents',
+                    lang === 'fr' ? 'Rappels de paiement automatiques aux retardataires' : 'Automatic payment reminders for overdue parents',
+                    lang === 'fr' ? 'Import Excel des notes en masse' : 'Bulk Excel grade import',
                   ].map((pt, pIdx) => (
                     <div key={pIdx} className="flex items-start gap-2 text-xs text-slate-600 leading-snug">
                       <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
@@ -1051,7 +1158,7 @@ export const LandingPage: React.FC = () => {
                   <p className="text-xs text-slate-500 mt-2 font-medium">{t.afterTrial}</p>
                 </div>
                 <ul className="space-y-3.5 text-xs text-slate-600 mb-8 border-t border-slate-100 pt-6">
-                  {[t.cashMgmt, t.unlimitedBulletins, t.fullAccess, t.whatsappSupport].map((item, i) => (
+                  {[t.cashMgmt, t.unlimitedBulletins, t.accountingPayroll, t.timetableReminders, t.fullAccess, t.whatsappSupport].map((item, i) => (
                     <li key={i} className="flex items-center gap-2.5">
                       <div className="w-5 h-5 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0"><Check className="w-3.5 h-3.5 text-emerald-500" /></div>
                       <span>{item}</span>
@@ -1074,7 +1181,18 @@ export const LandingPage: React.FC = () => {
               <h2 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase font-jakarta">{t.newsroomSub}</h2>
               <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm font-medium">{t.newsroomDesc}</p>
             </div>
-            <div className="grid grid-cols-1 gap-8 max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <div className="bg-white border border-slate-200/60 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+                <div className="space-y-4">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-rose-600 bg-rose-500/10 px-2.5 py-1 rounded-full inline-block font-jakarta">{t.newsroomBadge2}</span>
+                  <h3 className="text-base md:text-lg font-black text-slate-950 uppercase leading-snug group-hover:text-amber-500 transition-colors font-jakarta">{t.newsroomCardTitle2}</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed font-medium">{t.newsroomCardDesc2}</p>
+                </div>
+                <div className="border-t border-slate-100 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  <span>{t.newsroomDate2}</span>
+                  <span onClick={() => navigate(`/${lang}/newsroom`)} className="text-amber-500 flex items-center gap-1 cursor-pointer hover:underline font-jakarta">{t.viewAllNews} <ArrowRight className="w-3 h-3" /></span>
+                </div>
+              </div>
               <div className="bg-white border border-slate-200/60 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
                 <div className="space-y-4">
                   <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full inline-block font-jakarta">{t.newsroomBadge}</span>
@@ -1109,8 +1227,8 @@ export const LandingPage: React.FC = () => {
                   </h3>
                   <p className="text-xs md:text-sm text-slate-400 leading-relaxed font-medium max-w-sm">
                     {lang === 'fr'
-                      ? 'Rejoignez les directeurs d\'écoles qui ont abandonné les calculs manuels et les files d\'attente. Essai gratuit de 40 jours.'
-                      : 'Join school leaders who have left manual calculations and cash lines behind. 40 days free trial.'}
+                      ? 'Rejoignez les directeurs d\'écoles qui ont abandonné les calculs manuels et les files d\'attente. Gratuit à vie, aucune carte bancaire requise.'
+                      : 'Join school leaders who have left manual calculations and cash lines behind. Free for life, no credit card required.'}
                   </p>
                 </div>
                 <div className="pt-6 relative z-10 text-left">
