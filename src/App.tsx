@@ -496,9 +496,17 @@ export function App() {
 
     const pathWithoutLang = '/' + parts.slice(2).join('/');
     
+    // Ne redirige que les pages d'ENTRÉE d'authentification (login, création de
+    // compte, confirmation email, portail école, activation licence) — pas les
+    // pages purement informatives (tarifs, fonctionnalités, à-propos...). Un
+    // utilisateur déjà connecté doit pouvoir consulter les tarifs sans être
+    // renvoyé de force vers /app ; ce renvoi forcé, combiné à un état
+    // isAuthenticated obsolète (session expirée côté serveur mais encore
+    // marquée active côté client), pouvait faire atterrir l'utilisateur sur
+    // /login sans jamais voir la page cliquée (ex. "Tarifs").
     if (isAuthenticated) {
       if (
-        ['/login', '/portail-ecole', '/creer-compte', '/confirmer-email', '/pricing', '/a-propos', '/features', '/activation-licence', '/partager-mon-histoire'].includes(pathWithoutLang) ||
+        ['/login', '/portail-ecole', '/creer-compte', '/confirmer-email', '/activation-licence'].includes(pathWithoutLang) ||
         pathWithoutLang.startsWith('/login/') ||
         pathWithoutLang.startsWith('/portail-ecole/')
       ) {
