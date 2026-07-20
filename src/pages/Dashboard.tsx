@@ -1,14 +1,17 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useStore } from '../store/useStore';
 import { isBackendAvailable } from '../services/backendSync';
+import { API_BASE_URL } from '../config';
+import { getAuthHeaders, parseResponse } from '../services/apiHelpers';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
+  LineChart, Line,
 } from 'recharts';
-import { 
-  Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen, 
+import {
+  Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen,
   GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck, FileText, Eye, EyeOff,
-  Check, Settings, PlayCircle
+  Check, Settings, PlayCircle, Landmark, PiggyBank
 } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import {
@@ -81,6 +84,140 @@ const CustomTooltip: React.FC<{ active?: boolean; payload?: { name: string; valu
     );
   }
   return null;
+};
+
+const EXPENSE_COLORS = ['#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4', '#10b981', '#6366f1', '#ec4899', '#14b8a6'];
+
+interface RevenuePoint { month: string; total: number; }
+interface ExpenseSlice { code: string; name: string; amount: number; }
+
+/**
+ * Widget financier auto-suffisant : va chercher ses propres données (comptes
+ * Caisse/Banque, dépenses du mois, revenus des 6 derniers mois) auprès du
+ * module Comptabilité déjà existant. Se masque silencieusement si l'appel
+ * échoue (rôle sans accès compta, ex. proviseur/censeur — 403 attendu, pas
+ * une erreur à afficher) plutôt que de casser le reste du Dashboard.
+ */
+const FinancialOverview: React.FC<{ privacyMode: boolean }> = ({ privacyMode }) => {
+  const [tresorerie, setTresorerie] = useState<number | null>(null);
+  const [revenueTrend, setRevenueTrend] = useState<RevenuePoint[]>([]);
+  const [expenses, setExpenses] = useState<ExpenseSlice[]>([]);
+  const [available, setAvailable] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const now = new Date();
+        const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+
+        const [balanceRes, trendRes, resultatRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/accounting/balance`, { headers: getAuthHeaders() }),
+          fetch(`${API_BASE_URL}/accounting/revenue-trend?months=6`, { headers: getAuthHeaders() }),
+          fetch(`${API_BASE_URL}/accounting/compte-resultat?from=${monthStart}`, { headers: getAuthHeaders() }),
+        ]);
+
+        if (!balanceRes.ok || !trendRes.ok || !resultatRes.ok) {
+          if (!cancelled) setAvailable(false);
+          return;
+        }
+
+        const balance = await parseResponse(balanceRes);
+        const trend = await parseResponse(trendRes);
+        const resultat = await parseResponse(resultatRes);
+
+        if (cancelled) return;
+
+        const treasuryRows = (balance.rows || []).filter((r: { code: string }) => ['571', '521'].includes(r.code));
+        const total = treasuryRows.reduce((sum: number, r: { balance: number }) => sum + r.balance, 0);
+
+        setTresorerie(total);
+        setRevenueTrend(trend);
+        setExpenses((resultat.charges || []).filter((c: ExpenseSlice) => c.amount > 0));
+      } catch {
+        if (!cancelled) setAvailable(false);
+      }
+    };
+
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (!available) return null;
+
+  const mask = (val: string) => privacyMode ? '••••••' : val;
+  const trendData = revenueTrend.map(p => ({ ...p, label: p.month.slice(5) + '/' + p.month.slice(2, 4) }));
+
+  return (
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="pro-card p-8 flex flex-col justify-between">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight mb-1">Trésorerie</h3>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Caisse + Banque</p>
+          </div>
+          <div className="p-3 bg-emerald-50 dark:bg-emerald-500/10 rounded-[16px]">
+            <PiggyBank className="w-5 h-5 text-emerald-500" />
+          </div>
+        </div>
+        <p className={`text-3xl font-black tracking-tighter ${tresorerie !== null && tresorerie < 0 ? 'text-rose-600' : 'text-slate-900 dark:text-white'}`}>
+          {tresorerie === null ? '--' : mask(`${fmtMoney(tresorerie)} F`)}
+        </p>
+        <p className="text-[11px] font-bold text-slate-400 mt-2">Solde disponible en direct</p>
+      </div>
+
+      <div className="xl:col-span-2 pro-card p-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight mb-1">Évolution des revenus</h3>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">6 derniers mois (FCFA)</p>
+          </div>
+          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-[16px]">
+            <TrendingUp className="w-5 h-5 text-slate-400" />
+          </div>
+        </div>
+        {trendData.every(p => p.total === 0) ? (
+          <div className="h-[220px] flex items-center justify-center text-slate-400 text-sm font-bold bg-slate-50 dark:bg-slate-800/50 rounded-[20px]">Aucun revenu enregistré</div>
+        ) : (
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} opacity={0.5} />
+              <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} />
+              <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} />
+              <Tooltip formatter={(value?: number) => [privacyMode ? '••••••' : `${fmtMoney(value || 0)} FCFA`, 'Revenus']} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', fontWeight: 700 }} />
+              <Line type="monotone" dataKey="total" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4, fill: '#f59e0b' }} />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      <div className="xl:col-span-3 pro-card p-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight mb-1">Dépenses par catégorie</h3>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Mois en cours</p>
+          </div>
+          <div className="p-3 bg-rose-50 dark:bg-rose-500/10 rounded-[16px]">
+            <Landmark className="w-5 h-5 text-rose-500" />
+          </div>
+        </div>
+        {expenses.length === 0 ? (
+          <div className="h-[100px] flex items-center justify-center text-slate-400 text-sm font-bold bg-slate-50 dark:bg-slate-800/50 rounded-[20px]">Aucune dépense ce mois-ci</div>
+        ) : (
+          <div className="flex flex-wrap gap-3">
+            {expenses.sort((a, b) => b.amount - a.amount).map((e, i) => (
+              <div key={e.code} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: EXPENSE_COLORS[i % EXPENSE_COLORS.length] }} />
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{e.name}</span>
+                <span className="text-xs font-black text-slate-900 dark:text-white">{mask(`${fmtMoney(e.amount)} F`)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export const Dashboard: React.FC = () => {
@@ -634,6 +771,9 @@ export const Dashboard: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* ── TRÉSORERIE, REVENUS & DÉPENSES ── */}
+      <FinancialOverview privacyMode={privacyMode} />
 
       {/* ── TOP PERFORMERS & SOLVABILITY ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

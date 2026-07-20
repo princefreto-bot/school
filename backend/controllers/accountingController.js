@@ -329,6 +329,44 @@ async function getCompteResultat(req, res) {
 }
 
 /**
+ * GET /api/accounting/revenue-trend?months=6
+ * Évolution des revenus (comptes de type "produit") mois par mois, pour le
+ * widget "évolution mensuelle" du Dashboard principal. Regroupe par
+ * année-mois de la date d'écriture ; les mois sans écriture apparaissent à 0
+ * plutôt que d'être omis, pour que le graphique reste continu.
+ */
+async function getRevenueTrend(req, res) {
+    const { schoolSlug } = req.user;
+    const months = Math.min(Math.max(parseInt(req.query.months) || 6, 1), 24);
+
+    try {
+        const lines = await fetchAllLines(schoolSlug);
+
+        const today = new Date();
+        const monthKeys = [];
+        for (let i = months - 1; i >= 0; i--) {
+            const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+            monthKeys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+        }
+
+        const totalsByMonth = Object.fromEntries(monthKeys.map(k => [k, 0]));
+
+        for (const line of lines) {
+            const acc = line.account;
+            if (!acc || acc.type !== 'produit' || !line.entry?.date) continue;
+            const monthKey = line.entry.date.slice(0, 7);
+            if (monthKey in totalsByMonth) {
+                totalsByMonth[monthKey] += Number(line.credit) - Number(line.debit);
+            }
+        }
+
+        return res.json(monthKeys.map(k => ({ month: k, total: totalsByMonth[k] })));
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+/**
  * Poste automatiquement une écriture (débit Caisse, crédit Produits de scolarité)
  * pour chaque nouveau paiement synchronisé. Best-effort : une erreur ne doit
  * jamais faire échouer la synchronisation appelante.
@@ -379,5 +417,6 @@ module.exports = {
     getBalance,
     getBilan,
     getCompteResultat,
+    getRevenueTrend,
     postPaymentsToLedger
 };

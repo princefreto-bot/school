@@ -14,5 +14,6 @@ router.post('/expenses/upload-proof', accountingController.uploadExpenseProof);
 router.get('/balance', accountingController.getBalance);
 router.get('/bilan', accountingController.getBilan);
 router.get('/compte-resultat', accountingController.getCompteResultat);
+router.get('/revenue-trend', accountingController.getRevenueTrend);
 
 module.exports = router;
