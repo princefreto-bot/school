@@ -120,7 +120,7 @@ export const Pricing: React.FC = () => {
       "Full access to academic record and messaging"
     ],
     buttonText: lang === 'fr' ? "Démarrer l'essai (14j)" : "Start free trial",
-    ctaAction: () => navigate(`/${lang}/parents/login`)
+    ctaAction: () => navigate(`/${lang}/portail-ecole`)
   };
 
   const faqs = lang === 'fr' ? [

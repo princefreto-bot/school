@@ -1,6 +1,28 @@
 const { supabase, supabaseAdmin } = require('../utils/supabase');
 
 const BUCKET_NAME = 'withdrawal-proofs';
+const SIGNED_URL_TTL_SECONDS = 60 * 60; // 1h — bucket privé, même pattern que backupController.js
+
+/**
+ * Remplace les chemins de stockage (proof_image_url / admin_proof_image_url)
+ * d'une liste de retraits par des URLs signées temporaires, sans exposer le bucket
+ * publiquement. Best-effort : une preuve dont l'URL ne peut être signée reste null
+ * plutôt que de faire échouer toute la réponse.
+ */
+async function withSignedProofUrls(withdrawals) {
+    const client = supabaseAdmin || supabase;
+    const sign = async (path) => {
+        if (!path) return null;
+        const { data } = await client.storage.from(BUCKET_NAME).createSignedUrl(path, SIGNED_URL_TTL_SECONDS);
+        return data?.signedUrl || null;
+    };
+
+    return Promise.all((withdrawals || []).map(async (w) => ({
+        ...w,
+        proof_image_url: await sign(w.proof_image_url),
+        admin_proof_image_url: await sign(w.admin_proof_image_url)
+    })));
+}
 
 /**
  * Calcule le solde de ristourne disponible pour une école.
@@ -109,7 +131,7 @@ async function getHistory(req, res) {
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-        return res.json(data);
+        return res.json(await withSignedProofUrls(data));
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }
@@ -156,9 +178,10 @@ async function uploadProof(req, res) {
             return res.status(500).json({ error: 'Erreur upload Storage: ' + uploadError.message });
         }
 
-        const { data: urlData } = client.storage.from(BUCKET_NAME).getPublicUrl(filePath);
-
-        return res.json({ success: true, proofUrl: urlData.publicUrl });
+        // Bucket privé : on renvoie le chemin de stockage (pas d'URL publique). Le
+        // frontend le traite comme une valeur opaque à soumettre telle quelle ;
+        // getHistory() le convertit en URL signée temporaire à l'affichage.
+        return res.json({ success: true, proofUrl: filePath });
     } catch (err) {
         console.error('💥 [Withdrawal Proof] Unexpected error:', err.message);
         return res.status(500).json({ error: 'Erreur interne: ' + err.message });

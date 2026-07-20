@@ -8,6 +8,26 @@ const crypto = require('crypto');
 
 const PRICE_PER_STUDENT = 2100; // FCFA
 const WITHDRAWAL_PROOFS_BUCKET = 'withdrawal-proofs';
+const SIGNED_URL_TTL_SECONDS = 60 * 60; // 1h — bucket privé, même pattern que backupController.js
+
+/**
+ * Voir withdrawalController.js:withSignedProofUrls — même logique, dupliquée ici
+ * plutôt que de créer une dépendance croisée entre les deux contrôleurs.
+ */
+async function withSignedProofUrls(withdrawals) {
+    const client = supabaseAdmin || supabase;
+    const sign = async (path) => {
+        if (!path) return null;
+        const { data } = await client.storage.from(WITHDRAWAL_PROOFS_BUCKET).createSignedUrl(path, SIGNED_URL_TTL_SECONDS);
+        return data?.signedUrl || null;
+    };
+
+    return Promise.all((withdrawals || []).map(async (w) => ({
+        ...w,
+        proof_image_url: await sign(w.proof_image_url),
+        admin_proof_image_url: await sign(w.admin_proof_image_url)
+    })));
+}
 
 // ── GET /api/superadmin/schools ─────────────────────────────────
 // Liste toutes les écoles inscrites avec leurs stats
@@ -548,7 +568,7 @@ async function getWithdrawals(req, res) {
 
         const { data, error } = await query;
         if (error) throw error;
-        return res.json(data);
+        return res.json(await withSignedProofUrls(data));
     } catch (err) {
         return res.status(500).json({ error: 'Erreur getWithdrawals: ' + err.message });
     }
@@ -651,9 +671,9 @@ async function uploadWithdrawalAdminProof(req, res) {
             return res.status(500).json({ error: 'Erreur upload Storage: ' + uploadError.message });
         }
 
-        const { data: urlData } = client.storage.from(WITHDRAWAL_PROOFS_BUCKET).getPublicUrl(filePath);
-
-        return res.json({ success: true, proofUrl: urlData.publicUrl });
+        // Bucket privé : on renvoie le chemin de stockage, converti en URL signée à
+        // l'affichage par getWithdrawals() (withSignedProofUrls).
+        return res.json({ success: true, proofUrl: filePath });
     } catch (err) {
         console.error('💥 [Withdrawal Admin Proof] Unexpected error:', err.message);
         return res.status(500).json({ error: 'Erreur interne: ' + err.message });

@@ -1,6 +1,7 @@
 const { supabase, supabaseAdmin } = require('../utils/supabase');
 
 const EXPENSE_PROOFS_BUCKET = 'expense-proofs';
+const SIGNED_URL_TTL_SECONDS = 60 * 60; // 1h — bucket privé, même pattern que backupController.js
 // Codes du plan comptable par défaut (voir backend/migrations/accounting.sql)
 const CODE_CAISSE = '571';
 const CODE_BANQUE = '521';
@@ -73,7 +74,17 @@ async function getJournalEntries(req, res) {
             });
         }
         const entries = Object.values(entriesById).sort((a, b) => new Date(b.date) - new Date(a.date));
-        return res.json(entries);
+
+        // Bucket "expense-proofs" privé : proof_url stocke un chemin, converti en
+        // URL signée temporaire ici (même pattern que backupController.js).
+        const client = supabaseAdmin || supabase;
+        const entriesWithSignedProofs = await Promise.all(entries.map(async (entry) => {
+            if (!entry.proof_url) return entry;
+            const { data } = await client.storage.from(EXPENSE_PROOFS_BUCKET).createSignedUrl(entry.proof_url, SIGNED_URL_TTL_SECONDS);
+            return { ...entry, proof_url: data?.signedUrl || null };
+        }));
+
+        return res.json(entriesWithSignedProofs);
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }
@@ -160,8 +171,9 @@ async function uploadExpenseProof(req, res) {
             return res.status(500).json({ error: 'Erreur upload Storage: ' + uploadError.message });
         }
 
-        const { data: urlData } = client.storage.from(EXPENSE_PROOFS_BUCKET).getPublicUrl(filePath);
-        return res.json({ success: true, proofUrl: urlData.publicUrl });
+        // Bucket privé : on renvoie le chemin de stockage, converti en URL signée à
+        // l'affichage par getJournalEntries().
+        return res.json({ success: true, proofUrl: filePath });
     } catch (err) {
         return res.status(500).json({ error: 'Erreur interne: ' + err.message });
     }
