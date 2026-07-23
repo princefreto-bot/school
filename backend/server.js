@@ -504,7 +504,17 @@ if (fs.existsSync(frontendDir)) {
     </script>`;
                 }
 
-                // 2. Injecter canonical, hreflangs et JSON-LD dans le head
+                // 1bis. Aligner l'attribut lang de <html> sur la locale de l'URL.
+                // Sans cela le HTML brut sert `<html lang="fr">` même sur /en/*, ce qui
+                // contredit hreflang et perturbe screen readers + prompts de traduction.
+                modifiedHtml = modifiedHtml.replace(
+                    /<html\s+lang="[^"]*"/i,
+                    `<html lang="${currentLang}"`
+                );
+
+                // 2. Injecter canonical, hreflangs et JSON-LD dans le head.
+                // Note : le canonical statique a été retiré de index.html — on est la
+                // seule source d'un <link rel="canonical"> pour éviter les doublons.
                 const seoTags = `
     <link rel="canonical" href="${canonicalUrl}" />
     <link rel="alternate" hreflang="fr" href="${alternateFr}" />

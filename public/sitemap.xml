@@ -199,28 +199,6 @@
     <priority>0.3</priority>
   </url>
 
-  <!-- Login -->
-  <url>
-    <loc>https://dghubschool.com/fr/login</loc>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/login"/>
-
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dghubschool.com/fr/login"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/login"/>
-    <lastmod>2026-06-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://dghubschool.com/en/login</loc>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/login"/>
-
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dghubschool.com/fr/login"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/login"/>
-    <lastmod>2026-06-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
   <!-- Portail école -->
   <url>
     <loc>https://dghubschool.com/fr/portail-ecole</loc>
@@ -243,47 +221,4 @@
     <priority>0.5</priority>
   </url>
 
-  <!-- Créer compte -->
-  <url>
-    <loc>https://dghubschool.com/fr/creer-compte</loc>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/creer-compte"/>
-
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dghubschool.com/fr/creer-compte"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/creer-compte"/>
-    <lastmod>2026-06-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://dghubschool.com/en/creer-compte</loc>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/creer-compte"/>
-
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dghubschool.com/fr/creer-compte"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/creer-compte"/>
-    <lastmod>2026-06-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <!-- Activation licence -->
-  <url>
-    <loc>https://dghubschool.com/fr/activation-licence</loc>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/activation-licence"/>
-
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dghubschool.com/fr/activation-licence"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/activation-licence"/>
-    <lastmod>2026-06-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://dghubschool.com/en/activation-licence</loc>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/activation-licence"/>
-
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dghubschool.com/fr/activation-licence"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/activation-licence"/>
-    <lastmod>2026-06-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
 </urlset>
