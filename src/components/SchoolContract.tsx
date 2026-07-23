@@ -179,7 +179,7 @@ export const SchoolContract: React.FC<SchoolContractProps> = ({ isOpen, onClose,
                         </p>
 
                         <p className="text-xs text-slate-500">
-                            Contact : contact@dghubschool.com | support@dghubschool.com<br/>
+                            Contact : support@dghubschool.com<br/>
                             WhatsApp : +228 72 47 30 27 | Web : www.dghubschool.com
                         </p>
                     </div>

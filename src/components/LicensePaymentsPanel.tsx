@@ -87,7 +87,7 @@ function generateReceiptPdf(payment: LicensePayment) {
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
     doc.text('DGhubSchool — plateforme numérique de gestion scolaire.', 12, y);
-    doc.text('contact@dghubschool.com  ·  WhatsApp +228 72 47 30 27  ·  www.dghubschool.com', 12, y + 4);
+    doc.text('support@dghubschool.com  ·  WhatsApp +228 72 47 30 27  ·  www.dghubschool.com', 12, y + 4);
     doc.text('Ce reçu est généré automatiquement et fait foi du versement effectué via Chariow.', 12, y + 8);
 
     doc.save(`${receiptNo}_${studentName.replace(/\s+/g, '_')}.pdf`);
