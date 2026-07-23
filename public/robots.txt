@@ -1,4 +1,31 @@
 User-agent: *
 Allow: /
 
+# Pages privées / applicatives — pas la peine d'indexer
+Disallow: /fr/login
+Disallow: /en/login
+Disallow: /fr/creer-compte
+Disallow: /en/creer-compte
+Disallow: /fr/confirmer-email
+Disallow: /en/confirmer-email
+Disallow: /fr/reset-password
+Disallow: /en/reset-password
+Disallow: /fr/mot-de-passe-oublie
+Disallow: /en/mot-de-passe-oublie
+Disallow: /fr/activation-licence
+Disallow: /en/activation-licence
+Disallow: /fr/portail-parent/
+Disallow: /en/portail-parent/
+Disallow: /fr/superadmin
+Disallow: /en/superadmin
+Disallow: /admin/
+Disallow: /api/
+
+# Crawlers agressifs — throttle
+User-agent: SemrushBot
+Crawl-delay: 5
+
+User-agent: AhrefsBot
+Crawl-delay: 5
+
 Sitemap: https://dghubschool.com/sitemap.xml
