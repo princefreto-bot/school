@@ -12,6 +12,7 @@ const {
     getParentData,
     getLicensePricing,
     activateLicense,
+    activateLicenseAuto,
     getAcademicYears
 } = require('../controllers/parentController');
 
@@ -28,6 +29,7 @@ router.get('/active-count', getActiveParentsCount);
 router.get('/list', getAllParents);
 router.get('/license-pricing', getLicensePricing);
 router.post('/activate-license', activateLicense);
+router.post('/activate-license-auto', activateLicenseAuto);
 router.get('/:id', getParentById);
 router.delete('/:parentId', adminDeleteAccount);
 

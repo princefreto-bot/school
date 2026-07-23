@@ -38,8 +38,6 @@ export const Pricing: React.FC = () => {
       parentPlanPeriod: "par élève / par an",
       parentPlanDesc: "Contribution annuelle par élève donnant aux parents un accès complet au suivi scolaire en temps réel.",
       parentPlanBtn: "Accéder au portail parent",
-      degressiveTitle: "Tarifs Dégressifs Fratries (Parents)",
-      degressiveSubtitle: "Des abonnements annuels dégressifs calculés pour soulager les familles de plusieurs enfants.",
       faqTitle: "Questions Fréquentes"
     },
     en: {
@@ -59,8 +57,6 @@ export const Pricing: React.FC = () => {
       parentPlanPeriod: "per student / per year",
       parentPlanDesc: "Annual contribution per student giving parents full access to real-time school tracking.",
       parentPlanBtn: "Access parent portal",
-      degressiveTitle: "Degressive Family Rates (Parents)",
-      degressiveSubtitle: "Degressive annual subscriptions calculated to relieve families with multiple children.",
       faqTitle: "Frequently Asked Questions"
     }
   };
@@ -72,8 +68,8 @@ export const Pricing: React.FC = () => {
       name: lang === 'fr' ? "Licence Établissement" : "School License",
       limit: lang === 'fr' ? "Nombre d'élèves illimité" : "Unlimited students",
       price: lang === 'fr' ? "GRATUIT LA 1ÈRE ANNÉE" : "FREE FOR YEAR 1",
-      period: lang === 'fr' ? "Puis tarif par élève dès l'an 2" : "Then per-student fee from year 2",
-      description: lang === 'fr' ? "Un accès total à l'écosystème DGhubSchool, gratuit pendant la première année. À partir de la 2ème année, un tarif par élève s'applique (modalités communiquées aux établissements)." : "Full access to the DGhubSchool ecosystem, free for the first year. From year 2, a per-student fee applies (details shared with schools).",
+      period: lang === 'fr' ? "Puis licence annuelle selon l'effectif dès l'an 2" : "Then annual license by enrolment from year 2",
+      description: lang === 'fr' ? "Un accès total à l'écosystème DGhubSchool, gratuit pendant la première année. À partir de la 2ème année, une licence annuelle unique par établissement s'applique : 65 000 FCFA (0 à 500 élèves), 130 000 FCFA (500 à 1000 élèves), 200 000 FCFA (1000 à 1500 élèves)." : "Full access to the DGhubSchool ecosystem, free for the first year. From year 2, a single annual per-school license applies: 65,000 FCFA (0-500 students), 130,000 FCFA (500-1000), 200,000 FCFA (1000-1500).",
       features: lang === 'fr' ? [
         "Accès complet à la console d'administration et aux statistiques en temps réel",
         "Espace enseignant (notes, moyennes pondérées, appels)",
@@ -136,7 +132,7 @@ export const Pricing: React.FC = () => {
   const faqs = lang === 'fr' ? [
     {
       q: "Combien coûte DGhubSchool pour un établissement ?",
-      a: "La création de compte établissement et l'utilisation de la plateforme avec un nombre illimité d'élèves sont totalement gratuites pendant la première année. À partir de la 2ème année, un tarif par élève s'applique — les modalités exactes sont communiquées aux établissements avant la fin de leur première année."
+      a: "La 1ère année est entièrement gratuite, sans limite d'élèves. À partir de la 2ème année, une licence annuelle unique par établissement s'applique selon l'effectif : 65 000 FCFA/an (0 à 500 élèves), 130 000 FCFA/an (500 à 1000 élèves), 200 000 FCFA/an (1000 à 1500 élèves). Les modalités de paiement sont communiquées avant la fin de la première année."
     },
     {
       q: "Comment fonctionne l'essai pour les parents ?",
@@ -153,7 +149,7 @@ export const Pricing: React.FC = () => {
   ] : [
     {
       q: "How much does DGhubSchool cost for a school?",
-      a: "School account creation and platform usage with unlimited students are completely free for the first year. From year 2, a per-student fee applies — the exact terms are shared with schools before the end of their first year."
+      a: "Year 1 is fully free, with unlimited students. From year 2, a single annual per-school license applies based on enrolment: 65,000 FCFA/year (0-500 students), 130,000 FCFA/year (500-1000), 200,000 FCFA/year (1000-1500). Payment terms are shared before the end of year 1."
     },
     {
       q: "How does the parent trial work?",
@@ -297,6 +293,43 @@ export const Pricing: React.FC = () => {
                 </div>
               ))}
               </div>
+            </div>
+
+            {/* Year 2 tiers table */}
+            <div className="max-w-3xl mx-auto mt-10 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+              <div className="text-center mb-4">
+                <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/30 px-3 py-1 rounded-full inline-block">
+                  {lang === 'fr' ? 'À partir de la 2ème année' : 'From year 2 onward'}
+                </span>
+                <h4 className="text-lg font-black text-slate-950 dark:text-white mt-3">
+                  {lang === 'fr' ? 'Licence annuelle par établissement' : 'Annual license per school'}
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                  {lang === 'fr' ? "Un tarif unique et annuel selon l'effectif d'élèves inscrits." : 'One flat annual fee based on total enrolment.'}
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-center">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{lang === 'fr' ? '0 à 500 élèves' : '0 to 500 students'}</p>
+                  <p className="text-2xl font-black text-slate-950 dark:text-white mt-1">65 000<span className="text-sm text-slate-400 font-bold ml-1">FCFA</span></p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{lang === 'fr' ? 'par an' : 'per year'}</p>
+                </div>
+                <div className="border-2 border-amber-400 dark:border-amber-500/60 rounded-xl p-4 text-center bg-amber-50/30 dark:bg-amber-950/10">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-amber-600">{lang === 'fr' ? '500 à 1000 élèves' : '500 to 1000 students'}</p>
+                  <p className="text-2xl font-black text-slate-950 dark:text-white mt-1">130 000<span className="text-sm text-slate-400 font-bold ml-1">FCFA</span></p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{lang === 'fr' ? 'par an' : 'per year'}</p>
+                </div>
+                <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-center">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{lang === 'fr' ? '1000 à 1500 élèves' : '1000 to 1500 students'}</p>
+                  <p className="text-2xl font-black text-slate-950 dark:text-white mt-1">200 000<span className="text-sm text-slate-400 font-bold ml-1">FCFA</span></p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{lang === 'fr' ? 'par an' : 'per year'}</p>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 text-center mt-4 font-medium">
+                {lang === 'fr'
+                  ? "Modalités de paiement communiquées à chaque école avant la fin de sa 1ère année. Aucun engagement pendant la période gratuite."
+                  : "Payment terms are shared with each school before the end of year 1. No commitment during the free period."}
+              </p>
             </div>
           </div>
         ) : (

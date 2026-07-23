@@ -782,7 +782,7 @@ async function _autoAssignBadgesSync(parentId, studentId, schoolSlug) {
 
 /**
  * GET /api/parent/license-pricing
- * Calcule le prix des licences (1 enfant = 1500 F, 3 = 4000 F, 5 = 7000 F)
+ * Calcule le prix total : 2 100 F par enfant, payable en 3 tranches de 700 F.
  */
 async function getLicensePricing(req, res) {
     const { id: parentId, schoolSlug } = req.user;
@@ -827,6 +827,49 @@ async function getLicensePricing(req, res) {
             }
         });
     } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+/**
+ * POST /api/parent/activate-license-auto
+ * Active une licence pour le PREMIER enfant du parent connecté qui n'a pas encore
+ * de licence active. Utilisé par le flux de redirection Chariow après paiement,
+ * pour que le parent n'ait pas à saisir la clé manuellement.
+ */
+async function activateLicenseAuto(req, res) {
+    const { id: parentId, schoolSlug } = req.user;
+    const { licenseKey } = req.body;
+
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+    if (!licenseKey) return res.status(400).json({ error: 'Clé de licence requise.' });
+
+    try {
+        const { data: links, error: linksErr } = await supabase
+            .from(`parent_student_${schoolSlug}`)
+            .select('student_id')
+            .eq('parent_id', parentId);
+        if (linksErr) throw linksErr;
+        if (!links || links.length === 0) {
+            return res.status(404).json({ error: 'Aucun enfant lié à ce compte parent.' });
+        }
+
+        const studentIds = links.map(l => l.student_id);
+        const { data: students, error: stErr } = await supabase
+            .from(`students_${schoolSlug}`)
+            .select('id, license_status')
+            .in('id', studentIds);
+        if (stErr) throw stErr;
+
+        const target = (students || []).find(s => (s.license_status || 'inactive') !== 'active');
+        if (!target) {
+            return res.json({ success: true, message: 'Toutes les licences sont déjà actives.', alreadyActive: true });
+        }
+
+        req.body = { studentId: target.id, licenseKey };
+        return activateLicense(req, res);
+    } catch (err) {
+        console.error('activateLicenseAuto error:', err);
         return res.status(500).json({ error: err.message });
     }
 }
@@ -1004,5 +1047,6 @@ module.exports = {
     getParentData,
     getLicensePricing,
     activateLicense,
+    activateLicenseAuto,
     getAcademicYears
 };
