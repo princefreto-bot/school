@@ -8,6 +8,7 @@ import {
   Wallet, TrendingUp, Clock, CheckCircle, XCircle, Camera,
   Loader2, Send, ExternalLink, Sparkles, AlertCircle
 } from 'lucide-react';
+import { SchoolLicenseRevenuePanel } from '../components/SchoolLicenseRevenuePanel';
 
 const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n) + ' FCFA';
 const fmtDate = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -277,6 +278,9 @@ export const Retraits: React.FC = () => {
               </button>
             </form>
           )}
+
+          {/* ── Détail des paiements parents (revenus reversés) ── */}
+          <SchoolLicenseRevenuePanel />
 
           {/* ── Historique ── */}
           <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">

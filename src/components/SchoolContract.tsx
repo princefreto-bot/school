@@ -121,7 +121,15 @@ export const SchoolContract: React.FC<SchoolContractProps> = ({ isOpen, onClose,
 
                         <p><strong>5.1 — Accès École</strong></p>
                         <p>
-                            La création du compte établissement et l'utilisation de l'ensemble des fonctionnalités d'administration sont <strong>gratuites pendant la première année</strong> suivant la création du compte. À compter de la 2<sup>e</sup> année, l'accès de l'École est conditionné au paiement d'une licence de <strong>[MONTANT À PRÉCISER] FCFA par élève et par an</strong>, payable en <strong>[MODALITÉS DE TRANCHES À PRÉCISER]</strong>. Les modalités de paiement (dont les liens ou moyens de paiement acceptés) seront communiquées à l'École avant la fin de sa première année d'utilisation. Si cette licence n'est pas réglée à l'échéance, l'accès de l'École pourra être suspendu jusqu'au règlement, sans que cela ne constitue une rupture du présent contrat ni n'engage de pénalité au-delà du montant dû.
+                            La création du compte établissement et l'utilisation de l'ensemble des fonctionnalités d'administration sont <strong>gratuites pendant la première année</strong> suivant la création du compte. À compter de la 2<sup>e</sup> année, l'accès de l'École est conditionné au paiement d'une <strong>licence annuelle unique par établissement</strong>, selon l'effectif d'élèves inscrits :
+                        </p>
+                        <ul>
+                            <li><strong>65 000 FCFA/an</strong> pour un effectif de 0 à 500 élèves ;</li>
+                            <li><strong>130 000 FCFA/an</strong> pour un effectif de 500 à 1 000 élèves ;</li>
+                            <li><strong>200 000 FCFA/an</strong> pour un effectif de 1 000 à 1 500 élèves.</li>
+                        </ul>
+                        <p>
+                            Les modalités de paiement seront communiquées à l'École avant la fin de sa première année d'utilisation. Si cette licence n'est pas réglée à l'échéance, l'accès de l'École pourra être suspendu jusqu'au règlement, sans que cela ne constitue une rupture du présent contrat ni n'engage de pénalité au-delà du montant dû.
                         </p>
 
                         <p><strong>5.2 — Comptes Parents</strong></p>
@@ -130,12 +138,19 @@ export const SchoolContract: React.FC<SchoolContractProps> = ({ isOpen, onClose,
                         </p>
                         <ul>
                             <li>Les parents bénéficient d'une période de grâce de <strong>14 jours</strong> après inscription pour consulter les informations de leurs enfants ;</li>
-                            <li>Passé ce délai, l'accès complet du compte parent est conditionné à l'activation d'une licence de <strong>2 100 FCFA</strong> par élève et par an, payable en trois (3) tranches de <strong>700 FCFA</strong>.</li>
+                            <li>Passé ce délai, l'accès complet du compte parent est conditionné à l'activation d'une licence de <strong>2 100 FCFA</strong> par élève et par an, payable en <strong>trois (3) tranches de 700 FCFA</strong> ou en une seule fois ;</li>
+                            <li><strong>Chaque tranche fait l'objet d'un enregistrement individuel</strong> (numéro de tranche, date, clé, montant). Le parent peut à tout moment consulter et télécharger le <strong>reçu PDF</strong> de chacune de ses tranches depuis son espace personnel ;</li>
+                            <li>L'école consulte en temps réel, dans son propre espace, la liste détaillée des paiements effectués par les parents de ses élèves.</li>
                         </ul>
 
                         <p><strong>5.3 — Reversement à l'École</strong></p>
                         <p>
-                            Indépendamment du paiement décrit au 5.1, le Prestataire reverse à l'École <strong>un tiers (700 FCFA)</strong> de chaque licence parent soldée en totalité (§5.2). Ce montant appartient à l'École ; la manière dont elle en dispose (répartition interne, réinvestissement, etc.) relève de sa seule décision.
+                            Indépendamment du paiement décrit au 5.1, le Prestataire reverse à l'École <strong>un tiers (700 FCFA)</strong> de chaque licence parent <strong>entièrement soldée</strong> (§5.2). Ce reversement est <strong>automatiquement crédité au solde retrait de l'École</strong> dès l'enregistrement de la dernière tranche (ou du règlement en une seule fois). Ce montant appartient à l'École ; la manière dont elle en dispose (répartition interne, réinvestissement, etc.) relève de sa seule décision.
+                        </p>
+
+                        <p><strong>5.4 — Traçabilité et contrôle</strong></p>
+                        <p>
+                            L'ensemble des paiements de licence est enregistré de manière individuelle dans les registres du Prestataire. L'École et le Prestataire disposent d'un accès complet à ces registres pour leur périmètre respectif. Le Prestataire conserve un journal global permettant la génération de <strong>rapports d'activité</strong> (récapitulatifs par école, par période) à des fins d'audit et de reporting.
                         </p>
 
                         <h4>Article 6 — Retraits</h4>

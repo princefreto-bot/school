@@ -1,4 +1,15 @@
 const { supabase } = require('../utils/supabase');
+const { sendSuperadminLicensePaymentAlert } = require('../utils/mailer');
+
+// Chariow — mapping product_id -> montant unitaire (FCFA)
+// Utilisé pour reconnaître si un paiement est une tranche ou un règlement complet.
+const CHARIOW_PRODUCT_AMOUNTS = {
+    'prd_u611otjw': 700,   // Licence d'abonnement (tranche)
+    'prd_27g3ge9e': 2100,  // Licence d'abonnements complet
+};
+const CHARIOW_LICENSE_TOTAL = 2100;
+const CHARIOW_TRANCHE_COUNT = 3;
+const CHARIOW_TRANCHE_AMOUNT = 700;
 
 async function resolveAcademicYearId(schoolSlug, req) {
     let yearName = req.headers['x-academic-year'];
@@ -861,10 +872,29 @@ async function activateLicenseAuto(req, res) {
             .in('id', studentIds);
         if (stErr) throw stErr;
 
-        const target = (students || []).find(s => (s.license_status || 'inactive') !== 'active');
-        if (!target) {
+        const unlicensed = (students || []).filter(s => (s.license_status || 'inactive') !== 'active');
+        if (unlicensed.length === 0) {
             return res.json({ success: true, message: 'Toutes les licences sont déjà actives.', alreadyActive: true });
         }
+
+        // Privilégier l'enfant avec des tranches déjà entamées (poursuite du paiement en cours),
+        // sinon prendre le premier enfant sans aucune tranche.
+        const { data: partials, error: partErr } = await supabase
+            .from(`license_payments_${schoolSlug}`)
+            .select('student_id, amount')
+            .in('student_id', unlicensed.map(s => s.id));
+        if (partErr) throw partErr;
+
+        const totalsByStudent = new Map();
+        (partials || []).forEach(p => {
+            totalsByStudent.set(p.student_id, (totalsByStudent.get(p.student_id) || 0) + (p.amount || 0));
+        });
+        const withPartial = unlicensed
+            .map(s => ({ id: s.id, total: totalsByStudent.get(s.id) || 0 }))
+            .filter(s => s.total > 0 && s.total < CHARIOW_LICENSE_TOTAL)
+            .sort((a, b) => b.total - a.total);
+
+        const target = withPartial[0] || unlicensed[0];
 
         req.body = { studentId: target.id, licenseKey };
         return activateLicense(req, res);
@@ -992,23 +1022,121 @@ async function activateLicense(req, res) {
             }
         }
 
-        if (isValid) {
-            // Mettre à jour la base
-            const { error: updErr = null } = await supabase
-                .from(`students_${schoolSlug}`)
-                .update({
-                    license_key: cleanKey,
-                    license_status: 'active',
-                    license_activated_at: new Date().toISOString()
-                })
-                .eq('id', studentId);
-
-            if (updErr) throw updErr;
-
-            return res.json({ success: true, message: 'Licence activée avec succès !', license: chariowData });
-        } else {
+        if (!isValid) {
             return res.status(400).json({ error: 'Validation de licence échouée.' });
         }
+
+        // 3. Résoudre le montant du paiement à partir du produit Chariow
+        const productId = chariowData?.product?.id || null;
+        const productSlug = chariowData?.product?.slug || null;
+        const saleId = chariowData?.sale?.id || chariowData?.sale_id || null;
+        const paymentAmount = (productId && CHARIOW_PRODUCT_AMOUNTS[productId])
+            || CHARIOW_TRANCHE_AMOUNT; // fallback tranche 700 F
+
+        // 4. Refuser la réutilisation d'une clé déjà enregistrée (idempotence)
+        const { data: existingForKey } = await supabase
+            .from(`license_payments_${schoolSlug}`)
+            .select('id')
+            .eq('license_key', cleanKey)
+            .maybeSingle();
+        if (existingForKey) {
+            return res.status(400).json({ error: 'Cette clé de licence a déjà été utilisée.' });
+        }
+
+        // 5. Calculer les paiements déjà validés pour cet élève
+        const { data: previousRows, error: prevErr } = await supabase
+            .from(`license_payments_${schoolSlug}`)
+            .select('amount, tranche_number, paid_at')
+            .eq('student_id', studentId)
+            .order('paid_at', { ascending: true });
+        if (prevErr) throw prevErr;
+
+        const previousTotal = (previousRows || []).reduce((s, r) => s + (r.amount || 0), 0);
+        if (previousTotal >= CHARIOW_LICENSE_TOTAL) {
+            return res.status(400).json({ error: 'La licence de cet élève est déjà entièrement soldée.' });
+        }
+
+        // 6. Numéro de tranche : 0 pour paiement complet (2100), sinon incrémental
+        const trancheNumber = paymentAmount >= CHARIOW_LICENSE_TOTAL
+            ? 0
+            : Math.min((previousRows || []).length + 1, CHARIOW_TRANCHE_COUNT);
+        const newTotal = previousTotal + paymentAmount;
+        const isFinal = newTotal >= CHARIOW_LICENSE_TOTAL;
+
+        // 7. Enregistrer la ligne de paiement
+        const academicYearId = await resolveAcademicYearId(schoolSlug, req);
+        const { error: insErr } = await supabase
+            .from(`license_payments_${schoolSlug}`)
+            .insert({
+                student_id: studentId,
+                parent_id: parentId,
+                academic_year_id: academicYearId,
+                license_key: cleanKey,
+                sale_id: saleId,
+                product_id: productId || productSlug,
+                amount: paymentAmount,
+                tranche_number: trancheNumber,
+                is_final: isFinal
+            });
+        if (insErr) throw insErr;
+
+        // 8. Mettre à jour l'élève : active uniquement si soldé
+        const studentUpdate = { license_key: cleanKey };
+        if (isFinal) {
+            studentUpdate.license_status = 'active';
+            studentUpdate.license_activated_at = new Date().toISOString();
+        }
+        const { error: updErr } = await supabase
+            .from(`students_${schoolSlug}`)
+            .update(studentUpdate)
+            .eq('id', studentId);
+        if (updErr) throw updErr;
+
+        const amountRemaining = Math.max(0, CHARIOW_LICENSE_TOTAL - newTotal);
+        const tranchesPaid = trancheNumber === 0 ? CHARIOW_TRANCHE_COUNT : trancheNumber;
+        const tranchesRemaining = Math.max(0, CHARIOW_TRANCHE_COUNT - tranchesPaid);
+
+        // Notification superadmin (fire-and-forget, ne bloque pas la réponse)
+        (async () => {
+            try {
+                const [{ data: school }, { data: student }, { data: parentProfile }] = await Promise.all([
+                    supabase.from('schools').select('name').eq('slug', schoolSlug).maybeSingle(),
+                    supabase.from(`students_${schoolSlug}`).select('nom, prenom, classe').eq('id', studentId).maybeSingle(),
+                    supabase.from(`profiles_${schoolSlug}`).select('nom, telephone').eq('id', parentId).maybeSingle()
+                ]);
+                await sendSuperadminLicensePaymentAlert({
+                    schoolName: school?.name || schoolSlug,
+                    schoolSlug,
+                    studentName: student ? `${student.prenom} ${student.nom}${student.classe ? ' (' + student.classe + ')' : ''}` : '—',
+                    parentName: parentProfile ? `${parentProfile.nom}${parentProfile.telephone ? ' · ' + parentProfile.telephone : ''}` : '—',
+                    amount: paymentAmount,
+                    trancheLabel: trancheNumber === 0 ? 'Règlement complet' : `Tranche ${trancheNumber}/${CHARIOW_TRANCHE_COUNT}`,
+                    isFinal,
+                    totalPaid: newTotal,
+                    licenseKey: cleanKey
+                });
+            } catch (e) {
+                console.error('Notification superadmin licence: erreur non bloquante', e.message);
+            }
+        })();
+
+        return res.json({
+            success: true,
+            message: isFinal
+                ? 'Paiement complet enregistré. Licence activée avec succès !'
+                : `Tranche ${trancheNumber}/${CHARIOW_TRANCHE_COUNT} validée. Il vous reste ${amountRemaining} F CFA à régler.`,
+            license: chariowData,
+            payment: {
+                amount: paymentAmount,
+                trancheNumber,
+                tranchesPaid,
+                tranchesRemaining,
+                totalPaid: newTotal,
+                totalRequired: CHARIOW_LICENSE_TOTAL,
+                amountRemaining,
+                isFullyPaid: isFinal
+            }
+        });
     } catch (err) {
         console.error('activateLicense Error:', err.message);
         return res.status(500).json({ error: 'Erreur serveur: ' + err.message });

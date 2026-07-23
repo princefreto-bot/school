@@ -8,6 +8,7 @@ import {
     FileText, Play, Download
 } from 'lucide-react';
 import { LinkStudentModal } from '../../components/LinkStudentModal';
+import { LicensePaymentsPanel } from '../../components/LicensePaymentsPanel';
 import { SupportModal } from '../../components/SupportModal';
 import { LicenseLockScreen } from '../../components/LicenseLockScreen';
 import { ParentTodaySchedule } from '../../components/ParentTodaySchedule';
@@ -824,6 +825,9 @@ export const ParentDashboard: React.FC = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Historique des paiements de licence + reçus téléchargeables */}
+                <LicensePaymentsPanel />
             </div>
 
             {isLicenseReminderOpen && (

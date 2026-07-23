@@ -118,4 +118,80 @@ async function sendPasswordResetEmail(toEmail, resetLink) {
     return sendResendEmail(toEmail, `[DGhubSchool] Réinitialisation de votre mot de passe`, htmlContent);
 }
 
-module.exports = { sendVerificationEmail, sendPasswordResetEmail };
+/**
+ * Notification superadmin — un paiement de licence parent vient d'être enregistré.
+ * @param {object} info { schoolName, schoolSlug, studentName, parentName, amount, trancheLabel, isFinal, totalPaid, licenseKey }
+ */
+async function sendSuperadminLicensePaymentAlert(info) {
+    const to = process.env.SUPERADMIN_EMAIL;
+    if (!to) {
+        console.log('[Mailer] SUPERADMIN_EMAIL non configuré — notification licence ignorée.');
+        return false;
+    }
+
+    const {
+        schoolName = '—',
+        schoolSlug = '—',
+        studentName = '—',
+        parentName = '—',
+        amount = 0,
+        trancheLabel = '—',
+        isFinal = false,
+        totalPaid = 0,
+        licenseKey = '—'
+    } = info || {};
+
+    const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n) + ' F CFA';
+    const badgeColor = isFinal ? '#059669' : '#d97706';
+    const badgeText = isFinal ? 'LICENCE SOLDÉE — +700 F reversés à l\'école' : 'Tranche partielle enregistrée';
+
+    const html = `
+        <div style="font-family: 'Poppins', Helvetica, Arial, sans-serif; max-width: 620px; margin: 0 auto; padding: 24px; border: 1px solid #f1f5f9; border-radius: 16px; background-color: #ffffff;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="https://dghubschool.com/logo.png" alt="DGhubSchool" style="height: 48px; margin-bottom: 12px; object-fit: contain;" />
+                <h2 style="color: #0f172a; margin: 8px 0 0; font-weight: 800; font-size: 20px;">Nouveau paiement de licence parent</h2>
+                <span style="display:inline-block; margin-top:10px; padding: 4px 12px; background-color: ${badgeColor}; color: #fff; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
+                    ${badgeText}
+                </span>
+            </div>
+
+            <table style="width:100%; border-collapse: collapse; font-size: 13px; color: #334155;">
+                <tr><td style="padding:8px 0; font-weight:700; color:#0f172a; width:38%;">École</td><td style="padding:8px 0;">${schoolName} <span style="color:#94a3b8;">(${schoolSlug})</span></td></tr>
+                <tr style="background:#f8fafc;"><td style="padding:8px; font-weight:700; color:#0f172a;">Élève</td><td style="padding:8px;">${studentName}</td></tr>
+                <tr><td style="padding:8px 0; font-weight:700; color:#0f172a;">Parent</td><td style="padding:8px 0;">${parentName}</td></tr>
+                <tr style="background:#f8fafc;"><td style="padding:8px; font-weight:700; color:#0f172a;">Montant</td><td style="padding:8px; font-weight:800;">${fmt(amount)}</td></tr>
+                <tr><td style="padding:8px 0; font-weight:700; color:#0f172a;">Type</td><td style="padding:8px 0;">${trancheLabel}</td></tr>
+                <tr style="background:#f8fafc;"><td style="padding:8px; font-weight:700; color:#0f172a;">Total payé (élève)</td><td style="padding:8px;">${fmt(totalPaid)} / 2 100 F CFA</td></tr>
+                <tr><td style="padding:8px 0; font-weight:700; color:#0f172a;">Clé Chariow</td><td style="padding:8px 0; font-family: monospace; font-size:11px; color:#64748b;">${licenseKey}</td></tr>
+            </table>
+
+            ${isFinal ? `
+                <div style="margin-top:20px; padding:14px; background:#ecfdf5; border-left:4px solid #059669; border-radius:8px; color:#065f46; font-size:12px;">
+                    <strong>Licence entièrement soldée.</strong> 700 F CFA ont été automatiquement crédités au solde retrait de <strong>${schoolName}</strong>.
+                </div>
+            ` : ''}
+
+            <div style="margin-top:24px; text-align:center;">
+                <a href="https://www.dghubschool.com/fr/superadmin" style="display:inline-block; padding:12px 28px; background:#0f172a; color:#fff; text-decoration:none; border-radius:10px; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;">
+                    Ouvrir le dashboard superadmin
+                </a>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
+            <p style="color: #94a3b8; font-size: 11px; text-align: center; line-height: 1.4; margin:0;">
+                Notification automatique · DGHUBSCHOOL SaaS<br />
+                Reçue par ${to}
+            </p>
+        </div>
+    `;
+
+    try {
+        await sendResendEmail(to, `[DGhubSchool] ${isFinal ? '✅ Licence soldée' : '🧾 Tranche reçue'} — ${schoolName} — ${fmt(amount)}`, html);
+        return true;
+    } catch (err) {
+        console.error('[Mailer] Notification superadmin échouée:', err.message);
+        return false;
+    }
+}
+
+module.exports = { sendVerificationEmail, sendPasswordResetEmail, sendSuperadminLicensePaymentAlert };

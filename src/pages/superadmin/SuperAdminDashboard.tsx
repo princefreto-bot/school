@@ -11,6 +11,7 @@ import {
 import { School } from '../../types';
 import { API_BASE_URL } from '../../config';
 import { useStore } from '../../store/useStore';
+import { SuperAdminLicensePaymentsPanel } from '../../components/SuperAdminLicensePaymentsPanel';
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -1409,6 +1410,11 @@ export const SuperAdminDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Feed licences parents (toutes écoles) */}
+      <div className="max-w-7xl mx-auto px-4 pb-8">
+        <SuperAdminLicensePaymentsPanel />
+      </div>
 
       {/* Modal création école */}
       {showCreateModal && (
