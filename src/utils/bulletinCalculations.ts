@@ -84,14 +84,13 @@ const getPeriodesAntérieures = (periode: PeriodeType): PeriodeType[] => {
  * Permet de déterminer les rangs (Matière & Général) et les moyennes annuelles cumulées.
  */
 export const calculerBulletinsClasse = (
-    classe: string, 
+    classe: string,
     periode: PeriodeType,
     students: Student[],
     matieres: Matiere[],
     classeMatieres: ClasseMatiere[],
     notes: Note[],
-    presences: any[] = [],
-    simulerPeriodesVides: boolean = false
+    presences: any[] = []
 ): BulletinEleveResultat[] => {
     
     const elevesDeLaClasse = students.filter(s => s.classe === classe);
@@ -122,13 +121,7 @@ export const calculerBulletinsClasse = (
             const mat = matieres.find(m => m.id === cm.matiereId);
             if (!mat) return;
 
-            let n = notes.find(x => x.eleveId === eleve.id && x.matiereId === cm.matiereId && x.periode === periode);
-            
-            // Simulation : repli sur T1/S1 si la période actuelle est vide
-            if (simulerPeriodesVides && (!n || (n.noteClasse === null && n.noteDevoir === null && n.noteCompo === null))) {
-                const fallbackNote = notes.find(x => x.eleveId === eleve.id && x.matiereId === cm.matiereId && x.periode === (periode.includes('SEMESTRE') ? 'SEMESTRE 1' : 'TRIMESTRE 1'));
-                if (fallbackNote) n = fallbackNote;
-            }
+            const n = notes.find(x => x.eleveId === eleve.id && x.matiereId === cm.matiereId && x.periode === periode);
 
             const nc = n?.noteClasse ?? null;
             const nd = n?.noteDevoir ?? null;
@@ -185,17 +178,7 @@ export const calculerBulletinsClasse = (
             }
         });
 
-        let moyGen = totalCoefsGen > 0 ? (totalPointsGen / totalCoefsGen) : 0;
-
-        // --- Saisie directe de la moyenne générale (sans matières) ---
-        let genAvgNote = notes.find(x => x.eleveId === eleve.id && x.matiereId === 'moyenne_generale' && x.periode === periode);
-        if (simulerPeriodesVides && (!genAvgNote || genAvgNote.noteCompo === null)) {
-            const fallbackGenAvg = notes.find(x => x.eleveId === eleve.id && x.matiereId === 'moyenne_generale' && x.periode === (periode.includes('SEMESTRE') ? 'SEMESTRE 1' : 'TRIMESTRE 1'));
-            if (fallbackGenAvg) genAvgNote = fallbackGenAvg;
-        }
-        if (genAvgNote && genAvgNote.noteCompo !== null) {
-            moyGen = genAvgNote.noteCompo;
-        }
+        const moyGen = totalCoefsGen > 0 ? (totalPointsGen / totalCoefsGen) : 0;
 
         return {
             eleve,
@@ -246,41 +229,8 @@ export const calculerBulletinsClasse = (
                 let totalPts = 0;
                 let totalCoefs = 0;
 
-                // Saisie directe de la moyenne générale antérieure
-                let genAvgNote = notes.find(x => x.eleveId === e.id && x.matiereId === 'moyenne_generale' && x.periode === p);
-                if (simulerPeriodesVides && (!genAvgNote || genAvgNote.noteCompo === null)) {
-                    if (p === 'TRIMESTRE 2' || p === 'TRIMESTRE 3') {
-                        const fallbackGenAvg = notes.find(x => x.eleveId === e.id && x.matiereId === 'moyenne_generale' && x.periode === 'TRIMESTRE 1');
-                        if (fallbackGenAvg) genAvgNote = fallbackGenAvg;
-                    } else if (p === 'SEMESTRE 2') {
-                        const fallbackGenAvg = notes.find(x => x.eleveId === e.id && x.matiereId === 'moyenne_generale' && x.periode === 'SEMESTRE 1');
-                        if (fallbackGenAvg) genAvgNote = fallbackGenAvg;
-                    }
-                }
-
-                if (genAvgNote && genAvgNote.noteCompo !== null) {
-                    const absences = presences.filter(pr => pr.eleveId === e.id && pr.statut === 'absent' && pr.periode === p).length;
-                    const retards = presences.filter(pr => pr.eleveId === e.id && pr.statut === 'retard' && pr.periode === p).length;
-                    return {
-                        id: e.id,
-                        moy: genAvgNote.noteCompo,
-                        abs: absences,
-                        ret: retards
-                    };
-                }
-
                 configsMatiere.forEach(cm => {
-                    let n = notes.find(x => x.eleveId === e.id && x.matiereId === cm.matiereId && x.periode === p);
-                    
-                    if (simulerPeriodesVides && (!n || (n.noteClasse === null && n.noteDevoir === null && n.noteCompo === null))) {
-                        if (p === 'TRIMESTRE 2' || p === 'TRIMESTRE 3') {
-                            const fallbackNote = notes.find(x => x.eleveId === e.id && x.matiereId === cm.matiereId && x.periode === 'TRIMESTRE 1');
-                            if (fallbackNote) n = fallbackNote;
-                        } else if (p === 'SEMESTRE 2') {
-                            const fallbackNote = notes.find(x => x.eleveId === e.id && x.matiereId === cm.matiereId && x.periode === 'SEMESTRE 1');
-                            if (fallbackNote) n = fallbackNote;
-                        }
-                    }
+                    const n = notes.find(x => x.eleveId === e.id && x.matiereId === cm.matiereId && x.periode === p);
 
                     if (n) {
                         const nc = n.noteClasse ?? null;

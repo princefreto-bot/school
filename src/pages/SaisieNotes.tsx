@@ -40,7 +40,6 @@ export const SaisieNotes: React.FC = () => {
 
     const [selectedClasse, setSelectedClasse] = useState('');
     const [selectedMatiereId, setSelectedMatiereId] = useState('');
-    const [saisieMode, setSaisieMode] = useState<'matieres' | 'moyenne_generale'>('matieres');
     const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
     const selectedClassObj = students.find(s => s.classe === selectedClasse);
@@ -88,12 +87,10 @@ export const SaisieNotes: React.FC = () => {
     const [importFeedback, setImportFeedback] = useState<{ matchedCount: number; errors: string[] } | null>(null);
     const [importing, setImporting] = useState(false);
 
-    const currentMatiereLabel = saisieMode === 'moyenne_generale'
-        ? 'Moyenne Generale'
-        : (availableMatieres.find(item => item.mat!.id === selectedMatiereId)?.mat?.nom || '');
+    const currentMatiereLabel = availableMatieres.find(item => item.mat!.id === selectedMatiereId)?.mat?.nom || '';
 
     const handleDownloadTemplate = () => {
-        exportNotesTemplate(classStudents, draftNotes, selectedClasse, currentMatiereLabel, saisieMode);
+        exportNotesTemplate(classStudents, draftNotes, selectedClasse, currentMatiereLabel);
     };
 
     const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,7 +101,7 @@ export const SaisieNotes: React.FC = () => {
         setImporting(true);
         setImportFeedback(null);
         try {
-            const result = await importNotesFromExcel(file, classStudents, saisieMode);
+            const result = await importNotesFromExcel(file, classStudents);
             if (result.matchedCount > 0) {
                 isDirtyRef.current = true;
                 setDraftNotes(prev => ({ ...prev, ...result.updates }));
@@ -119,16 +116,15 @@ export const SaisieNotes: React.FC = () => {
 
     // Déclencher un rechargement forcé du cloud lors de la sélection pour s'assurer que les données sont fraîches
     React.useEffect(() => {
-        const targetMatiereId = saisieMode === 'moyenne_generale' ? 'moyenne_generale' : selectedMatiereId;
-        if (selectedClasse && targetMatiereId) {
-            console.log(`📥 [SaisieNotes] Chargement forcé des notes pour la classe ${selectedClasse} et la matière ${targetMatiereId}...`);
+        if (selectedClasse && selectedMatiereId) {
+            console.log(`📥 [SaisieNotes] Chargement forcé des notes pour la classe ${selectedClasse} et la matière ${selectedMatiereId}...`);
             useStore.getState().fetchAllFromBackend(true);
         }
-    }, [selectedClasse, selectedMatiereId, saisieMode, currentPeriode]);
+    }, [selectedClasse, selectedMatiereId, currentPeriode]);
 
     // Charge les notes existantes dans le brouillon quand la sélection, les élèves ou les notes du store changent
     React.useEffect(() => {
-        const targetMatiereId = saisieMode === 'moyenne_generale' ? 'moyenne_generale' : selectedMatiereId;
+        const targetMatiereId = selectedMatiereId;
         const selectionKey = `${selectedClasse}|${targetMatiereId}|${currentPeriode}`;
 
         // Si la sélection a changé, on n'est plus "dirty", on peut recharger
@@ -159,7 +155,7 @@ export const SaisieNotes: React.FC = () => {
             };
         });
         setDraftNotes(newDrafts);
-    }, [selectedClasse, selectedMatiereId, saisieMode, currentPeriode, classStudents, useStore((s) => s.notes)]);
+    }, [selectedClasse, selectedMatiereId, currentPeriode, classStudents, useStore((s) => s.notes)]);
 
     const handleNoteChange = (studentId: string, field: 'noteClasse' | 'noteDevoir' | 'noteCompo', value: string) => {
         // Validation basique (on autorise chiffres, point, virgule)
@@ -177,24 +173,24 @@ export const SaisieNotes: React.FC = () => {
     };
 
     const handleSave = async () => {
-        const targetMatiereId = saisieMode === 'moyenne_generale' ? 'moyenne_generale' : selectedMatiereId;
-        if (!targetMatiereId || !selectedClasse) return;
+        if (!selectedMatiereId || !selectedClasse) return;
+        const targetMatiereId = selectedMatiereId;
 
         const currentNotes = useStore.getState().notes;
         const batch: Note[] = [];
-        
+
         classStudents.forEach(student => {
             const draft = draftNotes[student.id];
             if (draft) {
                 // Chercher si une note existe déjà pour cet élève/matière/période
-                const existingNote = currentNotes.find(n => 
-                    n.eleveId === student.id && 
-                    n.matiereId === targetMatiereId && 
+                const existingNote = currentNotes.find(n =>
+                    n.eleveId === student.id &&
+                    n.matiereId === targetMatiereId &&
                     n.periode === currentPeriode
                 );
 
-                const nC = saisieMode === 'moyenne_generale' ? null : (draft.noteClasse === '' ? null : parseFloat(draft.noteClasse));
-                const nD = saisieMode === 'moyenne_generale' ? null : (draft.noteDevoir === '' ? null : parseFloat(draft.noteDevoir));
+                const nC = draft.noteClasse === '' ? null : parseFloat(draft.noteClasse);
+                const nD = draft.noteDevoir === '' ? null : parseFloat(draft.noteDevoir);
                 const nCp = draft.noteCompo === '' ? null : parseFloat(draft.noteCompo);
 
                 batch.push({
@@ -270,31 +266,9 @@ export const SaisieNotes: React.FC = () => {
                         <Edit3 className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold">Saisie des Notes & Moyennes</h2>
-                        <p className="text-pink-100">Saisissez les notes d'évaluation par matière ou directement la moyenne générale de la classe.</p>
+                        <h2 className="text-2xl font-bold">Saisie des Notes</h2>
+                        <p className="text-pink-100">Saisissez les notes d'évaluation par matière (interro, devoir, composition).</p>
                     </div>
-                </div>
-            </div>
-
-            {/* Bascule Mode de Saisie */}
-            <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h3 className="font-bold text-gray-800 text-base">Méthode de saisie</h3>
-                    <p className="text-gray-500 text-xs">Choisissez de saisir par matière individuelle ou directement la moyenne générale de la classe.</p>
-                </div>
-                <div className="flex p-1 rounded-xl w-fit border border-gray-200 bg-slate-100">
-                    <button
-                        onClick={() => { setSaisieMode('matieres'); setSelectedMatiereId(''); }}
-                        className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${saisieMode === 'matieres' ? 'bg-white text-rose-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
-                    >
-                        Notes par matière
-                    </button>
-                    <button
-                        onClick={() => { setSaisieMode('moyenne_generale'); setSelectedMatiereId('moyenne_generale'); }}
-                        className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${saisieMode === 'moyenne_generale' ? 'bg-white text-rose-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
-                    >
-                        Moyennes Générales directes
-                    </button>
                 </div>
             </div>
 
@@ -346,28 +320,26 @@ export const SaisieNotes: React.FC = () => {
                         {classesList.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                 </div>
-                {saisieMode === 'matieres' && (
-                    <div className="flex-1 min-w-[250px]">
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">Matière</label>
-                        <select
-                            value={selectedMatiereId}
-                            onChange={(e) => setSelectedMatiereId(e.target.value)}
-                            disabled={!selectedClasse}
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 font-bold disabled:opacity-50"
-                        >
-                            <option value="">Sélectionner une matière...</option>
-                            {availableMatieres.map(item => (
-                                <option key={item.mat!.id} value={item.mat!.id}>
-                                    {item.mat!.nom} (Coef: {item.cm.coefficient})
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                )}
+                <div className="flex-1 min-w-[250px]">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Matière</label>
+                    <select
+                        value={selectedMatiereId}
+                        onChange={(e) => setSelectedMatiereId(e.target.value)}
+                        disabled={!selectedClasse}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 font-bold disabled:opacity-50"
+                    >
+                        <option value="">Sélectionner une matière...</option>
+                        {availableMatieres.map(item => (
+                            <option key={item.mat!.id} value={item.mat!.id}>
+                                {item.mat!.nom} (Coef: {item.cm.coefficient})
+                            </option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             {/* Table de Saisie */}
-            {selectedClasse && (saisieMode === 'moyenne_generale' || selectedMatiereId) ? (
+            {selectedClasse && selectedMatiereId ? (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-fade-in">
                     <div className="flex flex-wrap justify-between items-center gap-3 p-4 border-b border-gray-100 bg-gray-50">
                         <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
@@ -397,7 +369,7 @@ export const SaisieNotes: React.FC = () => {
                                 className="bg-rose-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-rose-700 shadow-md transition-all active:scale-95"
                             >
                                 <Save className="w-5 h-5" />
-                                {saisieMode === 'moyenne_generale' ? 'Enregistrer les moyennes' : 'Enregistrer les notes'}
+                                Enregistrer les notes
                             </button>
                         </div>
                     </div>
@@ -431,16 +403,10 @@ export const SaisieNotes: React.FC = () => {
                                 <tr className="bg-white border-b border-gray-200 text-sm">
                                     <th className="p-4 font-bold text-gray-600 w-16">N°</th>
                                     <th className="p-4 font-bold text-gray-600">Nom & Prénom(s)</th>
-                                    {saisieMode === 'matieres' ? (
-                                        <>
-                                            <th className="p-4 font-bold text-blue-600 w-40 text-center">Interro. (/20)</th>
-                                            <th className="p-4 font-bold text-indigo-600 w-40 text-center">Devoir (/20)</th>
-                                            <th className="p-4 font-bold text-purple-600 w-40 text-center">Compo. (/20)</th>
-                                            <th className="p-4 font-bold text-emerald-600 w-40 text-center">Moyenne (/20)</th>
-                                        </>
-                                    ) : (
-                                        <th className="p-4 font-bold text-emerald-600 w-64 text-center">Moyenne Générale (/20)</th>
-                                    )}
+                                    <th className="p-4 font-bold text-blue-600 w-40 text-center">Interro. (/20)</th>
+                                    <th className="p-4 font-bold text-indigo-600 w-40 text-center">Devoir (/20)</th>
+                                    <th className="p-4 font-bold text-purple-600 w-40 text-center">Compo. (/20)</th>
+                                    <th className="p-4 font-bold text-emerald-600 w-40 text-center">Moyenne (/20)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -450,54 +416,39 @@ export const SaisieNotes: React.FC = () => {
                                         <td className="p-4 font-bold text-gray-800">
                                             {student.nom} {student.prenom}
                                         </td>
-                                        {saisieMode === 'matieres' ? (
-                                            <>
-                                                <td className="p-4 text-center">
-                                                    <input
-                                                        type="number"
-                                                        min="0" max="20" step="0.5"
-                                                        className="w-20 px-3 py-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 font-semibold"
-                                                        value={draftNotes[student.id]?.noteClasse ?? ''}
-                                                        onChange={(e) => handleNoteChange(student.id, 'noteClasse', e.target.value)}
-                                                        placeholder="--"
-                                                    />
-                                                </td>
-                                                <td className="p-4 text-center">
-                                                    <input
-                                                        type="number"
-                                                        min="0" max="20" step="0.5"
-                                                        className="w-20 px-3 py-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-semibold"
-                                                        value={draftNotes[student.id]?.noteDevoir ?? ''}
-                                                        onChange={(e) => handleNoteChange(student.id, 'noteDevoir', e.target.value)}
-                                                        placeholder="--"
-                                                    />
-                                                </td>
-                                                <td className="p-4 text-center">
-                                                    <input
-                                                        type="number"
-                                                        min="0" max="20" step="0.5"
-                                                        className="w-20 px-3 py-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 font-semibold"
-                                                        value={draftNotes[student.id]?.noteCompo ?? ''}
-                                                        onChange={(e) => handleNoteChange(student.id, 'noteCompo', e.target.value)}
-                                                        placeholder="--"
-                                                    />
-                                                </td>
-                                                <td className="p-4 text-center font-bold text-emerald-600 text-lg">
-                                                    {calculateMoyenne(draftNotes[student.id])}
-                                                </td>
-                                            </>
-                                        ) : (
-                                            <td className="p-4 text-center">
-                                                <input
-                                                    type="number"
-                                                    min="0" max="20" step="0.01"
-                                                    className="w-32 px-3 py-2 text-center border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-bold text-emerald-700 bg-emerald-50/20 text-lg"
-                                                    value={draftNotes[student.id]?.noteCompo ?? ''}
-                                                    onChange={(e) => handleNoteChange(student.id, 'noteCompo', e.target.value)}
-                                                    placeholder="--"
-                                                />
-                                            </td>
-                                        )}
+                                        <td className="p-4 text-center">
+                                            <input
+                                                type="number"
+                                                min="0" max="20" step="0.5"
+                                                className="w-20 px-3 py-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 font-semibold"
+                                                value={draftNotes[student.id]?.noteClasse ?? ''}
+                                                onChange={(e) => handleNoteChange(student.id, 'noteClasse', e.target.value)}
+                                                placeholder="--"
+                                            />
+                                        </td>
+                                        <td className="p-4 text-center">
+                                            <input
+                                                type="number"
+                                                min="0" max="20" step="0.5"
+                                                className="w-20 px-3 py-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-semibold"
+                                                value={draftNotes[student.id]?.noteDevoir ?? ''}
+                                                onChange={(e) => handleNoteChange(student.id, 'noteDevoir', e.target.value)}
+                                                placeholder="--"
+                                            />
+                                        </td>
+                                        <td className="p-4 text-center">
+                                            <input
+                                                type="number"
+                                                min="0" max="20" step="0.5"
+                                                className="w-20 px-3 py-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 font-semibold"
+                                                value={draftNotes[student.id]?.noteCompo ?? ''}
+                                                onChange={(e) => handleNoteChange(student.id, 'noteCompo', e.target.value)}
+                                                placeholder="--"
+                                            />
+                                        </td>
+                                        <td className="p-4 text-center font-bold text-emerald-600 text-lg">
+                                            {calculateMoyenne(draftNotes[student.id])}
+                                        </td>
                                     </tr>
                                 ))}
                                 {classStudents.length === 0 && (
@@ -524,63 +475,47 @@ export const SaisieNotes: React.FC = () => {
                                 <h4 className="font-bold text-slate-900 dark:text-white text-base">
                                     {student.nom} {student.prenom}
                                 </h4>
-                                {saisieMode === 'matieres' ? (
-                                    <>
-                                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/60">
-                                            <div className="flex flex-col items-center">
-                                                <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">Interro</span>
-                                                <input
-                                                    type="number"
-                                                    min="0" max="20" step="0.5"
-                                                    className="w-full px-2 py-2.5 text-center border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold bg-white dark:bg-slate-900 dark:text-white text-sm"
-                                                    value={draftNotes[student.id]?.noteClasse ?? ''}
-                                                    onChange={(e) => handleNoteChange(student.id, 'noteClasse', e.target.value)}
-                                                    placeholder="--"
-                                                />
-                                            </div>
-                                            <div className="flex flex-col items-center">
-                                                <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">Devoir</span>
-                                                <input
-                                                    type="number"
-                                                    min="0" max="20" step="0.5"
-                                                    className="w-full px-2 py-2.5 text-center border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-semibold bg-white dark:bg-slate-900 dark:text-white text-sm"
-                                                    value={draftNotes[student.id]?.noteDevoir ?? ''}
-                                                    onChange={(e) => handleNoteChange(student.id, 'noteDevoir', e.target.value)}
-                                                    placeholder="--"
-                                                />
-                                            </div>
-                                            <div className="flex flex-col items-center">
-                                                <span className="text-[9px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">Compo</span>
-                                                <input
-                                                    type="number"
-                                                    min="0" max="20" step="0.5"
-                                                    className="w-full px-2 py-2.5 text-center border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500 font-semibold bg-white dark:bg-slate-900 dark:text-white text-sm"
-                                                    value={draftNotes[student.id]?.noteCompo ?? ''}
-                                                    onChange={(e) => handleNoteChange(student.id, 'noteCompo', e.target.value)}
-                                                    placeholder="--"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="flex justify-between items-center pt-2 border-t border-dashed border-slate-100 dark:border-slate-800/40">
-                                            <span className="text-xs font-semibold text-slate-500">Moyenne calculée :</span>
-                                            <span className="text-sm font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-lg">
-                                                {calculateMoyenne(draftNotes[student.id])} / 20
-                                            </span>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800/60">
-                                        <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Moyenne Générale</span>
+                                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/60">
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">Interro</span>
                                         <input
                                             type="number"
-                                            min="0" max="20" step="0.01"
-                                            className="w-32 px-3 py-2 text-center border border-emerald-300 rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold bg-white dark:bg-slate-900 dark:text-white text-emerald-700 text-lg shadow-sm"
+                                            min="0" max="20" step="0.5"
+                                            className="w-full px-2 py-2.5 text-center border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold bg-white dark:bg-slate-900 dark:text-white text-sm"
+                                            value={draftNotes[student.id]?.noteClasse ?? ''}
+                                            onChange={(e) => handleNoteChange(student.id, 'noteClasse', e.target.value)}
+                                            placeholder="--"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">Devoir</span>
+                                        <input
+                                            type="number"
+                                            min="0" max="20" step="0.5"
+                                            className="w-full px-2 py-2.5 text-center border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-semibold bg-white dark:bg-slate-900 dark:text-white text-sm"
+                                            value={draftNotes[student.id]?.noteDevoir ?? ''}
+                                            onChange={(e) => handleNoteChange(student.id, 'noteDevoir', e.target.value)}
+                                            placeholder="--"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[9px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">Compo</span>
+                                        <input
+                                            type="number"
+                                            min="0" max="20" step="0.5"
+                                            className="w-full px-2 py-2.5 text-center border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500 font-semibold bg-white dark:bg-slate-900 dark:text-white text-sm"
                                             value={draftNotes[student.id]?.noteCompo ?? ''}
                                             onChange={(e) => handleNoteChange(student.id, 'noteCompo', e.target.value)}
                                             placeholder="--"
                                         />
                                     </div>
-                                )}
+                                </div>
+                                <div className="flex justify-between items-center pt-2 border-t border-dashed border-slate-100 dark:border-slate-800/40">
+                                    <span className="text-xs font-semibold text-slate-500">Moyenne calculée :</span>
+                                    <span className="text-sm font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-lg">
+                                        {calculateMoyenne(draftNotes[student.id])} / 20
+                                    </span>
+                                </div>
                             </div>
                         ))}
                         {classStudents.length === 0 && (
@@ -594,7 +529,7 @@ export const SaisieNotes: React.FC = () => {
                 <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
                     <Edit3 className="w-16 h-16 text-gray-200 mb-4" />
                     <p className="text-gray-500 font-semibold text-lg text-center max-w-sm">
-                        Sélectionnez une classe {saisieMode === 'matieres' ? 'et une matière ' : ''}pour commencer la saisie.
+                        Sélectionnez une classe et une matière pour commencer la saisie.
                     </p>
                 </div>
             )}

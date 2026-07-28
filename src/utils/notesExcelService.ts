@@ -4,40 +4,28 @@ import { Student } from '../types';
 // Même forme que draftNotes dans SaisieNotes.tsx (Record<string, Record<string, string>>)
 export type DraftNoteValues = Record<string, string>;
 
-type SaisieMode = 'matieres' | 'moyenne_generale';
-
 export const exportNotesTemplate = (
   students: Student[],
   draftNotes: Record<string, DraftNoteValues>,
   classe: string,
-  matiereLabel: string,
-  saisieMode: SaisieMode
+  matiereLabel: string
 ): void => {
   const sorted = [...students].sort((a, b) => a.nom.localeCompare(b.nom));
 
-  const data = saisieMode === 'moyenne_generale'
-    ? sorted.map(s => ({
-        'MATRICULE': s.adsn || '',
-        'NOM': s.nom,
-        'PRÉNOM': s.prenom,
-        'MOYENNE GÉNÉRALE (/20)': draftNotes[s.id]?.noteCompo || ''
-      }))
-    : sorted.map(s => ({
-        'MATRICULE': s.adsn || '',
-        'NOM': s.nom,
-        'PRÉNOM': s.prenom,
-        'INTERRO (/20)': draftNotes[s.id]?.noteClasse || '',
-        'DEVOIR (/20)': draftNotes[s.id]?.noteDevoir || '',
-        'COMPO (/20)': draftNotes[s.id]?.noteCompo || ''
-      }));
+  const data = sorted.map(s => ({
+    'MATRICULE': s.adsn || '',
+    'NOM': s.nom,
+    'PRÉNOM': s.prenom,
+    'INTERRO (/20)': draftNotes[s.id]?.noteClasse || '',
+    'DEVOIR (/20)': draftNotes[s.id]?.noteDevoir || '',
+    'COMPO (/20)': draftNotes[s.id]?.noteCompo || ''
+  }));
 
   const worksheet = XLSX.utils.json_to_sheet(data);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Notes');
 
-  worksheet['!cols'] = saisieMode === 'moyenne_generale'
-    ? [{ wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 22 }]
-    : [{ wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
+  worksheet['!cols'] = [{ wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
 
   const safeClasse = classe.replace(/[^\w-]/g, '_');
   const safeMatiere = matiereLabel.replace(/[^\w-]/g, '_');
@@ -72,8 +60,7 @@ const parseNoteValue = (raw: unknown, label: string, rowLabel: string, errors: s
  */
 export const importNotesFromExcel = (
   file: File,
-  classStudents: Student[],
-  saisieMode: SaisieMode
+  classStudents: Student[]
 ): Promise<NotesImportResult> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -113,15 +100,10 @@ export const importNotesFromExcel = (
             return;
           }
 
-          if (saisieMode === 'moyenne_generale') {
-            const noteCompo = parseNoteValue(row['MOYENNE GÉNÉRALE (/20)'], 'Moyenne générale', rowLabel, errors);
-            updates[student.id] = { noteClasse: '', noteDevoir: '', noteCompo };
-          } else {
-            const noteClasse = parseNoteValue(row['INTERRO (/20)'], 'Interro', rowLabel, errors);
-            const noteDevoir = parseNoteValue(row['DEVOIR (/20)'], 'Devoir', rowLabel, errors);
-            const noteCompo = parseNoteValue(row['COMPO (/20)'], 'Composition', rowLabel, errors);
-            updates[student.id] = { noteClasse, noteDevoir, noteCompo };
-          }
+          const noteClasse = parseNoteValue(row['INTERRO (/20)'], 'Interro', rowLabel, errors);
+          const noteDevoir = parseNoteValue(row['DEVOIR (/20)'], 'Devoir', rowLabel, errors);
+          const noteCompo = parseNoteValue(row['COMPO (/20)'], 'Composition', rowLabel, errors);
+          updates[student.id] = { noteClasse, noteDevoir, noteCompo };
           matchedCount++;
         });
 

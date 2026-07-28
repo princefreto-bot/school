@@ -18,7 +18,6 @@ export const Bulletins: React.FC = () => {
 
     const classesList = Array.from(new Set(students.map(s => s.classe))).sort();
     const [selectedClasse, setSelectedClasse] = useState('');
-    const [simulerPeriodes, setSimulerPeriodes] = useState(false);
     const [editableSchoolYear, setEditableSchoolYear] = useState('');
     const [bulletinsCalcules, setBulletinsCalcules] = useState<BulletinEleveResultat[]>([]);
 
@@ -66,14 +65,13 @@ export const Bulletins: React.FC = () => {
     const validerCalcul = () => {
         if (!selectedClasse) return;
         const resultats = calculerBulletinsClasse(
-            selectedClasse, 
-            currentPeriode, 
-            students, 
-            matieres, 
-            classeMatieres, 
+            selectedClasse,
+            currentPeriode,
+            students,
+            matieres,
+            classeMatieres,
             notes,
-            useStore.getState().presences,
-            simulerPeriodes
+            useStore.getState().presences
         );
         setBulletinsCalcules(resultats);
     };
@@ -132,19 +130,6 @@ export const Bulletins: React.FC = () => {
                         className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 font-bold text-gray-800"
                         placeholder="Ex: 2025-2026"
                     />
-                </div>
-
-                {/* Case à cocher Simulation */}
-                <div className="flex items-center pb-2.5">
-                    <label className="flex items-center gap-2 text-sm font-bold text-gray-700 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={simulerPeriodes}
-                            onChange={(e) => setSimulerPeriodes(e.target.checked)}
-                            className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500"
-                        />
-                        Simuler T3/S2 à partir de T1/S1 si vides
-                    </label>
                 </div>
 
                 <button
