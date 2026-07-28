@@ -162,15 +162,10 @@ export const ScanInformation: React.FC = () => {
 
     const handleInfoScan = useCallback((studentId: string) => {
         const student = students.find(s => s.id === studentId);
-        const { links } = useStore.getState();
 
-        const isLinked = links && links.some((l: any) =>
-            l.student_id?.trim().toLowerCase() === studentId?.trim().toLowerCase()
-        );
-
-        if (!student || !isLinked) {
+        if (!student) {
             playErrorSound();
-            setFlashError("PAS LIÉE");
+            setFlashError("ÉLÈVE INCONNU");
             isScanningPaused.current = true;
             setTimeout(() => {
                 setFlashError(null);
