@@ -6,57 +6,102 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { QRCodeCanvas } from 'qrcode.react';
 import {
   Smartphone, Download, ArrowLeft, ShieldCheck, Wifi,
-  CheckCircle2, AlertTriangle, Globe, Share2, Sparkles, Zap, Bell
+  CheckCircle2, AlertTriangle, Globe, Share2, Sparkles
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
 
-// ── Mockup téléphone incliné avec dashboard à l'intérieur ─────
+// ── Mockup téléphone incliné avec splash screen (logo centré) ─
+type Variant = 'dark' | 'amber' | 'light';
+
 interface PhoneMockupProps {
-  imgSrc: string;
-  imgAlt: string;
+  variant?: Variant;
   rotate: string;
   translateY?: string;
   className?: string;
   scale?: string;
   zIndex?: number;
+  showTime?: boolean;
 }
 
-const PhoneMockup: React.FC<PhoneMockupProps> = ({ imgSrc, imgAlt, rotate, translateY = '0', className = '', scale = '1', zIndex = 1 }) => (
-  <div
-    className={`relative ${className}`}
-    style={{
-      transform: `rotate(${rotate}) translateY(${translateY}) scale(${scale})`,
-      zIndex,
-      filter: 'drop-shadow(0 30px 40px rgba(15, 23, 42, 0.25))'
-    }}
-  >
-    {/* Cadre téléphone */}
-    <div className="relative bg-slate-950 rounded-[2.5rem] p-2 shadow-2xl">
-      {/* Encoche (notch) */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-slate-950 w-24 h-6 rounded-b-2xl z-20" />
-      {/* Écran */}
-      <div className="relative w-56 sm:w-64 h-[440px] sm:h-[500px] rounded-[2rem] overflow-hidden bg-white border-2 border-slate-800">
-        <img
-          src={imgSrc}
-          alt={imgAlt}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-        {/* Reflet subtil */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.08) 100%)'
-          }}
-        />
+const PhoneMockup: React.FC<PhoneMockupProps> = ({
+  variant = 'dark',
+  rotate,
+  translateY = '0',
+  className = '',
+  scale = '1',
+  zIndex = 1,
+  showTime = false
+}) => {
+  const screenBg = {
+    dark: 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950',
+    amber: 'bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700',
+    light: 'bg-gradient-to-br from-white via-slate-50 to-slate-100'
+  }[variant];
+
+  const titleColor = variant === 'light' ? 'text-slate-900' : 'text-white';
+  const subColor = variant === 'light' ? 'text-slate-500' : 'text-white/70';
+
+  return (
+    <div
+      className={`relative ${className}`}
+      style={{
+        transform: `rotate(${rotate}) translateY(${translateY}) scale(${scale})`,
+        zIndex,
+        filter: 'drop-shadow(0 30px 40px rgba(15, 23, 42, 0.35))'
+      }}
+    >
+      {/* Cadre téléphone */}
+      <div className="relative bg-slate-950 rounded-[2.5rem] p-2 shadow-2xl">
+        {/* Encoche (notch) */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-slate-950 w-24 h-6 rounded-b-2xl z-20" />
+        {/* Écran */}
+        <div className={`relative w-56 sm:w-64 h-[440px] sm:h-[500px] rounded-[2rem] overflow-hidden border-2 border-slate-800 ${screenBg} flex flex-col items-center justify-center`}>
+          {/* Status bar simulée */}
+          {showTime && (
+            <div className={`absolute top-2 left-0 right-0 px-6 flex justify-between items-center text-[9px] font-black tracking-widest ${variant === 'light' ? 'text-slate-700' : 'text-white'}`}>
+              <span>09:41</span>
+              <span className="flex items-center gap-1">
+                <span className="w-3 h-1.5 rounded-sm border border-current" />
+                <span className="w-3 h-2 rounded-sm border border-current bg-current" />
+              </span>
+            </div>
+          )}
+
+          {/* Logo centré */}
+          <div className="flex flex-col items-center gap-4 px-6 text-center">
+            <div className={`w-24 h-24 rounded-3xl flex items-center justify-center ${variant === 'amber' ? 'bg-white/20 backdrop-blur-md' : 'bg-white shadow-2xl'}`}>
+              <img src="/logo.png" alt="Logo DGhubSchool" className="w-16 h-16 object-contain" />
+            </div>
+            <div className={`font-black text-xl tracking-tighter ${titleColor}`}>
+              DGhub<span className="text-amber-400">School</span>
+            </div>
+            <div className={`text-[10px] font-black uppercase tracking-[0.2em] ${subColor}`}>
+              Gestion Scolaire
+            </div>
+          </div>
+
+          {/* Bas d'écran : indicateur home + loader style */}
+          <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-3">
+            <div className={`w-8 h-8 rounded-full border-2 border-t-transparent animate-spin ${variant === 'light' ? 'border-amber-500' : 'border-white/40'}`} style={{ borderTopColor: 'transparent' }} />
+            <div className={`h-1 w-24 rounded-full ${variant === 'light' ? 'bg-slate-900/40' : 'bg-white/40'}`} />
+          </div>
+
+          {/* Reflet subtil */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.06) 100%)'
+            }}
+          />
+        </div>
+        {/* Boutons latéraux */}
+        <div className="absolute right-[-3px] top-24 w-1 h-16 bg-slate-800 rounded-r-md" />
+        <div className="absolute left-[-3px] top-20 w-1 h-8 bg-slate-800 rounded-l-md" />
+        <div className="absolute left-[-3px] top-32 w-1 h-12 bg-slate-800 rounded-l-md" />
       </div>
-      {/* Bouton latéral */}
-      <div className="absolute right-[-3px] top-24 w-1 h-16 bg-slate-800 rounded-r-md" />
-      <div className="absolute left-[-3px] top-20 w-1 h-8 bg-slate-800 rounded-l-md" />
-      <div className="absolute left-[-3px] top-32 w-1 h-12 bg-slate-800 rounded-l-md" />
     </div>
-  </div>
-);
+  );
+};
 
 // URL de l'APK à héberger. Deux options :
 // 1) Fichier dans public/ → /downloads/dghubschool.apk (recommandé, servi statiquement)
@@ -200,56 +245,38 @@ export const TelechargerApp: React.FC = () => {
               </a>
             </div>
 
-            {/* Trust badges */}
-            <div className="mt-8 flex flex-wrap gap-3 justify-center md:justify-start">
-              <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[10px] font-black text-emerald-300 uppercase tracking-widest">
-                <ShieldCheck className="w-3 h-3" /> {t.apkMeta}
-              </div>
-              <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[10px] font-black text-blue-300 uppercase tracking-widest">
-                <Zap className="w-3 h-3" /> Signé v2
-              </div>
-              <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[10px] font-black text-amber-300 uppercase tracking-widest">
-                <Bell className="w-3 h-3" /> Push OK
-              </div>
-            </div>
           </div>
 
-          {/* Colonne mockups téléphones */}
+          {/* Colonne mockups téléphones — splash screens en 3 variantes */}
           <div className="relative h-[480px] sm:h-[560px] flex items-center justify-center perspective-1000">
-            {/* Téléphone arrière-gauche */}
-            <div className="absolute left-0 sm:left-4 top-8 opacity-90">
+            {/* Téléphone arrière-gauche : variant clair */}
+            <div className="absolute left-0 sm:left-4 top-8 opacity-95">
               <PhoneMockup
-                imgSrc="/DASH4.png"
-                imgAlt="Dashboard élèves"
+                variant="light"
                 rotate="-14deg"
                 translateY="20px"
                 scale="0.85"
                 zIndex={1}
               />
             </div>
-            {/* Téléphone arrière-droit */}
-            <div className="absolute right-0 sm:right-4 top-16 opacity-90">
+            {/* Téléphone arrière-droit : variant amber (brand) */}
+            <div className="absolute right-0 sm:right-4 top-16 opacity-95">
               <PhoneMockup
-                imgSrc="/DASH6.webp"
-                imgAlt="Dashboard paiements"
+                variant="amber"
                 rotate="12deg"
                 translateY="30px"
                 scale="0.82"
                 zIndex={1}
               />
             </div>
-            {/* Téléphone central (en avant) */}
+            {/* Téléphone central : variant dark, en avant, avec status bar */}
             <div className="relative">
               <PhoneMockup
-                imgSrc="/dashboard_preview.webp"
-                imgAlt="Dashboard DGhubSchool sur mobile"
+                variant="dark"
                 rotate="-3deg"
                 zIndex={5}
+                showTime
               />
-              {/* Petite étiquette flottante */}
-              <div className="absolute -top-4 -right-6 sm:-right-10 bg-emerald-500 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-xl uppercase tracking-widest animate-pulse z-10">
-                v1.0.0
-              </div>
             </div>
           </div>
         </div>
@@ -283,14 +310,11 @@ export const TelechargerApp: React.FC = () => {
               <a
                 href={APK_DOWNLOAD_URL}
                 download
-                className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black uppercase tracking-widest text-sm px-6 py-4 rounded-xl shadow-lg shadow-amber-500/30 transition-all active:scale-95 mb-3"
+                className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black uppercase tracking-widest text-sm px-6 py-4 rounded-xl shadow-lg shadow-amber-500/30 transition-all active:scale-95"
               >
                 <Download className="w-5 h-5" />
                 {t.apkBtn}
               </a>
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                {t.apkMeta}
-              </p>
             </div>
 
             <div className="flex flex-col items-center bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 rounded-2xl p-6">
