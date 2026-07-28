@@ -82,6 +82,7 @@ const Newsroom = lazy(() => import('./pages/Newsroom').then(m => ({ default: m.N
 const HelpCenter = lazy(() => import('./pages/HelpCenter').then(m => ({ default: m.HelpCenter })));
 const ActivationLicence = lazy(() => import('./pages/ActivationLicence').then(m => ({ default: m.ActivationLicence })));
 const SubmitStory = lazy(() => import('./pages/SubmitStory').then(m => ({ default: m.SubmitStory })));
+const TelechargerApp = lazy(() => import('./pages/TelechargerApp').then(m => ({ default: m.TelechargerApp })));
 const CookieConsent = lazy(() => import('./components/CookieConsent').then(m => ({ default: m.CookieConsent })));
 
 const LoadingSpinner = () => (
@@ -297,6 +298,10 @@ const pageMetadata: Record<string, Record<string, { title: string; description: 
     'portail-ecole': {
       title: "Portail École — Accès DGhubSchool",
       description: "Recherchez et accédez directement à l'espace de connexion dédié de votre établissement scolaire sur DGhubSchool."
+    },
+    'telecharger-app': {
+      title: "Télécharger l'app mobile — DGhubSchool",
+      description: "Installez l'app DGhubSchool sur Android via APK signé ou depuis votre navigateur (PWA). Aucun compte Play Store requis."
     }
   },
   en: {
@@ -351,6 +356,10 @@ const pageMetadata: Record<string, Record<string, { title: string; description: 
     'portail-ecole': {
       title: "Partner Schools Directory — DGhubSchool Portal Access",
       description: "Find the custom login page of your educational institution on DGhubSchool. Use our directory or search tool to access your dedicated school portal."
+    },
+    'telecharger-app': {
+      title: "Download the mobile app — DGhubSchool",
+      description: "Install the DGhubSchool app on Android via signed APK or from your browser (PWA). No Google Play account required."
     }
   }
 };
@@ -668,6 +677,7 @@ export function App() {
         <Route path="/:lang/reset-password" element={<Suspense fallback={<LoadingSpinner />}><ResetPassword /></Suspense>} />
         <Route path="/:lang/activation-licence" element={<Suspense fallback={<LoadingSpinner />}><ActivationLicence /></Suspense>} />
         <Route path="/:lang/partager-mon-histoire" element={<Suspense fallback={<LoadingSpinner />}><SubmitStory /></Suspense>} />
+        <Route path="/:lang/telecharger-app" element={<Suspense fallback={<LoadingSpinner />}><TelechargerApp /></Suspense>} />
         <Route
           path="/:lang/login"
           element={
@@ -735,6 +745,7 @@ export function App() {
         <Route path="/reset-password" element={<RedirectWithSearch to="/fr/reset-password" />} />
         <Route path="/activation-licence" element={<RedirectWithSearch to="/fr/activation-licence" />} />
         <Route path="/partager-mon-histoire" element={<Navigate to="/fr/partager-mon-histoire" replace />} />
+        <Route path="/telecharger-app" element={<Navigate to="/fr/telecharger-app" replace />} />
 
         <Route path="/stats" element={<Navigate to="/fr#stats" replace />} />
         <Route path="/fr/stats" element={<Navigate to="/fr#stats" replace />} />

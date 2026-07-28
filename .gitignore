@@ -37,6 +37,11 @@ yarn-error.log*
 # Credentials
 backend/serviceAccountKey.json
 
+# Android release signing — NE JAMAIS commit (perdre = perdre l'app)
+android/key.properties
+*.keystore
+*.jks
+
 # Local Claude Code tooling (skill cache, personal settings) — not shared project config
 .agents/
 .claude/settings.local.json

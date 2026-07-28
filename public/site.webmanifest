@@ -1,7 +1,30 @@
 {
-  "name": "DGhubSchool",
+  "id": "com.dghubschool.app",
+  "name": "DGhubSchool — Gestion Scolaire",
   "short_name": "DGhubSchool",
+  "description": "Plateforme numérique de gestion scolaire : notes, bulletins DRE, présence par QR Code, paiements, portail parents.",
+  "lang": "fr",
+  "dir": "ltr",
+  "scope": "/",
+  "start_url": "/fr",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#d97706",
+  "background_color": "#0f172a",
+  "categories": ["education", "productivity", "business"],
   "icons": [
+    {
+      "src": "/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/web-app-manifest-192x192.png",
       "sizes": "192x192",
@@ -15,8 +38,24 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#4f46e5",
-  "background_color": "#ffffff",
-  "display": "standalone",
-  "start_url": "/"
+  "shortcuts": [
+    {
+      "name": "Tableau de bord",
+      "short_name": "Dashboard",
+      "url": "/fr",
+      "description": "Vue d'ensemble de l'établissement"
+    },
+    {
+      "name": "Scanner un élève",
+      "short_name": "Scanner",
+      "url": "/fr",
+      "description": "Scanner un QR code élève"
+    },
+    {
+      "name": "Portail parent",
+      "short_name": "Parent",
+      "url": "/fr/portail-parent/dashboard",
+      "description": "Espace parent"
+    }
+  ]
 }

@@ -199,6 +199,26 @@
     <priority>0.3</priority>
   </url>
 
+  <!-- Télécharger l'app -->
+  <url>
+    <loc>https://dghubschool.com/fr/telecharger-app</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/telecharger-app"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dghubschool.com/fr/telecharger-app"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/telecharger-app"/>
+    <lastmod>2026-07-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dghubschool.com/en/telecharger-app</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://dghubschool.com/fr/telecharger-app"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dghubschool.com/fr/telecharger-app"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dghubschool.com/en/telecharger-app"/>
+    <lastmod>2026-07-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- Portail école -->
   <url>
     <loc>https://dghubschool.com/fr/portail-ecole</loc>

@@ -40,5 +40,12 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Vibration : feedback haptique lors d'un scan réussi -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Notifications push (requis à partir d'Android 13 / API 33) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Empêche l'écran de s'éteindre pendant un scan long -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>
