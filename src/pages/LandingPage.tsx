@@ -40,6 +40,7 @@ const TEXTS = {
     features: "Fonctionnalités",
     pricing: "Tarifs",
     about: "Notre Histoire",
+    mobileApp: "App Mobile",
     socialProof: "Résultats",
     login: "Se connecter",
     createSchool: "Lancer mon école",
@@ -143,6 +144,7 @@ const TEXTS = {
     features: "Features",
     pricing: "Pricing",
     about: "Our Story",
+    mobileApp: "Mobile App",
     socialProof: "Results",
     login: "Log in",
     createSchool: "Launch my school",
@@ -378,6 +380,14 @@ export const LandingPage: React.FC = () => {
               <span>DGhub<span className="text-slate-900">School</span></span>
             </div>
             <div className="hidden md:flex items-center gap-8 text-xs font-bold tracking-wider text-slate-500 uppercase">
+              <button
+                onClick={() => navigate(`/${lang}/telecharger-app`)}
+                className="relative inline-flex items-center gap-1.5 text-amber-600 hover:text-amber-700 transition-colors cursor-pointer py-1 group/item font-jakarta font-black"
+              >
+                📱 {t.mobileApp}
+                <span className="absolute -top-1 -right-4 bg-emerald-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full leading-none tracking-normal">NEW</span>
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-500 transition-all duration-300 group-hover/item:w-full" />
+              </button>
               {[
                 { label: t.features, path: `/${lang}/features` },
                 { label: t.pricing, path: `/${lang}/pricing` },
@@ -409,6 +419,10 @@ export const LandingPage: React.FC = () => {
           </nav>
           {mobileMenuOpen && (
             <div className="md:hidden border-t border-slate-100 bg-white pb-5 pt-4 space-y-4 flex flex-col px-2">
+              <button onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/telecharger-app`); }} className="text-sm font-black text-amber-600 hover:text-amber-700 py-2 text-left cursor-pointer flex items-center gap-2">
+                📱 {t.mobileApp}
+                <span className="bg-emerald-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full leading-none">NEW</span>
+              </button>
               <button onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/features`); }} className="text-sm font-bold text-slate-700 hover:text-amber-500 py-2 text-left cursor-pointer">{t.features}</button>
               <button onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/pricing`); }} className="text-sm font-bold text-slate-700 hover:text-amber-500 py-2 text-left cursor-pointer">{t.pricing}</button>
               <button onClick={() => { setMobileMenuOpen(false); navigate(`/${lang}/a-propos`); }} className="text-sm font-bold text-slate-700 hover:text-amber-500 py-2 text-left cursor-pointer">{t.about}</button>

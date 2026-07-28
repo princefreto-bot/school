@@ -1,14 +1,62 @@
 // ============================================================
-// PAGE TÉLÉCHARGER L'APP — APK direct + PWA install
+// PAGE APP MOBILE — APK direct + PWA install
 // ============================================================
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { QRCodeCanvas } from 'qrcode.react';
 import {
   Smartphone, Download, ArrowLeft, ShieldCheck, Wifi,
-  CheckCircle2, AlertTriangle, Globe, Share2
+  CheckCircle2, AlertTriangle, Globe, Share2, Sparkles, Zap, Bell
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
+
+// ── Mockup téléphone incliné avec dashboard à l'intérieur ─────
+interface PhoneMockupProps {
+  imgSrc: string;
+  imgAlt: string;
+  rotate: string;
+  translateY?: string;
+  className?: string;
+  scale?: string;
+  zIndex?: number;
+}
+
+const PhoneMockup: React.FC<PhoneMockupProps> = ({ imgSrc, imgAlt, rotate, translateY = '0', className = '', scale = '1', zIndex = 1 }) => (
+  <div
+    className={`relative ${className}`}
+    style={{
+      transform: `rotate(${rotate}) translateY(${translateY}) scale(${scale})`,
+      zIndex,
+      filter: 'drop-shadow(0 30px 40px rgba(15, 23, 42, 0.25))'
+    }}
+  >
+    {/* Cadre téléphone */}
+    <div className="relative bg-slate-950 rounded-[2.5rem] p-2 shadow-2xl">
+      {/* Encoche (notch) */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-slate-950 w-24 h-6 rounded-b-2xl z-20" />
+      {/* Écran */}
+      <div className="relative w-56 sm:w-64 h-[440px] sm:h-[500px] rounded-[2rem] overflow-hidden bg-white border-2 border-slate-800">
+        <img
+          src={imgSrc}
+          alt={imgAlt}
+          className="w-full h-full object-cover"
+          loading="lazy"
+        />
+        {/* Reflet subtil */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.08) 100%)'
+          }}
+        />
+      </div>
+      {/* Bouton latéral */}
+      <div className="absolute right-[-3px] top-24 w-1 h-16 bg-slate-800 rounded-r-md" />
+      <div className="absolute left-[-3px] top-20 w-1 h-8 bg-slate-800 rounded-l-md" />
+      <div className="absolute left-[-3px] top-32 w-1 h-12 bg-slate-800 rounded-l-md" />
+    </div>
+  </div>
+);
 
 // URL de l'APK à héberger. Deux options :
 // 1) Fichier dans public/ → /downloads/dghubschool.apk (recommandé, servi statiquement)
@@ -110,19 +158,111 @@ export const TelechargerApp: React.FC = () => {
         </nav>
       </header>
 
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-12 md:py-16">
-        {/* Hero */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
-            {t.badge}
+      {/* ── HERO IMMERSIF : Fond gradient + mockups téléphones inclinés ── */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white pt-14 md:pt-20 pb-16 md:pb-24">
+        {/* Halos décoratifs */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-amber-500/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-500/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute inset-0 pointer-events-none opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+
+        <div className="relative max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 md:gap-4 items-center">
+          {/* Colonne texte */}
+          <div className="text-center md:text-left">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-amber-300 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-5 shadow-lg">
+              <Sparkles className="w-3.5 h-3.5" />
+              {t.badge}
+            </div>
+            <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tight mb-5 leading-[0.95]">
+              <span className="bg-gradient-to-r from-white via-amber-100 to-amber-400 bg-clip-text text-transparent">
+                {t.title}
+              </span>
+            </h1>
+            <p className="text-sm md:text-base text-slate-300 max-w-lg mx-auto md:mx-0 font-medium mb-8">
+              {t.subtitle}
+            </p>
+
+            {/* CTA hero */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start items-center">
+              <a
+                href={APK_DOWNLOAD_URL}
+                download
+                className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black uppercase tracking-widest text-sm px-6 py-4 rounded-xl shadow-2xl shadow-amber-500/40 transition-all active:scale-95 hover:scale-105"
+              >
+                <Download className="w-5 h-5" />
+                {t.apkBtn}
+              </a>
+              <a
+                href="#pwa-install"
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-black uppercase tracking-widest text-xs px-5 py-4 rounded-xl transition-all"
+              >
+                <Globe className="w-4 h-4" />
+                {t.pwaTitle.replace(/^\d+\.\s*/, '')}
+              </a>
+            </div>
+
+            {/* Trust badges */}
+            <div className="mt-8 flex flex-wrap gap-3 justify-center md:justify-start">
+              <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[10px] font-black text-emerald-300 uppercase tracking-widest">
+                <ShieldCheck className="w-3 h-3" /> {t.apkMeta}
+              </div>
+              <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[10px] font-black text-blue-300 uppercase tracking-widest">
+                <Zap className="w-3 h-3" /> Signé v2
+              </div>
+              <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[10px] font-black text-amber-300 uppercase tracking-widest">
+                <Bell className="w-3 h-3" /> Push OK
+              </div>
+            </div>
           </div>
-          <h1 className="text-3xl md:text-5xl font-black text-slate-950 dark:text-white uppercase tracking-tight mb-4">
-            {t.title}
-          </h1>
-          <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-medium">
-            {t.subtitle}
+
+          {/* Colonne mockups téléphones */}
+          <div className="relative h-[480px] sm:h-[560px] flex items-center justify-center perspective-1000">
+            {/* Téléphone arrière-gauche */}
+            <div className="absolute left-0 sm:left-4 top-8 opacity-90">
+              <PhoneMockup
+                imgSrc="/DASH4.png"
+                imgAlt="Dashboard élèves"
+                rotate="-14deg"
+                translateY="20px"
+                scale="0.85"
+                zIndex={1}
+              />
+            </div>
+            {/* Téléphone arrière-droit */}
+            <div className="absolute right-0 sm:right-4 top-16 opacity-90">
+              <PhoneMockup
+                imgSrc="/DASH6.webp"
+                imgAlt="Dashboard paiements"
+                rotate="12deg"
+                translateY="30px"
+                scale="0.82"
+                zIndex={1}
+              />
+            </div>
+            {/* Téléphone central (en avant) */}
+            <div className="relative">
+              <PhoneMockup
+                imgSrc="/dashboard_preview.webp"
+                imgAlt="Dashboard DGhubSchool sur mobile"
+                rotate="-3deg"
+                zIndex={5}
+              />
+              {/* Petite étiquette flottante */}
+              <div className="absolute -top-4 -right-6 sm:-right-10 bg-emerald-500 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-xl uppercase tracking-widest animate-pulse z-10">
+                v1.0.0
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bandeau scroll hint */}
+        <div className="relative text-center mt-10 md:mt-12">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            ↓ 2 méthodes d'installation ci-dessous ↓
           </p>
         </div>
+      </section>
+
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-12 md:py-16">
 
         {/* Option 1 : APK */}
         <div className="bg-white dark:bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-6 md:p-8 shadow-xl shadow-amber-500/10 mb-8">
@@ -194,7 +334,7 @@ export const TelechargerApp: React.FC = () => {
         </div>
 
         {/* Option 2 : PWA */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm mb-8">
+        <div id="pwa-install" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm mb-8 scroll-mt-24">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white">
               <Globe className="w-5 h-5" />
