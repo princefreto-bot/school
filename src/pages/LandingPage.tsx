@@ -26,6 +26,8 @@ import {
   Landmark,
   Banknote,
   CalendarClock,
+  Smartphone,
+  Download,
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import { BACKEND_URL } from '../config';
@@ -1216,6 +1218,83 @@ export const LandingPage: React.FC = () => {
                 <div className="border-t border-slate-100 pt-4 mt-6 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <span>{t.newsroomDate}</span>
                   <span onClick={() => navigate(`/${lang}/newsroom`)} className="text-amber-500 flex items-center gap-1 cursor-pointer hover:underline font-jakarta">{t.viewAllNews} <ArrowRight className="w-3 h-3" /></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── APP MOBILE CTA ── */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-20 md:py-28 border-t border-slate-800">
+          {/* Halos décoratifs */}
+          <div className="absolute -top-32 -left-32 w-96 h-96 bg-amber-500/15 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute inset-0 pointer-events-none opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+
+          <div className="relative max-w-6xl mx-auto px-4 md:px-12 grid md:grid-cols-2 gap-10 md:gap-12 items-center">
+            {/* Colonne texte */}
+            <div className="text-center md:text-left text-white">
+              <div className="inline-flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-5 font-jakarta">
+                <Smartphone className="w-3.5 h-3.5" />
+                {lang === 'fr' ? 'Nouveau · App Android' : 'New · Android App'}
+              </div>
+              <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-[0.95] mb-5 font-jakarta">
+                <span className="bg-gradient-to-r from-white via-amber-100 to-amber-400 bg-clip-text text-transparent">
+                  {lang === 'fr' ? 'Téléchargez DGhubSchool sur votre téléphone' : 'Download DGhubSchool on your phone'}
+                </span>
+              </h3>
+              <p className="text-sm md:text-base text-slate-300 leading-relaxed font-medium max-w-lg mx-auto md:mx-0 mb-8">
+                {lang === 'fr'
+                  ? "Notes, présences, paiements, bulletins — tout dans la poche des directeurs, enseignants et parents. Installation directe, sans passer par le Play Store."
+                  : "Grades, attendance, payments, report cards — everything in the pocket of directors, teachers and parents. Direct install, no Play Store account needed."}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+                <button
+                  onClick={() => navigate(`/${lang}/telecharger-app`)}
+                  className="inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-xl shadow-2xl shadow-amber-500/30 active:scale-95 hover:scale-[1.02] transition-all font-jakarta"
+                >
+                  <Download className="w-4 h-4" />
+                  {lang === 'fr' ? 'Obtenir l\'app' : 'Get the app'}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => navigate(`/${lang}/telecharger-app`)}
+                  className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white text-xs font-black uppercase tracking-widest px-6 py-4.5 rounded-xl transition-all font-jakarta"
+                >
+                  {lang === 'fr' ? 'Voir les détails' : 'See details'}
+                </button>
+              </div>
+            </div>
+
+            {/* Colonne visuel — carte téléphone stylée */}
+            <div className="relative flex justify-center md:justify-end">
+              <div
+                className="relative"
+                style={{ transform: 'rotate(-4deg)', filter: 'drop-shadow(0 30px 40px rgba(15, 23, 42, 0.45))' }}
+              >
+                <div className="relative bg-slate-950 rounded-[2.5rem] p-2 shadow-2xl">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-slate-950 w-24 h-6 rounded-b-2xl z-20" />
+                  <div className="relative w-64 sm:w-72 h-[520px] sm:h-[560px] rounded-[2rem] overflow-hidden border-2 border-slate-800 bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 flex flex-col items-center justify-center">
+                    <div className="flex flex-col items-center gap-4 px-6 text-center">
+                      <div className="w-28 h-28 rounded-3xl flex items-center justify-center bg-white/20 backdrop-blur-md shadow-2xl">
+                        <img src="/logo.png" alt="Logo DGhubSchool" className="w-20 h-20 object-contain" />
+                      </div>
+                      <div className="font-black text-2xl tracking-tighter text-white">
+                        DGhub<span className="text-slate-900">School</span>
+                      </div>
+                      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/80">
+                        {lang === 'fr' ? 'Gestion Scolaire' : 'School Management'}
+                      </div>
+                    </div>
+                    <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-3">
+                      <div className="w-8 h-8 rounded-full border-2 border-white/40 border-t-transparent animate-spin" />
+                      <div className="h-1 w-24 rounded-full bg-white/40" />
+                    </div>
+                    <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.06) 100%)' }} />
+                  </div>
+                  <div className="absolute right-[-3px] top-24 w-1 h-16 bg-slate-800 rounded-r-md" />
+                  <div className="absolute left-[-3px] top-20 w-1 h-8 bg-slate-800 rounded-l-md" />
+                  <div className="absolute left-[-3px] top-32 w-1 h-12 bg-slate-800 rounded-l-md" />
                 </div>
               </div>
             </div>
