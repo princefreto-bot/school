@@ -6,21 +6,25 @@ import { useStore } from '../store/useStore';
 import { Html5Qrcode } from "html5-qrcode";
 import {
     Camera, Search, AlertTriangle, UserCircle,
-    X, Wallet, Info, ShieldCheck, ChevronRight, Scan, CreditCard
+    X, Wallet, Info, ShieldCheck, ChevronRight, Scan, CreditCard,
+    Phone, Hash, Calendar, MapPin, GraduationCap, User
 } from 'lucide-react';
+import type { Student } from '../types';
 import { playSuccessSound, playErrorSound, unlockAudio } from '../utils/audio';
 
 // ── Composant carte d'élève scanné (OVERLAY PREMIUM) ────────────────
 const InfoStudentScanned: React.FC<{
-    nom: string;
-    prenom: string;
-    classe: string;
-    photoUrl?: string;
-    solde: number;
-    statut: string;
+    student: Student;
     onClose: () => void;
-}> = ({ nom, prenom, classe, photoUrl, solde, statut, onClose }) => {
+}> = ({ student, onClose }) => {
+    const { nom, prenom, classe, photoUrl, restant: solde, status: statut } = student;
     const isSolvable = solde <= 0;
+    const fmtDate = (d?: string) => {
+        if (!d) return '—';
+        try { return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }); }
+        catch { return d; }
+    };
+    const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n) + ' F';
     
     // Mount animation effect
     const [mounted, setMounted] = useState(false);
@@ -123,6 +127,117 @@ const InfoStudentScanned: React.FC<{
                                     <span className="w-1.5 h-1.5 rounded-full bg-current shadow-[0_0_8px_currentColor]"></span>
                                     {statut.toUpperCase()}
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── Détails complets ─────────────────── */}
+                    <div className="bg-gray-50 dark:bg-gray-800/40 rounded-2xl p-4 sm:p-5 mb-6 border border-gray-100 dark:border-gray-800 text-left">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
+                            {/* Contact parent — le plus important, en haut */}
+                            <div className="col-span-full flex items-start gap-3 pb-3 mb-1 border-b border-gray-100 dark:border-gray-800">
+                                <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                                    <Phone className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Contact parent</p>
+                                    <a
+                                        href={student.telephone ? `tel:${student.telephone}` : undefined}
+                                        className="text-sm font-black text-gray-900 dark:text-white truncate block hover:text-blue-600 transition-colors"
+                                    >
+                                        {student.telephone || '—'}
+                                    </a>
+                                </div>
+                                {student.telephone && (
+                                    <a
+                                        href={`tel:${student.telephone}`}
+                                        className="text-[10px] font-black uppercase tracking-widest text-blue-600 border border-blue-200 px-2.5 py-1.5 rounded-lg hover:bg-blue-50"
+                                    >
+                                        Appeler
+                                    </a>
+                                )}
+                            </div>
+
+                            {/* Matricule */}
+                            <div className="flex items-start gap-2.5">
+                                <Hash className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" />
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Matricule</p>
+                                    <p className="text-xs font-bold text-gray-800 dark:text-gray-200 font-mono truncate">
+                                        {student.adsn?.toUpperCase() || '—'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Sexe */}
+                            <div className="flex items-start gap-2.5">
+                                <User className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" />
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Sexe</p>
+                                    <p className="text-xs font-bold text-gray-800 dark:text-gray-200">
+                                        {student.sexe === 'M' ? 'Masculin' : student.sexe === 'F' ? 'Féminin' : '—'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Cycle */}
+                            <div className="flex items-start gap-2.5">
+                                <GraduationCap className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" />
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Cycle</p>
+                                    <p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">{student.cycle || '—'}</p>
+                                </div>
+                            </div>
+
+                            {/* Statut élève */}
+                            <div className="flex items-start gap-2.5">
+                                <ShieldCheck className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" />
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Statut</p>
+                                    <p className="text-xs font-bold text-gray-800 dark:text-gray-200">
+                                        {student.statutElv || (student.redoublant ? 'REDOUBLANT' : 'ANCIEN')}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Date de naissance */}
+                            {student.dateNaissance && (
+                                <div className="flex items-start gap-2.5">
+                                    <Calendar className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" />
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Naissance</p>
+                                        <p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">{fmtDate(student.dateNaissance)}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Lieu de naissance */}
+                            {student.lieuNaissance && (
+                                <div className="flex items-start gap-2.5">
+                                    <MapPin className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" />
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Lieu de naissance</p>
+                                        <p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">{student.lieuNaissance}</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Bloc paiements — récap */}
+                        <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 grid grid-cols-3 gap-2 text-center">
+                            <div>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Écolage</p>
+                                <p className="text-xs font-black text-gray-800 dark:text-gray-200">{fmtMoney(student.ecolage || 0)}</p>
+                            </div>
+                            <div>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Payé</p>
+                                <p className="text-xs font-black text-emerald-600">{fmtMoney(student.dejaPaye || 0)}</p>
+                            </div>
+                            <div>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Restant</p>
+                                <p className={`text-xs font-black ${solde > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                                    {fmtMoney(Math.max(0, solde))}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -439,12 +554,7 @@ export const ScanInformation: React.FC = () => {
             {/* Overlay Résultat */}
             {scannedStudent && (
                 <InfoStudentScanned
-                    nom={scannedStudent.nom}
-                    prenom={scannedStudent.prenom}
-                    classe={scannedStudent.classe}
-                    photoUrl={scannedStudent.photoUrl}
-                    solde={scannedStudent.restant}
-                    statut={scannedStudent.status}
+                    student={scannedStudent}
                     onClose={() => {
                         setScannedStudent(null);
                         isScanningPaused.current = false;
