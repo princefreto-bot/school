@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { supabase } = require('../utils/supabase');
+const { computeMissedHours } = require('./staffAttendanceController');
 
 /**
  * Calcule l'IRPP annuel selon un barème progressif par tranches.
@@ -161,7 +162,7 @@ async function setStaffSalary(req, res) {
  */
 async function generatePayslip(req, res) {
     const { schoolSlug, id: userId } = req.user;
-    const { personnelId, periode, salaireBase, primes, retenues, personnesACharge } = req.body;
+    const { personnelId, periode, salaireBase, primes, retenues, personnesACharge, missedHoursAuto } = req.body;
 
     if (!personnelId || !periode || !salaireBase || salaireBase <= 0) {
         return res.status(400).json({ error: 'Personnel, période et salaire de base requis.' });
@@ -216,6 +217,42 @@ async function generatePayslip(req, res) {
             .single();
 
         if (error) throw error;
+
+        // Si l'admin a conservé la ligne de retenue calculée automatiquement, on
+        // trace ce résultat dans staff_absences (pour les vues MesAbsences /
+        // GestionPersonnel) — jamais l'inverse : cette écriture ne se déclenche
+        // QUE sur confirmation explicite, jamais au calcul lui-même.
+        if (missedHoursAuto && Number(missedHoursAuto.totalMissedHours) > 0) {
+            const motif = 'Calculé automatiquement (scan)';
+            const [yearStr, monthStr] = periode.split('-');
+            const lastDay = new Date(Number(yearStr), Number(monthStr), 0).getDate();
+            const dateAbsence = `${yearStr}-${monthStr}-${String(lastDay).padStart(2, '0')}`;
+
+            const { data: existing } = await supabase
+                .from(`staff_absences_${schoolSlug}`)
+                .select('id')
+                .eq('personnel_id', personnelId)
+                .eq('motif', motif)
+                .gte('date', `${yearStr}-${monthStr}-01`)
+                .lte('date', dateAbsence)
+                .maybeSingle();
+
+            const absenceRow = {
+                personnel_id: personnelId,
+                date: dateAbsence,
+                type: 'absence',
+                heures_manquees: Number(missedHoursAuto.totalMissedHours),
+                motif,
+                saisi_par: null
+            };
+
+            if (existing) {
+                await supabase.from(`staff_absences_${schoolSlug}`).update(absenceRow).eq('id', existing.id);
+            } else {
+                await supabase.from(`staff_absences_${schoolSlug}`).insert(absenceRow);
+            }
+        }
+
         return res.json(data);
     } catch (err) {
         return res.status(500).json({ error: err.message });
@@ -318,6 +355,58 @@ async function setStaffPaieInfo(req, res) {
 }
 
 /**
+ * GET /api/payroll/staff/:personnelId/missed-hours-suggestion?periode=AAAA-MM
+ * Calcule les heures manquées (scan vs planning) et les convertit en montant
+ * de retenue suggéré — JAMAIS appliqué automatiquement, seulement proposé.
+ * Si heures_mensuelles_standard n'est pas configuré pour l'école, renvoie les
+ * heures brutes avec configMissing=true plutôt qu'un montant inventé.
+ */
+async function getMissedHoursSuggestion(req, res) {
+    const { schoolSlug } = req.user;
+    const { personnelId } = req.params;
+    const { periode } = req.query;
+
+    if (!periode) {
+        return res.status(400).json({ error: 'Période (AAAA-MM) requise.' });
+    }
+
+    try {
+        const { totalMissedHours, byDay, incompleteDays } = await computeMissedHours(schoolSlug, personnelId, periode, req);
+
+        const { data: settings } = await supabase
+            .from(`app_settings_${schoolSlug}`)
+            .select('heures_mensuelles_standard')
+            .single();
+        const heuresMensuelles = settings?.heures_mensuelles_standard ? Number(settings.heures_mensuelles_standard) : null;
+
+        const { data: salaries } = await supabase
+            .from(`staff_salaries_${schoolSlug}`)
+            .select('salaire_base, date_effet')
+            .eq('personnel_id', personnelId)
+            .order('date_effet', { ascending: false })
+            .limit(1);
+        const salaireBase = salaries && salaries[0] ? Number(salaries[0].salaire_base) : null;
+
+        if (!heuresMensuelles || !salaireBase) {
+            return res.json({
+                totalMissedHours,
+                incompleteDays,
+                montant: null,
+                configMissing: true,
+                reason: !heuresMensuelles ? 'heures_mensuelles_standard non configuré (Paramètres)' : 'Salaire de base non défini pour ce salarié'
+            });
+        }
+
+        const tauxHoraire = salaireBase / heuresMensuelles;
+        const montant = Math.round(totalMissedHours * tauxHoraire);
+
+        return res.json({ totalMissedHours, incompleteDays, montant, tauxHoraire, configMissing: false, byDay });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+/**
  * GET /api/payroll/self/roster
  * Liste minimale du personnel (id + nom) pour la sélection côté enseignant.
  * Accessible à tout membre authentifié de l'établissement.
@@ -380,6 +469,31 @@ async function getSelfPayslips(req, res) {
     }
 }
 
+/**
+ * GET /api/payroll/self/payslips/mine
+ * Version directe : le JWT de l'appelant fait foi (compte individuel — vrai pour
+ * tout rôle staff hors compte enseignant partagé), aucun mot de passe requis.
+ */
+async function getMySelfPayslips(req, res) {
+    const { id: personnelId, nom, role, schoolSlug } = req.user;
+
+    try {
+        const { data: payslips, error } = await supabase
+            .from(`payslips_${schoolSlug}`)
+            .select('*')
+            .eq('personnel_id', personnelId)
+            .order('periode', { ascending: false });
+        if (error) throw error;
+
+        return res.json({
+            personnel: { id: personnelId, nom, role },
+            payslips: payslips || []
+        });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
 module.exports = {
     getConfig,
     updateConfig,
@@ -390,5 +504,7 @@ module.exports = {
     getPayslips,
     getSelfRoster,
     getSelfPayslips,
+    getMySelfPayslips,
+    getMissedHoursSuggestion,
     computePayslipAmounts // exporté pour les tests
 };

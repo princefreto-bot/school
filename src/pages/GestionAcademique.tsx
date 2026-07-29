@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useStore } from '../store/useStore';
 import { MatiereCategorie } from '../types';
 import { v4 as uuid } from '../utils/uuid';
+import { personnelApi } from '../services/personnelApi';
 import { BookOpen, Plus, Trash2, Settings2, Users, Layers, Library } from 'lucide-react';
 
+const FREE_TEXT_OPTION = '__free_text__';
+
 export const GestionAcademique: React.FC = () => {
-    const { 
+    const {
         matieres, addMatiere, deleteMatiere,
         classeMatieres, addClasseMatiere, deleteClasseMatiere,
         students
@@ -20,7 +23,17 @@ export const GestionAcademique: React.FC = () => {
     const [selectedClasse, setSelectedClasse] = useState('');
     const [selectedMatiere, setSelectedMatiere] = useState('');
     const [professeur, setProfesseur] = useState('');
+    const [professeurId, setProfesseurId] = useState('');
     const [coefficient, setCoefficient] = useState(1);
+
+    // Roster des enseignants ayant une fiche personnel individuelle (comptes à part entière) —
+    // permet de lier la liaison classe/matière à une vraie identité plutôt qu'à un nom libre.
+    const [teacherRoster, setTeacherRoster] = useState<{ id: string; nom: string }[]>([]);
+    useEffect(() => {
+        personnelApi.getPersonnel()
+            .then((data: any[]) => setTeacherRoster((data || []).filter((p) => p.role === 'enseignant').map((p) => ({ id: p.id, nom: p.nom }))))
+            .catch(() => setTeacherRoster([]));
+    }, []);
 
     const handleAddMatiere = (e: React.FormEvent) => {
         e.preventDefault();
@@ -43,11 +56,24 @@ export const GestionAcademique: React.FC = () => {
             classe: selectedClasse,
             matiereId: selectedMatiere,
             professeur: professeur.trim(),
+            professeurId: professeurId || null,
             coefficient
         });
         setSelectedMatiere('');
         setProfesseur('');
+        setProfesseurId('');
         setCoefficient(1);
+    };
+
+    const handleProfesseurSelectChange = (value: string) => {
+        if (value === FREE_TEXT_OPTION || value === '') {
+            setProfesseurId('');
+            setProfesseur('');
+            return;
+        }
+        const teacher = teacherRoster.find((t) => t.id === value);
+        setProfesseurId(value);
+        setProfesseur(teacher?.nom || '');
     };
 
     return (
@@ -241,13 +267,26 @@ export const GestionAcademique: React.FC = () => {
                                 <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
                                     Professeur (Optionnel)
                                 </label>
-                                <input
-                                    type="text"
-                                    value={professeur}
-                                    onChange={(e) => setProfesseur(e.target.value)}
-                                    placeholder="Ex: M. DUBOIS"
-                                    className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                />
+                                {teacherRoster.length > 0 && (
+                                    <select
+                                        value={professeurId || (professeur ? FREE_TEXT_OPTION : '')}
+                                        onChange={(e) => handleProfesseurSelectChange(e.target.value)}
+                                        className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer mb-2"
+                                    >
+                                        <option value="">— Sélectionner un compte enseignant —</option>
+                                        {teacherRoster.map((t) => <option key={t.id} value={t.id}>{t.nom}</option>)}
+                                        <option value={FREE_TEXT_OPTION}>Autre (saisie libre, sans compte)</option>
+                                    </select>
+                                )}
+                                {(teacherRoster.length === 0 || professeurId === '') && (
+                                    <input
+                                        type="text"
+                                        value={professeur}
+                                        onChange={(e) => { setProfesseur(e.target.value); setProfesseurId(''); }}
+                                        placeholder="Ex: M. DUBOIS"
+                                        className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    />
+                                )}
                             </div>
                             <div>
                                 <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">

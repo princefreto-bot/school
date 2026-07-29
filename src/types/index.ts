@@ -293,6 +293,11 @@ export type AppPage =
   | 'selection_enseignant'
   | 'mon_planning'
   | 'mon_bulletin_paie'
+  | 'mon_profil'
+  | 'mes_absences'
+  | 'carte_personnel'
+  | 'scan_presence_personnel'
+  | 'scan_sortie_personnel'
   // ── Pages SuperAdmin (propriétaire SaaS) ──
   | 'superadmin_dashboard'
   | 'superadmin_schools'
@@ -318,6 +323,7 @@ export interface ClasseMatiere {
   classe: string; // ex: '3ème A'
   matiereId: string;
   professeur: string;
+  professeurId?: string | null; // Lien vers la fiche personnel (compte enseignant individuel)
   coefficient: number;
 }
 

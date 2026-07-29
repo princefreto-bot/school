@@ -3,7 +3,10 @@
 // ============================================================
 import { AppPage } from '../types';
 
-type Role = 'superadmin' | 'admin' | 'directeur' | 'directeur_general' | 'proviseur' | 'censeur' | 'superviseur' | 'surveillant' | 'comptable' | 'parent' | 'enseignant' | 'creator';
+type Role = 'superadmin' | 'admin' | 'directeur' | 'directeur_general' | 'proviseur' | 'censeur' | 'superviseur' | 'surveillant' | 'comptable' | 'secretaire' | 'parent' | 'enseignant' | 'creator';
+
+// Portail personnel « Mon Espace » — accessible à tout le personnel staff (pas les parents).
+const MON_ESPACE_PAGES: AppPage[] = ['mon_profil', 'mon_bulletin_paie', 'mon_planning', 'mes_absences'];
 
 // Pages accessibles par rôle
 const ROLE_PAGES: Record<Role, AppPage[]> = {
@@ -18,37 +21,41 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'dashboard', 'eleves', 'paiements', 'retraits', 'comptabilite', 'paie', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire', 'carte_examen',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
-        'gestion_academique', 'emploi_du_temps', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins', 'rapports_academiques'
+        'gestion_academique', 'emploi_du_temps', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins', 'rapports_academiques',
+        'gestion_personnel', 'carte_personnel', 'scan_presence_personnel', 'scan_sortie_personnel', ...MON_ESPACE_PAGES
     ],
     admin: [
         'dashboard', 'eleves', 'paiements', 'retraits', 'comptabilite', 'paie', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire', 'carte_examen',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
-        'gestion_academique', 'emploi_du_temps', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins', 'rapports_academiques'
+        'gestion_academique', 'emploi_du_temps', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins', 'rapports_academiques',
+        'gestion_personnel', 'carte_personnel', 'scan_presence_personnel', 'scan_sortie_personnel', ...MON_ESPACE_PAGES
     ],
     directeur: [
         'dashboard', 'eleves', 'paiements', 'retraits', 'comptabilite', 'paie', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire', 'carte_examen',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
-        'gestion_academique', 'emploi_du_temps', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins', 'rapports_academiques'
+        'gestion_academique', 'emploi_du_temps', 'gestion_annees_scolaires', 'saisie_notes', 'bulletins', 'rapports_academiques',
+        'gestion_personnel', 'carte_personnel', 'scan_presence_personnel', 'scan_sortie_personnel', ...MON_ESPACE_PAGES
     ],
     comptable: [
         'dashboard', 'eleves', 'paiements', 'retraits', 'comptabilite', 'paie', 'analyses', 'documents',
-        'recouvrement', 'verification_recu', 'import_export', 'chat', 'scan_information'
+        'recouvrement', 'verification_recu', 'import_export', 'chat', 'scan_information', ...MON_ESPACE_PAGES
     ],
     superviseur: [
-        'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire'
+        'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire',
+        'scan_presence_personnel', 'scan_sortie_personnel', ...MON_ESPACE_PAGES
     ],
     surveillant: [
         'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire'
     ],
     proviseur: [
         'dashboard', 'eleves', 'analyses', 'chat', 'scan_information',
-        'gestion_academique', 'emploi_du_temps', 'saisie_notes', 'bulletins', 'rapports_academiques'
+        'gestion_academique', 'emploi_du_temps', 'saisie_notes', 'bulletins', 'rapports_academiques', ...MON_ESPACE_PAGES
     ],
     censeur: [
         'dashboard', 'eleves', 'analyses', 'chat', 'scan_information',
-        'gestion_academique', 'emploi_du_temps', 'saisie_notes', 'bulletins', 'rapports_academiques'
+        'gestion_academique', 'emploi_du_temps', 'saisie_notes', 'bulletins', 'rapports_academiques', ...MON_ESPACE_PAGES
     ],
     parent: [
         'parent_dashboard', 'parent_historique', 'parent_recus',
@@ -56,7 +63,10 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'parent_notes', 'parent_courses'
     ],
     enseignant: [
-        'saisie_notes', 'selection_enseignant', 'mon_planning', 'mon_bulletin_paie'
+        'saisie_notes', 'selection_enseignant', ...MON_ESPACE_PAGES
+    ],
+    secretaire: [
+        'dashboard', 'gestion_personnel', 'carte_personnel', 'scan_presence_personnel', 'scan_sortie_personnel', 'gestion_academique', 'emploi_du_temps', 'annonces', 'chat', 'documents', ...MON_ESPACE_PAGES
     ],
 };
 
@@ -108,6 +118,7 @@ const ROLE_ACTIONS: Record<Role, ActionType[]> = {
     censeur: [],
     parent: [],
     enseignant: [],
+    secretaire: [],
     creator: [],
 };
 
@@ -146,6 +157,7 @@ export const getRoleLabel = (role: string): string => {
         censeur: 'Censeur',
         parent: 'Parent',
         enseignant: 'Enseignant (Compte Partagé)',
+        secretaire: 'Secrétaire',
         creator: 'Créateur de contenu',
     };
     return labels[role] || role;

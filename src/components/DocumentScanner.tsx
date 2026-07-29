@@ -4,10 +4,24 @@ import { Capacitor } from '@capacitor/core';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 import jsPDF from 'jspdf';
 
+export interface DocTypeOption { value: string; label: string }
+
+const DEFAULT_DOC_TYPES: DocTypeOption[] = [
+  { value: 'birth_certificate', label: 'Acte de naissance' },
+  { value: 'report_card', label: 'Ancien bulletin scolaire' },
+  { value: 'certificate', label: 'Attestation ou Certificat' },
+  { value: 'other', label: 'Autre document' },
+];
+
 interface DocumentScannerProps {
   onCapture: (file: File, docType: string, title: string) => void;
   onClose: () => void;
-  studentName: string;
+  /** Nom de la personne/entité à qui le document sera associé (élève, membre du personnel...). */
+  subjectName: string;
+  /** Liste des types de document proposés — défaut : liste élève. */
+  docTypes?: DocTypeOption[];
+  /** Texte affiché sous le bouton de validation — défaut : mention notification parents (élève). */
+  notifyCopy?: string;
 }
 
 // Helper functions for perspective projection (quadrilateral warping)
@@ -135,7 +149,11 @@ function perspectiveWarp(
   ctx.putImageData(dstImgData, 0, 0);
 }
 
-export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onClose, studentName }) => {
+export const DocumentScanner: React.FC<DocumentScannerProps> = ({
+  onCapture, onClose, subjectName,
+  docTypes = DEFAULT_DOC_TYPES,
+  notifyCopy = "Le document sera associé au profil de l'élève et une notification push sera envoyée immédiatement aux parents.",
+}) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -146,8 +164,8 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   
   // Paramètres du document
-  const [docType, setDocType] = useState('birth_certificate');
-  const [docTitle, setDocTitle] = useState('Acte de naissance');
+  const [docType, setDocType] = useState(docTypes[0]?.value || 'other');
+  const [docTitle, setDocTitle] = useState(docTypes[0]?.label || 'Pièce numérisée');
 
   // Filtres
   const [filterType, setFilterType] = useState<'original' | 'binarized'>('binarized');
@@ -597,20 +615,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
   // Mettre à jour le titre automatique lors du changement de type
   const handleTypeChange = (type: string) => {
     setDocType(type);
-    switch (type) {
-      case 'birth_certificate':
-        setDocTitle('Acte de naissance');
-        break;
-      case 'report_card':
-        setDocTitle('Ancien bulletin scolaire');
-        break;
-      case 'certificate':
-        setDocTitle('Attestation scolaire');
-        break;
-      default:
-        setDocTitle('Pièce numérisée');
-        break;
-    }
+    setDocTitle(docTypes.find((t) => t.value === type)?.label || 'Pièce numérisée');
   };
 
   return (
@@ -900,7 +905,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                 <div>
                   <h4 className="font-black text-slate-900 dark:text-white text-lg tracking-tight">Numériseur de document</h4>
-                  <p className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mt-0.5">{studentName}</p>
+                  <p className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mt-0.5">{subjectName}</p>
                 </div>
                 <button 
                   onClick={onClose}
@@ -919,10 +924,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
                     onChange={(e) => handleTypeChange(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/80 rounded-xl font-bold text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   >
-                    <option value="birth_certificate">Acte de naissance</option>
-                    <option value="report_card">Ancien bulletin scolaire</option>
-                    <option value="certificate">Attestation ou Certificat</option>
-                    <option value="other">Autre document</option>
+                    {docTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
                 </div>
 
@@ -1024,7 +1026,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ onCapture, onC
                 <Check className="w-4 h-4" /> Numériser & Envoyer
               </button>
               <p className="text-[9px] text-center text-slate-400 font-bold leading-normal">
-                Le document sera associé au profil de l'élève et une notification push sera envoyée immédiatement aux parents.
+                {notifyCopy}
               </p>
             </div>
 

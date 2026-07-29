@@ -40,6 +40,9 @@ const Paiements = lazy(() => import('./pages/Paiements').then(m => ({ default: m
 const Retraits = lazy(() => import('./pages/Retraits').then(m => ({ default: m.Retraits })));
 const Comptabilite = lazy(() => import('./pages/Comptabilite').then(m => ({ default: m.Comptabilite })));
 const Paie = lazy(() => import('./pages/Paie').then(m => ({ default: m.Paie })));
+const GestionPersonnel = lazy(() => import('./pages/GestionPersonnel').then(m => ({ default: m.GestionPersonnel })));
+const MonProfil = lazy(() => import('./pages/MonProfil').then(m => ({ default: m.MonProfil })));
+const MesAbsences = lazy(() => import('./pages/MesAbsences').then(m => ({ default: m.MesAbsences })));
 const EmploiDuTemps = lazy(() => import('./pages/EmploiDuTemps').then(m => ({ default: m.EmploiDuTemps })));
 const MonPlanning = lazy(() => import('./pages/MonPlanning').then(m => ({ default: m.MonPlanning })));
 const MonBulletinPaie = lazy(() => import('./pages/MonBulletinPaie').then(m => ({ default: m.MonBulletinPaie })));
@@ -51,6 +54,9 @@ const ScanPresence = lazy(() => import('./pages/ScanPresence').then(m => ({ defa
 const ScanSortie = lazy(() => import('./pages/ScanSortie').then(m => ({ default: m.ScanSortie })));
 const ScanInformation = lazy(() => import('./pages/ScanInformation'));
 const CarteScolaire = lazy(() => import('./pages/CarteScolaire').then(m => ({ default: m.CarteScolaire })));
+const CarteEnseignant = lazy(() => import('./pages/CarteEnseignant').then(m => ({ default: m.CarteEnseignant })));
+const ScanPresenceEnseignant = lazy(() => import('./pages/ScanPresenceEnseignant').then(m => ({ default: m.ScanPresenceEnseignant })));
+const ScanSortieEnseignant = lazy(() => import('./pages/ScanSortieEnseignant').then(m => ({ default: m.ScanSortieEnseignant })));
 const CarteExamen = lazy(() => import('./pages/CarteExamen').then(m => ({ default: m.CarteExamen })));
 const GestionAcademique = lazy(() => import('./pages/GestionAcademique' /* */).then(m => ({ default: m.GestionAcademique })));
 const GestionAnneesScolaires = lazy(() => import('./pages/GestionAnneesScolaires').then(m => ({ default: m.GestionAnneesScolaires })));
@@ -131,6 +137,16 @@ const PageContent: React.FC = () => {
   const currentPage = useStore((s) => s.currentPage);
   const user = useStore((s) => s.user);
   const students = useStore((s) => s.students);
+  const teachingMode = useStore((s) => s.teachingMode);
+  const fetchTeachingMode = useStore((s) => s.fetchTeachingMode);
+
+  // Au rechargement de page (session restaurée depuis le localStorage), teachingMode
+  // repart à null — on le résout une fois si nécessaire, sans bloquer le rendu.
+  React.useEffect(() => {
+    if (user?.role === 'enseignant' && teachingMode === null) {
+      fetchTeachingMode();
+    }
+  }, [user?.role, teachingMode, fetchTeachingMode]);
 
   // SuperAdmin: uniquement ses pages
   if (user?.role === 'superadmin') {
@@ -178,8 +194,12 @@ const PageContent: React.FC = () => {
     }
   }
 
-  if (user?.role === 'enseignant') {
-    const teacherPages = ['saisie_notes', 'selection_enseignant', 'mon_planning', 'mon_bulletin_paie'];
+  // Compte enseignant partagé (historique) : on force la sélection de nom tant que
+  // l'école n'a pas migré vers des comptes individuels. Un compte individuel (teachingMode
+  // === 'individual') est traité comme n'importe quel autre rôle staff — son JWT fait foi,
+  // plus besoin de sélecteur de nom ni de restriction de pages.
+  if (user?.role === 'enseignant' && teachingMode !== 'individual') {
+    const teacherPages = ['saisie_notes', 'selection_enseignant', 'mon_planning', 'mon_bulletin_paie', 'mon_profil', 'mes_absences'];
     if (!teacherPages.includes(currentPage as any)) {
       const selectedTeacherName = localStorage.getItem('selected_teacher_name');
       return (
@@ -201,6 +221,9 @@ const PageContent: React.FC = () => {
             case 'retraits': return <Retraits />;
             case 'comptabilite': return <Comptabilite />;
             case 'paie': return <Paie />;
+            case 'gestion_personnel': return <GestionPersonnel />;
+            case 'mon_profil': return <MonProfil />;
+            case 'mes_absences': return <MesAbsences />;
             case 'emploi_du_temps': return <EmploiDuTemps />;
             case 'mon_planning': return <MonPlanning />;
             case 'mon_bulletin_paie': return <MonBulletinPaie />;
@@ -212,6 +235,9 @@ const PageContent: React.FC = () => {
             case 'scan_sortie': return <ScanSortie />;
             case 'scan_information': return <ScanInformation />;
             case 'carte_scolaire': return <CarteScolaire />;
+            case 'carte_personnel': return <CarteEnseignant />;
+            case 'scan_presence_personnel': return <ScanPresenceEnseignant />;
+            case 'scan_sortie_personnel': return <ScanSortieEnseignant />;
             case 'carte_examen': return <CarteExamen />;
             case 'gestion_academique': return <GestionAcademique />;
             case 'gestion_annees_scolaires': return <GestionAnneesScolaires />;

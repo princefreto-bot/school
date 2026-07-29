@@ -5,7 +5,6 @@ import {
   Save, School, MessageSquare, Shield, Info,
   Upload, X, Image, Clock, Plus, Calendar, Trash2, Database, AlertCircle, Layers
 } from 'lucide-react';
-import { GestionPersonnel } from '../components/GestionPersonnel';
 import { SchoolBackups } from '../components/SchoolBackups';
 import { AutoReminderSettings } from '../components/AutoReminderSettings';
 import { ParentSatisfactionOverview } from '../components/ParentSatisfactionOverview';
@@ -41,6 +40,7 @@ export const Parametres: React.FC = () => {
   const schoolEmail = useStore((s) => s.schoolEmail);
   const schoolWebsite = useStore((s) => s.schoolWebsite);
   const schoolAutorisation = useStore((s) => s.schoolAutorisation);
+  const heuresMensuellesStandard = useStore((s) => s.heuresMensuellesStandard);
   const countryName = useStore((s) => s.countryName);
   const countryMotto = useStore((s) => s.countryMotto);
   const ministereName = useStore((s) => s.ministereName);
@@ -61,6 +61,7 @@ export const Parametres: React.FC = () => {
   const [localEmail, setLocalEmail] = useState(schoolEmail || '');
   const [localWebsite, setLocalWebsite] = useState(schoolWebsite || '');
   const [localAutorisation, setLocalAutorisation] = useState(schoolAutorisation || '');
+  const [localHeuresMensuelles, setLocalHeuresMensuelles] = useState(heuresMensuellesStandard != null ? String(heuresMensuellesStandard) : '');
   const [localCountryName, setLocalCountryName] = useState(countryName);
   const [localCountryMotto, setLocalCountryMotto] = useState(countryMotto);
   const [localMinistereName, setLocalMinistereName] = useState(ministereName);
@@ -360,6 +361,7 @@ export const Parametres: React.FC = () => {
       schoolEmail: localEmail,
       schoolWebsite: localWebsite,
       schoolAutorisation: localAutorisation,
+      heuresMensuellesStandard: localHeuresMensuelles ? Number(localHeuresMensuelles) : null,
       countryName: localCountryName,
       countryMotto: localCountryMotto,
       ministereName: localMinistereName,
@@ -766,6 +768,21 @@ export const Parametres: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Heures mensuelles standard (paie)
+                            </label>
+                            <input
+                                type="number"
+                                min={1}
+                                step={0.5}
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localHeuresMensuelles}
+                                onChange={(e) => setLocalHeuresMensuelles(e.target.value)}
+                                placeholder="Ex : 173"
+                            />
+                            <p className="text-[10px] text-slate-400 mt-1">Utilisé pour calculer le taux horaire des retenues sur heures manquées.</p>
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
                                 Devise Monétaire
                             </label>
                             <input
@@ -971,13 +988,6 @@ export const Parametres: React.FC = () => {
         {/* COLONNE DROITE (Secondaire) */}
         <div className="space-y-6">
             
-            {/* ── GESTION DU PERSONNEL ────────────────────────────── */}
-            {(user?.role === 'directeur' || user?.role === 'directeur_general') && (
-                <div className="pro-card p-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800 overflow-hidden">
-                    <GestionPersonnel />
-                </div>
-            )}
-
             {/* ── HORAIRES SCOLAIRES ────────────────────── */}
             {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
                 <div className="pro-card p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800">

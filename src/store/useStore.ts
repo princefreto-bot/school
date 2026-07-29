@@ -11,6 +11,7 @@ import { createActivityLog } from '../utils/activityLogger';
 import { syncToBackend, fetchFromBackend, deleteAcademicYearBackend } from '../services/backendSync';
 import { chatApi } from '../services/chatApi';
 import { getAuthHeaders } from '../services/apiHelpers';
+import { personnelApi } from '../services/personnelApi';
 
 export interface AppState {
   // Identité de l'app
@@ -52,6 +53,11 @@ export interface AppState {
   fetchUnreadMessages: () => Promise<void>;
   login: (username: string, password: string, schoolSlug?: string, portal?: 'parent' | 'school') => Promise<boolean>;
   logout: () => void;
+
+  // Mode d'identité enseignant — 'individual' (compte propre, req.user.id fait foi)
+  // vs 'shared' (compte partagé historique, sélection de nom en localStorage).
+  teachingMode: 'individual' | 'shared' | null;
+  fetchTeachingMode: () => Promise<void>;
 
   // Navigation
   currentPage: AppPage;
@@ -122,6 +128,8 @@ export interface AppState {
   setSchoolWebsite: (v: string) => void;
   schoolAutorisation: string;
   setSchoolAutorisation: (v: string) => void;
+  heuresMensuellesStandard: number | null;
+  setHeuresMensuellesStandard: (v: number | null) => void;
   updateAllSettings: (settings: {
     appName?: string,
     schoolName?: string,
@@ -131,6 +139,7 @@ export interface AppState {
     schoolEmail?: string,
     schoolWebsite?: string,
     schoolAutorisation?: string,
+    heuresMensuellesStandard?: number | null,
     schoolYear?: string,
     schoolLogo?: string | null,
     schoolStamp?: string | null,
@@ -476,6 +485,7 @@ export const useStore = create<AppState>()(
             set({ user: loggedUser, isAuthenticated: true, currentPage: targetPage });
             get().addActivityLog(createActivityLog(loggedUser.nom, loggedUser.role, 'connexion', 'Connexion API réussie'));
             if (loggedUser.role !== 'superadmin' && loggedUser.role !== 'creator') get().fetchAllFromBackend();
+            if (loggedUser.role === 'enseignant') get().fetchTeachingMode();
             return true;
           }
         } catch (err: any) {
@@ -489,6 +499,16 @@ export const useStore = create<AppState>()(
         // ⛔ Fallback local supprimé pour la sécurité SaaS multi-tenant.
         // Toute authentification doit passer par le backend API.
         return false;
+      },
+      teachingMode: null,
+      fetchTeachingMode: async () => {
+        try {
+          const { mode } = await personnelApi.getTeachingMode();
+          set({ teachingMode: mode });
+        } catch {
+          // Repli sûr : comportement historique (sélection de nom) en cas d'erreur réseau.
+          set({ teachingMode: 'shared' });
+        }
       },
       logout: () => {
         const u = get().user;
@@ -512,6 +532,7 @@ export const useStore = create<AppState>()(
           matieres: [],
           classeMatieres: [],
           notes: [],
+          teachingMode: null,
           lastSyncTimestamp: 0 // Reset pour la prochaine session
         });
       },
@@ -748,6 +769,8 @@ export const useStore = create<AppState>()(
       setSchoolWebsite: (v) => set({ schoolWebsite: v }),
       schoolAutorisation: '',
       setSchoolAutorisation: (v) => set({ schoolAutorisation: v }),
+      heuresMensuellesStandard: null,
+      setHeuresMensuellesStandard: (v) => set({ heuresMensuellesStandard: v }),
       countryName: 'République Togolaise',
       setCountryName: (name) => set({ countryName: name }),
       countryMotto: 'Travail - Liberté - Patrie',
@@ -1178,6 +1201,7 @@ export const useStore = create<AppState>()(
               schoolEmail: data.appSettings.schoolEmail ?? get().schoolEmail,
               schoolWebsite: data.appSettings.schoolWebsite ?? get().schoolWebsite,
               schoolAutorisation: data.appSettings.schoolAutorisation ?? get().schoolAutorisation,
+              heuresMensuellesStandard: data.appSettings.heuresMensuellesStandard ?? get().heuresMensuellesStandard,
               countryName: data.appSettings.countryName || get().countryName,
               countryMotto: data.appSettings.countryMotto || get().countryMotto,
               ministereName: data.appSettings.ministereName || get().ministereName,

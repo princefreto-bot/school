@@ -24,6 +24,35 @@ export const personnelApi = {
         return data;
     },
 
+    updatePersonnel: async (id: string, updates: Record<string, any>) => {
+        const res = await fetch(`${API_URL}/${id}`, {
+            method: 'PATCH',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(updates)
+        });
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
+    },
+
+    getMyProfile: async () => {
+        const res = await fetch(`${API_URL}/me`, {
+            headers: getAuthHeaders()
+        });
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
+    },
+
+    getTeachingMode: async (): Promise<{ mode: 'individual' | 'shared'; applicable: boolean }> => {
+        const res = await fetch(`${API_URL}/me/teaching-mode`, {
+            headers: getAuthHeaders()
+        });
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
+    },
+
     deletePersonnel: async (id: string) => {
         const res = await fetch(`${API_URL}/${id}`, {
             method: 'DELETE',

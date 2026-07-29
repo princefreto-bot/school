@@ -1,9 +1,10 @@
 // ============================================================
-// PAGE MON PLANNING — Emploi du temps en lecture seule (enseignant)
+// PAGE MON PLANNING — Emploi du temps en lecture seule (personnel)
 // ============================================================
 import React, { useEffect, useMemo, useState } from 'react';
 import { API_BASE_URL } from '../config';
 import { getAuthHeaders, parseResponse } from '../services/apiHelpers';
+import { useStore } from '../store/useStore';
 import { Calendar, Loader2, Sparkles } from 'lucide-react';
 
 const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
@@ -22,22 +23,35 @@ interface Slot {
 const fmtTime = (t: string) => (t || '').slice(0, 5);
 
 export const MonPlanning: React.FC = () => {
+  const user = useStore((s) => s.user);
+  const teachingMode = useStore((s) => s.teachingMode);
+
+  // Compte enseignant partagé (historique) : le planning reste identifié par le
+  // nom choisi en localStorage. Tout autre cas (compte individuel, autre rôle
+  // staff) s'appuie sur le JWT — le backend dérive l'identité de req.user.id.
+  const useLegacyName = user?.role === 'enseignant' && teachingMode !== 'individual';
+  const teacherName = useLegacyName && typeof window !== 'undefined' ? localStorage.getItem('selected_teacher_name') || '' : '';
+  const awaitingSelection = useLegacyName && !teacherName;
+
   const [slots, setSlots] = useState<Slot[]>([]);
   const [loading, setLoading] = useState(true);
-  const teacherName = typeof window !== 'undefined' ? localStorage.getItem('selected_teacher_name') || '' : '';
 
   useEffect(() => {
     const load = async () => {
-      if (!teacherName) { setLoading(false); return; }
+      if (awaitingSelection) { setLoading(false); return; }
+      setLoading(true);
       try {
-        const res = await fetch(`${API_BASE_URL}/timetable/mine?nom=${encodeURIComponent(teacherName)}`, { headers: getAuthHeaders() });
+        const url = teacherName
+          ? `${API_BASE_URL}/timetable/mine?nom=${encodeURIComponent(teacherName)}`
+          : `${API_BASE_URL}/timetable/mine`;
+        const res = await fetch(url, { headers: getAuthHeaders() });
         if (res.ok) setSlots(await parseResponse(res));
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [teacherName]);
+  }, [teacherName, awaitingSelection]);
 
   const grid = useMemo(() => {
     const map: Record<string, Slot[]> = {};
@@ -50,6 +64,8 @@ export const MonPlanning: React.FC = () => {
     return map;
   }, [slots]);
 
+  const displayName = teacherName || user?.nom || 'Emploi du temps';
+
   return (
     <div className="space-y-6 pb-20 max-w-[1600px] mx-auto animate-slideUp">
       <div className="relative pro-card p-8 overflow-hidden group bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-indigo-100 dark:border-indigo-900/30">
@@ -61,7 +77,7 @@ export const MonPlanning: React.FC = () => {
             <Sparkles className="w-3.5 h-3.5" /> Mon Planning
           </div>
           <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-2">
-            <span className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-indigo-600">{teacherName || 'Emploi du temps'}</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-indigo-600">{displayName}</span>
           </h2>
           <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
             Vos créneaux de cours pour la semaine, toutes classes confondues.
@@ -72,8 +88,10 @@ export const MonPlanning: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></div>
-        ) : !teacherName ? (
+        ) : awaitingSelection ? (
           <p className="text-center text-slate-400 text-sm font-medium py-16">Aucun enseignant sélectionné.</p>
+        ) : slots.length === 0 ? (
+          <p className="text-center text-slate-400 text-sm font-medium py-16">Aucun planning disponible pour votre rôle actuellement.</p>
         ) : (
           <div className="overflow-x-auto">
             <div className="grid grid-cols-6 min-w-[900px]">

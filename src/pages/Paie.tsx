@@ -116,7 +116,7 @@ export const Paie: React.FC = () => {
     setSavingPaie(true);
     setPaieError('');
     try {
-      const res = await fetch(`${API_BASE_URL}/payroll/staff/${editStaff.id}/paie`, {
+      const res = await fetch(`${API_BASE_URL}/personnel/${editStaff.id}`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
         body: JSON.stringify(paieForm),
@@ -174,6 +174,40 @@ export const Paie: React.FC = () => {
     setSalaireBase(s?.salaireBase ? String(s.salaireBase) : '');
   }, [selectedStaffId]);
 
+  // ── Suggestion d'heures manquées (scan vs planning) — jamais appliquée
+  // automatiquement, seulement pré-remplie et éditable/supprimable. ──
+  const [missedHoursSuggestion, setMissedHoursSuggestion] = useState<{
+    totalMissedHours: number; montant: number | null; configMissing: boolean; incompleteDays: string[]; label: string;
+  } | null>(null);
+
+  useEffect(() => {
+    setMissedHoursSuggestion(null);
+    if (!selectedStaffId || !periode) return;
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/payroll/staff/${selectedStaffId}/missed-hours-suggestion?periode=${periode}`, { headers: getAuthHeaders() });
+        if (!res.ok) return;
+        const data = await parseResponse(res);
+        if (data.totalMissedHours > 0 && data.montant) {
+          const label = `Heures manquées — ${data.totalMissedHours}h (calculé)`;
+          setMissedHoursSuggestion({
+            totalMissedHours: data.totalMissedHours, montant: data.montant,
+            configMissing: false, incompleteDays: data.incompleteDays || [], label,
+          });
+          setRetenues((prev) => (prev.some((r) => r.label === label) ? prev : [...prev, { label, montant: data.montant }]));
+        } else if (data.configMissing && data.totalMissedHours > 0) {
+          setMissedHoursSuggestion({
+            totalMissedHours: data.totalMissedHours, montant: null,
+            configMissing: true, incompleteDays: data.incompleteDays || [], label: '',
+          });
+        }
+      } catch {
+        // Silencieux — la génération manuelle reste possible sans suggestion.
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedStaffId, periode]);
+
   const addLigne = (setter: React.Dispatch<React.SetStateAction<Ligne[]>>) => {
     setter((prev) => [...prev, { label: '', montant: 0 }]);
   };
@@ -195,6 +229,11 @@ export const Paie: React.FC = () => {
       return;
     }
 
+    // La retenue calculée n'est tracée dans les absences que si l'admin l'a
+    // gardée telle quelle dans le tableau (elle reste éditable/supprimable).
+    const keptAutoLine = missedHoursSuggestion && !missedHoursSuggestion.configMissing
+      && retenues.some((r) => r.label === missedHoursSuggestion.label);
+
     setSubmitting(true);
     try {
       const res = await fetch(`${API_BASE_URL}/payroll/payslips`, {
@@ -206,7 +245,8 @@ export const Paie: React.FC = () => {
           salaireBase: salaireNum,
           primes,
           retenues,
-          personnesACharge: Number(personnesACharge) || 0
+          personnesACharge: Number(personnesACharge) || 0,
+          ...(keptAutoLine ? { missedHoursAuto: { totalMissedHours: missedHoursSuggestion!.totalMissedHours } } : {})
         })
       });
       const data = await parseResponse(res);
@@ -214,6 +254,7 @@ export const Paie: React.FC = () => {
         setSuccessMsg('Bulletin généré avec succès.');
         setPrimes([]);
         setRetenues([]);
+        setMissedHoursSuggestion(null);
         await loadPayslips();
       } else {
         setErrorMsg(data.error || 'Erreur lors de la génération du bulletin.');
@@ -496,6 +537,17 @@ export const Paie: React.FC = () => {
               </div>
             ))}
           </div>
+          {missedHoursSuggestion?.configMissing && (
+            <div className="mt-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900 rounded-xl p-3 text-[11px] text-amber-700 dark:text-amber-400 flex items-center gap-2">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+              {missedHoursSuggestion.totalMissedHours}h manquées détectées, mais le taux horaire ne peut pas être calculé (heures mensuelles standard ou salaire de base manquant) — définissez-les pour obtenir une suggestion de retenue.
+            </div>
+          )}
+          {missedHoursSuggestion && missedHoursSuggestion.incompleteDays.length > 0 && (
+            <div className="mt-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900 rounded-xl p-3 text-[11px] text-amber-700 dark:text-amber-400">
+              <span className="font-bold">À vérifier manuellement</span> — pointage incomplet (entrée sans sortie) le : {missedHoursSuggestion.incompleteDays.join(', ')}. Ces jours ne sont pas comptés dans le calcul automatique.
+            </div>
+          )}
         </div>
 
         <button

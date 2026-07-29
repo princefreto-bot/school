@@ -431,7 +431,7 @@ export const Documents: React.FC = () => {
       {/* MODAL SCANNER OVERLAY */}
       {isScannerOpen && selectedStudent && (
         <DocumentScanner
-          studentName={`${selectedStudent.prenom} ${selectedStudent.nom}`}
+          subjectName={`${selectedStudent.prenom} ${selectedStudent.nom}`}
           onCapture={handleScannerCapture}
           onClose={() => setIsScannerOpen(false)}
         />

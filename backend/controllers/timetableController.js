@@ -96,25 +96,31 @@ async function getTimetable(req, res) {
 
 /**
  * GET /api/timetable/mine
- * Planning d'un enseignant (compte partagé identifié par nom, cf. classe_matieres.professeur).
+ * Planning d'un enseignant. Deux modes :
+ * - Compte individuel (identité prouvée par le JWT) : sans `?nom=`, on filtre
+ *   par `enseignant_id = req.user.id`.
+ * - Compte partagé historique (cf. classe_matieres.professeur) : `?nom=` requis,
+ *   filtrage par `enseignant_nom` (comportement préservé pour compatibilité).
  */
 async function getMyTimetable(req, res) {
-    const { schoolSlug } = req.user;
+    const { schoolSlug, id: userId } = req.user;
     const { nom } = req.query;
 
-    if (!nom) return res.status(400).json({ error: 'Nom d\'enseignant requis.' });
+    if (!nom && !userId) return res.status(400).json({ error: 'Nom d\'enseignant requis.' });
 
     try {
         const academicYearId = await resolveAcademicYearId(schoolSlug, req);
 
-        const { data, error } = await supabase
+        let query = supabase
             .from(`timetable_slots_${schoolSlug}`)
             .select(`*, matiere:matiere_id ( nom, categorie )`)
             .eq('academic_year_id', academicYearId)
-            .eq('enseignant_nom', nom)
             .order('jour_semaine', { ascending: true })
             .order('heure_debut', { ascending: true });
 
+        query = nom ? query.eq('enseignant_nom', nom) : query.eq('enseignant_id', userId);
+
+        const { data, error } = await query;
         if (error) throw error;
         return res.json(data || []);
     } catch (err) {
@@ -128,7 +134,7 @@ async function getMyTimetable(req, res) {
  */
 async function createSlot(req, res) {
     const { schoolSlug } = req.user;
-    const { classe, matiereId, enseignantNom, jourSemaine, heureDebut, heureFin, salle } = req.body;
+    const { classe, matiereId, enseignantNom, enseignantId, jourSemaine, heureDebut, heureFin, salle } = req.body;
 
     if (!classe || jourSemaine === undefined || !heureDebut || !heureFin) {
         return res.status(400).json({ error: 'Classe, jour et horaires requis.' });
@@ -158,6 +164,7 @@ async function createSlot(req, res) {
                 classe,
                 matiere_id: matiereId || null,
                 enseignant_nom: enseignantNom || null,
+                enseignant_id: enseignantId || null,
                 jour_semaine: jourSemaine,
                 heure_debut: heureDebut,
                 heure_fin: heureFin,
@@ -197,5 +204,10 @@ module.exports = {
     getTimetable,
     getMyTimetable,
     createSlot,
-    deleteSlot
+    deleteSlot,
+    // Exportés pour être réutilisés par staffAttendanceController.js (calcul des
+    // heures manquées) — éviter de dupliquer la logique de repli d'année scolaire
+    // et la normalisation des horaires TIME ("09:00" vs "09:00:00").
+    resolveAcademicYearId,
+    normalizeTime
 };

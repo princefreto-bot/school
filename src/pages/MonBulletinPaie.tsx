@@ -45,7 +45,13 @@ export const MonBulletinPaie: React.FC = () => {
     schoolName, schoolLogo, schoolAddress, schoolBp,
     schoolTelephone, schoolCurrency,
     schoolIfu, schoolRccm, schoolNif, schoolEmail,
+    user, teachingMode,
   } = useStore();
+
+  // Compte individuel (identité prouvée par le JWT) : vrai pour tout rôle staff
+  // hors compte enseignant partagé — dans ce cas, pas de roster/mot de passe,
+  // on récupère directement ses propres bulletins.
+  const isIndividualAccount = user?.role !== 'enseignant' || teachingMode === 'individual';
 
   const [roster, setRoster] = useState<RosterEntry[]>([]);
   const [loadingRoster, setLoadingRoster] = useState(true);
@@ -58,7 +64,28 @@ export const MonBulletinPaie: React.FC = () => {
   const [me, setMe] = useState<RosterEntry | null>(null);
   const [payslips, setPayslips] = useState<Payslip[]>([]);
 
+  // Compte individuel : accès direct, sans roster ni mot de passe.
   useEffect(() => {
+    if (!isIndividualAccount) return;
+    (async () => {
+      setLoadingRoster(true);
+      try {
+        const res = await fetch(`${API_BASE_URL}/payroll/self/payslips/mine`, { headers: getAuthHeaders() });
+        const data = await parseResponse(res);
+        if (res.ok) {
+          setMe(data.personnel);
+          setPayslips(data.payslips || []);
+          setUnlocked(true);
+        }
+      } finally {
+        setLoadingRoster(false);
+      }
+    })();
+  }, [isIndividualAccount]);
+
+  // Compte enseignant partagé (historique) : roster + mot de passe.
+  useEffect(() => {
+    if (isIndividualAccount) return;
     (async () => {
       setLoadingRoster(true);
       try {
@@ -68,7 +95,7 @@ export const MonBulletinPaie: React.FC = () => {
         setLoadingRoster(false);
       }
     })();
-  }, []);
+  }, [isIndividualAccount]);
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,7 +149,16 @@ export const MonBulletinPaie: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [printNonce]);
 
-  // ── Écran de déverrouillage ──
+  // ── Compte individuel : simple attente pendant le chargement direct ──
+  if (isIndividualAccount && !unlocked) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+      </div>
+    );
+  }
+
+  // ── Écran de déverrouillage (compte enseignant partagé) ──
   if (!unlocked) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center p-4">
@@ -180,9 +216,11 @@ export const MonBulletinPaie: React.FC = () => {
             <h3 className="text-xl font-black text-slate-900 dark:text-white">Mes bulletins de paie</h3>
             <p className="text-[11px] text-slate-400 font-medium">{me?.nom} — {me?.role}</p>
           </div>
-          <button onClick={lock} className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest transition">
-            <ArrowLeft className="w-3.5 h-3.5" /> Verrouiller
-          </button>
+          {!isIndividualAccount && (
+            <button onClick={lock} className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest transition">
+              <ArrowLeft className="w-3.5 h-3.5" /> Verrouiller
+            </button>
+          )}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">

@@ -377,6 +377,7 @@ async function syncFromFrontend(req, res) {
                     school_email: appSettings.schoolEmail,
                     school_website: appSettings.schoolWebsite,
                     school_autorisation: appSettings.schoolAutorisation,
+                    heures_mensuelles_standard: appSettings.heuresMensuellesStandard || null,
                     country_name: appSettings.countryName,
                     country_motto: appSettings.countryMotto,
                     ministere_name: appSettings.ministereName,
@@ -442,6 +443,7 @@ async function syncFromFrontend(req, res) {
                     classe: cm.classe,
                     matiere_id: cm.matiereId,
                     professeur: cm.professeur || '',
+                    professeur_id: cm.professeurId || null,
                     coefficient: cm.coefficient || 1,
                     academic_year_id: academicYearId || null
                 }));
@@ -680,6 +682,7 @@ async function syncToFrontend(req, res) {
                 schoolEmail: appSettings.school_email || '',
                 schoolWebsite: appSettings.school_website || '',
                 schoolAutorisation: appSettings.school_autorisation || '',
+                heuresMensuellesStandard: appSettings.heures_mensuelles_standard != null ? Number(appSettings.heures_mensuelles_standard) : null,
                 countryName: appSettings.country_name,
                 countryMotto: appSettings.country_motto,
                 ministereName: appSettings.ministere_name,
@@ -713,6 +716,7 @@ async function syncToFrontend(req, res) {
                 classe: cm.classe,
                 matiereId: cm.matiere_id,
                 professeur: cm.professeur,
+                professeurId: cm.professeur_id || null,
                 coefficient: cm.coefficient
             })) : undefined,
             notes: dbNotes ? dbNotes.map(n => ({
