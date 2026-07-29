@@ -199,6 +199,9 @@ async function syncFromFrontend(req, res) {
                             date: p.date,
                             recu: p.recu || null,
                             note: p.note || null,
+                            reduction: p.reduction || 0,
+                            mode: p.mode || null,
+                            reference: p.reference || null,
                             academic_year_id: academicYearId || null
                         });
                     });
@@ -368,6 +371,12 @@ async function syncFromFrontend(req, res) {
                     school_telephone: appSettings.schoolTelephone,
                     school_address: appSettings.schoolAddress,
                     school_currency: appSettings.schoolCurrency,
+                    school_ifu: appSettings.schoolIfu,
+                    school_rccm: appSettings.schoolRccm,
+                    school_nif: appSettings.schoolNif,
+                    school_email: appSettings.schoolEmail,
+                    school_website: appSettings.schoolWebsite,
+                    school_autorisation: appSettings.schoolAutorisation,
                     country_name: appSettings.countryName,
                     country_motto: appSettings.countryMotto,
                     ministere_name: appSettings.ministereName,
@@ -622,7 +631,10 @@ async function syncToFrontend(req, res) {
                     montant: p.montant,
                     date: p.date,
                     recu: p.recu,
-                    note: p.note
+                    note: p.note,
+                    reduction: p.reduction != null ? Number(p.reduction) : 0,
+                    mode: p.mode || undefined,
+                    reference: p.reference || undefined
                 });
             }
         });
@@ -662,6 +674,12 @@ async function syncToFrontend(req, res) {
                 schoolTelephone: appSettings.school_telephone,
                 schoolAddress: appSettings.school_address,
                 schoolCurrency: appSettings.school_currency,
+                schoolIfu: appSettings.school_ifu || '',
+                schoolRccm: appSettings.school_rccm || '',
+                schoolNif: appSettings.school_nif || '',
+                schoolEmail: appSettings.school_email || '',
+                schoolWebsite: appSettings.school_website || '',
+                schoolAutorisation: appSettings.school_autorisation || '',
                 countryName: appSettings.country_name,
                 countryMotto: appSettings.country_motto,
                 ministereName: appSettings.ministere_name,

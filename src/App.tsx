@@ -42,6 +42,7 @@ const Comptabilite = lazy(() => import('./pages/Comptabilite').then(m => ({ defa
 const Paie = lazy(() => import('./pages/Paie').then(m => ({ default: m.Paie })));
 const EmploiDuTemps = lazy(() => import('./pages/EmploiDuTemps').then(m => ({ default: m.EmploiDuTemps })));
 const MonPlanning = lazy(() => import('./pages/MonPlanning').then(m => ({ default: m.MonPlanning })));
+const MonBulletinPaie = lazy(() => import('./pages/MonBulletinPaie').then(m => ({ default: m.MonBulletinPaie })));
 const Analyses = lazy(() => import('./pages/Analyses').then(m => ({ default: m.Analyses })));
 const Documents = lazy(() => import('./pages/Documents').then(m => ({ default: m.Documents })));
 const Parametres = lazy(() => import('./pages/Parametres').then(m => ({ default: m.Parametres })));
@@ -178,7 +179,7 @@ const PageContent: React.FC = () => {
   }
 
   if (user?.role === 'enseignant') {
-    const teacherPages = ['saisie_notes', 'selection_enseignant', 'mon_planning'];
+    const teacherPages = ['saisie_notes', 'selection_enseignant', 'mon_planning', 'mon_bulletin_paie'];
     if (!teacherPages.includes(currentPage as any)) {
       const selectedTeacherName = localStorage.getItem('selected_teacher_name');
       return (
@@ -202,6 +203,7 @@ const PageContent: React.FC = () => {
             case 'paie': return <Paie />;
             case 'emploi_du_temps': return <EmploiDuTemps />;
             case 'mon_planning': return <MonPlanning />;
+            case 'mon_bulletin_paie': return <MonBulletinPaie />;
             case 'analyses': return <Analyses />;
             case 'recouvrement': return <Recouvrement />;
             case 'documents': return <Documents />;

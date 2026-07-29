@@ -21,7 +21,7 @@ const fmtDate = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: '2
 // ── Modale ajout paiement ────────────────────────────────────
 const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ student, onClose }) => {
   const addPayment = useStore((s) => s.addPayment);
-  const [form, setForm] = useState({ montant: '', recu: '', note: '', date: new Date().toISOString().slice(0, 10) });
+  const [form, setForm] = useState({ montant: '', recu: '', note: '', date: new Date().toISOString().slice(0, 10), mode: 'Espèces', reference: '', reduction: '' });
   const [error, setError] = useState('');
 
   const maxPay = student.restant;
@@ -31,7 +31,15 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
     const montant = Number(form.montant);
     if (!montant || montant <= 0) { setError('Montant invalide.'); return; }
     if (montant > maxPay) { setError(`Le montant dépasse le restant (${fmtMoney(maxPay)}).`); return; }
-    addPayment(student.id, { montant, recu: form.recu, note: form.note, date: form.date });
+    addPayment(student.id, {
+      montant,
+      recu: form.recu,
+      note: form.note,
+      date: form.date,
+      mode: form.mode,
+      reference: form.reference || undefined,
+      reduction: Number(form.reduction) || 0,
+    });
     onClose();
   };
 
@@ -106,14 +114,52 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
             </div>
           </div>
           
-          <div>
-            <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Note (optionnel)</label>
-            <input 
-              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white" 
-              value={form.note} 
-              onChange={(e) => setForm({ ...form, note: e.target.value })} 
-              placeholder="Ex : 1ère tranche espèce" 
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Mode de paiement</label>
+              <select
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white"
+                value={form.mode}
+                onChange={(e) => setForm({ ...form, mode: e.target.value })}
+              >
+                <option value="Espèces">Espèces</option>
+                <option value="Mobile Money">Mobile Money</option>
+                <option value="Virement bancaire">Virement bancaire</option>
+                <option value="Chèque">Chèque</option>
+                <option value="Carte bancaire">Carte bancaire</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Réduction (FCFA)</label>
+              <input
+                type="number" min={0}
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white"
+                value={form.reduction}
+                onChange={(e) => setForm({ ...form, reduction: e.target.value })}
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Référence transaction</label>
+              <input
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white"
+                value={form.reference}
+                onChange={(e) => setForm({ ...form, reference: e.target.value })}
+                placeholder="Ex : TRX-88213"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Note (optionnel)</label>
+              <input
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white"
+                value={form.note}
+                onChange={(e) => setForm({ ...form, note: e.target.value })}
+                placeholder="Ex : 1ère tranche"
+              />
+            </div>
           </div>
           
           {error && (

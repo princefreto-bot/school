@@ -109,9 +109,28 @@ export interface AppState {
   setCountryMotto: (motto: string) => void;
   ministereName: string;
   setMinistereName: (name: string) => void;
+  // Champs légaux de l'établissement (bulletins de paie)
+  schoolIfu: string;
+  setSchoolIfu: (v: string) => void;
+  schoolRccm: string;
+  setSchoolRccm: (v: string) => void;
+  schoolNif: string;
+  setSchoolNif: (v: string) => void;
+  schoolEmail: string;
+  setSchoolEmail: (v: string) => void;
+  schoolWebsite: string;
+  setSchoolWebsite: (v: string) => void;
+  schoolAutorisation: string;
+  setSchoolAutorisation: (v: string) => void;
   updateAllSettings: (settings: {
     appName?: string,
     schoolName?: string,
+    schoolIfu?: string,
+    schoolRccm?: string,
+    schoolNif?: string,
+    schoolEmail?: string,
+    schoolWebsite?: string,
+    schoolAutorisation?: string,
     schoolYear?: string,
     schoolLogo?: string | null,
     schoolStamp?: string | null,
@@ -717,6 +736,18 @@ export const useStore = create<AppState>()(
       setSchoolAddress: (addr) => set({ schoolAddress: addr }),
       schoolCurrency: 'FCFA',
       setSchoolCurrency: (curr) => set({ schoolCurrency: curr }),
+      schoolIfu: '',
+      setSchoolIfu: (v) => set({ schoolIfu: v }),
+      schoolRccm: '',
+      setSchoolRccm: (v) => set({ schoolRccm: v }),
+      schoolNif: '',
+      setSchoolNif: (v) => set({ schoolNif: v }),
+      schoolEmail: '',
+      setSchoolEmail: (v) => set({ schoolEmail: v }),
+      schoolWebsite: '',
+      setSchoolWebsite: (v) => set({ schoolWebsite: v }),
+      schoolAutorisation: '',
+      setSchoolAutorisation: (v) => set({ schoolAutorisation: v }),
       countryName: 'République Togolaise',
       setCountryName: (name) => set({ countryName: name }),
       countryMotto: 'Travail - Liberté - Patrie',
@@ -1141,6 +1172,12 @@ export const useStore = create<AppState>()(
               schoolTelephone: data.appSettings.schoolTelephone || get().schoolTelephone,
               schoolAddress: data.appSettings.schoolAddress || get().schoolAddress,
               schoolCurrency: data.appSettings.schoolCurrency || get().schoolCurrency,
+              schoolIfu: data.appSettings.schoolIfu ?? get().schoolIfu,
+              schoolRccm: data.appSettings.schoolRccm ?? get().schoolRccm,
+              schoolNif: data.appSettings.schoolNif ?? get().schoolNif,
+              schoolEmail: data.appSettings.schoolEmail ?? get().schoolEmail,
+              schoolWebsite: data.appSettings.schoolWebsite ?? get().schoolWebsite,
+              schoolAutorisation: data.appSettings.schoolAutorisation ?? get().schoolAutorisation,
               countryName: data.appSettings.countryName || get().countryName,
               countryMotto: data.appSettings.countryMotto || get().countryMotto,
               ministereName: data.appSettings.ministereName || get().ministereName,

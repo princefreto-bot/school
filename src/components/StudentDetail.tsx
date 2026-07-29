@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { Student } from '../types';
-import { generateRecuPDF } from '../utils/pdfGenerator';
+import { RecuPrintButton } from './pdf/RecuPrintButton';
 import {
   X, Download, MessageCircle, Clock, CheckCircle,
   AlertTriangle, User, Phone, School, CreditCard,
@@ -330,12 +330,13 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
 
         {/* Actions footer */}
         <div className="border-t border-gray-100 p-4 flex flex-wrap gap-2 bg-gray-50 rounded-b-2xl">
-          <button
-            onClick={() => generateRecuPDF(student, schoolName, schoolYear, messageRemerciement, messageRappel, schoolLogo ?? undefined, schoolStamp ?? undefined)}
+          <RecuPrintButton
+            student={student}
             className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-colors shadow-sm"
+            title="Imprimer / exporter le reçu de paiement"
           >
             <Download className="w-4 h-4" /> Reçu PDF
-          </button>
+          </RecuPrintButton>
           <a
             href={`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`}
             target="_blank"

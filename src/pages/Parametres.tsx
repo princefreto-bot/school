@@ -35,6 +35,12 @@ export const Parametres: React.FC = () => {
   const schoolTelephone = useStore((s) => s.schoolTelephone);
   const schoolAddress = useStore((s) => s.schoolAddress);
   const schoolCurrency = useStore((s) => s.schoolCurrency);
+  const schoolIfu = useStore((s) => s.schoolIfu);
+  const schoolRccm = useStore((s) => s.schoolRccm);
+  const schoolNif = useStore((s) => s.schoolNif);
+  const schoolEmail = useStore((s) => s.schoolEmail);
+  const schoolWebsite = useStore((s) => s.schoolWebsite);
+  const schoolAutorisation = useStore((s) => s.schoolAutorisation);
   const countryName = useStore((s) => s.countryName);
   const countryMotto = useStore((s) => s.countryMotto);
   const ministereName = useStore((s) => s.ministereName);
@@ -49,6 +55,12 @@ export const Parametres: React.FC = () => {
   const [localTelephone, setLocalTelephone] = useState(schoolTelephone);
   const [localAddress, setLocalAddress] = useState(schoolAddress);
   const [localCurrency, setLocalCurrency] = useState(schoolCurrency);
+  const [localIfu, setLocalIfu] = useState(schoolIfu || '');
+  const [localRccm, setLocalRccm] = useState(schoolRccm || '');
+  const [localNif, setLocalNif] = useState(schoolNif || '');
+  const [localEmail, setLocalEmail] = useState(schoolEmail || '');
+  const [localWebsite, setLocalWebsite] = useState(schoolWebsite || '');
+  const [localAutorisation, setLocalAutorisation] = useState(schoolAutorisation || '');
   const [localCountryName, setLocalCountryName] = useState(countryName);
   const [localCountryMotto, setLocalCountryMotto] = useState(countryMotto);
   const [localMinistereName, setLocalMinistereName] = useState(ministereName);
@@ -342,6 +354,12 @@ export const Parametres: React.FC = () => {
       schoolTelephone: localTelephone,
       schoolAddress: localAddress,
       schoolCurrency: localCurrency,
+      schoolIfu: localIfu,
+      schoolRccm: localRccm,
+      schoolNif: localNif,
+      schoolEmail: localEmail,
+      schoolWebsite: localWebsite,
+      schoolAutorisation: localAutorisation,
       countryName: localCountryName,
       countryMotto: localCountryMotto,
       ministereName: localMinistereName,
@@ -677,6 +695,73 @@ export const Parametres: React.FC = () => {
                                 value={localAddress}
                                 onChange={(e) => setLocalAddress(e.target.value)}
                                 placeholder="Ex : Apéssito - TOGO"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Email (bulletins de paie)
+                            </label>
+                            <input
+                                type="email"
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localEmail}
+                                onChange={(e) => setLocalEmail(e.target.value)}
+                                placeholder="Ex : contact@ecole.tg"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                N° IFU
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localIfu}
+                                onChange={(e) => setLocalIfu(e.target.value)}
+                                placeholder="Ex : 1000123456789"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                N° RCCM
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localRccm}
+                                onChange={(e) => setLocalRccm(e.target.value)}
+                                placeholder="Ex : TG-LOM-01-2020-B12-00001"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                N° NIF
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localNif}
+                                onChange={(e) => setLocalNif(e.target.value)}
+                                placeholder="Ex : NIF-0012345"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Site web
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localWebsite}
+                                onChange={(e) => setLocalWebsite(e.target.value)}
+                                placeholder="Ex : www.ecole.tg"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                N° d'autorisation
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localAutorisation}
+                                onChange={(e) => setLocalAutorisation(e.target.value)}
+                                placeholder="Ex : N° 042/MEPS"
                             />
                         </div>
                         <div>

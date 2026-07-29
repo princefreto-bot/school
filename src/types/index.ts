@@ -50,6 +50,7 @@ export interface Payment {
   recu: string;
   mode?: string;
   reference?: string;
+  reduction?: number;
   commentaire?: string;
   note?: string;
   methode?: string;
@@ -291,6 +292,7 @@ export type AppPage =
   | 'gestion_personnel'
   | 'selection_enseignant'
   | 'mon_planning'
+  | 'mon_bulletin_paie'
   // ── Pages SuperAdmin (propriétaire SaaS) ──
   | 'superadmin_dashboard'
   | 'superadmin_schools'

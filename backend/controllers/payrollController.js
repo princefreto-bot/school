@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const { supabase } = require('../utils/supabase');
 
 /**
@@ -88,7 +89,7 @@ async function getStaffSalaries(req, res) {
     try {
         const { data: personnel, error: pErr } = await supabase
             .from(`profiles_${schoolSlug}`)
-            .select('id, nom, role')
+            .select('id, nom, role, matricule, numero_cnss, date_embauche, mode_paiement, compte_bancaire, departement')
             .neq('role', 'parent')
             .order('nom', { ascending: true });
         if (pErr) throw pErr;
@@ -105,7 +106,15 @@ async function getStaffSalaries(req, res) {
         }
 
         const result = (personnel || []).map(p => ({
-            ...p,
+            id: p.id,
+            nom: p.nom,
+            role: p.role,
+            matricule: p.matricule || null,
+            numeroCnss: p.numero_cnss || null,
+            dateEmbauche: p.date_embauche || null,
+            modePaiement: p.mode_paiement || null,
+            compteBancaire: p.compte_bancaire || null,
+            departement: p.departement || null,
             salaireBase: latestByPersonnel[p.id] ? Number(latestByPersonnel[p.id].salaire_base) : null,
             dateEffet: latestByPersonnel[p.id] ? latestByPersonnel[p.id].date_effet : null
         }));
@@ -171,6 +180,14 @@ async function generatePayslip(req, res) {
             config
         });
 
+        // On fige (snapshot) les informations d'identité du salarié sur le bulletin,
+        // afin qu'un bulletin déjà émis reste stable même si la fiche évolue ensuite.
+        const { data: profile } = await supabase
+            .from(`profiles_${schoolSlug}`)
+            .select('role, matricule, numero_cnss, date_embauche, mode_paiement, compte_bancaire, departement')
+            .eq('id', personnelId)
+            .single();
+
         const { data, error } = await supabase
             .from(`payslips_${schoolSlug}`)
             .upsert({
@@ -186,6 +203,13 @@ async function generatePayslip(req, res) {
                 amu_patronal: amounts.amuPatronal,
                 irpp: amounts.irpp,
                 net_a_payer: amounts.netAPayer,
+                fonction: profile?.role || null,
+                matricule: profile?.matricule || null,
+                numero_cnss: profile?.numero_cnss || null,
+                date_embauche: profile?.date_embauche || null,
+                mode_paiement: profile?.mode_paiement || null,
+                compte_bancaire: profile?.compte_bancaire || null,
+                departement: profile?.departement || null,
                 created_by: userId
             }, { onConflict: 'personnel_id,periode' })
             .select('*')
@@ -257,12 +281,114 @@ async function updateConfig(req, res) {
     }
 }
 
+/**
+ * PATCH /api/payroll/staff/:personnelId/paie
+ * Met à jour les informations de paie du salarié (fiche personnel).
+ * Réservé aux administrateurs d'établissement.
+ */
+async function setStaffPaieInfo(req, res) {
+    const { schoolSlug } = req.user;
+    const { personnelId } = req.params;
+    const { matricule, numeroCnss, dateEmbauche, modePaiement, compteBancaire, departement } = req.body;
+
+    const updates = {};
+    if (matricule !== undefined) updates.matricule = matricule || null;
+    if (numeroCnss !== undefined) updates.numero_cnss = numeroCnss || null;
+    if (dateEmbauche !== undefined) updates.date_embauche = dateEmbauche || null;
+    if (modePaiement !== undefined) updates.mode_paiement = modePaiement || null;
+    if (compteBancaire !== undefined) updates.compte_bancaire = compteBancaire || null;
+    if (departement !== undefined) updates.departement = departement || null;
+
+    if (Object.keys(updates).length === 0) {
+        return res.status(400).json({ error: 'Aucune information à mettre à jour.' });
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from(`profiles_${schoolSlug}`)
+            .update(updates)
+            .eq('id', personnelId)
+            .select('id, nom, role, matricule, numero_cnss, date_embauche, mode_paiement, compte_bancaire, departement')
+            .single();
+        if (error) throw error;
+        return res.json(data);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+/**
+ * GET /api/payroll/self/roster
+ * Liste minimale du personnel (id + nom) pour la sélection côté enseignant.
+ * Accessible à tout membre authentifié de l'établissement.
+ */
+async function getSelfRoster(req, res) {
+    const { schoolSlug } = req.user;
+    try {
+        const { data, error } = await supabase
+            .from(`profiles_${schoolSlug}`)
+            .select('id, nom, role')
+            .neq('role', 'parent')
+            .order('nom', { ascending: true });
+        if (error) throw error;
+        return res.json(data || []);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+/**
+ * POST /api/payroll/self/payslips
+ * Le salarié prouve son identité avec le mot de passe de sa fiche,
+ * puis reçoit ses propres bulletins. Aucune donnée d'un autre salarié n'est exposée.
+ */
+async function getSelfPayslips(req, res) {
+    const { schoolSlug } = req.user;
+    const { personnelId, password } = req.body;
+
+    if (!personnelId || !password) {
+        return res.status(400).json({ error: 'Sélection et mot de passe requis.' });
+    }
+
+    try {
+        const { data: profile, error: pErr } = await supabase
+            .from(`profiles_${schoolSlug}`)
+            .select('id, nom, role, password')
+            .eq('id', personnelId)
+            .single();
+        if (pErr || !profile) return res.status(404).json({ error: 'Membre du personnel introuvable.' });
+
+        if (!profile.password) {
+            return res.status(403).json({ error: 'Aucun mot de passe défini pour cette fiche. Contactez la direction.' });
+        }
+        const valid = await bcrypt.compare(password, profile.password);
+        if (!valid) return res.status(401).json({ error: 'Mot de passe incorrect.' });
+
+        const { data: payslips, error: sErr } = await supabase
+            .from(`payslips_${schoolSlug}`)
+            .select('*')
+            .eq('personnel_id', personnelId)
+            .order('periode', { ascending: false });
+        if (sErr) throw sErr;
+
+        return res.json({
+            personnel: { id: profile.id, nom: profile.nom, role: profile.role },
+            payslips: payslips || []
+        });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
 module.exports = {
     getConfig,
     updateConfig,
     getStaffSalaries,
     setStaffSalary,
+    setStaffPaieInfo,
     generatePayslip,
     getPayslips,
+    getSelfRoster,
+    getSelfPayslips,
     computePayslipAmounts // exporté pour les tests
 };

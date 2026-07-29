@@ -56,7 +56,7 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'parent_notes', 'parent_courses'
     ],
     enseignant: [
-        'saisie_notes', 'selection_enseignant', 'mon_planning'
+        'saisie_notes', 'selection_enseignant', 'mon_planning', 'mon_bulletin_paie'
     ],
 };
 
