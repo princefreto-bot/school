@@ -3,7 +3,9 @@ import { useStore } from '../store/useStore';
 import { StatusPaiement } from '../types';
 import { CLASSES_BY_CYCLE } from '../data/classConfig';
 import { formatMontant, getStatusPaiement, generateWhatsAppLink } from '../utils/helpers';
-import { generateReceipt, generateClassReport, generateNonSoldesReport } from '../utils/pdfService';
+import { generateClassReport, generateNonSoldesReport } from '../utils/pdfService';
+import { RecuPrintButton } from './pdf/RecuPrintButton';
+import { RecuBulkPrintButton } from './pdf/RecuBulkPrintButton';
 import {
   FileText,
   Receipt,
@@ -21,14 +23,6 @@ export const Reports = () => {
   const allClasses = [...CLASSES_BY_CYCLE.Primaire, ...CLASSES_BY_CYCLE.Collège, ...CLASSES_BY_CYCLE.Lycée];
   const nonSoldes = students.filter(s => s.restant > 0);
   const classStudents = selectedClasse ? students.filter(s => s.classe === selectedClasse) : [];
-
-  const generateAllReceipts = (studentsList: typeof students) => {
-    studentsList.forEach((s, index) => {
-      setTimeout(() => {
-        generateReceipt(s, settings);
-      }, index * 500);
-    });
-  };
 
   const sendBulkWhatsApp = (studentsList: typeof students) => {
     const messages = studentsList.map(student => {
@@ -97,13 +91,13 @@ export const Reports = () => {
                     <FileText className="w-4 h-4" />
                     Rapport complet
                   </button>
-                  <button
-                    onClick={() => generateAllReceipts(classStudents)}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-500 transition"
+                  <RecuBulkPrintButton
+                    students={classStudents}
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-500 transition disabled:opacity-50"
                   >
                     <Receipt className="w-4 h-4" />
                     Tous les reçus
-                  </button>
+                  </RecuBulkPrintButton>
                 </div>
 
                 {/* Liste des élèves de la classe */}
@@ -143,13 +137,13 @@ export const Reports = () => {
                           </p>
                         </div>
                         <div className="flex gap-1">
-                          <button
-                            onClick={() => generateReceipt(student, settings)}
+                          <RecuPrintButton
+                            student={student}
                             className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
                             title="Reçu"
                           >
                             <Receipt className="w-4 h-4" />
-                          </button>
+                          </RecuPrintButton>
                           <button
                             onClick={() => window.open(generateWhatsAppLink(student.telephone, `Message pour ${student.nom}`), '_blank')}
                             className="p-1.5 text-green-600 hover:bg-green-50 rounded"
@@ -223,13 +217,13 @@ export const Reports = () => {
                         </p>
                       </div>
                       <div className="flex gap-1">
-                        <button
-                          onClick={() => generateReceipt(student, settings)}
+                        <RecuPrintButton
+                          student={student}
                           className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
                           title="Reçu"
                         >
                           <Receipt className="w-4 h-4" />
-                        </button>
+                        </RecuPrintButton>
                         <button
                           onClick={() => {
                             const message = `Bonjour,\n\nConcernant ${student.nom} ${student.prenom} (${student.classe}):\nReste à payer: ${formatMontant(student.restant)}\n\n${settings.messageRappel}\n\n${settings.nomEcole}`;
@@ -254,9 +248,8 @@ export const Reports = () => {
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Actions rapides</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button
-            onClick={() => generateAllReceipts(students.filter(s => s.restant === 0))}
-            disabled={students.filter(s => s.restant === 0).length === 0}
+          <RecuBulkPrintButton
+            students={students.filter(s => s.restant === 0)}
             className="flex items-center justify-between p-4 border rounded-lg hover:bg-green-50 hover:border-green-200 transition group disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="flex items-center gap-3">
@@ -271,11 +264,10 @@ export const Reports = () => {
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-green-600" />
-          </button>
+          </RecuBulkPrintButton>
 
-          <button
-            onClick={() => generateAllReceipts(students)}
-            disabled={students.length === 0}
+          <RecuBulkPrintButton
+            students={students}
             className="flex items-center justify-between p-4 border rounded-lg hover:bg-blue-50 hover:border-blue-200 transition group disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="flex items-center gap-3">
@@ -288,7 +280,7 @@ export const Reports = () => {
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
-          </button>
+          </RecuBulkPrintButton>
 
           <button
             onClick={() => {

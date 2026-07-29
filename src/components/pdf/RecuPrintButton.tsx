@@ -52,7 +52,8 @@ export const RecuPrintButton: React.FC<RecuPrintButtonProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonce]);
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setArmed(true);
     setNonce((n) => n + 1);
   };

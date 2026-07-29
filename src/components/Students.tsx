@@ -1,7 +1,8 @@
 import { useState, useMemo, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { parseExcelFile, exportToExcel } from '../utils/excelUtils';
-import { generateReceipt, generateStudentCard } from '../utils/pdfUtils';
+import { generateStudentCard } from '../utils/pdfUtils';
+import { RecuPrintButton } from './pdf/RecuPrintButton';
 import { Student, Payment } from '../types';
 import { CLASSES } from '../data/classes';
 import { formatMontant, getCycleFromClasse, getEcolageFromClasse } from '../utils/helpers';
@@ -219,11 +220,6 @@ export default function Students() {
     }
   };
 
-  const handleGenerateReceipt = (student: Student, e: React.MouseEvent) => {
-    e.stopPropagation();
-    generateReceipt(student, settings);
-  };
-
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat('fr-FR').format(amount) + ' ' + settings.currency;
   };
@@ -439,13 +435,13 @@ export default function Students() {
                         >
                           <CreditCard className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={(e) => handleGenerateReceipt(student, e)}
+                        <RecuPrintButton
+                          student={student}
                           className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-purple-600 hover:bg-purple-100 rounded-lg transition-all"
                           title="Générer reçu"
                         >
                           <FileText className="w-4 h-4" />
-                        </button>
+                        </RecuPrintButton>
                         <button
                           onClick={(e) => openEditModal(student, e)}
                           className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-amber-600 hover:bg-amber-100 rounded-lg transition-all"
@@ -828,13 +824,10 @@ export default function Students() {
                 <FileText className="w-4 h-4" />
                 Fiche PDF
               </button>
-              <button 
-                onClick={() => generateReceipt(selectedStudent, settings)} 
-                className="btn btn-primary"
-              >
+              <RecuPrintButton student={selectedStudent} className="btn btn-primary">
                 <FileText className="w-4 h-4" />
                 Reçu PDF
-              </button>
+              </RecuPrintButton>
             </div>
           </div>
         </div>

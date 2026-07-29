@@ -2,10 +2,10 @@
 // PAGE COMPTABILITÉ — Dépenses, Balance, Bilan, Compte de résultat
 // ============================================================
 import React, { useEffect, useState } from 'react';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { API_BASE_URL } from '../config';
 import { getAuthHeaders, parseResponse } from '../services/apiHelpers';
+import { StatementPrintButton } from '../components/pdf/StatementPrintButton';
+import { StatementSection } from '../components/pdf/StatementPDF';
 import {
   Landmark, Wallet, Loader2, Send, Camera, AlertCircle, CheckCircle,
   Download, Sparkles
@@ -195,68 +195,42 @@ export const Comptabilite: React.FC = () => {
 
   const expenseEntries = entries.filter(e => e.reference === 'DEPENSE');
 
-  const exportBalancePDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(14);
-    doc.text('Balance Comptable', 14, 15);
-    autoTable(doc, {
-      startY: 20,
-      head: [['Code', 'Compte', 'Type', 'Débit', 'Crédit', 'Solde']],
-      body: balanceRows.map(r => [r.code, r.name, r.type, fmtMoney(r.debit), fmtMoney(r.credit), fmtMoney(r.balance)]),
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [79, 70, 229] }
-    });
-    doc.save('Balance_Comptable.pdf');
-  };
+  // ── Sections des états comptables (StatementPDF — même charte que les reçus/bulletins) ──
+  const balanceSections: StatementSection[] = [{
+    title: 'Balance des comptes',
+    columns: ['code', 'type', 'debit', 'credit', 'balance'],
+    rows: balanceRows.map(r => ({ code: r.code, name: r.name, type: r.type, debit: r.debit, credit: r.credit, balance: r.balance })),
+  }];
 
-  const exportBilanPDF = () => {
-    if (!bilan) return;
-    const doc = new jsPDF();
-    doc.setFontSize(14);
-    doc.text(`Bilan au ${new Date().toLocaleDateString('fr-FR')}`, 14, 15);
-    autoTable(doc, {
-      startY: 20,
-      head: [['Actif', 'Montant']],
-      body: bilan.actif.map(r => [r.name, fmtMoney(r.amount)]),
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [16, 185, 129] },
-      foot: [['Total Actif', fmtMoney(bilan.totalActif)]]
-    });
-    autoTable(doc, {
-      startY: (doc as any).lastAutoTable.finalY + 10,
-      head: [['Passif & Capitaux Propres', 'Montant']],
-      body: [...bilan.passif, ...bilan.capitauxPropres].map(r => [r.name, fmtMoney(r.amount)]),
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [244, 63, 94] },
-      foot: [['Total Passif & Capitaux', fmtMoney(bilan.totalPassifEtCapitaux)]]
-    });
-    doc.save('Bilan.pdf');
-  };
+  const bilanSections: StatementSection[] = bilan ? [
+    {
+      title: 'Actif',
+      columns: ['amount'],
+      rows: bilan.actif.map(r => ({ name: r.name, amount: r.amount })),
+      total: { label: 'Total Actif', amount: bilan.totalActif },
+    },
+    {
+      title: 'Passif & Capitaux propres',
+      columns: ['amount'],
+      rows: [...bilan.passif, ...bilan.capitauxPropres].map(r => ({ name: r.name, amount: r.amount })),
+      total: { label: 'Total Passif & Capitaux', amount: bilan.totalPassifEtCapitaux },
+    },
+  ] : [];
 
-  const exportResultatPDF = () => {
-    if (!resultat) return;
-    const doc = new jsPDF();
-    doc.setFontSize(14);
-    doc.text('Compte de Résultat', 14, 15);
-    autoTable(doc, {
-      startY: 20,
-      head: [['Produits', 'Montant']],
-      body: resultat.produits.map(r => [r.name, fmtMoney(r.amount)]),
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [16, 185, 129] },
-      foot: [['Total Produits', fmtMoney(resultat.totalProduits)]]
-    });
-    autoTable(doc, {
-      startY: (doc as any).lastAutoTable.finalY + 10,
-      head: [['Charges', 'Montant']],
-      body: resultat.charges.map(r => [r.name, fmtMoney(r.amount)]),
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [244, 63, 94] },
-      foot: [['Total Charges', fmtMoney(resultat.totalCharges)]]
-    });
-    doc.text(`Résultat Net : ${fmtMoney(resultat.resultatNet)}`, 14, (doc as any).lastAutoTable.finalY + 15);
-    doc.save('Compte_Resultat.pdf');
-  };
+  const resultatSections: StatementSection[] = resultat ? [
+    {
+      title: 'Produits',
+      columns: ['amount'],
+      rows: resultat.produits.map(r => ({ name: r.name, amount: r.amount })),
+      total: { label: 'Total Produits', amount: resultat.totalProduits },
+    },
+    {
+      title: 'Charges',
+      columns: ['amount'],
+      rows: resultat.charges.map(r => ({ name: r.name, amount: r.amount })),
+      total: { label: 'Total Charges', amount: resultat.totalCharges },
+    },
+  ] : [];
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'depenses', label: 'Dépenses' },
@@ -446,9 +420,16 @@ export const Comptabilite: React.FC = () => {
             <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-3">
               <Wallet className="w-6 h-6 text-indigo-500" /> Balance comptable
             </h3>
-            <button onClick={exportBalancePDF} disabled={balanceRows.length === 0} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition disabled:opacity-40">
+            <StatementPrintButton
+              title="Balance comptable"
+              subtitle={new Date().toLocaleDateString('fr-FR')}
+              sections={balanceSections}
+              documentTitle="Balance_Comptable"
+              disabled={balanceRows.length === 0}
+              className="flex items-center gap-1.5 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition disabled:opacity-40"
+            >
               <Download className="w-3.5 h-3.5" /> Export PDF
-            </button>
+            </StatementPrintButton>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -487,9 +468,17 @@ export const Comptabilite: React.FC = () => {
           <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 sm:p-8">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-black text-slate-900 dark:text-white">Actif</h3>
-              <button onClick={exportBilanPDF} disabled={!bilan} className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition disabled:opacity-40">
+              <StatementPrintButton
+                title="Bilan"
+                subtitle={`Au ${new Date().toLocaleDateString('fr-FR')}`}
+                sections={bilanSections}
+                finalTotal={bilan ? { label: 'Total Actif = Total Passif & Capitaux', amount: bilan.totalActif } : undefined}
+                documentTitle="Bilan"
+                disabled={!bilan}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition disabled:opacity-40"
+              >
                 <Download className="w-3.5 h-3.5" /> PDF
-              </button>
+              </StatementPrintButton>
             </div>
             {loadingBilan ? (
               <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
@@ -536,9 +525,17 @@ export const Comptabilite: React.FC = () => {
         <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 sm:p-8">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-black text-slate-900 dark:text-white">Compte de résultat</h3>
-            <button onClick={exportResultatPDF} disabled={!resultat} className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition disabled:opacity-40">
+            <StatementPrintButton
+              title="Compte de résultat"
+              subtitle={new Date().toLocaleDateString('fr-FR')}
+              sections={resultatSections}
+              finalTotal={resultat ? { label: 'Résultat net', amount: resultat.resultatNet } : undefined}
+              documentTitle="Compte_Resultat"
+              disabled={!resultat}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition disabled:opacity-40"
+            >
               <Download className="w-3.5 h-3.5" /> PDF
-            </button>
+            </StatementPrintButton>
           </div>
           {loadingResultat ? (
             <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
