@@ -5,10 +5,23 @@
 import React, { useEffect, useState } from 'react';
 import { personnelApi } from '../services/personnelApi';
 import { staffAbsencesApi } from '../services/staffAbsencesApi';
+import { personnelDocumentsApi, PersonnelDocument } from '../services/personnelDocumentsApi';
+import { getAuthHeaders } from '../services/apiHelpers';
+import { DocumentScanner, DocTypeOption } from '../components/DocumentScanner';
 import { useStore } from '../store/useStore';
 import {
-  Users, UserPlus, Trash2, Loader2, Shield, Pencil, X, AlertTriangle, CheckCircle, CalendarX, Plus
+  Users, UserPlus, Trash2, Loader2, Shield, Pencil, X, AlertTriangle, CheckCircle, CalendarX, Plus,
+  FileText, Download, ScanLine
 } from 'lucide-react';
+
+const STAFF_DOC_TYPES: DocTypeOption[] = [
+  { value: 'contract', label: 'Contrat' },
+  { value: 'diploma', label: 'Diplôme' },
+  { value: 'id_card', label: "Pièce d'identité" },
+  { value: 'cnss_card', label: 'Carte CNSS' },
+  { value: 'other', label: 'Autre document' },
+];
+const STAFF_DOC_LABELS: Record<string, string> = Object.fromEntries(STAFF_DOC_TYPES.map((t) => [t.value, t.label]));
 
 interface PersonnelRow {
   id: string;
@@ -214,6 +227,66 @@ export const GestionPersonnel: React.FC = () => {
       setEditError(err?.error || "Erreur lors de l'enregistrement.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  // ── Documents personnel (contrat, diplôme, pièce d'identité...) ──
+  const [personnelDocs, setPersonnelDocs] = useState<PersonnelDocument[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [docError, setDocError] = useState('');
+
+  const fetchPersonnelDocs = async (personnelId: string) => {
+    setLoadingDocs(true);
+    try {
+      const data = await personnelDocumentsApi.getForPersonnel(personnelId);
+      setPersonnelDocs(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingDocs(false);
+    }
+  };
+
+  useEffect(() => {
+    if (editRow) fetchPersonnelDocs(editRow.id);
+    else setPersonnelDocs([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editRow?.id]);
+
+  const handleDocCapture = async (file: File, docType: string, title: string) => {
+    if (!editRow) return;
+    setScannerOpen(false);
+    setDocError('');
+    try {
+      await personnelDocumentsApi.scan(file, editRow.id, docType, title);
+      await fetchPersonnelDocs(editRow.id);
+    } catch (err: any) {
+      setDocError(err?.error || 'Erreur lors de la numérisation.');
+    }
+  };
+
+  const handleViewDoc = async (d: PersonnelDocument) => {
+    const filename = d.file_url.split('/').pop() || '';
+    try {
+      const res = await fetch(personnelDocumentsApi.fileUrl(filename), { headers: getAuthHeaders() });
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      window.open(objectUrl, '_blank');
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+    } catch {
+      alert('Erreur lors du chargement du document.');
+    }
+  };
+
+  const handleDeleteDoc = async (id: string) => {
+    if (!editRow || !window.confirm('Supprimer ce document ?')) return;
+    try {
+      await personnelDocumentsApi.remove(id);
+      await fetchPersonnelDocs(editRow.id);
+    } catch {
+      alert('Erreur lors de la suppression.');
     }
   };
 
@@ -487,6 +560,49 @@ export const GestionPersonnel: React.FC = () => {
                   <input value={editForm.compteBancaire} onChange={(e) => setEditForm({ ...editForm, compteBancaire: e.target.value })} className="w-full p-3 bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 text-xs outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
                 </div>
               </div>
+
+              {/* ── Documents ── */}
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5" /> Documents
+                  </h4>
+                  <button type="button" onClick={() => setScannerOpen(true)} className="flex items-center gap-1 text-[10px] font-black text-indigo-600 dark:text-indigo-400 hover:underline">
+                    <ScanLine className="w-3.5 h-3.5" /> Numériser un document
+                  </button>
+                </div>
+
+                {docError && (
+                  <div className="mb-2 bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900 rounded-xl p-2.5 text-[11px] text-rose-600 dark:text-rose-400 flex items-center gap-2">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> {docError}
+                  </div>
+                )}
+
+                {loadingDocs ? (
+                  <div className="py-4 flex justify-center"><Loader2 className="w-4 h-4 animate-spin text-slate-400" /></div>
+                ) : personnelDocs.length === 0 ? (
+                  <p className="text-[11px] text-slate-400 py-2">Aucun document numérisé.</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {personnelDocs.map((d) => (
+                      <div key={d.id} className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-950/40 rounded-lg">
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{d.title}</p>
+                          <p className="text-[10px] text-slate-400">{STAFF_DOC_LABELS[d.document_type] || d.document_type}</p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button onClick={() => handleViewDoc(d)} className="p-1.5 text-slate-400 hover:text-indigo-600" title="Voir / télécharger">
+                            <Download className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => handleDeleteDoc(d.id)} className="p-1.5 text-slate-400 hover:text-rose-600" title="Supprimer">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
@@ -498,6 +614,16 @@ export const GestionPersonnel: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {scannerOpen && editRow && (
+        <DocumentScanner
+          subjectName={editRow.nom}
+          docTypes={STAFF_DOC_TYPES}
+          notifyCopy="Le document sera associé à la fiche du membre du personnel."
+          onCapture={handleDocCapture}
+          onClose={() => setScannerOpen(false)}
+        />
       )}
     </div>
   );
