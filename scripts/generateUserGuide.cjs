@@ -242,25 +242,28 @@ for (const [num, title] of toc) {
 
 // ── 1. PRISE EN MAIN ──
 sectionTitle(1, 'Prise en main : connexion et rôles');
-paragraph("DGhubSchool distingue deux portails de connexion : le portail établissement (personnel de l'école) et le portail parent. Chaque école dispose d'un identifiant unique (le « slug » de l'école) qui isole totalement ses données de celles des autres établissements.");
-subTitle('Se connecter côté établissement');
+paragraph("DGhubSchool distingue désormais trois portails de connexion, chacun avec sa propre adresse : le Portail Établissement (direction), le Portail Personnel (le reste du personnel) et le Portail Parent. Chaque école dispose d'un identifiant unique (le « slug » de l'école) qui isole totalement ses données de celles des autres établissements.");
+subTitle('Portail Établissement — réservé à la direction');
+paragraph("Accessible uniquement aux comptes Administrateur, Directeur et Directeur Général. C'est le seul portail donnant accès au tableau de bord financier complet (écolage, encaissements, comptabilité, paie) et à la configuration de l'établissement.");
 stepList([
   "Ouvrez la page « Portail Établissement ».",
   "Sélectionnez ou saisissez le nom de votre établissement.",
   "Entrez votre numéro de téléphone (ou email) et votre mot de passe.",
-  "Vous êtes redirigé vers l'écran correspondant à votre rôle.",
+  "Vous êtes redirigé vers le tableau de bord.",
 ]);
-subTitle('Les rôles disponibles');
+subTitle('Portail Personnel — pour le reste du personnel');
+paragraph("Enseignants, secrétariat, comptabilité, censeur, proviseur et superviseurs/surveillants se connectent désormais via une adresse dédiée et distincte du Portail Établissement — un compte de ces rôles ne peut plus se connecter sur le Portail Établissement, et inversement un compte Direction ne peut pas se connecter sur le Portail Personnel.");
 bulletList([
-  "Directeur / Administrateur : accès complet à toutes les fonctionnalités.",
-  "Comptable : paiements, comptabilité, paie, recouvrement.",
-  "Censeur / Proviseur : académique (notes, emploi du temps, bulletins).",
+  "Comptable : paiements, comptabilité, paie, recouvrement (accès au tableau de bord financier conservé).",
+  "Censeur / Proviseur : académique (notes, emploi du temps, bulletins), tableau de bord financier conservé.",
   "Superviseur (surveillant) : scan de présence élèves et personnel, cartes.",
-  "Secrétaire : gestion du personnel, documents, académique — sans accès à la comptabilité ni à la paie.",
-  "Enseignant : saisie des notes, planning, bulletin de paie et absences personnels.",
-  "Parent : tableau de bord de son ou ses enfants, paiements, reçus, notes.",
+  "Secrétaire : gestion du personnel, documents, académique — atterrit sur un accueil « Espace Personnel » dédié, sans aucune donnée financière (ni chiffres d'écolage, ni comptabilité).",
+  "Enseignant : saisie des notes, notes d'examens, planning, bulletin de paie et absences personnels.",
 ]);
-roleNote("Astuce : le rôle d'un compte détermine automatiquement ce qui s'affiche dans le menu latéral — un membre du personnel ne voit jamais une page à laquelle il n'a pas accès.");
+roleNote("Important : seule la secrétaire est privée du tableau de bord financier — les autres rôles migrés vers le Portail Personnel (comptable, censeur, proviseur, superviseur) gardent exactement les mêmes accès qu'avant.");
+subTitle('Portail Parent');
+paragraph("Tableau de bord dédié au suivi d'un ou plusieurs enfants : paiements, reçus, notes, badges d'assiduité. Accessible via sa propre page de connexion, distincte des deux portails ci-dessus.");
+roleNote("Astuce : le rôle d'un compte détermine automatiquement ce qui s'affiche dans le menu latéral — un membre du personnel ne voit jamais une page à laquelle il n'a pas accès. Chaque page de connexion propose un lien vers les deux autres portails pour ne jamais se tromper d'adresse.");
 
 // ── 2. TABLEAU DE BORD ──
 sectionTitle(2, 'Tableau de bord');
@@ -446,28 +449,29 @@ bulletList([
 // ── 19. RÔLES ET PERMISSIONS ──
 sectionTitle(19, 'Rôles et permissions — tableau récapitulatif');
 const roleTable = [
-  ['Directeur / Admin', 'Accès complet à toutes les fonctionnalités.'],
-  ['Comptable', 'Paiements, comptabilité, paie, recouvrement, Mon Espace.'],
-  ['Censeur / Proviseur', 'Académique complet (notes, notes d\'examens, emploi du temps, bulletins), Mon Espace.'],
-  ['Secrétaire', 'Gestion du personnel, documents, académique — sans comptabilité ni paie.'],
-  ['Superviseur', 'Scan présence/sortie élèves et personnel, cartes, Mon Espace.'],
-  ['Enseignant', 'Saisie des notes et notes d\'examens, Mon Planning, Mes Bulletins, Mes Absences.'],
-  ['Parent', 'Tableau de bord de son enfant, paiements, reçus, notes, messagerie.'],
+  ['Directeur / Admin', 'Portail Établissement. Accès complet à toutes les fonctionnalités.'],
+  ['Comptable', 'Portail Personnel. Paiements, comptabilité, paie, recouvrement, Mon Espace.'],
+  ['Censeur / Proviseur', 'Portail Personnel. Académique (notes, notes d\'examens, emploi du temps, bulletins), Mon Espace.'],
+  ['Secrétaire', 'Portail Personnel. Espace Personnel sans données financières, gestion du personnel, documents.'],
+  ['Superviseur', 'Portail Personnel. Scan présence/sortie élèves et personnel, cartes, Mon Espace.'],
+  ['Enseignant', 'Portail Personnel. Saisie des notes et notes d\'examens, Mon Planning, Mes Bulletins, Mes Absences.'],
+  ['Parent', 'Portail Parent. Tableau de bord de son enfant, paiements, reçus, notes, messagerie.'],
 ];
 doc.setFont(FONT, 'normal');
 doc.setFontSize(9.5);
 for (const [role, desc] of roleTable) {
-  ensureSpace(14);
+  const descLines = doc.splitTextToSize(desc, CONTENT_W - 55);
+  const boxH = Math.max(12, descLines.length * 4.4 + 6);
+  ensureSpace(boxH + 3);
   doc.setFillColor(255, 251, 235);
-  doc.roundedRect(MARGIN, y, CONTENT_W, 12, 1.5, 1.5, 'F');
+  doc.roundedRect(MARGIN, y, CONTENT_W, boxH, 1.5, 1.5, 'F');
   doc.setFont(FONT, 'bold');
   doc.setTextColor(...ACCENT);
   doc.text(role, MARGIN + 4, y + 7.5);
   doc.setFont(FONT, 'normal');
   doc.setTextColor(60, 65, 75);
-  const descLines = doc.splitTextToSize(desc, CONTENT_W - 55);
   doc.text(descLines, MARGIN + 52, y + 7.5);
-  y += 15;
+  y += boxH + 3;
 }
 
 // ── 18. SUPPORT ──

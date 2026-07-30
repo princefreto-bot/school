@@ -162,6 +162,7 @@ const featuresFr = [
       'Badge QR enseignant : pointage entrée/sortie avec calcul automatique des heures manquées',
       'Numérisation des documents du personnel (contrat, diplôme, pièce d\'identité...)',
       'Notes d\'examens nationaux (CEPD, BEPC, BAC) avec classement automatique par section',
+      'Portail Personnel séparé : connexion dédiée pour enseignants, secrétariat et comptabilité',
     ],
   },
   {
@@ -324,6 +325,7 @@ const featuresEn = [
       "Staff document digitization (contract, diploma, ID card...)",
       'Timetable builder with automatic conflict detection',
       'National exam grades (CEPD, BEPC, BAC) with automatic per-section ranking',
+      'Separate Staff Portal: dedicated login for teachers, secretariat and accounting',
     ],
   },
   {

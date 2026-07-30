@@ -23,6 +23,8 @@ const Layout = lazy(() => import('./components/Layout').then(m => ({ default: m.
 const AnnouncementPopup = lazy(() => import('./components/AnnouncementPopup').then(m => ({ default: m.AnnouncementPopup })));
 const Confidentialite = lazy(() => import('./pages/Confidentialite').then(m => ({ default: m.Confidentialite })));
 const PortailEcole = lazy(() => import('./pages/PortailEcole').then(m => ({ default: m.PortailEcole })));
+const PortailPersonnel = lazy(() => import('./pages/PortailPersonnel').then(m => ({ default: m.PortailPersonnel })));
+const EspacePersonnel = lazy(() => import('./pages/EspacePersonnel').then(m => ({ default: m.EspacePersonnel })));
 const CreerCompte = lazy(() => import('./pages/CreerCompte').then(m => ({ default: m.CreerCompte })));
 const ConditionsUtilisation = lazy(() => import('./pages/ConditionsUtilisation').then(m => ({ default: m.ConditionsUtilisation })));
 const ConfirmerEmail = lazy(() => import('./pages/ConfirmerEmail').then(m => ({ default: m.ConfirmerEmail })));
@@ -195,6 +197,16 @@ const PageContent: React.FC = () => {
     }
   }
 
+  // Sécurité — la secrétaire n'a jamais accès au dashboard financier, même si
+  // currentPage est resté sur 'dashboard' depuis une session/localStorage antérieure.
+  if (user?.role === 'secretaire' && (currentPage as any) === 'dashboard') {
+    return (
+      <Suspense fallback={<LoadingSpinner />}>
+        <EspacePersonnel />
+      </Suspense>
+    );
+  }
+
   // Compte enseignant partagé (historique) : on force la sélection de nom tant que
   // l'école n'a pas migré vers des comptes individuels. Un compte individuel (teachingMode
   // === 'individual') est traité comme n'importe quel autre rôle staff — son JWT fait foi,
@@ -217,6 +229,7 @@ const PageContent: React.FC = () => {
         {(() => {
           switch (currentPage) {
             case 'dashboard': return <Dashboard />;
+            case 'espace_personnel': return <EspacePersonnel />;
             case 'eleves': return <Eleves />;
             case 'paiements': return <Paiements />;
             case 'retraits': return <Retraits />;
@@ -265,7 +278,7 @@ const PageContent: React.FC = () => {
             case 'superadmin_schools':
             case 'superadmin_billing':
               return <SuperAdminDashboard />;
-            default: return user?.role === 'parent' ? <ParentDashboard /> : <Dashboard />;
+            default: return user?.role === 'parent' ? <ParentDashboard /> : (user?.role === 'secretaire' ? <EspacePersonnel /> : <Dashboard />);
           }
         })()}
       </Suspense>
@@ -329,6 +342,10 @@ const pageMetadata: Record<string, Record<string, { title: string; description: 
       title: "Portail École — Accès DGhubSchool",
       description: "Recherchez et accédez directement à l'espace de connexion dédié de votre établissement scolaire sur DGhubSchool."
     },
+    'portail-personnel': {
+      title: "Portail Personnel — Accès DGhubSchool",
+      description: "Espace de connexion dédié au personnel de l'établissement (enseignants, secrétariat, comptabilité) sur DGhubSchool."
+    },
     'telecharger-app': {
       title: "Télécharger l'app mobile — DGhubSchool",
       description: "Installez l'app DGhubSchool sur Android via APK signé ou depuis votre navigateur (PWA). Aucun compte Play Store requis."
@@ -386,6 +403,10 @@ const pageMetadata: Record<string, Record<string, { title: string; description: 
     'portail-ecole': {
       title: "Partner Schools Directory — DGhubSchool Portal Access",
       description: "Find the custom login page of your educational institution on DGhubSchool. Use our directory or search tool to access your dedicated school portal."
+    },
+    'portail-personnel': {
+      title: "Staff Portal — DGhubSchool Access",
+      description: "Dedicated login area for school staff (teachers, secretariat, accounting) on DGhubSchool."
     },
     'telecharger-app': {
       title: "Download the mobile app — DGhubSchool",
@@ -696,6 +717,8 @@ export function App() {
         <Route path="/:lang/confirmer-email" element={<Suspense fallback={<LoadingSpinner />}><ConfirmerEmail /></Suspense>} />
         <Route path="/:lang/portail-ecole" element={<Suspense fallback={<LoadingSpinner />}><PortailEcole /></Suspense>} />
         <Route path="/:lang/portail-ecole/:schoolSlug" element={<Suspense fallback={<LoadingSpinner />}><PortailEcole /></Suspense>} />
+        <Route path="/:lang/portail-personnel" element={<Suspense fallback={<LoadingSpinner />}><PortailPersonnel /></Suspense>} />
+        <Route path="/:lang/portail-personnel/:schoolSlug" element={<Suspense fallback={<LoadingSpinner />}><PortailPersonnel /></Suspense>} />
         <Route path="/:lang/creer-compte" element={<Suspense fallback={<LoadingSpinner />}><CreerCompte /></Suspense>} />
         <Route path="/:lang/pricing" element={<Suspense fallback={<LoadingSpinner />}><Pricing /></Suspense>} />
         <Route path="/:lang/a-propos" element={<Suspense fallback={<LoadingSpinner />}><APropos /></Suspense>} />

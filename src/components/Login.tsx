@@ -96,6 +96,7 @@ const translations = {
     trialExpiredSuffix: " doit régler son abonnement. Contactez l'administrateur de la plateforme.",
     connecting: "Connexion...",
     schoolPortalAccess: "Accès Portail Établissement",
+    personnelPortalAccess: "Accès Portail Personnel",
     welcomeBack: "Content de vous revoir ! 👋",
     welcomeBackSub: "Retrouvez tout l'univers scolaire de vos enfants en un clic. Votre tableau de bord personnalisé vous attend.",
     bulletDashboard: "Accès tableau de bord",
@@ -159,6 +160,7 @@ const translations = {
     trialExpiredSuffix: " must pay their subscription. Contact the platform administrator.",
     connecting: "Connecting...",
     schoolPortalAccess: "School Portal Access",
+    personnelPortalAccess: "Staff Portal Access",
     welcomeBack: "Welcome back! 👋",
     welcomeBackSub: "Find all your children's school universe in one click. Your personalized dashboard awaits you.",
     bulletDashboard: "Dashboard access",
@@ -583,12 +585,19 @@ export const Login: React.FC = () => {
               {error && <div className="text-rose-500 text-xs mt-2 font-bold">{error}</div>}
               <button className="auth-button" type="submit" disabled={loading}>{loading ? t('connecting') : t('login')}</button>
               <div className="mt-4 flex flex-col gap-2">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => navigate(`/${lang}/portail-ecole`)}
                   className="text-slate-400 hover:text-amber-600 text-[10px] font-bold tracking-wider uppercase transition-colors"
                 >
                   {t('schoolPortalAccess')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/${lang}/portail-personnel`)}
+                  className="text-slate-400 hover:text-amber-600 text-[10px] font-bold tracking-wider uppercase transition-colors"
+                >
+                  {t('personnelPortalAccess')}
                 </button>
               </div>
             </form>
@@ -760,6 +769,9 @@ export const Login: React.FC = () => {
                       <div className="flex flex-col gap-1 mt-1">
                         <button type="button" onClick={() => navigate(`/${lang}/portail-ecole`)} className="w-full py-2 text-slate-500 text-[9px] font-bold uppercase tracking-wider">
                           {t('schoolPortalAccess')}
+                        </button>
+                        <button type="button" onClick={() => navigate(`/${lang}/portail-personnel`)} className="w-full py-2 text-slate-500 text-[9px] font-bold uppercase tracking-wider">
+                          {t('personnelPortalAccess')}
                         </button>
                       </div>
                     )}

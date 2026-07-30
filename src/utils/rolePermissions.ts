@@ -66,7 +66,7 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'saisie_notes', 'notes_examens', 'selection_enseignant', ...MON_ESPACE_PAGES
     ],
     secretaire: [
-        'dashboard', 'gestion_personnel', 'carte_personnel', 'scan_presence_personnel', 'scan_sortie_personnel', 'gestion_academique', 'emploi_du_temps', 'annonces', 'chat', 'documents', ...MON_ESPACE_PAGES
+        'espace_personnel', 'gestion_personnel', 'carte_personnel', 'scan_presence_personnel', 'scan_sortie_personnel', 'gestion_academique', 'emploi_du_temps', 'annonces', 'chat', 'documents', ...MON_ESPACE_PAGES
     ],
 };
 

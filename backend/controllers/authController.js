@@ -204,6 +204,11 @@ async function register(req, res) {
 }
 
 // ── Login (Séparé par Portail) ──────────────────────────
+// Portail École : réservé à la direction. Portail Personnel : le reste du staff
+// (fiches de paie, absences, planning et outils métiers de chaque rôle).
+const SCHOOL_PORTAL_ROLES = ['admin', 'directeur', 'directeur_general'];
+const PERSONNEL_PORTAL_ROLES = ['enseignant', 'secretaire', 'comptable', 'censeur', 'proviseur', 'superviseur', 'surveillant'];
+
 async function login(req, res) {
     const { telephone, password, schoolSlug, portal } = req.body; // portal: 'parent' ou 'school'
 
@@ -314,8 +319,11 @@ async function login(req, res) {
         if (portal === 'parent' && user.role !== 'parent') {
             return res.status(403).json({ error: 'Ce portail est réservé exclusivement aux parents d\'élèves.' });
         }
-        if (portal === 'school' && user.role === 'parent') {
-            return res.status(403).json({ error: 'Ce portail est réservé exclusivement aux personnels scolaires.' });
+        if (portal === 'school' && !SCHOOL_PORTAL_ROLES.includes(user.role)) {
+            return res.status(403).json({ error: 'Ce portail est réservé à la direction de l\'établissement. Utilisez le Portail Personnel.' });
+        }
+        if (portal === 'personnel' && !PERSONNEL_PORTAL_ROLES.includes(user.role)) {
+            return res.status(403).json({ error: 'Ce portail est réservé au personnel de l\'établissement.' });
         }
 
         const valid = await bcrypt.compare(password, user.password);

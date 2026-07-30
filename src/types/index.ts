@@ -145,6 +145,7 @@ export type UserRole =
   | 'superviseur'
   | 'surveillant'
   | 'comptable'
+  | 'secretaire'
   | 'parent'
   | 'enseignant'
   | 'creator';
@@ -255,6 +256,7 @@ export interface ReceiptVerification {
 
 export type AppPage =
   | 'dashboard'
+  | 'espace_personnel'
   | 'eleves'
   | 'paiements'
   | 'retraits'

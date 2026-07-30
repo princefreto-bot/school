@@ -51,7 +51,7 @@ export interface AppState {
   unreadMessages: number;
   setUnreadMessages: (count: number) => void;
   fetchUnreadMessages: () => Promise<void>;
-  login: (username: string, password: string, schoolSlug?: string, portal?: 'parent' | 'school') => Promise<boolean>;
+  login: (username: string, password: string, schoolSlug?: string, portal?: 'parent' | 'school' | 'personnel') => Promise<boolean>;
   logout: () => void;
 
   // Mode d'identité enseignant — 'individual' (compte propre, req.user.id fait foi)
@@ -447,6 +447,7 @@ export const useStore = create<AppState>()(
             else if (loggedUser.role === 'creator') targetPage = 'creator_dashboard';
             else if (loggedUser.role === 'parent') targetPage = 'parent_dashboard';
             else if (loggedUser.role === 'superviseur' || loggedUser.role === 'surveillant') targetPage = 'scan_presence';
+            else if (loggedUser.role === 'secretaire') targetPage = 'espace_personnel';
             else if (loggedUser.role === 'enseignant') {
               const selectedTeacherName = localStorage.getItem('selected_teacher_name');
               targetPage = selectedTeacherName ? 'saisie_notes' : 'selection_enseignant';
