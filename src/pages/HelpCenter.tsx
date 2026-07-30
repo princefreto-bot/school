@@ -16,8 +16,8 @@ export const HelpCenter: React.FC = () => {
       emailDesc: "Notre équipe technique est disponible pour résoudre vos problèmes complexes.",
       writeUs: "Nous écrire",
       docs: "Documentation",
-      docsDesc: "Consultez nos guides et tutoriels pour maîtriser la plateforme.",
-      soon: "Bientôt disponible",
+      docsDesc: "Le guide utilisateur complet (PDF) : toutes les fonctionnalités expliquées pas à pas.",
+      soon: "Télécharger le guide (PDF)",
       urgentTitle: "Un problème urgent ?",
       urgentDesc: "Si vous êtes administrateur d'un établissement, vous pouvez contacter directement votre gestionnaire de compte dédié."
     },
@@ -29,8 +29,8 @@ export const HelpCenter: React.FC = () => {
       emailDesc: "Our technical team is available to solve your complex issues.",
       writeUs: "Write to us",
       docs: "Documentation",
-      docsDesc: "Check out our guides and tutorials to master the platform.",
-      soon: "Coming soon",
+      docsDesc: "The complete user guide (PDF): every feature explained step by step.",
+      soon: "Download the guide (PDF)",
       urgentTitle: "Urgent issue?",
       urgentDesc: "If you are a school administrator, you can directly contact your dedicated account manager."
     }
@@ -97,9 +97,14 @@ export const HelpCenter: React.FC = () => {
             <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 font-medium">
               {t.docsDesc}
             </p>
-            <button className="px-6 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-950 dark:text-white text-xs font-black uppercase tracking-widest rounded-xl transition-colors">
+            <a
+              href="/guides/DGhubSchool_Guide_Utilisateur.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-950 dark:text-white text-xs font-black uppercase tracking-widest rounded-xl transition-colors"
+            >
               {t.soon}
-            </button>
+            </a>
           </div>
 
         </div>

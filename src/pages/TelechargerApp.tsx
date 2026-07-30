@@ -107,8 +107,8 @@ const PhoneMockup: React.FC<PhoneMockupProps> = ({
 // 1) Fichier dans public/ → /downloads/dghubschool.apk (recommandé, servi statiquement)
 // 2) GitHub Releases → https://github.com/.../releases/download/vX.Y.Z/app-release.apk
 const APK_DOWNLOAD_URL = '/downloads/dghubschool.apk';
-const APK_VERSION = '1.0.0';
-const APK_SIZE = '~20 Mo';
+const APK_VERSION = '1.1.0';
+const APK_SIZE = '~18 Mo';
 
 const texts = {
   fr: {
