@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dghubschool-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start-all"],
+      "port": 5173
+    }
+  ]
+}

@@ -18,12 +18,24 @@ const LIGHT_LINE = [226, 232, 240];
 
 const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
+// ── Police Montserrat (embarquée) — remplace Helvetica pour un rendu pro et lisible ──
+const FONT = 'Montserrat';
+function loadFont(file, style) {
+  const fontPath = path.join(__dirname, 'fonts', file);
+  const base64 = fs.readFileSync(fontPath).toString('base64');
+  doc.addFileToVFS(file, base64);
+  doc.addFont(file, FONT, style);
+}
+loadFont('Montserrat-Regular.ttf', 'normal');
+loadFont('Montserrat-Bold.ttf', 'bold');
+loadFont('Montserrat-Italic.ttf', 'italic');
+
 let pageNum = 0;
 let sectionForFooter = '';
 
 function addFooter() {
   doc.setFontSize(7.5);
-  doc.setFont('helvetica', 'normal');
+  doc.setFont(FONT, 'normal');
   doc.setTextColor(...GRAY);
   doc.text('DGhubSchool — Guide utilisateur', MARGIN, PAGE_H - 10);
   doc.text(sectionForFooter, PAGE_W / 2, PAGE_H - 10, { align: 'center' });
@@ -51,7 +63,7 @@ function sectionTitle(num, title) {
   sectionForFooter = `${num}. ${title}`;
   doc.setFillColor(...ACCENT);
   doc.rect(0, 0, PAGE_W, 3, 'F');
-  doc.setFont('helvetica', 'bold');
+  doc.setFont(FONT, 'bold');
   doc.setFontSize(11);
   doc.setTextColor(...ACCENT);
   doc.text(`SECTION ${num}`, MARGIN, y + 6);
@@ -69,7 +81,7 @@ function sectionTitle(num, title) {
 function subTitle(text) {
   ensureSpace(14);
   y += 2;
-  doc.setFont('helvetica', 'bold');
+  doc.setFont(FONT, 'bold');
   doc.setFontSize(13);
   doc.setTextColor(...DARK);
   doc.text(text, MARGIN, y);
@@ -81,7 +93,7 @@ function subTitle(text) {
 }
 
 function paragraph(text) {
-  doc.setFont('helvetica', 'normal');
+  doc.setFont(FONT, 'normal');
   doc.setFontSize(10);
   doc.setTextColor(60, 65, 75);
   const lines = doc.splitTextToSize(text, CONTENT_W);
@@ -91,7 +103,7 @@ function paragraph(text) {
 }
 
 function bulletList(items) {
-  doc.setFont('helvetica', 'normal');
+  doc.setFont(FONT, 'normal');
   doc.setFontSize(10);
   for (const item of items) {
     const lines = doc.splitTextToSize(item, CONTENT_W - 7);
@@ -106,15 +118,15 @@ function bulletList(items) {
 }
 
 function stepList(steps) {
-  doc.setFont('helvetica', 'normal');
+  doc.setFont(FONT, 'normal');
   doc.setFontSize(10);
   steps.forEach((step, i) => {
     const lines = doc.splitTextToSize(step, CONTENT_W - 9);
     ensureSpace(lines.length * 5 + 2);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont(FONT, 'bold');
     doc.setTextColor(...ACCENT);
     doc.text(`${i + 1}.`, MARGIN, y);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont(FONT, 'normal');
     doc.setTextColor(60, 65, 75);
     doc.text(lines, MARGIN + 7, y);
     y += lines.length * 5 + 2;
@@ -130,7 +142,7 @@ function roleNote(text) {
   const lines = doc.splitTextToSize(text, CONTENT_W - 10);
   const h = lines.length * 4.6 + 6;
   doc.roundedRect(MARGIN, y, CONTENT_W, h, 2, 2, 'FD');
-  doc.setFont('helvetica', 'italic');
+  doc.setFont(FONT, 'italic');
   doc.setFontSize(9);
   doc.setTextColor(146, 64, 14);
   doc.text(lines, MARGIN + 5, y + 5.5);
@@ -156,14 +168,14 @@ async function drawCover() {
 async function main() {
 await drawCover();
 
-doc.setFont('helvetica', 'bold');
+doc.setFont(FONT, 'bold');
 doc.setFontSize(34);
 doc.setTextColor(255, 255, 255);
 doc.text('DGhubSchool', PAGE_W / 2, 110, { align: 'center' });
 doc.setFontSize(15);
 doc.setTextColor(...ACCENT);
 doc.text('GUIDE UTILISATEUR COMPLET', PAGE_W / 2, 122, { align: 'center' });
-doc.setFont('helvetica', 'normal');
+doc.setFont(FONT, 'normal');
 doc.setFontSize(10.5);
 doc.setTextColor(200, 205, 215);
 const introLines = doc.splitTextToSize(
@@ -187,7 +199,7 @@ pageNum = 1;
 doc.addPage();
 pageNum++;
 y = MARGIN;
-doc.setFont('helvetica', 'bold');
+doc.setFont(FONT, 'bold');
 doc.setFontSize(20);
 doc.setTextColor(...DARK);
 doc.text('Sommaire', MARGIN, y + 4);
@@ -207,20 +219,22 @@ const toc = [
   ['11', 'Numérisation de documents'],
   ['12', 'Emploi du temps'],
   ['13', 'Notes et bulletins scolaires'],
-  ['14', 'Communication : messagerie et annonces'],
-  ['15', 'Portail parent'],
-  ['16', 'Paramètres de l\'établissement'],
-  ['17', 'Rôles et permissions — tableau récapitulatif'],
-  ['18', 'Assistance et support'],
+  ['14', 'Notes d\'examens (CEPD, BEPC, BAC) et classement'],
+  ['15', 'Rapports académiques et statistiques'],
+  ['16', 'Communication : messagerie et annonces'],
+  ['17', 'Portail parent'],
+  ['18', 'Paramètres de l\'établissement'],
+  ['19', 'Rôles et permissions — tableau récapitulatif'],
+  ['20', 'Assistance et support'],
 ];
-doc.setFont('helvetica', 'normal');
+doc.setFont(FONT, 'normal');
 doc.setFontSize(11);
 for (const [num, title] of toc) {
   ensureSpace(9);
   doc.setTextColor(...ACCENT);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont(FONT, 'bold');
   doc.text(num, MARGIN, y);
-  doc.setFont('helvetica', 'normal');
+  doc.setFont(FONT, 'normal');
   doc.setTextColor(...DARK);
   doc.text(title, MARGIN + 10, y);
   y += 9;
@@ -381,12 +395,35 @@ stepList([
   "Depuis la page Bulletins, calculez les moyennes et rangs de toute une classe, puis générez les bulletins scolaires officiels au format PDF (modèle conforme DRE).",
 ]);
 
-// ── 14. COMMUNICATION ──
-sectionTitle(14, 'Communication : messagerie et annonces');
+// ── 14. NOTES D'EXAMENS ──
+sectionTitle(14, 'Notes d\'examens (CEPD, BEPC, BAC) et classement');
+paragraph("Les classes concernées par un examen national — CM2 (CEPD), 3ème (BEPC), 1ère (BAC 1) et Terminale (BAC 2), toutes sections confondues — disposent d'un espace de saisie dédié, entièrement séparé des notes trimestrielles/semestrielles habituelles. Les notes sont rattachées à des sessions d'examen créées librement (ex. « Devoir Blanc 1 », « Examen Final ») plutôt qu'aux périodes académiques classiques.");
+subTitle('Créer une session et saisir les notes');
+stepList([
+  "Ouvrez la page « Notes d'Examens » et créez une session (ex. « Devoir Blanc 1 »).",
+  "Sélectionnez une classe d'examen — seules les 4 classes éligibles sont proposées — puis une matière.",
+  "Saisissez la note de chaque élève sur 20, puis cliquez sur « Enregistrer les notes ».",
+]);
+subTitle('Consulter le classement');
+paragraph("Le bouton « Voir le classement » calcule automatiquement la moyenne pondérée (par coefficient de matière) et le rang de chaque élève pour la session sélectionnée.");
+roleNote("Le classement est toujours calculé par section — une classe de Terminale A4 est classée séparément d'une Terminale D, même si les deux préparent le même examen (BAC 2).");
+
+// ── 15. RAPPORTS ACADÉMIQUES ──
+sectionTitle(15, 'Rapports académiques et statistiques');
+paragraph("La page Rapports Académiques centralise les indicateurs de réussite de l'établissement, avec un onglet dédié par cycle et un onglet « Examens » consacré aux résultats des sessions d'examen national.");
+bulletList([
+  "Onglets Collège / Lycée — taux de réussite par classe et par matière, période par période.",
+  "Alertes de baisse de performance — élèves dont la moyenne chute entre deux périodes.",
+  "Onglet Examens — moyenne générale et taux de réussite par type d'examen (CEPD, BEPC, BAC 1, BAC 2), graphique comparatif et top 5 des meilleurs élèves par session.",
+  "Génération d'un rapport PDF officiel en noir et blanc, prêt à imprimer.",
+]);
+
+// ── 16. COMMUNICATION ──
+sectionTitle(16, 'Communication : messagerie et annonces');
 paragraph("La messagerie intégrée permet des échanges directs entre l'école et les parents. Les annonces permettent de diffuser une information à tous les parents (ou à une classe précise) en un clic, avec notification automatique.");
 
-// ── 15. PORTAIL PARENT ──
-sectionTitle(15, 'Portail parent');
+// ── 17. PORTAIL PARENT ──
+sectionTitle(17, 'Portail parent');
 paragraph("Les parents disposent de leur propre portail de connexion, avec un tableau de bord dédié à leur(s) enfant(s).");
 bulletList([
   "Suivi en temps réel des paiements et du solde restant.",
@@ -396,8 +433,8 @@ bulletList([
   "Messagerie directe avec l'établissement.",
 ]);
 
-// ── 16. PARAMÈTRES ──
-sectionTitle(16, 'Paramètres de l\'établissement');
+// ── 18. PARAMÈTRES ──
+sectionTitle(18, 'Paramètres de l\'établissement');
 paragraph("Cette page centralise toute la configuration de l'école : identité (logo, nom, adresse, contacts), informations légales (IFU, RCCM, NIF), année scolaire, tranches de paiement, horaires par cycle, et le nouveau réglage des heures mensuelles standard utilisé pour calculer les retenues sur heures manquées.");
 bulletList([
   "Logo, cachet et signature du directeur pour les documents officiels.",
@@ -406,27 +443,27 @@ bulletList([
   "Messages personnalisés pour les rappels et remerciements de paiement.",
 ]);
 
-// ── 17. RÔLES ET PERMISSIONS ──
-sectionTitle(17, 'Rôles et permissions — tableau récapitulatif');
+// ── 19. RÔLES ET PERMISSIONS ──
+sectionTitle(19, 'Rôles et permissions — tableau récapitulatif');
 const roleTable = [
   ['Directeur / Admin', 'Accès complet à toutes les fonctionnalités.'],
   ['Comptable', 'Paiements, comptabilité, paie, recouvrement, Mon Espace.'],
-  ['Censeur / Proviseur', 'Académique complet (notes, emploi du temps, bulletins), Mon Espace.'],
+  ['Censeur / Proviseur', 'Académique complet (notes, notes d\'examens, emploi du temps, bulletins), Mon Espace.'],
   ['Secrétaire', 'Gestion du personnel, documents, académique — sans comptabilité ni paie.'],
   ['Superviseur', 'Scan présence/sortie élèves et personnel, cartes, Mon Espace.'],
-  ['Enseignant', 'Saisie des notes, Mon Planning, Mes Bulletins, Mes Absences.'],
+  ['Enseignant', 'Saisie des notes et notes d\'examens, Mon Planning, Mes Bulletins, Mes Absences.'],
   ['Parent', 'Tableau de bord de son enfant, paiements, reçus, notes, messagerie.'],
 ];
-doc.setFont('helvetica', 'normal');
+doc.setFont(FONT, 'normal');
 doc.setFontSize(9.5);
 for (const [role, desc] of roleTable) {
   ensureSpace(14);
   doc.setFillColor(255, 251, 235);
   doc.roundedRect(MARGIN, y, CONTENT_W, 12, 1.5, 1.5, 'F');
-  doc.setFont('helvetica', 'bold');
+  doc.setFont(FONT, 'bold');
   doc.setTextColor(...ACCENT);
   doc.text(role, MARGIN + 4, y + 7.5);
-  doc.setFont('helvetica', 'normal');
+  doc.setFont(FONT, 'normal');
   doc.setTextColor(60, 65, 75);
   const descLines = doc.splitTextToSize(desc, CONTENT_W - 55);
   doc.text(descLines, MARGIN + 52, y + 7.5);
@@ -434,7 +471,7 @@ for (const [role, desc] of roleTable) {
 }
 
 // ── 18. SUPPORT ──
-sectionTitle(18, 'Assistance et support');
+sectionTitle(20, 'Assistance et support');
 paragraph("Pour toute question ou difficulté rencontrée sur la plateforme, l'équipe DGhubSchool reste disponible :");
 bulletList([
   "Email : support@dghubschool.com",

@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { BulletinTogoPDF } from '../components/pdf/BulletinTogoPDF';
 import { calculerBulletinsClasse, BulletinEleveResultat } from '../utils/bulletinCalculations';
+import { getAvailablePeriods } from '../data/classConfig';
 import { useReactToPrint } from 'react-to-print';
 import { FileSpreadsheet, Printer, Users, Award, ShieldCheck } from 'lucide-react';
 import { PeriodeType } from '../types';
@@ -21,24 +22,19 @@ export const Bulletins: React.FC = () => {
     const [editableSchoolYear, setEditableSchoolYear] = useState('');
     const [bulletinsCalcules, setBulletinsCalcules] = useState<BulletinEleveResultat[]>([]);
 
-    const selectedClassObj = students.find(s => s.classe === selectedClasse);
-    const selectedCycle = selectedClassObj?.cycle;
-    const availablePeriods = selectedCycle 
-        ? (selectedCycle === 'Lycée' 
-            ? ['SEMESTRE 1', 'SEMESTRE 2'] as PeriodeType[]
-            : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'] as PeriodeType[])
-        : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3', 'SEMESTRE 1', 'SEMESTRE 2'] as PeriodeType[];
+    // Dérivé directement du cycle de la classe (jamais via un élève trouvé) —
+    // garantit qu'une seule famille de périodes (Trimestre XOR Semestre) est
+    // jamais proposée, même pour une classe sans élève encore inscrit.
+    const availablePeriods: PeriodeType[] = selectedClasse ? getAvailablePeriods(selectedClasse) : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'];
 
     React.useEffect(() => {
         if (selectedClasse) {
-            const cycle = students.find(s => s.classe === selectedClasse)?.cycle || 'Collège';
-            const isLycee = cycle === 'Lycée';
-            const allowed = isLycee ? ['SEMESTRE 1', 'SEMESTRE 2'] : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'];
+            const allowed = getAvailablePeriods(selectedClasse);
             if (!allowed.includes(currentPeriode)) {
-                setCurrentPeriode(allowed[0] as PeriodeType);
+                setCurrentPeriode(allowed[0]);
             }
         }
-    }, [selectedClasse, students, currentPeriode, setCurrentPeriode]);
+    }, [selectedClasse, currentPeriode, setCurrentPeriode]);
 
     React.useEffect(() => {
         if (schoolYear) {

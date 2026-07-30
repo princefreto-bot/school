@@ -1,10 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { FileText, Download, Award, ShieldCheck, BookOpen, Layers, GraduationCap, UserX, TrendingDown } from 'lucide-react';
+import { FileText, Download, Award, ShieldCheck, BookOpen, Layers, GraduationCap, UserX, TrendingDown, Trophy, Loader2 } from 'lucide-react';
 import { computeAcademicStats, computeSubjectAcademicStats, computePerformanceDeclineAlerts, generateAcademicReportPDF } from '../utils/academicReportGenerator';
 import { computeAbsenceTrend, filterSchoolDays } from '../services/attendanceAnalyticsService';
+import { computeExamStats } from '../utils/examReportGenerator';
+import { isExamClass } from '../utils/examEligibility';
+import { examApi, ExamSession, ExamNote } from '../services/examApi';
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+    LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 
 export const RapportsAcademiques: React.FC = () => {
@@ -20,7 +23,43 @@ export const RapportsAcademiques: React.FC = () => {
         schoolYear
     } = useStore();
 
-    const [activeTab, setActiveTab] = useState<'college' | 'lycee'>('college');
+    const [activeTab, setActiveTab] = useState<'college' | 'lycee' | 'examens'>('college');
+
+    // ── Statistiques d'examens (CEPD/BEPC/BAC) ──
+    const [examSessions, setExamSessions] = useState<ExamSession[]>([]);
+    const [examNotesAll, setExamNotesAll] = useState<ExamNote[]>([]);
+    const [loadingExamStats, setLoadingExamStats] = useState(false);
+
+    useEffect(() => {
+        if (activeTab !== 'examens' || examSessions.length > 0 || loadingExamStats) return;
+
+        const examClasses = Array.from(new Set(students.map(s => s.classe))).filter(isExamClass);
+        if (examClasses.length === 0) return;
+
+        setLoadingExamStats(true);
+        examApi.getSessions()
+            .then(async (sessions) => {
+                setExamSessions(sessions);
+                const allNotes: ExamNote[] = [];
+                for (const classe of examClasses) {
+                    for (const session of sessions) {
+                        try {
+                            const notes = await examApi.getNotes(classe, session.id);
+                            allNotes.push(...notes);
+                        } catch {
+                            // classe/session sans notes — ignoré
+                        }
+                    }
+                }
+                setExamNotesAll(allNotes);
+            })
+            .catch(() => { setExamSessions([]); setExamNotesAll([]); })
+            .finally(() => setLoadingExamStats(false));
+    }, [activeTab, students, examSessions.length, loadingExamStats]);
+
+    const examStats = useMemo(() => {
+        return computeExamStats(students, matieres, classeMatieres, examNotesAll, examSessions);
+    }, [students, matieres, classeMatieres, examNotesAll, examSessions]);
 
     // Calculer les statistiques
     const stats = useMemo(() => {
@@ -203,11 +242,91 @@ export const RapportsAcademiques: React.FC = () => {
                     <Layers className="w-4 h-4" />
                     Lycée (Semestres)
                 </button>
+                <button
+                    onClick={() => setActiveTab('examens')}
+                    className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                        activeTab === 'examens'
+                        ? 'bg-slate-950 text-white dark:bg-slate-800 dark:text-white shadow-sm'
+                        : 'text-slate-500 hover:text-slate-750 dark:hover:text-slate-300'
+                    }`}
+                >
+                    <Trophy className="w-4 h-4" />
+                    Examens (CEPD/BEPC/BAC)
+                </button>
             </div>
- 
+
+            {/* ── ONGLET EXAMENS ── */}
+            {activeTab === 'examens' && (
+                <div className="space-y-6">
+                    {loadingExamStats ? (
+                        <div className="flex items-center justify-center py-16 border border-slate-900/10 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[28px] shadow-sm">
+                            <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+                        </div>
+                    ) : examStats.length === 0 ? (
+                        <div className="text-center py-16 border border-dashed border-slate-200 dark:border-slate-800 rounded-[28px] bg-white dark:bg-slate-900">
+                            <Trophy className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                            <p className="text-sm font-bold text-slate-400">Aucune session d'examen ou aucune note saisie pour l'instant.</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {examStats.map(s => (
+                                    <div key={s.type} className="border border-slate-900/10 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 rounded-[24px] shadow-sm">
+                                        <p className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest mb-1">{s.type}</p>
+                                        <p className="text-3xl font-black tracking-tighter text-slate-950 dark:text-white mb-2">{s.moyenneGenerale}/20</p>
+                                        <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Réussite : {s.successRate}%</p>
+                                        <p className="text-[10px] font-bold text-slate-400 mt-2">{s.effectif} élèves · {s.sessionsCount} session(s)</p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="border border-slate-900/10 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[28px] p-6 sm:p-8 shadow-sm">
+                                <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight mb-6">Moyenne Générale par Type d'Examen</h3>
+                                <ResponsiveContainer width="100%" height={240}>
+                                    <BarChart data={examStats.map(s => ({ name: s.type, moyenne: s.moyenneGenerale }))} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} opacity={0.5} />
+                                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} />
+                                        <YAxis tickFormatter={(v) => `${v}`} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} domain={[0, 20]} />
+                                        <Tooltip
+                                            formatter={(value?: number) => [`${value ?? 0}/20`, 'Moyenne']}
+                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', fontWeight: 700 }}
+                                        />
+                                        <Bar dataKey="moyenne" name="moyenne" fill="#7c3aed" radius={[8, 8, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            <div className="border border-slate-900/10 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[28px] p-6 sm:p-8 shadow-sm">
+                                <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight mb-6">Top 5 par Type d'Examen</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {examStats.map(s => (
+                                        <div key={s.type} className="border border-slate-100 dark:border-slate-800 rounded-2xl p-4">
+                                            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">{s.type}</p>
+                                            {s.top5.length === 0 ? (
+                                                <p className="text-xs text-slate-400 italic">Aucune donnée.</p>
+                                            ) : (
+                                                <ul className="space-y-2">
+                                                    {s.top5.map((t, i) => (
+                                                        <li key={i} className="flex items-center justify-between text-sm">
+                                                            <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{i + 1}. {t.nom} <span className="text-slate-400 font-medium">({t.classe})</span></span>
+                                                            <span className="font-black text-emerald-600">{t.moyenne}/20</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+            )}
+
             {/* ── TABLE PREVIEW — BLACK & WHITE ÉPURÉ ── */}
+            {activeTab !== 'examens' && (
             <div className="border border-slate-900/10 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[28px] p-6 sm:p-8 shadow-sm">
-                
+
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight">
                         {activeTab === 'college' ? 'Tableau des Résultats — Collège' : 'Tableau des Résultats — Lycée'}
@@ -295,8 +414,10 @@ export const RapportsAcademiques: React.FC = () => {
                     )}
                 </div>
             </div>
+            )}
 
             {/* ── TAUX DE RÉUSSITE PAR MATIÈRE ── */}
+            {activeTab !== 'examens' && (
             <div className="border border-slate-900/10 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[28px] p-6 sm:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center border border-indigo-500/20">
@@ -352,6 +473,7 @@ export const RapportsAcademiques: React.FC = () => {
                     })()}
                 </div>
             </div>
+            )}
 
             {/* ── TENDANCE DES ABSENCES ── */}
             <div className="border border-slate-900/10 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[28px] p-6 sm:p-8 shadow-sm">

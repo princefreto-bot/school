@@ -2,32 +2,11 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Student } from '../types';
 import jsPDF from 'jspdf';
+import { getExamenForClasse, isExamClass } from '../utils/examEligibility';
 import {
-    Award, Search, Filter, Download, Printer, Edit3, X, Eye, 
+    Award, Search, Filter, Download, Printer, Edit3, X, Eye,
     CheckCircle, AlertCircle, Users, Check, RefreshCw, ZoomIn, ZoomOut, RotateCw
 } from 'lucide-react';
-
-// ============================================================
-// LOGIQUE DE DÉTECTION DES EXAMENS
-// ============================================================
-export const getExamenForClasse = (classe: string): 'CEPD' | 'BEPC' | 'BAC 1' | 'BAC 2' | null => {
-    if (!classe) return null;
-    const lower = classe.trim().toLowerCase();
-    
-    if (lower.startsWith('cm2')) {
-        return 'CEPD';
-    }
-    if (lower.startsWith('3ème') || lower.startsWith('3e') || lower.startsWith('3eme')) {
-        return 'BEPC';
-    }
-    if (lower.startsWith('1ère') || lower.startsWith('1ere') || lower.startsWith('1e') || lower.startsWith('première') || lower.startsWith('premiere')) {
-        return 'BAC 1';
-    }
-    if (lower.startsWith('terminale') || lower.startsWith('tle')) {
-        return 'BAC 2';
-    }
-    return null;
-};
 
 // Couleurs Togo associées aux examens
 const EXAM_COLORS: Record<'CEPD' | 'BEPC' | 'BAC 1' | 'BAC 2', { primary: string, bg: string, text: string }> = {
@@ -123,12 +102,16 @@ export const CarteExamen: React.FC = () => {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    // Classes et Examens disponibles
-    const classes = [...new Set(students.map((s) => s.classe))].sort();
-    
+    // Classes et Examens disponibles — uniquement les classes éligibles à un
+    // examen national (CM2, 3ème, 1ère, Terminale, toutes sections confondues).
+    // Les autres classes ne doivent ni apparaître dans le sélecteur, ni être
+    // générables via l'export en lot (défense en profondeur ci-dessous).
+    const classes = [...new Set(students.map((s) => s.classe).filter(isExamClass))].sort();
+
     // Auto-calculer les examens de chaque élève pour filtrage
     const filteredStudents = students.filter((s) => {
         const exam = getExamenForClasse(s.classe);
+        if (!exam) return false;
         const matchesSearch = `${s.prenom} ${s.nom} ${s.id} ${s.numeroTable || ''}`.toLowerCase().includes(search.toLowerCase());
         const matchesExam = !selectedExam || exam === selectedExam;
         const matchesClasse = !selectedClasse || s.classe === selectedClasse;

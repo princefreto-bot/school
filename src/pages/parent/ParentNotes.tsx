@@ -6,7 +6,7 @@ import {
     ChevronRight, AlertCircle, Loader2, Search,
     Filter, Calendar
 } from 'lucide-react';
-import { PeriodeType } from '../../types';
+import { getAvailablePeriods } from '../../data/classConfig';
 
 export const ParentNotes: React.FC = () => {
     const { notes, matieres, classeMatieres, students: children } = useStore();
@@ -72,10 +72,7 @@ export const ParentNotes: React.FC = () => {
             {/* Liste des notes par période */}
             {selectedChild && (
                 <div className="space-y-12 pb-20">
-                    {(selectedChild.cycle === 'Lycée' 
-                        ? (['SEMESTRE 1', 'SEMESTRE 2'] as PeriodeType[])
-                        : (['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'] as PeriodeType[])
-                    ).map(periode => {
+                    {getAvailablePeriods(selectedChild.classe).map(periode => {
                         // Filtrer les matières de la classe de l'enfant
                         const childClasseMatieres = classeMatieres.filter(cm => cm.classe === selectedChild.classe);
                         // Filtrer les notes de l'enfant pour cette période

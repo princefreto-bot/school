@@ -11,7 +11,7 @@ import {
   ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone,
   BookOpen, Edit3, FileSpreadsheet, Sun, Moon, Calendar,
   PanelLeftClose, PanelLeftOpen, RefreshCw, Shield, Wallet, Landmark,
-  UserCircle, CalendarX
+  UserCircle, CalendarX, GraduationCap
 } from 'lucide-react';
 
 import { SupportModal } from './SupportModal';
@@ -45,6 +45,7 @@ const NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'mes_absences',         label: 'Mes Absences',      icon: <CalendarX className="w-[18px] h-[18px]" /> },
   { id: 'gestion_annees_scolaires', label: 'Années Scolaires', icon: <Calendar className="w-[18px] h-[18px]" /> },
   { id: 'saisie_notes',         label: 'Saisie Notes',      icon: <Edit3 className="w-[18px] h-[18px]" /> },
+  { id: 'notes_examens',        label: 'Notes d\'Examens',  icon: <GraduationCap className="w-[18px] h-[18px]" /> },
   { id: 'bulletins',            label: 'Bulletins',         icon: <FileSpreadsheet className="w-[18px] h-[18px]" /> },
   { id: 'rapports_academiques', label: 'Rapports Académiques', icon: <FileText className="w-[18px] h-[18px]" /> },
   { id: 'verification_recu',    label: 'Vérif. Reçus',      icon: <ShieldCheck className="w-[18px] h-[18px]" /> },
@@ -98,6 +99,7 @@ const NAV_GROUPS: Record<string, string> = {
   mes_absences: 'Mon Espace',
   gestion_annees_scolaires: 'Académique',
   saisie_notes: 'Académique',
+  notes_examens: 'Académique',
   bulletins: 'Académique',
   rapports_academiques: 'Académique',
   verification_recu: 'Outils',

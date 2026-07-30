@@ -276,6 +276,7 @@ export type AppPage =
   | 'gestion_academique'
   | 'gestion_annees_scolaires'
   | 'saisie_notes'
+  | 'notes_examens'
   | 'bulletins'
   | 'rapports_academiques'
   | 'parent_dashboard'

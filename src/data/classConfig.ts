@@ -1,7 +1,7 @@
 // ============================================================
 // CONFIGURATION DES CLASSES ET ÉCOLAGES
 // ============================================================
-import { ClassConfig, Cycle } from '../types';
+import { ClassConfig, Cycle, PeriodeType } from '../types';
 
 export const CLASS_CONFIG: ClassConfig[] = [
   // Primaire — 50 000 FCFA
@@ -66,6 +66,18 @@ export const getEcolage = (className: string): number => {
 export const getCycle = (className: string): Cycle => {
   const config = getClassConfig(className);
   return config ? config.cycle : 'Primaire';
+};
+
+// Périodes valides pour une classe donnée — dérivées directement du cycle
+// (jamais via un élève trouvé, qui peut être absent ou avoir un cycle périmé).
+// Un cycle Lycée ne voit jamais Trimestre, un cycle Primaire/Collège ne voit
+// jamais Semestre — jamais les deux à la fois, contrairement à l'ancien
+// comportement qui retombait sur les 5 périodes quand aucun élève n'était trouvé.
+export const getAvailablePeriods = (className: string): PeriodeType[] => {
+  const cycle = getCycle(className);
+  return cycle === 'Lycée'
+    ? ['SEMESTRE 1', 'SEMESTRE 2']
+    : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'];
 };
 
 export const CYCLES: Cycle[] = ['Primaire', 'Collège', 'Lycée'];

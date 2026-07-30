@@ -137,6 +137,7 @@ app.use('/api/accounting', require('./routes/accounting'));
 app.use('/api/payroll', require('./routes/payroll'));
 app.use('/api/staff-absences', require('./routes/staffAbsences'));
 app.use('/api/staff-attendance', require('./routes/staffAttendance'));
+app.use('/api/exam', require('./routes/exam'));
 app.use('/api/personnel-documents', require('./routes/personnelDocuments'));
 app.use('/api/timetable', require('./routes/timetable'));
 app.use('/api/satisfaction', require('./routes/satisfaction'));

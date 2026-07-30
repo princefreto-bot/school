@@ -161,6 +161,7 @@ const featuresFr = [
       'Portail « Mon Espace » : profil, bulletin, planning et absences pour tout le personnel',
       'Badge QR enseignant : pointage entrée/sortie avec calcul automatique des heures manquées',
       'Numérisation des documents du personnel (contrat, diplôme, pièce d\'identité...)',
+      'Notes d\'examens nationaux (CEPD, BEPC, BAC) avec classement automatique par section',
     ],
   },
   {
@@ -322,6 +323,7 @@ const featuresEn = [
       'Teacher QR badge: clock-in/out with automatic missed-hours calculation',
       "Staff document digitization (contract, diploma, ID card...)",
       'Timetable builder with automatic conflict detection',
+      'National exam grades (CEPD, BEPC, BAC) with automatic per-section ranking',
     ],
   },
   {

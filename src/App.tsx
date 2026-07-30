@@ -61,6 +61,7 @@ const CarteExamen = lazy(() => import('./pages/CarteExamen').then(m => ({ defaul
 const GestionAcademique = lazy(() => import('./pages/GestionAcademique' /* */).then(m => ({ default: m.GestionAcademique })));
 const GestionAnneesScolaires = lazy(() => import('./pages/GestionAnneesScolaires').then(m => ({ default: m.GestionAnneesScolaires })));
 const SaisieNotes = lazy(() => import('./pages/SaisieNotes' /* */).then(m => ({ default: m.SaisieNotes })));
+const NotesExamens = lazy(() => import('./pages/NotesExamens').then(m => ({ default: m.NotesExamens })));
 const Bulletins = lazy(() => import('./pages/Bulletins').then(m => ({ default: m.Bulletins })));
 const VerificationRecu = lazy(() => import('./pages/VerificationRecu').then(m => ({ default: m.VerificationRecu })));
 const RapportsAcademiques = lazy(() => import('./pages/RapportsAcademiques').then(m => ({ default: m.RapportsAcademiques })));
@@ -242,6 +243,7 @@ const PageContent: React.FC = () => {
             case 'gestion_academique': return <GestionAcademique />;
             case 'gestion_annees_scolaires': return <GestionAnneesScolaires />;
             case 'saisie_notes': return <SaisieNotes />;
+            case 'notes_examens': return <NotesExamens />;
             case 'selection_enseignant': return <SelectionEnseignant />;
             case 'bulletins': return <Bulletins />;
             case 'verification_recu': return <VerificationRecu />;
