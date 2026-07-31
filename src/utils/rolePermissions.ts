@@ -66,7 +66,7 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'saisie_notes', 'notes_examens', 'selection_enseignant', ...MON_ESPACE_PAGES
     ],
     secretaire: [
-        'espace_personnel', 'gestion_personnel', 'carte_personnel', 'scan_presence_personnel', 'scan_sortie_personnel', 'gestion_academique', 'emploi_du_temps', 'annonces', 'chat', 'documents', ...MON_ESPACE_PAGES
+        'eleves', 'espace_personnel', 'gestion_personnel', 'carte_personnel', 'scan_presence_personnel', 'scan_sortie_personnel', 'gestion_academique', 'emploi_du_temps', 'annonces', 'chat', 'documents', ...MON_ESPACE_PAGES
     ],
 };
 
@@ -118,7 +118,9 @@ const ROLE_ACTIONS: Record<Role, ActionType[]> = {
     censeur: [],
     parent: [],
     enseignant: [],
-    secretaire: [],
+    secretaire: [
+        'ajouter_eleve', 'modifier_eleve'
+    ],
     creator: [],
 };
 

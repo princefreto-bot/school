@@ -48,7 +48,7 @@ async function syncFromFrontend(req, res) {
         }
     }
 
-    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur', 'enseignant'].includes(role)) {
+    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur', 'enseignant', 'secretaire'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
     }
 
@@ -61,6 +61,15 @@ async function syncFromFrontend(req, res) {
         appSettings = null;
         matieres = [];
         classeMatieres = [];
+        replace = false;
+    }
+
+    // Sécurité : La secrétaire gère élèves + matières/coefficients (pour le planning),
+    // mais ne doit jamais pouvoir écrire de notes, modifier les paramètres d'école,
+    // ou déclencher un remplacement complet de la base.
+    if (role === 'secretaire') {
+        notes = [];
+        appSettings = null;
         replace = false;
     }
 
