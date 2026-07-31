@@ -302,9 +302,15 @@ export type AppPage =
   | 'scan_presence_personnel'
   | 'scan_sortie_personnel'
   // ── Pages SuperAdmin (propriétaire SaaS) ──
-  | 'superadmin_dashboard'
+  | 'superadmin_overview'
   | 'superadmin_schools'
-  | 'superadmin_billing'
+  | 'superadmin_creators'
+  | 'superadmin_finance'
+  | 'superadmin_withdrawals'
+  | 'superadmin_cashflow'
+  | 'superadmin_alerts'
+  | 'superadmin_auditor'
+  | 'superadmin_pipeline'
   | 'creator_dashboard';
 
 // Les types de cycles existants

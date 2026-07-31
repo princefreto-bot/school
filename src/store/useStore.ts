@@ -443,7 +443,7 @@ export const useStore = create<AppState>()(
 
             // Déterminer la page de redirection selon le rôle
             let targetPage: AppPage = 'dashboard';
-            if (loggedUser.role === 'superadmin') targetPage = 'superadmin_dashboard';
+            if (loggedUser.role === 'superadmin') targetPage = 'superadmin_overview';
             else if (loggedUser.role === 'creator') targetPage = 'creator_dashboard';
             else if (loggedUser.role === 'parent') targetPage = 'parent_dashboard';
             else if (loggedUser.role === 'superviseur' || loggedUser.role === 'surveillant') targetPage = 'scan_presence';
@@ -544,9 +544,13 @@ export const useStore = create<AppState>()(
         const u = get().user;
         // SuperAdmin : accès uniquement aux pages superadmin
         if (u?.role === 'superadmin') {
-          const allowed: AppPage[] = ['superadmin_dashboard', 'superadmin_schools', 'superadmin_billing'];
+          const allowed: AppPage[] = [
+            'superadmin_overview', 'superadmin_schools', 'superadmin_creators', 'superadmin_finance',
+            'superadmin_withdrawals', 'superadmin_cashflow', 'superadmin_auditor', 'superadmin_alerts',
+            'superadmin_pipeline'
+          ];
           if (!allowed.includes(page)) {
-            set({ currentPage: 'superadmin_dashboard' });
+            set({ currentPage: 'superadmin_overview' });
             return;
           }
         } else if (u?.role === 'parent') {

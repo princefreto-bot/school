@@ -22,6 +22,10 @@ const {
 } = require('../controllers/superAdminController');
 
 const { getConfig: getPayrollConfig, updateConfig: updatePayrollConfig } = require('../controllers/payrollController');
+const { getCashflowTrend } = require('../controllers/superAdminAnalyticsController');
+const { getAuditFindings } = require('../controllers/superAdminAuditorController');
+const { getOverdueAlerts, markAlertContacted } = require('../controllers/superAdminAlertsController');
+const { listProspects, createProspect, updateProspect, updateProspectStage, deleteProspect } = require('../controllers/prospectsController');
 
 const {
     getAllCreators,
@@ -65,5 +69,22 @@ router.post('/withdrawals/upload-proof', authenticateToken, requireSuperAdmin, u
 // ── RÉSÉRVÉ SUPERADMIN : CONFIGURATION LÉGALE DE LA PAIE (taux nationaux) ──
 router.get('/payroll-config', authenticateToken, requireSuperAdmin, getPayrollConfig);
 router.patch('/payroll-config', authenticateToken, requireSuperAdmin, updatePayrollConfig);
+
+// ── RÉSÉRVÉ SUPERADMIN : CASHFLOW (encaissements réels vs dépenses) ──
+router.get('/cashflow/trend', authenticateToken, requireSuperAdmin, getCashflowTrend);
+
+// ── RÉSÉRVÉ SUPERADMIN : AUDITEUR D'ABONNEMENTS ──
+router.get('/auditor/findings', authenticateToken, requireSuperAdmin, getAuditFindings);
+
+// ── RÉSÉRVÉ SUPERADMIN : ALERTES (écoles à contacter) ──
+router.get('/alerts/overdue', authenticateToken, requireSuperAdmin, getOverdueAlerts);
+router.post('/alerts/:schoolId/mark-contacted', authenticateToken, requireSuperAdmin, markAlertContacted);
+
+// ── RÉSÉRVÉ SUPERADMIN : PIPELINE COMMERCIAL (prospects) ──
+router.get('/prospects', authenticateToken, requireSuperAdmin, listProspects);
+router.post('/prospects', authenticateToken, requireSuperAdmin, createProspect);
+router.patch('/prospects/:id', authenticateToken, requireSuperAdmin, updateProspect);
+router.patch('/prospects/:id/stage', authenticateToken, requireSuperAdmin, updateProspectStage);
+router.delete('/prospects/:id', authenticateToken, requireSuperAdmin, deleteProspect);
 
 module.exports = router;

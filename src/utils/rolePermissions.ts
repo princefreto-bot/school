@@ -12,7 +12,9 @@ const MON_ESPACE_PAGES: AppPage[] = ['mon_profil', 'mon_bulletin_paie', 'mon_pla
 const ROLE_PAGES: Record<Role, AppPage[]> = {
     // ── SuperAdmin : accès global SaaS ──
     superadmin: [
-        'superadmin_dashboard', 'superadmin_schools', 'superadmin_billing'
+        'superadmin_overview', 'superadmin_schools', 'superadmin_creators', 'superadmin_finance',
+        'superadmin_withdrawals', 'superadmin_cashflow', 'superadmin_auditor', 'superadmin_alerts',
+        'superadmin_pipeline'
     ],
     creator: [
         'creator_dashboard'

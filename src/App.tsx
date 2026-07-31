@@ -4,6 +4,7 @@
 import React, { Suspense, lazy } from 'react';
 import { useStore } from './store/useStore';
 import { webPushService } from './services/webPushService';
+import { AppPage } from './types';
 import { Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
 
 import { Capacitor } from '@capacitor/core';
@@ -81,7 +82,15 @@ const ParentsList = lazy(() => import('./pages/ParentsList').then(m => ({ defaul
 const ImportExport = lazy(() => import('./components/ImportExport').then(m => ({ default: m.ImportExport })));
 const ChatWindow = lazy(() => import('./components/ChatWindow').then(m => ({ default: m.ChatWindow })));
 const Annonces = lazy(() => import('./pages/Annonces').then(m => ({ default: m.Annonces })));
-const SuperAdminDashboard = lazy(() => import('./pages/superadmin/SuperAdminDashboard').then(m => ({ default: m.SuperAdminDashboard })));
+const SuperAdminOverviewPage = lazy(() => import('./pages/superadmin/SuperAdminOverviewPage').then(m => ({ default: m.SuperAdminOverviewPage })));
+const SuperAdminSchoolsPage = lazy(() => import('./pages/superadmin/SuperAdminSchoolsPage').then(m => ({ default: m.SuperAdminSchoolsPage })));
+const SuperAdminCreatorsPage = lazy(() => import('./pages/superadmin/SuperAdminCreatorsPage').then(m => ({ default: m.SuperAdminCreatorsPage })));
+const SuperAdminFinancePage = lazy(() => import('./pages/superadmin/SuperAdminFinancePage').then(m => ({ default: m.SuperAdminFinancePage })));
+const SuperAdminWithdrawalsPage = lazy(() => import('./pages/superadmin/SuperAdminWithdrawalsPage').then(m => ({ default: m.SuperAdminWithdrawalsPage })));
+const SuperAdminCashflowPage = lazy(() => import('./pages/superadmin/SuperAdminCashflowPage').then(m => ({ default: m.SuperAdminCashflowPage })));
+const SuperAdminAuditorPage = lazy(() => import('./pages/superadmin/SuperAdminAuditorPage').then(m => ({ default: m.SuperAdminAuditorPage })));
+const SuperAdminAlertsPage = lazy(() => import('./pages/superadmin/SuperAdminAlertsPage').then(m => ({ default: m.SuperAdminAlertsPage })));
+const SuperAdminPipelinePage = lazy(() => import('./pages/superadmin/SuperAdminPipelinePage').then(m => ({ default: m.SuperAdminPipelinePage })));
 const SelectionEnseignant = lazy(() => import('./pages/SelectionEnseignant').then(m => ({ default: m.SelectionEnseignant })));
 const CreatorDashboard = lazy(() => import('./pages/creator/CreatorDashboard').then(m => ({ default: m.CreatorDashboard })));
 const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
@@ -151,12 +160,31 @@ const PageContent: React.FC = () => {
     }
   }, [user?.role, teachingMode, fetchTeachingMode]);
 
-  // SuperAdmin: uniquement ses pages
+  // SuperAdmin : accès uniquement à ses pages, routées selon currentPage
+  // (avant refonte : verrouillé sur un seul composant monolithique quel que soit currentPage)
   if (user?.role === 'superadmin') {
+    const superadminPages: AppPage[] = [
+      'superadmin_overview', 'superadmin_schools', 'superadmin_creators', 'superadmin_finance',
+      'superadmin_withdrawals', 'superadmin_cashflow', 'superadmin_auditor', 'superadmin_alerts',
+      'superadmin_pipeline'
+    ];
+    const page: AppPage = superadminPages.includes(currentPage as AppPage) ? (currentPage as AppPage) : 'superadmin_overview';
     return (
-      <div key="superadmin" className="page-transition-running">
+      <div key={page} className="page-transition-running">
         <Suspense fallback={<LoadingSpinner />}>
-          <SuperAdminDashboard />
+          {(() => {
+            switch (page) {
+              case 'superadmin_schools': return <SuperAdminSchoolsPage />;
+              case 'superadmin_creators': return <SuperAdminCreatorsPage />;
+              case 'superadmin_finance': return <SuperAdminFinancePage />;
+              case 'superadmin_withdrawals': return <SuperAdminWithdrawalsPage />;
+              case 'superadmin_cashflow': return <SuperAdminCashflowPage />;
+              case 'superadmin_auditor': return <SuperAdminAuditorPage />;
+              case 'superadmin_alerts': return <SuperAdminAlertsPage />;
+              case 'superadmin_pipeline': return <SuperAdminPipelinePage />;
+              default: return <SuperAdminOverviewPage />;
+            }
+          })()}
         </Suspense>
       </div>
     );
@@ -274,10 +302,8 @@ const PageContent: React.FC = () => {
             case 'import_export': return <ImportExport />;
             case 'chat': return <ChatWindow />;
             case 'annonces': return <Annonces />;
-            case 'superadmin_dashboard':
-            case 'superadmin_schools':
-            case 'superadmin_billing':
-              return <SuperAdminDashboard />;
+            // NOTE: le rôle superadmin est intercepté plus haut par un early-return dédié
+            // (routage multi-pages propre) — ce switch ne le concerne plus.
             default: return user?.role === 'parent' ? <ParentDashboard /> : (user?.role === 'secretaire' ? <EspacePersonnel /> : <Dashboard />);
           }
         })()}

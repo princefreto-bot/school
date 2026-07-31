@@ -75,6 +75,19 @@ const CREATOR_NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'creator_dashboard',  label: 'Mon Espace Pub',     icon: <Megaphone className="w-[18px] h-[18px]" /> },
 ];
 
+// NOTE: cashflow/alertes/auditeur/pipeline sont ajoutés au fil des phases (voir plan de refonte SuperAdmin).
+const SUPERADMIN_NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
+  { id: 'superadmin_overview',    label: 'Vue d\'ensemble', icon: <Shield className="w-[18px] h-[18px]" /> },
+  { id: 'superadmin_schools',     label: 'Établissements',  icon: <Database className="w-[18px] h-[18px]" /> },
+  { id: 'superadmin_creators',    label: 'Partenaires',     icon: <Megaphone className="w-[18px] h-[18px]" /> },
+  { id: 'superadmin_finance',     label: 'Dépenses & CA',   icon: <Wallet className="w-[18px] h-[18px]" /> },
+  { id: 'superadmin_withdrawals', label: 'Retraits',        icon: <Landmark className="w-[18px] h-[18px]" /> },
+  { id: 'superadmin_cashflow',    label: 'Cashflow',        icon: <Activity className="w-[18px] h-[18px]" /> },
+  { id: 'superadmin_auditor',     label: 'Auditeur',        icon: <ShieldCheck className="w-[18px] h-[18px]" /> },
+  { id: 'superadmin_alerts',      label: 'Alertes',         icon: <Bell className="w-[18px] h-[18px]" /> },
+  { id: 'superadmin_pipeline',    label: 'Pipeline',        icon: <Target className="w-[18px] h-[18px]" /> },
+];
+
 const NAV_GROUPS: Record<string, string> = {
   dashboard: 'Principal',
   espace_personnel: 'Principal',
@@ -113,6 +126,15 @@ const NAV_GROUPS: Record<string, string> = {
   gestion_personnel: 'Administration',
   import_export: 'Administration',
   parametres: 'Administration',
+  superadmin_overview: 'Principal',
+  superadmin_schools: 'Écosystème',
+  superadmin_creators: 'Écosystème',
+  superadmin_finance: 'Finance',
+  superadmin_withdrawals: 'Finance',
+  superadmin_cashflow: 'Finance',
+  superadmin_alerts: 'Croissance',
+  superadmin_auditor: 'Croissance',
+  superadmin_pipeline: 'Croissance',
 };
 
 // ── Real-time clock ──
@@ -406,6 +428,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   const isParent = user?.role === 'parent';
   const isCreator = user?.role === 'creator';
+  const isSuperadmin = user?.role === 'superadmin';
   const isSchoolAdmin = user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general';
   
   const showYearOverlay = 
@@ -469,7 +492,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   const isSyncing = useStore((s) => s.isSyncing);
   const nonSoldes = students.filter((s) => s.status !== 'Soldé').length;
-  const baseNavItems = isCreator ? CREATOR_NAV_ITEMS : (isParent ? PARENT_NAV_ITEMS : NAV_ITEMS);
+  const baseNavItems = isSuperadmin ? SUPERADMIN_NAV_ITEMS : (isCreator ? CREATOR_NAV_ITEMS : (isParent ? PARENT_NAV_ITEMS : NAV_ITEMS));
   const filteredItems = getFilteredNavItems(user?.role, baseNavItems) as Omit<NavItem, 'badge'>[];
 
   const navItems: NavItem[] = filteredItems.map((item) => ({
