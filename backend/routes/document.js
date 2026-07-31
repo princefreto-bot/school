@@ -10,8 +10,14 @@ const {
     downloadDocumentFile
 } = require('../controllers/documentController');
 
-// Seul le personnel d'établissement (directeur, surveillant, etc.) peut numériser
-router.post('/scan', authenticateToken, requireSchoolAdmin, scanAndUploadDocument);
+// La secrétaire numérise aussi les dossiers élèves (sans les droits admin complets).
+const requireSchoolAdminOrSecretaire = (req, res, next) => {
+    if (req.user && req.user.role === 'secretaire') return next();
+    return requireSchoolAdmin(req, res, next);
+};
+
+// Seul le personnel d'établissement (directeur, surveillant, secrétaire, etc.) peut numériser
+router.post('/scan', authenticateToken, requireSchoolAdminOrSecretaire, scanAndUploadDocument);
 
 // Les parents ou l'administration peuvent lire les pièces numérisées d'un élève
 router.get('/student/:studentId', authenticateToken, getStudentDocuments);

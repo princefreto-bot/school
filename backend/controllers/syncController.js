@@ -522,7 +522,7 @@ async function syncToFrontend(req, res) {
     }
 
     const { role, schoolSlug } = req.user;
-    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur', 'enseignant'].includes(role)) {
+    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur', 'enseignant', 'secretaire'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
     }
 
@@ -798,7 +798,7 @@ async function clearStudents(req, res) {
 }
 
 async function deleteMatiere(req, res) {
-    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) return res.status(403).json({ error: 'Non autorisé.' });
+    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable', 'secretaire'].includes(req.user.role)) return res.status(403).json({ error: 'Non autorisé.' });
     try {
         const { error } = await supabase.from(`matieres_${req.user.schoolSlug}`).delete().eq('id', req.params.id);
         if (error) throw error;
@@ -809,7 +809,7 @@ async function deleteMatiere(req, res) {
 }
 
 async function deleteClasseMatiere(req, res) {
-    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) return res.status(403).json({ error: 'Non autorisé.' });
+    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable', 'secretaire'].includes(req.user.role)) return res.status(403).json({ error: 'Non autorisé.' });
     try {
         const { error } = await supabase.from(`classe_matieres_${req.user.schoolSlug}`).delete().eq('id', req.params.id);
         if (error) throw error;
