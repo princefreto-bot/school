@@ -8,12 +8,14 @@ import { useStore } from '../store/useStore';
 import { CLASS_CONFIG } from '../data/classConfig';
 import { API_BASE_URL } from '../config';
 import { getAuthHeaders, parseResponse } from '../services/apiHelpers';
+import { personnelApi } from '../services/personnelApi';
 import {
   Calendar, Loader2, Plus, X, AlertTriangle, Download, Sparkles, Trash2
 } from 'lucide-react';
 
 const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const JOUR_INDEX: Record<string, number> = { Lundi: 1, Mardi: 2, Mercredi: 3, Jeudi: 4, Vendredi: 5, Samedi: 6 };
+const FREE_TEXT_OPTION = '__free_text__';
 
 interface Slot {
   id: string;
@@ -40,10 +42,31 @@ export const EmploiDuTemps: React.FC = () => {
   const [formJour, setFormJour] = useState('Lundi');
   const [formMatiereId, setFormMatiereId] = useState('');
   const [formEnseignant, setFormEnseignant] = useState('');
+  const [formEnseignantId, setFormEnseignantId] = useState('');
   const [formDebut, setFormDebut] = useState('08:00');
   const [formFin, setFormFin] = useState('09:00');
   const [formSalle, setFormSalle] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Roster des enseignants ayant une fiche personnel — pour choisir une vraie identité
+  // plutôt que de ressaisir un nom en texte libre (source d'incohérences/doublons).
+  const [teacherRoster, setTeacherRoster] = useState<{ id: string; nom: string }[]>([]);
+  useEffect(() => {
+    personnelApi.getPersonnel()
+      .then((data: any[]) => setTeacherRoster((data || []).filter((p) => p.role === 'enseignant').map((p) => ({ id: p.id, nom: p.nom }))))
+      .catch(() => setTeacherRoster([]));
+  }, []);
+
+  const handleEnseignantSelectChange = (value: string) => {
+    if (value === FREE_TEXT_OPTION || value === '') {
+      setFormEnseignantId('');
+      setFormEnseignant('');
+      return;
+    }
+    const teacher = teacherRoster.find((t) => t.id === value);
+    setFormEnseignantId(value);
+    setFormEnseignant(teacher?.nom || '');
+  };
 
   const loadSlots = async () => {
     setLoading(true);
@@ -87,6 +110,7 @@ export const EmploiDuTemps: React.FC = () => {
           classe,
           matiereId: formMatiereId || null,
           enseignantNom: formEnseignant.trim() || null,
+          enseignantId: formEnseignantId || null,
           jourSemaine: JOUR_INDEX[formJour],
           heureDebut: formDebut,
           heureFin: formFin,
@@ -98,6 +122,7 @@ export const EmploiDuTemps: React.FC = () => {
         setShowForm(false);
         setFormMatiereId('');
         setFormEnseignant('');
+        setFormEnseignantId('');
         setFormSalle('');
         await loadSlots();
       } else {
@@ -234,7 +259,28 @@ export const EmploiDuTemps: React.FC = () => {
           </div>
           <div className="mb-5">
             <label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5">Enseignant</label>
-            <input type="text" value={formEnseignant} onChange={(e) => setFormEnseignant(e.target.value)} placeholder="Nom de l'enseignant" className="w-full md:w-80 p-2.5 bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 rounded-lg text-xs" />
+            {teacherRoster.length > 0 ? (
+              <select
+                value={formEnseignantId || (formEnseignant ? FREE_TEXT_OPTION : '')}
+                onChange={(e) => handleEnseignantSelectChange(e.target.value)}
+                className="w-full md:w-80 p-2.5 bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+              >
+                <option value="">— Sélectionner un enseignant —</option>
+                {teacherRoster.map((t) => <option key={t.id} value={t.id}>{t.nom}</option>)}
+                <option value={FREE_TEXT_OPTION}>Autre (saisie libre, sans compte)</option>
+              </select>
+            ) : (
+              <input type="text" value={formEnseignant} onChange={(e) => setFormEnseignant(e.target.value)} placeholder="Nom de l'enseignant" className="w-full md:w-80 p-2.5 bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 rounded-lg text-xs" />
+            )}
+            {teacherRoster.length > 0 && (formEnseignantId === '' && formEnseignant !== '') && (
+              <input
+                type="text"
+                value={formEnseignant}
+                onChange={(e) => setFormEnseignant(e.target.value)}
+                placeholder="Nom de l'enseignant"
+                className="w-full md:w-80 mt-2 p-2.5 bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
+              />
+            )}
           </div>
           <div className="flex gap-2">
             <button type="submit" disabled={submitting} className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs uppercase rounded-xl transition active:scale-95 disabled:opacity-50">
