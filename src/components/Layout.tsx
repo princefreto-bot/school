@@ -11,7 +11,7 @@ import {
   ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone,
   BookOpen, Edit3, FileSpreadsheet, Sun, Moon, Calendar,
   PanelLeftClose, PanelLeftOpen, RefreshCw, Shield, Wallet, Landmark,
-  UserCircle, CalendarX, GraduationCap
+  UserCircle, CalendarX, GraduationCap, HelpCircle
 } from 'lucide-react';
 
 import { SupportModal } from './SupportModal';
@@ -245,6 +245,27 @@ const SidebarNav: React.FC<{
           </button>
         </div>
       )}
+
+      {/* Guide & Centre d'aide — visible pour tous les rôles (auparavant introuvable
+          une fois connecté : la page /centre-aide n'était liée nulle part dans l'app). */}
+      <div className={navItems.some(i => i.id.startsWith('parent_')) ? 'mt-3' : 'mt-8 pt-4 border-t border-white/5'}>
+        {!collapsed && !navItems.some(i => i.id.startsWith('parent_')) && (
+          <div className="mb-2 ml-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400/50">Assistance</div>
+        )}
+        <a
+          href={`/${lang}/centre-aide`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`group flex items-center w-full rounded-[20px] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98]
+            bg-indigo-500/5 hover:bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 hover:border-indigo-500/20
+            ${collapsed ? 'justify-center p-3 h-12' : 'px-4 py-3.5'}`}
+        >
+          <div className={`transition-transform duration-300 group-hover:scale-110 ${!collapsed && 'mr-3'}`}>
+            <HelpCircle className="w-[18px] h-[18px]" />
+          </div>
+          {!collapsed && <span className="text-[13px] font-bold tracking-wide">Guide & Centre d'aide</span>}
+        </a>
+      </div>
     </nav>
   );
 };

@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { supabase } = require('../utils/supabase');
 const { JWT_SECRET, JWT_EXPIRES } = require('../config');
+const { getCurrentAcademicYear } = require('../utils/academicYear');
 const Joi = require('joi');
 const crypto = require('crypto');
 
@@ -138,7 +139,7 @@ async function register(req, res) {
                 .from(`app_settings_${school_slug}`)
                 .select('school_year')
                 .single();
-            const yearName = settings?.school_year || '2025-2026';
+            const yearName = settings?.school_year || getCurrentAcademicYear();
 
             const { data: yearRow } = await supabase
                 .from('academic_years')

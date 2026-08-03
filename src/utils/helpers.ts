@@ -1,6 +1,16 @@
 import { Student, StatusPaiement, DashboardStats, ClassStats } from '../types';
 import { getEcolage, getCycle, CLASS_CONFIG } from '../data/classConfig';
 
+// Année scolaire "par défaut" calculée dynamiquement (au lieu d'une chaîne codée en dur
+// qui devenait fausse chaque nouvelle rentrée) — bascule sur la rentrée suivante à partir
+// d'août, cohérent avec le calendrier scolaire togolais (rentrée ~septembre).
+export const getCurrentAcademicYear = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const isNewSchoolYearStarted = now.getMonth() >= 7; // 7 = août (0-indexé)
+  return isNewSchoolYearStarted ? `${year}-${year + 1}` : `${year - 1}-${year}`;
+};
+
 export const generateId = (): string => {
   // Use a proper UUID v4 format to avoid "invalid input syntax for type uuid" error in Supabase
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {

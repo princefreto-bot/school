@@ -1,5 +1,6 @@
 const { supabase } = require('../utils/supabase');
 const { sendSuperadminLicensePaymentAlert } = require('../utils/mailer');
+const { getCurrentAcademicYear } = require('../utils/academicYear');
 
 // Chariow — mapping product_id -> montant unitaire (FCFA)
 // Utilisé pour reconnaître si un paiement est une tranche ou un règlement complet.
@@ -19,7 +20,7 @@ async function resolveAcademicYearId(schoolSlug, req) {
             .from(`app_settings_${schoolSlug}`)
             .select('school_year')
             .single();
-        yearName = settings?.school_year || '2025-2026';
+        yearName = settings?.school_year || getCurrentAcademicYear();
     }
 
     const { data: yearRow } = await supabase

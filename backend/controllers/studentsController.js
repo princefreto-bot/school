@@ -1,14 +1,15 @@
 const { supabase } = require('../utils/supabase');
+const { getCurrentAcademicYear } = require('../utils/academicYear');
 
 async function resolveAcademicYearId(schoolSlug, req) {
     let yearName = req.headers['x-academic-year'];
-    
+
     if (!yearName) {
         const { data: settings } = await supabase
             .from(`app_settings_${schoolSlug}`)
             .select('school_year')
             .single();
-        yearName = settings?.school_year || '2025-2026';
+        yearName = settings?.school_year || getCurrentAcademicYear();
     }
 
     const { data: yearRow } = await supabase

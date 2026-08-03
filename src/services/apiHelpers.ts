@@ -12,6 +12,7 @@ export async function parseResponse(res: Response) {
 }
 
 import { useStore } from '../store/useStore';
+import { getCurrentAcademicYear } from '../utils/helpers';
 
 /**
  * Common headers including JWT token from local storage when available.
@@ -25,6 +26,6 @@ export function getAuthHeaders(): Record<string, string> {
     return {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        'x-academic-year': schoolYear || '2024-2025'
+        'x-academic-year': schoolYear || getCurrentAcademicYear()
     };
 }
