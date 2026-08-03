@@ -3,11 +3,40 @@ import { useStore } from '../store/useStore';
 import { API_BASE_URL } from '../config';
 import {
   Save, School, MessageSquare, Shield, Info,
-  Upload, X, Image, Clock, Plus, Calendar, Trash2, Database, AlertCircle, Layers
+  Upload, X, Image, Clock, Plus, Calendar, Trash2, Database, Layers,
+  CheckCircle2, Circle, ChevronDown, Phone, MapPin, Mail, Globe, FileBadge2,
+  Landmark, Sparkles, UserSquare2
 } from 'lucide-react';
 import { SchoolBackups } from '../components/SchoolBackups';
 import { AutoReminderSettings } from '../components/AutoReminderSettings';
 import { ParentSatisfactionOverview } from '../components/ParentSatisfactionOverview';
+
+// ── Interrupteur réutilisable, plus lisible qu'une case à cocher pour un réglage on/off ──
+const ToggleSwitch: React.FC<{ checked: boolean; onChange: (v: boolean) => void; label: string }> = ({ checked, onChange, label }) => (
+  <label className="flex items-center justify-between gap-3 cursor-pointer select-none py-1.5">
+    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{label}</span>
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${checked ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}`}
+    >
+      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${checked ? 'translate-x-4' : ''}`} />
+    </button>
+  </label>
+);
+
+// ── En-tête de sous-section, cohérent partout dans la page ──
+const SectionHeading: React.FC<{ icon: React.ReactNode; title: string; subtitle?: string }> = ({ icon, title, subtitle }) => (
+  <div className="flex items-start gap-2.5 mb-4">
+    <div className="mt-0.5 text-indigo-500 shrink-0">{icon}</div>
+    <div>
+      <h4 className="text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">{title}</h4>
+      {subtitle && <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">{subtitle}</p>}
+    </div>
+  </div>
+);
 
 export const Parametres: React.FC = () => {
   const schoolName = useStore((s) => s.schoolName);
@@ -99,6 +128,23 @@ export const Parametres: React.FC = () => {
   const setTranches = useStore((s) => s.setTranches);
   const [localTranches, setLocalTranches] = useState(tranches || []);
   const [tranchesSaved, setTranchesSaved] = useState(false);
+
+  // Sections avancées repliées par défaut sur un profil neuf (moins intimidant),
+  // mais ouvertes d'office si l'école a déjà renseigné ces champs.
+  const [legalOpen, setLegalOpen] = useState(() => !!(schoolIfu || schoolRccm || schoolNif || schoolAutorisation));
+  const [nationalOpen, setNationalOpen] = useState(false);
+
+  // Checklist de complétion du profil — n'affiche que l'essentiel, pas les champs légaux
+  // optionnels, pour ne pas culpabiliser une école qui n'en a simplement pas besoin.
+  const completionItems = [
+    { label: 'Logo de l\'établissement', done: !!logoPreview },
+    { label: 'Nom du directeur', done: !!localDirectorName.trim() },
+    { label: 'Téléphone', done: !!localTelephone.trim() },
+    { label: 'Adresse', done: !!localAddress.trim() },
+    { label: 'Email de contact', done: !!localEmail.trim() },
+  ];
+  const completionDone = completionItems.filter((i) => i.done).length;
+  const completionPercent = Math.round((completionDone / completionItems.length) * 100);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLogoError('');
@@ -406,255 +452,86 @@ export const Parametres: React.FC = () => {
         </div>
       </div>
 
+      {/* ── PROGRESSION DU PROFIL ── */}
+      {(user?.role === 'directeur' || user?.role === 'comptable') && completionPercent < 100 && (
+        <div className="pro-card p-5 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-amber-200/50 dark:border-amber-500/20">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="relative w-12 h-12 shrink-0">
+                <svg className="w-12 h-12 -rotate-90" viewBox="0 0 36 36">
+                  <path className="text-slate-100 dark:text-slate-800" stroke="currentColor" strokeWidth="4" fill="none" d="M18 2.5 a15.5 15.5 0 0 1 0 31 a15.5 15.5 0 0 1 0 -31" />
+                  <path className="text-amber-500" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round"
+                    strokeDasharray={`${completionPercent}, 100`}
+                    d="M18 2.5 a15.5 15.5 0 0 1 0 31 a15.5 15.5 0 0 1 0 -31" />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-700 dark:text-slate-200">{completionPercent}%</span>
+              </div>
+              <div>
+                <p className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Profil de l'établissement
+                </p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">Complétez ces informations pour des bulletins et cartes scolaires professionnels.</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 sm:ml-auto">
+              {completionItems.map((item) => (
+                <span key={item.label} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                  item.done
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                }`}>
+                  {item.done ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
+                  {item.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        
+
         {/* COLONNE GAUCHE (Principale) */}
         <div className="xl:col-span-2 space-y-6">
             {/* ── IDENTITÉ DE L'APPLICATION ─────────────────────── */}
             <div className="pro-card p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800">
-                <h3 className="font-black text-lg text-slate-900 dark:text-white flex items-center gap-3 mb-6">
+                <h3 className="font-black text-lg text-slate-900 dark:text-white flex items-center gap-3 mb-1">
                 <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl">
                     <School className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 Identité de l'Établissement
                 </h3>
-                
-                <form onSubmit={handleSave} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
-                            Nom de l'application
-                        </label>
-                        <input
-                            disabled={user?.role !== 'directeur' && user?.role !== 'comptable'}
-                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-60"
-                            value={localAppName}
-                            onChange={(e) => setLocalAppName(e.target.value)}
-                            placeholder="Ex : DGhubSchool"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
-                            Nom de l'établissement
-                        </label>
-                        <input
-                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                            value={localSchool}
-                            onChange={(e) => setLocalSchool(e.target.value)}
-                            placeholder="Ex : Groupe Scolaire Excellence"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
-                            Année scolaire en cours
-                        </label>
-                        <div className="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-500 dark:text-slate-400 cursor-not-allowed">
-                            {schoolYear}
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1">Pour changer d'année scolaire, utilisez le menu "Années Scolaires".</p>
-                    </div>
-                    <div>
-                        <label className="block text-[11px] font-black text-indigo-600 dark:text-indigo-400 mb-2.5 uppercase tracking-widest">
-                            Nom du Directeur (Affiché sur cartes et bulletins)
-                        </label>
-                        <input
-                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-4 text-base font-extrabold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm"
-                            value={localDirectorName}
-                            onChange={(e) => setLocalDirectorName(e.target.value)}
-                            placeholder="Ex : M. KOFFI Yao"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-[11px] font-black text-indigo-600 dark:text-indigo-400 mb-2.5 uppercase tracking-widest">
-                            Fonction du Directeur
-                        </label>
-                        <input
-                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-4 text-base font-extrabold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm"
-                            value={localDirectorTitle}
-                            onChange={(e) => setLocalDirectorTitle(e.target.value)}
-                            placeholder="Ex : Directeur Général"
-                        />
-                    </div>
-                </div>
+                <p className="text-xs text-slate-400 dark:text-slate-500 ml-[52px] mb-6">Ces informations apparaissent sur les cartes scolaires, bulletins et documents officiels.</p>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-100 dark:border-slate-800/60">
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">
-                            Logo de l'établissement
-                        </label>
-                        <div className="flex items-center gap-4">
-                            <div className="shrink-0 w-20 h-20 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 overflow-hidden relative group">
-                                {logoPreview ? (
-                                <>
-                                    <img src={logoPreview} alt="Logo aperçu" className="w-full h-full object-contain p-2" />
-                                    <button type="button" onClick={removeLogo} className="absolute inset-0 bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                                    <X className="w-5 h-5" />
-                                    </button>
-                                </>
-                                ) : (
-                                <Image className="w-6 h-6 text-slate-300 dark:text-slate-600" />
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" className="hidden" id="logo-upload" onChange={handleLogoUpload} />
-                                <label htmlFor="logo-upload" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/10 text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 rounded-xl text-[11px] font-black uppercase tracking-widest cursor-pointer transition-colors border border-transparent hover:border-indigo-200 dark:hover:border-indigo-500/30">
-                                <Upload className="w-3.5 h-3.5" /> Modifier Logo
-                                </label>
-                                {logoError && <p className="mt-2 text-[10px] font-bold text-rose-500">{logoError}</p>}
-                            </div>
-                        </div>
-                    </div>
+                <form onSubmit={handleSave} className="space-y-8">
 
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">
-                            Cachet de l'établissement
-                        </label>
-                        <div className="flex items-center gap-4">
-                            <div className="shrink-0 w-20 h-20 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 overflow-hidden relative group">
-                                {stampPreview ? (
-                                <>
-                                    <img src={stampPreview} alt="Cachet" className="w-full h-full object-contain p-2" />
-                                    <button type="button" onClick={removeStamp} className="absolute inset-0 bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                                    <X className="w-5 h-5" />
-                                    </button>
-                                </>
-                                ) : (
-                                <Image className="w-6 h-6 text-slate-300 dark:text-slate-600" />
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <input ref={stampFileRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" className="hidden" id="stamp-upload" onChange={handleStampUpload} />
-                                <label htmlFor="stamp-upload" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/10 text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 rounded-xl text-[11px] font-black uppercase tracking-widest cursor-pointer transition-colors border border-transparent hover:border-indigo-200 dark:hover:border-indigo-500/30">
-                                <Upload className="w-3.5 h-3.5" /> Modifier Cachet
-                                </label>
-                                {stampError && <p className="mt-2 text-[10px] font-bold text-rose-500">{stampError}</p>}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">
-                            Sceau Officiel (République / Ministère)
-                        </label>
-                        <div className="flex items-center gap-4">
-                            <div className="shrink-0 w-20 h-20 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 overflow-hidden relative group">
-                                {sealPreview ? (
-                                <>
-                                    <img src={sealPreview} alt="Sceau" className="w-full h-full object-contain p-2" />
-                                    <button type="button" onClick={removeSeal} className="absolute inset-0 bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                                    <X className="w-5 h-5" />
-                                    </button>
-                                </>
-                                ) : (
-                                <Image className="w-6 h-6 text-slate-300 dark:text-slate-600" />
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <input ref={sealFileRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" className="hidden" id="seal-upload" onChange={handleSealUpload} />
-                                <label htmlFor="seal-upload" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/10 text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 rounded-xl text-[11px] font-black uppercase tracking-widest cursor-pointer transition-colors border border-transparent hover:border-indigo-200 dark:hover:border-indigo-500/30">
-                                <Upload className="w-3.5 h-3.5" /> Sceau PNG
-                                </label>
-                                {sealError && <p className="mt-2 text-[10px] font-bold text-rose-500">{sealError}</p>}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-3 uppercase tracking-widest">
-                            Signature du Directeur
-                        </label>
-                        <div className="flex items-center gap-4">
-                            <div className="shrink-0 w-20 h-20 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 overflow-hidden relative group">
-                                {signaturePreview ? (
-                                <>
-                                    <img src={signaturePreview} alt="Signature" className="w-full h-full object-contain p-2" />
-                                    <button type="button" onClick={removeSignature} className="absolute inset-0 bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                                    <X className="w-5 h-5" />
-                                    </button>
-                                </>
-                                ) : (
-                                <Image className="w-6 h-6 text-slate-300 dark:text-slate-600" />
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <input ref={signatureFileRef} type="file" accept="image/png" className="hidden" id="signature-upload" onChange={handleSignatureUpload} />
-                                <label htmlFor="signature-upload" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/10 text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 rounded-xl text-[11px] font-black uppercase tracking-widest cursor-pointer transition-colors border border-transparent hover:border-indigo-200 dark:hover:border-indigo-500/30">
-                                <Upload className="w-3.5 h-3.5" /> Signature PNG
-                                </label>
-                                {signatureError && <p className="mt-2 text-[10px] font-bold text-rose-500">{signatureError}</p>}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60 space-y-4">
-                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                        <Shield className="w-3.5 h-3.5 text-indigo-500" /> Options de Signature et Cachet
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label className="flex items-center gap-3 cursor-pointer select-none">
+                {/* ── Identité générale ── */}
+                <div>
+                    <SectionHeading icon={<Info className="w-4 h-4" />} title="Identité générale" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Nom de l'application
+                            </label>
                             <input
-                                type="checkbox"
-                                checked={localShowStampOnCards}
-                                onChange={(e) => setLocalShowStampOnCards(e.target.checked)}
-                                className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 focus:ring-opacity-25"
+                                disabled={user?.role !== 'directeur' && user?.role !== 'comptable'}
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-60"
+                                value={localAppName}
+                                onChange={(e) => setLocalAppName(e.target.value)}
+                                placeholder="Ex : DGhubSchool"
                             />
-                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                Afficher le cachet de l'établissement sur les cartes scolaires
-                            </span>
-                        </label>
-                        <label className="flex items-center gap-3 cursor-pointer select-none">
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Nom de l'établissement
+                            </label>
                             <input
-                                type="checkbox"
-                                checked={localShowSealOnCards}
-                                onChange={(e) => setLocalShowSealOnCards(e.target.checked)}
-                                className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 focus:ring-opacity-25"
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localSchool}
+                                onChange={(e) => setLocalSchool(e.target.value)}
+                                placeholder="Ex : Groupe Scolaire Excellence"
                             />
-                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                Afficher le sceau officiel sur les cartes scolaires
-                            </span>
-                        </label>
-                        <label className="flex items-center gap-3 cursor-pointer select-none">
-                            <input
-                                type="checkbox"
-                                checked={localShowSignatureOnCards}
-                                onChange={(e) => setLocalShowSignatureOnCards(e.target.checked)}
-                                className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 focus:ring-opacity-25"
-                            />
-                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                Afficher la signature du directeur sur les cartes scolaires
-                            </span>
-                        </label>
-                        <label className="flex items-center gap-3 cursor-pointer select-none">
-                            <input
-                                type="checkbox"
-                                checked={localShowStampOnBulletins}
-                                onChange={(e) => setLocalShowStampOnBulletins(e.target.checked)}
-                                className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 focus:ring-opacity-25"
-                            />
-                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                Afficher le cachet sur les bulletins
-                            </span>
-                        </label>
-                        <label className="flex items-center gap-3 cursor-pointer select-none">
-                            <input
-                                type="checkbox"
-                                checked={localShowSignatureOnBulletins}
-                                onChange={(e) => setLocalShowSignatureOnBulletins(e.target.checked)}
-                                className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 focus:ring-opacity-25"
-                            />
-                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                Afficher la signature du directeur sur les bulletins
-                            </span>
-                        </label>
-                    </div>
-                </div>
-
-                <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
-                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <Info className="w-3.5 h-3.5 text-indigo-500" /> Bulletin & Coordonnées Officielles
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        </div>
                         <div>
                             <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
                                 Devise de l'école (Motto)
@@ -668,40 +545,154 @@ export const Parametres: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
-                                Boîte Postale (BP)
+                                Année scolaire en cours
+                            </label>
+                            <div className="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-500 dark:text-slate-400 cursor-not-allowed">
+                                {schoolYear}
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-1">Pour changer d'année scolaire, utilisez le menu "Années Scolaires".</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Direction ── */}
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
+                    <SectionHeading icon={<UserSquare2 className="w-4 h-4" />} title="Direction" subtitle="Affiché sur les cartes scolaires et bulletins." />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-[11px] font-black text-indigo-600 dark:text-indigo-400 mb-2.5 uppercase tracking-widest">
+                                Nom du Directeur
                             </label>
                             <input
-                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                value={localBp}
-                                onChange={(e) => setLocalBp(e.target.value)}
-                                placeholder="Ex : 80159"
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-4 text-base font-extrabold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm"
+                                value={localDirectorName}
+                                onChange={(e) => setLocalDirectorName(e.target.value)}
+                                placeholder="Ex : M. KOFFI Yao"
                             />
                         </div>
                         <div>
-                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
-                                Numéro de Téléphone
+                            <label className="block text-[11px] font-black text-indigo-600 dark:text-indigo-400 mb-2.5 uppercase tracking-widest">
+                                Fonction du Directeur
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-4 text-base font-extrabold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm"
+                                value={localDirectorTitle}
+                                onChange={(e) => setLocalDirectorTitle(e.target.value)}
+                                placeholder="Ex : Directeur Général"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Kit visuel + aperçu en direct ── */}
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
+                    <SectionHeading icon={<Image className="w-4 h-4" />} title="Kit visuel" subtitle="Logo, cachet, sceau et signature — utilisés sur cartes et bulletins." />
+                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-start">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            {[
+                                { label: 'Logo', preview: logoPreview, error: logoError, inputRef: fileRef, id: 'logo-upload', onUpload: handleLogoUpload, onRemove: removeLogo, accept: 'image/png,image/jpeg,image/svg+xml,image/webp' },
+                                { label: 'Cachet', preview: stampPreview, error: stampError, inputRef: stampFileRef, id: 'stamp-upload', onUpload: handleStampUpload, onRemove: removeStamp, accept: 'image/png,image/jpeg,image/svg+xml,image/webp' },
+                                { label: 'Sceau officiel', preview: sealPreview, error: sealError, inputRef: sealFileRef, id: 'seal-upload', onUpload: handleSealUpload, onRemove: removeSeal, accept: 'image/png,image/jpeg,image/svg+xml,image/webp' },
+                                { label: 'Signature', preview: signaturePreview, error: signatureError, inputRef: signatureFileRef, id: 'signature-upload', onUpload: handleSignatureUpload, onRemove: removeSignature, accept: 'image/png' },
+                            ].map((asset) => (
+                                <div key={asset.id} className="flex flex-col items-center gap-2 text-center">
+                                    <div className="w-full aspect-square max-w-[110px] rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 overflow-hidden relative group">
+                                        {asset.preview ? (
+                                        <>
+                                            <img src={asset.preview} alt={asset.label} className="w-full h-full object-contain p-2" />
+                                            <button type="button" onClick={asset.onRemove} className="absolute inset-0 bg-rose-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                                            <X className="w-5 h-5" />
+                                            </button>
+                                        </>
+                                        ) : (
+                                        <Image className="w-6 h-6 text-slate-300 dark:text-slate-600" />
+                                        )}
+                                    </div>
+                                    <input ref={asset.inputRef} type="file" accept={asset.accept} className="hidden" id={asset.id} onChange={asset.onUpload} />
+                                    <label htmlFor={asset.id} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/10 text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer transition-colors">
+                                        <Upload className="w-3 h-3" /> {asset.label}
+                                    </label>
+                                    {asset.error && <p className="text-[10px] font-bold text-rose-500">{asset.error}</p>}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Aperçu en direct — traduit le kit visuel + les interrupteurs en rendu concret */}
+                        <div className="w-full lg:w-64 shrink-0">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                                <Sparkles className="w-3 h-3" /> Aperçu carte scolaire
+                            </p>
+                            <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 p-4 shadow-sm">
+                                <div className="flex items-center gap-2.5 mb-2">
+                                    <div className="w-9 h-9 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center overflow-hidden shrink-0">
+                                        {logoPreview ? <img src={logoPreview} alt="" className="w-full h-full object-contain" /> : <School className="w-4 h-4 text-slate-300 dark:text-slate-600" />}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-[11px] font-black text-slate-800 dark:text-white truncate">{localSchool || 'Nom de l\'établissement'}</p>
+                                        <p className="text-[9px] text-slate-400 truncate">{localMotto || 'Devise de l\'école'}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 pt-2 border-t border-dashed border-slate-200 dark:border-slate-800">
+                                    {localShowStampOnCards && (
+                                        <div className="w-7 h-7 rounded bg-slate-50 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+                                            {stampPreview ? <img src={stampPreview} alt="" className="w-full h-full object-contain" /> : <Image className="w-3 h-3 text-slate-300" />}
+                                        </div>
+                                    )}
+                                    {localShowSealOnCards && (
+                                        <div className="w-7 h-7 rounded bg-slate-50 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+                                            {sealPreview ? <img src={sealPreview} alt="" className="w-full h-full object-contain" /> : <Image className="w-3 h-3 text-slate-300" />}
+                                        </div>
+                                    )}
+                                    {localShowSignatureOnCards && (
+                                        <div className="w-7 h-7 rounded bg-slate-50 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+                                            {signaturePreview ? <img src={signaturePreview} alt="" className="w-full h-full object-contain" /> : <Image className="w-3 h-3 text-slate-300" />}
+                                        </div>
+                                    )}
+                                    {!localShowStampOnCards && !localShowSealOnCards && !localShowSignatureOnCards && (
+                                        <p className="text-[9px] text-slate-400 italic">Aucun élément affiché sur les cartes</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Options d'affichage ── */}
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
+                    <SectionHeading icon={<Shield className="w-4 h-4" />} title="Où afficher cachet, sceau et signature" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 bg-slate-50/60 dark:bg-slate-800/30 rounded-2xl p-4">
+                        <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 pb-1 border-b border-slate-200 dark:border-slate-700">Sur les cartes scolaires</p>
+                            <ToggleSwitch label="Cachet de l'établissement" checked={localShowStampOnCards} onChange={setLocalShowStampOnCards} />
+                            <ToggleSwitch label="Sceau officiel" checked={localShowSealOnCards} onChange={setLocalShowSealOnCards} />
+                            <ToggleSwitch label="Signature du directeur" checked={localShowSignatureOnCards} onChange={setLocalShowSignatureOnCards} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 pb-1 border-b border-slate-200 dark:border-slate-700">Sur les bulletins</p>
+                            <ToggleSwitch label="Cachet de l'établissement" checked={localShowStampOnBulletins} onChange={setLocalShowStampOnBulletins} />
+                            <ToggleSwitch label="Signature du directeur" checked={localShowSignatureOnBulletins} onChange={setLocalShowSignatureOnBulletins} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Coordonnées ── */}
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
+                    <SectionHeading icon={<Phone className="w-4 h-4" />} title="Coordonnées" subtitle="Utilisées sur les documents remis aux parents." />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest flex items-center gap-1.5">
+                                <Phone className="w-3 h-3" /> Numéro de Téléphone
                             </label>
                             <input
                                 className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                 value={localTelephone}
                                 onChange={(e) => setLocalTelephone(e.target.value)}
-                                placeholder="Ex : +228 90 17 79 66 / 99 41 40 47"
+                                placeholder="Ex : +228 90 00 00 00"
                             />
                         </div>
                         <div>
-                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
-                                Adresse / Ville / Pays
-                            </label>
-                            <input
-                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                value={localAddress}
-                                onChange={(e) => setLocalAddress(e.target.value)}
-                                placeholder="Ex : Apéssito - TOGO"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
-                                Email (bulletins de paie)
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest flex items-center gap-1.5">
+                                <Mail className="w-3 h-3" /> Email (bulletins de paie)
                             </label>
                             <input
                                 type="email"
@@ -711,6 +702,61 @@ export const Parametres: React.FC = () => {
                                 placeholder="Ex : contact@ecole.tg"
                             />
                         </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest flex items-center gap-1.5">
+                                <MapPin className="w-3 h-3" /> Adresse / Ville / Pays
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localAddress}
+                                onChange={(e) => setLocalAddress(e.target.value)}
+                                placeholder="Ex : Quartier, Ville - Pays"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Boîte Postale (BP)
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localBp}
+                                onChange={(e) => setLocalBp(e.target.value)}
+                                placeholder="Ex : BP 123"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest flex items-center gap-1.5">
+                                <Globe className="w-3 h-3" /> Site web
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localWebsite}
+                                onChange={(e) => setLocalWebsite(e.target.value)}
+                                placeholder="Ex : www.ecole.tg"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
+                                Devise Monétaire
+                            </label>
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                value={localCurrency}
+                                onChange={(e) => setLocalCurrency(e.target.value)}
+                                placeholder="Ex : FCFA"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Informations légales & paie (repliable) ── */}
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
+                    <button type="button" onClick={() => setLegalOpen((v) => !v)} className="w-full flex items-center justify-between text-left">
+                        <SectionHeading icon={<FileBadge2 className="w-4 h-4" />} title="Informations légales & paie" subtitle="Optionnel — IFU, RCCM, NIF et calcul des retenues sur salaire." />
+                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform shrink-0 ${legalOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {legalOpen && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2 animate-fadeIn">
                         <div>
                             <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
                                 N° IFU
@@ -746,17 +792,6 @@ export const Parametres: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
-                                Site web
-                            </label>
-                            <input
-                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                value={localWebsite}
-                                onChange={(e) => setLocalWebsite(e.target.value)}
-                                placeholder="Ex : www.ecole.tg"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
                                 N° d'autorisation
                             </label>
                             <input
@@ -766,7 +801,7 @@ export const Parametres: React.FC = () => {
                                 placeholder="Ex : N° 042/MEPS"
                             />
                         </div>
-                        <div>
+                        <div className="md:col-span-2">
                             <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
                                 Heures mensuelles standard (paie)
                             </label>
@@ -774,24 +809,25 @@ export const Parametres: React.FC = () => {
                                 type="number"
                                 min={1}
                                 step={0.5}
-                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                className="w-full md:w-64 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                 value={localHeuresMensuelles}
                                 onChange={(e) => setLocalHeuresMensuelles(e.target.value)}
                                 placeholder="Ex : 173"
                             />
                             <p className="text-[10px] text-slate-400 mt-1">Utilisé pour calculer le taux horaire des retenues sur heures manquées.</p>
                         </div>
-                        <div>
-                            <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
-                                Devise Monétaire
-                            </label>
-                            <input
-                                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                value={localCurrency}
-                                onChange={(e) => setLocalCurrency(e.target.value)}
-                                placeholder="Ex : FCFA"
-                            />
-                        </div>
+                    </div>
+                    )}
+                </div>
+
+                {/* ── Contexte national (repliable) ── */}
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
+                    <button type="button" onClick={() => setNationalOpen((v) => !v)} className="w-full flex items-center justify-between text-left">
+                        <SectionHeading icon={<Landmark className="w-4 h-4" />} title="Contexte national" subtitle="Rarement à modifier — mêmes conventions pour toutes les écoles du pays." />
+                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform shrink-0 ${nationalOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {nationalOpen && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2 animate-fadeIn">
                         <div>
                             <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">
                                 Nom du Pays (Titre Officiel)
@@ -826,12 +862,12 @@ export const Parametres: React.FC = () => {
                             />
                         </div>
                     </div>
+                    )}
                 </div>
 
+                {/* ── Messages personnalisables ── */}
                 <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
-                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <MessageSquare className="w-3.5 h-3.5 text-indigo-500" /> Messages Personnalisables
-                    </h4>
+                    <SectionHeading icon={<MessageSquare className="w-4 h-4" />} title="Messages Personnalisables" />
                     <div className="space-y-4">
                     <div>
                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">Message de remerciement (Soldé)</label>
