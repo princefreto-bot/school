@@ -214,7 +214,10 @@ export const ConfirmerEmail: React.FC = () => {
           schoolApproved: data.user.school_approved !== undefined ? data.user.school_approved : false,
         };
 
-        // Configurer l'état global Zustand
+        // Configurer l'état global Zustand — on repart d'une base neutre pour éviter
+        // qu'une session précédente (autre école, même navigateur) laisse des données
+        // affichées le temps que la synchro cloud ne les remplace.
+        useStore.getState().resetSchoolSettingsToDefaults();
         useStore.setState({
           students: [],
           parents: [],

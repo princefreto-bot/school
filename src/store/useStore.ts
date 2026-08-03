@@ -130,6 +130,11 @@ export interface AppState {
   setSchoolAutorisation: (v: string) => void;
   heuresMensuellesStandard: number | null;
   setHeuresMensuellesStandard: (v: number | null) => void;
+  // Remet tous les champs de paramètres/branding à leurs valeurs neutres — appelé à
+  // chaque connexion pour éviter qu'une session précédente (autre école, même
+  // navigateur) ne laisse des données affichées avant que la synchro cloud ne les
+  // remplace par celles de l'école réellement connectée.
+  resetSchoolSettingsToDefaults: () => void;
   updateAllSettings: (settings: {
     appName?: string,
     schoolName?: string,
@@ -465,6 +470,7 @@ export const useStore = create<AppState>()(
             const savedReadsStr = localStorage.getItem(`announcements_read_${result.user.id}`);
             const savedReads = savedReadsStr ? JSON.parse(savedReadsStr) : [];
 
+            get().resetSchoolSettingsToDefaults();
             set({
               students: [],
               parents: [],
@@ -478,7 +484,6 @@ export const useStore = create<AppState>()(
               notes: [],
               academicYears: [],
               schoolLogo: result.user.school_logo || null,
-              schoolStamp: null,
               schoolName: result.user.school_name || 'Établissement',
               lastSyncTimestamp: 0, // Reset pour forcer la synchronisation cloud
             });
@@ -517,9 +522,10 @@ export const useStore = create<AppState>()(
           get().addActivityLog(createActivityLog(u.nom, u.role, 'connexion', 'Déconnexion'));
         }
         localStorage.removeItem('parent_token');
+        get().resetSchoolSettingsToDefaults();
         set({
-          user: null, 
-          isAuthenticated: false, 
+          user: null,
+          isAuthenticated: false,
           currentPage: 'dashboard',
           subscriptionBlockedMessage: null,
           students: [],
@@ -754,11 +760,11 @@ export const useStore = create<AppState>()(
       setMessageRappel: (m) => set({ messageRappel: m }),
       schoolMotto: 'Travail-Rigueur-Succès',
       setSchoolMotto: (motto) => set({ schoolMotto: motto }),
-      schoolBp: '80159',
+      schoolBp: '',
       setSchoolBp: (bp) => set({ schoolBp: bp }),
-      schoolTelephone: '+228 90 17 79 66 / 99 41 40 47',
+      schoolTelephone: '',
       setSchoolTelephone: (tel) => set({ schoolTelephone: tel }),
-      schoolAddress: 'Apéssito - TOGO',
+      schoolAddress: '',
       setSchoolAddress: (addr) => set({ schoolAddress: addr }),
       schoolCurrency: 'FCFA',
       setSchoolCurrency: (curr) => set({ schoolCurrency: curr }),
@@ -798,6 +804,36 @@ export const useStore = create<AppState>()(
       setShowStampOnBulletins: (v) => set({ showStampOnBulletins: v }),
       showSignatureOnBulletins: true,
       setShowSignatureOnBulletins: (v) => set({ showSignatureOnBulletins: v }),
+
+      resetSchoolSettingsToDefaults: () => set({
+        schoolName: 'Établissement Scolaire',
+        schoolLogo: null,
+        schoolStamp: null,
+        officialSeal: null,
+        directorSignature: null,
+        directorName: '',
+        directorTitle: 'Directeur',
+        tranches: [],
+        messageRemerciement:
+          "Nous vous remercions sincèrement pour votre ponctualité dans le règlement de la scolarité. Votre soutien contribue au bon fonctionnement de notre établissement.",
+        messageRappel:
+          "Nous vous rappelons cordialement que le règlement du solde de scolarité est attendu. Veuillez régulariser votre situation dans les meilleurs délais.",
+        schoolMotto: 'Travail-Rigueur-Succès',
+        schoolBp: '',
+        schoolTelephone: '',
+        schoolAddress: '',
+        schoolCurrency: 'FCFA',
+        schoolIfu: '',
+        schoolRccm: '',
+        schoolNif: '',
+        schoolEmail: '',
+        schoolWebsite: '',
+        schoolAutorisation: '',
+        heuresMensuellesStandard: null,
+        countryName: 'République Togolaise',
+        countryMotto: 'Travail - Liberté - Patrie',
+        ministereName: "Ministère de l'Éducation Nationale",
+      }),
 
       updateAllSettings: async (newSettings) => {
         console.log('💾 [Store] Saving all settings to cloud...', Object.keys(newSettings));

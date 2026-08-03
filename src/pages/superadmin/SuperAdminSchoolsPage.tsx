@@ -140,6 +140,7 @@ export const SuperAdminSchoolsPage: React.FC = () => {
 
       localStorage.setItem('parent_token', data.token);
 
+      useStore.getState().resetSchoolSettingsToDefaults();
       useStore.setState({
         students: [], parents: [], presences: [], activityLogs: [], links: [],
         announcements: [], announcementReads: [], matieres: [], classeMatieres: [],
