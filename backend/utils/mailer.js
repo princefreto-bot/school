@@ -1,6 +1,6 @@
 const fetch = require('node-fetch'); // Ou utiliser le fetch global natif de Node > 18 si disponible
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_YvZHtCpM_JdmCAtGEt3tSTAhK3TwMFpqw';
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.SMTP_FROM || 'DGhubSchool <onboarding@resend.dev>'; // Doit être un domaine vérifié ou onboarding@resend.dev pour les tests
 
 /**
@@ -8,6 +8,9 @@ const FROM_EMAIL = process.env.SMTP_FROM || 'DGhubSchool <onboarding@resend.dev>
  */
 async function sendResendEmail(toEmail, subject, htmlContent) {
     console.log(`✉️ [Mailer] Tentative d'envoi d'email via Resend à ${toEmail}...`);
+    if (!RESEND_API_KEY) {
+        throw new Error('RESEND_API_KEY n\'est pas configurée sur le serveur (variable d\'environnement manquante).');
+    }
     try {
         const response = await fetch('https://api.resend.com/emails', {
             method: 'POST',
