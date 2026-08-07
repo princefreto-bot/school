@@ -868,18 +868,23 @@ export const useStore = create<AppState>()(
         set(newSettings);
         try {
           const result = await syncToBackend(newSettings);
-          if (result) {
-            console.log('✅ [Store] All settings synced successfully!');
-            // If the academic year changed, completely reload the page
-            if (newSettings.schoolYear && newSettings.schoolYear !== previousYear) {
-               console.log('🔄 [Store] Academic year changed, clearing data and reloading page...');
-               // Clear data specifically bound to the previous year before reloading
-               set({ students: [], presences: [], activityLogs: [], notes: [] });
-               window.location.reload();
-            }
+          if (!result) {
+            // syncToBackend avale ses propres erreurs réseau/HTTP et retourne null en cas
+            // d'échec — on relance ici pour que l'appelant (ex: création d'année scolaire)
+            // puisse enfin afficher une vraie erreur au lieu de rester silencieusement bloqué.
+            throw new Error('La synchronisation a échoué.');
+          }
+          console.log('✅ [Store] All settings synced successfully!');
+          // If the academic year changed, completely reload the page
+          if (newSettings.schoolYear && newSettings.schoolYear !== previousYear) {
+             console.log('🔄 [Store] Academic year changed, clearing data and reloading page...');
+             // Clear data specifically bound to the previous year before reloading
+             set({ students: [], presences: [], activityLogs: [], notes: [] });
+             window.location.reload();
           }
         } catch (err) {
           console.error('❌ [Store] Error syncing settings:', err);
+          throw err;
         }
       },
       deleteAcademicYear: async (yearId: string) => {

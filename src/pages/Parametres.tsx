@@ -152,10 +152,15 @@ export const Parametres: React.FC = () => {
       if (!Number.isNaN(val) && val > 0 && val !== c.ecolage) fees[c.name] = val;
     });
 
-    await updateAllSettings({ classFees: fees });
-    setFeesSaved(true);
-    setTimeout(() => setFeesSaved(false), 3000);
     setRecalcMessage('');
+    try {
+      await updateAllSettings({ classFees: fees });
+      setFeesSaved(true);
+      setTimeout(() => setFeesSaved(false), 3000);
+    } catch (err) {
+      setRecalcMessage("Erreur lors de l'enregistrement des frais. Vérifiez votre connexion et réessayez.");
+      return;
+    }
 
     const hasOverrides = Object.keys(fees).length > 0;
     if (hasOverrides && window.confirm(
@@ -422,10 +427,14 @@ export const Parametres: React.FC = () => {
     return currentPreview;
   };
 
+  const [saveError, setSaveError] = useState('');
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaved(false);
+    setSaveError('');
 
+    try {
     // Téléverser les images en base64 vers le stockage Supabase en premier
     const logoUrl = await uploadAssetIfBase64('logo', logoPreview);
     const stampUrl = await uploadAssetIfBase64('stamp', stampPreview);
@@ -473,6 +482,9 @@ export const Parametres: React.FC = () => {
 
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setSaveError("Erreur lors de l'enregistrement. Vérifiez votre connexion et réessayez.");
+    }
   };
 
   return (
@@ -935,7 +947,10 @@ export const Parametres: React.FC = () => {
                 </div>
 
                 {(user?.role === 'directeur' || user?.role === 'comptable') && (
-                    <div className="flex justify-end pt-4">
+                    <div className="flex flex-col items-end gap-2 pt-4">
+                        {saveError && (
+                            <p className="text-xs font-bold text-rose-500">{saveError}</p>
+                        )}
                         <button
                         type="submit"
                         className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all ${

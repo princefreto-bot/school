@@ -374,8 +374,13 @@ async function syncFromFrontend(req, res) {
                     school_stamp: appSettings.schoolStamp,
                     message_remerciement: appSettings.messageRemerciement,
                     message_rappel: appSettings.messageRappel,
-                    tranches: appSettings.tranches || [],
-                    class_fees: appSettings.classFees || {},
+                    // Pas de fallback `|| []` / `|| {}` ici : un appSettings partiel (ex: juste le
+                    // changement d'année scolaire) ne fournit pas ce champ, et JSON.stringify()
+                    // retire les clés `undefined` du corps de requête — ce qui laisse la colonne
+                    // intacte côté DB. Un fallback actif aurait au contraire écrasé silencieusement
+                    // les tranches / frais personnalisés à chaque sync partiel ne les concernant pas.
+                    tranches: appSettings.tranches,
+                    class_fees: appSettings.classFees,
                     school_motto: appSettings.schoolMotto,
                     school_bp: appSettings.schoolBp,
                     school_telephone: appSettings.schoolTelephone,
@@ -387,7 +392,7 @@ async function syncFromFrontend(req, res) {
                     school_email: appSettings.schoolEmail,
                     school_website: appSettings.schoolWebsite,
                     school_autorisation: appSettings.schoolAutorisation,
-                    heures_mensuelles_standard: appSettings.heuresMensuellesStandard || null,
+                    heures_mensuelles_standard: appSettings.heuresMensuellesStandard,
                     country_name: appSettings.countryName,
                     country_motto: appSettings.countryMotto,
                     ministere_name: appSettings.ministereName,

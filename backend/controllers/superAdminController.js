@@ -3,6 +3,7 @@
 // Accessible UNIQUEMENT au propriétaire de la plateforme
 // ============================================================
 const { supabase, supabaseAdmin } = require('../utils/supabase');
+const { getCurrentAcademicYear } = require('../utils/academicYear');
 const Joi = require('joi');
 const crypto = require('crypto');
 
@@ -258,6 +259,18 @@ async function createSchool(req, res) {
             .single();
 
         if (adminErr) throw adminErr;
+
+        // Créer la toute première année scolaire (sans quoi le frontend affiche un écran
+        // bloquant « aucune année scolaire » au premier login du directeur).
+        try {
+            await supabase.from('academic_years').insert({
+                school_slug: cleanSlug,
+                name: getCurrentAcademicYear(),
+                is_current: true
+            });
+        } catch (yearErr) {
+            console.error(`⚠️ Erreur création année scolaire initiale pour ${cleanSlug}:`, yearErr.message);
+        }
 
         console.log(`🏫 Nouvelle école créée: ${school.name} (${school.slug}), Admin: ${adminUser.nom}`);
 

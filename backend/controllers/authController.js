@@ -661,6 +661,19 @@ async function verifySchoolEmail(req, res) {
             .eq('is_email_verified', false)
             .neq('id', school.id);
 
+        // Créer la toute première année scolaire de l'école (sans quoi le frontend affiche
+        // un écran bloquant « aucune année scolaire », vécu comme s'il fallait repartir de
+        // zéro, avant que le directeur n'en crée une lui-même manuellement).
+        try {
+            await supabase.from('academic_years').insert({
+                school_slug: school.slug,
+                name: getCurrentAcademicYear(),
+                is_current: true
+            });
+        } catch (yearErr) {
+            console.error(`⚠️ Erreur création année scolaire initiale pour ${school.slug}:`, yearErr.message);
+        }
+
         console.log(`🏫 Nouvelle école enregistrée et validée par e-mail : ${school.name} (${school.slug})`);
 
         // Signer directement un token JWT pour connecter l'utilisateur
