@@ -81,6 +81,11 @@ export const webPushService = {
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));
         console.error('❌ [Push] Erreur sauvegarde token Web:', err.error || response.status);
+        // Session expirée : évite de laisser l'utilisateur bloqué dans un état
+        // "authentifié" côté client alors que le serveur rejette déjà ses requêtes.
+        if (response.status === 401) {
+          useStore.getState().logout();
+        }
         return;
       }
       console.log('✅ [Push] Token Web Push sauvegardé sur le serveur.');
@@ -160,6 +165,9 @@ export const webPushService = {
 
       if (!response.ok) {
         console.error('❌ [Capacitor Push] Erreur sauvegarde token FCM:', response.status);
+        if (response.status === 401) {
+          useStore.getState().logout();
+        }
         return;
       }
       console.log('✅ [Capacitor Push] Token FCM sauvegardé sur le serveur.');
