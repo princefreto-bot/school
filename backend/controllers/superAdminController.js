@@ -232,6 +232,30 @@ async function createSchool(req, res) {
             console.error(`⚠️ Erreur de provisionnement satisfaction pour ${cleanSlug}:`, satisfactionRpcErr.message);
         }
 
+        // Provisionner les tables d'examens (CEPD/BEPC/BAC)
+        const { error: examRpcErr } = await supabase.rpc('create_exam_tables', { school_slug: cleanSlug });
+        if (examRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement examens pour ${cleanSlug}:`, examRpcErr.message);
+        }
+
+        // Provisionner la table de documents personnel
+        const { error: personnelDocsRpcErr } = await supabase.rpc('create_personnel_documents_table', { school_slug: cleanSlug });
+        if (personnelDocsRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement documents personnel pour ${cleanSlug}:`, personnelDocsRpcErr.message);
+        }
+
+        // Provisionner la table des paiements de licence
+        const { error: licensePaymentsRpcErr } = await supabase.rpc('create_license_payments_table', { school_slug: cleanSlug });
+        if (licensePaymentsRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement paiements de licence pour ${cleanSlug}:`, licensePaymentsRpcErr.message);
+        }
+
+        // Provisionner les tables de pointage/absences du personnel
+        const { error: staffTrackingRpcErr } = await supabase.rpc('create_staff_tracking_tables', { school_slug: cleanSlug });
+        if (staffTrackingRpcErr) {
+            console.error(`⚠️ Erreur de provisionnement pointage personnel pour ${cleanSlug}:`, staffTrackingRpcErr.message);
+        }
+
         // Attendre que la base recharge son schéma (1s par sécurité)
         await new Promise(r => setTimeout(r, 1000));
 
