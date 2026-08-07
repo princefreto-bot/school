@@ -153,7 +153,14 @@ async function updatePersonnel(req, res) {
 // Sa propre fiche — accessible à tout membre du personnel authentifié
 // (base du portail « Mon Espace », voir Phase C).
 async function getMyProfile(req, res) {
-    const { id, schoolSlug } = req.user;
+    const { id, nom, role, schoolSlug, impersonating } = req.user;
+
+    // Session d'impersonation SuperAdmin : l'id du token est celui du SuperAdmin,
+    // pas une ligne réelle de profiles_<slug> (et n'en aura jamais). Renvoyer une
+    // fiche synthétique plutôt que d'interroger une ligne qui n'existera jamais.
+    if (impersonating) {
+        return res.json({ id, nom, telephone: 'SuperAdmin', email: null, role, matricule: null, numero_cnss: null, date_embauche: null, mode_paiement: null, compte_bancaire: null, departement: null });
+    }
 
     try {
         const { data, error } = await supabase

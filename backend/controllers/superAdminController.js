@@ -501,7 +501,7 @@ async function impersonateSchool(req, res) {
         const userId = req.user.id || 'superadmin_impersonate';
         
         const token = jwt.sign(
-            { id: userId, nom: userName, role: 'admin', schoolSlug: school.slug },
+            { id: userId, nom: userName, role: 'admin', schoolSlug: school.slug, impersonating: true },
             JWT_SECRET,
             { expiresIn: JWT_EXPIRES }
         );
