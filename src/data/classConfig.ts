@@ -63,6 +63,21 @@ export const getEcolage = (className: string): number => {
   return config ? config.ecolage : 60000;
 };
 
+// Variante consciente des frais personnalisés par école (voir Paramètres > Frais de
+// scolarité). `overrides` est une map { nomDeClasseNormalisé: montant } — une classe sans
+// entrée retombe sur le tarif générique de CLASS_CONFIG. Fonction pure (pas d'accès au
+// store) pour rester utilisable depuis n'importe quel module sans risque d'import circulaire.
+export const getEffectiveEcolage = (className: string, overrides?: Record<string, number> | null): number => {
+  if (overrides) {
+    const key = normalize(className);
+    const override = Object.entries(overrides).find(([k]) => normalize(k) === key);
+    if (override && typeof override[1] === 'number' && !Number.isNaN(override[1])) {
+      return override[1];
+    }
+  }
+  return getEcolage(className);
+};
+
 export const getCycle = (className: string): Cycle => {
   const config = getClassConfig(className);
   return config ? config.cycle : 'Primaire';

@@ -5,8 +5,9 @@ import {
   Save, School, MessageSquare, Shield, Info,
   Upload, X, Image, Clock, Plus, Calendar, Trash2, Database, Layers,
   CheckCircle2, Circle, ChevronDown, Phone, MapPin, Mail, Globe, FileBadge2,
-  Landmark, Sparkles, UserSquare2
+  Landmark, Sparkles, UserSquare2, Wallet, RefreshCw
 } from 'lucide-react';
+import { CLASS_CONFIG } from '../data/classConfig';
 import { SchoolBackups } from '../components/SchoolBackups';
 import { AutoReminderSettings } from '../components/AutoReminderSettings';
 import { ParentSatisfactionOverview } from '../components/ParentSatisfactionOverview';
@@ -128,6 +129,49 @@ export const Parametres: React.FC = () => {
   const setTranches = useStore((s) => s.setTranches);
   const [localTranches, setLocalTranches] = useState(tranches || []);
   const [tranchesSaved, setTranchesSaved] = useState(false);
+
+  // ── Frais de scolarité personnalisés par classe ──
+  const classFees = useStore((s) => s.classFees);
+  const recalculateStudentFees = useStore((s) => s.recalculateStudentFees);
+  const [localClassFees, setLocalClassFees] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    CLASS_CONFIG.forEach((c) => {
+      const override = classFees?.[c.name];
+      initial[c.name] = String(override != null ? override : c.ecolage);
+    });
+    return initial;
+  });
+  const [feesSaved, setFeesSaved] = useState(false);
+  const [recalculating, setRecalculating] = useState(false);
+  const [recalcMessage, setRecalcMessage] = useState('');
+
+  const handleSaveFees = async () => {
+    const fees: Record<string, number> = {};
+    CLASS_CONFIG.forEach((c) => {
+      const val = Number(localClassFees[c.name]);
+      if (!Number.isNaN(val) && val > 0 && val !== c.ecolage) fees[c.name] = val;
+    });
+
+    await updateAllSettings({ classFees: fees });
+    setFeesSaved(true);
+    setTimeout(() => setFeesSaved(false), 3000);
+    setRecalcMessage('');
+
+    const hasOverrides = Object.keys(fees).length > 0;
+    if (hasOverrides && window.confirm(
+      "Appliquer aussi ces nouveaux tarifs aux élèves déjà inscrits dans ces classes ? " +
+      "Le montant dû (restant à payer) sera recalculé — les paiements déjà encaissés ne sont pas modifiés."
+    )) {
+      setRecalculating(true);
+      const result = await recalculateStudentFees();
+      setRecalculating(false);
+      setRecalcMessage(
+        result.success
+          ? `${result.updated ?? 0} élève${(result.updated ?? 0) > 1 ? 's' : ''} mis à jour avec les nouveaux tarifs.`
+          : (result.error || 'Erreur lors du recalcul.')
+      );
+    }
+  };
 
   // Sections avancées repliées par défaut sur un profil neuf (moins intimidant),
   // mais ouvertes d'office si l'école a déjà renseigné ces champs.
@@ -1015,6 +1059,74 @@ export const Parametres: React.FC = () => {
                         >
                             <Save className="w-4 h-4" />
                             {tranchesSaved ? 'Enregistré' : 'Enregistrer'}
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ── FRAIS DE SCOLARITÉ PERSONNALISÉS ────────────────── */}
+            {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
+                <div className="pro-card p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+                        <h3 className="font-black text-lg text-slate-900 dark:text-white flex items-center gap-3">
+                            <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl">
+                                <Wallet className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                            </div>
+                            Frais de scolarité
+                        </h3>
+                    </div>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mb-6">
+                        Chaque école a ses propres tarifs — ajustez le montant par classe ci-dessous. Une classe non modifiée garde le tarif générique proposé par défaut.
+                    </p>
+
+                    <div className="space-y-6">
+                        {(['Primaire', 'Collège', 'Lycée'] as const).map((cycle) => (
+                            <div key={cycle}>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{cycle}</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {CLASS_CONFIG.filter((c) => c.cycle === cycle).map((c) => {
+                                        const isCustom = localClassFees[c.name] !== String(c.ecolage);
+                                        return (
+                                            <div key={c.name} className="flex items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                                    {c.name}
+                                                    {isCustom && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" title="Tarif personnalisé" />}
+                                                </span>
+                                                <div className="relative">
+                                                    <input
+                                                        type="number"
+                                                        min={0}
+                                                        step={500}
+                                                        value={localClassFees[c.name] ?? ''}
+                                                        onChange={(e) => setLocalClassFees((prev) => ({ ...prev, [c.name]: e.target.value }))}
+                                                        className="w-32 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg pl-3 pr-12 py-2 text-sm font-bold text-slate-900 dark:text-white text-right focus:ring-2 focus:ring-indigo-500 outline-none"
+                                                    />
+                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400">{localCurrency || 'FCFA'}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {recalcMessage && (
+                        <p className="mt-4 text-xs font-bold text-slate-500 dark:text-slate-400">{recalcMessage}</p>
+                    )}
+
+                    <div className="flex justify-end pt-6">
+                        <button
+                            onClick={handleSaveFees}
+                            disabled={recalculating}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all disabled:opacity-60 ${
+                                feesSaved
+                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20'
+                            }`}
+                        >
+                            {recalculating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            {recalculating ? 'Application en cours...' : feesSaved ? 'Enregistré' : 'Enregistrer'}
                         </button>
                     </div>
                 </div>

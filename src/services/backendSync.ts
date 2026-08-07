@@ -41,7 +41,7 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
     const { 
         appName, schoolName, schoolYear, 
         messageRemerciement, messageRappel, 
-        schoolLogo, schoolStamp, cycleSchedules, tranches,
+        schoolLogo, schoolStamp, cycleSchedules, tranches, classFees,
         schoolMotto, schoolBp, schoolTelephone, schoolAddress, schoolCurrency,
         schoolIfu, schoolRccm, schoolNif, schoolEmail, schoolWebsite, schoolAutorisation, heuresMensuellesStandard,
         countryName, countryMotto, ministereName,
@@ -51,7 +51,7 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
     } = store;
     
     // Si l'un des paramètres de configuration est fourni, on envoie appSettings
-    if (appName !== undefined || schoolName !== undefined || schoolLogo !== undefined || schoolStamp !== undefined || cycleSchedules !== undefined || tranches !== undefined || schoolMotto !== undefined || schoolBp !== undefined || schoolTelephone !== undefined || schoolAddress !== undefined || schoolCurrency !== undefined || schoolIfu !== undefined || schoolRccm !== undefined || schoolNif !== undefined || schoolEmail !== undefined || schoolWebsite !== undefined || schoolAutorisation !== undefined || heuresMensuellesStandard !== undefined || countryName !== undefined || countryMotto !== undefined || ministereName !== undefined || directorSignature !== undefined || directorName !== undefined || directorTitle !== undefined || showStampOnCards !== undefined || showSignatureOnCards !== undefined || showStampOnBulletins !== undefined || showSignatureOnBulletins !== undefined || officialSeal !== undefined || showSealOnCards !== undefined) {
+    if (appName !== undefined || schoolName !== undefined || schoolLogo !== undefined || schoolStamp !== undefined || cycleSchedules !== undefined || tranches !== undefined || classFees !== undefined || schoolMotto !== undefined || schoolBp !== undefined || schoolTelephone !== undefined || schoolAddress !== undefined || schoolCurrency !== undefined || schoolIfu !== undefined || schoolRccm !== undefined || schoolNif !== undefined || schoolEmail !== undefined || schoolWebsite !== undefined || schoolAutorisation !== undefined || heuresMensuellesStandard !== undefined || countryName !== undefined || countryMotto !== undefined || ministereName !== undefined || directorSignature !== undefined || directorName !== undefined || directorTitle !== undefined || showStampOnCards !== undefined || showSignatureOnCards !== undefined || showStampOnBulletins !== undefined || showSignatureOnBulletins !== undefined || officialSeal !== undefined || showSealOnCards !== undefined) {
         payload.appSettings = {
             appName,
             schoolName,
@@ -62,6 +62,7 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
             schoolStamp,
             cycleSchedules,
             tranches,
+            classFees,
             schoolMotto,
             schoolBp,
             schoolTelephone,

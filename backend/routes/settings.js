@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { getPublicSettings, getReminderSettings, updateReminderSettings } = require('../controllers/settingsController');
+const { getPublicSettings, getReminderSettings, updateReminderSettings, recalculateFees } = require('../controllers/settingsController');
 const { uploadSchoolAsset, removeSchoolAsset } = require('../controllers/photoController');
 const { authenticateToken, requireSchool, requireSchoolAdmin } = require('../middleware/auth');
 
@@ -15,5 +15,8 @@ router.delete('/remove-asset', authenticateToken, removeSchoolAsset);
 // Alertes automatiques de retard de paiement
 router.get('/reminders', authenticateToken, requireSchool, requireSchoolAdmin, getReminderSettings);
 router.patch('/reminders', authenticateToken, requireSchool, requireSchoolAdmin, updateReminderSettings);
+
+// Frais de scolarité personnalisés — applique les nouveaux tarifs aux élèves déjà créés
+router.post('/recalculate-fees', authenticateToken, requireSchool, requireSchoolAdmin, recalculateFees);
 
 module.exports = router;

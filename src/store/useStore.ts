@@ -5,7 +5,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Student, User, AppPage, Payment, Parent, AppSettings, Presence, ActivityLog, CycleSchedule, Announcement, AnnouncementRead, Matiere, ClasseMatiere, Note, PeriodeType } from '../types';
 import { API_BASE_URL, BACKEND_URL } from '../config';
-import { getEcolage, getCycle } from '../data/classConfig';
+import { getEcolage, getCycle, getEffectiveEcolage } from '../data/classConfig';
 import { getCurrentAcademicYear } from '../utils/helpers';
 import { v4 as uuid } from '../utils/uuid';
 import { createActivityLog } from '../utils/activityLogger';
@@ -42,6 +42,12 @@ export interface AppState {
   setShowSignatureOnBulletins: (v: boolean) => void;
   tranches: any[];
   setTranches: (tranches: any[]) => void;
+  // Frais de scolarité personnalisés par classe (Paramètres > Frais de scolarité) —
+  // { nomDeClasse: montant }. Une classe absente de la map utilise le tarif générique
+  // de CLASS_CONFIG (voir getEffectiveEcolage).
+  classFees: Record<string, number>;
+  setClassFees: (fees: Record<string, number>) => void;
+  recalculateStudentFees: () => Promise<{ success: boolean; updated?: number; error?: string }>;
 
   // Auth
   user: User | null;
@@ -152,6 +158,7 @@ export interface AppState {
     messageRemerciement?: string,
     messageRappel?: string,
     tranches?: any[],
+    classFees?: Record<string, number>,
     schoolMotto?: string,
     schoolBp?: string,
     schoolTelephone?: string,
@@ -323,10 +330,12 @@ const deduplicateStudents = (list: Student[]): { list: Student[]; countRemoved: 
   return { list: result, countRemoved: removedCount };
 };
 
-// Réparation des données (cycle, écolage, restant, status)
-const repairStudent = (s: Student): Student => {
+// Réparation des données (cycle, écolage, restant, status). `classFees` = frais
+// personnalisés de l'école (Paramètres > Frais de scolarité) — sans quoi cette fonction
+// « corrigerait » silencieusement chaque étudiant vers le tarif générique à chaque sync.
+const repairStudent = (s: Student, classFees?: Record<string, number>): Student => {
   const correctCycle = getCycle(s.classe);
-  const correctEcolage = getEcolage(s.classe);
+  const correctEcolage = getEffectiveEcolage(s.classe, classFees);
   const correctRestant = Math.max(0, correctEcolage - s.dejaPaye);
   const correctStatus = computeStatus(correctRestant, correctEcolage);
 
@@ -359,6 +368,22 @@ export const useStore = create<AppState>()(
       setTranches: (tranches) => {
         set({ tranches });
         syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
+      },
+      classFees: {},
+      setClassFees: (classFees) => set({ classFees }),
+      recalculateStudentFees: async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/settings/recalculate-fees`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) return { success: false, error: data.error || 'Erreur lors du recalcul.' };
+          await get().fetchAllFromBackend(true);
+          return { success: true, updated: data.updated };
+        } catch (err) {
+          return { success: false, error: 'Erreur réseau lors du recalcul.' };
+        }
       },
       academicYears: [],
       setAcademicYears: (years) => set({ academicYears: years }),
@@ -578,9 +603,9 @@ export const useStore = create<AppState>()(
 
       // ── Élèves ───────────────────────────────────────────
       students: [],
-      setStudents: (students) => set({ students: deduplicateStudents(students.map(repairStudent)).list }),
+      setStudents: (students) => set({ students: deduplicateStudents(students.map((s) => repairStudent(s, get().classFees))).list }),
       addStudent: (data) => {
-        const ecolage = getEcolage((data as { classe: string }).classe);
+        const ecolage = getEffectiveEcolage((data as { classe: string }).classe, get().classFees);
         const restant = ecolage - ((data as { dejaPaye?: number }).dejaPaye || 0);
         const studentId = uuid();
         const existing = get().students.find(s => 
@@ -623,7 +648,7 @@ export const useStore = create<AppState>()(
           if (s.id !== id) return s;
           const updated = { ...s, ...updates, updatedAt: new Date().toISOString() };
           if (updates.classe) {
-            updated.ecolage = getEcolage(updates.classe);
+            updated.ecolage = getEffectiveEcolage(updates.classe, get().classFees);
             updated.cycle = getCycle(updates.classe);
           }
           if (updates.dejaPaye !== undefined || updates.classe) {
@@ -654,7 +679,7 @@ export const useStore = create<AppState>()(
           if (!up) return s;
           const updated = { ...s, ...up.updates, updatedAt: new Date().toISOString() };
           if (up.updates.classe) {
-            updated.ecolage = getEcolage(up.updates.classe);
+            updated.ecolage = getEffectiveEcolage(up.updates.classe, get().classFees);
             updated.cycle = getCycle(up.updates.classe);
           }
           if (up.updates.dejaPaye !== undefined || up.updates.classe) {
@@ -815,6 +840,7 @@ export const useStore = create<AppState>()(
         directorName: '',
         directorTitle: 'Directeur',
         tranches: [],
+        classFees: {},
         messageRemerciement:
           "Nous vous remercions sincèrement pour votre ponctualité dans le règlement de la scolarité. Votre soutien contribue au bon fonctionnement de notre établissement.",
         messageRappel:
@@ -1115,9 +1141,9 @@ export const useStore = create<AppState>()(
                 messageRappel: appSettings.messageRappel || '',
                 tranches: appSettings.tranches || [],
                 schoolMotto: appSettings.schoolMotto || 'Travail-Rigueur-Succès',
-                schoolBp: appSettings.schoolBp || '80159',
-                schoolTelephone: appSettings.schoolTelephone || '+228 90 17 79 66 / 99 41 40 47',
-                schoolAddress: appSettings.schoolAddress || 'Apéssito - TOGO',
+                schoolBp: appSettings.schoolBp || '',
+                schoolTelephone: appSettings.schoolTelephone || '',
+                schoolAddress: appSettings.schoolAddress || '',
                 schoolCurrency: appSettings.schoolCurrency || 'FCFA',
                 countryName: appSettings.countryName || 'République Togolaise',
                 countryMotto: appSettings.countryMotto || 'Travail - Liberté - Patrie',
@@ -1258,6 +1284,7 @@ export const useStore = create<AppState>()(
               showSignatureOnBulletins: data.appSettings.showSignatureOnBulletins ?? get().showSignatureOnBulletins,
               ...(data.appSettings.cycleSchedules ? { cycleSchedules: data.appSettings.cycleSchedules } : {}),
               ...(data.appSettings.tranches ? { tranches: data.appSettings.tranches } : {}),
+              classFees: data.appSettings.classFees || {},
             });
             console.log('✅ [Sync] Paramètres appliqués ! Logo:', !!get().schoolLogo, '| Sceau:', !!get().schoolStamp);
           } else {
@@ -1269,7 +1296,8 @@ export const useStore = create<AppState>()(
           // ════════════════════════════════════════════════════════
           if (Array.isArray(data.students)) {
             const rawCount = data.students.length;
-            const { list: repairedStudents, countRemoved } = deduplicateStudents(data.students.map(repairStudent));
+            const currentClassFees = data.appSettings?.classFees || get().classFees;
+            const { list: repairedStudents, countRemoved } = deduplicateStudents(data.students.map((s: Student) => repairStudent(s, currentClassFees)));
             
             set({
               students: repairedStudents,
@@ -1547,6 +1575,7 @@ export const useStore = create<AppState>()(
         receiptCounter: state.receiptCounter || 0,
         cycleSchedules: state.cycleSchedules || [],
         tranches: state.tranches || [],
+        classFees: state.classFees || {},
         announcements: state.announcements || [],
         announcementReads: state.announcementReads || [],
         currentPeriode: state.currentPeriode || 'TRIMESTRE 1',
@@ -1563,7 +1592,7 @@ export const useStore = create<AppState>()(
         if (state) {
           if (state.students && state.students.length > 0) {
             // Déduplication agressive pour éradiquer les doublons (Nom+Prénom+Classe)
-            state.students = deduplicateStudents(state.students.map(repairStudent)).list;
+            state.students = deduplicateStudents(state.students.map((s) => repairStudent(s, state.classFees))).list;
           }
 
           // Sécurité — Empêcher la re-connexion automatique de switcher un parent sur l'admin

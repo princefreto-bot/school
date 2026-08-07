@@ -2,6 +2,7 @@ import * as XLSX from 'xlsx';
 import { Student } from '../types';
 import { CLASSES } from '../data/classes';
 import { generateId, getCycleFromClasse, getEcolageFromClasse } from './helpers';
+import { useStore } from '../store/useStore';
 
 export const importExcel = (file: File, existingStudents?: Student[]): Promise<Student[]> => {
   return new Promise((resolve, reject) => {
@@ -94,7 +95,7 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
           // If we already processed this student IN THIS FILE (loop), skip to avoid internal duplicates
           if (studentsMap.has(key) || (adsn && studentsMap.has(adsn.toLowerCase()))) continue;
 
-          const ecolage = Number(row[8]) || getEcolageFromClasse(validClasse);
+          const ecolage = Number(row[8]) || getEcolageFromClasse(validClasse, useStore.getState().classFees);
           const dejaPaye = Number(row[9]) || 0;
           const restant = row[10] === 'SOLDE' ? 0 : (Number(row[10]) || Math.max(0, ecolage - dejaPaye));
           const recu = String(row[11] || '').trim();
