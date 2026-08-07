@@ -2,7 +2,7 @@
 // STORE ZUSTAND — État global de l'application
 // ============================================================
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { Student, User, AppPage, Payment, Parent, AppSettings, Presence, ActivityLog, CycleSchedule, Announcement, AnnouncementRead, Matiere, ClasseMatiere, Note, PeriodeType } from '../types';
 import { API_BASE_URL, BACKEND_URL } from '../config';
 import { getEcolage, getCycle, getEffectiveEcolage } from '../data/classConfig';
@@ -350,6 +350,21 @@ const repairStudent = (s: Student, classFees?: Record<string, number>): Student 
     };
   }
   return s;
+};
+
+// Stockage local tolérant au dépassement de quota : si localStorage est plein
+// (grosses écoles avec beaucoup de données), on log un avertissement au lieu
+// de planter la synchro avec une exception non gérée.
+const safeLocalStorage = {
+  getItem: (name: string) => localStorage.getItem(name),
+  setItem: (name: string, value: string) => {
+    try {
+      localStorage.setItem(name, value);
+    } catch (err) {
+      console.warn('⚠️ [Storage] Quota localStorage dépassé, sauvegarde locale ignorée (les données restent synchronisées avec le cloud):', err);
+    }
+  },
+  removeItem: (name: string) => localStorage.removeItem(name),
 };
 
 export const useStore = create<AppState>()(
@@ -1554,8 +1569,8 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'dghubschool-storage',
+      storage: createJSONStorage(() => safeLocalStorage),
       partialize: (state) => ({
-        students: state.students,
         schoolName: state.schoolName,
         schoolYear: state.schoolYear,
         messageRemerciement: state.messageRemerciement,
@@ -1575,7 +1590,6 @@ export const useStore = create<AppState>()(
         showStampOnBulletins: state.showStampOnBulletins,
         showSignatureOnBulletins: state.showSignatureOnBulletins,
         parents: state.parents || [],
-        presences: state.presences || [],
         activityLogs: (state.activityLogs || []).slice(0, 500),
         receiptCounter: state.receiptCounter || 0,
         cycleSchedules: state.cycleSchedules || [],
