@@ -166,6 +166,12 @@ async function getMyProfile(req, res) {
         return res.json(data);
     } catch (err) {
         console.error('getMyProfile Error:', err.message);
+        // PGRST116 : .single() n'a trouvé aucune ligne — le compte du token a été
+        // supprimé/recréé entretemps (id obsolète). Ce n'est pas une erreur serveur :
+        // le frontend doit forcer une reconnexion plutôt qu'afficher un 500 générique.
+        if (err.code === 'PGRST116') {
+            return res.status(401).json({ error: 'Session invalide : ce compte n\'existe plus. Merci de vous reconnecter.' });
+        }
         return res.status(500).json({ error: 'Erreur lors de la récupération du profil.' });
     }
 }

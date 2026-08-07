@@ -1,5 +1,6 @@
 import { API_BASE_URL } from '../config';
 import { parseResponse, getAuthHeaders } from './apiHelpers';
+import { useStore } from '../store/useStore';
 
 const API_URL = `${API_BASE_URL}/personnel`;
 
@@ -40,7 +41,12 @@ export const personnelApi = {
             headers: getAuthHeaders()
         });
         const data = await parseResponse(res);
-        if (!res.ok) throw data;
+        if (!res.ok) {
+            // Session invalide (compte du token supprimé/recréé) : on déconnecte
+            // proprement plutôt que de laisser l'utilisateur bloqué sur une erreur.
+            if (res.status === 401) useStore.getState().logout();
+            throw data;
+        }
         return data;
     },
 
