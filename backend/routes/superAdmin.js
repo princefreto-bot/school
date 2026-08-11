@@ -26,6 +26,7 @@ const { getCashflowTrend } = require('../controllers/superAdminAnalyticsControll
 const { getAuditFindings } = require('../controllers/superAdminAuditorController');
 const { getOverdueAlerts, markAlertContacted } = require('../controllers/superAdminAlertsController');
 const { listProspects, createProspect, updateProspect, updateProspectStage, deleteProspect } = require('../controllers/prospectsController');
+const { getHandoffToken, redeemHandoff } = require('../controllers/classeurHandoffController');
 
 const {
     getAllCreators,
@@ -86,5 +87,12 @@ router.post('/prospects', authenticateToken, requireSuperAdmin, createProspect);
 router.patch('/prospects/:id', authenticateToken, requireSuperAdmin, updateProspect);
 router.patch('/prospects/:id/stage', authenticateToken, requireSuperAdmin, updateProspectStage);
 router.delete('/prospects/:id', authenticateToken, requireSuperAdmin, deleteProspect);
+
+// ── RÉSÉRVÉ SUPERADMIN : HANDOFF SSO VERS LE CLASSEUR INTELLIGENT (data.dghubschool.com) ──
+// handoff-token : appelé par le navigateur du superadmin (JWT normal requis)
+// redeem-handoff : appelé serveur-à-serveur par classeur-backend, protégé par son propre
+// secret interne (voir classeurHandoffController) et non par authenticateToken.
+router.get('/classeur/handoff-token', authenticateToken, requireSuperAdmin, getHandoffToken);
+router.post('/classeur/redeem-handoff', redeemHandoff);
 
 module.exports = router;

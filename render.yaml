@@ -6,3 +6,14 @@ services:
     buildCommand: rm -rf node_modules && NPM_CONFIG_PRODUCTION=false npm install && npm run build
     startCommand: npm run start
     plan: free
+
+  # Service séparé et volontairement isolé : l'OCR/parsing de documents lourds
+  # ne doit jamais risquer de ralentir ou faire timeout le backend ci-dessus,
+  # qui sert les écoles clientes payantes. Voir le plan du Classeur Intelligent.
+  - name: dghubschool-classeur
+    type: web
+    env: node
+    rootDir: classeur-backend
+    buildCommand: rm -rf node_modules && npm install && npm run build
+    startCommand: npm run start
+    plan: free

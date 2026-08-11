@@ -1,0 +1,94 @@
+:root {
+    color-scheme: light dark;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: #f4f5f7;
+    color: #1c1f26;
+}
+
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.app-nav {
+    width: 240px;
+    flex-shrink: 0;
+    background: #14171f;
+    color: #e6e8ee;
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem 0.75rem;
+}
+
+.app-nav__brand {
+    font-weight: 600;
+    padding: 0 0.5rem 1rem;
+    border-bottom: 1px solid #2a2f3a;
+    margin-bottom: 0.75rem;
+}
+
+.app-nav__link {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    color: #b7bcc9;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.app-nav__link.active,
+.app-nav__link:hover {
+    background: #232838;
+    color: #fff;
+}
+
+.app-nav__footer {
+    margin-top: auto;
+    padding: 0.75rem 0.5rem 0;
+    border-top: 1px solid #2a2f3a;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.app-content {
+    flex: 1;
+    padding: 2rem;
+    max-width: 1100px;
+}
+
+.sso-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 0.5rem;
+    text-align: center;
+    padding: 1rem;
+}
+
+.sso-status--error { color: #b3261e; }
+
+.stub-page__note {
+    color: #5b6270;
+}
+
+.probable-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: #fff3cd;
+    color: #7a5b00;
+}
