@@ -14,7 +14,7 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
     superadmin: [
         'superadmin_overview', 'superadmin_schools', 'superadmin_creators', 'superadmin_finance',
         'superadmin_withdrawals', 'superadmin_cashflow', 'superadmin_auditor', 'superadmin_alerts',
-        'superadmin_pipeline'
+        'superadmin_pipeline', 'superadmin_classeur'
     ],
     creator: [
         'creator_dashboard'
