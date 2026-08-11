@@ -17,6 +17,8 @@ import {
 import { SupportModal } from './SupportModal';
 import { chatApi } from '../services/chatApi';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
+import { superAdminApi } from '../services/superAdminApi';
+import { CLASSEUR_FRONTEND_URL } from '../config';
 
 interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: number }
 
@@ -86,6 +88,7 @@ const SUPERADMIN_NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'superadmin_auditor',     label: 'Auditeur',        icon: <ShieldCheck className="w-[18px] h-[18px]" /> },
   { id: 'superadmin_alerts',      label: 'Alertes',         icon: <Bell className="w-[18px] h-[18px]" /> },
   { id: 'superadmin_pipeline',    label: 'Pipeline',        icon: <Target className="w-[18px] h-[18px]" /> },
+  { id: 'superadmin_classeur',    label: 'Classeur Intelligent', icon: <Database className="w-[18px] h-[18px]" /> },
 ];
 
 const NAV_GROUPS: Record<string, string> = {
@@ -135,6 +138,7 @@ const NAV_GROUPS: Record<string, string> = {
   superadmin_alerts: 'Croissance',
   superadmin_auditor: 'Croissance',
   superadmin_pipeline: 'Croissance',
+  superadmin_classeur: 'Croissance',
 };
 
 // ── Real-time clock ──
@@ -184,9 +188,18 @@ const SidebarNav: React.FC<{
               </div>
             )}
             <button
-              onClick={() => {
+              onClick={async () => {
                 if (item.id === 'parent_courses') {
                   navigate(`/${lang}/parent/exercices`);
+                } else if (item.id === 'superadmin_classeur') {
+                  // Le Classeur Intelligent est une application séparée (data.dghubschool.com) :
+                  // on n'y navigue pas en interne, on déclenche le handoff SSO puis on redirige.
+                  try {
+                    const { code } = await superAdminApi.getClasseurHandoffCode();
+                    window.location.href = `${CLASSEUR_FRONTEND_URL}/sso?code=${encodeURIComponent(code)}`;
+                  } catch (err: any) {
+                    alert(err.message || "Erreur lors de la connexion au Classeur Intelligent");
+                  }
                 } else {
                   setCurrentPage(item.id);
                 }

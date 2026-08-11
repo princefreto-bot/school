@@ -49,6 +49,10 @@ export const superAdminApi = {
   updateProspect: (id: string, payload: any) => request(`/superadmin/prospects/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
   updateProspectStage: (id: string, stage: string) => request(`/superadmin/prospects/${id}/stage`, { method: 'PATCH', body: JSON.stringify({ stage }) }),
   deleteProspect: (id: string) => request(`/superadmin/prospects/${id}`, { method: 'DELETE' }),
+
+  // Handoff SSO — Classeur Intelligent de Personnes (data.dghubschool.com)
+  getClasseurHandoffCode: (): Promise<{ code: string; expiresAt: string }> =>
+    request('/superadmin/classeur/handoff-token'),
 };
 
 export function formatFCFA(n: number) {

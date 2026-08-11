@@ -311,6 +311,7 @@ export type AppPage =
   | 'superadmin_alerts'
   | 'superadmin_auditor'
   | 'superadmin_pipeline'
+  | 'superadmin_classeur'
   | 'creator_dashboard';
 
 // Les types de cycles existants

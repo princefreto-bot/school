@@ -10,3 +10,5 @@ export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (
 );
 export const API_BASE_URL = `${BACKEND_URL}/api`;
 
+export const CLASSEUR_FRONTEND_URL = import.meta.env.VITE_CLASSEUR_FRONTEND_URL || 'https://data.dghubschool.com';
+
