@@ -54,6 +54,31 @@ export interface SourceRecord {
     sources: { name: string; original_filename: string | null; imported_at: string } | null;
 }
 
+export interface MatchEvidence {
+    field_name: string;
+    source_value: string | null;
+    person_value: string | null;
+    field_weight: number;
+    field_score: number;
+    contribution: number;
+    notes: string | null;
+}
+
+export interface Match {
+    id: string;
+    score: number;
+    confidence_band: 'strong' | 'to_verify' | 'weak';
+    status: string;
+    computed_at: string;
+    source_record: {
+        id: string;
+        raw_data: { raw: Record<string, any>; extracted: Record<string, string> };
+        sources: { name: string; original_filename: string | null } | null;
+    } | null;
+    person: { id: string; display_name: string; origin_school_slug: string | null } | null;
+    match_evidence: MatchEvidence[];
+}
+
 export interface DashboardStats {
     totalPersons: number;
     totalEleves: number;

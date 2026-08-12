@@ -16,6 +16,7 @@ import dashboardRoutes from './routes/dashboard';
 import schoolsRoutes from './routes/schools';
 import sourcesRoutes from './routes/sources';
 import toClassifyRoutes from './routes/toClassify';
+import matchesRoutes from './routes/matches';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -79,8 +80,9 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/schools', schoolsRoutes);
 app.use('/api/sources', sourcesRoutes);
 app.use('/api/to-classify', toClassifyRoutes);
+app.use('/api/matches', matchesRoutes);
 
-// TODO (M3+) : /api/matches, /api/duplicates, /api/relations, /api/documents,
+// TODO (M4+) : /api/duplicates, /api/relations, /api/documents,
 // /api/locations, /api/history, /api/settings — protégées par authenticateOperator.
 
 // Sert le build statique du frontend du classeur (même pattern que backend/server.js)

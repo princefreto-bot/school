@@ -9,6 +9,7 @@ import Personnes from './pages/Personnes';
 import PersonDetail from './pages/PersonDetail';
 import Sources from './pages/Sources';
 import AClasser from './pages/AClasser';
+import Correspondances from './pages/Correspondances';
 
 export default function App() {
     return (
@@ -25,7 +26,7 @@ export default function App() {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/personnes" element={<Personnes />} />
                     <Route path="/personnes/:id" element={<PersonDetail />} />
-                    <Route path="/correspondances" element={<StubPage title="Correspondances" note="Arrive en phase M3 avec le moteur de corrélation automatique." />} />
+                    <Route path="/correspondances" element={<Correspondances />} />
                     <Route path="/a-classer" element={<AClasser />} />
                     <Route path="/doublons" element={<StubPage title="Doublons" note="Arrive en phase M4." />} />
                     <Route path="/documents" element={<StubPage title="Documents" note="Arrive en phase M4 (PDF/images)." />} />

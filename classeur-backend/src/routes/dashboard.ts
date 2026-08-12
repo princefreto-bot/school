@@ -10,7 +10,7 @@ router.use(authenticateOperator);
 
 router.get('/', async (_req, res) => {
     try {
-        const [persons, eleves, personnel, sources, lastSync] = await Promise.all([
+        const [persons, eleves, personnel, sources, lastSync, matchesStrong, matchesToVerify, toClassify] = await Promise.all([
             classeurClient.from('persons').select('id', { count: 'exact', head: true }).eq('status', 'active'),
             classeurClient
                 .from('persons')
@@ -30,6 +30,12 @@ router.get('/', async (_req, res) => {
                 .order('imported_at', { ascending: false })
                 .limit(1)
                 .maybeSingle(),
+            classeurClient.from('matches').select('id', { count: 'exact', head: true }).eq('status', 'pending').eq('confidence_band', 'strong'),
+            classeurClient.from('matches').select('id', { count: 'exact', head: true }).eq('status', 'pending').eq('confidence_band', 'to_verify'),
+            classeurClient
+                .from('source_records')
+                .select('id', { count: 'exact', head: true })
+                .in('classification_status', ['unclassified', 'to_classify']),
         ]);
 
         return res.json({
@@ -37,11 +43,10 @@ router.get('/', async (_req, res) => {
             totalEleves: eleves.count ?? 0,
             totalPersonnel: personnel.count ?? 0,
             totalSources: sources.count ?? 0,
-            // Les compteurs suivants arrivent avec le moteur de corrélation (M2/M3) —
-            // renvoyés à 0 pour que le dashboard n'affiche jamais un chiffre inventé.
-            matchesStrong: 0,
-            matchesToVerify: 0,
-            toClassify: 0,
+            matchesStrong: matchesStrong.count ?? 0,
+            matchesToVerify: matchesToVerify.count ?? 0,
+            toClassify: toClassify.count ?? 0,
+            // Détection de doublons : arrive en M4, renvoyé à 0 pour ne jamais inventer un chiffre.
             duplicateCandidates: 0,
             lastSyncAt: lastSync.data?.imported_at ?? null,
         });

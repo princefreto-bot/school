@@ -22,7 +22,10 @@ const rawClient = createClient(config.SUPABASE_URL(), config.SUPABASE_SERVICE_RO
 // Colonnes explicites (jamais `*`) : on évite de faire transiter password/push_token/
 // signup_ip_hash/etc. par ce service alors qu'ils ne servent jamais à rien ici.
 const PROFILE_COLUMNS = 'id, nom, telephone, email, role, matricule, numero_cnss, date_embauche, departement';
-const STUDENT_COLUMNS = 'id, nom, prenom, classe, cycle, sexe, date_naissance, telephone_parent, photo_url, status, ecole_provenance, license_status';
+// license_status/license_key volontairement exclus : n'existent que sur 2 des 6 écoles
+// (dérive de schéma entre établissements, confirmé via information_schema) et ne servent
+// à rien ici — toute colonne non universelle casserait la lecture pour les 4 autres écoles.
+const STUDENT_COLUMNS = 'id, nom, prenom, classe, cycle, sexe, date_naissance, telephone_parent, photo_url, status, ecole_provenance';
 
 /** Lecture seule des tables DGhubschool school-scoped. Ne jamais ajouter de méthode d'écriture ici. */
 export const dghubschoolReadOnly = {

@@ -458,3 +458,67 @@ body {
 .person-search__results button:hover {
     background: #f4f5f7;
 }
+
+.match-card {
+    background: #fff;
+    border: 1px solid #e6e8ee;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+}
+
+.match-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.match-card__candidate {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+}
+
+.band-badge {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+}
+
+.band-badge--strong { background: #e6f4ea; color: #1e7a34; }
+.band-badge--to_verify { background: #fff3cd; color: #7a5b00; }
+.band-badge--weak { background: #fbe4e4; color: #b3261e; }
+
+.link-button {
+    background: none;
+    border: none;
+    color: #1a4fb4;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 0.5rem;
+}
+
+.evidence-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0.75rem;
+    font-size: 0.82rem;
+}
+
+.evidence-table th,
+.evidence-table td {
+    text-align: left;
+    padding: 0.35rem 0.6rem;
+    border-bottom: 1px solid #eef0f3;
+}
+
+.evidence-row--veto {
+    color: #b3261e;
+    font-weight: 600;
+}
