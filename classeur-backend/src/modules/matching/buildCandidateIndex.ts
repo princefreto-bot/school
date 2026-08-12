@@ -47,6 +47,7 @@ export async function buildCandidateIndex(aliases: ClassAliasMap): Promise<Candi
                 personId: match.id,
                 displayName: match.displayName,
                 schoolSlug: slug,
+                originSourceTable: 'profiles',
                 fields: {
                     nomComplet: normalizeName(match.displayName),
                     telephone: normalizePhone(p.telephone).e164,
@@ -56,6 +57,10 @@ export async function buildCandidateIndex(aliases: ClassAliasMap): Promise<Candi
                     dateNaissance: null,
                     sexe: null,
                     departement: normalizeText(p.departement),
+                    // profiles.nom est un nom complet en une seule chaîne, pas décomposable
+                    // de façon fiable en nom/prénom -> jamais de détection de fratrie pour le staff.
+                    surnameOnly: null,
+                    prenomOnly: null,
                 },
             });
         }
@@ -67,6 +72,7 @@ export async function buildCandidateIndex(aliases: ClassAliasMap): Promise<Candi
                 personId: match.id,
                 displayName: match.displayName,
                 schoolSlug: slug,
+                originSourceTable: 'students',
                 fields: {
                     nomComplet: normalizeName(match.displayName),
                     telephone: normalizePhone(s.telephone_parent).e164,
@@ -76,6 +82,8 @@ export async function buildCandidateIndex(aliases: ClassAliasMap): Promise<Candi
                     dateNaissance: normalizeDate(s.date_naissance),
                     sexe: normalizeSexe(s.sexe),
                     departement: null,
+                    surnameOnly: normalizeName(s.nom),
+                    prenomOnly: normalizeName(s.prenom),
                 },
             });
         }

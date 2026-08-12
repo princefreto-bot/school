@@ -11,12 +11,18 @@ export interface NormalizedFields {
     dateNaissance?: string | null; // ISO
     sexe?: string | null;
     departement?: string | null;
+    // Nom/prénom isolés, disponibles UNIQUEMENT pour les élèves (students.nom/prenom sont
+    // déjà séparés dans DGhubschool) — sert à la détection de fratrie (modules/matching/
+    // runSiblingDetection.ts), qui a besoin du seul nom de famille, pas du nom complet.
+    surnameOnly?: string | null;
+    prenomOnly?: string | null;
 }
 
 export interface CandidatePerson {
     personId: string;
     displayName: string;
     schoolSlug: string | null;
+    originSourceTable: 'profiles' | 'students';
     fields: NormalizedFields;
 }
 

@@ -100,6 +100,7 @@ export interface DuplicateCandidate {
     id: string;
     score: number;
     status: string;
+    candidate_type: 'duplicate' | 'sibling';
     detected_at: string;
     person_a: { id: string; display_name: string; origin_school_slug: string | null };
     person_b: { id: string; display_name: string; origin_school_slug: string | null };

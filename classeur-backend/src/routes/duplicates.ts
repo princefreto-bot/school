@@ -4,39 +4,48 @@
 import { Router } from 'express';
 import { classeurClient } from '../lib/supabaseClasseur';
 import { authenticateOperator } from '../middleware/auth';
+import { loadClassAliases } from '../modules/matching/classAlias';
 import { runDuplicateDetection } from '../modules/matching/runDuplicateDetection';
+import { runSiblingDetection } from '../modules/matching/runSiblingDetection';
 
 const router = Router();
 router.use(authenticateOperator);
 
 router.post('/run', async (req, res) => {
     try {
-        const result = await runDuplicateDetection();
+        const [duplicateResult, siblingResult] = await Promise.all([
+            runDuplicateDetection(),
+            loadClassAliases().then(runSiblingDetection),
+        ]);
         await classeurClient.from('audit_logs').insert({
             actor_id: req.operator!.operatorId,
             actor_name: req.operator!.nom,
             action: 'correlation',
             entity_type: 'duplicate_candidates',
-            details: result,
+            details: { duplicates: duplicateResult, siblings: siblingResult },
         });
-        return res.json(result);
+        return res.json({ duplicates: duplicateResult, siblings: siblingResult });
     } catch (err: any) {
-        console.error('Run duplicate detection error:', err);
-        return res.status(500).json({ error: err.message || 'Erreur lors de la détection de doublons.' });
+        console.error('Run duplicate/sibling detection error:', err);
+        return res.status(500).json({ error: err.message || 'Erreur lors de la détection de doublons/fratries.' });
     }
 });
 
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
     try {
-        const { data, error } = await classeurClient
+        const { type } = req.query as Record<string, string>;
+        let query = classeurClient
             .from('duplicate_candidates')
             .select(
-                'id, score, status, detected_at, ' +
+                'id, score, status, candidate_type, detected_at, ' +
                     'person_a:persons!duplicate_candidates_person_a_id_fkey(id, display_name, origin_school_slug), ' +
                     'person_b:persons!duplicate_candidates_person_b_id_fkey(id, display_name, origin_school_slug)'
             )
             .eq('status', 'pending')
             .order('score', { ascending: false });
+        if (type) query = query.eq('candidate_type', type);
+
+        const { data, error } = await query;
         if (error) throw error;
         return res.json({ duplicates: data });
     } catch (err: any) {
@@ -85,12 +94,19 @@ router.post('/:id/merge', async (req, res) => {
     try {
         const { data: candidate, error: candErr } = await classeurClient
             .from('duplicate_candidates')
-            .select('id, status, person_a_id, person_b_id')
+            .select('id, status, candidate_type, person_a_id, person_b_id')
             .eq('id', req.params.id)
             .maybeSingle();
         if (candErr) throw candErr;
         if (!candidate) return res.status(404).json({ error: 'Doublon introuvable.' });
         if (candidate.status !== 'pending') return res.status(409).json({ error: 'Ce doublon a déjà été traité.' });
+        if (candidate.candidate_type === 'sibling') {
+            return res.status(400).json({
+                error:
+                    'Il s\'agit de deux personnes distinctes (fratrie possible), pas d\'un doublon — impossible de fusionner. ' +
+                    'Ouvre les deux dossiers pour créer une relation Frère de / Sœur de si c\'est confirmé.',
+            });
+        }
         if (survivorId !== candidate.person_a_id && survivorId !== candidate.person_b_id) {
             return res.status(400).json({ error: 'survivorId doit être l\'une des deux personnes du doublon.' });
         }
