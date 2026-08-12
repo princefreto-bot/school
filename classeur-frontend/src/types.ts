@@ -35,6 +35,25 @@ export interface School {
     status: string;
 }
 
+export interface Source {
+    id: string;
+    name: string;
+    source_type: string;
+    original_filename: string | null;
+    status: 'pending' | 'processing' | 'processed' | 'failed';
+    row_count: number | null;
+    imported_at: string;
+}
+
+export interface SourceRecord {
+    id: string;
+    raw_data: { raw: Record<string, any>; extracted: Record<string, string> };
+    row_index: number | null;
+    classification_status: string;
+    extracted_at: string;
+    sources: { name: string; original_filename: string | null; imported_at: string } | null;
+}
+
 export interface DashboardStats {
     totalPersons: number;
     totalEleves: number;

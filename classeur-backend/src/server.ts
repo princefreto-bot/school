@@ -14,6 +14,8 @@ import syncRoutes from './routes/sync';
 import personsRoutes from './routes/persons';
 import dashboardRoutes from './routes/dashboard';
 import schoolsRoutes from './routes/schools';
+import sourcesRoutes from './routes/sources';
+import toClassifyRoutes from './routes/toClassify';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -75,9 +77,11 @@ app.use('/api/sync', syncRoutes);
 app.use('/api/persons', personsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/schools', schoolsRoutes);
+app.use('/api/sources', sourcesRoutes);
+app.use('/api/to-classify', toClassifyRoutes);
 
-// TODO (M2+) : /api/matches, /api/to-classify, /api/duplicates, /api/relations,
-// /api/documents, /api/locations, /api/history, /api/settings — protégées par authenticateOperator.
+// TODO (M3+) : /api/matches, /api/duplicates, /api/relations, /api/documents,
+// /api/locations, /api/history, /api/settings — protégées par authenticateOperator.
 
 // Sert le build statique du frontend du classeur (même pattern que backend/server.js)
 const frontendDist = path.join(__dirname, '..', '..', 'classeur-frontend', 'dist');

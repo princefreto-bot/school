@@ -1,0 +1,122 @@
+// ============================================================
+// SOURCES — import de fichiers locaux (xlsx/csv/json)
+// ============================================================
+// Sélection explicite par l'utilisateur uniquement (input file côté frontend) —
+// aucun scan automatique de dossier n'existe ni ne doit exister ici.
+import crypto from 'crypto';
+import { Router } from 'express';
+import multer from 'multer';
+import { classeurClient } from '../lib/supabaseClasseur';
+import { detectSourceType, parseFile } from '../modules/importers';
+import { mapRow } from '../modules/extraction/mapFields';
+import { authenticateOperator } from '../middleware/auth';
+
+const router = Router();
+router.use(authenticateOperator);
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } }).single('file');
+
+router.get('/', async (_req, res) => {
+    try {
+        const { data, error } = await classeurClient
+            .from('sources')
+            .select('id, name, source_type, original_filename, status, row_count, imported_at')
+            .order('imported_at', { ascending: false })
+            .limit(100);
+        if (error) throw error;
+        return res.json({ sources: data });
+    } catch (err: any) {
+        console.error('List sources error:', err);
+        return res.status(500).json({ error: err.message || 'Erreur lors du chargement des sources.' });
+    }
+});
+
+router.post('/', (req, res) => {
+    upload(req, res, async (uploadErr) => {
+        if (uploadErr) {
+            return res.status(400).json({ error: 'Erreur de transfert du fichier : ' + uploadErr.message });
+        }
+        if (!req.file) {
+            return res.status(400).json({ error: 'Aucun fichier fourni.' });
+        }
+
+        const sourceType = detectSourceType(req.file.originalname);
+        if (!sourceType) {
+            return res.status(415).json({
+                error: 'Format non supporté pour le moment. Formats acceptés : .xlsx, .xls, .csv, .json (le PDF/image OCR arrive dans une phase ultérieure).',
+            });
+        }
+
+        const fileHash = crypto.createHash('sha256').update(req.file.buffer).digest('hex');
+        const { data: existing } = await classeurClient
+            .from('sources')
+            .select('id, status')
+            .eq('file_hash', fileHash)
+            .neq('status', 'failed')
+            .maybeSingle();
+        if (existing) {
+            return res.status(409).json({ error: 'Ce fichier a déjà été importé (contenu identique détecté).' });
+        }
+
+        const { data: source, error: sourceErr } = await classeurClient
+            .from('sources')
+            .insert({
+                name: req.file.originalname,
+                source_type: sourceType,
+                original_filename: req.file.originalname,
+                file_hash: fileHash,
+                status: 'processing',
+                imported_by: req.operator!.operatorId,
+            })
+            .select('id')
+            .single();
+        if (sourceErr || !source) {
+            return res.status(500).json({ error: sourceErr?.message || "Erreur lors de l'enregistrement de la source." });
+        }
+
+        try {
+            const rows = parseFile(req.file.buffer, sourceType);
+            if (rows.length === 0) {
+                throw new Error('Aucune ligne exploitable trouvée dans le fichier.');
+            }
+
+            const records = rows.map((row, index) => {
+                const { raw, extracted } = mapRow(row);
+                return {
+                    source_id: source.id,
+                    raw_data: { raw, extracted },
+                    row_index: index,
+                    classification_status: 'unclassified' as const,
+                };
+            });
+
+            const { error: recordsErr } = await classeurClient.from('source_records').insert(records);
+            if (recordsErr) throw recordsErr;
+
+            await classeurClient
+                .from('sources')
+                .update({ status: 'processed', row_count: records.length })
+                .eq('id', source.id);
+
+            await classeurClient.from('audit_logs').insert({
+                actor_id: req.operator!.operatorId,
+                actor_name: req.operator!.nom,
+                action: 'import',
+                entity_type: 'source',
+                entity_id: source.id,
+                details: { filename: req.file.originalname, sourceType, rowCount: records.length },
+            });
+
+            return res.status(201).json({ sourceId: source.id, rowCount: records.length });
+        } catch (err: any) {
+            console.error('Source processing error:', err);
+            await classeurClient
+                .from('sources')
+                .update({ status: 'failed', error_log: { message: err.message } })
+                .eq('id', source.id);
+            return res.status(422).json({ error: err.message || "Erreur lors de l'analyse du fichier." });
+        }
+    });
+});
+
+export default router;
