@@ -8,6 +8,7 @@
 // distincte, prévue en M5 — elle n'est pas exposée ici.
 import { Router } from 'express';
 import { classeurClient } from '../lib/supabaseClasseur';
+import { attachDocumentIfApplicable } from '../modules/documents/attachDocument';
 import { authenticateOperator } from '../middleware/auth';
 
 const router = Router();
@@ -96,6 +97,7 @@ router.post('/:id/associate', async (req, res) => {
             .eq('id', record.id);
         if (updateErr) throw updateErr;
 
+        await attachDocumentIfApplicable({ personId, sourceRecordId: record.id, raw: (record.raw_data as any)?.raw || {} });
         await logValidation(record.id, 'associer', req.operator!.operatorId);
 
         return res.json({ ok: true, attributesAdded: attributeRows.length });

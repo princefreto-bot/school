@@ -3,6 +3,7 @@
 // ============================================================
 import { Router } from 'express';
 import { classeurClient } from '../lib/supabaseClasseur';
+import { attachDocumentIfApplicable } from '../modules/documents/attachDocument';
 import { authenticateOperator } from '../middleware/auth';
 import { runMatching } from '../modules/matching/runMatching';
 
@@ -89,6 +90,11 @@ router.post('/:id/confirm', async (req, res) => {
             .from('source_records')
             .update({ classification_status: 'associated', linked_person_id: match.candidate_person_id })
             .eq('id', match.source_record_id);
+        await attachDocumentIfApplicable({
+            personId: match.candidate_person_id,
+            sourceRecordId: match.source_record_id,
+            raw: (record?.raw_data as any)?.raw || {},
+        });
         await classeurClient
             .from('match_validations')
             .insert({ match_id: match.id, action: 'associer', performed_by: req.operator!.operatorId });

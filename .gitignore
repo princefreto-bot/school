@@ -11,6 +11,9 @@ dist/
 build/
 *.tsbuildinfo
 
+# tesseract.js télécharge ses modèles de langue en cache dans le cwd au premier OCR
+*.traineddata
+
 # Misc
 .DS_Store
 *.pem

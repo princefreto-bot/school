@@ -35,6 +35,22 @@ export interface School {
     status: string;
 }
 
+export interface PersonDocument {
+    id: string;
+    document_type: string | null;
+    title: string | null;
+    mime_type: string | null;
+    uploaded_at: string;
+    url: string | null;
+}
+
+export interface PersonImage {
+    id: string;
+    is_primary: boolean;
+    uploaded_at: string;
+    url: string | null;
+}
+
 export interface Source {
     id: string;
     name: string;
@@ -77,6 +93,25 @@ export interface Match {
     } | null;
     person: { id: string; display_name: string; origin_school_slug: string | null } | null;
     match_evidence: MatchEvidence[];
+}
+
+export interface DuplicateCandidate {
+    id: string;
+    score: number;
+    status: string;
+    detected_at: string;
+    person_a: { id: string; display_name: string; origin_school_slug: string | null };
+    person_b: { id: string; display_name: string; origin_school_slug: string | null };
+}
+
+export interface DocumentItem {
+    id: string;
+    kind: 'document' | 'image';
+    title?: string | null;
+    document_type?: string | null;
+    uploaded_at: string;
+    url: string | null;
+    person: { id: string; display_name: string } | null;
 }
 
 export interface DashboardStats {

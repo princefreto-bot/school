@@ -17,6 +17,9 @@ import schoolsRoutes from './routes/schools';
 import sourcesRoutes from './routes/sources';
 import toClassifyRoutes from './routes/toClassify';
 import matchesRoutes from './routes/matches';
+import duplicatesRoutes from './routes/duplicates';
+import documentsRoutes from './routes/documents';
+import { startCronJobs } from './cron';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -81,9 +84,11 @@ app.use('/api/schools', schoolsRoutes);
 app.use('/api/sources', sourcesRoutes);
 app.use('/api/to-classify', toClassifyRoutes);
 app.use('/api/matches', matchesRoutes);
+app.use('/api/duplicates', duplicatesRoutes);
+app.use('/api/documents', documentsRoutes);
 
-// TODO (M4+) : /api/duplicates, /api/relations, /api/documents,
-// /api/locations, /api/history, /api/settings — protégées par authenticateOperator.
+// TODO (M5) : /api/relations, /api/locations, /api/history, /api/settings —
+// protégées par authenticateOperator.
 
 // Sert le build statique du frontend du classeur (même pattern que backend/server.js)
 const frontendDist = path.join(__dirname, '..', '..', 'classeur-frontend', 'dist');
@@ -95,4 +100,5 @@ app.get('*', (req, res, next) => {
 
 app.listen(config.PORT, () => {
     console.log(`Classeur backend démarré sur le port ${config.PORT}`);
+    startCronJobs();
 });

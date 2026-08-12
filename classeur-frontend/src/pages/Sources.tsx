@@ -25,10 +25,19 @@ export default function Sources() {
 
     useEffect(loadSources, []);
 
+    // Un import PDF/image se traite en tâche de fond (OCR) — on rafraîchit la liste
+    // pendant que quelque chose est encore en attente/en cours, pour voir le statut évoluer.
+    useEffect(() => {
+        const hasPending = sources.some((s) => s.status === 'pending' || s.status === 'processing');
+        if (!hasPending) return;
+        const interval = setInterval(loadSources, 5000);
+        return () => clearInterval(interval);
+    }, [sources]);
+
     const handleUpload = async () => {
         const file = fileInput.current?.files?.[0];
         if (!file) {
-            setError('Choisis un fichier (.xlsx, .xls, .csv ou .json) avant de lancer l\'import.');
+            setError("Choisis un fichier avant de lancer l'import.");
             return;
         }
         setUploading(true);
@@ -40,7 +49,11 @@ export default function Sources() {
             const res = await apiUpload('/sources', formData);
             const body = await res.json();
             if (!res.ok) throw new Error(body.error || "Erreur lors de l'import.");
-            setMessage(`${file.name} importé : ${body.rowCount} ligne(s) ajoutée(s) à la file « À classer ».`);
+            setMessage(
+                body.rowCount != null
+                    ? `${file.name} importé : ${body.rowCount} ligne(s) ajoutée(s) à la file « À classer ».`
+                    : `${file.name} envoyé — analyse (OCR) en cours, ça peut prendre jusqu'à une minute.`
+            );
             if (fileInput.current) fileInput.current.value = '';
             loadSources();
         } catch (err: any) {
@@ -54,12 +67,13 @@ export default function Sources() {
         <div className="sources-page">
             <h1>Sources</h1>
             <p className="stub-page__note">
-                Choisis un fichier Excel, CSV ou JSON à importer. Rien n'est scanné automatiquement — c'est toi qui sélectionnes
-                chaque fichier. Le PDF et l'image (OCR) arrivent dans une phase ultérieure.
+                Choisis un fichier Excel, CSV, JSON, PDF (texte) ou image (JPG/PNG) à importer. Rien n'est scanné
+                automatiquement — c'est toi qui sélectionnes chaque fichier. Les PDF/images passent par une reconnaissance
+                optique en tâche de fond, ça peut prendre un peu de temps.
             </p>
 
             <div className="upload-box">
-                <input ref={fileInput} type="file" accept=".xlsx,.xls,.csv,.json" />
+                <input ref={fileInput} type="file" accept=".xlsx,.xls,.csv,.json,.pdf,.jpg,.jpeg,.png,.webp" />
                 <button className="btn-primary" onClick={handleUpload} disabled={uploading}>
                     {uploading ? 'Import en cours…' : 'Importer'}
                 </button>

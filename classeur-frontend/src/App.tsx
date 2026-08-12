@@ -10,6 +10,8 @@ import PersonDetail from './pages/PersonDetail';
 import Sources from './pages/Sources';
 import AClasser from './pages/AClasser';
 import Correspondances from './pages/Correspondances';
+import Doublons from './pages/Doublons';
+import Documents from './pages/Documents';
 
 export default function App() {
     return (
@@ -28,8 +30,8 @@ export default function App() {
                     <Route path="/personnes/:id" element={<PersonDetail />} />
                     <Route path="/correspondances" element={<Correspondances />} />
                     <Route path="/a-classer" element={<AClasser />} />
-                    <Route path="/doublons" element={<StubPage title="Doublons" note="Arrive en phase M4." />} />
-                    <Route path="/documents" element={<StubPage title="Documents" note="Arrive en phase M4 (PDF/images)." />} />
+                    <Route path="/doublons" element={<Doublons />} />
+                    <Route path="/documents" element={<Documents />} />
                     <Route path="/relations" element={<StubPage title="Relations" note="Arrive en phase M5." />} />
                     <Route
                         path="/localisations"

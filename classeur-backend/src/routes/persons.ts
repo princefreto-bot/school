@@ -2,7 +2,7 @@
 // PERSONNES — annuaire unifié (lecture)
 // ============================================================
 import { Router } from 'express';
-import { classeurClient, dghubschoolReadOnly } from '../lib/supabaseClasseur';
+import { classeurClient, dghubschoolReadOnly, getSignedDocumentUrl } from '../lib/supabaseClasseur';
 import { authenticateOperator } from '../middleware/auth';
 
 const router = Router();
@@ -81,7 +81,22 @@ router.get('/:id', async (req, res) => {
 
         const school = person.origin_school_slug ? await dghubschoolReadOnly.getSchoolBySlug(person.origin_school_slug) : null;
 
-        return res.json({ person, live, school });
+        const [{ data: documents }, { data: images }] = await Promise.all([
+            classeurClient
+                .from('documents')
+                .select('id, document_type, title, storage_path, mime_type, uploaded_at')
+                .eq('person_id', person.id),
+            classeurClient.from('images').select('id, storage_path, is_primary, uploaded_at').eq('person_id', person.id),
+        ]);
+
+        const documentsWithUrls = await Promise.all(
+            (documents || []).map(async (d) => ({ ...d, url: await getSignedDocumentUrl(d.storage_path) }))
+        );
+        const imagesWithUrls = await Promise.all(
+            (images || []).map(async (i) => ({ ...i, url: await getSignedDocumentUrl(i.storage_path) }))
+        );
+
+        return res.json({ person, live, school, documents: documentsWithUrls, images: imagesWithUrls });
     } catch (err: any) {
         console.error('Get person error:', err);
         return res.status(500).json({ error: err.message || 'Erreur lors du chargement de la personne.' });

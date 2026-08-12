@@ -1,5 +1,5 @@
 // ============================================================
-// SOURCES — import de fichiers locaux (xlsx/csv/json)
+// SOURCES — import de fichiers locaux (xlsx/csv/json/pdf/image)
 // ============================================================
 // Sélection explicite par l'utilisateur uniquement (input file côté frontend) —
 // aucun scan automatique de dossier n'existe ni ne doit exister ici.
@@ -7,20 +7,21 @@ import crypto from 'crypto';
 import { Router } from 'express';
 import multer from 'multer';
 import { classeurClient } from '../lib/supabaseClasseur';
-import { detectSourceType, parseFile } from '../modules/importers';
 import { mapRow } from '../modules/extraction/mapFields';
+import { detectSourceType, isDocumentSourceType, parseTabularFile, TabularSourceType } from '../modules/importers';
 import { authenticateOperator } from '../middleware/auth';
 
 const router = Router();
 router.use(authenticateOperator);
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } }).single('file');
+const DOCUMENTS_BUCKET = 'classeur-documents';
 
 router.get('/', async (_req, res) => {
     try {
         const { data, error } = await classeurClient
             .from('sources')
-            .select('id, name, source_type, original_filename, status, row_count, imported_at')
+            .select('id, name, source_type, original_filename, status, row_count, error_log, imported_at')
             .order('imported_at', { ascending: false })
             .limit(100);
         if (error) throw error;
@@ -43,7 +44,7 @@ router.post('/', (req, res) => {
         const sourceType = detectSourceType(req.file.originalname);
         if (!sourceType) {
             return res.status(415).json({
-                error: 'Format non supporté pour le moment. Formats acceptés : .xlsx, .xls, .csv, .json (le PDF/image OCR arrive dans une phase ultérieure).',
+                error: 'Format non supporté. Formats acceptés : .xlsx, .xls, .csv, .json, .pdf, .jpg, .jpeg, .png, .webp.',
             });
         }
 
@@ -74,8 +75,31 @@ router.post('/', (req, res) => {
             return res.status(500).json({ error: sourceErr?.message || "Erreur lors de l'enregistrement de la source." });
         }
 
+        // PDF/image : l'OCR peut être lent — on stocke le fichier et on répond tout de
+        // suite, un tick cron traite le contenu en tâche de fond (voir cron/processDocuments.ts).
+        if (isDocumentSourceType(sourceType)) {
+            try {
+                const storagePath = `imports/${source.id}/${req.file.originalname}`;
+                const { error: uploadError } = await classeurClient.storage
+                    .from(DOCUMENTS_BUCKET)
+                    .upload(storagePath, req.file.buffer, { contentType: req.file.mimetype, upsert: true });
+                if (uploadError) throw uploadError;
+
+                await classeurClient.from('sources').update({ status: 'pending', storage_path: storagePath }).eq('id', source.id);
+
+                return res.status(202).json({ sourceId: source.id, status: 'pending' });
+            } catch (err: any) {
+                console.error('Document upload error:', err);
+                await classeurClient
+                    .from('sources')
+                    .update({ status: 'failed', error_log: { message: err.message } })
+                    .eq('id', source.id);
+                return res.status(500).json({ error: err.message || "Erreur lors du transfert du document." });
+            }
+        }
+
         try {
-            const rows = parseFile(req.file.buffer, sourceType);
+            const rows = parseTabularFile(req.file.buffer, sourceType as TabularSourceType);
             if (rows.length === 0) {
                 throw new Error('Aucune ligne exploitable trouvée dans le fichier.');
             }

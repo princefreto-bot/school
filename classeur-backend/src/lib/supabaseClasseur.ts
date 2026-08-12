@@ -60,3 +60,13 @@ export const dghubschoolReadOnly = {
         return data;
     },
 };
+
+const DOCUMENTS_BUCKET = 'classeur-documents';
+
+/** URL signée de courte durée : le bucket est privé, jamais rendu public, jamais de
+ *  clé service_role transmise au frontend — seule cette URL temporaire l'est. */
+export async function getSignedDocumentUrl(storagePath: string, expiresInSeconds = 300): Promise<string | null> {
+    const { data, error } = await classeurClient.storage.from(DOCUMENTS_BUCKET).createSignedUrl(storagePath, expiresInSeconds);
+    if (error || !data) return null;
+    return data.signedUrl;
+}

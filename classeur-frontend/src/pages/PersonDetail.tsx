@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
-import { PersonDetail as PersonDetailType, School } from '../types';
+import { PersonDetail as PersonDetailType, PersonDocument, PersonImage, School } from '../types';
 
 interface DossierResponse {
     person: PersonDetailType;
     live: Record<string, any> | null;
     school: School | null;
+    documents: PersonDocument[];
+    images: PersonImage[];
 }
 
 function initials(name: string): string {
@@ -43,7 +45,7 @@ export default function PersonDetail() {
     if (error) return <p className="sso-status--error">{error}</p>;
     if (!data) return <p className="stub-page__note">Chargement…</p>;
 
-    const { person, live, school } = data;
+    const { person, live, school, documents, images } = data;
     const isStaff = person.origin_source_table === 'profiles';
     const roleLabels = Array.from(new Set(person.person_roles.map((r) => r.role_types?.label_fr).filter(Boolean)));
 
@@ -108,7 +110,37 @@ export default function PersonDetail() {
 
             <section>
                 <h2>Documents &amp; images</h2>
-                <p className="stub-page__note">Aucun document importé pour l'instant (arrive en phase M2).</p>
+                {documents.length === 0 && images.length === 0 ? (
+                    <p className="stub-page__note">Aucun document importé pour l'instant.</p>
+                ) : (
+                    <>
+                        {images.length > 0 && (
+                            <div className="dossier-images">
+                                {images.map((img) =>
+                                    img.url ? (
+                                        <a key={img.id} href={img.url} target="_blank" rel="noreferrer">
+                                            <img src={img.url} alt="" className="dossier-image" />
+                                        </a>
+                                    ) : null
+                                )}
+                            </div>
+                        )}
+                        {documents.length > 0 && (
+                            <ul className="dossier-documents">
+                                {documents.map((doc) => (
+                                    <li key={doc.id}>
+                                        {doc.url ? (
+                                            <a href={doc.url} target="_blank" rel="noreferrer">{doc.title || 'Document'}</a>
+                                        ) : (
+                                            <span>{doc.title || 'Document'}</span>
+                                        )}
+                                        <span className="stub-page__note"> — {new Date(doc.uploaded_at).toLocaleDateString('fr-FR')}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </>
+                )}
             </section>
 
             {person.is_minor ? null : (
