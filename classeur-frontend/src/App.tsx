@@ -5,6 +5,8 @@ import StubPage from './components/StubPage';
 import { AuthProvider } from './auth/AuthContext';
 import Dashboard from './pages/Dashboard';
 import SsoPage from './pages/SsoPage';
+import Personnes from './pages/Personnes';
+import PersonDetail from './pages/PersonDetail';
 
 export default function App() {
     return (
@@ -19,8 +21,8 @@ export default function App() {
                     }
                 >
                     <Route path="/" element={<Dashboard />} />
-                    <Route path="/personnes" element={<StubPage title="Personnes" />} />
-                    <Route path="/personnes/:id" element={<StubPage title="Dossier personne" />} />
+                    <Route path="/personnes" element={<Personnes />} />
+                    <Route path="/personnes/:id" element={<PersonDetail />} />
                     <Route path="/correspondances" element={<StubPage title="Correspondances" />} />
                     <Route path="/a-classer" element={<StubPage title="À classer" />} />
                     <Route path="/doublons" element={<StubPage title="Doublons" />} />

@@ -92,3 +92,228 @@ body {
     background: #fff3cd;
     color: #7a5b00;
 }
+
+.source-badge {
+    display: inline-flex;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: #dbe7ff;
+    color: #1a4fb4;
+}
+
+.personnes-filters {
+    display: flex;
+    gap: 0.75rem;
+    margin: 1rem 0 1.5rem;
+    flex-wrap: wrap;
+}
+
+.personnes-search {
+    flex: 1;
+    min-width: 220px;
+}
+
+.personnes-filters input,
+.personnes-filters select {
+    padding: 0.55rem 0.75rem;
+    border: 1px solid #d7dae0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: #fff;
+}
+
+.person-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.person-card {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e6e8ee;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s ease;
+}
+
+.person-card:hover {
+    border-color: #b7bcc9;
+}
+
+.person-avatar {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #14171f;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.person-avatar--lg {
+    width: 64px;
+    height: 64px;
+    font-size: 1.2rem;
+}
+
+.person-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.person-card__name {
+    font-weight: 600;
+}
+
+.person-card__role {
+    font-size: 0.8rem;
+    color: #5b6270;
+}
+
+.person-card__school {
+    font-size: 0.75rem;
+    color: #8a90a0;
+}
+
+.dossier__back {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: #5b6270;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.dossier__header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.dossier__header h1 {
+    margin: 0 0 0.15rem;
+}
+
+.dossier__roles {
+    margin: 0;
+    color: #5b6270;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.dossier section {
+    background: #fff;
+    border: 1px solid #e6e8ee;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.dossier section h2 {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #5b6270;
+}
+
+.field-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.75rem;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.field__label {
+    font-size: 0.75rem;
+    color: #8a90a0;
+}
+
+.field__value {
+    font-size: 0.95rem;
+}
+
+.dashboard__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-primary {
+    background: #14171f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.sync-message {
+    background: #e6f4ea;
+    color: #1e7a34;
+    border-radius: 8px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.9rem;
+    margin: 1.25rem 0;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #e6e8ee;
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.stat-grid--muted .stat-card {
+    background: #f9fafb;
+}
+
+.stat-card__value {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.stat-card__label {
+    font-size: 0.8rem;
+    color: #5b6270;
+}

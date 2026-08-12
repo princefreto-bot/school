@@ -10,6 +10,10 @@ import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { config } from './config';
 import ssoRoutes from './routes/sso';
+import syncRoutes from './routes/sync';
+import personsRoutes from './routes/persons';
+import dashboardRoutes from './routes/dashboard';
+import schoolsRoutes from './routes/schools';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -67,10 +71,13 @@ app.use('/api', globalLimiter);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/sso', ssoRoutes);
+app.use('/api/sync', syncRoutes);
+app.use('/api/persons', personsRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/schools', schoolsRoutes);
 
-// TODO (M1+) : routes /api/persons, /api/matches, /api/to-classify, /api/duplicates,
-// /api/relations, /api/documents, /api/locations, /api/sources, /api/history,
-// /api/dashboard, /api/settings — protégées par authenticateOperator.
+// TODO (M2+) : /api/matches, /api/to-classify, /api/duplicates, /api/relations,
+// /api/documents, /api/locations, /api/history, /api/settings — protégées par authenticateOperator.
 
 // Sert le build statique du frontend du classeur (même pattern que backend/server.js)
 const frontendDist = path.join(__dirname, '..', '..', 'classeur-frontend', 'dist');
