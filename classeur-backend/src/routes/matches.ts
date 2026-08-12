@@ -3,7 +3,7 @@
 // ============================================================
 import { Router } from 'express';
 import { classeurClient } from '../lib/supabaseClasseur';
-import { attachDocumentIfApplicable } from '../modules/documents/attachDocument';
+import { attachDocumentIfApplicable, attachLocationIfApplicable } from '../modules/documents/attachDocument';
 import { authenticateOperator } from '../middleware/auth';
 import { runMatching } from '../modules/matching/runMatching';
 
@@ -94,6 +94,11 @@ router.post('/:id/confirm', async (req, res) => {
             personId: match.candidate_person_id,
             sourceRecordId: match.source_record_id,
             raw: (record?.raw_data as any)?.raw || {},
+        });
+        await attachLocationIfApplicable({
+            personId: match.candidate_person_id,
+            sourceRecordId: match.source_record_id,
+            extracted,
         });
         await classeurClient
             .from('match_validations')

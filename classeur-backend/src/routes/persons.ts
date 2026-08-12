@@ -96,7 +96,42 @@ router.get('/:id', async (req, res) => {
             (images || []).map(async (i) => ({ ...i, url: await getSignedDocumentUrl(i.storage_path) }))
         );
 
-        return res.json({ person, live, school, documents: documentsWithUrls, images: imagesWithUrls });
+        const [{ data: relTypes }, { data: forwardRels }, { data: reverseRels }, { data: locations }] = await Promise.all([
+            classeurClient.from('relationship_types').select('code, label_fr, inverse_code'),
+            classeurClient
+                .from('relationships')
+                .select('id, status, relationship_types(label_fr), person_b:persons!relationships_person_b_id_fkey(id, display_name)')
+                .eq('person_a_id', person.id),
+            classeurClient
+                .from('relationships')
+                .select('id, status, relationship_types(code, inverse_code), person_a:persons!relationships_person_a_id_fkey(id, display_name)')
+                .eq('person_b_id', person.id),
+            classeurClient
+                .from('person_locations')
+                .select('id, relation_type, status, confidence, locations(label, address_text, source)')
+                .eq('person_id', person.id),
+        ]);
+
+        const labelByCode = new Map((relTypes || []).map((t) => [t.code, t.label_fr]));
+        const relations = [
+            ...(forwardRels || []).map((r: any) => ({
+                id: r.id,
+                status: r.status,
+                label: r.relationship_types?.label_fr,
+                otherPerson: r.person_b,
+            })),
+            ...(reverseRels || []).map((r: any) => {
+                const inverseCode = r.relationship_types?.inverse_code;
+                return {
+                    id: r.id,
+                    status: r.status,
+                    label: inverseCode ? labelByCode.get(inverseCode) : `${r.relationship_types?.code} (réciproque)`,
+                    otherPerson: r.person_a,
+                };
+            }),
+        ];
+
+        return res.json({ person, live, school, documents: documentsWithUrls, images: imagesWithUrls, relations, locations: locations || [] });
     } catch (err: any) {
         console.error('Get person error:', err);
         return res.status(500).json({ error: err.message || 'Erreur lors du chargement de la personne.' });

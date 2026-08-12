@@ -1,4 +1,5 @@
 export interface RoleType {
+    id?: string;
     code: string;
     label_fr: string;
     category: 'staff' | 'student' | 'family' | 'other';
@@ -112,6 +113,57 @@ export interface DocumentItem {
     uploaded_at: string;
     url: string | null;
     person: { id: string; display_name: string } | null;
+}
+
+export interface RelationshipType {
+    id: string;
+    code: string;
+    label_fr: string;
+    inverse_code: string | null;
+}
+
+export interface Relation {
+    id: string;
+    status: string;
+    label: string | null;
+    otherPerson: { id: string; display_name: string } | null;
+}
+
+export interface PersonLocationEntry {
+    id: string;
+    relation_type: string;
+    status: string;
+    confidence: number | null;
+    locations: { label: string | null; address_text: string | null; source: string } | null;
+}
+
+export interface LocationListEntry {
+    id: string;
+    relation_type: string;
+    status: string;
+    confidence: number | null;
+    created_at: string;
+    person: { id: string; display_name: string } | null;
+    locations: { label: string | null; address_text: string | null; source: string } | null;
+}
+
+export interface GlobalRelation {
+    id: string;
+    status: string;
+    created_at: string;
+    relationship_types: { label_fr: string } | null;
+    person_a: { id: string; display_name: string } | null;
+    person_b: { id: string; display_name: string } | null;
+}
+
+export interface HistoryEntry {
+    id: string;
+    actor_name: string | null;
+    action: string;
+    entity_type: string | null;
+    entity_id: string | null;
+    details: Record<string, any> | null;
+    created_at: string;
 }
 
 export interface DashboardStats {

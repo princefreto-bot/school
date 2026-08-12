@@ -19,6 +19,10 @@ import toClassifyRoutes from './routes/toClassify';
 import matchesRoutes from './routes/matches';
 import duplicatesRoutes from './routes/duplicates';
 import documentsRoutes from './routes/documents';
+import relationsRoutes from './routes/relations';
+import locationsRoutes from './routes/locations';
+import historyRoutes from './routes/history';
+import settingsRoutes from './routes/settings';
 import { startCronJobs } from './cron';
 
 const app = express();
@@ -86,9 +90,10 @@ app.use('/api/to-classify', toClassifyRoutes);
 app.use('/api/matches', matchesRoutes);
 app.use('/api/duplicates', duplicatesRoutes);
 app.use('/api/documents', documentsRoutes);
-
-// TODO (M5) : /api/relations, /api/locations, /api/history, /api/settings —
-// protégées par authenticateOperator.
+app.use('/api/relations', relationsRoutes);
+app.use('/api/locations', locationsRoutes);
+app.use('/api/history', historyRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Sert le build statique du frontend du classeur (même pattern que backend/server.js)
 const frontendDist = path.join(__dirname, '..', '..', 'classeur-frontend', 'dist');

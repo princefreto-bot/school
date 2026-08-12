@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import RequireAuth from './components/RequireAuth';
-import StubPage from './components/StubPage';
 import { AuthProvider } from './auth/AuthContext';
 import Dashboard from './pages/Dashboard';
 import SsoPage from './pages/SsoPage';
@@ -12,6 +11,10 @@ import AClasser from './pages/AClasser';
 import Correspondances from './pages/Correspondances';
 import Doublons from './pages/Doublons';
 import Documents from './pages/Documents';
+import Relations from './pages/Relations';
+import Localisations from './pages/Localisations';
+import Historique from './pages/Historique';
+import Parametres from './pages/Parametres';
 
 export default function App() {
     return (
@@ -32,14 +35,11 @@ export default function App() {
                     <Route path="/a-classer" element={<AClasser />} />
                     <Route path="/doublons" element={<Doublons />} />
                     <Route path="/documents" element={<Documents />} />
-                    <Route path="/relations" element={<StubPage title="Relations" note="Arrive en phase M5." />} />
-                    <Route
-                        path="/localisations"
-                        element={<StubPage title="Localisations" note="Réservé au personnel adulte — jamais aux élèves. Arrive en phase M5." />}
-                    />
+                    <Route path="/relations" element={<Relations />} />
+                    <Route path="/localisations" element={<Localisations />} />
                     <Route path="/sources" element={<Sources />} />
-                    <Route path="/historique" element={<StubPage title="Historique" />} />
-                    <Route path="/parametres" element={<StubPage title="Paramètres" />} />
+                    <Route path="/historique" element={<Historique />} />
+                    <Route path="/parametres" element={<Parametres />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Route>
             </Routes>

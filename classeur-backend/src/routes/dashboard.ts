@@ -10,7 +10,7 @@ router.use(authenticateOperator);
 
 router.get('/', async (_req, res) => {
     try {
-        const [persons, eleves, personnel, sources, lastSync, matchesStrong, matchesToVerify, toClassify] = await Promise.all([
+        const [persons, eleves, personnel, sources, lastSync, matchesStrong, matchesToVerify, toClassify, duplicateCandidates] = await Promise.all([
             classeurClient.from('persons').select('id', { count: 'exact', head: true }).eq('status', 'active'),
             classeurClient
                 .from('persons')
@@ -36,6 +36,7 @@ router.get('/', async (_req, res) => {
                 .from('source_records')
                 .select('id', { count: 'exact', head: true })
                 .in('classification_status', ['unclassified', 'to_classify']),
+            classeurClient.from('duplicate_candidates').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
         ]);
 
         return res.json({
@@ -46,8 +47,7 @@ router.get('/', async (_req, res) => {
             matchesStrong: matchesStrong.count ?? 0,
             matchesToVerify: matchesToVerify.count ?? 0,
             toClassify: toClassify.count ?? 0,
-            // Détection de doublons : arrive en M4, renvoyé à 0 pour ne jamais inventer un chiffre.
-            duplicateCandidates: 0,
+            duplicateCandidates: duplicateCandidates.count ?? 0,
             lastSyncAt: lastSync.data?.imported_at ?? null,
         });
     } catch (err: any) {

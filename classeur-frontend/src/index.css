@@ -555,6 +555,61 @@ body {
     border-radius: 8px;
 }
 
+.param-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    color: #5b6270;
+}
+
+.param-field input {
+    padding: 0.5rem 0.7rem;
+    border: 1px solid #d7dae0;
+    border-radius: 8px;
+}
+
+.add-relation-form {
+    margin-top: 0.75rem;
+    padding: 0.9rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 420px;
+}
+
+.add-relation-form input,
+.add-relation-form select {
+    padding: 0.5rem 0.7rem;
+    border: 1px solid #d7dae0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.add-relation-form__tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.add-relation-form__tabs button {
+    flex: 1;
+    padding: 0.4rem;
+    border: 1px solid #d7dae0;
+    background: #fff;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.add-relation-form__tabs button.tab-active {
+    background: #14171f;
+    color: #fff;
+    border-color: #14171f;
+}
+
 .dossier-documents {
     list-style: none;
     margin: 0;

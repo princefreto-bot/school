@@ -17,6 +17,27 @@ router.use(authenticateOperator);
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } }).single('file');
 const DOCUMENTS_BUCKET = 'classeur-documents';
 
+// multer/busboy décodent l'en-tête multipart `filename` en latin1 par défaut, quel que
+// soit l'encodage réel envoyé par le navigateur (toujours UTF-8) — un nom accentué comme
+// "Succès.pdf" ressort donc corrompu ("SuccÃ¨s.pdf"). Re-décodage correctif standard.
+function fixFilenameEncoding(name: string): string {
+    return Buffer.from(name, 'latin1').toString('utf8');
+}
+
+// Les clés d'objet Supabase Storage n'acceptent pas tous les caractères (accents,
+// espaces, apostrophes...) — on ne s'en sert QUE pour le chemin de stockage ; le nom
+// affiché à l'utilisateur (sources.name / original_filename) garde le vrai nom corrigé.
+function slugifyForStorage(name: string): string {
+    const dot = name.lastIndexOf('.');
+    const ext = dot > 0 ? name.slice(dot).toLowerCase().replace(/[^a-z0-9.]/g, '') : '';
+    const base = (dot > 0 ? name.slice(0, dot) : name)
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-zA-Z0-9._-]+/g, '_')
+        .slice(0, 100);
+    return `${base || 'fichier'}${ext}`;
+}
+
 router.get('/', async (_req, res) => {
     try {
         const { data, error } = await classeurClient
@@ -40,6 +61,8 @@ router.post('/', (req, res) => {
         if (!req.file) {
             return res.status(400).json({ error: 'Aucun fichier fourni.' });
         }
+
+        req.file.originalname = fixFilenameEncoding(req.file.originalname);
 
         const sourceType = detectSourceType(req.file.originalname);
         if (!sourceType) {
@@ -79,7 +102,7 @@ router.post('/', (req, res) => {
         // suite, un tick cron traite le contenu en tâche de fond (voir cron/processDocuments.ts).
         if (isDocumentSourceType(sourceType)) {
             try {
-                const storagePath = `imports/${source.id}/${req.file.originalname}`;
+                const storagePath = `imports/${source.id}/${slugifyForStorage(req.file.originalname)}`;
                 const { error: uploadError } = await classeurClient.storage
                     .from(DOCUMENTS_BUCKET)
                     .upload(storagePath, req.file.buffer, { contentType: req.file.mimetype, upsert: true });
