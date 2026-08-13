@@ -1,7 +1,7 @@
 import * as XLSX from 'xlsx';
 import { Student } from '../types';
 import { CLASSES } from '../data/classes';
-import { generateId, getCycleFromClasse, getEcolageFromClasse } from './helpers';
+import { generateId, getCycleFromClasse, getEcolageFromClasse, getFraisInscriptionFromClasse } from './helpers';
 import { useStore } from '../store/useStore';
 
 export const importExcel = (file: File, existingStudents?: Student[]): Promise<Student[]> => {
@@ -113,6 +113,12 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
           const nationalite = row[14] ? String(row[14]).trim() : undefined;
           const numeroTable = row[15] ? String(row[15]).trim() : undefined;
 
+          // Frais d'inscription — colonnes ajoutées en fin de ligne (jamais insérées au
+          // milieu) pour ne pas décaler les fichiers déjà en circulation.
+          const fraisInscription = Number(row[16]) || getFraisInscriptionFromClasse(validClasse, useStore.getState().classRegistrationFees);
+          const inscriptionPaye = Number(row[17]) || 0;
+          const inscriptionRestant = row[18] === 'SOLDE' ? 0 : (Number(row[18]) || Math.max(0, fraisInscription - inscriptionPaye));
+
           const studentId = existingStudent ? existingStudent.id : generateId();
           const student: Student = {
             id: studentId,
@@ -126,6 +132,9 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
             ecolage,
             dejaPaye,
             restant,
+            fraisInscription,
+            inscriptionPaye,
+            inscriptionRestant,
             recu,
             adsn: adsn || undefined,
             cycle: getCycleFromClasse(validClasse),
@@ -179,19 +188,23 @@ export const exportToExcel = (students: Student[], filename: string = 'eleves.xl
     'DATE DE NAISSANCE': s.dateNaissance || '',
     'LIEU DE NAISSANCE': s.lieuNaissance || '',
     'NATIONALITÉ': s.nationalite || '',
-    'N° DE TABLE': s.numeroTable || ''
+    'N° DE TABLE': s.numeroTable || '',
+    'FRAIS D\'INSCRIPTION': s.fraisInscription || 0,
+    'INSCRIPTION PAYÉE': s.inscriptionPaye || 0,
+    'INSCRIPTION RESTANT': (s.inscriptionRestant || 0) === 0 ? 'SOLDÉ' : s.inscriptionRestant
   }));
-  
+
   const worksheet = XLSX.utils.json_to_sheet(data);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Élèves');
-  
+
   // Auto-size columns
   const colWidths = [
     { wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 10 },
     { wch: 15 }, { wch: 6 }, { wch: 12 }, { wch: 25 },
     { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 15 },
-    { wch: 20 }, { wch: 20 }, { wch: 15 }, { wch: 15 }
+    { wch: 20 }, { wch: 20 }, { wch: 15 }, { wch: 15 },
+    { wch: 16 }, { wch: 16 }, { wch: 16 }
   ];
   worksheet['!cols'] = colWidths;
   

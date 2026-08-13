@@ -251,19 +251,28 @@ export const RecuPaiementPDF: React.FC<RecuPaiementPDFProps> = ({
   const mode = tx?.mode || tx?.methode || 'Espèces';
   const reference = tx?.reference || NA;
 
-  const totalDu = student.ecolage || 0;
-  // Réduction = somme des réductions accordées sur l'ensemble des versements.
-  const reduction = (student.historiquesPaiements || []).reduce((t, p) => t + (Number(p.reduction) || 0), 0);
-  const paye = student.dejaPaye || 0;
+  // Un reçu documente une seule transaction — écolage et frais d'inscription ne sont
+  // jamais mélangés sur un même document, même si le compte a les deux (voir Paramètres >
+  // Frais d'inscription).
+  const isInscription = tx?.type === 'inscription';
+
+  const totalDu = isInscription ? (student.fraisInscription || 0) : (student.ecolage || 0);
+  // Réduction = somme des réductions accordées sur l'ensemble des versements (concept
+  // propre à l'écolage — les frais d'inscription n'en ont pas).
+  const reduction = isInscription ? 0 : (student.historiquesPaiements || []).reduce((t, p) => t + (Number(p.reduction) || 0), 0);
+  const paye = isInscription ? (student.inscriptionPaye || 0) : (student.dejaPaye || 0);
   // Reste cohérent sur le document : dû − réduction − payé.
-  const reste = Math.max(0, totalDu - reduction - paye);
+  const reste = isInscription ? (student.inscriptionRestant || 0) : Math.max(0, totalDu - reduction - paye);
   const solde = reste <= 0;
 
   // QR : le numéro de reçu suffit à la vérification (page Vérif. Reçus).
   const qrValue = numero;
 
   const detailRows: DetailRow[] = [
-    { label: `Frais de scolarité — ${schoolYear || ''}`.trim(), montant: totalDu, reduction, paye, reste, strong: true },
+    {
+      label: `${isInscription ? "Frais d'inscription" : 'Frais de scolarité'} — ${schoolYear || ''}`.trim(),
+      montant: totalDu, reduction, paye, reste, strong: true,
+    },
   ];
 
   return (

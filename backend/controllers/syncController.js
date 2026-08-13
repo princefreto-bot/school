@@ -130,6 +130,9 @@ async function syncFromFrontend(req, res) {
                 ecolage: s.ecolage || 0,
                 deja_paye: s.dejaPaye || 0,
                 restant: s.restant || 0,
+                frais_inscription: s.fraisInscription || 0,
+                inscription_paye: s.inscriptionPaye || 0,
+                inscription_restant: s.inscriptionRestant || 0,
                 status: s.status || 'Non soldé',
                 telephone_parent: s.telephone || null,
                 sexe: s.sexe || 'M',
@@ -211,6 +214,7 @@ async function syncFromFrontend(req, res) {
                             reduction: p.reduction || 0,
                             mode: p.mode || null,
                             reference: p.reference || null,
+                            type: p.type || 'ecolage',
                             academic_year_id: academicYearId || null
                         });
                     });
@@ -381,6 +385,7 @@ async function syncFromFrontend(req, res) {
                     // les tranches / frais personnalisés à chaque sync partiel ne les concernant pas.
                     tranches: appSettings.tranches,
                     class_fees: appSettings.classFees,
+                    class_registration_fees: appSettings.classRegistrationFees,
                     school_motto: appSettings.schoolMotto,
                     school_bp: appSettings.schoolBp,
                     school_telephone: appSettings.schoolTelephone,
@@ -628,6 +633,9 @@ async function syncToFrontend(req, res) {
             studentMap.set(s.id, {
                 ...s,
                 dejaPaye: s.deja_paye,
+                fraisInscription: s.frais_inscription || 0,
+                inscriptionPaye: s.inscription_paye || 0,
+                inscriptionRestant: s.inscription_restant || 0,
                 telephone: s.telephone_parent,
                 sexe: s.sexe || 'M',
                 redoublant: s.redoublant || false,
@@ -651,7 +659,8 @@ async function syncToFrontend(req, res) {
                     note: p.note,
                     reduction: p.reduction != null ? Number(p.reduction) : 0,
                     mode: p.mode || undefined,
-                    reference: p.reference || undefined
+                    reference: p.reference || undefined,
+                    type: p.type || 'ecolage'
                 });
             }
         });
@@ -687,6 +696,7 @@ async function syncToFrontend(req, res) {
                 messageRappel: appSettings.message_rappel,
                 tranches: appSettings.tranches || [],
                 classFees: appSettings.class_fees || {},
+                classRegistrationFees: appSettings.class_registration_fees || {},
                 schoolMotto: appSettings.school_motto,
                 schoolBp: appSettings.school_bp,
                 schoolTelephone: appSettings.school_telephone,

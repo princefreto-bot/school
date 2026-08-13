@@ -78,6 +78,21 @@ export const getEffectiveEcolage = (className: string, overrides?: Record<string
   return getEcolage(className);
 };
 
+// Frais d'inscription : contrairement à l'écolage, pas de tarif générique par défaut — les
+// frais d'inscription varient trop d'une école à l'autre pour en inventer un. Une classe sans
+// entrée dans `overrides` (voir Paramètres > Frais d'inscription) vaut 0, jamais un montant
+// deviné.
+export const getEffectiveFraisInscription = (className: string, overrides?: Record<string, number> | null): number => {
+  if (overrides) {
+    const key = normalize(className);
+    const override = Object.entries(overrides).find(([k]) => normalize(k) === key);
+    if (override && typeof override[1] === 'number' && !Number.isNaN(override[1])) {
+      return override[1];
+    }
+  }
+  return 0;
+};
+
 export const getCycle = (className: string): Cycle => {
   const config = getClassConfig(className);
   return config ? config.cycle : 'Primaire';

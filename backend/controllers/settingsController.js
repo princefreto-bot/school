@@ -143,4 +143,69 @@ async function recalculateFees(req, res) {
     }
 }
 
-module.exports = { getPublicSettings, getReminderSettings, updateReminderSettings, recalculateFees };
+/**
+ * POST /api/settings/recalculate-registration-fees
+ * Applique les frais d'inscription personnalisés (class_registration_fees, déjà
+ * enregistrés via updateAllSettings) aux élèves déjà créés : recalcule
+ * frais_inscription/inscription_restant pour chaque élève dont la classe a un
+ * tarif personnalisé, sans toucher aux autres. Ne modifie jamais inscription_paye,
+ * ni aucun champ de l'écolage — piste totalement séparée (voir recalculateFees).
+ */
+async function recalculateRegistrationFees(req, res) {
+    const { schoolSlug } = req.user;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+
+    try {
+        const { data: settings, error: settingsErr } = await supabase
+            .from(`app_settings_${schoolSlug}`)
+            .select('class_registration_fees')
+            .eq('id', 'global_settings')
+            .single();
+        if (settingsErr) throw settingsErr;
+
+        const classRegistrationFees = settings?.class_registration_fees || {};
+        const overrideEntries = Object.entries(classRegistrationFees).filter(
+            ([, v]) => typeof v === 'number' && !Number.isNaN(v) && v >= 0
+        );
+        if (overrideEntries.length === 0) {
+            return res.json({ updated: 0, total: 0, message: 'Aucun frais d\'inscription personnalisé à appliquer.' });
+        }
+
+        const { data: students, error: studentsErr } = await supabase
+            .from(`students_${schoolSlug}`)
+            .select('id, classe, inscription_paye, frais_inscription');
+        if (studentsErr) throw studentsErr;
+
+        const findOverride = (classe) => {
+            const target = String(classe || '').trim().toLowerCase();
+            const match = overrideEntries.find(([k]) => k.trim().toLowerCase() === target);
+            return match ? match[1] : null;
+        };
+
+        let updated = 0;
+        for (const student of students || []) {
+            const newFrais = findOverride(student.classe);
+            if (newFrais == null || newFrais === student.frais_inscription) continue;
+
+            const inscriptionPaye = Number(student.inscription_paye) || 0;
+            const inscriptionRestant = Math.max(0, newFrais - inscriptionPaye);
+
+            const { error: updateErr } = await supabase
+                .from(`students_${schoolSlug}`)
+                .update({ frais_inscription: newFrais, inscription_restant: inscriptionRestant })
+                .eq('id', student.id);
+            if (updateErr) {
+                console.error(`recalculateRegistrationFees: échec mise à jour élève ${student.id}:`, updateErr.message);
+                continue;
+            }
+            updated++;
+        }
+
+        return res.json({ updated, total: (students || []).length });
+    } catch (err) {
+        console.error('recalculateRegistrationFees error:', err.message);
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+module.exports = { getPublicSettings, getReminderSettings, updateReminderSettings, recalculateFees, recalculateRegistrationFees };

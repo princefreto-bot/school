@@ -6,6 +6,7 @@ const SIGNED_URL_TTL_SECONDS = 60 * 60; // 1h — bucket privé, même pattern q
 const CODE_CAISSE = '571';
 const CODE_BANQUE = '521';
 const CODE_PRODUITS_SCOLARITE = '706';
+const CODE_FRAIS_INSCRIPTION = '705';
 
 async function getAccountByCode(schoolSlug, code) {
     const { data, error } = await supabase
@@ -375,21 +376,24 @@ async function postPaymentsToLedger(schoolSlug, newPayments, studentsById) {
     if (!newPayments || newPayments.length === 0) return;
 
     try {
-        const [caisse, produitsScolarite] = await Promise.all([
+        const [caisse, produitsScolarite, fraisInscription] = await Promise.all([
             getAccountByCode(schoolSlug, CODE_CAISSE),
-            getAccountByCode(schoolSlug, CODE_PRODUITS_SCOLARITE)
+            getAccountByCode(schoolSlug, CODE_PRODUITS_SCOLARITE),
+            getAccountByCode(schoolSlug, CODE_FRAIS_INSCRIPTION)
         ]);
 
         for (const payment of newPayments) {
             const student = studentsById[payment.student_id];
             const studentName = student ? `${student.prenom || ''} ${student.nom || ''}`.trim() : payment.student_id;
+            const isInscription = payment.type === 'inscription';
+            const produitAccount = isInscription ? fraisInscription : produitsScolarite;
 
             const { data: entry, error: entryErr } = await supabase
                 .from(`journal_entries_${schoolSlug}`)
                 .insert({
                     date: payment.date,
                     reference: 'PAIEMENT',
-                    description: `Paiement scolarité - ${studentName}`
+                    description: isInscription ? `Frais d'inscription - ${studentName}` : `Paiement scolarité - ${studentName}`
                 })
                 .select('id')
                 .single();
@@ -400,7 +404,7 @@ async function postPaymentsToLedger(schoolSlug, newPayments, studentsById) {
                 .from(`journal_entry_lines_${schoolSlug}`)
                 .insert([
                     { entry_id: entry.id, account_id: caisse.id, debit: amount, credit: 0 },
-                    { entry_id: entry.id, account_id: produitsScolarite.id, debit: 0, credit: amount }
+                    { entry_id: entry.id, account_id: produitAccount.id, debit: 0, credit: amount }
                 ]);
             if (linesErr) throw linesErr;
         }

@@ -1,5 +1,5 @@
 import { Student, StatusPaiement, DashboardStats, ClassStats } from '../types';
-import { getCycle, getEffectiveEcolage, CLASS_CONFIG } from '../data/classConfig';
+import { getCycle, getEffectiveEcolage, getEffectiveFraisInscription, CLASS_CONFIG } from '../data/classConfig';
 
 // Année scolaire "par défaut" calculée dynamiquement (au lieu d'une chaîne codée en dur
 // qui devenait fausse chaque nouvelle rentrée) — bascule sur la rentrée suivante à partir
@@ -26,6 +26,10 @@ export const getCycleFromClasse = (classe: string): 'Primaire' | 'Collège' | 'L
 
 export const getEcolageFromClasse = (classe: string, overrides?: Record<string, number> | null): number => {
   return getEffectiveEcolage(classe, overrides);
+};
+
+export const getFraisInscriptionFromClasse = (classe: string, overrides?: Record<string, number> | null): number => {
+  return getEffectiveFraisInscription(classe, overrides);
 };
 
 export const getStatusPaiement = (student: Student, seuil: number = 70): StatusPaiement => {

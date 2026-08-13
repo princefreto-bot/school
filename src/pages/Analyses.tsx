@@ -110,6 +110,13 @@ export const Analyses: React.FC = () => {
 
   const radarData = useMemo(() => cycleComparison.map((c) => ({ cycle: c.cycle, taux: c.taux })), [cycleComparison]);
 
+  // Frais d'inscription — piste distincte de l'écolage, jamais fondue dans les KPIs
+  // ci-dessus (voir Paramètres > Frais d'inscription).
+  const totalFraisInscription = students.reduce((a, s) => a + (s.fraisInscription || 0), 0);
+  const totalInscriptionPaye = students.reduce((a, s) => a + (s.inscriptionPaye || 0), 0);
+  const totalInscriptionRestant = students.reduce((a, s) => a + (s.inscriptionRestant || 0), 0);
+  const tauxInscription = totalFraisInscription > 0 ? Math.round((totalInscriptionPaye / totalFraisInscription) * 100) : 0;
+
   if (students.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fadeIn">
@@ -174,6 +181,33 @@ export const Analyses: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* ── FRAIS D'INSCRIPTION (piste séparée de l'écolage) ── */}
+      {totalFraisInscription > 0 && (
+        <div className="pro-card p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-indigo-200/40 dark:border-indigo-500/20">
+          <div className="flex items-center justify-between mb-6">
+            <div className="space-y-1">
+              <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight">Frais d'inscription</h3>
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Suivi distinct de l'écolage</p>
+            </div>
+            <div className="text-3xl font-black text-indigo-500 dark:text-indigo-400 tracking-tighter">{maskValue(`${tauxInscription}%`)}</div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-indigo-50/80 dark:bg-indigo-900/20 border border-indigo-500/20 rounded-2xl p-4">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total attendu</p>
+              <p className="text-xl font-black text-slate-900 dark:text-white">{maskValue(`${fmtMoney(totalFraisInscription)} F`)}</p>
+            </div>
+            <div className="bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-500/20 rounded-2xl p-4">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Encaissé</p>
+              <p className="text-xl font-black text-slate-900 dark:text-white">{maskValue(`${fmtMoney(totalInscriptionPaye)} F`)}</p>
+            </div>
+            <div className="bg-rose-50/80 dark:bg-rose-900/20 border border-rose-500/20 rounded-2xl p-4">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Restant</p>
+              <p className="text-xl font-black text-slate-900 dark:text-white">{maskValue(`${fmtMoney(totalInscriptionRestant)} F`)}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── BAR CHART ── */}
       <div className="pro-card p-8">

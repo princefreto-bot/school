@@ -303,6 +303,14 @@ bulletList([
   "Impression individuelle ou en lot (par classe, par statut).",
   "Vérification d'authenticité d'un reçu via son numéro ou son QR code (page « Vérif. Reçus »).",
 ]);
+subTitle('Frais d\'inscription');
+paragraph("Distincts de l'écolage : un montant à percevoir à l'inscription (ou la réinscription) de l'élève, jamais mélangé au suivi de l'écolage — solde, statut et reçu séparés.");
+stepList([
+  "Définissez le tarif par classe dans Paramètres > Frais d'inscription (une classe laissée à 0 n'a pas de frais d'inscription).",
+  "À l'enregistrement d'un paiement, choisissez le type de versement : Écolage ou Frais d'inscription.",
+  "Le reçu généré documente uniquement le type de versement concerné.",
+]);
+paragraph("Le suivi (total attendu, encaissé, restant) apparaît sur le Tableau de bord et la page Analyses dans un encart séparé — il n'est jamais additionné aux totaux de l'écolage, ni pris en compte dans le score de priorité du module Recouvrement.");
 
 // ── 5. COMPTABILITÉ ──
 sectionTitle(5, 'Comptabilité');
@@ -322,7 +330,7 @@ stepList([
 subTitle('Préparer votre budget prévisionnel');
 paragraph("Le budget prévisionnel s'établit avant le début de l'année scolaire, pour anticiper vos recettes et vos dépenses. Ce n'est pas encore un module automatisé de DGhubSchool, mais vous pouvez le construire facilement en vous appuyant sur les données déjà disponibles dans votre espace.");
 bulletList([
-  "Recettes prévisionnelles : nombre d'élèves attendus par classe (page Élèves) × frais de scolarité, plus frais d'inscription et autres revenus éventuels (cantine, transport, activités).",
+  "Recettes prévisionnelles : nombre d'élèves attendus par classe (page Élèves) × frais de scolarité, plus le total attendu des frais d'inscription (encart dédié sur le Tableau de bord et la page Analyses) et autres revenus éventuels (cantine, transport, activités).",
   "Dépenses prévisionnelles : reprenez votre masse salariale actuelle (page Paie) comme base, et le détail de votre Compte de résultat de l'année en cours poste par poste (eau, électricité, fournitures, entretien...).",
   "Ajoutez une marge pour imprévus de 5 à 10 % du total des charges.",
 ]);

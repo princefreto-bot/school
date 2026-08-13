@@ -44,6 +44,7 @@ BEGIN
             (''571'', ''Caisse'', ''actif''),
             (''401'', ''Dettes fournisseurs'', ''passif''),
             (''706'', ''Produits de scolarité'', ''produit''),
+            (''705'', ''Frais d''''inscription'', ''produit''),
             (''758'', ''Autres produits'', ''produit''),
             (''641'', ''Charges de personnel'', ''charge''),
             (''606'', ''Fournitures'', ''charge''),

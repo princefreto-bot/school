@@ -21,10 +21,12 @@ const fmtDate = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: '2
 // ── Modale ajout paiement ────────────────────────────────────
 const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ student, onClose }) => {
   const addPayment = useStore((s) => s.addPayment);
+  const hasInscriptionFee = (student.fraisInscription || 0) > 0;
+  const [feeType, setFeeType] = useState<'ecolage' | 'inscription'>('ecolage');
   const [form, setForm] = useState({ montant: '', recu: '', note: '', date: new Date().toISOString().slice(0, 10), mode: 'Espèces', reference: '', reduction: '' });
   const [error, setError] = useState('');
 
-  const maxPay = student.restant;
+  const maxPay = feeType === 'inscription' ? (student.inscriptionRestant || 0) : student.restant;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +40,8 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
       date: form.date,
       mode: form.mode,
       reference: form.reference || undefined,
-      reduction: Number(form.reduction) || 0,
+      reduction: feeType === 'inscription' ? 0 : (Number(form.reduction) || 0),
+      type: feeType,
     });
     onClose();
   };
@@ -78,10 +81,55 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
                 <p className="font-black text-rose-600 dark:text-rose-400">{fmtMoney(student.restant)}</p>
               </div>
             </div>
+            {hasInscriptionFee && (
+              <div className="grid grid-cols-3 gap-4 text-sm mt-4 pt-4 border-t border-amber-200/60 dark:border-amber-800/30">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Frais d'inscription</p>
+                  <p className="font-bold text-slate-700 dark:text-slate-300">{fmtMoney(student.fraisInscription || 0)}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Déjà payé</p>
+                  <p className="font-bold text-emerald-600 dark:text-emerald-400">{fmtMoney(student.inscriptionPaye || 0)}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Restant</p>
+                  <p className="font-black text-rose-600 dark:text-rose-400">{fmtMoney(student.inscriptionRestant || 0)}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {hasInscriptionFee && (
+            <div>
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Type de versement</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setFeeType('ecolage'); setForm({ ...form, montant: '' }); setError(''); }}
+                  className={`py-3 rounded-2xl text-[12px] font-black uppercase tracking-widest border transition-all ${
+                    feeType === 'ecolage'
+                      ? 'bg-amber-500 border-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+                      : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-500'
+                  }`}
+                >
+                  Écolage
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setFeeType('inscription'); setForm({ ...form, montant: '' }); setError(''); }}
+                  className={`py-3 rounded-2xl text-[12px] font-black uppercase tracking-widest border transition-all ${
+                    feeType === 'inscription'
+                      ? 'bg-amber-500 border-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+                      : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-500'
+                  }`}
+                >
+                  Frais d'inscription
+                </button>
+              </div>
+            </div>
+          )}
           <div>
             <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Montant perçu (FCFA) *</label>
             <input
@@ -129,16 +177,18 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
                 <option value="Carte bancaire">Carte bancaire</option>
               </select>
             </div>
-            <div>
-              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Réduction (FCFA)</label>
-              <input
-                type="number" min={0}
-                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white"
-                value={form.reduction}
-                onChange={(e) => setForm({ ...form, reduction: e.target.value })}
-                placeholder="0"
-              />
-            </div>
+            {feeType === 'ecolage' && (
+              <div>
+                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Réduction (FCFA)</label>
+                <input
+                  type="number" min={0}
+                  className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white"
+                  value={form.reduction}
+                  onChange={(e) => setForm({ ...form, reduction: e.target.value })}
+                  placeholder="0"
+                />
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -216,8 +266,15 @@ const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => voi
             <span className="text-slate-300 dark:text-slate-700">•</span>
             <span className="text-[11px] font-bold text-slate-500">{student.historiquesPaiements.length} transaction(s)</span>
           </div>
+          {(student.fraisInscription || 0) > 0 && (
+            <p className={`text-[11px] font-bold mt-1.5 ${(student.inscriptionRestant || 0) > 0 ? 'text-indigo-500' : 'text-slate-400'}`}>
+              Inscription : {(student.inscriptionRestant || 0) > 0
+                ? `${new Intl.NumberFormat('fr-FR').format(student.inscriptionPaye || 0)} / ${new Intl.NumberFormat('fr-FR').format(student.fraisInscription || 0)} F`
+                : 'Soldée'}
+            </p>
+          )}
         </div>
-        
+
         <div className="flex items-center justify-between sm:justify-end gap-6 sm:w-auto">
           <div className="text-left sm:text-right">
             <p className="text-sm font-black text-emerald-600 dark:text-emerald-400 tracking-tight">{new Intl.NumberFormat('fr-FR').format(student.dejaPaye)} F</p>
@@ -227,7 +284,7 @@ const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => voi
           </div>
           
           <div className="flex items-center gap-3">
-            {student.restant > 0 && (user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') && (
+            {(student.restant > 0 || (student.inscriptionRestant || 0) > 0) && (user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') && (
               <button
                 onClick={(e) => { e.stopPropagation(); onPay(student); }}
                 className="shrink-0 flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-amber-600 hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_20px_rgba(245,158,11,0.5)]"
@@ -325,11 +382,15 @@ export const Paiements: React.FC = () => {
                   const ecolage = s.ecolage || 0;
                   const dejaPaye = s.deja_paye ?? 0;
                   const restantVal = typeof s.restant === 'number' ? s.restant : ecolage - dejaPaye;
+                  const fraisInscription = s.frais_inscription || 0;
+                  const inscriptionPaye = s.inscription_paye || 0;
+                  const inscriptionRestant = typeof s.inscription_restant === 'number' ? s.inscription_restant : Math.max(0, fraisInscription - inscriptionPaye);
                   return {
                     id: s.id, nom: s.nom, prenom: s.prenom || '', classe: s.classe || 'Inconnue',
                     telephone: s.telephone || s.telephone_parent || '', parentId: s.parent_id || undefined,
                     sexe: s.sexe || 'M', redoublant: s.redoublant || false, ecoleProvenance: s.ecole_provenance || '',
-                    ecolage, dejaPaye, restant: restantVal, recu: s.recu || '', cycle: getCycle(s.classe),
+                    ecolage, dejaPaye, restant: restantVal, fraisInscription, inscriptionPaye, inscriptionRestant,
+                    recu: s.recu || '', cycle: getCycle(s.classe),
                     status: computeStatus(restantVal, ecolage), historiquesPaiements: s.historiques_paiements || [],
                     createdAt: s.created_at || new Date().toISOString(), updatedAt: s.updated_at || new Date().toISOString(),
                   };

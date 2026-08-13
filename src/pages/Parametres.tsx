@@ -178,6 +178,54 @@ export const Parametres: React.FC = () => {
     }
   };
 
+  // ── Frais d'inscription personnalisés par classe (piste distincte de l'écolage) ──
+  const classRegistrationFees = useStore((s) => s.classRegistrationFees);
+  const recalculateStudentRegistrationFees = useStore((s) => s.recalculateStudentRegistrationFees);
+  const [localRegistrationFees, setLocalRegistrationFees] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    CLASS_CONFIG.forEach((c) => {
+      const override = classRegistrationFees?.[c.name];
+      initial[c.name] = String(override != null ? override : 0);
+    });
+    return initial;
+  });
+  const [registrationFeesSaved, setRegistrationFeesSaved] = useState(false);
+  const [recalculatingRegistration, setRecalculatingRegistration] = useState(false);
+  const [recalcRegistrationMessage, setRecalcRegistrationMessage] = useState('');
+
+  const handleSaveRegistrationFees = async () => {
+    const fees: Record<string, number> = {};
+    CLASS_CONFIG.forEach((c) => {
+      const val = Number(localRegistrationFees[c.name]);
+      if (!Number.isNaN(val) && val > 0) fees[c.name] = val;
+    });
+
+    setRecalcRegistrationMessage('');
+    try {
+      await updateAllSettings({ classRegistrationFees: fees });
+      setRegistrationFeesSaved(true);
+      setTimeout(() => setRegistrationFeesSaved(false), 3000);
+    } catch (err) {
+      setRecalcRegistrationMessage("Erreur lors de l'enregistrement des frais. Vérifiez votre connexion et réessayez.");
+      return;
+    }
+
+    const hasOverrides = Object.keys(fees).length > 0;
+    if (hasOverrides && window.confirm(
+      "Appliquer aussi ces nouveaux tarifs aux élèves déjà inscrits dans ces classes ? " +
+      "Le montant dû (restant à payer sur l'inscription) sera recalculé — les paiements déjà encaissés ne sont pas modifiés."
+    )) {
+      setRecalculatingRegistration(true);
+      const result = await recalculateStudentRegistrationFees();
+      setRecalculatingRegistration(false);
+      setRecalcRegistrationMessage(
+        result.success
+          ? `${result.updated ?? 0} élève${(result.updated ?? 0) > 1 ? 's' : ''} mis à jour avec les nouveaux tarifs.`
+          : (result.error || 'Erreur lors du recalcul.')
+      );
+    }
+  };
+
   // Sections avancées repliées par défaut sur un profil neuf (moins intimidant),
   // mais ouvertes d'office si l'école a déjà renseigné ces champs.
   const [legalOpen, setLegalOpen] = useState(() => !!(schoolIfu || schoolRccm || schoolNif || schoolAutorisation));
@@ -1142,6 +1190,74 @@ export const Parametres: React.FC = () => {
                         >
                             {recalculating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                             {recalculating ? 'Application en cours...' : feesSaved ? 'Enregistré' : 'Enregistrer'}
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ── FRAIS D'INSCRIPTION PERSONNALISÉS ────────────────── */}
+            {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
+                <div className="pro-card p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+                        <h3 className="font-black text-lg text-slate-900 dark:text-white flex items-center gap-3">
+                            <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl">
+                                <Wallet className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                            </div>
+                            Frais d'inscription
+                        </h3>
+                    </div>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mb-6">
+                        Distincts de l'écolage — un montant unique perçu à l'inscription (ou réinscription) de l'élève, suivi séparément. Une classe laissée à 0 n'a pas de frais d'inscription.
+                    </p>
+
+                    <div className="space-y-6">
+                        {(['Primaire', 'Collège', 'Lycée'] as const).map((cycle) => (
+                            <div key={cycle}>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{cycle}</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {CLASS_CONFIG.filter((c) => c.cycle === cycle).map((c) => {
+                                        const isCustom = Number(localRegistrationFees[c.name]) > 0;
+                                        return (
+                                            <div key={c.name} className="flex items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                                    {c.name}
+                                                    {isCustom && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" title="Frais d'inscription défini" />}
+                                                </span>
+                                                <div className="relative">
+                                                    <input
+                                                        type="number"
+                                                        min={0}
+                                                        step={500}
+                                                        value={localRegistrationFees[c.name] ?? ''}
+                                                        onChange={(e) => setLocalRegistrationFees((prev) => ({ ...prev, [c.name]: e.target.value }))}
+                                                        className="w-32 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg pl-3 pr-12 py-2 text-sm font-bold text-slate-900 dark:text-white text-right focus:ring-2 focus:ring-indigo-500 outline-none"
+                                                    />
+                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400">{localCurrency || 'FCFA'}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {recalcRegistrationMessage && (
+                        <p className="mt-4 text-xs font-bold text-slate-500 dark:text-slate-400">{recalcRegistrationMessage}</p>
+                    )}
+
+                    <div className="flex justify-end pt-6">
+                        <button
+                            onClick={handleSaveRegistrationFees}
+                            disabled={recalculatingRegistration}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all disabled:opacity-60 ${
+                                registrationFeesSaved
+                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20'
+                            }`}
+                        >
+                            {recalculatingRegistration ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            {recalculatingRegistration ? 'Application en cours...' : registrationFeesSaved ? 'Enregistré' : 'Enregistrer'}
                         </button>
                     </div>
                 </div>

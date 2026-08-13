@@ -5,7 +5,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Student, User, AppPage, Payment, Parent, AppSettings, Presence, ActivityLog, CycleSchedule, Announcement, AnnouncementRead, Matiere, ClasseMatiere, Note, PeriodeType } from '../types';
 import { API_BASE_URL, BACKEND_URL } from '../config';
-import { getEcolage, getCycle, getEffectiveEcolage } from '../data/classConfig';
+import { getEcolage, getCycle, getEffectiveEcolage, getEffectiveFraisInscription } from '../data/classConfig';
 import { getCurrentAcademicYear } from '../utils/helpers';
 import { v4 as uuid } from '../utils/uuid';
 import { createActivityLog } from '../utils/activityLogger';
@@ -48,6 +48,11 @@ export interface AppState {
   classFees: Record<string, number>;
   setClassFees: (fees: Record<string, number>) => void;
   recalculateStudentFees: () => Promise<{ success: boolean; updated?: number; error?: string }>;
+  // Frais d'inscription personnalisés par classe (Paramètres > Frais d'inscription) — même
+  // mécanique que classFees mais piste totalement séparée, jamais mélangée à l'écolage.
+  classRegistrationFees: Record<string, number>;
+  setClassRegistrationFees: (fees: Record<string, number>) => void;
+  recalculateStudentRegistrationFees: () => Promise<{ success: boolean; updated?: number; error?: string }>;
 
   // Auth
   user: User | null;
@@ -73,7 +78,7 @@ export interface AppState {
   // Élèves
   students: Student[];
   setStudents: (students: Student[]) => void;
-  addStudent: (student: Omit<Student, 'id' | 'createdAt' | 'updatedAt' | 'cycle' | 'status' | 'restant' | 'historiquesPaiements' | 'ecolage'>) => void;
+  addStudent: (student: Omit<Student, 'id' | 'createdAt' | 'updatedAt' | 'cycle' | 'status' | 'restant' | 'historiquesPaiements' | 'ecolage' | 'fraisInscription' | 'inscriptionRestant'>) => void;
   updateStudent: (id: string, updates: Partial<Student>) => void;
   updateMultipleStudents: (updates: { id: string; updates: Partial<Student> }[]) => void;
   deleteStudent: (id: string) => void;
@@ -159,6 +164,7 @@ export interface AppState {
     messageRappel?: string,
     tranches?: any[],
     classFees?: Record<string, number>,
+    classRegistrationFees?: Record<string, number>,
     schoolMotto?: string,
     schoolBp?: string,
     schoolTelephone?: string,
@@ -333,19 +339,31 @@ const deduplicateStudents = (list: Student[]): { list: Student[]; countRemoved: 
 // Réparation des données (cycle, écolage, restant, status). `classFees` = frais
 // personnalisés de l'école (Paramètres > Frais de scolarité) — sans quoi cette fonction
 // « corrigerait » silencieusement chaque étudiant vers le tarif générique à chaque sync.
-const repairStudent = (s: Student, classFees?: Record<string, number>): Student => {
+// `classRegistrationFees` fait la même chose pour les frais d'inscription, piste séparée :
+// seul `inscriptionPaye` (alimenté par les paiements) est une donnée propre à l'élève, le
+// montant dû est toujours recalculé depuis le tarif de l'école.
+const repairStudent = (s: Student, classFees?: Record<string, number>, classRegistrationFees?: Record<string, number>): Student => {
   const correctCycle = getCycle(s.classe);
   const correctEcolage = getEffectiveEcolage(s.classe, classFees);
   const correctRestant = Math.max(0, correctEcolage - s.dejaPaye);
   const correctStatus = computeStatus(correctRestant, correctEcolage);
+  const correctFraisInscription = getEffectiveFraisInscription(s.classe, classRegistrationFees);
+  const inscriptionPaye = s.inscriptionPaye || 0;
+  const correctInscriptionRestant = Math.max(0, correctFraisInscription - inscriptionPaye);
 
-  if (s.cycle !== correctCycle || s.ecolage !== correctEcolage || s.restant !== correctRestant || s.status !== correctStatus) {
+  if (
+    s.cycle !== correctCycle || s.ecolage !== correctEcolage || s.restant !== correctRestant || s.status !== correctStatus ||
+    (s.fraisInscription || 0) !== correctFraisInscription || (s.inscriptionRestant || 0) !== correctInscriptionRestant
+  ) {
     return {
       ...s,
       cycle: correctCycle,
       ecolage: correctEcolage,
       restant: correctRestant,
       status: correctStatus,
+      fraisInscription: correctFraisInscription,
+      inscriptionPaye,
+      inscriptionRestant: correctInscriptionRestant,
       updatedAt: new Date().toISOString()
     };
   }
@@ -389,6 +407,22 @@ export const useStore = create<AppState>()(
       recalculateStudentFees: async () => {
         try {
           const res = await fetch(`${API_BASE_URL}/settings/recalculate-fees`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) return { success: false, error: data.error || 'Erreur lors du recalcul.' };
+          await get().fetchAllFromBackend(true);
+          return { success: true, updated: data.updated };
+        } catch (err) {
+          return { success: false, error: 'Erreur réseau lors du recalcul.' };
+        }
+      },
+      classRegistrationFees: {},
+      setClassRegistrationFees: (classRegistrationFees) => set({ classRegistrationFees }),
+      recalculateStudentRegistrationFees: async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/settings/recalculate-registration-fees`, {
             method: 'POST',
             headers: getAuthHeaders(),
           });
@@ -618,10 +652,13 @@ export const useStore = create<AppState>()(
 
       // ── Élèves ───────────────────────────────────────────
       students: [],
-      setStudents: (students) => set({ students: deduplicateStudents(students.map((s) => repairStudent(s, get().classFees))).list }),
+      setStudents: (students) => set({ students: deduplicateStudents(students.map((s) => repairStudent(s, get().classFees, get().classRegistrationFees))).list }),
       addStudent: (data) => {
         const ecolage = getEffectiveEcolage((data as { classe: string }).classe, get().classFees);
         const restant = ecolage - ((data as { dejaPaye?: number }).dejaPaye || 0);
+        const fraisInscription = getEffectiveFraisInscription((data as { classe: string }).classe, get().classRegistrationFees);
+        const inscriptionPaye = (data as { inscriptionPaye?: number }).inscriptionPaye || 0;
+        const inscriptionRestant = Math.max(0, fraisInscription - inscriptionPaye);
         const studentId = uuid();
         const existing = get().students.find(s => 
           (s.nom || '').toLowerCase() === (data.nom || '').toLowerCase() && 
@@ -640,6 +677,9 @@ export const useStore = create<AppState>()(
           id: studentId,
           ecolage,
           restant,
+          fraisInscription,
+          inscriptionPaye,
+          inscriptionRestant,
           cycle: getCycle(data.classe),
           status: computeStatus(restant, ecolage),
           historiquesPaiements: [],
@@ -665,9 +705,13 @@ export const useStore = create<AppState>()(
           if (updates.classe) {
             updated.ecolage = getEffectiveEcolage(updates.classe, get().classFees);
             updated.cycle = getCycle(updates.classe);
+            updated.fraisInscription = getEffectiveFraisInscription(updates.classe, get().classRegistrationFees);
           }
           if (updates.dejaPaye !== undefined || updates.classe) {
             updated.restant = updated.ecolage - updated.dejaPaye;
+          }
+          if (updates.inscriptionPaye !== undefined || updates.classe) {
+            updated.inscriptionRestant = Math.max(0, (updated.fraisInscription || 0) - (updated.inscriptionPaye || 0));
           }
           updated.status = computeStatus(updated.restant, updated.ecolage);
           return updated;
@@ -696,9 +740,13 @@ export const useStore = create<AppState>()(
           if (up.updates.classe) {
             updated.ecolage = getEffectiveEcolage(up.updates.classe, get().classFees);
             updated.cycle = getCycle(up.updates.classe);
+            updated.fraisInscription = getEffectiveFraisInscription(up.updates.classe, get().classRegistrationFees);
           }
           if (up.updates.dejaPaye !== undefined || up.updates.classe) {
             updated.restant = updated.ecolage - updated.dejaPaye;
+          }
+          if (up.updates.inscriptionPaye !== undefined || up.updates.classe) {
+            updated.inscriptionRestant = Math.max(0, (updated.fraisInscription || 0) - (updated.inscriptionPaye || 0));
           }
           updated.status = computeStatus(updated.restant, updated.ecolage);
           return updated;
@@ -739,9 +787,23 @@ export const useStore = create<AppState>()(
         }
       },
       addPayment: (studentId, paymentData) => {
+        const type = paymentData.type || 'ecolage';
         const students = get().students.map((s) => {
           if (s.id !== studentId) return s;
-          const payment: Payment = { id: uuid(), studentId, ...paymentData };
+          const payment: Payment = { id: uuid(), studentId, ...paymentData, type };
+
+          if (type === 'inscription') {
+            const newInscriptionPaye = (s.inscriptionPaye || 0) + paymentData.montant;
+            const newInscriptionRestant = Math.max(0, (s.fraisInscription || 0) - newInscriptionPaye);
+            return {
+              ...s,
+              inscriptionPaye: newInscriptionPaye,
+              inscriptionRestant: newInscriptionRestant,
+              historiquesPaiements: [...s.historiquesPaiements, payment],
+              updatedAt: new Date().toISOString(),
+            };
+          }
+
           const newDejaPaye = s.dejaPaye + paymentData.montant;
           const newRestant = Math.max(0, s.ecolage - newDejaPaye);
           return {
@@ -856,6 +918,7 @@ export const useStore = create<AppState>()(
         directorTitle: 'Directeur',
         tranches: [],
         classFees: {},
+        classRegistrationFees: {},
         messageRemerciement:
           "Nous vous remercions sincèrement pour votre ponctualité dans le règlement de la scolarité. Votre soutien contribue au bon fonctionnement de notre établissement.",
         messageRappel:
@@ -1305,6 +1368,7 @@ export const useStore = create<AppState>()(
               ...(data.appSettings.cycleSchedules ? { cycleSchedules: data.appSettings.cycleSchedules } : {}),
               ...(data.appSettings.tranches ? { tranches: data.appSettings.tranches } : {}),
               classFees: data.appSettings.classFees || {},
+              classRegistrationFees: data.appSettings.classRegistrationFees || {},
             });
             console.log('✅ [Sync] Paramètres appliqués ! Logo:', !!get().schoolLogo, '| Sceau:', !!get().schoolStamp);
           } else {
@@ -1317,7 +1381,8 @@ export const useStore = create<AppState>()(
           if (Array.isArray(data.students)) {
             const rawCount = data.students.length;
             const currentClassFees = data.appSettings?.classFees || get().classFees;
-            const { list: repairedStudents, countRemoved } = deduplicateStudents(data.students.map((s: Student) => repairStudent(s, currentClassFees)));
+            const currentClassRegistrationFees = data.appSettings?.classRegistrationFees || get().classRegistrationFees;
+            const { list: repairedStudents, countRemoved } = deduplicateStudents(data.students.map((s: Student) => repairStudent(s, currentClassFees, currentClassRegistrationFees)));
             
             set({
               students: repairedStudents,
@@ -1595,6 +1660,7 @@ export const useStore = create<AppState>()(
         cycleSchedules: state.cycleSchedules || [],
         tranches: state.tranches || [],
         classFees: state.classFees || {},
+        classRegistrationFees: state.classRegistrationFees || {},
         announcements: state.announcements || [],
         announcementReads: state.announcementReads || [],
         currentPeriode: state.currentPeriode || 'TRIMESTRE 1',
@@ -1611,7 +1677,7 @@ export const useStore = create<AppState>()(
         if (state) {
           if (state.students && state.students.length > 0) {
             // Déduplication agressive pour éradiquer les doublons (Nom+Prénom+Classe)
-            state.students = deduplicateStudents(state.students.map((s) => repairStudent(s, state.classFees))).list;
+            state.students = deduplicateStudents(state.students.map((s) => repairStudent(s, state.classFees, state.classRegistrationFees))).list;
           }
 
           // Sécurité — Empêcher la re-connexion automatique de switcher un parent sur l'admin

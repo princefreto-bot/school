@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { getPublicSettings, getReminderSettings, updateReminderSettings, recalculateFees } = require('../controllers/settingsController');
+const { getPublicSettings, getReminderSettings, updateReminderSettings, recalculateFees, recalculateRegistrationFees } = require('../controllers/settingsController');
 const { uploadSchoolAsset, removeSchoolAsset } = require('../controllers/photoController');
 const { authenticateToken, requireSchool, requireSchoolAdmin } = require('../middleware/auth');
 
@@ -18,5 +18,8 @@ router.patch('/reminders', authenticateToken, requireSchool, requireSchoolAdmin,
 
 // Frais de scolarité personnalisés — applique les nouveaux tarifs aux élèves déjà créés
 router.post('/recalculate-fees', authenticateToken, requireSchool, requireSchoolAdmin, recalculateFees);
+
+// Frais d'inscription personnalisés — applique les nouveaux tarifs aux élèves déjà créés
+router.post('/recalculate-registration-fees', authenticateToken, requireSchool, requireSchoolAdmin, recalculateRegistrationFees);
 
 module.exports = router;

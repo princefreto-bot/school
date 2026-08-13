@@ -21,6 +21,12 @@ export interface Student {
   ecolage: number;
   dejaPaye: number;
   restant: number;
+  // Frais d'inscription — piste distincte de l'écolage, jamais mélangée (voir Paramètres >
+  // Frais d'inscription). Absent/undefined sur les élèves existants avant cette fonctionnalité,
+  // à traiter comme 0 partout.
+  fraisInscription?: number;
+  inscriptionPaye?: number;
+  inscriptionRestant?: number;
   recu: string;
   adsn?: string;
   statutElv?: 'NOUVEAU' | 'ANCIEN' | 'REDOUBLANT';
@@ -54,6 +60,8 @@ export interface Payment {
   commentaire?: string;
   note?: string;
   methode?: string;
+  // Absent = 'ecolage' (tout l'historique existant avant cette fonctionnalité est de l'écolage).
+  type?: 'ecolage' | 'inscription';
 }
 
 export interface ClassConfig {
@@ -101,6 +109,8 @@ export interface Tranche {
 
 export interface AppSettings extends AdminSettings {
   currency: string;
+  classFees?: Record<string, number>;
+  classRegistrationFees?: Record<string, number>;
   badgeParentResponsable: string;
   badge2emeTranche: string;
   messageSolde?: string; // Utilisé dans pdfUtils.ts

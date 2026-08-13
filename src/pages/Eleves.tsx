@@ -3,11 +3,12 @@ import { useStore } from '../store/useStore';
 import { Student } from '../types';
 import { CLASS_CONFIG } from '../data/classConfig';
 import { RecuPrintButton } from '../components/pdf/RecuPrintButton';
+import { ListeNominativePrintButton } from '../components/pdf/ListeNominativePrintButton';
 import { uploadStudentPhoto, deleteStudentPhoto } from '../services/photoService';
 import {
   Search, Plus, Trash2, Edit2, FileText,
   MessageCircle, ChevronUp, ChevronDown, X, Check,
-  Download, Filter, Camera, User, Users, GraduationCap, Building2, Smartphone
+  Download, Filter, Camera, User, Users, GraduationCap, Building2, Smartphone, Printer
 } from 'lucide-react';
 import { StudentDetail } from '../components/StudentDetail';
 
@@ -45,6 +46,7 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
     redoublant: student?.redoublant ?? false,
     ecoleProvenance: student?.ecoleProvenance ?? '',
     dejaPaye: student?.dejaPaye ?? 0,
+    inscriptionPaye: student?.inscriptionPaye ?? 0,
     recu: student?.recu ?? '',
     adsn: student?.adsn ?? '',
   });
@@ -168,26 +170,39 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
           </div>
 
           <div className="p-5 bg-gradient-to-br from-slate-50 to-emerald-50 dark:from-slate-800/50 dark:to-emerald-900/10 rounded-2xl border border-slate-200 dark:border-emerald-500/20">
-            <h3 className="text-xs font-black text-slate-800 dark:text-emerald-400 uppercase tracking-widest mb-4">Informations financières (1er versement)</h3>
+            <h3 className="text-xs font-black text-slate-800 dark:text-emerald-400 uppercase tracking-widest mb-4">Écolage (1er versement)</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Montant payé (FCFA)</label>
-                <input 
-                  type="number" min={0} 
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none transition-all dark:text-white" 
-                  value={form.dejaPaye} 
-                  onChange={(e) => setForm({ ...form, dejaPaye: Number(e.target.value) })} 
+                <input
+                  type="number" min={0}
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none transition-all dark:text-white"
+                  value={form.dejaPaye}
+                  onChange={(e) => setForm({ ...form, dejaPaye: Number(e.target.value) })}
                 />
               </div>
               <div>
                 <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">N° Reçu associé</label>
-                <input 
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none transition-all dark:text-white uppercase" 
-                  value={form.recu} 
-                  onChange={(e) => setForm({ ...form, recu: e.target.value })} 
+                <input
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none transition-all dark:text-white uppercase"
+                  value={form.recu}
+                  onChange={(e) => setForm({ ...form, recu: e.target.value })}
                   placeholder="Ex: R-001"
                 />
               </div>
+            </div>
+          </div>
+
+          <div className="p-5 bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-800/50 dark:to-indigo-900/10 rounded-2xl border border-slate-200 dark:border-indigo-500/20">
+            <h3 className="text-xs font-black text-slate-800 dark:text-indigo-400 uppercase tracking-widest mb-4">Frais d'inscription (distinct de l'écolage)</h3>
+            <div>
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Montant déjà payé (FCFA)</label>
+              <input
+                type="number" min={0}
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all dark:text-white"
+                value={form.inscriptionPaye}
+                onChange={(e) => setForm({ ...form, inscriptionPaye: Number(e.target.value) })}
+              />
             </div>
           </div>
 
@@ -515,6 +530,21 @@ export const Eleves: React.FC = () => {
               <option value="">Tous les statuts financiers</option>
               <option>Soldé</option><option>Partiel</option><option>Non soldé</option>
             </select>
+            {filterClasse ? (
+              <ListeNominativePrintButton
+                students={filtered}
+                classe={filterClasse}
+                cycle={filterCycle || undefined}
+                title="Imprimer la liste nominative de cette classe"
+                className="flex items-center gap-2 px-6 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-[12px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                <Printer className="w-4 h-4" /> Liste nominative
+              </ListeNominativePrintButton>
+            ) : (
+              <button disabled title="Sélectionnez une classe pour imprimer sa liste nominative" className="flex items-center gap-2 px-6 py-4 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 rounded-2xl text-[12px] font-black uppercase tracking-widest cursor-not-allowed">
+                <Printer className="w-4 h-4" /> Liste nominative
+              </button>
+            )}
             {(filterClasse || filterCycle || filterStatus) && (
               <button onClick={() => { setFilterClasse(''); setFilterCycle(''); setFilterStatus(''); }} className="flex items-center gap-2 px-6 py-4 text-[12px] font-black uppercase tracking-widest text-rose-500 hover:text-white hover:bg-rose-500 rounded-2xl transition-all border border-rose-200 dark:border-rose-500/30">
                 <X className="w-4 h-4" /> Reset

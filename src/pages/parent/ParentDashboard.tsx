@@ -597,6 +597,11 @@ export const ParentDashboard: React.FC = () => {
                                                     {(child.restant || 0).toLocaleString()} F
                                                 </p>
                                                 <p className="text-[10px] text-slate-400 italic">Total: {(child.ecolage || 0).toLocaleString()} F</p>
+                                                {(child.fraisInscription || 0) > 0 && (
+                                                    <p className="text-[10px] text-indigo-400 italic mt-1">
+                                                        Inscription : {(child.inscriptionRestant || 0) > 0 ? `${(child.inscriptionRestant || 0).toLocaleString()} F restant` : 'soldée'}
+                                                    </p>
+                                                )}
                                             </td>
                                             <td className="px-6 py-5">
                                                 <div className="flex justify-center">
@@ -708,6 +713,11 @@ export const ParentDashboard: React.FC = () => {
                                                 {(child.restant || 0).toLocaleString()} F
                                             </p>
                                             <p className="text-[10px] text-slate-400 italic">Total: {(child.ecolage || 0).toLocaleString()} F</p>
+                                            {(child.fraisInscription || 0) > 0 && (
+                                                <p className="text-[10px] text-indigo-400 italic mt-1">
+                                                    Inscription : {(child.inscriptionRestant || 0) > 0 ? `${(child.inscriptionRestant || 0).toLocaleString()} F restant` : 'soldée'}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
