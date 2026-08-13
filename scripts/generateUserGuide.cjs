@@ -319,6 +319,20 @@ stepList([
   "Renseignez le montant, le mode de règlement (caisse ou banque) et une pièce justificative si disponible.",
   "L'écriture comptable est générée automatiquement.",
 ]);
+subTitle('Préparer votre budget prévisionnel');
+paragraph("Le budget prévisionnel s'établit avant le début de l'année scolaire, pour anticiper vos recettes et vos dépenses. Ce n'est pas encore un module automatisé de DGhubSchool, mais vous pouvez le construire facilement en vous appuyant sur les données déjà disponibles dans votre espace.");
+bulletList([
+  "Recettes prévisionnelles : nombre d'élèves attendus par classe (page Élèves) × frais de scolarité, plus frais d'inscription et autres revenus éventuels (cantine, transport, activités).",
+  "Dépenses prévisionnelles : reprenez votre masse salariale actuelle (page Paie) comme base, et le détail de votre Compte de résultat de l'année en cours poste par poste (eau, électricité, fournitures, entretien...).",
+  "Ajoutez une marge pour imprévus de 5 à 10 % du total des charges.",
+]);
+stepList([
+  "Reportez ces deux colonnes (recettes / dépenses) mois par mois sur l'année scolaire, dans un tableur.",
+  "Recettes moins dépenses = votre résultat prévisionnel.",
+  "En cas de déficit, ajustez avant la rentrée (frais de scolarité, charges, ou financement complémentaire) plutôt qu'en cours d'année.",
+  "Une fois l'année lancée, comparez chaque mois votre Compte de résultat réel à votre prévisionnel pour repérer vite les écarts.",
+]);
+roleNote("Le budget prévisionnel se prépare en dehors de l'application (tableur). Les écrans Élèves, Paie et Comptabilité de DGhubSchool vous donnent les chiffres réels nécessaires pour le construire, puis pour suivre le réalisé face au prévisionnel une fois l'année en cours.");
 
 // ── 6. PAIE DU PERSONNEL ──
 sectionTitle(6, 'Paie du personnel et bulletins');
