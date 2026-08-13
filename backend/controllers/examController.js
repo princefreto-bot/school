@@ -48,6 +48,15 @@ async function createSession(req, res) {
         if (error) throw error;
         return res.status(201).json(data);
     } catch (err) {
+        // 23503 = violation de clé étrangère. Le cas concret rencontré en prod : le
+        // compte du token (created_by) ne correspond plus à aucune ligne de
+        // profiles_{slug} (ex. compte supprimé puis recréé pendant l'onboarding) —
+        // un token valide en apparence mais qui pointe sur un id disparu. Sans ce
+        // garde-fou l'erreur Postgres brute remontait telle quelle en 500, illisible
+        // pour l'utilisateur et sans piste d'action.
+        if (err.code === '23503' && (err.message || '').includes('created_by')) {
+            return res.status(409).json({ error: 'Votre session est invalide ou obsolète. Déconnectez-vous puis reconnectez-vous pour réessayer.' });
+        }
         return res.status(500).json({ error: err.message });
     }
 }
