@@ -285,6 +285,14 @@ stepList([
   "L'écolage et le cycle sont déduits automatiquement de la classe.",
   "Le statut de paiement (soldé, partiel, non soldé) se met à jour à chaque encaissement.",
 ]);
+subTitle('Liste nominative par classe');
+paragraph("Un document PDF prêt à imprimer pour les démarches administratives (DRENA, examens) : identité des élèves uniquement, aucune donnée financière.");
+stepList([
+  "Ouvrez la page Élèves, puis « Filtres Avancés ».",
+  "Sélectionnez une classe précise (le bouton n'apparaît que pour une classe donnée, jamais « toutes les classes »).",
+  "Cliquez sur « Liste nominative ».",
+]);
+paragraph("Le PDF généré contient le numéro, le nom et prénoms, le sexe, la date de naissance et le statut (régulier/redoublant) de chaque élève, ainsi que l'effectif total (garçons/filles) et une zone de signature pour le directeur.");
 subTitle('Comptes parents');
 paragraph("Chaque parent peut disposer d'un compte pour suivre le dossier de son enfant à distance : paiements, reçus, notes, badges d'assiduité, messagerie avec l'école.");
 
@@ -304,12 +312,15 @@ bulletList([
   "Vérification d'authenticité d'un reçu via son numéro ou son QR code (page « Vérif. Reçus »).",
 ]);
 subTitle('Frais d\'inscription');
-paragraph("Distincts de l'écolage : un montant à percevoir à l'inscription (ou la réinscription) de l'élève, jamais mélangé au suivi de l'écolage — solde, statut et reçu séparés.");
+paragraph("Distincts de l'écolage : un montant à percevoir uniquement à l'inscription d'un NOUVEL élève à l'établissement, jamais mélangé au suivi de l'écolage — solde, statut et reçu séparés.");
 stepList([
   "Définissez le tarif par classe dans Paramètres > Frais d'inscription (une classe laissée à 0 n'a pas de frais d'inscription).",
+  "Sur la fiche de l'élève, indiquez son statut « Nouveau à l'établissement » ou « Déjà inscrit avant » — seul un élève Nouveau doit les frais d'inscription. Un ancien élève ne les paie jamais, même en changeant de classe.",
   "À l'enregistrement d'un paiement, choisissez le type de versement : Écolage ou Frais d'inscription.",
   "Le reçu généré documente uniquement le type de versement concerné.",
 ]);
+roleNote("Ce statut « Nouveau / Ancien » (financier, propre à l'établissement) est indépendant du statut « Redoublant » (académique, propre à la classe) : un élève peut être nouveau à l'école tout en redoublant sa classe, ou ancien tout en progressant normalement.");
+paragraph("La réduction de paiement reste réservée à l'écolage (jusqu'à 100% du montant dû) — elle n'est pas disponible pour les frais d'inscription.");
 paragraph("Le suivi (total attendu, encaissé, restant) apparaît sur le Tableau de bord et la page Analyses dans un encart séparé — il n'est jamais additionné aux totaux de l'écolage, ni pris en compte dans le score de priorité du module Recouvrement.");
 
 // ── 5. COMPTABILITÉ ──

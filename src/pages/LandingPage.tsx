@@ -63,7 +63,7 @@ const TEXTS = {
     bentoTitle: "Tout ce que gère un directeur. Dans un seul outil.",
     bentoDesc: "DGhubSchool centralise la caisse, les bulletins, le suivi des parents et la sécurité d'accès — pour que vous passiez enfin du temps à enseigner, pas à administrer.",
     paymentTracking: "Caisse & Recouvrement en temps réel",
-    paymentDesc: "Chaque versement (espèces, chèques, virements) est horodaté et associé à l'élève en 2 secondes après enregistrement du reçu physique. Le solde restant est recalculé instantanément, le reçu PDF + SMS part au parent, et votre journal de caisse s'alimente seul. Exportable Excel en un clic. Les frais d'inscription (variables par classe) sont suivis séparément de l'écolage, avec leur propre reçu et leur propre solde.",
+    paymentDesc: "Chaque versement (espèces, chèques, virements) est horodaté et associé à l'élève en 2 secondes après enregistrement du reçu physique. Le solde restant est recalculé instantanément, le reçu PDF + SMS part au parent, et votre journal de caisse s'alimente seul. Exportable Excel en un clic. Les frais d'inscription (variables par classe, réservés aux nouveaux élèves) sont suivis séparément de l'écolage, avec leur propre reçu et leur propre solde.",
     paymentBadge: "💰 Caisse",
     bulletinsTitle: "Bulletins & Relevés de Notes",
     bulletinsDesc: "Vos enseignants saisissent les notes, DGhubSchool fait le reste : moyennes trimestrielles, rangs de classe, appréciations et bulletins PDF conformes au format officiel DRE. Imprimables ou partageables en masse en quelques secondes.",
@@ -167,7 +167,7 @@ const TEXTS = {
     bentoTitle: "Everything a principal manages. In one tool.",
     bentoDesc: "DGhubSchool centralizes cashiering, report cards, parent communication and access security — so you spend your time teaching, not administering.",
     paymentTracking: "Cashier & Collections in Real Time",
-    paymentDesc: "Every payment (cash, checks, transfers) is timestamped and linked to the student in 2 seconds after recording the physical receipt. The remaining balance is instantly recalculated, a PDF + SMS receipt goes to the parent, and your cash journal updates itself. Exportable to Excel in one click. Registration fees (variable by class) are tracked separately from tuition, with their own receipt and their own balance.",
+    paymentDesc: "Every payment (cash, checks, transfers) is timestamped and linked to the student in 2 seconds after recording the physical receipt. The remaining balance is instantly recalculated, a PDF + SMS receipt goes to the parent, and your cash journal updates itself. Exportable to Excel in one click. Registration fees (variable by class, new students only) are tracked separately from tuition, with their own receipt and their own balance.",
     paymentBadge: "💰 Cashier",
     bulletinsTitle: "Report Cards & Grade Records",
     bulletinsDesc: "Teachers enter grades, DGhubSchool does the rest: term averages, class rankings, remarks and DRE-compliant PDF report cards. Printable or shareable in bulk in seconds.",
@@ -595,6 +595,7 @@ export const LandingPage: React.FC = () => {
                     lang === 'fr' ? 'Recalcul instantané du solde et journal de caisse' : 'Instant balance recalculation & cash journal',
                     lang === 'fr' ? 'Envoi automatisé de reçus PDF + SMS aux parents' : 'Automated PDF + SMS receipt sent to parents',
                     lang === 'fr' ? 'Export comptable Excel en un clic' : 'One-click Excel accounting export',
+                    lang === 'fr' ? 'Liste nominative PDF par classe, prête pour les démarches administratives' : 'Printable PDF class roster, ready for official paperwork',
                   ].map((pt, pIdx) => (
                     <div key={pIdx} className="flex items-start gap-2 text-xs text-slate-600 leading-snug">
                       <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
