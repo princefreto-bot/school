@@ -5,7 +5,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Student, User, AppPage, Payment, Parent, AppSettings, Presence, ActivityLog, CycleSchedule, Announcement, AnnouncementRead, Matiere, ClasseMatiere, Note, PeriodeType } from '../types';
 import { API_BASE_URL, BACKEND_URL } from '../config';
-import { getEcolage, getCycle, getEffectiveEcolage, getEffectiveFraisInscription } from '../data/classConfig';
+import { getEcolage, getCycle, getEffectiveEcolage, getEffectiveFraisInscription, isSubjectToRegistrationFee } from '../data/classConfig';
 import { getCurrentAcademicYear } from '../utils/helpers';
 import { v4 as uuid } from '../utils/uuid';
 import { createActivityLog } from '../utils/activityLogger';
@@ -347,7 +347,9 @@ const repairStudent = (s: Student, classFees?: Record<string, number>, classRegi
   const correctEcolage = getEffectiveEcolage(s.classe, classFees);
   const correctRestant = Math.max(0, correctEcolage - s.dejaPaye);
   const correctStatus = computeStatus(correctRestant, correctEcolage);
-  const correctFraisInscription = getEffectiveFraisInscription(s.classe, classRegistrationFees);
+  const correctFraisInscription = isSubjectToRegistrationFee(s.statutElv)
+    ? getEffectiveFraisInscription(s.classe, classRegistrationFees)
+    : 0;
   const inscriptionPaye = s.inscriptionPaye || 0;
   const correctInscriptionRestant = Math.max(0, correctFraisInscription - inscriptionPaye);
 
@@ -656,7 +658,9 @@ export const useStore = create<AppState>()(
       addStudent: (data) => {
         const ecolage = getEffectiveEcolage((data as { classe: string }).classe, get().classFees);
         const restant = ecolage - ((data as { dejaPaye?: number }).dejaPaye || 0);
-        const fraisInscription = getEffectiveFraisInscription((data as { classe: string }).classe, get().classRegistrationFees);
+        const fraisInscription = isSubjectToRegistrationFee((data as { statutElv?: string }).statutElv)
+          ? getEffectiveFraisInscription((data as { classe: string }).classe, get().classRegistrationFees)
+          : 0;
         const inscriptionPaye = (data as { inscriptionPaye?: number }).inscriptionPaye || 0;
         const inscriptionRestant = Math.max(0, fraisInscription - inscriptionPaye);
         const studentId = uuid();
@@ -705,12 +709,16 @@ export const useStore = create<AppState>()(
           if (updates.classe) {
             updated.ecolage = getEffectiveEcolage(updates.classe, get().classFees);
             updated.cycle = getCycle(updates.classe);
-            updated.fraisInscription = getEffectiveFraisInscription(updates.classe, get().classRegistrationFees);
+          }
+          if (updates.classe || updates.statutElv !== undefined) {
+            updated.fraisInscription = isSubjectToRegistrationFee(updated.statutElv)
+              ? getEffectiveFraisInscription(updated.classe, get().classRegistrationFees)
+              : 0;
           }
           if (updates.dejaPaye !== undefined || updates.classe) {
             updated.restant = updated.ecolage - updated.dejaPaye;
           }
-          if (updates.inscriptionPaye !== undefined || updates.classe) {
+          if (updates.inscriptionPaye !== undefined || updates.classe || updates.statutElv !== undefined) {
             updated.inscriptionRestant = Math.max(0, (updated.fraisInscription || 0) - (updated.inscriptionPaye || 0));
           }
           updated.status = computeStatus(updated.restant, updated.ecolage);
@@ -740,12 +748,16 @@ export const useStore = create<AppState>()(
           if (up.updates.classe) {
             updated.ecolage = getEffectiveEcolage(up.updates.classe, get().classFees);
             updated.cycle = getCycle(up.updates.classe);
-            updated.fraisInscription = getEffectiveFraisInscription(up.updates.classe, get().classRegistrationFees);
+          }
+          if (up.updates.classe || up.updates.statutElv !== undefined) {
+            updated.fraisInscription = isSubjectToRegistrationFee(updated.statutElv)
+              ? getEffectiveFraisInscription(updated.classe, get().classRegistrationFees)
+              : 0;
           }
           if (up.updates.dejaPaye !== undefined || up.updates.classe) {
             updated.restant = updated.ecolage - updated.dejaPaye;
           }
-          if (up.updates.inscriptionPaye !== undefined || up.updates.classe) {
+          if (up.updates.inscriptionPaye !== undefined || up.updates.classe || up.updates.statutElv !== undefined) {
             updated.inscriptionRestant = Math.max(0, (updated.fraisInscription || 0) - (updated.inscriptionPaye || 0));
           }
           updated.status = computeStatus(updated.restant, updated.ecolage);

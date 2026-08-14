@@ -257,12 +257,19 @@ export const RecuPaiementPDF: React.FC<RecuPaiementPDFProps> = ({
   const isInscription = tx?.type === 'inscription';
 
   const totalDu = isInscription ? (student.fraisInscription || 0) : (student.ecolage || 0);
-  // Réduction = somme des réductions accordées sur l'ensemble des versements (concept
-  // propre à l'écolage — les frais d'inscription n'en ont pas).
-  const reduction = isInscription ? 0 : (student.historiquesPaiements || []).reduce((t, p) => t + (Number(p.reduction) || 0), 0);
+  // Réduction = somme des réductions accordées sur les versements de la MÊME piste
+  // (écolage et frais d'inscription ont chacun leurs propres réductions, jamais
+  // additionnées entre elles sur un même reçu).
+  const reduction = (student.historiquesPaiements || [])
+    .filter((p) => (p.type || 'ecolage') === (isInscription ? 'inscription' : 'ecolage'))
+    .reduce((t, p) => t + (Number(p.reduction) || 0), 0);
   const paye = isInscription ? (student.inscriptionPaye || 0) : (student.dejaPaye || 0);
-  // Reste cohérent sur le document : dû − réduction − payé.
-  const reste = isInscription ? (student.inscriptionRestant || 0) : Math.max(0, totalDu - reduction - paye);
+  // Le montant d'un versement inclut déjà le crédit de réduction éventuel (une réduction
+  // se traduit par un montant perçu plus élevé que le cash réellement encaissé, voir
+  // PaymentModal) — `restant`/`inscriptionRestant` en tiennent donc déjà compte. Ne pas
+  // soustraire `reduction` une seconde fois ici, sous peine d'afficher un reste inférieur
+  // à ce que montre le reste de l'application (Tableau de bord, Paiements, Recouvrement).
+  const reste = isInscription ? (student.inscriptionRestant || 0) : student.restant;
   const solde = reste <= 0;
 
   // QR : le numéro de reçu suffit à la vérification (page Vérif. Reçus).

@@ -547,11 +547,24 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     onOpenSupport: () => setShowSupportModal(true),
   };
 
+  // Sécurité — cette barre ne doit jamais proposer une page hors du périmètre du rôle
+  // (voir rolePermissions.ts). Le bloc générique "Accueil→dashboard, Config→parametres"
+  // suppose un rôle admin-like : il ne convient ni à l'enseignant, ni à la secrétaire.
   const bottomNavItems = (user?.role === 'superviseur' || user?.role === 'surveillant') ? [
     { id: 'scan_presence' as AppPage, label: 'Entrée', icon: <ScanLine className="w-5 h-5" /> },
     { id: 'scan_sortie'   as AppPage, label: 'Sortie', icon: <ScanLine className="w-5 h-5" /> },
     { id: 'scan_information' as AppPage, label: 'Info', icon: <ScanLine className="w-5 h-5" /> },
     { id: 'carte_scolaire'as AppPage, label: 'Cartes', icon: <IdCard className="w-5 h-5" /> },
+  ] : user?.role === 'enseignant' ? [
+    { id: 'saisie_notes' as AppPage, label: 'Notes', icon: <Edit3 className="w-5 h-5" /> },
+    { id: 'mon_planning' as AppPage, label: 'Planning', icon: <Calendar className="w-5 h-5" /> },
+    { id: 'mes_absences' as AppPage, label: 'Absences', icon: <CalendarX className="w-5 h-5" /> },
+    { id: 'mon_profil'   as AppPage, label: 'Profil', icon: <UserCircle className="w-5 h-5" /> },
+  ] : user?.role === 'secretaire' ? [
+    { id: 'espace_personnel' as AppPage, label: 'Accueil', icon: <LayoutDashboard className="w-5 h-5" /> },
+    { id: 'eleves'    as AppPage, label: 'Élèves', icon: <Users className="w-5 h-5" /> },
+    { id: 'chat'      as AppPage, label: 'Chat', icon: <MessageSquare className="w-5 h-5" />, badge: unreadMessages },
+    { id: 'annonces'  as AppPage, label: 'Annonces', icon: <Megaphone className="w-5 h-5" /> },
   ] : [
     { id: (isParent ? 'parent_dashboard' : 'dashboard') as AppPage, label: 'Accueil', icon: <LayoutDashboard className="w-5 h-5" /> },
     { id: (isParent ? 'parent_historique' : 'eleves') as AppPage, label: isParent ? 'Paiements' : 'Élèves', icon: isParent ? <CreditCard className="w-5 h-5" /> : <Users className="w-5 h-5" /> },

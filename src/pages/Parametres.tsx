@@ -212,8 +212,9 @@ export const Parametres: React.FC = () => {
 
     const hasOverrides = Object.keys(fees).length > 0;
     if (hasOverrides && window.confirm(
-      "Appliquer aussi ces nouveaux tarifs aux élèves déjà inscrits dans ces classes ? " +
-      "Le montant dû (restant à payer sur l'inscription) sera recalculé — les paiements déjà encaissés ne sont pas modifiés."
+      "Appliquer aussi ces nouveaux tarifs aux élèves déjà présents dans ces classes ? " +
+      "Seuls les élèves marqués « Nouveau » (voir fiche élève) sont concernés — les élèves anciens et redoublants " +
+      "ne sont jamais facturés. Le montant dû (restant à payer sur l'inscription) sera recalculé — les paiements déjà encaissés ne sont pas modifiés."
     )) {
       setRecalculatingRegistration(true);
       const result = await recalculateStudentRegistrationFees();

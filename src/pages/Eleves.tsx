@@ -44,6 +44,13 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
     telephone: student?.telephone ?? '+228',
     sexe: (student?.sexe ?? 'M') as 'M' | 'F',
     redoublant: student?.redoublant ?? false,
+    // Statut FINANCIER (nouveau/ancien à l'établissement) — distinct du statut
+    // ACADÉMIQUE "redoublant" (repère la classe, pas l'établissement) géré par la
+    // case à cocher ci-dessous. Nouveau par défaut pour une nouvelle inscription
+    // (l'élève doit des frais d'inscription), Ancien par défaut à l'édition d'un
+    // dossier existant (jamais facturé rétroactivement) — voir Paramètres > Frais
+    // d'inscription.
+    statutElv: (student?.statutElv === 'NOUVEAU' ? 'NOUVEAU' : (student ? 'ANCIEN' : 'NOUVEAU')) as 'NOUVEAU' | 'ANCIEN',
     ecoleProvenance: student?.ecoleProvenance ?? '',
     dejaPaye: student?.dejaPaye ?? 0,
     inscriptionPaye: student?.inscriptionPaye ?? 0,
@@ -195,6 +202,20 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
 
           <div className="p-5 bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-800/50 dark:to-indigo-900/10 rounded-2xl border border-slate-200 dark:border-indigo-500/20">
             <h3 className="text-xs font-black text-slate-800 dark:text-indigo-400 uppercase tracking-widest mb-4">Frais d'inscription (distinct de l'écolage)</h3>
+            <div className="mb-4">
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Inscription à l'établissement</label>
+              <select
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all dark:text-white cursor-pointer"
+                value={form.statutElv}
+                onChange={(e) => setForm({ ...form, statutElv: e.target.value as 'NOUVEAU' | 'ANCIEN' })}
+              >
+                <option value="NOUVEAU">Nouveau à l'établissement (doit les frais d'inscription)</option>
+                <option value="ANCIEN">Déjà inscrit avant (ne les doit pas)</option>
+              </select>
+              <p className="text-[10px] text-slate-400 mt-1.5">
+                Distinct du statut « redoublant » ci-dessous : un élève peut être nouveau à l'établissement tout en redoublant sa classe, ou ancien tout en progressant normalement.
+              </p>
+            </div>
             <div>
               <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Montant déjà payé (FCFA)</label>
               <input
@@ -202,7 +223,11 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all dark:text-white"
                 value={form.inscriptionPaye}
                 onChange={(e) => setForm({ ...form, inscriptionPaye: Number(e.target.value) })}
+                disabled={form.statutElv !== 'NOUVEAU'}
               />
+              {form.statutElv !== 'NOUVEAU' && (
+                <p className="text-[10px] text-slate-400 mt-1.5">Aucun frais d'inscription pour un élève déjà inscrit avant cette année.</p>
+              )}
             </div>
           </div>
 

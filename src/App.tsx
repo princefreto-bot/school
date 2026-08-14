@@ -235,13 +235,23 @@ const PageContent: React.FC = () => {
     );
   }
 
-  // Compte enseignant partagé (historique) : on force la sélection de nom tant que
-  // l'école n'a pas migré vers des comptes individuels. Un compte individuel (teachingMode
-  // === 'individual') est traité comme n'importe quel autre rôle staff — son JWT fait foi,
-  // plus besoin de sélecteur de nom ni de restriction de pages.
-  if (user?.role === 'enseignant' && teachingMode !== 'individual') {
-    const teacherPages = ['saisie_notes', 'selection_enseignant', 'mon_planning', 'mon_bulletin_paie', 'mon_profil', 'mes_absences'];
+  // Sécurité — un enseignant n'a JAMAIS accès aux pages admin (dashboard, comptabilité,
+  // paie...), qu'il soit sur un compte partagé (historique) ou individuel. Un compte
+  // individuel (teachingMode === 'individual') dispense uniquement du sélecteur de nom
+  // (le JWT identifie déjà la personne) — ce n'est PAS une dispense de restriction de
+  // pages. Les deux concepts avaient été fusionnés à tort, ce qui laissait un enseignant
+  // sur un compte individuel accéder à n'importe quelle page (ex. bouton « Accueil » de
+  // la barre mobile, qui pointe sur 'dashboard' pour tous les rôles non-parent).
+  if (user?.role === 'enseignant') {
+    const teacherPages = ['saisie_notes', 'notes_examens', 'selection_enseignant', 'mon_planning', 'mon_bulletin_paie', 'mon_profil', 'mes_absences'];
     if (!teacherPages.includes(currentPage as any)) {
+      if (teachingMode === 'individual') {
+        return (
+          <Suspense fallback={<LoadingSpinner />}>
+            <SaisieNotes />
+          </Suspense>
+        );
+      }
       const selectedTeacherName = localStorage.getItem('selected_teacher_name');
       return (
         <Suspense fallback={<LoadingSpinner />}>

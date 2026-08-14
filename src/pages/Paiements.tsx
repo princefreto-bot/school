@@ -40,6 +40,7 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
       date: form.date,
       mode: form.mode,
       reference: form.reference || undefined,
+      // Réduction réservée à l'écolage — les frais d'inscription n'en admettent pas.
       reduction: feeType === 'inscription' ? 0 : (Number(form.reduction) || 0),
       type: feeType,
     });
@@ -187,6 +188,7 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
                   onChange={(e) => setForm({ ...form, reduction: e.target.value })}
                   placeholder="0"
                 />
+                <p className="text-[10px] text-slate-400 mt-1.5">Montant considéré comme réglé sans encaissement (bourse, exonération...) — inclus dans le montant perçu ci-dessus, jusqu'à 100% du restant.</p>
               </div>
             )}
           </div>

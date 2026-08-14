@@ -150,6 +150,9 @@ async function recalculateFees(req, res) {
  * frais_inscription/inscription_restant pour chaque élève dont la classe a un
  * tarif personnalisé, sans toucher aux autres. Ne modifie jamais inscription_paye,
  * ni aucun champ de l'écolage — piste totalement séparée (voir recalculateFees).
+ * Ne concerne QUE les élèves marqués statut_elv='NOUVEAU' — un ancien ou un
+ * redoublant a déjà réglé son inscription les années précédentes et ne doit jamais
+ * être facturé rétroactivement, même si sa classe a un tarif d'inscription défini.
  */
 async function recalculateRegistrationFees(req, res) {
     const { schoolSlug } = req.user;
@@ -173,7 +176,7 @@ async function recalculateRegistrationFees(req, res) {
 
         const { data: students, error: studentsErr } = await supabase
             .from(`students_${schoolSlug}`)
-            .select('id, classe, inscription_paye, frais_inscription');
+            .select('id, classe, inscription_paye, frais_inscription, statut_elv');
         if (studentsErr) throw studentsErr;
 
         const findOverride = (classe) => {
@@ -184,6 +187,8 @@ async function recalculateRegistrationFees(req, res) {
 
         let updated = 0;
         for (const student of students || []) {
+            if (student.statut_elv !== 'NOUVEAU') continue;
+
             const newFrais = findOverride(student.classe);
             if (newFrais == null || newFrais === student.frais_inscription) continue;
 

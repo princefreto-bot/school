@@ -2,6 +2,7 @@ import * as XLSX from 'xlsx';
 import { Student } from '../types';
 import { CLASSES } from '../data/classes';
 import { generateId, getCycleFromClasse, getEcolageFromClasse, getFraisInscriptionFromClasse } from './helpers';
+import { isSubjectToRegistrationFee } from '../data/classConfig';
 import { useStore } from '../store/useStore';
 
 export const importExcel = (file: File, existingStudents?: Student[]): Promise<Student[]> => {
@@ -114,8 +115,19 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
           const numeroTable = row[15] ? String(row[15]).trim() : undefined;
 
           // Frais d'inscription — colonnes ajoutées en fin de ligne (jamais insérées au
-          // milieu) pour ne pas décaler les fichiers déjà en circulation.
-          const fraisInscription = Number(row[16]) || getFraisInscriptionFromClasse(validClasse, useStore.getState().classRegistrationFees);
+          // milieu) pour ne pas décaler les fichiers déjà en circulation. Ne s'appliquent
+          // qu'aux élèves marqués NOUVEAU (colonne T) — un import en masse de l'effectif
+          // existant (majoritairement des anciens) ne doit jamais leur facturer
+          // l'inscription rétroactivement. Statut FINANCIER (nouveau/ancien à
+          // l'établissement) uniquement — le redoublement est un statut académique
+          // indépendant, déjà couvert par la colonne REDOUBLANT.
+          const statutElv = row[19] ? String(row[19]).trim().toUpperCase() : (existingStudent?.statutElv || undefined);
+          const validStatutElv = ['NOUVEAU', 'ANCIEN'].includes(statutElv || '')
+            ? (statutElv as 'NOUVEAU' | 'ANCIEN')
+            : undefined;
+          const fraisInscription = isSubjectToRegistrationFee(validStatutElv)
+            ? (Number(row[16]) || getFraisInscriptionFromClasse(validClasse, useStore.getState().classRegistrationFees))
+            : 0;
           const inscriptionPaye = Number(row[17]) || 0;
           const inscriptionRestant = row[18] === 'SOLDE' ? 0 : (Number(row[18]) || Math.max(0, fraisInscription - inscriptionPaye));
 
@@ -135,6 +147,7 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
             fraisInscription,
             inscriptionPaye,
             inscriptionRestant,
+            statutElv: validStatutElv,
             recu,
             adsn: adsn || undefined,
             cycle: getCycleFromClasse(validClasse),
@@ -191,7 +204,8 @@ export const exportToExcel = (students: Student[], filename: string = 'eleves.xl
     'N° DE TABLE': s.numeroTable || '',
     'FRAIS D\'INSCRIPTION': s.fraisInscription || 0,
     'INSCRIPTION PAYÉE': s.inscriptionPaye || 0,
-    'INSCRIPTION RESTANT': (s.inscriptionRestant || 0) === 0 ? 'SOLDÉ' : s.inscriptionRestant
+    'INSCRIPTION RESTANT': (s.inscriptionRestant || 0) === 0 ? 'SOLDÉ' : s.inscriptionRestant,
+    'STATUT (NOUVEAU/ANCIEN/REDOUBLANT)': s.statutElv || ''
   }));
 
   const worksheet = XLSX.utils.json_to_sheet(data);
@@ -204,7 +218,7 @@ export const exportToExcel = (students: Student[], filename: string = 'eleves.xl
     { wch: 15 }, { wch: 6 }, { wch: 12 }, { wch: 25 },
     { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 15 },
     { wch: 20 }, { wch: 20 }, { wch: 15 }, { wch: 15 },
-    { wch: 16 }, { wch: 16 }, { wch: 16 }
+    { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 20 }
   ];
   worksheet['!cols'] = colWidths;
   

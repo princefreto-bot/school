@@ -93,6 +93,17 @@ export const getEffectiveFraisInscription = (className: string, overrides?: Reco
   return 0;
 };
 
+// Les frais d'inscription ne concernent QUE les élèves nouveaux à l'ÉTABLISSEMENT
+// (statutElv, un statut FINANCIER : nouveau/ancien) — jamais un ancien, même s'il
+// redouble sa classe cette année. Le redoublement (`Student.redoublant`) est un statut
+// ACADÉMIQUE indépendant, propre à la classe, sans lien avec les frais d'inscription :
+// un élève peut être nouveau à l'établissement en redoublant sa classe (ex. transfert
+// après un échec ailleurs), ou ancien tout en progressant normalement. `statutElv`
+// absent (élèves importés/historiques, avant l'existence de ce champ) est traité comme
+// "ancien" par sécurité — jamais facturé par défaut, y compris lors d'un changement de
+// classe (promotion) ou d'un recalcul en masse des tarifs.
+export const isSubjectToRegistrationFee = (statutElv?: string | null): boolean => statutElv === 'NOUVEAU';
+
 export const getCycle = (className: string): Cycle => {
   const config = getClassConfig(className);
   return config ? config.cycle : 'Primaire';

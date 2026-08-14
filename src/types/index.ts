@@ -16,6 +16,10 @@ export interface Student {
   telephone: string;
   parentId?: string;
   sexe: 'M' | 'F';
+  // Statut ACADÉMIQUE (redouble sa CLASSE cette année) — indépendant du statut financier
+  // ci-dessous. Un élève peut être nouveau à l'établissement en redoublant (transfert après
+  // un échec ailleurs) ou ancien tout en progressant normalement : les deux axes ne se
+  // déduisent jamais l'un de l'autre.
   redoublant: boolean;
   ecoleProvenance: string;
   ecolage: number;
@@ -29,7 +33,10 @@ export interface Student {
   inscriptionRestant?: number;
   recu: string;
   adsn?: string;
-  statutElv?: 'NOUVEAU' | 'ANCIEN' | 'REDOUBLANT';
+  // Statut FINANCIER (nouveau/ancien à l'ÉTABLISSEMENT) — décide seul qui doit les frais
+  // d'inscription (isSubjectToRegistrationFee, voir data/classConfig.ts). N'a aucun lien
+  // avec `redoublant` ci-dessus (statut académique, propre à la classe).
+  statutElv?: 'NOUVEAU' | 'ANCIEN';
   dateNaissance?: string;
   lieuNaissance?: string;
   nationalite?: string;
