@@ -270,6 +270,81 @@ app.get('/api/debug-outbound-ip', async (req, res) => {
     }
 });
 
+// ── DIAGNOSTIC TEMPORAIRE — Test decaissement SasPay depuis l'IP whitelistee ──
+// A SUPPRIMER une fois le test valide, ne sert qu'a ce test ponctuel.
+// La cle est lue depuis les variables d'environnement Render, jamais en dur ici.
+const DEBUG_PAYOUT_PAYLOAD = {
+    amount: '200.00',
+    currency: 'XOF',
+    country: 'TG',
+    method: 'togocel',
+    recipient: { msisdn: '72473027' },
+    customer: { phone: '+22872473027' },
+    description: 'Test decaissement DGhubSchool',
+};
+
+app.get('/api/debug-payout-test', (req, res) => {
+    res.send(`<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Test decaissement SasPay (Render)</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 560px; margin: 60px auto; padding: 0 20px; color: #1e293b; }
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  td { padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+  td:first-child { color: #64748b; font-weight: 600; width: 40%; }
+  button { background: #dc2626; color: white; border: none; padding: 14px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; width: 100%; }
+  button:disabled { background: #94a3b8; cursor: not-allowed; }
+  #result { margin-top: 20px; padding: 16px; border-radius: 8px; white-space: pre-wrap; font-family: monospace; font-size: 12px; display: none; }
+  .ok { background: #dcfce7; color: #166534; display: block !important; }
+  .err { background: #fee2e2; color: #991b1b; display: block !important; }
+</style></head>
+<body>
+  <h1>⚠️ Test decaissement reel — depuis Render (IP whitelistee)</h1>
+  <table>
+    <tr><td>Montant</td><td>${DEBUG_PAYOUT_PAYLOAD.amount} ${DEBUG_PAYOUT_PAYLOAD.currency}</td></tr>
+    <tr><td>Destinataire</td><td>${DEBUG_PAYOUT_PAYLOAD.customer.phone} (${DEBUG_PAYOUT_PAYLOAD.method})</td></tr>
+  </table>
+  <button id="btn" onclick="run()">Lancer le decaissement</button>
+  <div id="result"></div>
+<script>
+async function run() {
+  const btn = document.getElementById('btn');
+  const result = document.getElementById('result');
+  btn.disabled = true; btn.textContent = 'Envoi en cours...';
+  try {
+    const res = await fetch('/api/debug-payout-test', { method: 'POST' });
+    const data = await res.json();
+    result.className = res.ok ? 'ok' : 'err';
+    result.textContent = JSON.stringify(data, null, 2);
+  } catch (err) {
+    result.className = 'err'; result.textContent = 'Erreur: ' + err.message;
+  }
+  btn.disabled = false; btn.textContent = 'Lancer le decaissement';
+}
+</script>
+</body></html>`);
+});
+
+app.post('/api/debug-payout-test', async (req, res) => {
+    const key = process.env.SASPAY_SECRET_KEY;
+    if (!key) return res.status(500).json({ error: 'SASPAY_SECRET_KEY manquante dans les variables d\'environnement.' });
+    try {
+        const apiRes = await fetch('https://api.saspay.me/api/v1/payouts/initialize/', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${key}`,
+                'Content-Type': 'application/json',
+                'Idempotency-Key': `render-test-${Date.now()}`,
+            },
+            body: JSON.stringify(DEBUG_PAYOUT_PAYLOAD),
+        });
+        const data = await apiRes.json();
+        res.status(apiRes.status).json(data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ── Service du Frontend (Static Files) ───────────────────────
 // On pointe vers le dossier 'dist' à la racine du projet
 const frontendDir = path.join(__dirname, '..', 'dist');
