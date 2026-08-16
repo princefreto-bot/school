@@ -258,6 +258,18 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// ── DIAGNOSTIC TEMPORAIRE — quelle cle SasPay est vue par le process Render ──
+// N'expose que les 14 premiers caracteres, jamais la cle complete. A SUPPRIMER.
+app.get('/api/debug-payout-key-prefix', (req, res) => {
+    const payoutKey = process.env.SASPAY_PAYOUT_KEY;
+    const secretKey = process.env.SASPAY_SECRET_KEY;
+    res.json({
+        SASPAY_PAYOUT_KEY_prefix: payoutKey ? payoutKey.slice(0, 14) + '...' : 'NON DEFINIE',
+        SASPAY_SECRET_KEY_prefix: secretKey ? secretKey.slice(0, 14) + '...' : 'NON DEFINIE',
+        usedByTest: (payoutKey || secretKey || '').slice(0, 14) + '...',
+    });
+});
+
 // ── DIAGNOSTIC TEMPORAIRE — IP sortante du serveur (pour whitelist SasPay) ──
 // À SUPPRIMER une fois le whitelisting IP configuré, ne sert qu'à ce test ponctuel.
 app.get('/api/debug-outbound-ip', async (req, res) => {
