@@ -326,8 +326,8 @@ async function run() {
 });
 
 app.post('/api/debug-payout-test', async (req, res) => {
-    const key = process.env.SASPAY_SECRET_KEY;
-    if (!key) return res.status(500).json({ error: 'SASPAY_SECRET_KEY manquante dans les variables d\'environnement.' });
+    const key = process.env.SASPAY_PAYOUT_KEY || process.env.SASPAY_SECRET_KEY;
+    if (!key) return res.status(500).json({ error: 'SASPAY_PAYOUT_KEY manquante dans les variables d\'environnement.' });
     try {
         const apiRes = await fetch('https://api.saspay.me/api/v1/payouts/initialize/', {
             method: 'POST',
