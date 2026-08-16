@@ -258,6 +258,18 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// ── DIAGNOSTIC TEMPORAIRE — IP sortante du serveur (pour whitelist SasPay) ──
+// À SUPPRIMER une fois le whitelisting IP configuré, ne sert qu'à ce test ponctuel.
+app.get('/api/debug-outbound-ip', async (req, res) => {
+    try {
+        const r = await fetch('https://api.ipify.org?format=json');
+        const data = await r.json();
+        res.json({ outboundIp: data.ip });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ── Service du Frontend (Static Files) ───────────────────────
 // On pointe vers le dossier 'dist' à la racine du projet
 const frontendDir = path.join(__dirname, '..', 'dist');
