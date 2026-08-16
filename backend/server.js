@@ -286,7 +286,7 @@ app.get('/api/debug-outbound-ip', async (req, res) => {
 // A SUPPRIMER une fois le test valide, ne sert qu'a ce test ponctuel.
 // La cle est lue depuis les variables d'environnement Render, jamais en dur ici.
 const DEBUG_PAYOUT_PAYLOAD = {
-    amount: '200.00',
+    amount: '270.00',
     currency: 'XOF',
     country: 'TG',
     method: 'togocel',
