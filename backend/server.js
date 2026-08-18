@@ -100,7 +100,13 @@ app.use(cors((req, callback) => {
     }
     callback(null, corsOptions);
 }));
-app.use(express.json({ limit: '10mb' }));
+// Capture le corps brut (rawBody) pour la vérification de signature HMAC des
+// webhooks (SasPay) — express.json() parse en objet JS et perd les octets
+// exacts, or la signature est calculée sur le corps brut, pas sa resérialisation.
+app.use(express.json({
+    limit: '10mb',
+    verify: (req, res, buf) => { req.rawBody = buf; },
+}));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Logger simple des requêtes (uniquement en développement)
@@ -142,6 +148,10 @@ app.use('/api/personnel-documents', require('./routes/personnelDocuments'));
 app.use('/api/timetable', require('./routes/timetable'));
 app.use('/api/satisfaction', require('./routes/satisfaction'));
 app.use('/api/license-payments', require('./routes/licensePayments'));
+
+// Webhook SasPay — public (pas de authenticateToken, la sécurité vient de la
+// vérification de signature HMAC dans le controller lui-même).
+app.post('/api/webhooks/saspay', require('./controllers/saspayLicenseController').handleSaspayWebhook);
 
 // Route publique pour lister les écoles dans le login
 app.get('/api/schools', async (req, res) => {
@@ -356,6 +366,12 @@ app.post('/api/debug-payout-test', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// Dépenses élève — mis en dernier car son routeur applique authenticateToken/requireSchool
+// à TOUTE requête entrant sous /api sans route correspondante à l'intérieur (Express exécute
+// router.use() avant de chercher une route précise) ; monté plus haut, il interceptait et
+// renvoyait 401 sur les routes publiques /api/schools, /api/testimonials, etc. définies après lui.
+app.use('/api', require('./routes/studentExpenses'));
 
 // ── Service du Frontend (Static Files) ───────────────────────
 // On pointe vers le dossier 'dist' à la racine du projet

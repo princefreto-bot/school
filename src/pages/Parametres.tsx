@@ -10,6 +10,7 @@ import {
 import { CLASS_CONFIG } from '../data/classConfig';
 import { SchoolBackups } from '../components/SchoolBackups';
 import { AutoReminderSettings } from '../components/AutoReminderSettings';
+import { ExpenseLabelsSettings } from '../components/ExpenseLabelsSettings';
 import { ParentSatisfactionOverview } from '../components/ParentSatisfactionOverview';
 
 // ── Interrupteur réutilisable, plus lisible qu'une case à cocher pour un réglage on/off ──
@@ -1262,6 +1263,11 @@ export const Parametres: React.FC = () => {
                         </button>
                     </div>
                 </div>
+            )}
+
+            {/* ── FRAIS DIVERS (DÉPENSES ÉLÈVE) ────────────────── */}
+            {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
+                <ExpenseLabelsSettings />
             )}
         </div>
 

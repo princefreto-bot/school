@@ -183,6 +183,22 @@ export const parentApi = {
         return data;
     },
 
+    // Réservé aux codes promo/VIP (bypass) — la clé Chariow n'existe plus, mais le
+    // mécanisme de bypass est indépendant du fournisseur de paiement.
+    activateLicenseAuto: async (licenseKey: string) => {
+        const res = await fetch(`${API_URL}/parent/activate-license-auto`, {
+            method: 'POST',
+            headers: {
+                ...getHeaders(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ licenseKey })
+        });
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data;
+    },
+
     getLicensePricing: async () => {
         const res = await fetch(`${API_URL}/parent/license-pricing`, {
             headers: getHeaders()
@@ -190,6 +206,41 @@ export const parentApi = {
         const data = await parseResponse(res);
         if (!res.ok) throw data;
         return data;
+    },
+
+    createLicenseCheckoutSession: async (studentId: string, tranche: 'partial' | 'full') => {
+        const res = await fetch(`${API_URL}/parent/license-checkout-session`, {
+            method: 'POST',
+            headers: {
+                ...getHeaders(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ studentId, tranche })
+        });
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data as { checkoutUrl: string; sessionId: string; amount: number };
+    },
+
+    checkLicenseCheckoutSessionStatus: async (sessionId: string) => {
+        const res = await fetch(`${API_URL}/parent/license-checkout-session/${sessionId}/status`, {
+            headers: getHeaders()
+        });
+        const data = await parseResponse(res);
+        if (!res.ok) throw data;
+        return data as {
+            sessionStatus: string;
+            licenseActive: boolean;
+            payment: {
+                amount: number;
+                trancheNumber: number;
+                tranchesPaid: number;
+                totalPaid: number;
+                totalRequired: number;
+                amountRemaining: number;
+                isFullyPaid: boolean;
+            };
+        };
     },
 
     // ── Annonces (temps réel) ────────────────────────────────

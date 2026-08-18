@@ -165,7 +165,7 @@ async function sendSuperadminLicensePaymentAlert(info) {
                 <tr style="background:#f8fafc;"><td style="padding:8px; font-weight:700; color:#0f172a;">Montant</td><td style="padding:8px; font-weight:800;">${fmt(amount)}</td></tr>
                 <tr><td style="padding:8px 0; font-weight:700; color:#0f172a;">Type</td><td style="padding:8px 0;">${trancheLabel}</td></tr>
                 <tr style="background:#f8fafc;"><td style="padding:8px; font-weight:700; color:#0f172a;">Total payé (élève)</td><td style="padding:8px;">${fmt(totalPaid)} / 2 100 F CFA</td></tr>
-                <tr><td style="padding:8px 0; font-weight:700; color:#0f172a;">Clé Chariow</td><td style="padding:8px 0; font-family: monospace; font-size:11px; color:#64748b;">${licenseKey}</td></tr>
+                <tr><td style="padding:8px 0; font-weight:700; color:#0f172a;">Référence paiement</td><td style="padding:8px 0; font-family: monospace; font-size:11px; color:#64748b;">${licenseKey}</td></tr>
             </table>
 
             ${isFinal ? `

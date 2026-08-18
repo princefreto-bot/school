@@ -71,6 +71,27 @@ export interface Payment {
   type?: 'ecolage' | 'inscription';
 }
 
+// Dépenses ponctuelles liées à un élève précis (ex: Maillots, Excursion) — jamais une
+// dépense de l'établissement, jamais mélangée à l'écolage ou aux frais d'inscription.
+export interface ExpenseLabel {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface StudentExpense {
+  id: string;
+  studentId: string;
+  labelId: string | null;
+  label: string;
+  amount: number;
+  amountPaid: number;
+  academicYearId?: string | null;
+  createdBy?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ClassConfig {
   name: string;
   cycle: Cycle;

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle2, Loader2, KeyRound, AlertCircle, ArrowRight, LogIn } from 'lucide-react';
-import { API_BASE_URL } from '../config';
+import { parentApi } from '../services/parentApi';
 
 interface ActivationTranslations {
   loadingTitle: string;
@@ -17,6 +17,7 @@ interface ActivationTranslations {
   btnSubmit: string;
   successMsg: string;
   errorMsg: string;
+  stillProcessingMsg: string;
   needLoginTitle: string;
   needLoginDesc: string;
   goToLogin: string;
@@ -27,7 +28,6 @@ interface PaymentPayload {
   amount: number;
   trancheNumber: number;
   tranchesPaid: number;
-  tranchesRemaining: number;
   totalPaid: number;
   totalRequired: number;
   amountRemaining: number;
@@ -36,81 +36,75 @@ interface PaymentPayload {
 
 const translations: Record<'fr' | 'en', ActivationTranslations> = {
   fr: {
-    loadingTitle: "Activation en cours...",
-    loadingDesc: "Nous validons votre licence auprès de Chariow et débloquons votre compte.",
+    loadingTitle: "Vérification du paiement...",
+    loadingDesc: "Nous confirmons votre paiement et débloquons votre compte.",
     successTitle: "Licence Activée",
     partialTitle: "Tranche validée",
     successRedirect: "Redirection vers votre tableau de bord...",
-    errorTitle: "Échec de l'activation",
+    errorTitle: "Paiement introuvable",
     retry: "Réessayer",
-    idleTitle: "Activer votre licence",
-    idleDesc: "Saisissez la clé de licence que vous avez reçue par email après le paiement.",
-    inputPlaceholder: "Ex: ABC-123-XYZ-789",
-    btnSubmit: "Valider la licence",
+    idleTitle: "Code promotionnel",
+    idleDesc: "Si vous disposez d'un code promotionnel fourni par l'école ou le support, saisissez-le ici.",
+    inputPlaceholder: "Ex: DGHUB-PROMO-XXXX",
+    btnSubmit: "Valider le code",
     successMsg: "Votre licence a été activée avec succès !",
-    errorMsg: "La clé de licence est invalide ou a déjà été utilisée.",
+    errorMsg: "Ce code est invalide ou a déjà été utilisé.",
+    stillProcessingMsg: "Le paiement est en cours de confirmation, ça peut prendre quelques instants...",
     needLoginTitle: "Connexion requise",
-    needLoginDesc: "Connectez-vous à votre compte parent pour finaliser l'activation. Nous garderons la clé de licence en mémoire.",
+    needLoginDesc: "Connectez-vous à votre compte parent pour finaliser l'activation.",
     goToLogin: "Se connecter",
     goToDashboard: "Aller au tableau de bord"
   },
   en: {
-    loadingTitle: "Activation in progress...",
-    loadingDesc: "We are validating your license with Chariow and unlocking your account.",
+    loadingTitle: "Verifying payment...",
+    loadingDesc: "We are confirming your payment and unlocking your account.",
     successTitle: "License Activated",
     partialTitle: "Instalment recorded",
     successRedirect: "Redirecting to your dashboard...",
-    errorTitle: "Activation failed",
+    errorTitle: "Payment not found",
     retry: "Try again",
-    idleTitle: "Activate your license",
-    idleDesc: "Enter the license key you received by email after your purchase.",
-    inputPlaceholder: "e.g., ABC-123-XYZ-789",
-    btnSubmit: "Validate license",
+    idleTitle: "Promo code",
+    idleDesc: "If you have a promotional code provided by the school or support, enter it here.",
+    inputPlaceholder: "e.g., DGHUB-PROMO-XXXX",
+    btnSubmit: "Validate code",
     successMsg: "Your license was activated successfully!",
-    errorMsg: "License key is invalid or has already been used.",
+    errorMsg: "This code is invalid or has already been used.",
+    stillProcessingMsg: "Payment confirmation is in progress, this can take a few moments...",
     needLoginTitle: "Sign-in required",
-    needLoginDesc: "Sign in to your parent account to finalize the activation. We will remember the license key.",
+    needLoginDesc: "Sign in to your parent account to finalize the activation.",
     goToLogin: "Sign in",
     goToDashboard: "Go to dashboard"
   }
 };
 
+const POLL_ATTEMPTS = 8;
+const POLL_INTERVAL_MS = 2500;
+
 export const ActivationLicence: React.FC = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { lang = 'fr' } = useParams<{ lang?: string }>();
   const activeLang = (lang === 'fr' || lang === 'en') ? lang : 'fr';
   const t = translations[activeLang];
 
-  // Chariow ajoute typiquement license_key / sale_id après paiement.
-  // On accepte aussi `key` par simplicité.
-  const initialKey = searchParams.get('license_key') || searchParams.get('key') || '';
-  const [licenseKey, setLicenseKey] = useState(initialKey);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'need_login'>('idle');
+  const [promoCode, setPromoCode] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'still_processing' | 'success' | 'error' | 'need_login'>('idle');
   const [message, setMessage] = useState('');
   const [payment, setPayment] = useState<PaymentPayload | null>(null);
+  const cancelledRef = useRef(false);
 
   const dashboardPath = `/${activeLang}/portail-parent/dashboard`;
 
   useEffect(() => {
-    // Persister la clé au cas où le parent doit se connecter d'abord
-    if (initialKey) {
-      localStorage.setItem('pending_license_key', initialKey);
+    cancelledRef.current = false;
+    const sessionId = localStorage.getItem('pending_license_checkout_session_id');
+    if (sessionId) {
+      pollSession(sessionId);
     }
-
-    // Récupérer une clé en attente après login (renvoyée par le flux de login)
-    const pending = localStorage.getItem('pending_license_key');
-    const keyToUse = initialKey || pending || '';
-
-    if (keyToUse) {
-      setLicenseKey(keyToUse);
-      handleActivate(keyToUse);
-    }
+    return () => { cancelledRef.current = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleActivate = async (keyToUse: string) => {
-    if (!keyToUse) return;
+  const pollSession = async (sessionId: string) => {
     const token = localStorage.getItem('parent_token');
     if (!token) {
       setStatus('need_login');
@@ -120,34 +114,64 @@ export const ActivationLicence: React.FC = () => {
     setStatus('loading');
     setMessage('');
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/parent/activate-license-auto`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ licenseKey: keyToUse.trim() })
-      });
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        setStatus('error');
-        setMessage(data.error || t.errorMsg);
-        return;
+    for (let attempt = 0; attempt < POLL_ATTEMPTS; attempt++) {
+      if (cancelledRef.current) return;
+      try {
+        const data = await parentApi.checkLicenseCheckoutSessionStatus(sessionId);
+        if (data.sessionStatus === 'PAID' || data.sessionStatus === 'paid') {
+          localStorage.removeItem('pending_license_checkout_session_id');
+          setPayment(data.payment);
+          setStatus('success');
+          setMessage(data.payment.isFullyPaid ? t.successMsg : t.successMsg);
+          if (data.payment.isFullyPaid) {
+            setTimeout(() => { if (!cancelledRef.current) navigate(dashboardPath); }, 3500);
+          }
+          return;
+        }
+        if (data.sessionStatus === 'expired' || data.sessionStatus === 'failed') {
+          localStorage.removeItem('pending_license_checkout_session_id');
+          setStatus('error');
+          setMessage(t.errorMsg);
+          return;
+        }
+      } catch (err: any) {
+        // Session introuvable ou erreur réseau ponctuelle — on continue les tentatives,
+        // la dernière itération basculera sur l'état "still_processing".
       }
+      setStatus('still_processing');
+      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+    }
 
-      localStorage.removeItem('pending_license_key');
+    // Après plusieurs tentatives sans confirmation : le webhook prendra probablement
+    // le relais en arrière-plan, mais on laisse le parent avec un état clair plutôt
+    // que de le bloquer indéfiniment sur un spinner.
+    if (!cancelledRef.current) {
+      setStatus('still_processing');
+      setMessage(t.stillProcessingMsg);
+    }
+  };
+
+  const handlePromoCode = async () => {
+    if (!promoCode.trim()) return;
+    const token = localStorage.getItem('parent_token');
+    if (!token) {
+      setStatus('need_login');
+      return;
+    }
+
+    setStatus('loading');
+    setMessage('');
+    try {
+      const data = await parentApi.activateLicenseAuto(promoCode.trim());
       setPayment(data.payment || null);
       setStatus('success');
       setMessage(data.message || t.successMsg);
-      // Ne rediriger auto que si la licence est entièrement soldée
       if (data.payment?.isFullyPaid !== false) {
-        setTimeout(() => navigate(dashboardPath), 3500);
+        setTimeout(() => { if (!cancelledRef.current) navigate(dashboardPath); }, 3500);
       }
     } catch (err: any) {
       setStatus('error');
-      setMessage(err?.message || t.errorMsg);
+      setMessage(err?.error || t.errorMsg);
     }
   };
 
@@ -155,13 +179,13 @@ export const ActivationLicence: React.FC = () => {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-['Poppins']">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-8 text-center">
 
-        {status === 'loading' && (
+        {(status === 'loading' || status === 'still_processing') && (
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mb-2">
               <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
             </div>
             <h2 className="text-xl font-black text-slate-900">{t.loadingTitle}</h2>
-            <p className="text-sm text-slate-500">{t.loadingDesc}</p>
+            <p className="text-sm text-slate-500">{status === 'still_processing' ? t.stillProcessingMsg : t.loadingDesc}</p>
           </div>
         )}
 
@@ -236,10 +260,10 @@ export const ActivationLicence: React.FC = () => {
             <h2 className="text-xl font-black text-slate-900">{t.errorTitle}</h2>
             <p className="text-sm text-rose-600 font-medium">{message}</p>
             <button
-              onClick={() => setStatus('idle')}
+              onClick={() => navigate(dashboardPath)}
               className="mt-4 text-sm font-bold text-slate-500 hover:text-slate-700 underline"
             >
-              {t.retry}
+              {t.goToDashboard}
             </button>
           </div>
         )}
@@ -274,13 +298,13 @@ export const ActivationLicence: React.FC = () => {
               <input
                 type="text"
                 placeholder={t.inputPlaceholder}
-                value={licenseKey}
-                onChange={(e) => setLicenseKey(e.target.value)}
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-center"
               />
               <button
-                onClick={() => handleActivate(licenseKey)}
-                disabled={!licenseKey.trim()}
+                onClick={handlePromoCode}
+                disabled={!promoCode.trim()}
                 className="w-full py-3.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-black uppercase tracking-wider text-sm rounded-xl shadow-md transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {t.btnSubmit} <ArrowRight className="w-4 h-4" />

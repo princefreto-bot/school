@@ -23,17 +23,17 @@ const getPaymentOptions = () => {
     return [
         {
             id: 'tranche_1',
+            tranche: 'partial' as const,
             name: `Payer une tranche (1 mois)`,
             description: `Payez 700 F maintenant. Vous aurez 2 autres tranches de 700 F à régler plus tard.`,
             price: 700,
-            url: 'https://zwhhrrbi.mychariow.co/prd_u611otjw/checkout'
         },
         {
             id: 'total',
+            tranche: 'full' as const,
             name: `Solder la scolarité (Année complète)`,
-            description: `Payez 2100 F en une seule fois et soyez tranquille pour toute l'année scolaire.`,
+            description: `Payez le reliquat en une seule fois et soyez tranquille pour toute l'année scolaire.`,
             price: 2100,
-            url: 'https://zwhhrrbi.mychariow.co/prd_27g3ge9e/checkout',
             recommended: true
         }
     ];
@@ -48,6 +48,7 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
     const [activating, setActivating] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
+    const [payingOptionId, setPayingOptionId] = useState<string | null>(null);
 
     const schoolSlug = useStore((s) => s.user?.schoolSlug);
 
@@ -96,6 +97,26 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
             setErrorMsg(err.error || "Clé de licence invalide ou expirée.");
         } finally {
             setActivating(false);
+        }
+    };
+
+    const handlePay = async (tranche: 'partial' | 'full', optionId: string) => {
+        if (!selectedChildId) {
+            setErrorMsg("Sélectionnez d'abord un enfant à activer ci-dessous.");
+            return;
+        }
+        setErrorMsg('');
+        setPayingOptionId(optionId);
+        try {
+            const { checkoutUrl, sessionId } = await parentApi.createLicenseCheckoutSession(selectedChildId, tranche);
+            // Le retour SasPay atterrit sur la page d'activation sans connaître l'id
+            // de session — on le passe par localStorage, même mécanisme que l'ancien
+            // flux Chariow (pending_license_key).
+            localStorage.setItem('pending_license_checkout_session_id', sessionId);
+            window.location.href = checkoutUrl;
+        } catch (err: any) {
+            setErrorMsg(err?.error || "Impossible de démarrer le paiement. Réessayez.");
+            setPayingOptionId(null);
         }
     };
 
@@ -203,7 +224,22 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
                                             <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-snug">
                                                 Pour vos {inactiveCount} enfant(s) non activé(s), veuillez acheter la/les licence(s) ci-dessous :
                                             </p>
-                                            
+
+                                            {inactiveCount > 1 && (
+                                                <div>
+                                                    <label className="block text-[9px] font-black text-slate-400 uppercase mb-1">Paiement pour</label>
+                                                    <select
+                                                        value={selectedChildId}
+                                                        onChange={(e) => setSelectedChildId(e.target.value)}
+                                                        className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 text-[11px] font-bold focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                                                    >
+                                                        {childrenList.filter(c => (c.licenseStatus || 'inactive') !== 'active').map((child) => (
+                                                            <option key={child.id} value={child.id}>{child.prenom} {child.nom}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            )}
+
                                             <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1 mt-2">
                                                 {paymentOptions.map((option) => (
                                                     <div key={option.id} className={`flex flex-col gap-2 p-3 bg-white dark:bg-slate-900 border ${option.recommended ? 'border-amber-500 shadow-amber-500/10' : 'border-slate-200 dark:border-slate-800/80'} rounded-xl shadow-sm relative overflow-hidden`}>
@@ -224,14 +260,21 @@ export const LicenseLockScreen: React.FC<LicenseLockScreenProps> = ({ childrenLi
                                                         
                                                         <button
                                                             type="button"
-                                                            onClick={() => window.open(option.url, '_blank')}
-                                                            className={`w-full flex items-center justify-center gap-1.5 py-2 ${option.recommended ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-lg shadow-amber-500/30 animate-pulse' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'} font-black text-[11px] rounded-lg transition active:scale-95 shadow-sm cursor-pointer mt-1 relative overflow-hidden group`}
+                                                            disabled={payingOptionId !== null}
+                                                            onClick={() => handlePay(option.tranche, option.id)}
+                                                            className={`w-full flex items-center justify-center gap-1.5 py-2 ${option.recommended ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-lg shadow-amber-500/30 animate-pulse' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'} font-black text-[11px] rounded-lg transition active:scale-95 shadow-sm cursor-pointer mt-1 relative overflow-hidden group disabled:opacity-60 disabled:cursor-not-allowed disabled:animate-none`}
                                                         >
                                                             {option.recommended && (
                                                                 <div className="absolute inset-0 bg-white/20 w-12 skew-x-12 -ml-16 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                                                             )}
-                                                            <ShoppingBag className={`w-3.5 h-3.5 ${option.recommended ? 'animate-bounce' : ''}`} />
-                                                            {option.recommended ? `Payer ${option.price} F (Solder)` : `Payer ${option.price} F (Tranche)`}
+                                                            {payingOptionId === option.id ? (
+                                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                            ) : (
+                                                                <ShoppingBag className={`w-3.5 h-3.5 ${option.recommended ? 'animate-bounce' : ''}`} />
+                                                            )}
+                                                            {payingOptionId === option.id
+                                                                ? 'Redirection...'
+                                                                : (option.recommended ? `Payer ${option.price} F (Solder)` : `Payer ${option.price} F (Tranche)`)}
                                                         </button>
                                                     </div>
                                                 ))}

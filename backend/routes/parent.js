@@ -15,6 +15,10 @@ const {
     activateLicenseAuto,
     getAcademicYears
 } = require('../controllers/parentController');
+const {
+    createLicenseCheckoutSession,
+    checkLicenseCheckoutSessionStatus,
+} = require('../controllers/saspayLicenseController');
 
 // Routes protégées
 router.use(authenticateToken);
@@ -30,6 +34,8 @@ router.get('/list', getAllParents);
 router.get('/license-pricing', getLicensePricing);
 router.post('/activate-license', activateLicense);
 router.post('/activate-license-auto', activateLicenseAuto);
+router.post('/license-checkout-session', createLicenseCheckoutSession);
+router.get('/license-checkout-session/:id/status', checkLicenseCheckoutSessionStatus);
 router.get('/:id', getParentById);
 router.delete('/:parentId', adminDeleteAccount);
 

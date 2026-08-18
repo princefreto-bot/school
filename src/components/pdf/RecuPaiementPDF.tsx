@@ -10,7 +10,7 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { SchoolLogo } from './SchoolLogo';
-import { Student, Payment } from '../../types';
+import { Student, Payment, StudentExpense } from '../../types';
 
 const ACCENT = '#820000';
 const NA = '—';
@@ -40,6 +40,9 @@ interface RecuPaiementPDFProps {
   currency?: string;
   cashierName?: string;
   stamp?: string | null;
+  /** Dépenses liées à l'élève (Maillots, Excursion...) — récapitulatif cumulé depuis
+   * le début de l'année, affiché sur chaque reçu quel que soit la transaction documentée. */
+  expenses?: StudentExpense[];
 }
 
 // ── Ligne d'information (clé grise / valeur noire) ──
@@ -191,6 +194,55 @@ const ReceiptSummary: React.FC<{
   </div>
 );
 
+// ── DÉPENSES LIÉES À L'ÉLÈVE (Maillots, Excursion...) — récapitulatif cumulé,
+// distinct de l'écolage/frais d'inscription, affiché sur tous les reçus. ──
+const ReceiptExpensesTable: React.FC<{ expenses: StudentExpense[]; currency: string }> = ({ expenses, currency }) => {
+  const cell = 'py-[4px] px-2 align-top';
+  const num = (v: number) => money(v, currency);
+  const totalAmount = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  const totalPaid = expenses.reduce((s, e) => s + (Number(e.amountPaid) || 0), 0);
+  const totalRest = totalAmount - totalPaid;
+
+  return (
+    <div className="mt-3">
+      <h3 className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-900 pb-1 mb-1 border-b" style={{ borderColor: ACCENT }}>
+        Dépenses liées à l'élève (cumul depuis le début de l'année)
+      </h3>
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="border-y border-neutral-300">
+            <th className={`${cell} text-left text-[9px] font-semibold uppercase tracking-wider text-neutral-600`}>Libellé</th>
+            <th className={`${cell} text-right text-[9px] font-semibold uppercase tracking-wider text-neutral-600 w-[22%]`}>Montant</th>
+            <th className={`${cell} text-right text-[9px] font-semibold uppercase tracking-wider text-neutral-600 w-[22%]`}>Payé</th>
+            <th className={`${cell} text-right text-[9px] font-semibold uppercase tracking-wider text-neutral-600 w-[22%]`}>Reste</th>
+          </tr>
+        </thead>
+        <tbody>
+          {expenses.map((e) => {
+            const reste = (Number(e.amount) || 0) - (Number(e.amountPaid) || 0);
+            return (
+              <tr key={e.id} className="border-b border-neutral-100">
+                <td className={`${cell} text-left text-[10px] text-neutral-800`}>{e.label}</td>
+                <td className={`${cell} text-right text-[10px] tabular-nums text-neutral-700`}>{num(e.amount)}</td>
+                <td className={`${cell} text-right text-[10px] tabular-nums text-neutral-900 font-medium`}>{num(e.amountPaid)}</td>
+                <td className={`${cell} text-right text-[10px] tabular-nums ${reste > 0 ? 'text-neutral-900' : 'text-neutral-400'}`}>{num(reste)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+        <tfoot>
+          <tr className="border-t-2 border-neutral-800">
+            <td className={`${cell} text-left text-[10px] font-semibold uppercase tracking-wider text-neutral-900`}>Totaux</td>
+            <td className={`${cell} text-right text-[10px] font-bold tabular-nums text-neutral-900`}>{num(totalAmount)}</td>
+            <td className={`${cell} text-right text-[10px] font-bold tabular-nums text-neutral-900`}>{num(totalPaid)}</td>
+            <td className={`${cell} text-right text-[10px] font-bold tabular-nums text-neutral-900`}>{num(totalRest)}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  );
+};
+
 // ── QR CODE DE VÉRIFICATION ──
 const ReceiptQRCode: React.FC<{ value: string }> = ({ value }) => (
   <div className="flex flex-col items-center gap-1">
@@ -237,7 +289,7 @@ const ReceiptFooter: React.FC<{ cashierName?: string; stamp?: string | null; qrV
 // Composant principal
 // ============================================================
 export const RecuPaiementPDF: React.FC<RecuPaiementPDFProps> = ({
-  student, payment, employer, parentName, schoolYear, currency = 'FCFA', cashierName, stamp,
+  student, payment, employer, parentName, schoolYear, currency = 'FCFA', cashierName, stamp, expenses,
 }) => {
   const tx = payment
     || (student.historiquesPaiements && student.historiquesPaiements.length
@@ -307,6 +359,10 @@ export const RecuPaiementPDF: React.FC<RecuPaiementPDFProps> = ({
       <div className="mt-4">
         <ReceiptSummary totalDu={totalDu} reduction={reduction} paye={paye} reste={reste} currency={currency} />
       </div>
+
+      {expenses && expenses.length > 0 && (
+        <ReceiptExpensesTable expenses={expenses} currency={currency} />
+      )}
 
       <ReceiptFooter cashierName={cashierName} stamp={stamp} qrValue={qrValue} />
     </div>

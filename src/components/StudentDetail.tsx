@@ -1,14 +1,15 @@
 // ============================================================
 // FICHE DÉTAILLÉE D'UN ÉLÈVE — Modale complète
 // ============================================================
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useStore } from '../store/useStore';
-import { Student } from '../types';
+import { Student, ExpenseLabel, StudentExpense } from '../types';
 import { RecuPrintButton } from './pdf/RecuPrintButton';
+import { expensesApi } from '../services/expensesApi';
 import {
   X, Download, MessageCircle, Clock, CheckCircle,
   AlertTriangle, User, Phone, School, CreditCard,
-  TrendingUp, FileText, Camera, Loader2
+  TrendingUp, FileText, Camera, Loader2, ShoppingBag, Plus, Trash2
 } from 'lucide-react';
 
 const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n) + ' FCFA';
@@ -24,9 +25,97 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
   const schoolLogo          = useStore((s) => s.schoolLogo);
   const schoolStamp         = useStore((s) => s.schoolStamp);
 
-  const [tab, setTab] = useState<'infos' | 'historique'>('infos');
+  const [tab, setTab] = useState<'infos' | 'historique' | 'depenses'>('infos');
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // ── Dépenses élève (Maillots, Excursion...) ──────────────────
+  const [expenses, setExpenses] = useState<StudentExpense[]>([]);
+  const [labels, setLabels] = useState<ExpenseLabel[]>([]);
+  const [loadingExpenses, setLoadingExpenses] = useState(false);
+  const [showAddExpense, setShowAddExpense] = useState(false);
+  const [newLabelId, setNewLabelId] = useState('');
+  const [newLabelText, setNewLabelText] = useState('');
+  const [newAmount, setNewAmount] = useState('');
+  const [savingExpense, setSavingExpense] = useState(false);
+  const [expenseError, setExpenseError] = useState('');
+  const [payingExpenseId, setPayingExpenseId] = useState<string | null>(null);
+  const [payAmount, setPayAmount] = useState('');
+  const [payingBusy, setPayingBusy] = useState(false);
+
+  const loadExpenses = React.useCallback(async () => {
+    setLoadingExpenses(true);
+    try {
+      const [exp, lbl] = await Promise.all([
+        expensesApi.getStudentExpenses(student.id),
+        expensesApi.getLabels(),
+      ]);
+      setExpenses(exp);
+      setLabels(lbl);
+    } catch (err) {
+      console.error('Erreur chargement dépenses élève:', err);
+    } finally {
+      setLoadingExpenses(false);
+    }
+  }, [student.id]);
+
+  useEffect(() => {
+    if (tab === 'depenses' && expenses.length === 0 && !loadingExpenses) {
+      loadExpenses();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
+
+  const handleAddExpense = async () => {
+    setExpenseError('');
+    const amount = Number(newAmount);
+    if (!amount || amount <= 0) { setExpenseError('Montant invalide.'); return; }
+    if (!newLabelId && !newLabelText.trim()) { setExpenseError('Choisissez ou saisissez un libellé.'); return; }
+
+    setSavingExpense(true);
+    try {
+      const created = await expensesApi.createStudentExpense(student.id, {
+        labelId: newLabelId || undefined,
+        label: newLabelId ? undefined : newLabelText.trim(),
+        amount,
+      });
+      setExpenses((prev) => [created, ...prev]);
+      setShowAddExpense(false);
+      setNewLabelId('');
+      setNewLabelText('');
+      setNewAmount('');
+    } catch (err: any) {
+      setExpenseError(err?.error || 'Erreur lors de l\'ajout de la dépense.');
+    } finally {
+      setSavingExpense(false);
+    }
+  };
+
+  const handleDeleteExpense = async (expenseId: string) => {
+    if (!window.confirm('Supprimer cette dépense ?')) return;
+    try {
+      await expensesApi.deleteStudentExpense(student.id, expenseId);
+      setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
+    } catch (err) {
+      console.error('Erreur suppression dépense:', err);
+    }
+  };
+
+  const handlePayExpense = async (expenseId: string) => {
+    const amount = Number(payAmount);
+    if (!amount || amount <= 0) return;
+    setPayingBusy(true);
+    try {
+      const updated = await expensesApi.payStudentExpense(student.id, expenseId, amount);
+      setExpenses((prev) => prev.map((e) => (e.id === expenseId ? updated : e)));
+      setPayingExpenseId(null);
+      setPayAmount('');
+    } catch (err) {
+      console.error('Erreur paiement dépense:', err);
+    } finally {
+      setPayingBusy(false);
+    }
+  };
 
   const taux     = student.ecolage > 0 ? Math.round((student.dejaPaye / student.ecolage) * 100) : 0;
   const isSolde  = student.restant <= 0;
@@ -163,7 +252,7 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
 
         {/* Onglets */}
         <div className="flex border-b border-gray-100">
-          {(['infos', 'historique'] as const).map((t) => (
+          {(['infos', 'historique', 'depenses'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -173,7 +262,7 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              {t === 'infos' ? 'Informations' : `Historique (${student.historiquesPaiements.length})`}
+              {t === 'infos' ? 'Informations' : t === 'historique' ? `Historique (${student.historiquesPaiements.length})` : 'Dépenses'}
             </button>
           ))}
         </div>
@@ -322,6 +411,164 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
                       {fmtMoney(student.historiquesPaiements.reduce((a, p) => a + p.montant, 0))}
                     </span>
                   </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab === 'depenses' && (
+            <div>
+              {loadingExpenses ? (
+                <div className="flex items-center justify-center py-16 text-gray-400">
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-gray-400">
+                      Dépenses liées à l'élève (Maillots, Excursion...) — distinctes de l'écolage, à payer par le parent.
+                    </p>
+                    <button
+                      onClick={() => { setShowAddExpense((v) => !v); setExpenseError(''); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-xs font-semibold hover:bg-amber-100 transition-colors shrink-0 ml-3"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Ajouter
+                    </button>
+                  </div>
+
+                  {showAddExpense && (
+                    <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                      <div>
+                        <label className="text-xs text-gray-400 mb-1 block">Libellé</label>
+                        <select
+                          value={newLabelId}
+                          onChange={(e) => { setNewLabelId(e.target.value); if (e.target.value) setNewLabelText(''); }}
+                          className="w-full p-2.5 bg-white border border-gray-200 rounded-lg text-sm"
+                        >
+                          <option value="">— Choisir dans le catalogue —</option>
+                          {labels.map((l) => (
+                            <option key={l.id} value={l.id}>{l.name}</option>
+                          ))}
+                        </select>
+                        {!newLabelId && (
+                          <input
+                            type="text"
+                            value={newLabelText}
+                            onChange={(e) => setNewLabelText(e.target.value)}
+                            placeholder="Ou saisir un nouveau libellé (ex: Maillots)"
+                            className="w-full mt-2 p-2.5 bg-white border border-gray-200 rounded-lg text-sm"
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-400 mb-1 block">Montant (FCFA)</label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={newAmount}
+                          onChange={(e) => setNewAmount(e.target.value)}
+                          className="w-full p-2.5 bg-white border border-gray-200 rounded-lg text-sm"
+                        />
+                      </div>
+                      {expenseError && <p className="text-xs text-red-500">{expenseError}</p>}
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => setShowAddExpense(false)}
+                          className="px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700"
+                        >
+                          Annuler
+                        </button>
+                        <button
+                          onClick={handleAddExpense}
+                          disabled={savingExpense}
+                          className="px-4 py-2 bg-amber-500 text-white rounded-lg text-xs font-semibold hover:bg-amber-600 disabled:opacity-60"
+                        >
+                          {savingExpense ? 'Enregistrement...' : 'Enregistrer'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {expenses.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center text-gray-400">
+                      <ShoppingBag className="w-10 h-10 mb-3 opacity-30" />
+                      <p className="font-medium text-sm">Aucune dépense enregistrée pour cet élève</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {expenses.map((exp) => {
+                        const remaining = exp.amount - exp.amountPaid;
+                        const isPaid = remaining <= 0;
+                        return (
+                          <div key={exp.id} className="bg-gray-50 rounded-xl px-4 py-3">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="text-sm font-semibold text-gray-900 truncate">{exp.label}</p>
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                  {fmtMoney(exp.amountPaid)} payé sur {fmtMoney(exp.amount)}
+                                  {!isPaid && <span className="text-red-500"> · Reste {fmtMoney(remaining)}</span>}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {isPaid ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">
+                                    <CheckCircle className="w-3 h-3" /> Soldé
+                                  </span>
+                                ) : payingExpenseId === exp.id ? (
+                                  <div className="flex items-center gap-1.5">
+                                    <input
+                                      type="number"
+                                      autoFocus
+                                      min={1}
+                                      max={remaining}
+                                      value={payAmount}
+                                      onChange={(e) => setPayAmount(e.target.value)}
+                                      className="w-24 p-1.5 border border-gray-200 rounded-lg text-xs"
+                                      placeholder={String(remaining)}
+                                    />
+                                    <button
+                                      onClick={() => handlePayExpense(exp.id)}
+                                      disabled={payingBusy}
+                                      className="px-2.5 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-semibold hover:bg-emerald-600 disabled:opacity-60"
+                                    >
+                                      OK
+                                    </button>
+                                    <button
+                                      onClick={() => { setPayingExpenseId(null); setPayAmount(''); }}
+                                      className="px-2 py-1.5 text-gray-400 hover:text-gray-600 text-xs"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => { setPayingExpenseId(exp.id); setPayAmount(String(remaining)); }}
+                                    className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-100"
+                                  >
+                                    Payer
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleDeleteExpense(exp.id)}
+                                  className="p-1.5 text-gray-300 hover:text-red-500 transition-colors"
+                                  title="Supprimer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      <div className="border-t border-gray-200 pt-3 mt-3 flex justify-between text-sm">
+                        <span className="text-gray-500 font-medium">Total des dépenses</span>
+                        <span className="font-bold text-gray-900">
+                          {fmtMoney(expenses.reduce((a, e) => a + e.amount, 0))}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

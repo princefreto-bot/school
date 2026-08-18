@@ -6,7 +6,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { useStore } from '../../store/useStore';
 import { RecuPaiementPDF } from './RecuPaiementPDF';
-import { Student } from '../../types';
+import { Student, StudentExpense } from '../../types';
+import { expensesApi } from '../../services/expensesApi';
 
 interface RecuBulkPrintButtonProps {
   students: Student[];
@@ -28,6 +29,7 @@ export const RecuBulkPrintButton: React.FC<RecuBulkPrintButtonProps> = ({
   const printRef = useRef<HTMLDivElement>(null);
   const [armed, setArmed] = useState(false);
   const [nonce, setNonce] = useState(0);
+  const [expensesByStudent, setExpensesByStudent] = useState<Record<string, StudentExpense[]>>({});
 
   const doPrint = useReactToPrint({
     contentRef: printRef,
@@ -46,8 +48,19 @@ export const RecuBulkPrintButton: React.FC<RecuBulkPrintButtonProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonce]);
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    try {
+      const results = await Promise.all(
+        students.map((s) => expensesApi.getStudentExpenses(s.id).catch(() => []))
+      );
+      const map: Record<string, StudentExpense[]> = {};
+      students.forEach((s, i) => { map[s.id] = results[i]; });
+      setExpensesByStudent(map);
+    } catch (err) {
+      console.error('Erreur chargement dépenses pour les reçus:', err);
+      setExpensesByStudent({});
+    }
     setArmed(true);
     setNonce((n) => n + 1);
   };
@@ -81,6 +94,7 @@ export const RecuBulkPrintButton: React.FC<RecuBulkPrintButtonProps> = ({
                   currency={schoolCurrency || 'FCFA'}
                   cashierName={user?.nom}
                   stamp={schoolStamp}
+                  expenses={expensesByStudent[s.id]}
                   employer={employer}
                 />
               </div>

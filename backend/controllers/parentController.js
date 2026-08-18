@@ -2,15 +2,12 @@ const { supabase } = require('../utils/supabase');
 const { sendSuperadminLicensePaymentAlert } = require('../utils/mailer');
 const { getCurrentAcademicYear } = require('../utils/academicYear');
 
-// Chariow — mapping product_id -> montant unitaire (FCFA)
-// Utilisé pour reconnaître si un paiement est une tranche ou un règlement complet.
-const CHARIOW_PRODUCT_AMOUNTS = {
-    'prd_u611otjw': 700,   // Licence d'abonnement (tranche)
-    'prd_27g3ge9e': 2100,  // Licence d'abonnements complet
-};
-const CHARIOW_LICENSE_TOTAL = 2100;
-const CHARIOW_TRANCHE_COUNT = 3;
-const CHARIOW_TRANCHE_AMOUNT = 700;
+// Licence parent : 2100 F par élève, payable en 3 tranches de 700 F.
+// Le paiement normal passe par SasPay (saspayLicenseController.js) ; ces constantes
+// ne servent plus ici qu'au chemin de bypass code promo/VIP.
+const LICENSE_TOTAL = 2100;
+const TRANCHE_COUNT = 3;
+const TRANCHE_AMOUNT = 700;
 
 async function resolveAcademicYearId(schoolSlug, req) {
     let yearName = req.headers['x-academic-year'];
@@ -892,7 +889,7 @@ async function activateLicenseAuto(req, res) {
         });
         const withPartial = unlicensed
             .map(s => ({ id: s.id, total: totalsByStudent.get(s.id) || 0 }))
-            .filter(s => s.total > 0 && s.total < CHARIOW_LICENSE_TOTAL)
+            .filter(s => s.total > 0 && s.total < LICENSE_TOTAL)
             .sort((a, b) => b.total - a.total);
 
         const target = withPartial[0] || unlicensed[0];
@@ -907,7 +904,9 @@ async function activateLicenseAuto(req, res) {
 
 /**
  * POST /api/parent/activate-license
- * Active une licence pour un élève (Bypass DGHUB-VIP/PROMO, ou validation externe)
+ * Active une licence pour un élève via un code promo/VIP (bypass uniquement).
+ * Le paiement normal passe désormais par SasPay (voir saspayLicenseController.js) —
+ * cet endpoint ne sert plus qu'aux codes promotionnels distribués par l'école/le support.
  */
 async function activateLicense(req, res) {
     const { id: parentId, schoolSlug } = req.user;
@@ -933,106 +932,21 @@ async function activateLicense(req, res) {
 
         const cleanKey = (licenseKey || '').trim().toUpperCase();
 
-        // 2. Bypass VIP/PROMO
+        // Bypass VIP/PROMO — seul chemin restant pour cet endpoint. Le paiement normal
+        // passe par SasPay (createLicenseCheckoutSession), jamais par une clé saisie ici.
         const promoBypassKeys = process.env.PROMO_BYPASS_KEYS
             ? process.env.PROMO_BYPASS_KEYS.split(',')
             : (process.env.NODE_ENV === 'production' ? [] : ['DGHUB-VIP', 'DGHUB-PROMO']);
         const isBypass = promoBypassKeys.some(k => cleanKey.startsWith(k.trim().toUpperCase()));
-        let isValid = false;
-        let chariowData = null;
-
-        if (isBypass) {
-            isValid = true;
-            chariowData = {
-                id: 'bypass-' + Math.random().toString(36).substring(2, 9),
-                key: cleanKey,
-                status: 'active'
-            };
-        } else {
-            const CHARIOW_SECRET = process.env.CHARIOW_SECRET_KEY;
-            if (!CHARIOW_SECRET) {
-                if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
-                    console.log('⚠️ Mode Dev: Pas de CHARIOW_SECRET_KEY, acceptation automatique de la clé.');
-                    isValid = true;
-                    chariowData = { id: 'dev-key', key: cleanKey, status: 'active' };
-                } else {
-                    return res.status(500).json({ error: 'Clé secrète d\'activation non configurée.' });
-                }
-            } else {
-                // Appel API externe
-                const validateRes = await fetch(`https://api.chariow.com/v1/licenses/${cleanKey}`, {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${CHARIOW_SECRET}` }
-                });
-
-                if (validateRes.ok) {
-                    const responseBody = await validateRes.json();
-                    const license = responseBody.data || responseBody;
-                    
-                    if (license.is_expired) {
-                        return res.status(400).json({ error: 'Cette licence a expiré.' });
-                    }
-
-                    // Vérifier si la licence est déjà activée pour cet élève précis
-                    let isAlreadyActivatedForThisStudent = false;
-                    try {
-                        const activationsRes = await fetch(`https://api.chariow.com/v1/licenses/${cleanKey}/activations`, {
-                            method: 'GET',
-                            headers: { 'Authorization': `Bearer ${CHARIOW_SECRET}` }
-                        });
-                        if (activationsRes.ok) {
-                            const activationsBody = await activationsRes.json();
-                            const activationsList = activationsBody.data || [];
-                            isAlreadyActivatedForThisStudent = activationsList.some(act => 
-                                (act.activated_by?.device === studentId) || 
-                                (act.device === studentId)
-                            );
-                        }
-                    } catch (e) {
-                        console.error('Erreur lors de la vérification de l\'historique d\'activations:', e);
-                    }
-
-                    if (isAlreadyActivatedForThisStudent) {
-                        chariowData = license;
-                        isValid = true;
-                    } else if (!license.is_active || license.can_activate) {
-                        // Activer sur la plateforme externe
-                        const actRes = await fetch(`https://api.chariow.com/v1/licenses/${cleanKey}/activate`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${CHARIOW_SECRET}`
-                            },
-                            body: JSON.stringify({ device_identifier: studentId })
-                        });
-
-                        if (actRes.ok) {
-                            const actBody = await actRes.json();
-                            chariowData = actBody.data || actBody;
-                            isValid = true;
-                        } else {
-                            const errData = await actRes.json();
-                            return res.status(400).json({ error: errData.message || 'Erreur lors de l\'activation.' });
-                        }
-                    } else {
-                        return res.status(400).json({ error: 'Cette licence a déjà atteint sa limite d\'activation sur un autre compte.' });
-                    }
-                } else {
-                    return res.status(400).json({ error: 'Licence introuvable ou invalide.' });
-                }
-            }
+        if (!isBypass) {
+            return res.status(400).json({ error: 'Code invalide.' });
         }
+        const externalRef = 'promo-' + Math.random().toString(36).substring(2, 9);
 
-        if (!isValid) {
-            return res.status(400).json({ error: 'Validation de licence échouée.' });
-        }
-
-        // 3. Résoudre le montant du paiement à partir du produit Chariow
-        const productId = chariowData?.product?.id || null;
-        const productSlug = chariowData?.product?.slug || null;
-        const saleId = chariowData?.sale?.id || chariowData?.sale_id || null;
-        const paymentAmount = (productId && CHARIOW_PRODUCT_AMOUNTS[productId])
-            || CHARIOW_TRANCHE_AMOUNT; // fallback tranche 700 F
+        // Un code promo/VIP correspond toujours à une tranche de 700 F (voir logique
+        // de calcul plus bas) — comportement identique à avant, un simple bypass de
+        // validation ne change pas le montant crédité.
+        const paymentAmount = TRANCHE_AMOUNT;
 
         // 4. Refuser la réutilisation d'une clé déjà enregistrée (idempotence)
         const { data: existingForKey } = await supabase
@@ -1053,16 +967,16 @@ async function activateLicense(req, res) {
         if (prevErr) throw prevErr;
 
         const previousTotal = (previousRows || []).reduce((s, r) => s + (r.amount || 0), 0);
-        if (previousTotal >= CHARIOW_LICENSE_TOTAL) {
+        if (previousTotal >= LICENSE_TOTAL) {
             return res.status(400).json({ error: 'La licence de cet élève est déjà entièrement soldée.' });
         }
 
         // 6. Numéro de tranche : 0 pour paiement complet (2100), sinon incrémental
-        const trancheNumber = paymentAmount >= CHARIOW_LICENSE_TOTAL
+        const trancheNumber = paymentAmount >= LICENSE_TOTAL
             ? 0
-            : Math.min((previousRows || []).length + 1, CHARIOW_TRANCHE_COUNT);
+            : Math.min((previousRows || []).length + 1, TRANCHE_COUNT);
         const newTotal = previousTotal + paymentAmount;
-        const isFinal = newTotal >= CHARIOW_LICENSE_TOTAL;
+        const isFinal = newTotal >= LICENSE_TOTAL;
 
         // 7. Enregistrer la ligne de paiement
         const academicYearId = await resolveAcademicYearId(schoolSlug, req);
@@ -1073,8 +987,8 @@ async function activateLicense(req, res) {
                 parent_id: parentId,
                 academic_year_id: academicYearId,
                 license_key: cleanKey,
-                sale_id: saleId,
-                product_id: productId || productSlug,
+                sale_id: externalRef,
+                product_id: 'promo',
                 amount: paymentAmount,
                 tranche_number: trancheNumber,
                 is_final: isFinal
@@ -1093,9 +1007,9 @@ async function activateLicense(req, res) {
             .eq('id', studentId);
         if (updErr) throw updErr;
 
-        const amountRemaining = Math.max(0, CHARIOW_LICENSE_TOTAL - newTotal);
-        const tranchesPaid = trancheNumber === 0 ? CHARIOW_TRANCHE_COUNT : trancheNumber;
-        const tranchesRemaining = Math.max(0, CHARIOW_TRANCHE_COUNT - tranchesPaid);
+        const amountRemaining = Math.max(0, LICENSE_TOTAL - newTotal);
+        const tranchesPaid = trancheNumber === 0 ? TRANCHE_COUNT : trancheNumber;
+        const tranchesRemaining = Math.max(0, TRANCHE_COUNT - tranchesPaid);
 
         // Notification superadmin (fire-and-forget, ne bloque pas la réponse)
         (async () => {
@@ -1111,7 +1025,7 @@ async function activateLicense(req, res) {
                     studentName: student ? `${student.prenom} ${student.nom}${student.classe ? ' (' + student.classe + ')' : ''}` : '—',
                     parentName: parentProfile ? `${parentProfile.nom}${parentProfile.telephone ? ' · ' + parentProfile.telephone : ''}` : '—',
                     amount: paymentAmount,
-                    trancheLabel: trancheNumber === 0 ? 'Règlement complet' : `Tranche ${trancheNumber}/${CHARIOW_TRANCHE_COUNT}`,
+                    trancheLabel: trancheNumber === 0 ? 'Règlement complet' : `Tranche ${trancheNumber}/${TRANCHE_COUNT}`,
                     isFinal,
                     totalPaid: newTotal,
                     licenseKey: cleanKey
@@ -1125,15 +1039,15 @@ async function activateLicense(req, res) {
             success: true,
             message: isFinal
                 ? 'Paiement complet enregistré. Licence activée avec succès !'
-                : `Tranche ${trancheNumber}/${CHARIOW_TRANCHE_COUNT} validée. Il vous reste ${amountRemaining} F CFA à régler.`,
-            license: chariowData,
+                : `Tranche ${trancheNumber}/${TRANCHE_COUNT} validée. Il vous reste ${amountRemaining} F CFA à régler.`,
+            license: { id: externalRef, key: cleanKey, status: 'active' },
             payment: {
                 amount: paymentAmount,
                 trancheNumber,
                 tranchesPaid,
                 tranchesRemaining,
                 totalPaid: newTotal,
-                totalRequired: CHARIOW_LICENSE_TOTAL,
+                totalRequired: LICENSE_TOTAL,
                 amountRemaining,
                 isFullyPaid: isFinal
             }

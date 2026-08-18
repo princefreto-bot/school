@@ -8,7 +8,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { useStore } from '../../store/useStore';
 import { RecuPaiementPDF } from './RecuPaiementPDF';
-import { Student, Payment } from '../../types';
+import { Student, Payment, StudentExpense } from '../../types';
+import { expensesApi } from '../../services/expensesApi';
 
 interface RecuPrintButtonProps {
   student: Student;
@@ -37,6 +38,7 @@ export const RecuPrintButton: React.FC<RecuPrintButtonProps> = ({
   const printRef = useRef<HTMLDivElement>(null);
   const [armed, setArmed] = useState(false);
   const [nonce, setNonce] = useState(0);
+  const [expenses, setExpenses] = useState<StudentExpense[]>([]);
 
   const doPrint = useReactToPrint({
     contentRef: printRef,
@@ -52,8 +54,14 @@ export const RecuPrintButton: React.FC<RecuPrintButtonProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonce]);
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    try {
+      setExpenses(await expensesApi.getStudentExpenses(student.id));
+    } catch (err) {
+      console.error('Erreur chargement dépenses pour le reçu:', err);
+      setExpenses([]);
+    }
     setArmed(true);
     setNonce((n) => n + 1);
   };
@@ -76,6 +84,7 @@ export const RecuPrintButton: React.FC<RecuPrintButtonProps> = ({
               currency={schoolCurrency || 'FCFA'}
               cashierName={user?.nom}
               stamp={schoolStamp}
+              expenses={expenses}
               employer={{
                 name: schoolName,
                 logo: schoolLogo,
