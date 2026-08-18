@@ -50,6 +50,7 @@ const featuresFr = [
       'Export Excel/CSV des rapports financiers',
       'Comptabilité en partie double : balance, bilan, compte de résultat',
       'Rappels de paiement automatiques aux parents en retard',
+      'Dépenses élève (maillots, excursion...) suivies séparément jusqu\'au reçu',
     ],
   },
   {
@@ -213,6 +214,7 @@ const featuresEn = [
       'Excel/CSV financial report export',
       'Double-entry accounting: trial balance, balance sheet, income statement',
       'Automatic payment reminders for overdue parents',
+      'Student expenses (jerseys, field trips...) tracked separately through to the receipt',
     ],
   },
   {

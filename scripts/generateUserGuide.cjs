@@ -322,6 +322,15 @@ stepList([
 roleNote("Ce statut « Nouveau / Ancien » (financier, propre à l'établissement) est indépendant du statut « Redoublant » (académique, propre à la classe) : un élève peut être nouveau à l'école tout en redoublant sa classe, ou ancien tout en progressant normalement.");
 paragraph("La réduction de paiement reste réservée à l'écolage (jusqu'à 100% du montant dû) — elle n'est pas disponible pour les frais d'inscription.");
 paragraph("Le suivi (total attendu, encaissé, restant) apparaît sur le Tableau de bord et la page Analyses dans un encart séparé — il n'est jamais additionné aux totaux de l'écolage, ni pris en compte dans le score de priorité du module Recouvrement.");
+subTitle('Dépenses élève (Maillots, Excursion...)');
+paragraph("Une troisième piste, distincte de l'écolage et des frais d'inscription : des dépenses ponctuelles liées à UN élève précis (maillots, excursion, fournitures...) — jamais une dépense de l'établissement. Le montant est dû par le parent et suivi comme un versement classique (payé / restant).");
+stepList([
+  "Créez d'abord les libellés réutilisables dans Paramètres > Frais divers (ex. « Maillots », « Excursion ») — un catalogue commun à toute l'école, pas ressaisi à chaque fois.",
+  "Sur la fiche de l'élève, ouvrez l'onglet « Dépenses » puis « Ajouter » : choisissez un libellé du catalogue (ou saisissez-en un nouveau) et le montant dû.",
+  "Enregistrez un paiement partiel ou total sur cette dépense avec le bouton « Payer », comme pour l'écolage.",
+]);
+paragraph("Toutes les dépenses d'un élève, avec leur montant payé et restant, apparaissent automatiquement sur chaque reçu imprimé pour cet élève (individuel ou en lot) — un récapitulatif cumulé depuis le début de l'année.");
+roleNote("Cette piste n'est jamais mélangée à l'écolage ou aux frais d'inscription, et n'est jamais prise en compte dans le score de priorité du module Recouvrement.");
 
 // ── 5. COMPTABILITÉ ──
 sectionTitle(5, 'Comptabilité');
