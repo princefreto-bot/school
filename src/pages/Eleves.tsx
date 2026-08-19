@@ -43,6 +43,7 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
     classe: student?.classe ?? CLASS_CONFIG[0].name,
     telephone: student?.telephone ?? '+228',
     sexe: (student?.sexe ?? 'M') as 'M' | 'F',
+    dateNaissance: student?.dateNaissance ?? '',
     redoublant: student?.redoublant ?? false,
     // Statut FINANCIER (nouveau/ancien à l'établissement) — distinct du statut
     // ACADÉMIQUE "redoublant" (repère la classe, pas l'établissement) géré par la
@@ -151,7 +152,7 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
             <div>
               <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                 <Smartphone className="w-3 h-3" /> Téléphone parent
@@ -163,6 +164,20 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
                 placeholder="+228" 
               />
             </div>
+            <div>
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                🎂 Date de naissance
+              </label>
+              <input 
+                type="date"
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all dark:text-white" 
+                value={form.dateNaissance} 
+                onChange={(e) => setForm({ ...form, dateNaissance: e.target.value })} 
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5">
             <div>
               <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                 <Building2 className="w-3 h-3" /> École de provenance

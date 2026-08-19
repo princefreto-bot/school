@@ -281,6 +281,7 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
                   {[
                     { label: 'Matricule', value: student.adsn || 'Non assigné' },
                     { label: 'Nom complet', value: `${student.prenom} ${student.nom}` },
+                    { label: 'Date de naissance', value: student.dateNaissance ? new Date(student.dateNaissance).toLocaleDateString('fr-FR') : '—' },
                     { label: 'Sexe', value: student.sexe === 'M' ? 'Masculin' : 'Féminin' },
                     { label: 'Redoublant', value: student.redoublant ? 'Oui' : 'Non' },
                     { label: 'N° Reçu', value: student.recu || '—' },

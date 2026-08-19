@@ -44,6 +44,7 @@ export default function Students() {
     classe: '',
     telephone: '',
     sexe: 'M',
+    dateNaissance: '',
     redoublant: false,
     ecoleProvenance: '',
     ecolage: 0,
@@ -110,6 +111,7 @@ export default function Students() {
       classe: '',
       telephone: '',
       sexe: 'M',
+      dateNaissance: '',
       redoublant: false,
       ecoleProvenance: '',
       ecolage: 0,
@@ -172,6 +174,7 @@ export default function Students() {
         classe: formData.classe || '',
         telephone: formData.telephone || '',
         sexe: (formData.sexe as 'M' | 'F') || 'M',
+        dateNaissance: formData.dateNaissance || '',
         redoublant: formData.redoublant || false,
         ecoleProvenance: formData.ecoleProvenance || '',
         ecolage,
@@ -539,6 +542,15 @@ export default function Students() {
                   />
                 </div>
                 <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Date de naissance</label>
+                  <input
+                    type="date"
+                    value={formData.dateNaissance || ''}
+                    onChange={(e) => setFormData({ ...formData, dateNaissance: e.target.value })}
+                    className="input"
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Sexe</label>
                   <select
                     value={formData.sexe || 'M'}
@@ -739,6 +751,14 @@ export default function Students() {
                   <p className="font-semibold">{selectedStudent.telephone || '—'}</p>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-xl">
+                  <p className="text-sm text-gray-500 mb-1">🎂 Date de naissance</p>
+                  <p className="font-semibold">
+                    {selectedStudent.dateNaissance 
+                      ? new Date(selectedStudent.dateNaissance).toLocaleDateString('fr-FR') 
+                      : '—'}
+                  </p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-xl">
                   <p className="text-sm text-gray-500 mb-1">{selectedStudent.sexe === 'F' ? '👩' : '👨'} Sexe</p>
                   <p className="font-semibold">{selectedStudent.sexe === 'F' ? 'Féminin' : 'Masculin'}</p>
                 </div>
@@ -746,7 +766,7 @@ export default function Students() {
                   <p className="text-sm text-gray-500 mb-1">🔄 Redoublant</p>
                   <p className="font-semibold">{selectedStudent.redoublant ? 'Oui' : 'Non'}</p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="p-4 bg-gray-50 rounded-xl col-span-2">
                   <p className="text-sm text-gray-500 mb-1">🏫 École de provenance</p>
                   <p className="font-semibold">{selectedStudent.ecoleProvenance || '—'}</p>
                 </div>

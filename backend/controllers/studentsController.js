@@ -36,9 +36,12 @@ async function listStudents(req, res) {
     try {
         const academicYearId = await resolveAcademicYearId(schoolSlug, req);
 
+        // Colonnes limitées : cette recherche est accessible à tout utilisateur authentifié
+        // (y compris les parents pour retrouver leur enfant) — ne jamais exposer license_key,
+        // telephone_parent ou les données financières (ecolage, restant...) ici.
         let query = supabase
             .from(`students_${schoolSlug}`)
-            .select('*');
+            .select('id, nom, prenom, classe, cycle, sexe, photo_url, license_status, academic_year_id');
 
         if (academicYearId) {
             query = query.eq('academic_year_id', academicYearId);
@@ -133,6 +136,22 @@ async function linkStudentToParent(req, res) {
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
+        // Le JWT ne porte pas le téléphone du parent — on le récupère pour vérifier
+        // sa correspondance avec telephone_parent avant toute liaison à un élève
+        // non réclamé (sinon n'importe quel compte parent pourrait se lier à
+        // n'importe quel élève de l'école, cf. audit sécurité 2026-08-19).
+        const { data: requestingParent } = await supabase
+            .from(`profiles_${schoolSlug}`)
+            .select('telephone')
+            .eq('id', parentId)
+            .single();
+        const clean = (num) => (num || '').replace(/[\s\-\(\)\+]/g, '');
+        const requesterPhoneClean = clean(requestingParent?.telephone);
+
+        const promoBypassKeys = process.env.PROMO_BYPASS_KEYS
+            ? process.env.PROMO_BYPASS_KEYS.split(',')
+            : (process.env.NODE_ENV === 'production' ? [] : ['DGHUB-VIP', 'DGHUB-PROMO']);
+
         const errors = [];
         for (const sId of idsToLink) {
             // 1. Vérifier si l'élève est déjà lié à un autre parent
@@ -168,9 +187,6 @@ async function linkStudentToParent(req, res) {
                 const providedKey = (licenseKey || '').trim().toUpperCase();
                 const activeKey = (student.license_key || '').trim().toUpperCase();
 
-                const promoBypassKeys = process.env.PROMO_BYPASS_KEYS
-                    ? process.env.PROMO_BYPASS_KEYS.split(',')
-                    : (process.env.NODE_ENV === 'production' ? [] : ['DGHUB-VIP', 'DGHUB-PROMO']);
                 const isPromo = promoBypassKeys.some(k => providedKey.startsWith(k.trim().toUpperCase()));
                 const keysMatch = activeKey && providedKey === activeKey;
 
@@ -179,7 +195,7 @@ async function linkStudentToParent(req, res) {
                     const { error: insErr } = await supabase
                         .from(`parent_student_${schoolSlug}`)
                         .insert({ parent_id: parentId, student_id: sId });
-                    
+
                     if (insErr && insErr.code !== '23505') {
                         errors.push(`${sId}: ${insErr.message}`);
                     }
@@ -187,13 +203,40 @@ async function linkStudentToParent(req, res) {
                     errors.push(`Cet enfant est déjà lié à un compte. Veuillez saisir la clé de licence d'activation valide pour confirmer votre lien.`);
                 }
             } else {
-                // Pas encore lié. Liaison directe.
-                const { error: insErr } = await supabase
-                    .from(`parent_student_${schoolSlug}`)
-                    .insert({ parent_id: parentId, student_id: sId });
-                
-                if (insErr && insErr.code !== '23505') {
-                    errors.push(`${sId}: ${insErr.message}`);
+                // Pas encore lié à personne. On exige une preuve de filiation avant la liaison :
+                // le téléphone du compte parent doit correspondre à telephone_parent sur la fiche
+                // élève (comme à l'inscription, cf. authController.js registerParent), ou à défaut
+                // la clé de licence si l'élève en a déjà une (paiement déjà tenté). Sans quoi
+                // n'importe quel compte parent pourrait se lier à n'importe quel enfant de l'école.
+                const { data: student, error: fetchStudErr } = await supabase
+                    .from(`students_${schoolSlug}`)
+                    .select('license_key, license_status, telephone_parent')
+                    .eq('id', sId)
+                    .single();
+
+                if (fetchStudErr) {
+                    errors.push(`${sId}: Impossible de vérifier cet élève.`);
+                    continue;
+                }
+
+                const studentPhoneClean = clean(student.telephone_parent);
+                const phoneMatches = requesterPhoneClean && studentPhoneClean && requesterPhoneClean === studentPhoneClean;
+
+                const providedKey = (licenseKey || '').trim().toUpperCase();
+                const activeKey = (student.license_key || '').trim().toUpperCase();
+                const isPromo = promoBypassKeys.some(k => providedKey.startsWith(k.trim().toUpperCase()));
+                const keysMatch = activeKey && providedKey === activeKey;
+
+                if (phoneMatches || isPromo || (student.license_status === 'active' && keysMatch)) {
+                    const { error: insErr } = await supabase
+                        .from(`parent_student_${schoolSlug}`)
+                        .insert({ parent_id: parentId, student_id: sId });
+
+                    if (insErr && insErr.code !== '23505') {
+                        errors.push(`${sId}: ${insErr.message}`);
+                    }
+                } else {
+                    errors.push(`Cet enfant n'a pas pu être lié : le numéro de téléphone de votre compte ne correspond pas à celui enregistré pour cet élève. Contactez l'établissement.`);
                 }
             }
         }

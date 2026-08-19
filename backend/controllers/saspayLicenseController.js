@@ -125,7 +125,9 @@ async function createLicenseCheckoutSession(req, res) {
         });
         const checkoutBody = await checkoutRes.json();
         if (!checkoutRes.ok || !checkoutBody?.data?.id) {
-            console.error('SasPay checkout-session error:', checkoutBody);
+            // Ne jamais logger checkoutBody en entier : SasPay peut ré-échoer customer_email/
+            // customer_name (PII du parent) dans sa réponse d'erreur.
+            console.error('SasPay checkout-session error:', checkoutRes.status, checkoutBody?.error?.message || checkoutBody?.error || 'réponse inattendue');
             return res.status(502).json({ error: checkoutBody?.error?.message || 'Erreur lors de la création de la session de paiement.' });
         }
 

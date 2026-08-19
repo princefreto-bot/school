@@ -7,7 +7,9 @@ async function test() {
         if (error) {
             console.error(`Error for profiles_${slug}:`, error.message);
         } else {
-            console.log(`profiles_${slug} rows (${data.length}):`, data.map(p => ({ id: p.id, nom: p.nom, role: p.role, telephone: p.telephone })));
+            // PII (nom/téléphone) volontairement omise : script pouvant être lancé par erreur
+            // avec un .env pointant vers la base de production.
+            console.log(`profiles_${slug} rows (${data.length}):`, data.map(p => ({ id: p.id, role: p.role })));
         }
     }
 }

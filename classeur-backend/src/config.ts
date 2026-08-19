@@ -11,12 +11,20 @@ function requireEnv(name: string): string {
     return value;
 }
 
+// Render définit automatiquement RENDER=true sur tout service déployé — utilisé comme filet
+// de sécurité si NODE_ENV a été oublié/mal configuré au déploiement (incident déjà vécu côté
+// backend principal, cf. mémoire "Deployment gotchas"). Sans ce filet, un NODE_ENV manquant
+// désactive silencieusement HSTS et bascule le CORS en "autoriser toute origine".
+const detectedNodeEnv = process.env.NODE_ENV || (process.env.RENDER === 'true' ? 'production' : 'development');
+
 export const config = {
     PORT: Number(process.env.PORT) || 4001,
-    NODE_ENV: process.env.NODE_ENV || 'development',
+    NODE_ENV: detectedNodeEnv,
 
     // Ce service émet ses propres tokens, indépendants du JWT_SECRET de dghubschool.com.
-    CLASSEUR_JWT_SECRET: process.env.CLASSEUR_JWT_SECRET || '',
+    // Doit échouer au démarrage si absent : un secret vide signerait/vérifierait les JWT
+    // avec HS256 sur '' , ce qui permettrait de forger un token opérateur valide.
+    CLASSEUR_JWT_SECRET: requireEnv('CLASSEUR_JWT_SECRET'),
     CLASSEUR_JWT_EXPIRES: '7d',
 
     // Secret partagé côté serveur uniquement pour l'échange du code de handoff SSO

@@ -60,7 +60,7 @@ export const webPushService = {
         applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
       });
 
-      console.log('✅ [Push] Abonnement Web Push réussi:', subscription.endpoint);
+      console.log('✅ [Push] Abonnement Web Push réussi.');
 
       // 5. Sauvegarder la subscription sur le backend
       await this.saveSubscription(subscription);
@@ -113,7 +113,7 @@ export const webPushService = {
 
       // 3. Écouter l'enregistrement du token (FCM)
       PushNotifications.addListener('registration', async (token) => {
-        console.log('✅ [Capacitor Push] Token FCM généré :', token.value);
+        console.log('✅ [Capacitor Push] Token FCM généré.');
         await this.saveCapacitorToken(token.value);
       });
 

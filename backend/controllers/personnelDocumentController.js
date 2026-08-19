@@ -10,9 +10,16 @@ const path = require('path');
 const { PERSONNEL_MANAGERS } = require('./personnelController');
 
 const storage = multer.memoryStorage();
+const ALLOWED_DOCUMENT_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
 const upload = multer({
     storage,
-    limits: { fileSize: 10 * 1024 * 1024 } // 10 Mo
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10 Mo
+    fileFilter: (req, file, cb) => {
+        if (!ALLOWED_DOCUMENT_TYPES.has(file.mimetype)) {
+            return cb(new Error('Type de fichier non autorisé. Formats acceptés : PDF, JPEG, PNG, WEBP.'));
+        }
+        cb(null, true);
+    }
 }).single('document');
 
 const BUCKET = 'staff-documents';
@@ -105,7 +112,7 @@ async function getPersonnelDocuments(req, res) {
 
 // ── GET /api/personnel-documents/file/:filename ──────────────────────────────
 async function downloadDocumentFile(req, res) {
-    const { filename } = req.params;
+    const filename = path.basename(req.params.filename);
     const { role, schoolSlug, id: userId } = req.user;
 
     try {

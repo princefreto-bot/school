@@ -2,6 +2,8 @@ if (import.meta.env.PROD) {
   console.log = () => {};
   console.info = () => {};
   console.debug = () => {};
+  console.warn = () => {};
+  console.error = () => {};
 }
 
 // Empêche les transitions de s'exécuter lors du chargement initial

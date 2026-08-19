@@ -24,9 +24,10 @@ async function run() {
             .single();
 
         if (error) {
-            console.error('Error inserting test user:', error);
+            console.error('Error inserting test user:', error.message);
         } else {
-            console.log('Successfully created test user:', data);
+            // Ne jamais logger `data` en entier : il contient le hash bcrypt du mot de passe.
+            console.log('Successfully created test user, id:', data.id);
         }
     } catch (e) {
         console.error('Exception:', e);

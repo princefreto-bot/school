@@ -1,5 +1,6 @@
 const router = require('express').Router();
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, requireSchoolAdmin } = require('../middleware/auth');
+const { paymentLimiter } = require('../middleware/rateLimiter');
 const {
     getDashboard,
     getPayments,
@@ -29,12 +30,14 @@ router.get('/dashboard', getDashboard);
 router.get('/payments/:studentId', getPayments);
 router.get('/presences/:studentId', getPresences);
 router.get('/badges', getBadges);
-router.get('/active-count', getActiveParentsCount);
-router.get('/list', getAllParents);
+// Roster/liste des parents réservé à la direction — sinon tout compte parent authentifié
+// pouvait lister les noms/téléphones de toutes les autres familles de l'école.
+router.get('/active-count', requireSchoolAdmin, getActiveParentsCount);
+router.get('/list', requireSchoolAdmin, getAllParents);
 router.get('/license-pricing', getLicensePricing);
 router.post('/activate-license', activateLicense);
 router.post('/activate-license-auto', activateLicenseAuto);
-router.post('/license-checkout-session', createLicenseCheckoutSession);
+router.post('/license-checkout-session', paymentLimiter, createLicenseCheckoutSession);
 router.get('/license-checkout-session/:id/status', checkLicenseCheckoutSessionStatus);
 router.get('/:id', getParentById);
 router.delete('/:parentId', adminDeleteAccount);

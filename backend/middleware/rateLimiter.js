@@ -22,7 +22,21 @@ const authLimiter = rateLimit({
   }
 });
 
+// Limiteur dédié à la création de session de paiement (licence parent) : un token parent
+// compromis ne doit pas pouvoir spammer la création de sessions SasPay au rythme du
+// limiteur global générique (20 requêtes / 10 minutes, largement suffisant en usage normal).
+const paymentLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: 'Trop de tentatives de paiement, veuillez réessayer plus tard.'
+  }
+});
+
 module.exports = {
   globalLimiter,
-  authLimiter
+  authLimiter,
+  paymentLimiter
 };

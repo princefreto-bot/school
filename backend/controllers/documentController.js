@@ -10,9 +10,17 @@ const { sendPushNotification } = require('../utils/webPush');
 // Utiliser memoryStorage pour ne pas dépendre du système de fichiers éphémère de Render
 const storage = multer.memoryStorage();
 
-const upload = multer({ 
+const ALLOWED_DOCUMENT_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
+
+const upload = multer({
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 } // Limite à 10 Mo
+    limits: { fileSize: 10 * 1024 * 1024 }, // Limite à 10 Mo
+    fileFilter: (req, file, cb) => {
+        if (!ALLOWED_DOCUMENT_TYPES.has(file.mimetype)) {
+            return cb(new Error('Type de fichier non autorisé. Formats acceptés : PDF, JPEG, PNG, WEBP.'));
+        }
+        cb(null, true);
+    }
 }).single('document');
 
 // ── POST /api/documents/scan ──────────────────────────────────
@@ -28,10 +36,11 @@ async function scanAndUploadDocument(req, res) {
             return res.status(400).json({ error: "Aucun fichier fourni." });
         }
 
-        const { student_id, document_type, title, school_slug } = req.body;
+        const { student_id, document_type, title } = req.body;
+        const school_slug = req.user.schoolSlug;
 
         if (!student_id || !document_type || !title || !school_slug) {
-            return res.status(400).json({ error: "Champs requis manquants : student_id, document_type, title, school_slug." });
+            return res.status(400).json({ error: "Champs requis manquants : student_id, document_type, title." });
         }
 
         try {
@@ -237,7 +246,7 @@ async function deleteDocument(req, res) {
 
 // Télécharge ou visionne de façon sécurisée un fichier document
 async function downloadDocumentFile(req, res) {
-    const { filename } = req.params;
+    const filename = path.basename(req.params.filename);
     const { schoolSlug, role, id: userId } = req.user;
 
     if (!schoolSlug) {

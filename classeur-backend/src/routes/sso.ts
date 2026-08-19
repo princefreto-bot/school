@@ -3,16 +3,27 @@
 // ============================================================
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
+import rateLimit from 'express-rate-limit';
 import { config } from '../config';
 import { classeurClient } from '../lib/supabaseClasseur';
 
 const router = Router();
 
+// Seul point de connexion de tout le service : le limiteur global (500/10min, partagé avec
+// toutes les autres routes) ne suffit pas à empêcher un bruteforce du paramètre `code`.
+const ssoRedeemLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Trop de tentatives, veuillez réessayer plus tard.' },
+});
+
 // ── POST /api/sso/redeem ─────────────────────────────────────
 // Appelé par le frontend du classeur juste après la redirection depuis dghubschool.com
 // (?code=...). Échange ensuite ce code serveur-à-serveur contre l'identité du superadmin,
 // vérifie qu'il est un opérateur actif du classeur, puis émet un JWT propre à ce service.
-router.post('/redeem', async (req, res) => {
+router.post('/redeem', ssoRedeemLimiter, async (req, res) => {
     const { code } = req.body || {};
     if (!code) {
         return res.status(400).json({ error: 'Code manquant.' });
