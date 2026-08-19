@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { FileText, Download, Award, ShieldCheck, BookOpen, Layers, GraduationCap, UserX, TrendingDown, Trophy, Loader2 } from 'lucide-react';
 import { computeAcademicStats, computeSubjectAcademicStats, computePerformanceDeclineAlerts, generateAcademicReportPDF } from '../utils/academicReportGenerator';
@@ -29,13 +29,18 @@ export const RapportsAcademiques: React.FC = () => {
     const [examSessions, setExamSessions] = useState<ExamSession[]>([]);
     const [examNotesAll, setExamNotesAll] = useState<ExamNote[]>([]);
     const [loadingExamStats, setLoadingExamStats] = useState(false);
+    // Ref pour éviter les re-fetch infinis (notamment en cas d'échec réseau)
+    const hasFetchedExams = useRef(false);
 
     useEffect(() => {
-        if (activeTab !== 'examens' || examSessions.length > 0 || loadingExamStats) return;
+        if (activeTab !== 'examens') return;
+        // Ne pas re-fetcher si déjà en cours ou déjà tenté
+        if (hasFetchedExams.current || loadingExamStats) return;
 
         const examClasses = Array.from(new Set(students.map(s => s.classe))).filter(isExamClass);
         if (examClasses.length === 0) return;
 
+        hasFetchedExams.current = true;
         setLoadingExamStats(true);
         examApi.getSessions()
             .then(async (sessions) => {
@@ -53,9 +58,15 @@ export const RapportsAcademiques: React.FC = () => {
                 }
                 setExamNotesAll(allNotes);
             })
-            .catch(() => { setExamSessions([]); setExamNotesAll([]); })
+            .catch(() => {
+                // En cas d'échec, permettre un retry manuel en réinitialisant le ref
+                hasFetchedExams.current = false;
+                setExamSessions([]);
+                setExamNotesAll([]);
+            })
             .finally(() => setLoadingExamStats(false));
-    }, [activeTab, students, examSessions.length, loadingExamStats]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeTab, students]);
 
     const examStats = useMemo(() => {
         return computeExamStats(students, matieres, classeMatieres, examNotesAll, examSessions);
