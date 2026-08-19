@@ -23,7 +23,7 @@ export const RapportsAcademiques: React.FC = () => {
         schoolYear
     } = useStore();
 
-    const [activeTab, setActiveTab] = useState<'college' | 'lycee' | 'examens'>('college');
+    const [activeTab, setActiveTab] = useState<'primaire' | 'college' | 'lycee' | 'examens'>('primaire');
 
     // ── Statistiques d'examens (CEPD/BEPC/BAC) ──
     const [examSessions, setExamSessions] = useState<ExamSession[]>([]);
@@ -66,6 +66,7 @@ export const RapportsAcademiques: React.FC = () => {
         return computeAcademicStats(students, matieres, classeMatieres, notes);
     }, [students, matieres, classeMatieres, notes]);
 
+    const primaireStats = useMemo(() => stats.filter(s => s.cycle === 'Primaire'), [stats]);
     const collegeStats = useMemo(() => stats.filter(s => s.cycle === 'Collège'), [stats]);
     const lyceeStats = useMemo(() => stats.filter(s => s.cycle === 'Lycée'), [stats]);
 
@@ -74,6 +75,7 @@ export const RapportsAcademiques: React.FC = () => {
         return computeSubjectAcademicStats(students, matieres, classeMatieres, notes);
     }, [students, matieres, classeMatieres, notes]);
 
+    const primaireSubjectStats = useMemo(() => subjectStats.filter(s => s.cycle === 'Primaire'), [subjectStats]);
     const collegeSubjectStats = useMemo(() => subjectStats.filter(s => s.cycle === 'Collège'), [subjectStats]);
     const lyceeSubjectStats = useMemo(() => subjectStats.filter(s => s.cycle === 'Lycée'), [subjectStats]);
 
@@ -106,7 +108,9 @@ export const RapportsAcademiques: React.FC = () => {
         if (activeClassesWithAverages.length === 0) return 0;
         const totalRatesSum = activeClassesWithAverages.reduce((sum, s) => sum + s.annual.successRate, 0);
         return parseFloat((totalRatesSum / activeClassesWithAverages.length).toFixed(2));
-    }, [stats]);    const renderStatsCell = (periodData?: { successCount: number; successRate: number; failureCount: number; failureRate: number }, isRight = false) => {
+    }, [stats]);
+
+    const primaryStudentsCount = useMemo(() => primaireStats.reduce((sum, s) => sum + s.effectif, 0), [primaireStats]);    const renderStatsCell = (periodData?: { successCount: number; successRate: number; failureCount: number; failureRate: number }, isRight = false) => {
         const success = periodData?.successCount || 0;
         const successPct = periodData?.successRate || 0;
         const failure = periodData?.failureCount || 0;
@@ -219,7 +223,18 @@ export const RapportsAcademiques: React.FC = () => {
             )}
 
             {/* ── TABS ── */}
-            <div className="flex gap-2 p-1.5 bg-slate-100 dark:bg-slate-900/50 rounded-2xl border border-slate-200/50 dark:border-slate-800 w-fit">
+            <div className="flex flex-wrap gap-2 p-1.5 bg-slate-100 dark:bg-slate-900/50 rounded-2xl border border-slate-200/50 dark:border-slate-800 w-fit">
+                <button
+                    onClick={() => setActiveTab('primaire')}
+                    className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                        activeTab === 'primaire'
+                        ? 'bg-slate-950 text-white dark:bg-slate-800 dark:text-white shadow-sm'
+                        : 'text-slate-500 hover:text-slate-750 dark:hover:text-slate-300'
+                    }`}
+                >
+                    <Layers className="w-4 h-4" />
+                    Primaire (Trimestres)
+                </button>
                 <button
                     onClick={() => setActiveTab('college')}
                     className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
@@ -323,13 +338,15 @@ export const RapportsAcademiques: React.FC = () => {
                 </div>
             )}
 
-            {/* ── TABLE PREVIEW — BLACK & WHITE ÉPURÉ ── */}
+            {/* ── TABLE PREVIEW ── */}
             {activeTab !== 'examens' && (
             <div className="border border-slate-900/10 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[28px] p-6 sm:p-8 shadow-sm">
 
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight">
-                        {activeTab === 'college' ? 'Tableau des Résultats — Collège' : 'Tableau des Résultats — Lycée'}
+                        {activeTab === 'primaire' ? 'Tableau des Résultats — Primaire'
+                         : activeTab === 'college' ? 'Tableau des Résultats — Collège'
+                         : 'Tableau des Résultats — Lycée'}
                     </h3>
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-450">
                         Session {schoolYear}
@@ -337,7 +354,42 @@ export const RapportsAcademiques: React.FC = () => {
                 </div>
  
                 <div className="overflow-x-auto">
-                    {activeTab === 'college' ? (
+                    {/* Primaire */}
+                    {activeTab === 'primaire' && (
+                        primaireStats.length === 0 ? (
+                            <div className="text-center py-12 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
+                                <p className="text-sm font-bold text-slate-400">Aucune donnée disponible pour le Primaire.</p>
+                            </div>
+                        ) : (
+                            <table className="w-full text-sm text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-slate-905 dark:border-slate-800">
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Classe</th>
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Effectif</th>
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Trimestre 1</th>
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Trimestre 2</th>
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest">Trimestre 3</th>
+                                        <th className="py-4 px-4 text-[10px] font-black text-slate-450 uppercase tracking-widest text-right">Bilan Annuel</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                                    {primaireStats.map(c => (
+                                        <tr key={c.classe} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                            <td className="py-4 px-4 font-black text-slate-900 dark:text-white">{c.classe.toUpperCase()}</td>
+                                            <td className="py-4 px-4 font-bold text-slate-500">{c.effectif} élèves</td>
+                                            <td className="py-4 px-4">{renderStatsCell(c.periods['TRIMESTRE 1'])}</td>
+                                            <td className="py-4 px-4">{renderStatsCell(c.periods['TRIMESTRE 2'])}</td>
+                                            <td className="py-4 px-4">{renderStatsCell(c.periods['TRIMESTRE 3'])}</td>
+                                            <td className="py-4 px-4">{renderStatsCell(c.annual, true)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )
+                    )}
+
+                    {/* Collège */}
+                    {activeTab === 'college' && (
                         collegeStats.length === 0 ? (
                             <div className="text-center py-12 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
                                 <p className="text-sm font-bold text-slate-400">Aucune donnée disponible pour le Collège.</p>
@@ -376,7 +428,11 @@ export const RapportsAcademiques: React.FC = () => {
                                 </tbody>
                             </table>
                         )
-                    ) : (
+                    )}
+
+
+                    {/* Lycée */}
+                    {activeTab === 'lycee' && (
                         lyceeStats.length === 0 ? (
                             <div className="text-center py-12 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
                                 <p className="text-sm font-bold text-slate-400">Aucune donnée disponible pour le Lycée.</p>
@@ -426,17 +482,19 @@ export const RapportsAcademiques: React.FC = () => {
                     <div>
                         <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight">Taux de Réussite par Matière</h3>
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-450">
-                            {activeTab === 'college' ? 'Collège' : 'Lycée'} — toutes classes confondues
+                            {activeTab === 'primaire' ? 'Primaire' : activeTab === 'college' ? 'Collège' : 'Lycée'} — toutes classes confondues
                         </p>
                     </div>
                 </div>
 
                 <div className="overflow-x-auto">
                     {(() => {
-                        const rows = activeTab === 'college' ? collegeSubjectStats : lyceeSubjectStats;
-                        const periodKeys = activeTab === 'college'
-                            ? ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3']
-                            : ['SEMESTRE 1', 'SEMESTRE 2'];
+                        const rows = activeTab === 'primaire' ? primaireSubjectStats
+                            : activeTab === 'college' ? collegeSubjectStats
+                            : lyceeSubjectStats;
+                        const periodKeys = activeTab === 'lycee'
+                            ? ['SEMESTRE 1', 'SEMESTRE 2']
+                            : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'];
 
                         if (rows.length === 0) {
                             return (

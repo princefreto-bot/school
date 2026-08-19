@@ -32,7 +32,7 @@ export interface ClassAcademicStats {
 }
 
 /**
- * Calcule les statistiques académiques pour le Collège et le Lycée (exclut le Primaire).
+ * Calcule les statistiques académiques pour le Primaire, le Collège et le Lycée.
  */
 export const computeAcademicStats = (
     students: Student[],
@@ -40,17 +40,14 @@ export const computeAcademicStats = (
     classeMatieres: ClasseMatiere[],
     notes: Note[]
 ): ClassAcademicStats[] => {
-    // Exclure les élèves du primaire
-    const nonPrimaryStudents = students.filter(s => s.classe && s.classe.toUpperCase() !== 'CM2' && s.classe.toUpperCase() !== 'CM1' && s.classe.toUpperCase() !== 'CE2' && s.classe.toUpperCase() !== 'CE1' && s.classe.toUpperCase() !== 'CP2' && s.classe.toUpperCase() !== 'CP1' && s.classe.toUpperCase() !== 'CI' && s.classe.toUpperCase() !== 'CI 1' && s.classe.toUpperCase() !== 'CI 2');
-    
     // Identifier les classes uniques
-    const classes = Array.from(new Set(nonPrimaryStudents.map(s => s.classe))).sort();
+    const classes = Array.from(new Set(students.filter(s => s.classe).map(s => s.classe))).sort();
     
-    // Liste des classes collège et lycée configurées
+    // Liste des classes tous cycles (Primaire, Collège, Lycée)
     const academicClasses = classes.filter(classe => {
         const classStudents = students.filter(s => s.classe === classe);
-        const cycle = classStudents[0]?.cycle || 'Primaire';
-        return cycle === 'Collège' || cycle === 'Lycée';
+        const cycle = classStudents[0]?.cycle || '';
+        return cycle === 'Collège' || cycle === 'Lycée' || cycle === 'Primaire';
     });
 
     return academicClasses.map(classe => {
@@ -59,9 +56,9 @@ export const computeAcademicStats = (
         const effectif = classStudents.length;
 
         // Périodes à vérifier selon le cycle
-        const periodsToCheck: PeriodeType[] = cycle === 'Lycée' 
+        const periodsToCheck: PeriodeType[] = cycle === 'Lycée'
             ? ['SEMESTRE 1', 'SEMESTRE 2']
-            : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'];
+            : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3']; // Collège et Primaire = Trimestres
 
         const periodStats: Record<string, { 
             successCount: number; 
@@ -200,18 +197,18 @@ export const computeSubjectAcademicStats = (
     const academicClasses = Array.from(new Set(students.map(s => s.classe)))
         .filter(classe => {
             const cycle = students.find(s => s.classe === classe)?.cycle;
-            return cycle === 'Collège' || cycle === 'Lycée';
+            return cycle === 'Collège' || cycle === 'Lycée' || cycle === 'Primaire';
         });
 
     const result: SubjectAcademicStats[] = [];
 
-    (['Collège', 'Lycée'] as const).forEach(cycle => {
+    (['Primaire', 'Collège', 'Lycée'] as const).forEach(cycle => {
         const cycleClasses = academicClasses.filter(classe => students.find(s => s.classe === classe)?.cycle === cycle);
         if (cycleClasses.length === 0) return;
 
         const periodsToCheck: PeriodeType[] = cycle === 'Lycée'
             ? ['SEMESTRE 1', 'SEMESTRE 2']
-            : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'];
+            : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3']; // Primaire et Collège = Trimestres
 
         // matiereId -> nom + { period -> { studentId -> moyenneMatiere } }
         const bySubject: Record<string, { name: string; perPeriod: Record<string, Record<string, number>> }> = {};
@@ -328,7 +325,7 @@ export const computePerformanceDeclineAlerts = (
     const academicClasses = Array.from(new Set(students.map(s => s.classe)))
         .filter(classe => {
             const cycle = students.find(s => s.classe === classe)?.cycle;
-            return cycle === 'Collège' || cycle === 'Lycée';
+            return cycle === 'Collège' || cycle === 'Lycée' || cycle === 'Primaire';
         });
 
     academicClasses.forEach(classe => {
@@ -336,7 +333,7 @@ export const computePerformanceDeclineAlerts = (
         const cycle = classStudents[0]?.cycle as string;
         const periodsToCheck: PeriodeType[] = cycle === 'Lycée'
             ? ['SEMESTRE 1', 'SEMESTRE 2']
-            : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'];
+            : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3']; // Primaire et Collège = Trimestres
 
         const periodsWithData = periodsToCheck.filter(period =>
             notes.some(n => n.periode === period && classStudents.some(s => s.id === n.eleveId))
@@ -487,76 +484,79 @@ export const generateAcademicReportPDF = (
 
     y += 12;
 
-    // --- 1. RÉSULTATS DU COLLÈGE (TRIMESTRIELS & ANNUELS) ---
-    const collegeStats = stats.filter(s => s.cycle === 'Collège');
-    if (collegeStats.length > 0) {
+    const buildTrimesterRows = (cls: ClassAcademicStats[]) => cls.map(c => [
+        c.classe.toUpperCase(),
+        c.effectif.toString(),
+        c.periods['TRIMESTRE 1']
+            ? `Réu: ${c.periods['TRIMESTRE 1'].successCount} (${c.periods['TRIMESTRE 1'].successRate}%)\nÉch: ${c.periods['TRIMESTRE 1'].failureCount} (${c.periods['TRIMESTRE 1'].failureRate}%)`
+            : 'Réu: 0 (0%)\nÉch: 0 (0%)',
+        c.periods['TRIMESTRE 2']
+            ? `Réu: ${c.periods['TRIMESTRE 2'].successCount} (${c.periods['TRIMESTRE 2'].successRate}%)\nÉch: ${c.periods['TRIMESTRE 2'].failureCount} (${c.periods['TRIMESTRE 2'].failureRate}%)`
+            : 'Réu: 0 (0%)\nÉch: 0 (0%)',
+        c.periods['TRIMESTRE 3']
+            ? `Réu: ${c.periods['TRIMESTRE 3'].successCount} (${c.periods['TRIMESTRE 3'].successRate}%)\nÉch: ${c.periods['TRIMESTRE 3'].failureCount} (${c.periods['TRIMESTRE 3'].failureRate}%)`
+            : 'Réu: 0 (0%)\nÉch: 0 (0%)',
+        `Réu: ${c.annual.successCount} (${c.annual.successRate}%)\nÉch: ${c.annual.failureCount} (${c.annual.failureRate}%)`
+    ]);
+
+    const tableTheme = {
+        theme: 'plain' as const,
+        styles: { fontSize: 8, cellPadding: 3, font: 'times', textColor: [0, 0, 0] as [number,number,number], lineColor: [0, 0, 0] as [number,number,number], lineWidth: 0.1 },
+        headStyles: { fontStyle: 'bold' as const, fillColor: [0, 0, 0] as [number,number,number], textColor: [255, 255, 255] as [number,number,number] },
+        alternateRowStyles: { fillColor: [245, 245, 245] as [number,number,number] },
+        margin: { left: margin, right: margin }
+    };
+
+    // --- 1. RÉSULTATS DU PRIMAIRE (TRIMESTRIELS & ANNUELS) ---
+    const primaireStats = stats.filter(s => s.cycle === 'Primaire');
+    if (primaireStats.length > 0) {
         doc.setFontSize(12);
         doc.setFont('times', 'bold');
-        doc.text('1. SITUATION ACADÉMIQUE — COLLÈGE', margin, y);
-        
+        doc.text('1. SITUATION ACADÉMIQUE — PRIMAIRE', margin, y);
         y += 6;
-        
-        const collegeRows = collegeStats.map(c => [
-            c.classe.toUpperCase(),
-            c.effectif.toString(),
-            c.periods['TRIMESTRE 1'] 
-                ? `Réu: ${c.periods['TRIMESTRE 1'].successCount} (${c.periods['TRIMESTRE 1'].successRate}%)\nÉch: ${c.periods['TRIMESTRE 1'].failureCount} (${c.periods['TRIMESTRE 1'].failureRate}%)`
-                : 'Réu: 0 (0%)\nÉch: 0 (0%)',
-            c.periods['TRIMESTRE 2'] 
-                ? `Réu: ${c.periods['TRIMESTRE 2'].successCount} (${c.periods['TRIMESTRE 2'].successRate}%)\nÉch: ${c.periods['TRIMESTRE 2'].failureCount} (${c.periods['TRIMESTRE 2'].failureRate}%)`
-                : 'Réu: 0 (0%)\nÉch: 0 (0%)',
-            c.periods['TRIMESTRE 3'] 
-                ? `Réu: ${c.periods['TRIMESTRE 3'].successCount} (${c.periods['TRIMESTRE 3'].successRate}%)\nÉch: ${c.periods['TRIMESTRE 3'].failureCount} (${c.periods['TRIMESTRE 3'].failureRate}%)`
-                : 'Réu: 0 (0%)\nÉch: 0 (0%)',
-            `Réu: ${c.annual.successCount} (${c.annual.successRate}%)\nÉch: ${c.annual.failureCount} (${c.annual.failureRate}%)`
-        ]);
-
         autoTable(doc, {
             startY: y,
             head: [['CLASSE', 'EFFECTIF', 'TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3', 'RÉSULTAT ANNUEL']],
-            body: collegeRows,
-            theme: 'plain',
-            styles: { 
-                fontSize: 8, 
-                cellPadding: 3, 
-                font: 'times',
-                textColor: [0, 0, 0],
-                lineColor: [0, 0, 0],
-                lineWidth: 0.1
-            },
-            headStyles: { 
-                fontStyle: 'bold', 
-                fillColor: [0, 0, 0], 
-                textColor: [255, 255, 255] 
-            },
-            alternateRowStyles: { fillColor: [245, 245, 245] },
-            margin: { left: margin, right: margin }
+            body: buildTrimesterRows(primaireStats),
+            ...tableTheme
         });
-
         y = (doc as any).lastAutoTable.finalY + 12;
     }
 
-    // --- 2. RÉSULTATS DU LYCÉE (SEMESTRIELS & ANNUELS) ---
+    // --- 2. RÉSULTATS DU COLLÈGE (TRIMESTRIELS & ANNUELS) ---
+    const collegeStats = stats.filter(s => s.cycle === 'Collège');
+    if (collegeStats.length > 0) {
+        if (y > h - 60) { doc.addPage(); y = 20; }
+        doc.setFontSize(12);
+        doc.setFont('times', 'bold');
+        doc.text('2. SITUATION ACADÉMIQUE — COLLÈGE', margin, y);
+        y += 6;
+        autoTable(doc, {
+            startY: y,
+            head: [['CLASSE', 'EFFECTIF', 'TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3', 'RÉSULTAT ANNUEL']],
+            body: buildTrimesterRows(collegeStats),
+            ...tableTheme
+        });
+        y = (doc as any).lastAutoTable.finalY + 12;
+    }
+
+    // --- 3. RÉSULTATS DU LYCÉE (SEMESTRIELS & ANNUELS) ---
     const lyceeStats = stats.filter(s => s.cycle === 'Lycée');
     if (lyceeStats.length > 0) {
-        if (y > h - 60) {
-            doc.addPage();
-            y = 20;
-        }
+        if (y > h - 60) { doc.addPage(); y = 20; }
 
         doc.setFontSize(12);
         doc.setFont('times', 'bold');
-        doc.text('2. SITUATION ACADÉMIQUE — LYCÉE', margin, y);
-        
+        doc.text('3. SITUATION ACADÉMIQUE — LYCÉE', margin, y);
         y += 6;
 
         const lyceeRows = lyceeStats.map(c => [
             c.classe.toUpperCase(),
             c.effectif.toString(),
-            c.periods['SEMESTRE 1'] 
+            c.periods['SEMESTRE 1']
                 ? `Réu: ${c.periods['SEMESTRE 1'].successCount} (${c.periods['SEMESTRE 1'].successRate}%)\nÉch: ${c.periods['SEMESTRE 1'].failureCount} (${c.periods['SEMESTRE 1'].failureRate}%)`
                 : 'Réu: 0 (0%)\nÉch: 0 (0%)',
-            (c.periods['SEMESTRE 2'] || c.periods['SEMERE 2']) 
+            (c.periods['SEMESTRE 2'] || c.periods['SEMERE 2'])
                 ? `Réu: ${(c.periods['SEMESTRE 2'] || c.periods['SEMERE 2']).successCount} (${(c.periods['SEMESTRE 2'] || c.periods['SEMERE 2']).successRate}%)\nÉch: ${(c.periods['SEMESTRE 2'] || c.periods['SEMERE 2']).failureCount} (${(c.periods['SEMESTRE 2'] || c.periods['SEMERE 2']).failureRate}%)`
                 : 'Réu: 0 (0%)\nÉch: 0 (0%)',
             `Réu: ${c.annual.successCount} (${c.annual.successRate}%)\nÉch: ${c.annual.failureCount} (${c.annual.failureRate}%)`
@@ -566,22 +566,7 @@ export const generateAcademicReportPDF = (
             startY: y,
             head: [['CLASSE', 'EFFECTIF', 'SEMESTRE 1', 'SEMESTRE 2', 'RÉSULTAT ANNUEL']],
             body: lyceeRows,
-            theme: 'plain',
-            styles: { 
-                fontSize: 8, 
-                cellPadding: 3, 
-                font: 'times',
-                textColor: [0, 0, 0],
-                lineColor: [0, 0, 0],
-                lineWidth: 0.1
-            },
-            headStyles: { 
-                fontStyle: 'bold', 
-                fillColor: [0, 0, 0], 
-                textColor: [255, 255, 255] 
-            },
-            alternateRowStyles: { fillColor: [245, 245, 245] },
-            margin: { left: margin, right: margin }
+            ...tableTheme
         });
 
         y = (doc as any).lastAutoTable.finalY + 12;
