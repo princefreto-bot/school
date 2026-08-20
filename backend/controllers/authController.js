@@ -36,8 +36,13 @@ const schoolRegisterSchema = Joi.object({
     name: Joi.string().trim().required().messages({
         'any.required': 'Le nom de l\'établissement est requis.'
     }),
-    slug: Joi.string().trim().lowercase().required().messages({
-        'any.required': 'Le code de l\'établissement (slug) est requis.'
+    // Le slug finit concaténé dans du SQL dynamique (SECURITY DEFINER) côté
+    // Supabase pour provisionner les tables de l'école — n'accepter que des
+    // caractères alphanumériques minuscules et des tirets, jamais de guillemet
+    // ou autre caractère spécial SQL. Voir migration schools_slug_format_check.
+    slug: Joi.string().trim().lowercase().pattern(/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/).required().messages({
+        'any.required': 'Le code de l\'établissement (slug) est requis.',
+        'string.pattern.base': 'Le code de l\'établissement ne doit contenir que des lettres minuscules, des chiffres et des tirets.'
     }),
     address: Joi.string().allow('', null),
     phone: Joi.string().allow('', null),

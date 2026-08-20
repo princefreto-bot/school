@@ -1,0 +1,38 @@
+-- ============================================================
+-- SÉCURITÉ CRITIQUE — Injection SQL via le slug d'école
+-- ============================================================
+-- Le slug d'une école est concaténé directement dans du SQL dynamique
+-- (EXECUTE ... || school_slug || ...) par create_school_tables() et les
+-- fonctions RPC soeurs (create_accounting_tables, create_payroll_tables,
+-- create_timetable_tables, create_reminder_tables, create_satisfaction_tables,
+-- create_exam_tables, create_personnel_documents_table,
+-- create_license_payments_table, create_staff_tracking_tables,
+-- drop_school_tables, enable_rls_for_school) — toutes SECURITY DEFINER
+-- (privilèges élevés).
+--
+-- Le slug provenait d'un formulaire d'inscription d'école PUBLIC
+-- (schoolRegisterSchema dans authController.js) sans aucune validation de
+-- format côté backend (juste .trim().lowercase()). Une valeur du type
+-- "x'; DROP TABLE students_autre_ecole; --" y était acceptée telle quelle,
+-- stockée dans schools.slug, puis exécutée en SQL avec des privilèges
+-- élevés lors de l'appel à create_school_tables() (déclenché par la
+-- vérification d'email — atteignable par n'importe quel visiteur
+-- contrôlant sa propre boîte mail).
+--
+-- Le formulaire frontend (CreerCompte.tsx) assainit déjà le slug
+-- correctement (lettres/chiffres uniquement) — cette faille n'était donc
+-- exploitable qu'en appelant l'API directement (curl/Postman), en
+-- contournant le frontend.
+--
+-- Corrigé le 2026-08-20 :
+--   1. Validation Joi (pattern alphanumérique+tirets) ajoutée aux deux
+--      points d'entrée (authController.js + superAdminController.js).
+--   2. CHECK constraint ci-dessous, au niveau base de données : bloque
+--      toute valeur hors format, quel que soit le point d'entrée
+--      applicatif (y compris un bug futur qui oublierait de valider),
+--      puisque TOUS les appels RPC school_slug ci-dessus utilisent
+--      systématiquement schools.slug — jamais une valeur brute distincte.
+-- ============================================================
+ALTER TABLE public.schools
+  ADD CONSTRAINT schools_slug_format_check
+  CHECK (slug ~ '^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$');
