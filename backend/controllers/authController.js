@@ -5,6 +5,33 @@ const { JWT_SECRET, JWT_EXPIRES } = require('../config');
 const { getCurrentAcademicYear } = require('../utils/academicYear');
 const Joi = require('joi');
 const crypto = require('crypto');
+const { getCache, setCache, deleteCache } = require('../services/cacheService');
+
+// ── Verrouillage de compte après échecs répétés ──────────────────────────
+// Complète le rate-limit par IP (authLimiter) : celui-ci ne protège pas un
+// compte ciblé depuis plusieurs IP différentes (attaque distribuée). Ici on
+// verrouille le COMPTE visé (par téléphone) après plusieurs mots de passe
+// erronés, quelle que soit l'IP d'origine.
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_LOCKOUT_SECONDS = 15 * 60; // 15 minutes
+
+function loginLockKey(schoolSlug, input) {
+    return `login_lock:${schoolSlug || 'global'}:${input}`;
+}
+
+async function isLoginLocked(lockKey) {
+    const attempts = await getCache(lockKey);
+    return typeof attempts === 'number' && attempts >= LOGIN_MAX_ATTEMPTS;
+}
+
+async function recordLoginFailure(lockKey) {
+    const attempts = (await getCache(lockKey)) || 0;
+    await setCache(lockKey, attempts + 1, LOGIN_LOCKOUT_SECONDS);
+}
+
+async function clearLoginLockout(lockKey) {
+    await deleteCache(lockKey);
+}
 
 // Joi validation schema for Parent registration
 const parentRegisterSchema = Joi.object({
@@ -239,6 +266,11 @@ async function login(req, res) {
         const input = telephone.trim();
         console.log(`🔍 [Auth] Tentative login pour: ${input} (Portail: ${portal || 'non spécifié'})`);
 
+        const lockKey = loginLockKey(schoolSlug, input);
+        if (await isLoginLocked(lockKey)) {
+            return res.status(429).json({ error: 'Trop de tentatives échouées pour ce compte. Réessayez dans 15 minutes.' });
+        }
+
         // ── 1. Vérifier si c'est le SuperAdmin ──
         const { data: superadmin } = await supabase
             .from('superadmins')
@@ -254,6 +286,7 @@ async function login(req, res) {
             const valid = await bcrypt.compare(password, superadmin.password);
             if (valid) {
                 console.log(`✅ [Auth] SuperAdmin identifié !`);
+                await clearLoginLockout(lockKey);
                 const token = jwt.sign(
                     { id: superadmin.id, nom: superadmin.nom, role: 'superadmin', schoolSlug: null },
                     JWT_SECRET,
@@ -265,6 +298,7 @@ async function login(req, res) {
                     user: { id: superadmin.id, nom: superadmin.nom, telephone: superadmin.telephone, role: 'superadmin', created_at: superadmin.created_at }
                 });
             } else {
+                await recordLoginFailure(lockKey);
                 return res.status(401).json({ error: 'Mot de passe SuperAdmin incorrect.' });
             }
         }
@@ -284,6 +318,7 @@ async function login(req, res) {
             const valid = await bcrypt.compare(password, creator.password);
             if (valid) {
                 console.log(`✅ [Auth] Créateur identifié !`);
+                await clearLoginLockout(lockKey);
                 const token = jwt.sign(
                     { id: creator.id, nom: creator.nom, role: 'creator', schoolSlug: null },
                     JWT_SECRET,
@@ -295,6 +330,7 @@ async function login(req, res) {
                     user: { id: creator.id, nom: creator.nom, telephone: creator.telephone, role: 'creator', created_at: creator.created_at }
                 });
             } else {
+                await recordLoginFailure(lockKey);
                 return res.status(401).json({ error: 'Mot de passe Créateur incorrect.' });
             }
         }
@@ -331,6 +367,7 @@ async function login(req, res) {
             .maybeSingle();
 
         if (error || !user) {
+            await recordLoginFailure(lockKey);
             return res.status(401).json({ error: 'Identifiants (téléphone/email ou mot de passe) incorrects.' });
         }
 
@@ -347,9 +384,11 @@ async function login(req, res) {
 
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) {
+            await recordLoginFailure(lockKey);
             return res.status(401).json({ error: 'Identifiants (téléphone/email ou mot de passe) incorrects.' });
         }
 
+        await clearLoginLockout(lockKey);
         console.log(`✅ [Auth] Utilisateur trouvé: ${user.nom} (Rôle: ${user.role}) - École: ${schoolSlug}`);
 
         const token = jwt.sign(
