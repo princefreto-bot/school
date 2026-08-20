@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { BulletinTogoPDF } from '../components/pdf/BulletinTogoPDF';
-import { calculerBulletinsClasse, BulletinEleveResultat } from '../utils/bulletinCalculations';
+import { calculerBulletinsClasse, BulletinEleveResultat, getPeriodesAntérieures } from '../utils/bulletinCalculations';
 import { getAvailablePeriods } from '../data/classConfig';
 import { useReactToPrint } from 'react-to-print';
 import { FileSpreadsheet, Printer, Users, Award, ShieldCheck } from 'lucide-react';
@@ -21,6 +21,32 @@ export const Bulletins: React.FC = () => {
     const [selectedClasse, setSelectedClasse] = useState('');
     const [editableSchoolYear, setEditableSchoolYear] = useState('');
     const [bulletinsCalcules, setBulletinsCalcules] = useState<BulletinEleveResultat[]>([]);
+    // Moyennes de périodes antérieures saisies à la main quand l'établissement
+    // n'a pas rentré les notes de cette période (ex: Trimestre 1 / Semestre 1).
+    // Jamais envoyées au backend : uniquement utilisées pour le calcul en local
+    // de la moyenne annuelle cumulée du bulletin en cours.
+    const [manualOverrides, setManualOverrides] = useState<Record<string, Partial<Record<PeriodeType, number>>>>({});
+
+    const elevesDeLaClasse = selectedClasse ? students.filter(s => s.classe === selectedClasse) : [];
+    const periodesAnterieures = selectedClasse ? getPeriodesAntérieures(currentPeriode) : [];
+    const periodesSansNotes = periodesAnterieures.filter(p =>
+        !notes.some(n => n.periode === p && elevesDeLaClasse.some(e => e.id === n.eleveId))
+    );
+
+    const updateManualOverride = (eleveId: string, periode: PeriodeType, rawValue: string) => {
+        setManualOverrides(prev => {
+            const next = { ...prev };
+            const forEleve = { ...(next[eleveId] || {}) };
+            if (rawValue === '') {
+                delete forEleve[periode];
+            } else {
+                const num = parseFloat(rawValue);
+                if (!isNaN(num)) forEleve[periode] = num;
+            }
+            next[eleveId] = forEleve;
+            return next;
+        });
+    };
 
     // Dérivé directement du cycle de la classe (jamais via un élève trouvé) —
     // garantit qu'une seule famille de périodes (Trimestre XOR Semestre) est
@@ -67,7 +93,8 @@ export const Bulletins: React.FC = () => {
             matieres,
             classeMatieres,
             notes,
-            useStore.getState().presences
+            useStore.getState().presences,
+            manualOverrides
         );
         setBulletinsCalcules(resultats);
     };
@@ -145,6 +172,40 @@ export const Bulletins: React.FC = () => {
                     Imprimer (Lot PDF)
                 </button>
             </div>
+
+            {/* Saisie manuelle des moyennes de périodes sans notes (ex: T1 non renseigné) */}
+            {selectedClasse && periodesSansNotes.length > 0 && (
+                <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm">
+                    <h3 className="font-bold text-gray-800 mb-1">Moyennes manuelles — périodes sans notes</h3>
+                    <p className="text-sm text-gray-500 mb-4">
+                        Aucune note n'est enregistrée pour {periodesSansNotes.join(' et ')} dans cette classe.
+                        Saisissez ici la moyenne de chaque élève pour {periodesSansNotes.length > 1 ? 'ces périodes' : 'cette période'} :
+                        ces valeurs ne sont utilisées que pour le calcul de la moyenne annuelle affichée sur ce bulletin et ne sont jamais enregistrées.
+                    </p>
+                    {periodesSansNotes.map(p => (
+                        <div key={p} className="mb-4 last:mb-0">
+                            <p className="font-semibold text-sm text-gray-700 mb-2">{p}</p>
+                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                {elevesDeLaClasse.map(e => (
+                                    <div key={e.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                                        <span className="flex-1 text-sm truncate">{e.nom} {e.prenom}</span>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            max={20}
+                                            step={0.01}
+                                            value={manualOverrides[e.id]?.[p] ?? ''}
+                                            onChange={(ev) => updateManualOverride(e.id, p, ev.target.value)}
+                                            className="w-20 px-2 py-1 border border-gray-200 rounded-lg text-right focus:ring-2 focus:ring-amber-500"
+                                            placeholder="/20"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* Aperçu des Résultats (Liste) */}
             {bulletinsCalcules.length > 0 && (

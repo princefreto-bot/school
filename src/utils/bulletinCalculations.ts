@@ -71,7 +71,7 @@ const getAppreciation = (moy: number): string => {
  * T1 ⇒ [] (pas de cumul), T2 ⇒ [T1], T3 ⇒ [T1, T2]
  * S1 ⇒ [] (pas de cumul), S2 ⇒ [S1]
  */
-const getPeriodesAntérieures = (periode: PeriodeType): PeriodeType[] => {
+export const getPeriodesAntérieures = (periode: PeriodeType): PeriodeType[] => {
     switch (periode) {
         case 'TRIMESTRE 3': return ['TRIMESTRE 1', 'TRIMESTRE 2'];
         case 'SEMESTRE 2':  return ['SEMESTRE 1'];
@@ -90,7 +90,11 @@ export const calculerBulletinsClasse = (
     matieres: Matiere[],
     classeMatieres: ClasseMatiere[],
     notes: Note[],
-    presences: any[] = []
+    presences: any[] = [],
+    // Moyennes saisies manuellement pour des périodes antérieures sans notes
+    // (ex: T1 non renseigné). Jamais persistées : uniquement utilisées ici
+    // pour le calcul de la moyenne annuelle cumulée.
+    manualOverrides: Record<string, Partial<Record<PeriodeType, number>>> = {}
 ): BulletinEleveResultat[] => {
     
     const elevesDeLaClasse = students.filter(s => s.classe === classe);
@@ -226,6 +230,14 @@ export const calculerBulletinsClasse = (
         // afin d'avoir le "Rang" de l'élève pour cette période passée.
         periodesAnterieures.forEach(p => {
             const moysElevesPeriod: { id: string, moy: number, abs: number, ret: number }[] = elevesDeLaClasse.map(e => {
+                const absences = presences.filter(pr => pr.eleveId === e.id && pr.statut === 'absent' && pr.periode === p).length;
+                const retards = presences.filter(pr => pr.eleveId === e.id && pr.statut === 'retard' && pr.periode === p).length;
+
+                const override = manualOverrides[e.id]?.[p];
+                if (override !== undefined) {
+                    return { id: e.id, moy: override, abs: absences, ret: retards };
+                }
+
                 let totalPts = 0;
                 let totalCoefs = 0;
 
@@ -249,12 +261,9 @@ export const calculerBulletinsClasse = (
                         }
                     }
                 });
-                
-                const absences = presences.filter(pr => pr.eleveId === e.id && pr.statut === 'absent' && pr.periode === p).length;
-                const retards = presences.filter(pr => pr.eleveId === e.id && pr.statut === 'retard' && pr.periode === p).length;
 
-                return { 
-                    id: e.id, 
+                return {
+                    id: e.id,
                     moy: totalCoefs > 0 ? parseFloat((totalPts / totalCoefs).toFixed(2)) : 0,
                     abs: absences,
                     ret: retards
