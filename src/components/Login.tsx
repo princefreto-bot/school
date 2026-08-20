@@ -35,22 +35,33 @@ const SchoolLogo: React.FC<{ size?: string; logoUrl?: string | null }> = ({ size
 
 const BackgroundSlideshow: React.FC = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
+    // Seules l'image affichée et la suivante sont chargées : évite de télécharger
+    // les 4 photos de fond dès le montage (gros contributeur du LCP de cette page,
+    // avant même la compression des images) — chaque transition précharge l'image
+    // d'après avec ~5s d'avance.
+    const [loadedIndices, setLoadedIndices] = useState<Set<number>>(() => new Set([0, 1 % BG_IMAGES.length]));
+
     const goToNext = useCallback(() => {
-      setCurrentIndex((prev) => (prev + 1) % BG_IMAGES.length);
+      setCurrentIndex((prev) => {
+        const next = (prev + 1) % BG_IMAGES.length;
+        const upcoming = (next + 1) % BG_IMAGES.length;
+        setLoadedIndices((s) => (s.has(upcoming) ? s : new Set(s).add(upcoming)));
+        return next;
+      });
     }, []);
-  
+
     useEffect(() => {
       const timer = setInterval(goToNext, SLIDE_DURATION);
       return () => clearInterval(timer);
     }, [goToNext]);
-  
+
     return (
       <div className="fixed inset-0 z-0 overflow-hidden">
         {BG_IMAGES.map((img, i) => (
           <div
             key={i}
             className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${i === currentIndex ? 'opacity-100' : 'opacity-0'}`}
-            style={{ backgroundImage: `url(${img})` }}
+            style={loadedIndices.has(i) ? { backgroundImage: `url(${img})` } : undefined}
           />
         ))}
         <div className="absolute inset-0 z-[1] bg-slate-900/40 backdrop-blur-[2px]" />
@@ -240,7 +251,6 @@ export const Login: React.FC = () => {
 
   useEffect(() => {
     // Récupérer la liste des écoles
-    console.log("Fetching schools from:", `${API_BASE_URL}/schools`);
     setFetchError(null);
     fetch(`${API_BASE_URL}/schools`)
       .then(res => {
@@ -250,7 +260,6 @@ export const Login: React.FC = () => {
          return res.json();
       })
       .then(data => {
-         console.log("Schools received:", data);
          if (Array.isArray(data)) {
            setSchools(data);
          } else {

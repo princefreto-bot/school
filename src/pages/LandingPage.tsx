@@ -5,8 +5,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   CreditCard,
   BookOpen,
@@ -33,8 +31,6 @@ import { Footer } from '../components/Footer';
 import { BACKEND_URL } from '../config';
 import { MorphBlob } from '../components/MorphBlob';
 import { AnimatedCounter } from '../components/AnimatedCounter';
-
-gsap.registerPlugin(ScrollTrigger);
 
 // ── Texts (FR / EN) — copywriting conservé ──────────────────
 const TEXTS = {
@@ -322,6 +318,10 @@ export const LandingPage: React.FC = () => {
   }, []);
 
   // ── GSAP Master Timeline ──
+  // gsap + ScrollTrigger (~114 Ko) sont chargés dynamiquement, après le montage,
+  // plutôt qu'importés statiquement : ces animations d'entrée/parallax ne sont
+  // jamais nécessaires au premier rendu (le hero doit s'afficher immédiatement,
+  // pas attendre cette librairie) et sont de toute façon désactivées sur mobile.
   useEffect(() => {
     const isMobileOrLowEnd = typeof window !== 'undefined' && (
       window.innerWidth < 768 ||
@@ -330,28 +330,39 @@ export const LandingPage: React.FC = () => {
 
     if (isMobileOrLowEnd) return;
 
-    const ctx = gsap.context(() => {
-      // HERO entrance animation
-      const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-      heroTl
-        .from(heroTitleRef.current, { opacity: 0, y: 55, duration: 0.8 }, 0.1)
-        .from(heroSubRef.current, { opacity: 0, y: 35, duration: 0.8 }, 0.3)
-        .from(heroCTARef.current, { opacity: 0, y: 20, duration: 0.8 }, 0.5)
-        .from(heroProofRef.current, { opacity: 0, y: 15, duration: 0.8 }, 0.6)
-        .from(heroFloatPhoneRef.current, { opacity: 0, x: 30, duration: 0.8 }, 0.4);
+    let cancelled = false;
+    let ctx: { revert: () => void } | undefined;
 
-      // HERO Parallax
-      if (heroRef.current && heroFloatPhoneRef.current) {
-        gsap.to(heroFloatPhoneRef.current, {
-          y: -40,
-          ease: 'none',
-          scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 1 },
-        });
-      }
+    Promise.all([import('gsap'), import('gsap/ScrollTrigger')]).then(([gsapModule, { ScrollTrigger }]) => {
+      if (cancelled) return;
+      const gsap = gsapModule.default;
+      gsap.registerPlugin(ScrollTrigger);
+
+      ctx = gsap.context(() => {
+        // HERO entrance animation — le titre et le sous-titre (élément LCP) ne sont
+        // JAMAIS animés en opacité : ils doivent rester visibles dès le premier
+        // rendu, sans dépendre du chargement (différé) de gsap ni provoquer de
+        // flash "visible → invisible → fondu" une fois la librairie chargée.
+        const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+        heroTl
+          .from(heroCTARef.current, { opacity: 0, y: 20, duration: 0.8 }, 0.5)
+          .from(heroProofRef.current, { opacity: 0, y: 15, duration: 0.8 }, 0.6)
+          .from(heroFloatPhoneRef.current, { opacity: 0, x: 30, duration: 0.8 }, 0.4);
+
+        // HERO Parallax
+        if (heroRef.current && heroFloatPhoneRef.current) {
+          gsap.to(heroFloatPhoneRef.current, {
+            y: -40,
+            ease: 'none',
+            scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 1 },
+          });
+        }
+      });
     });
 
     return () => {
-      ctx.revert();
+      cancelled = true;
+      ctx?.revert();
     };
   }, []);
 

@@ -6,6 +6,7 @@ import { useStore } from './store/useStore';
 import { webPushService } from './services/webPushService';
 import { AppPage } from './types';
 import { Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
+import { ScrollToTop } from './components/ScrollToTop';
 
 import { Capacitor } from '@capacitor/core';
 
@@ -727,6 +728,7 @@ export function App() {
 
   return (
     <>
+      <ScrollToTop />
       <Routes>
         {/* Prefixed routes */}
         <Route path="/:lang/confidentialite" element={<Suspense fallback={<LoadingSpinner />}><Confidentialite /></Suspense>} />
