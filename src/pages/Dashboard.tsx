@@ -11,14 +11,15 @@ import {
 import {
   Users, TrendingUp, Wallet, AlertCircle, CheckCircle, School, BookOpen,
   GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck, FileText, Eye, EyeOff,
-  Check, Settings, PlayCircle, Landmark, PiggyBank
+  Check, Settings, PlayCircle, Landmark, PiggyBank, Cake
 } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import {
   computeRecouvrement,
   computeClassComparison,
   computeSanteFinanciere,
-  computeCycleComparison
+  computeCycleComparison,
+  computeAgeSexStats
 } from '../services/analyticsService';
 import { generateRapportMensuelPDF } from '@/utils/reportGenerator';
 import { DashboardSkeleton } from '../components/SkeletonLoaders';
@@ -26,6 +27,7 @@ import { DashboardSkeleton } from '../components/SkeletonLoaders';
 const fmtMoney = (n: number) => new Intl.NumberFormat('fr-FR').format(n);
 const PIE_COLORS = ['#f59e0b', '#10b981', '#f43f5e'];
 const BAR_COLORS = { paye: '#10b981', restant: '#f43f5e' };
+const GENDER_COLORS = { garcons: '#2563eb', filles: '#ec4899' };
 
 interface StatCardProps {
   title: string; value: string | number; sub?: string;
@@ -262,6 +264,7 @@ export const Dashboard: React.FC = () => {
   const classComp = useMemo(() => computeClassComparison(students), [students]);
   const santeFinanciere = useMemo(() => computeSanteFinanciere(students), [students]);
   const cycleComparison = useMemo(() => computeCycleComparison(students), [students]);
+  const ageSexStats = useMemo(() => computeAgeSexStats(students), [students]);
 
   useEffect(() => {
     if (students.length === 0 || classComp.length === 0) return;
@@ -804,6 +807,68 @@ export const Dashboard: React.FC = () => {
               </ResponsiveContainer>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* ── STATISTIQUES ÂGE & SEXE ── */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 pro-card p-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="font-black text-slate-900 dark:text-white text-xl tracking-tight mb-1">Répartition par âge</h3>
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Élèves avec date de naissance renseignée</p>
+            </div>
+            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-[16px]">
+              <Cake className="w-5 h-5 text-slate-400" />
+            </div>
+          </div>
+          {ageSexStats.parAge.length === 0 ? (
+            <div className="h-[300px] flex items-center justify-center text-slate-400 text-sm font-bold bg-slate-50 dark:bg-slate-800/50 rounded-[20px]">Aucune date de naissance renseignée</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={ageSexStats.parAge} barCategoryGap="25%" margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} opacity={0.5} />
+                <XAxis dataKey="age" tickFormatter={(v) => `${v} ans`} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} dy={10} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} dx={-10} />
+                <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', fontWeight: 700 }} />
+                <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px', fontWeight: 700 }} iconType="circle" />
+                <Bar dataKey="garcons" name="Garçons" stackId="sexe" fill={GENDER_COLORS.garcons} maxBarSize={40} />
+                <Bar dataKey="filles" name="Filles" stackId="sexe" fill={GENDER_COLORS.filles} radius={[6, 6, 0, 0]} maxBarSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        <div className="pro-card p-8 flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="font-black text-slate-900 dark:text-white text-xl tracking-tight mb-1">Répartition</h3>
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Élèves par sexe</p>
+            </div>
+            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-[16px]">
+              <Users className="w-5 h-5 text-slate-400" />
+            </div>
+          </div>
+          <div className="flex-1 grid grid-cols-2 gap-4">
+            <div className="rounded-[20px] p-5 flex flex-col justify-center items-center" style={{ backgroundColor: `${GENDER_COLORS.garcons}14` }}>
+              <p className="text-3xl font-black" style={{ color: GENDER_COLORS.garcons }}>{maskValue(ageSexStats.garcons)}</p>
+              <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mt-2">Garçons</p>
+            </div>
+            <div className="rounded-[20px] p-5 flex flex-col justify-center items-center" style={{ backgroundColor: `${GENDER_COLORS.filles}14` }}>
+              <p className="text-3xl font-black" style={{ color: GENDER_COLORS.filles }}>{maskValue(ageSexStats.filles)}</p>
+              <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mt-2">Filles</p>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center justify-between p-3 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Âge moyen</span>
+            <span className="font-black text-slate-900 dark:text-white">{maskValue(ageSexStats.ageMoyen ?? '—')}</span>
+          </div>
+          <button
+            onClick={() => useStore.getState().setCurrentPage('statistiques_eleves')}
+            className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black uppercase tracking-wider rounded-xl transition active:scale-[0.98] hover:opacity-90"
+          >
+            Voir la liste détaillée &amp; imprimer
+          </button>
         </div>
       </div>
 

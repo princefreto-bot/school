@@ -20,28 +20,28 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'creator_dashboard'
     ],
     directeur_general: [
-        'dashboard', 'eleves', 'paiements', 'retraits', 'comptabilite', 'paie', 'analyses', 'documents',
+        'dashboard', 'eleves', 'statistiques_eleves', 'paiements', 'retraits', 'comptabilite', 'paie', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire', 'carte_examen',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'emploi_du_temps', 'gestion_annees_scolaires', 'saisie_notes', 'notes_examens', 'bulletins', 'rapports_academiques',
         'gestion_personnel', 'carte_personnel', 'scan_presence_personnel', 'scan_sortie_personnel', ...MON_ESPACE_PAGES
     ],
     admin: [
-        'dashboard', 'eleves', 'paiements', 'retraits', 'comptabilite', 'paie', 'analyses', 'documents',
+        'dashboard', 'eleves', 'statistiques_eleves', 'paiements', 'retraits', 'comptabilite', 'paie', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire', 'carte_examen',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'emploi_du_temps', 'gestion_annees_scolaires', 'saisie_notes', 'notes_examens', 'bulletins', 'rapports_academiques',
         'gestion_personnel', 'carte_personnel', 'scan_presence_personnel', 'scan_sortie_personnel', ...MON_ESPACE_PAGES
     ],
     directeur: [
-        'dashboard', 'eleves', 'paiements', 'retraits', 'comptabilite', 'paie', 'analyses', 'documents',
+        'dashboard', 'eleves', 'statistiques_eleves', 'paiements', 'retraits', 'comptabilite', 'paie', 'analyses', 'documents',
         'parametres', 'recouvrement', 'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire', 'carte_examen',
         'verification_recu', 'historique_activites', 'parents_list', 'import_export', 'chat', 'annonces',
         'gestion_academique', 'emploi_du_temps', 'gestion_annees_scolaires', 'saisie_notes', 'notes_examens', 'bulletins', 'rapports_academiques',
         'gestion_personnel', 'carte_personnel', 'scan_presence_personnel', 'scan_sortie_personnel', ...MON_ESPACE_PAGES
     ],
     comptable: [
-        'dashboard', 'eleves', 'paiements', 'retraits', 'comptabilite', 'paie', 'analyses', 'documents',
+        'dashboard', 'eleves', 'statistiques_eleves', 'paiements', 'retraits', 'comptabilite', 'paie', 'analyses', 'documents',
         'recouvrement', 'verification_recu', 'import_export', 'chat', 'scan_information', ...MON_ESPACE_PAGES
     ],
     superviseur: [
@@ -52,11 +52,11 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'scan_presence', 'scan_sortie', 'scan_information', 'carte_scolaire'
     ],
     proviseur: [
-        'dashboard', 'eleves', 'analyses', 'chat', 'scan_information',
+        'dashboard', 'eleves', 'statistiques_eleves', 'analyses', 'chat', 'scan_information',
         'gestion_academique', 'emploi_du_temps', 'saisie_notes', 'notes_examens', 'bulletins', 'rapports_academiques', ...MON_ESPACE_PAGES
     ],
     censeur: [
-        'dashboard', 'eleves', 'analyses', 'chat', 'scan_information',
+        'dashboard', 'eleves', 'statistiques_eleves', 'analyses', 'chat', 'scan_information',
         'gestion_academique', 'emploi_du_temps', 'saisie_notes', 'notes_examens', 'bulletins', 'rapports_academiques', ...MON_ESPACE_PAGES
     ],
     parent: [
@@ -68,7 +68,7 @@ const ROLE_PAGES: Record<Role, AppPage[]> = {
         'saisie_notes', 'notes_examens', 'selection_enseignant', ...MON_ESPACE_PAGES
     ],
     secretaire: [
-        'eleves', 'espace_personnel', 'gestion_personnel', 'carte_personnel', 'scan_presence_personnel', 'scan_sortie_personnel', 'gestion_academique', 'emploi_du_temps', 'annonces', 'chat', 'documents', ...MON_ESPACE_PAGES
+        'eleves', 'statistiques_eleves', 'espace_personnel', 'gestion_personnel', 'carte_personnel', 'scan_presence_personnel', 'scan_sortie_personnel', 'gestion_academique', 'emploi_du_temps', 'annonces', 'chat', 'documents', ...MON_ESPACE_PAGES
     ],
 };
 

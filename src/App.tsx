@@ -39,6 +39,7 @@ const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.N
 // Lazy loading for pages to reduce initial bundle size
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 const Eleves = lazy(() => import('./pages/Eleves').then(m => ({ default: m.Eleves })));
+const StatistiquesEleves = lazy(() => import('./pages/StatistiquesEleves').then(m => ({ default: m.StatistiquesEleves })));
 const Paiements = lazy(() => import('./pages/Paiements').then(m => ({ default: m.Paiements })));
 const Retraits = lazy(() => import('./pages/Retraits').then(m => ({ default: m.Retraits })));
 const Comptabilite = lazy(() => import('./pages/Comptabilite').then(m => ({ default: m.Comptabilite })));
@@ -269,6 +270,7 @@ const PageContent: React.FC = () => {
             case 'dashboard': return <Dashboard />;
             case 'espace_personnel': return <EspacePersonnel />;
             case 'eleves': return <Eleves />;
+            case 'statistiques_eleves': return <StatistiquesEleves />;
             case 'paiements': return <Paiements />;
             case 'retraits': return <Retraits />;
             case 'comptabilite': return <Comptabilite />;

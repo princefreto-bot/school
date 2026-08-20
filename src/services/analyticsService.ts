@@ -458,3 +458,74 @@ export function computeCycleComparison(students: Student[]): CycleFinanceRow[] {
     } satisfies CycleFinanceRow;
   }).filter((r): r is CycleFinanceRow => r !== null);
 }
+
+// ─────────────────────────────────────────────
+// 9. STATISTIQUES ÂGE & SEXE
+// ─────────────────────────────────────────────
+
+export interface AgeBucket {
+  age: number;
+  garcons: number;
+  filles: number;
+  total: number;
+}
+
+export interface AgeSexStats {
+  garcons: number;
+  filles: number;
+  sansSexe: number;
+  sansDateNaissance: number;
+  ageMoyen: number | null;
+  parAge: AgeBucket[];
+}
+
+/**
+ * Âge en années révolues à la date de référence (par défaut aujourd'hui).
+ * Retourne null si la date de naissance est absente/invalide.
+ */
+export function calculerAge(dateNaissance: string | undefined, reference: Date = new Date()): number | null {
+  if (!dateNaissance) return null;
+  const naissance = new Date(dateNaissance);
+  if (isNaN(naissance.getTime())) return null;
+
+  let age = reference.getFullYear() - naissance.getFullYear();
+  const moisDiff = reference.getMonth() - naissance.getMonth();
+  if (moisDiff < 0 || (moisDiff === 0 && reference.getDate() < naissance.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+/**
+ * Calcule la répartition des élèves par sexe et par âge (dérivé de dateNaissance).
+ * Les élèves sans date de naissance renseignée sont comptés à part
+ * (sansDateNaissance) et exclus de parAge / ageMoyen.
+ */
+export function computeAgeSexStats(students: Student[], reference: Date = new Date()): AgeSexStats {
+  const garcons = students.filter((s) => s.sexe === 'M').length;
+  const filles = students.filter((s) => s.sexe === 'F').length;
+  const sansSexe = students.length - garcons - filles;
+
+  const avecAge = students
+    .map((s) => ({ sexe: s.sexe, age: calculerAge(s.dateNaissance, reference) }))
+    .filter((x): x is { sexe: Student['sexe']; age: number } => x.age !== null && x.age >= 0);
+
+  const sansDateNaissance = students.length - avecAge.length;
+
+  const parAgeMap = new Map<number, AgeBucket>();
+  avecAge.forEach(({ sexe, age }) => {
+    const bucket = parAgeMap.get(age) || { age, garcons: 0, filles: 0, total: 0 };
+    if (sexe === 'M') bucket.garcons++;
+    else if (sexe === 'F') bucket.filles++;
+    bucket.total++;
+    parAgeMap.set(age, bucket);
+  });
+
+  const parAge = Array.from(parAgeMap.values()).sort((a, b) => a.age - b.age);
+
+  const ageMoyen = avecAge.length > 0
+    ? parseFloat((avecAge.reduce((acc, x) => acc + x.age, 0) / avecAge.length).toFixed(1))
+    : null;
+
+  return { garcons, filles, sansSexe, sansDateNaissance, ageMoyen, parAge };
+}

@@ -439,6 +439,13 @@ stepList([
   "Saisissez les notes élève par élève, ou importez un fichier Excel pré-rempli.",
   "Depuis la page Bulletins, calculez les moyennes et rangs de toute une classe, puis générez les bulletins scolaires officiels au format PDF (modèle conforme DRE).",
 ]);
+subTitle('Moyenne manuelle pour une période sans notes');
+paragraph("Si l'établissement n'a pas encore saisi les notes d'une période antérieure (par exemple le Trimestre 1, ou le Semestre 1 au Lycée), la page Bulletins détecte automatiquement cette absence de notes et propose, pour la période en cours, un champ de saisie de la moyenne de chaque élève pour la période manquante.");
+bulletList([
+  "Cette moyenne saisie à la main n'est jamais enregistrée dans la base de données : elle reste uniquement dans le navigateur, le temps de la génération des bulletins.",
+  "Elle sert uniquement au calcul de la moyenne annuelle cumulée affichée sur le bulletin — les notes par matière de la période en cours ne sont pas concernées.",
+  "Dès que de vraies notes sont saisies pour la période concernée, le champ de saisie manuelle disparaît automatiquement.",
+]);
 
 // ── 14. NOTES D'EXAMENS ──
 sectionTitle(14, 'Notes d\'examens (CEPD, BEPC, BAC) et classement');
@@ -462,6 +469,14 @@ bulletList([
   "Onglet Examens — moyenne générale et taux de réussite par type d'examen (CEPD, BEPC, BAC 1, BAC 2), graphique comparatif et top 5 des meilleurs élèves par session.",
   "Génération d'un rapport PDF officiel en noir et blanc, prêt à imprimer.",
 ]);
+subTitle('Statistiques élèves par âge et par sexe');
+paragraph("Le Tableau de bord affiche désormais un aperçu de la répartition des élèves par âge et par sexe (garçons/filles), calculée à partir de la date de naissance renseignée sur chaque fiche élève. Un bouton « Voir la liste détaillée & imprimer » ouvre la page dédiée « Statistiques Élèves ».");
+bulletList([
+  "Filtrage par cycle ou par classe, avec les totaux (effectif, garçons, filles, âge moyen) recalculés en direct.",
+  "Graphique de répartition par âge, ventilé par sexe.",
+  "Liste nominative détaillée (nom, classe, sexe, date de naissance, âge) triable et exportable en PDF imprimable, prête pour les démarches administratives.",
+]);
+roleNote("Un élève sans date de naissance renseignée est compté séparément (« Sans date de naissance ») et n'entre pas dans le calcul de l'âge moyen ni dans le graphique par âge.");
 
 // ── 16. COMMUNICATION ──
 sectionTitle(16, 'Communication : messagerie et annonces');

@@ -296,6 +296,7 @@ export type AppPage =
   | 'dashboard'
   | 'espace_personnel'
   | 'eleves'
+  | 'statistiques_eleves'
   | 'paiements'
   | 'retraits'
   | 'comptabilite'

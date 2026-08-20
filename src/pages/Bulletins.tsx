@@ -183,12 +183,19 @@ export const Bulletins: React.FC = () => {
                         ces valeurs ne sont utilisées que pour le calcul de la moyenne annuelle affichée sur ce bulletin et ne sont jamais enregistrées.
                     </p>
                     {periodesSansNotes.map(p => (
-                        <div key={p} className="mb-4 last:mb-0">
-                            <p className="font-semibold text-sm text-gray-700 mb-2">{p}</p>
-                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                {elevesDeLaClasse.map(e => (
-                                    <div key={e.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-                                        <span className="flex-1 text-sm truncate">{e.nom} {e.prenom}</span>
+                        <div key={p} className="mb-6 last:mb-0">
+                            <p className="font-bold text-sm text-amber-700 mb-2 uppercase tracking-wide">Moyenne — {p}</p>
+                            <div className="border border-gray-200 rounded-xl overflow-hidden">
+                                <div className="flex items-center gap-3 px-4 py-2 bg-gray-100 border-b border-gray-200">
+                                    <span className="flex-1 text-[11px] font-black text-gray-500 uppercase tracking-wider">Élève</span>
+                                    <span className="w-24 text-[11px] font-black text-gray-500 uppercase tracking-wider text-right">Moyenne /20</span>
+                                </div>
+                                {elevesDeLaClasse.map((e, idx) => (
+                                    <div
+                                        key={e.id}
+                                        className={`flex items-center gap-3 px-4 py-2.5 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                                    >
+                                        <span className="flex-1 text-sm font-bold text-gray-900">{e.nom} {e.prenom}</span>
                                         <input
                                             type="number"
                                             min={0}
@@ -196,11 +203,14 @@ export const Bulletins: React.FC = () => {
                                             step={0.01}
                                             value={manualOverrides[e.id]?.[p] ?? ''}
                                             onChange={(ev) => updateManualOverride(e.id, p, ev.target.value)}
-                                            className="w-20 px-2 py-1 border border-gray-200 rounded-lg text-right focus:ring-2 focus:ring-amber-500"
-                                            placeholder="/20"
+                                            className="w-24 px-2 py-1.5 border border-gray-300 rounded-lg text-right font-bold text-gray-900 focus:ring-2 focus:ring-amber-500"
+                                            placeholder="—"
                                         />
                                     </div>
                                 ))}
+                                {elevesDeLaClasse.length === 0 && (
+                                    <div className="px-4 py-6 text-center text-sm text-gray-400 font-semibold">Aucun élève dans cette classe.</div>
+                                )}
                             </div>
                         </div>
                     ))}
