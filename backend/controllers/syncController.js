@@ -411,6 +411,7 @@ async function syncFromFrontend(req, res) {
                     show_seal_on_cards: appSettings.showSealOnCards !== undefined ? appSettings.showSealOnCards : true,
                     show_stamp_on_bulletins: appSettings.showStampOnBulletins !== undefined ? appSettings.showStampOnBulletins : true,
                     show_signature_on_bulletins: appSettings.showSignatureOnBulletins !== undefined ? appSettings.showSignatureOnBulletins : true,
+                    carte_verso_texte: appSettings.carteVersoTexte,
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'id' });
                 if (settingsErr) {
@@ -722,7 +723,8 @@ async function syncToFrontend(req, res) {
                 showSignatureOnCards: appSettings.show_signature_on_cards,
                 showSealOnCards: appSettings.show_seal_on_cards,
                 showStampOnBulletins: appSettings.show_stamp_on_bulletins,
-                showSignatureOnBulletins: appSettings.show_signature_on_bulletins
+                showSignatureOnBulletins: appSettings.show_signature_on_bulletins,
+                carteVersoTexte: appSettings.carte_verso_texte
             } : null,
             announcements: (announcements || []).map(a => ({
                 id: a.id,

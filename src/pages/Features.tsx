@@ -180,6 +180,7 @@ const featuresFr = [
       'QR Code unique crypté par élève',
       'Compatible scan entrée/sortie',
       'Format numérique et imprimable',
+      'Verso personnalisable (texte libre) pour le règlement ou les mentions légales',
     ],
   },
 ];
@@ -345,6 +346,7 @@ const featuresEn = [
       'Unique encrypted QR Code per student',
       'Compatible with entry/exit scan',
       'Digital and printable format',
+      'Customizable back side (free text) for rules or legal notices',
     ],
   },
 ];

@@ -5,7 +5,7 @@ import {
   Save, School, MessageSquare, Shield, Info,
   Upload, X, Image, Clock, Plus, Calendar, Trash2, Database, Layers,
   CheckCircle2, Circle, ChevronDown, Phone, MapPin, Mail, Globe, FileBadge2,
-  Landmark, Sparkles, UserSquare2, Wallet, RefreshCw
+  Landmark, Sparkles, UserSquare2, Wallet, RefreshCw, CreditCard
 } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import { SchoolBackups } from '../components/SchoolBackups';
@@ -57,6 +57,7 @@ export const Parametres: React.FC = () => {
   const showSealOnCards = useStore((s) => s.showSealOnCards);
   const showStampOnBulletins = useStore((s) => s.showStampOnBulletins);
   const showSignatureOnBulletins = useStore((s) => s.showSignatureOnBulletins);
+  const carteVersoTexte = useStore((s) => s.carteVersoTexte);
   const user = useStore((s) => s.user);
   const academicYears = useStore((s) => s.academicYears) || [];
 
@@ -103,6 +104,7 @@ export const Parametres: React.FC = () => {
   const [localShowSealOnCards, setLocalShowSealOnCards] = useState(showSealOnCards !== undefined ? showSealOnCards : true);
   const [localShowStampOnBulletins, setLocalShowStampOnBulletins] = useState(showStampOnBulletins !== undefined ? showStampOnBulletins : true);
   const [localShowSignatureOnBulletins, setLocalShowSignatureOnBulletins] = useState(showSignatureOnBulletins !== undefined ? showSignatureOnBulletins : true);
+  const [localCarteVersoTexte, setLocalCarteVersoTexte] = useState(carteVersoTexte || '');
   const [saved, setSaved] = useState(false);
   
   const [logoPreview, setLogoPreview] = useState<string | null>(schoolLogo);
@@ -522,7 +524,8 @@ export const Parametres: React.FC = () => {
       showSignatureOnCards: localShowSignatureOnCards,
       showSealOnCards: localShowSealOnCards,
       showStampOnBulletins: localShowStampOnBulletins,
-      showSignatureOnBulletins: localShowSignatureOnBulletins
+      showSignatureOnBulletins: localShowSignatureOnBulletins,
+      carteVersoTexte: localCarteVersoTexte
     });
 
     setLogoPreview(logoUrl);
@@ -779,6 +782,19 @@ export const Parametres: React.FC = () => {
                             <ToggleSwitch label="Signature du directeur" checked={localShowSignatureOnBulletins} onChange={setLocalShowSignatureOnBulletins} />
                         </div>
                     </div>
+                </div>
+
+                {/* ── Verso de la carte scolaire ── */}
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
+                    <SectionHeading icon={<CreditCard className="w-4 h-4" />} title="Verso de la carte scolaire" subtitle="Texte libre imprimé au dos de la carte élève (règlement intérieur, mentions légales, consignes...)." />
+                    <textarea
+                        className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-y"
+                        rows={4}
+                        value={localCarteVersoTexte}
+                        onChange={(e) => setLocalCarteVersoTexte(e.target.value)}
+                        placeholder="Ex : En cas de perte, merci de retourner cette carte à l'administration de l'établissement. Cette carte reste la propriété de l'école et doit être présentée à chaque entrée/sortie."
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1.5">Laissez vide pour ne pas générer de verso — seul le recto sera imprimé.</p>
                 </div>
 
                 {/* ── Coordonnées ── */}

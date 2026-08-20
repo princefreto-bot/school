@@ -406,6 +406,8 @@ stepList([
   "Le surveillant scanne la carte à l'entrée : le parent est notifié automatiquement (SMS ou push) en moins de 2 secondes.",
 ]);
 paragraph("Deux pages de scan sont disponibles : Scan Présence (entrée) et Scan Sortie. Un retard est automatiquement détecté si le scan a lieu après l'heure limite définie pour le cycle de l'élève.");
+subTitle('Verso personnalisable de la carte');
+paragraph("Dans Paramètres > Cartes, un champ de texte libre permet de définir un verso pour la carte scolaire (règlement intérieur, consigne en cas de perte, mentions légales...). S'il est renseigné, une page verso est automatiquement ajoutée après chaque page de rectos lors de la génération du PDF, prête pour une impression recto-verso. Si le champ est laissé vide, seul le recto est imprimé, comme auparavant.");
 
 // ── 10. SCAN PERSONNEL ──
 sectionTitle(10, 'Scan et présence du personnel');

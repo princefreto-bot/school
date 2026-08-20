@@ -158,6 +158,8 @@ export interface AppSettings extends AdminSettings {
   showSealOnCards?: boolean;
   showStampOnBulletins?: boolean;
   showSignatureOnBulletins?: boolean;
+  // Texte libre affiché au dos (verso) de la carte scolaire élève.
+  carteVersoTexte?: string;
 }
 
 export interface DashboardStats {

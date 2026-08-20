@@ -47,11 +47,11 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
         countryName, countryMotto, ministereName,
         directorSignature, directorName, directorTitle,
         showStampOnCards, showSignatureOnCards, showStampOnBulletins, showSignatureOnBulletins,
-        officialSeal, showSealOnCards
+        officialSeal, showSealOnCards, carteVersoTexte
     } = store;
-    
+
     // Si l'un des paramètres de configuration est fourni, on envoie appSettings
-    if (appName !== undefined || schoolName !== undefined || schoolLogo !== undefined || schoolStamp !== undefined || cycleSchedules !== undefined || tranches !== undefined || classFees !== undefined || schoolMotto !== undefined || schoolBp !== undefined || schoolTelephone !== undefined || schoolAddress !== undefined || schoolCurrency !== undefined || schoolIfu !== undefined || schoolRccm !== undefined || schoolNif !== undefined || schoolEmail !== undefined || schoolWebsite !== undefined || schoolAutorisation !== undefined || heuresMensuellesStandard !== undefined || countryName !== undefined || countryMotto !== undefined || ministereName !== undefined || directorSignature !== undefined || directorName !== undefined || directorTitle !== undefined || showStampOnCards !== undefined || showSignatureOnCards !== undefined || showStampOnBulletins !== undefined || showSignatureOnBulletins !== undefined || officialSeal !== undefined || showSealOnCards !== undefined) {
+    if (appName !== undefined || schoolName !== undefined || schoolLogo !== undefined || schoolStamp !== undefined || cycleSchedules !== undefined || tranches !== undefined || classFees !== undefined || schoolMotto !== undefined || schoolBp !== undefined || schoolTelephone !== undefined || schoolAddress !== undefined || schoolCurrency !== undefined || schoolIfu !== undefined || schoolRccm !== undefined || schoolNif !== undefined || schoolEmail !== undefined || schoolWebsite !== undefined || schoolAutorisation !== undefined || heuresMensuellesStandard !== undefined || countryName !== undefined || countryMotto !== undefined || ministereName !== undefined || directorSignature !== undefined || directorName !== undefined || directorTitle !== undefined || showStampOnCards !== undefined || showSignatureOnCards !== undefined || showStampOnBulletins !== undefined || showSignatureOnBulletins !== undefined || officialSeal !== undefined || showSealOnCards !== undefined || carteVersoTexte !== undefined) {
         payload.appSettings = {
             appName,
             schoolName,
@@ -86,7 +86,8 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
             showStampOnBulletins,
             showSignatureOnBulletins,
             officialSeal,
-            showSealOnCards
+            showSealOnCards,
+            carteVersoTexte
         };
     }
 

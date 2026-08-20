@@ -40,6 +40,9 @@ export interface AppState {
   setShowStampOnBulletins: (v: boolean) => void;
   showSignatureOnBulletins: boolean;
   setShowSignatureOnBulletins: (v: boolean) => void;
+  // Texte libre affiché au dos (verso) de la carte scolaire élève (Paramètres > Cartes).
+  carteVersoTexte: string;
+  setCarteVersoTexte: (v: string) => void;
   tranches: any[];
   setTranches: (tranches: any[]) => void;
   // Frais de scolarité personnalisés par classe (Paramètres > Frais de scolarité) —
@@ -181,7 +184,8 @@ export interface AppState {
     showSignatureOnCards?: boolean,
     showSealOnCards?: boolean,
     showStampOnBulletins?: boolean,
-    showSignatureOnBulletins?: boolean
+    showSignatureOnBulletins?: boolean,
+    carteVersoTexte?: string
   }) => Promise<void>;
   settings: AppSettings;
   updateSettings: (settings: AppSettings) => void;
@@ -919,6 +923,8 @@ export const useStore = create<AppState>()(
       setShowStampOnBulletins: (v) => set({ showStampOnBulletins: v }),
       showSignatureOnBulletins: true,
       setShowSignatureOnBulletins: (v) => set({ showSignatureOnBulletins: v }),
+      carteVersoTexte: '',
+      setCarteVersoTexte: (v) => set({ carteVersoTexte: v }),
 
       resetSchoolSettingsToDefaults: () => set({
         schoolName: 'Établissement Scolaire',
@@ -950,6 +956,7 @@ export const useStore = create<AppState>()(
         countryName: 'République Togolaise',
         countryMotto: 'Travail - Liberté - Patrie',
         ministereName: "Ministère de l'Éducation Nationale",
+        carteVersoTexte: '',
       }),
 
       updateAllSettings: async (newSettings) => {
@@ -1251,7 +1258,8 @@ export const useStore = create<AppState>()(
                 showSignatureOnCards: appSettings.showSignatureOnCards ?? true,
                 showSealOnCards: appSettings.showSealOnCards ?? true,
                 showStampOnBulletins: appSettings.showStampOnBulletins ?? true,
-                showSignatureOnBulletins: appSettings.showSignatureOnBulletins ?? true
+                showSignatureOnBulletins: appSettings.showSignatureOnBulletins ?? true,
+                carteVersoTexte: appSettings.carteVersoTexte || ''
               });
               console.log(`🎨 [Sync Parent] Paramètres appliqués ! Logo: ${!!appSettings.schoolLogo}`);
             }
@@ -1377,6 +1385,7 @@ export const useStore = create<AppState>()(
               showSealOnCards: data.appSettings.showSealOnCards ?? get().showSealOnCards,
               showStampOnBulletins: data.appSettings.showStampOnBulletins ?? get().showStampOnBulletins,
               showSignatureOnBulletins: data.appSettings.showSignatureOnBulletins ?? get().showSignatureOnBulletins,
+              carteVersoTexte: data.appSettings.carteVersoTexte ?? get().carteVersoTexte,
               ...(data.appSettings.cycleSchedules ? { cycleSchedules: data.appSettings.cycleSchedules } : {}),
               ...(data.appSettings.tranches ? { tranches: data.appSettings.tranches } : {}),
               classFees: data.appSettings.classFees || {},
@@ -1666,6 +1675,7 @@ export const useStore = create<AppState>()(
         showSealOnCards: state.showSealOnCards,
         showStampOnBulletins: state.showStampOnBulletins,
         showSignatureOnBulletins: state.showSignatureOnBulletins,
+        carteVersoTexte: state.carteVersoTexte,
         parents: state.parents || [],
         activityLogs: (state.activityLogs || []).slice(0, 500),
         receiptCounter: state.receiptCounter || 0,
