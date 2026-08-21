@@ -223,7 +223,7 @@ export const BulletinTogoPDF = React.forwardRef<HTMLDivElement, BulletinTogoPDFP
                         <tr className="bg-gray-200 font-bold text-center">
                             <th className="border-[1.5px] border-black p-0.5">MATIÈRES</th>
                             <th className="border-[1.5px] border-black p-0.5">CL.<br/>(/20)</th>
-                            <th className="border-[1.5px] border-black p-0.5">DEV.<br/>(/20)</th>
+                            <th className="border-[1.5px] border-black p-0.5">INT.<br/>(/20)</th>
                             <th className="border-[1.5px] border-black p-0.5" style={{ fontSize: '7px' }}>MOY.<br/>CL.</th>
                             <th className="border-[1.5px] border-black p-0.5">COMP.<br/>(/20)</th>
                             <th className="border-[1.5px] border-black p-0.5">MOY.<br/>(/20)</th>
