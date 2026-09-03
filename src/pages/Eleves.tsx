@@ -58,13 +58,27 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
     recu: student?.recu ?? '',
     adsn: student?.adsn ?? '',
   });
+  const [saving, setSaving] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Attend la confirmation d'enregistrement avant de fermer la modale : sans ça, un
+  // logout/fermeture d'onglet juste après "Valider l'inscription" pouvait perdre
+  // l'élève (jamais écrit en base) si la synchro en tâche de fond n'avait pas eu le
+  // temps de se terminer — incident vécu en prod le 2026-08-21.
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError('');
     if (student) {
       updateStudent(student.id, form);
-    } else {
-      addStudent(form);
+      onClose();
+      return;
+    }
+    setSaving(true);
+    const result = await addStudent(form);
+    setSaving(false);
+    if (!result.success) {
+      setSubmitError(result.error || "Erreur lors de l'enregistrement. Réessayez.");
+      return;
     }
     onClose();
   };
@@ -256,12 +270,18 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
             <span className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">Élève Redoublant</span>
           </label>
 
+          {submitError && (
+            <p className="text-sm font-bold text-rose-600 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl px-4 py-3">
+              {submitError}
+            </p>
+          )}
+
           <div className="flex gap-3 pt-4">
-            <button type="button" onClick={onClose} className="flex-1 py-4 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-black text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors uppercase tracking-widest">
+            <button type="button" onClick={onClose} disabled={saving} className="flex-1 py-4 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-black text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors uppercase tracking-widest disabled:opacity-50">
               Annuler
             </button>
-            <button type="submit" className="flex-1 py-4 bg-amber-500 text-white rounded-2xl text-[13px] font-black hover:bg-amber-600 transition-colors flex items-center justify-center gap-2 uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)]">
-              {student ? 'Enregistrer les modifications' : 'Valider l\'inscription'}
+            <button type="submit" disabled={saving} className="flex-1 py-4 bg-amber-500 text-white rounded-2xl text-[13px] font-black hover:bg-amber-600 transition-colors flex items-center justify-center gap-2 uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] disabled:opacity-60 disabled:cursor-not-allowed">
+              {saving ? 'Enregistrement…' : (student ? 'Enregistrer les modifications' : "Valider l'inscription")}
             </button>
           </div>
         </form>

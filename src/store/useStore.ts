@@ -81,7 +81,12 @@ export interface AppState {
   // Élèves
   students: Student[];
   setStudents: (students: Student[]) => void;
-  addStudent: (student: Omit<Student, 'id' | 'createdAt' | 'updatedAt' | 'cycle' | 'status' | 'restant' | 'historiquesPaiements' | 'ecolage' | 'fraisInscription' | 'inscriptionRestant'>) => void;
+  // Retourne { success: false } si la synchro cloud échoue (ex: réseau coupé, session
+  // expirée) — l'élève reste alors visible en local uniquement. L'appelant DOIT attendre
+  // cette promesse et prévenir l'utilisateur en cas d'échec avant qu'il ne quitte la page :
+  // sans ça, un logout/fermeture d'onglet juste après perd l'inscription (jamais écrite
+  // en base), incident vécu en prod le 2026-08-21.
+  addStudent: (student: Omit<Student, 'id' | 'createdAt' | 'updatedAt' | 'cycle' | 'status' | 'restant' | 'historiquesPaiements' | 'ecolage' | 'fraisInscription' | 'inscriptionRestant'>) => Promise<{ success: boolean; error?: string }>;
   updateStudent: (id: string, updates: Partial<Student>) => void;
   updateMultipleStudents: (updates: { id: string; updates: Partial<Student> }[]) => void;
   deleteStudent: (id: string) => void;
@@ -659,7 +664,7 @@ export const useStore = create<AppState>()(
       // ── Élèves ───────────────────────────────────────────
       students: [],
       setStudents: (students) => set({ students: deduplicateStudents(students.map((s) => repairStudent(s, get().classFees, get().classRegistrationFees))).list }),
-      addStudent: (data) => {
+      addStudent: async (data) => {
         const ecolage = getEffectiveEcolage((data as { classe: string }).classe, get().classFees);
         const restant = ecolage - ((data as { dejaPaye?: number }).dejaPaye || 0);
         const fraisInscription = isSubjectToRegistrationFee((data as { statutElv?: string }).statutElv)
@@ -677,7 +682,7 @@ export const useStore = create<AppState>()(
         if (existing) {
           console.warn(`[AddStudent] L'élève ${data.prenom} ${data.nom} existe déjà dans cette classe. Mise à jour de l'existant.`);
           get().updateStudent(existing.id, data);
-          return;
+          return { success: true };
         }
 
         const student: Student = {
@@ -699,12 +704,18 @@ export const useStore = create<AppState>()(
 
         set({ students: [...get().students, student] });
 
-        // Background sync
-        syncToBackend({
+        // Synchro attendue (pas fire-and-forget) : un logout/fermeture d'onglet juste
+        // après l'ajout ne doit jamais faire disparaître un élève jamais écrit en base.
+        const result = await syncToBackend({
           students: get().students,
           presences: get().presences,
           activityLogs: get().activityLogs
-        }).then(() => set({ lastSyncTimestamp: Date.now() }));
+        });
+        if (result) {
+          set({ lastSyncTimestamp: Date.now() });
+          return { success: true };
+        }
+        return { success: false, error: "L'enregistrement n'a pas pu être synchronisé (connexion instable). Restez sur la page et réessayez." };
       },
       updateStudent: (id, updates) => {
         const students = get().students.map((s) => {
