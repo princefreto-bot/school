@@ -147,6 +147,11 @@ export const Parametres: React.FC = () => {
   const [feesSaved, setFeesSaved] = useState(false);
   const [recalculating, setRecalculating] = useState(false);
   const [recalcMessage, setRecalcMessage] = useState('');
+  // Remplace l'ancienne window.confirm() — trop facile à fermer/ignorer par erreur
+  // (incident vécu : un directeur l'a ratée, ses élèves déjà inscrits ont gardé
+  // l'ancien tarif, écart constaté ensuite en Comptabilité). Coché par défaut car
+  // c'est l'intention la plus courante ; reste visible et explicite avant l'action.
+  const [applyToExisting, setApplyToExisting] = useState(true);
 
   const handleSaveFees = async () => {
     const fees: Record<string, number> = {};
@@ -166,10 +171,7 @@ export const Parametres: React.FC = () => {
     }
 
     const hasOverrides = Object.keys(fees).length > 0;
-    if (hasOverrides && window.confirm(
-      "Appliquer aussi ces nouveaux tarifs aux élèves déjà inscrits dans ces classes ? " +
-      "Le montant dû (restant à payer) sera recalculé — les paiements déjà encaissés ne sont pas modifiés."
-    )) {
+    if (hasOverrides && applyToExisting) {
       setRecalculating(true);
       const result = await recalculateStudentFees();
       setRecalculating(false);
@@ -178,6 +180,8 @@ export const Parametres: React.FC = () => {
           ? `${result.updated ?? 0} élève${(result.updated ?? 0) > 1 ? 's' : ''} mis à jour avec les nouveaux tarifs.`
           : (result.error || 'Erreur lors du recalcul.')
       );
+    } else if (hasOverrides) {
+      setRecalcMessage("Nouveau tarif enregistré pour les futures inscriptions. Les élèves déjà inscrits gardent leur ancien montant (case décochée).");
     }
   };
 
@@ -195,6 +199,9 @@ export const Parametres: React.FC = () => {
   const [registrationFeesSaved, setRegistrationFeesSaved] = useState(false);
   const [recalculatingRegistration, setRecalculatingRegistration] = useState(false);
   const [recalcRegistrationMessage, setRecalcRegistrationMessage] = useState('');
+  // Même correction que pour les frais de scolarité (ci-dessus) : une case visible
+  // au lieu d'une window.confirm() facile à ignorer par erreur.
+  const [applyToExistingRegistration, setApplyToExistingRegistration] = useState(true);
 
   const handleSaveRegistrationFees = async () => {
     const fees: Record<string, number> = {};
@@ -214,11 +221,7 @@ export const Parametres: React.FC = () => {
     }
 
     const hasOverrides = Object.keys(fees).length > 0;
-    if (hasOverrides && window.confirm(
-      "Appliquer aussi ces nouveaux tarifs aux élèves déjà présents dans ces classes ? " +
-      "Seuls les élèves marqués « Nouveau » (voir fiche élève) sont concernés — les élèves anciens et redoublants " +
-      "ne sont jamais facturés. Le montant dû (restant à payer sur l'inscription) sera recalculé — les paiements déjà encaissés ne sont pas modifiés."
-    )) {
+    if (hasOverrides && applyToExistingRegistration) {
       setRecalculatingRegistration(true);
       const result = await recalculateStudentRegistrationFees();
       setRecalculatingRegistration(false);
@@ -227,6 +230,8 @@ export const Parametres: React.FC = () => {
           ? `${result.updated ?? 0} élève${(result.updated ?? 0) > 1 ? 's' : ''} mis à jour avec les nouveaux tarifs.`
           : (result.error || 'Erreur lors du recalcul.')
       );
+    } else if (hasOverrides) {
+      setRecalcRegistrationMessage("Nouveau tarif enregistré pour les futures inscriptions. Les élèves déjà présents gardent leur ancien montant (case décochée).");
     }
   };
 
@@ -1192,6 +1197,14 @@ export const Parametres: React.FC = () => {
                         ))}
                     </div>
 
+                    <div className="mt-6 p-4 bg-indigo-50/60 dark:bg-indigo-500/10 border border-indigo-200/60 dark:border-indigo-500/20 rounded-xl">
+                        <ToggleSwitch
+                            checked={applyToExisting}
+                            onChange={setApplyToExisting}
+                            label="Appliquer aussi ces tarifs aux élèves déjà inscrits (recalcule le montant dû — les paiements déjà encaissés ne sont pas modifiés)"
+                        />
+                    </div>
+
                     {recalcMessage && (
                         <p className="mt-4 text-xs font-bold text-slate-500 dark:text-slate-400">{recalcMessage}</p>
                     )}
@@ -1258,6 +1271,14 @@ export const Parametres: React.FC = () => {
                                 </div>
                             </div>
                         ))}
+                    </div>
+
+                    <div className="mt-6 p-4 bg-indigo-50/60 dark:bg-indigo-500/10 border border-indigo-200/60 dark:border-indigo-500/20 rounded-xl">
+                        <ToggleSwitch
+                            checked={applyToExistingRegistration}
+                            onChange={setApplyToExistingRegistration}
+                            label="Appliquer aussi ces tarifs aux élèves « Nouveau » déjà présents (recalcule le montant dû — les paiements déjà encaissés ne sont pas modifiés)"
+                        />
                     </div>
 
                     {recalcRegistrationMessage && (
