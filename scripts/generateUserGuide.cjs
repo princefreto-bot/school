@@ -293,6 +293,13 @@ stepList([
   "Cliquez sur « Liste nominative ».",
 ]);
 paragraph("Le PDF généré contient le numéro, le nom et prénoms, le sexe, la date de naissance et le statut (régulier/redoublant) de chaque élève, ainsi que l'effectif total (garçons/filles) et une zone de signature pour le directeur.");
+subTitle('Attestation de scolarité');
+paragraph("Un document officiel généré en un clic depuis la fiche d'un élève, sans avoir à le rédiger à la main : identité de l'élève, classe, année scolaire, en-tête de l'établissement, cachet et signature du directeur.");
+stepList([
+  "Ouvrez la fiche d'un élève (page Élèves, cliquez sur son nom).",
+  "Dans le pied de la fiche, cliquez sur « Attestation ».",
+  "Le PDF s'ouvre prêt à imprimer, avec les zones de cachet et signature déjà en place.",
+]);
 subTitle('Comptes parents');
 paragraph("Chaque parent peut disposer d'un compte pour suivre le dossier de son enfant à distance : paiements, reçus, notes, badges d'assiduité, messagerie avec l'école.");
 

@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useStore } from '../store/useStore';
 import { Student, ExpenseLabel, StudentExpense } from '../types';
 import { RecuPrintButton } from './pdf/RecuPrintButton';
+import { AttestationScolaritePrintButton } from './pdf/AttestationScolaritePrintButton';
 import { expensesApi } from '../services/expensesApi';
 import {
   X, Download, MessageCircle, Clock, CheckCircle,
@@ -585,6 +586,13 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
           >
             <Download className="w-4 h-4" /> Reçu PDF
           </RecuPrintButton>
+          <AttestationScolaritePrintButton
+            student={student}
+            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+            title="Imprimer / exporter l'attestation de scolarité"
+          >
+            <FileText className="w-4 h-4" /> Attestation
+          </AttestationScolaritePrintButton>
           <a
             href={`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`}
             target="_blank"
