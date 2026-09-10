@@ -273,6 +273,8 @@ bulletList([
   "Montant total attendu vs. montant encaissé, avec taux de recouvrement.",
   "Liste des derniers paiements enregistrés.",
   "Répartition des statuts de paiement (soldé, partiel, non soldé).",
+  "Répartition des élèves par âge et par sexe (graphique + page dédiée imprimable).",
+  "Bloc « Nouvelles inscriptions & frais d'inscription » : nombre de nouveaux inscrits et montant des frais d'inscription attendu / encaissé / restant.",
 ]);
 
 // ── 3. ÉLÈVES ET PARENTS ──

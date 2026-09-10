@@ -315,6 +315,9 @@ export const Dashboard: React.FC = () => {
     const totalInscriptionPaye = students.reduce((a, s) => a + (s.inscriptionPaye || 0), 0);
     const totalInscriptionRestant = students.reduce((a, s) => a + (s.inscriptionRestant || 0), 0);
     const tauxInscription = totalFraisInscription > 0 ? Math.round((totalInscriptionPaye / totalFraisInscription) * 100) : 0;
+    // Nouveaux inscrits = élèves au statut FINANCIER "NOUVEAU" (ceux qui doivent
+    // les frais d'inscription), indépendamment du redoublement académique.
+    const nouveauxInscrits = students.filter((s) => s.statutElv === 'NOUVEAU').length;
 
     return {
       primaire: primaire.length, college: college.length, lycee: lycee.length,
@@ -324,7 +327,7 @@ export const Dashboard: React.FC = () => {
         Lycée: cycleStat(lycee),
       },
       totalEcolage, totalPaye, totalRestant, taux, soldes, nonSoldes,
-      totalFraisInscription, totalInscriptionPaye, totalInscriptionRestant, tauxInscription,
+      totalFraisInscription, totalInscriptionPaye, totalInscriptionRestant, tauxInscription, nouveauxInscrits,
     };
   }, [students]);
 
@@ -621,22 +624,26 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* ── FRAIS D'INSCRIPTION (piste séparée de l'écolage) ── */}
-      {stats.totalFraisInscription > 0 && (
+      {(stats.totalFraisInscription > 0 || stats.nouveauxInscrits > 0) && (
         <div className="pro-card p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-indigo-200/40 dark:border-indigo-500/20">
           <div className="flex items-center justify-between mb-6">
             <div className="space-y-1">
-              <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight">Frais d'inscription</h3>
+              <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight">Nouvelles inscriptions &amp; frais d'inscription</h3>
               <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Suivi distinct de l'écolage</p>
             </div>
             <div className="text-3xl font-black text-indigo-500 dark:text-indigo-400 tracking-tighter">{maskValue(`${stats.tauxInscription}%`)}</div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Nouveaux inscrits</p>
+              <p className="text-xl font-black text-slate-900 dark:text-white">{maskValue(stats.nouveauxInscrits)}</p>
+            </div>
             <div className="bg-indigo-50/80 dark:bg-indigo-900/20 border border-indigo-500/20 rounded-2xl p-4">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total attendu</p>
               <p className="text-xl font-black text-slate-900 dark:text-white">{maskValue(`${fmtMoney(stats.totalFraisInscription)} F`)}</p>
             </div>
             <div className="bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-500/20 rounded-2xl p-4">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Encaissé</p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Encaissé (inscriptions)</p>
               <p className="text-xl font-black text-slate-900 dark:text-white">{maskValue(`${fmtMoney(stats.totalInscriptionPaye)} F`)}</p>
             </div>
             <div className="bg-rose-50/80 dark:bg-rose-900/20 border border-rose-500/20 rounded-2xl p-4">
