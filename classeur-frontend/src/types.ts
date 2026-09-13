@@ -178,3 +178,68 @@ export interface DashboardStats {
     duplicateCandidates: number;
     lastSyncAt: string | null;
 }
+
+export interface InfraSubscription {
+    id: number;
+    provider: string;
+    label: string;
+    monthly_cost: number | null;
+    currency: string;
+    billing_cycle: string;
+    renewal_date: string | null;
+    quota_label: string | null;
+    quota_limit_mb: number | null;
+    notes: string | null;
+    is_active: boolean;
+}
+
+export interface InfraProjection {
+    subscriptionId: number;
+    label: string;
+    quotaLimitMb: number;
+    usagePct: number;
+    daysToLimit: number | null;
+    limitDate: string | null;
+}
+
+export interface InfraAlert {
+    level: 'info' | 'warning' | 'critical';
+    message: string;
+}
+
+export interface SupabaseLiveInfo {
+    project: {
+        name: string;
+        region: string;
+        status: string;
+        postgresVersion: string | null;
+        createdAt: string | null;
+    } | null;
+    activeAddons: { type: string; name: string; priceDescription: string | null }[];
+    tokenConfigured: boolean;
+}
+
+export interface InfraOverview {
+    currentBytes: number;
+    tableCount: number;
+    personCount: number;
+    schemaBreakdown: { schema: string; bytes: number }[];
+    topTables: { schema: string; table: string; bytes: number }[];
+    dailyGrowthBytes: number;
+    growth7dBytes: number | null;
+    growth30dBytes: number | null;
+    snapshotCount: number;
+    firstSnapshotOn: string | null;
+    subscriptions: InfraSubscription[];
+    projections: InfraProjection[];
+    monthlyCostByCurrency: Record<string, number>;
+    alerts: InfraAlert[];
+    supabaseLive: SupabaseLiveInfo;
+}
+
+export interface UsageSnapshotPoint {
+    captured_on: string;
+    db_size_bytes: number;
+    table_count: number;
+    person_count: number;
+}

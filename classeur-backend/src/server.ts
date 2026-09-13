@@ -23,6 +23,7 @@ import relationsRoutes from './routes/relations';
 import locationsRoutes from './routes/locations';
 import historyRoutes from './routes/history';
 import settingsRoutes from './routes/settings';
+import infrastructureRoutes from './routes/infrastructure';
 import { startCronJobs } from './cron';
 
 const app = express();
@@ -94,6 +95,7 @@ app.use('/api/relations', relationsRoutes);
 app.use('/api/locations', locationsRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/infrastructure', infrastructureRoutes);
 
 // Sert le build statique du frontend du classeur (même pattern que backend/server.js)
 const frontendDist = path.join(__dirname, '..', '..', 'classeur-frontend', 'dist');

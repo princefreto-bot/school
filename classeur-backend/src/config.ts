@@ -46,4 +46,13 @@ export const config = {
     // + lecture/écriture exclusive sur le schéma `classeur`.
     SUPABASE_URL: () => requireEnv('SUPABASE_URL'),
     SUPABASE_SERVICE_ROLE_KEY: () => requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
+
+    // Jeton Management Supabase (secret NIVEAU COMPTE — ne jamais exposer au frontend,
+    // ne jamais committer). OPTIONNEL : s'il est absent, le module infra dégrade
+    // proprement (les infos projet/addons live ne s'affichent simplement pas, le
+    // suivi de la taille de base et des abonnements manuels continue de fonctionner).
+    SUPABASE_MANAGEMENT_TOKEN: process.env.SUPABASE_MANAGEMENT_TOKEN || '',
+    // Ref du projet Supabase (le sous-domaine de SUPABASE_URL). Déduit par défaut.
+    SUPABASE_PROJECT_REF: process.env.SUPABASE_PROJECT_REF
+        || (process.env.SUPABASE_URL || '').replace('https://', '').split('.')[0] || '',
 };

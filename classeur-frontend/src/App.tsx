@@ -14,6 +14,7 @@ import Documents from './pages/Documents';
 import Relations from './pages/Relations';
 import Localisations from './pages/Localisations';
 import Historique from './pages/Historique';
+import Infrastructure from './pages/Infrastructure';
 import Parametres from './pages/Parametres';
 
 export default function App() {
@@ -39,6 +40,7 @@ export default function App() {
                     <Route path="/localisations" element={<Localisations />} />
                     <Route path="/sources" element={<Sources />} />
                     <Route path="/historique" element={<Historique />} />
+                    <Route path="/infrastructure" element={<Infrastructure />} />
                     <Route path="/parametres" element={<Parametres />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Route>

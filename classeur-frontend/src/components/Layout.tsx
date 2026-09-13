@@ -12,6 +12,7 @@ const NAV_ITEMS = [
     { to: '/localisations', label: 'Localisations' },
     { to: '/sources', label: 'Sources' },
     { to: '/historique', label: 'Historique' },
+    { to: '/infrastructure', label: 'Infrastructure' },
     { to: '/parametres', label: 'Paramètres' },
 ];
 
