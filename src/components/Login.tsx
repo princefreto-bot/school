@@ -223,6 +223,14 @@ export const Login: React.FC = () => {
   const [nom, setNom] = useState('');
   const [error, setError] = useState('');
   const [trialExpiredSchool, setTrialExpiredSchool] = useState<string | null>(null);
+  // Compte à rebours quand le compte est temporairement bloqué (trop de tentatives).
+  const [lockSeconds, setLockSeconds] = useState(0);
+
+  React.useEffect(() => {
+    if (lockSeconds <= 0) return;
+    const id = setInterval(() => setLockSeconds((s) => (s <= 1 ? 0 : s - 1)), 1000);
+    return () => clearInterval(id);
+  }, [lockSeconds]);
   const [loading, setLoading] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   
@@ -312,6 +320,11 @@ export const Login: React.FC = () => {
         if (msg.startsWith('TRIAL_EXPIRED:')) {
             const schoolName = msg.split(':')[1] || '';
             setTrialExpiredSchool(schoolName);
+        } else if (msg.startsWith('LOCKED:')) {
+            const parts = msg.split(':');
+            const secs = parseInt(parts[1], 10) || 0;
+            setLockSeconds(secs);
+            setError(parts.slice(2).join(':') || 'Trop de tentatives. Réessayez plus tard.');
         } else {
             setError(msg);
         }
@@ -766,8 +779,13 @@ export const Login: React.FC = () => {
                         </div>
                     )}
                     {error && <div className="text-rose-500 text-xs italic text-center font-bold px-4">{error}</div>}
+                    {lockSeconds > 0 && (
+                        <div className="text-center text-amber-700 bg-amber-50 border border-amber-200 rounded-xl py-2 px-3 text-xs font-black">
+                            Déblocage dans {String(Math.floor(lockSeconds / 60)).padStart(2, '0')}:{String(lockSeconds % 60).padStart(2, '0')}
+                        </div>
+                    )}
 
-                    <button type="submit" disabled={loading} className="w-full py-4 bg-amber-500 text-white rounded-none font-black text-xs uppercase tracking-widest shadow-xl shadow-amber-500/30 active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4 cursor-pointer">
+                    <button type="submit" disabled={loading || lockSeconds > 0} className="w-full py-4 bg-amber-500 text-white rounded-none font-black text-xs uppercase tracking-widest shadow-xl shadow-amber-500/30 active:scale-95 transition-transform flex items-center justify-center gap-2 mt-4 cursor-pointer disabled:opacity-60">
                         {loading ? t('processing') : (view === 'login' ? t('launchMobile') : t('registerMobile'))}
                     </button>
                     

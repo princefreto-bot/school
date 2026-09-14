@@ -174,7 +174,12 @@ export async function fetchFromBackend() {
  */
 export async function isBackendAvailable() {
     try {
-        const response = await fetch(`${BACKEND_URL}/api/health`, { signal: AbortSignal.timeout(2000) });
+        // 10s (au lieu de 2s) : sur l'offre gratuite Render le serveur s'endort après
+        // ~15 min d'inactivité et met 30-60s à se réveiller. Un timeout de 2s le
+        // déclarait « indisponible » avant même son réveil, et l'app sautait alors le
+        // chargement des données (écran de chargement bloqué / vide, incident yzo
+        // 2026-09-14). 10s laisse le temps au premier réveil de répondre.
+        const response = await fetch(`${BACKEND_URL}/api/health`, { signal: AbortSignal.timeout(10000) });
         return response.ok;
     } catch {
         return false;

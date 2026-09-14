@@ -516,6 +516,11 @@ export const useStore = create<AppState>()(
           if (res.status === 403) {
             throw new Error(result.error || 'Accès refusé.');
           }
+          // Compte temporairement bloqué (trop de tentatives) : on transporte le nombre
+          // de secondes restantes pour afficher un compte à rebours côté connexion.
+          if (res.status === 429) {
+            throw new Error(`LOCKED:${result.lockedForSeconds || 0}:${result.error || 'Trop de tentatives. Réessayez plus tard.'}`);
+          }
 
           if (res.ok && result.token) {
             localStorage.setItem('parent_token', result.token);

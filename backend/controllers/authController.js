@@ -12,21 +12,37 @@ const { getCache, setCache, deleteCache } = require('../services/cacheService');
 // compte ciblé depuis plusieurs IP différentes (attaque distribuée). Ici on
 // verrouille le COMPTE visé (par téléphone) après plusieurs mots de passe
 // erronés, quelle que soit l'IP d'origine.
-const LOGIN_MAX_ATTEMPTS = 5;
-const LOGIN_LOCKOUT_SECONDS = 15 * 60; // 15 minutes
+// Adouci (2026-09-14) : 8 tentatives au lieu de 5, blocage de 10 min au lieu de 15,
+// et on renvoie le temps restant exact pour un compte à rebours côté connexion.
+// Cible des utilisateurs réels (directeurs qui tapent au téléphone, oublis fréquents),
+// tout en gardant une vraie protection anti-brute-force.
+const LOGIN_MAX_ATTEMPTS = 8;
+const LOGIN_LOCKOUT_SECONDS = 10 * 60; // 10 minutes de blocage une fois le seuil atteint
+const LOGIN_WINDOW_SECONDS = 15 * 60;  // fenêtre de comptage des échecs
 
 function loginLockKey(schoolSlug, input) {
     return `login_lock:${schoolSlug || 'global'}:${input}`;
 }
 
-async function isLoginLocked(lockKey) {
-    const attempts = await getCache(lockKey);
-    return typeof attempts === 'number' && attempts >= LOGIN_MAX_ATTEMPTS;
+// Retourne { locked, remainingSeconds } — remainingSeconds alimente le compte à rebours.
+async function getLoginLockState(lockKey) {
+    const rec = await getCache(lockKey);
+    if (!rec || typeof rec !== 'object') return { locked: false, remainingSeconds: 0 };
+    if (rec.lockedUntil && rec.lockedUntil > Date.now()) {
+        return { locked: true, remainingSeconds: Math.ceil((rec.lockedUntil - Date.now()) / 1000) };
+    }
+    return { locked: false, remainingSeconds: 0 };
 }
 
 async function recordLoginFailure(lockKey) {
-    const attempts = (await getCache(lockKey)) || 0;
-    await setCache(lockKey, attempts + 1, LOGIN_LOCKOUT_SECONDS);
+    const rec = (await getCache(lockKey)) || { count: 0, lockedUntil: 0 };
+    const count = (rec.count || 0) + 1;
+    let lockedUntil = rec.lockedUntil || 0;
+    if (count >= LOGIN_MAX_ATTEMPTS) {
+        lockedUntil = Date.now() + LOGIN_LOCKOUT_SECONDS * 1000;
+    }
+    const ttl = Math.max(LOGIN_WINDOW_SECONDS, Math.ceil((lockedUntil - Date.now()) / 1000));
+    await setCache(lockKey, { count, lockedUntil }, ttl);
 }
 
 async function clearLoginLockout(lockKey) {
@@ -267,8 +283,13 @@ async function login(req, res) {
         console.log(`🔍 [Auth] Tentative login pour: ${input} (Portail: ${portal || 'non spécifié'})`);
 
         const lockKey = loginLockKey(schoolSlug, input);
-        if (await isLoginLocked(lockKey)) {
-            return res.status(429).json({ error: 'Trop de tentatives échouées pour ce compte. Réessayez dans 15 minutes.' });
+        const lockState = await getLoginLockState(lockKey);
+        if (lockState.locked) {
+            const mins = Math.max(1, Math.ceil(lockState.remainingSeconds / 60));
+            return res.status(429).json({
+                error: `Trop de tentatives échouées. Compte temporairement bloqué — réessayez dans ${mins} min.`,
+                lockedForSeconds: lockState.remainingSeconds,
+            });
         }
 
         // ── 1. Vérifier si c'est le SuperAdmin ──
