@@ -48,6 +48,32 @@ async function syncFromFrontend(req, res) {
         }
     }
 
+    // ── FILET ANTI-NULL (incident csyzomacamb, 2026-09-14) ──
+    // Si l'année n'a pas pu être résolue depuis l'en-tête x-academic-year (en-tête
+    // absent, ou nom qui ne correspond à aucune année ET rôle non autorisé à en créer),
+    // on retombe sur l'année COURANTE de l'école (puis la plus récente). Sans ce filet,
+    // academicYearId restait NULL et TOUTES les écritures ci-dessous réécrivaient les
+    // élèves/paiements/notes avec academic_year_id = NULL — ce qui les faisait
+    // disparaître de l'app (qui filtre strictement par l'année courante).
+    // NULL n'est plus possible que pour une école n'ayant littéralement aucune année
+    // enregistrée (toute première initialisation) — cas où il n'y a rien à écraser.
+    if (!academicYearId && schoolSlug) {
+        const { data: fallbackYear } = await supabase
+            .from('academic_years')
+            .select('id')
+            .eq('school_slug', schoolSlug)
+            .order('is_current', { ascending: false }) // année courante en priorité
+            .order('name', { ascending: false })         // sinon la plus récente
+            .limit(1)
+            .maybeSingle();
+        if (fallbackYear) {
+            academicYearId = fallbackYear.id;
+            if (yearName) {
+                console.warn(`🩹 [Sync POST] Année "${yearName}" non résolue pour ${schoolSlug} — repli sur l'année courante/récente (${academicYearId}) au lieu d'écrire NULL.`);
+            }
+        }
+    }
+
     if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur', 'enseignant', 'secretaire'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
     }
