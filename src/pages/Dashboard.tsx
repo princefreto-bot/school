@@ -13,7 +13,7 @@ import {
   GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck, FileText, Eye, EyeOff,
   Check, Settings, PlayCircle, Landmark, PiggyBank, Cake
 } from 'lucide-react';
-import { CLASS_CONFIG } from '../data/classConfig';
+import { CLASS_CONFIG, getFiliere } from '../data/classConfig';
 import {
   computeRecouvrement,
   computeClassComparison,
@@ -319,12 +319,23 @@ export const Dashboard: React.FC = () => {
     // les frais d'inscription), indépendamment du redoublement académique.
     const nouveauxInscrits = students.filter((s) => s.statutElv === 'NOUVEAU').length;
 
+    // Lycée Moderne vs Lycée Technique (ex: G1/G2/G3/C.D) — dérivé du nom de classe
+    // (getFiliere), jamais stocké sur l'élève. Un établissement qui n'a que du Lycée
+    // Moderne (l'immense majorité) a systématiquement lyceeTechnique.count === 0 et
+    // la section correspondante du dashboard reste masquée (aucun changement visible).
+    const lyceeModerne = lycee.filter((s) => getFiliere(s.classe) === 'Moderne');
+    const lyceeTechnique = lycee.filter((s) => getFiliere(s.classe) === 'Technique');
+
     return {
       primaire: primaire.length, college: college.length, lycee: lycee.length,
       cycleStats: {
         Primaire: cycleStat(primaire),
         Collège: cycleStat(college),
         Lycée: cycleStat(lycee),
+      },
+      lyceeFiliereStats: {
+        Moderne: cycleStat(lyceeModerne),
+        Technique: cycleStat(lyceeTechnique),
       },
       totalEcolage, totalPaye, totalRestant, taux, soldes, nonSoldes,
       totalFraisInscription, totalInscriptionPaye, totalInscriptionRestant, tauxInscription, nouveauxInscrits,
@@ -749,6 +760,41 @@ export const Dashboard: React.FC = () => {
           );
         })}
       </div>
+
+      {/* ── LYCÉE MODERNE vs LYCÉE TECHNIQUE ── */}
+      {/* Visible uniquement pour un établissement ayant au moins une classe technique
+          (G1/G2/G3, C.D...) — pour tous les autres, lyceeTechnique.count === 0 et
+          cette section reste masquée, sans aucun changement d'affichage. */}
+      {stats.lyceeFiliereStats.Technique.count > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {([
+            { label: 'Lycée Moderne', sub: 'A4, D, S...', key: 'Moderne' as const, colors: { bg: 'bg-sky-50 dark:bg-sky-500/10', text: 'text-sky-600', fill: 'bg-sky-500' } },
+            { label: 'Lycée Technique', sub: 'G1, G2, G3, C.D...', key: 'Technique' as const, colors: { bg: 'bg-orange-50 dark:bg-orange-500/10', text: 'text-orange-600', fill: 'bg-orange-500' } },
+          ] as const).map((f) => {
+            const fs = stats.lyceeFiliereStats[f.key];
+            return (
+              <div key={f.key} className="pro-card p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <p className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{f.label}</p>
+                    <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest">{f.sub}</p>
+                  </div>
+                  <div className={`px-4 py-2 rounded-xl font-black text-xl ${f.colors.bg} ${f.colors.text}`}>
+                    {maskValue(fs.count)}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Recouvrement</span>
+                  <span className={`text-lg font-black ${f.colors.text}`}>{maskValue(`${fs.taux}%`)}</span>
+                </div>
+                <div className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className={`h-full ${f.colors.fill} rounded-full transition-all duration-1000`} style={{ width: `${fs.taux}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* ── CHARTS SECTION ── */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">

@@ -92,10 +92,16 @@ export interface StudentExpense {
   updatedAt: string;
 }
 
+// Sous-catégorie du cycle Lycée uniquement — un établissement peut proposer l'un,
+// l'autre, ou les deux en parallèle (ex: DINO GOLO a un Lycée Moderne A4/D et un
+// Lycée Technique G1/G2/G3/C.D). Jamais pertinent pour Primaire/Collège.
+export type LyceeFiliere = 'Moderne' | 'Technique';
+
 export interface ClassConfig {
   name: string;
   cycle: Cycle;
   ecolage: number;
+  filiere?: LyceeFiliere;
 }
 
 export type StatusPaiement = 'solde' | 'tranche_validee' | 'tranche_partielle' | 'non_solde';

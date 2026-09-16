@@ -1,7 +1,7 @@
 // ============================================================
 // CONFIGURATION DES CLASSES ET ÉCOLAGES
 // ============================================================
-import { ClassConfig, Cycle, PeriodeType } from '../types';
+import { ClassConfig, Cycle, LyceeFiliere, PeriodeType } from '../types';
 
 export const CLASS_CONFIG: ClassConfig[] = [
   // Primaire — 50 000 FCFA
@@ -25,30 +25,30 @@ export const CLASS_CONFIG: ClassConfig[] = [
   // Collège — 70 000 FCFA
   { name: '3EME', cycle: 'Collège', ecolage: 70000 },
 
-  // Lycée — 75 000 FCFA
-  { name: '2nde S',  cycle: 'Lycée', ecolage: 75000 },
-  { name: '2nde A4', cycle: 'Lycée', ecolage: 75000 },
-  // Séries techniques/commerciales (G1/G2/G3, C.D) — mêmes tarifs génériques que les
-  // autres classes du même niveau ; chaque école ajuste via Paramètres > Frais de
-  // scolarité (voir getEffectiveEcolage). Sans ces entrées, une classe non reconnue
-  // retombe sur le cycle "Primaire" par défaut (getCycle) — ce qui casserait le choix
-  // Semestre/Trimestre et les bulletins pour ces classes de Lycée.
-  { name: '2nde G1', cycle: 'Lycée', ecolage: 75000 },
-  { name: '2nde G2', cycle: 'Lycée', ecolage: 75000 },
-  { name: '2nde G3', cycle: 'Lycée', ecolage: 75000 },
-  { name: '2nde CD', cycle: 'Lycée', ecolage: 75000 },
+  // Lycée Moderne (A4 lettres/philo, S/D maths-sciences) — 75 000 FCFA
+  { name: '2nde S',  cycle: 'Lycée', ecolage: 75000, filiere: 'Moderne' },
+  { name: '2nde A4', cycle: 'Lycée', ecolage: 75000, filiere: 'Moderne' },
+  // Lycée Technique (séries techniques/commerciales G1/G2/G3, C.D) — mêmes tarifs
+  // génériques que les autres classes du même niveau ; chaque école ajuste via
+  // Paramètres > Frais de scolarité (voir getEffectiveEcolage). Sans ces entrées,
+  // une classe non reconnue retombe sur le cycle "Primaire" par défaut (getCycle) —
+  // ce qui casserait le choix Semestre/Trimestre et les bulletins pour ces classes.
+  { name: '2nde G1', cycle: 'Lycée', ecolage: 75000, filiere: 'Technique' },
+  { name: '2nde G2', cycle: 'Lycée', ecolage: 75000, filiere: 'Technique' },
+  { name: '2nde G3', cycle: 'Lycée', ecolage: 75000, filiere: 'Technique' },
+  { name: '2nde CD', cycle: 'Lycée', ecolage: 75000, filiere: 'Technique' },
 
   // Lycée — 85 000 FCFA
-  { name: '1er A4', cycle: 'Lycée', ecolage: 85000 },
-  { name: '1er D',  cycle: 'Lycée', ecolage: 85000 },
-  { name: '1ere G1', cycle: 'Lycée', ecolage: 85000 },
-  { name: '1ere G2 ET G3', cycle: 'Lycée', ecolage: 85000 },
+  { name: '1er A4', cycle: 'Lycée', ecolage: 85000, filiere: 'Moderne' },
+  { name: '1er D',  cycle: 'Lycée', ecolage: 85000, filiere: 'Moderne' },
+  { name: '1ere G1', cycle: 'Lycée', ecolage: 85000, filiere: 'Technique' },
+  { name: '1ere G2 ET G3', cycle: 'Lycée', ecolage: 85000, filiere: 'Technique' },
 
   // Lycée — 95 000 FCFA
-  { name: 'Tle A4', cycle: 'Lycée', ecolage: 95000 },
-  { name: 'Tle D',  cycle: 'Lycée', ecolage: 95000 },
-  { name: 'Tle G2', cycle: 'Lycée', ecolage: 95000 },
-  { name: 'Tle G3', cycle: 'Lycée', ecolage: 95000 },
+  { name: 'Tle A4', cycle: 'Lycée', ecolage: 95000, filiere: 'Moderne' },
+  { name: 'Tle D',  cycle: 'Lycée', ecolage: 95000, filiere: 'Moderne' },
+  { name: 'Tle G2', cycle: 'Lycée', ecolage: 95000, filiere: 'Technique' },
+  { name: 'Tle G3', cycle: 'Lycée', ecolage: 95000, filiere: 'Technique' },
 ];
 
 // Normalise pour la recherche flexible (essentiel pour Excel)
@@ -74,6 +74,15 @@ export const getClassConfig = (className: string): ClassConfig | undefined => {
 export const getEcolage = (className: string): number => {
   const config = getClassConfig(className);
   return config ? config.ecolage : 60000;
+};
+
+// Sous-catégorie Lycée (Moderne / Technique) — null pour Primaire/Collège ou une
+// classe non reconnue. Dérivée à la volée depuis le nom de classe, jamais stockée
+// sur l'élève (comme `cycle` l'est) : un établissement qui ajoute/renomme ses séries
+// techniques n'a donc rien à migrer, la répartition se recalcule automatiquement.
+export const getFiliere = (className: string): LyceeFiliere | null => {
+  const config = getClassConfig(className);
+  return config?.filiere ?? null;
 };
 
 // Variante consciente des frais personnalisés par école (voir Paramètres > Frais de
