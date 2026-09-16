@@ -28,14 +28,27 @@ export const CLASS_CONFIG: ClassConfig[] = [
   // Lycée — 75 000 FCFA
   { name: '2nde S',  cycle: 'Lycée', ecolage: 75000 },
   { name: '2nde A4', cycle: 'Lycée', ecolage: 75000 },
+  // Séries techniques/commerciales (G1/G2/G3, C.D) — mêmes tarifs génériques que les
+  // autres classes du même niveau ; chaque école ajuste via Paramètres > Frais de
+  // scolarité (voir getEffectiveEcolage). Sans ces entrées, une classe non reconnue
+  // retombe sur le cycle "Primaire" par défaut (getCycle) — ce qui casserait le choix
+  // Semestre/Trimestre et les bulletins pour ces classes de Lycée.
+  { name: '2nde G1', cycle: 'Lycée', ecolage: 75000 },
+  { name: '2nde G2', cycle: 'Lycée', ecolage: 75000 },
+  { name: '2nde G3', cycle: 'Lycée', ecolage: 75000 },
+  { name: '2nde CD', cycle: 'Lycée', ecolage: 75000 },
 
   // Lycée — 85 000 FCFA
   { name: '1er A4', cycle: 'Lycée', ecolage: 85000 },
   { name: '1er D',  cycle: 'Lycée', ecolage: 85000 },
+  { name: '1ere G1', cycle: 'Lycée', ecolage: 85000 },
+  { name: '1ere G2 ET G3', cycle: 'Lycée', ecolage: 85000 },
 
   // Lycée — 95 000 FCFA
   { name: 'Tle A4', cycle: 'Lycée', ecolage: 95000 },
   { name: 'Tle D',  cycle: 'Lycée', ecolage: 95000 },
+  { name: 'Tle G2', cycle: 'Lycée', ecolage: 95000 },
+  { name: 'Tle G3', cycle: 'Lycée', ecolage: 95000 },
 ];
 
 // Normalise pour la recherche flexible (essentiel pour Excel)
