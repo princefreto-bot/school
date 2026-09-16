@@ -96,11 +96,6 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
           // If we already processed this student IN THIS FILE (loop), skip to avoid internal duplicates
           if (studentsMap.has(key) || (adsn && studentsMap.has(adsn.toLowerCase()))) continue;
 
-          const ecolage = Number(row[8]) || getEcolageFromClasse(validClasse, useStore.getState().classFees);
-          const dejaPaye = Number(row[9]) || 0;
-          const restant = row[10] === 'SOLDE' ? 0 : (Number(row[10]) || Math.max(0, ecolage - dejaPaye));
-          const recu = String(row[11] || '').trim();
-          
           let existingStudent = null;
           if (adsn) {
             existingStudent = existingMap.get(adsn.toLowerCase());
@@ -108,7 +103,21 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
           if (!existingStudent) {
             existingStudent = existingMap.get(key);
           }
-          
+
+          // Statut FINANCIER (nouveau/ancien à l'établissement) — calculé ici, avant l'écolage,
+          // car certaines écoles (ex. DINO GOLO) facturent un tarif différent aux NOUVEAU
+          // (voir getEcolageFromClasse / getEffectiveEcolage). Le redoublement est un statut
+          // académique indépendant, déjà couvert par la colonne REDOUBLANT.
+          const statutElvRaw = row[19] ? String(row[19]).trim().toUpperCase() : (existingStudent?.statutElv || undefined);
+          const validStatutElv = ['NOUVEAU', 'ANCIEN'].includes(statutElvRaw || '')
+            ? (statutElvRaw as 'NOUVEAU' | 'ANCIEN')
+            : undefined;
+
+          const ecolage = Number(row[8]) || getEcolageFromClasse(validClasse, useStore.getState().classFees, validStatutElv);
+          const dejaPaye = Number(row[9]) || 0;
+          const restant = row[10] === 'SOLDE' ? 0 : (Number(row[10]) || Math.max(0, ecolage - dejaPaye));
+          const recu = String(row[11] || '').trim();
+
           const dateNaissance = row[12] ? String(row[12]).trim() : undefined;
           const lieuNaissance = row[13] ? String(row[13]).trim() : undefined;
           const nationalite = row[14] ? String(row[14]).trim() : undefined;
@@ -118,13 +127,7 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
           // milieu) pour ne pas décaler les fichiers déjà en circulation. Ne s'appliquent
           // qu'aux élèves marqués NOUVEAU (colonne T) — un import en masse de l'effectif
           // existant (majoritairement des anciens) ne doit jamais leur facturer
-          // l'inscription rétroactivement. Statut FINANCIER (nouveau/ancien à
-          // l'établissement) uniquement — le redoublement est un statut académique
-          // indépendant, déjà couvert par la colonne REDOUBLANT.
-          const statutElv = row[19] ? String(row[19]).trim().toUpperCase() : (existingStudent?.statutElv || undefined);
-          const validStatutElv = ['NOUVEAU', 'ANCIEN'].includes(statutElv || '')
-            ? (statutElv as 'NOUVEAU' | 'ANCIEN')
-            : undefined;
+          // l'inscription rétroactivement.
           const fraisInscription = isSubjectToRegistrationFee(validStatutElv)
             ? (Number(row[16]) || getFraisInscriptionFromClasse(validClasse, useStore.getState().classRegistrationFees))
             : 0;

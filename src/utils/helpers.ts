@@ -24,8 +24,8 @@ export const getCycleFromClasse = (classe: string): 'Primaire' | 'Collège' | 'L
   return getCycle(classe);
 };
 
-export const getEcolageFromClasse = (classe: string, overrides?: Record<string, number> | null): number => {
-  return getEffectiveEcolage(classe, overrides);
+export const getEcolageFromClasse = (classe: string, overrides?: Record<string, number> | null, statutElv?: string | null): number => {
+  return getEffectiveEcolage(classe, overrides, statutElv);
 };
 
 export const getFraisInscriptionFromClasse = (classe: string, overrides?: Record<string, number> | null): number => {

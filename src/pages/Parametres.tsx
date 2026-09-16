@@ -154,7 +154,14 @@ export const Parametres: React.FC = () => {
   const [applyToExisting, setApplyToExisting] = useState(true);
 
   const handleSaveFees = async () => {
+    const classNames = new Set(CLASS_CONFIG.map((c) => c.name));
     const fees: Record<string, number> = {};
+    // Préserve les clés que ce formulaire ne gère pas (ex: tarif "<classe> NOUVEAU"
+    // distinct pour les écoles avec grille Ancien/Nouveau — voir getEffectiveEcolage) :
+    // sans ça, chaque sauvegarde ici les effacerait silencieusement.
+    Object.entries(classFees || {}).forEach(([k, v]) => {
+      if (!classNames.has(k) && typeof v === 'number') fees[k] = v;
+    });
     CLASS_CONFIG.forEach((c) => {
       const val = Number(localClassFees[c.name]);
       if (!Number.isNaN(val) && val > 0 && val !== c.ecolage) fees[c.name] = val;

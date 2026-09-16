@@ -105,18 +105,26 @@ async function recalculateFees(req, res) {
 
         const { data: students, error: studentsErr } = await supabase
             .from(`students_${schoolSlug}`)
-            .select('id, classe, deja_paye, ecolage');
+            .select('id, classe, deja_paye, ecolage, statut_elv');
         if (studentsErr) throw studentsErr;
 
-        const findOverride = (classe) => {
+        // Certaines écoles (ex. DINO GOLO) facturent un tarif différent aux élèves NOUVEAU,
+        // stocké sous la clé suffixée "<classe> NOUVEAU" (voir getEffectiveEcolage côté
+        // frontend, src/data/classConfig.ts) — priorité sur la clé de classe simple.
+        const findOverride = (classe, statutElv) => {
             const target = String(classe || '').trim().toLowerCase();
+            if (statutElv === 'NOUVEAU') {
+                const nouveauTarget = `${target} nouveau`;
+                const nouveauMatch = overrideEntries.find(([k]) => k.trim().toLowerCase() === nouveauTarget);
+                if (nouveauMatch) return nouveauMatch[1];
+            }
             const match = overrideEntries.find(([k]) => k.trim().toLowerCase() === target);
             return match ? match[1] : null;
         };
 
         let updated = 0;
         for (const student of students || []) {
-            const newEcolage = findOverride(student.classe);
+            const newEcolage = findOverride(student.classe, student.statut_elv);
             if (newEcolage == null || newEcolage === student.ecolage) continue;
 
             const dejaPaye = Number(student.deja_paye) || 0;

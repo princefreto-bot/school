@@ -353,7 +353,7 @@ const deduplicateStudents = (list: Student[]): { list: Student[]; countRemoved: 
 // montant dû est toujours recalculé depuis le tarif de l'école.
 const repairStudent = (s: Student, classFees?: Record<string, number>, classRegistrationFees?: Record<string, number>): Student => {
   const correctCycle = getCycle(s.classe);
-  const correctEcolage = getEffectiveEcolage(s.classe, classFees);
+  const correctEcolage = getEffectiveEcolage(s.classe, classFees, s.statutElv);
   const correctRestant = Math.max(0, correctEcolage - s.dejaPaye);
   const correctStatus = computeStatus(correctRestant, correctEcolage);
   const correctFraisInscription = isSubjectToRegistrationFee(s.statutElv)
@@ -670,7 +670,7 @@ export const useStore = create<AppState>()(
       students: [],
       setStudents: (students) => set({ students: deduplicateStudents(students.map((s) => repairStudent(s, get().classFees, get().classRegistrationFees))).list }),
       addStudent: async (data) => {
-        const ecolage = getEffectiveEcolage((data as { classe: string }).classe, get().classFees);
+        const ecolage = getEffectiveEcolage((data as { classe: string }).classe, get().classFees, (data as { statutElv?: string }).statutElv);
         const restant = ecolage - ((data as { dejaPaye?: number }).dejaPaye || 0);
         const fraisInscription = isSubjectToRegistrationFee((data as { statutElv?: string }).statutElv)
           ? getEffectiveFraisInscription((data as { classe: string }).classe, get().classRegistrationFees)
@@ -727,15 +727,15 @@ export const useStore = create<AppState>()(
           if (s.id !== id) return s;
           const updated = { ...s, ...updates, updatedAt: new Date().toISOString() };
           if (updates.classe) {
-            updated.ecolage = getEffectiveEcolage(updates.classe, get().classFees);
             updated.cycle = getCycle(updates.classe);
           }
           if (updates.classe || updates.statutElv !== undefined) {
+            updated.ecolage = getEffectiveEcolage(updated.classe, get().classFees, updated.statutElv);
             updated.fraisInscription = isSubjectToRegistrationFee(updated.statutElv)
               ? getEffectiveFraisInscription(updated.classe, get().classRegistrationFees)
               : 0;
           }
-          if (updates.dejaPaye !== undefined || updates.classe) {
+          if (updates.dejaPaye !== undefined || updates.classe || updates.statutElv !== undefined) {
             updated.restant = updated.ecolage - updated.dejaPaye;
           }
           if (updates.inscriptionPaye !== undefined || updates.classe || updates.statutElv !== undefined) {
@@ -766,15 +766,15 @@ export const useStore = create<AppState>()(
           if (!up) return s;
           const updated = { ...s, ...up.updates, updatedAt: new Date().toISOString() };
           if (up.updates.classe) {
-            updated.ecolage = getEffectiveEcolage(up.updates.classe, get().classFees);
             updated.cycle = getCycle(up.updates.classe);
           }
           if (up.updates.classe || up.updates.statutElv !== undefined) {
+            updated.ecolage = getEffectiveEcolage(updated.classe, get().classFees, updated.statutElv);
             updated.fraisInscription = isSubjectToRegistrationFee(updated.statutElv)
               ? getEffectiveFraisInscription(updated.classe, get().classRegistrationFees)
               : 0;
           }
-          if (up.updates.dejaPaye !== undefined || up.updates.classe) {
+          if (up.updates.dejaPaye !== undefined || up.updates.classe || up.updates.statutElv !== undefined) {
             updated.restant = updated.ecolage - updated.dejaPaye;
           }
           if (up.updates.inscriptionPaye !== undefined || up.updates.classe || up.updates.statutElv !== undefined) {

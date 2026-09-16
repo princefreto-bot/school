@@ -93,8 +93,23 @@ export const getFiliere = (className: string): LyceeFiliere | null => {
 // scolarité). `overrides` est une map { nomDeClasseNormalisé: montant } — une classe sans
 // entrée retombe sur le tarif générique de CLASS_CONFIG. Fonction pure (pas d'accès au
 // store) pour rester utilisable depuis n'importe quel module sans risque d'import circulaire.
-export const getEffectiveEcolage = (className: string, overrides?: Record<string, number> | null): number => {
+// `statutElv` : certaines écoles (ex. DINO GOLO) facturent un tarif différent aux élèves
+// NOUVEAU — stocké sous la clé suffixée `"<classe> NOUVEAU"` dans `overrides` pour rester
+// 100% additif (aucune migration de schéma, aucune école existante affectée : sans cette
+// clé, le comportement est identique à avant). Repli sur la clé de classe normale si absente.
+export const getEffectiveEcolage = (
+  className: string,
+  overrides?: Record<string, number> | null,
+  statutElv?: string | null
+): number => {
   if (overrides) {
+    if (statutElv === 'NOUVEAU') {
+      const nouveauKey = normalize(`${className} NOUVEAU`);
+      const nouveauOverride = Object.entries(overrides).find(([k]) => normalize(k) === nouveauKey);
+      if (nouveauOverride && typeof nouveauOverride[1] === 'number' && !Number.isNaN(nouveauOverride[1])) {
+        return nouveauOverride[1];
+      }
+    }
     const key = normalize(className);
     const override = Object.entries(overrides).find(([k]) => normalize(k) === key);
     if (override && typeof override[1] === 'number' && !Number.isNaN(override[1])) {
