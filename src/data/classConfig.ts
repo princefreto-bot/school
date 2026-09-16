@@ -41,8 +41,12 @@ export const CLASS_CONFIG: ClassConfig[] = [
   // Lycée — 85 000 FCFA
   { name: '1er A4', cycle: 'Lycée', ecolage: 85000, filiere: 'Moderne' },
   { name: '1er D',  cycle: 'Lycée', ecolage: 85000, filiere: 'Moderne' },
-  { name: '1ere G1', cycle: 'Lycée', ecolage: 85000, filiere: 'Technique' },
-  { name: '1ere G2 ET G3', cycle: 'Lycée', ecolage: 85000, filiere: 'Technique' },
+  // 1ère G1/G2/G3 : trois classes distinctes (jamais "G2 ET G3" combinée — corrigé
+  // le 2026-09-16, la colonne "statut" du fichier source de DINO GOLO indiquait en
+  // réalité G2/G3 par élève, pas une vraie classe unique).
+  { name: '1ere G1', cycle: 'Lycée', ecolage: 95000, filiere: 'Technique' },
+  { name: '1ere G2', cycle: 'Lycée', ecolage: 95000, filiere: 'Technique' },
+  { name: '1ere G3', cycle: 'Lycée', ecolage: 95000, filiere: 'Technique' },
 
   // Lycée — 95 000 FCFA
   { name: 'Tle A4', cycle: 'Lycée', ecolage: 95000, filiere: 'Moderne' },
