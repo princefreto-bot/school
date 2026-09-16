@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useStore } from '../store/useStore';
-import { CLASS_CONFIG } from '../data/classConfig';
+import { CLASS_CONFIG, getClassConfig } from '../data/classConfig';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
@@ -64,8 +64,11 @@ export const Analyses: React.FC = () => {
   const maskValue = (val: string | number) => privacyMode ? '••••••' : val;
 
   const classData = useMemo(() => {
+    // Comparaison via getClassConfig (normalisation floue) : une égalité stricte sur le
+    // nom fait disparaître silencieusement toute classe dont l'orthographe stockée en
+    // base diffère de CLASS_CONFIG (ex. DINO GOLO : "1ere A4"/"1ere D" vs "1er A4"/"1er D").
     return CLASS_CONFIG.map((c) => {
-      const cls = students.filter((s) => s.classe === c.name);
+      const cls = students.filter((s) => getClassConfig(s.classe)?.name === c.name);
       if (!cls.length) return null;
       const ecolageTotal = cls.reduce((a, s) => a + s.ecolage, 0);
       const paye         = cls.reduce((a, s) => a + s.dejaPaye, 0);

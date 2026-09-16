@@ -4,7 +4,7 @@
 // Les pages ne font qu'appeler ces fonctions.
 // ============================================================
 import { Student, Payment, Cycle } from '../types';
-import { CLASS_CONFIG } from '../data/classConfig';
+import { CLASS_CONFIG, getClassConfig } from '../data/classConfig';
 
 // ─────────────────────────────────────────────
 // TYPES EXPORTÉS
@@ -170,7 +170,10 @@ export function computeProjection(students: Student[]): ProjectionResult {
 export function computeClassComparison(students: Student[]): ClassFinanceRow[] {
   const rows: ClassFinanceRow[] = CLASS_CONFIG
     .map((config) => {
-      const classeStudents = students.filter((s) => s.classe === config.name);
+      // getClassConfig (normalisation floue) plutôt qu'une égalité stricte : une école
+      // peut stocker une variante orthographique de la classe (ex. DINO GOLO "1ere A4"
+      // vs CLASS_CONFIG "1er A4") — l'égalité stricte ferait disparaître cette classe.
+      const classeStudents = students.filter((s) => getClassConfig(s.classe)?.name === config.name);
       if (classeStudents.length === 0) return null;
 
       const totalTheorique = classeStudents.reduce((acc, s) => acc + s.ecolage, 0);
@@ -388,8 +391,8 @@ export function computePriorityList(students: Student[], classComparaisons: Clas
       joursRetard = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     }
 
-    // Info classe
-    const cStats = classComparaisons.find(c => c.classe === s.classe);
+    // Info classe (via getClassConfig : voir computeClassComparison ci-dessus)
+    const cStats = classComparaisons.find(c => c.classe === getClassConfig(s.classe)?.name);
     const tauxClasse = cStats ? cStats.taux : 100; // si on ne trouve pas
 
     // Calcul score (plus c'est élevé plus c'est urgent) sur 100

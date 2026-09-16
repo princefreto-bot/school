@@ -13,7 +13,7 @@ import {
   GraduationCap, Target, ArrowUpRight, BarChart2, UserCheck, FileText, Eye, EyeOff,
   Check, Settings, PlayCircle, Landmark, PiggyBank, Cake
 } from 'lucide-react';
-import { CLASS_CONFIG, getFiliere } from '../data/classConfig';
+import { CLASS_CONFIG, getFiliere, getClassConfig } from '../data/classConfig';
 import {
   computeRecouvrement,
   computeClassComparison,
@@ -343,8 +343,13 @@ export const Dashboard: React.FC = () => {
   }, [students]);
 
   const classData = useMemo(() => {
+    // Comparaison via getClassConfig (normalisation floue), pas une égalité stricte sur
+    // le nom : certaines écoles stockent une variante orthographique de la classe (ex.
+    // DINO GOLO utilise "1ere A4"/"1ere D" en base quand CLASS_CONFIG référence "1er A4"/
+    // "1er D") — une égalité stricte ferait disparaître ces classes de tout le graphique,
+    // silencieusement, sans erreur.
     return CLASS_CONFIG.map((c) => {
-      const cls = students.filter((s) => s.classe === c.name);
+      const cls = students.filter((s) => getClassConfig(s.classe)?.name === c.name);
       return {
         classe: c.name,
         Payé: cls.reduce((a, s) => a + s.dejaPaye, 0),
@@ -362,7 +367,7 @@ export const Dashboard: React.FC = () => {
 
   const topClasses = useMemo(() => {
     return CLASS_CONFIG.map((c) => {
-      const cls = students.filter((s) => s.classe === c.name);
+      const cls = students.filter((s) => getClassConfig(s.classe)?.name === c.name);
       if (!cls.length) return null;
       const paye = cls.reduce((a, s) => a + s.dejaPaye, 0);
       const total = cls.reduce((a, s) => a + s.ecolage, 0);
@@ -811,17 +816,26 @@ export const Dashboard: React.FC = () => {
           {classData.length === 0 ? (
             <div className="h-[300px] flex items-center justify-center text-slate-400 text-sm font-bold bg-slate-50 dark:bg-slate-800/50 rounded-[20px]">Aucune donnée</div>
           ) : (
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={classData} barCategoryGap="20%" barGap={4} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} opacity={0.5} />
-                <XAxis dataKey="classe" tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} dy={10} />
-                <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} dx={-10} />
-                <Tooltip cursor={{ fill: 'transparent' }} content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px', fontWeight: 700 }} iconType="circle" />
-                <Bar dataKey="Payé" fill={BAR_COLORS.paye} radius={[6, 6, 0, 0]} maxBarSize={40} />
-                <Bar dataKey="Restant" fill={BAR_COLORS.restant} radius={[6, 6, 0, 0]} maxBarSize={40} />
-              </BarChart>
-            </ResponsiveContainer>
+            // Avec beaucoup de classes (ex. DINO GOLO : ~18), Recharts masque silencieusement
+            // la plupart des étiquettes de l'axe X pour éviter qu'elles se chevauchent — les
+            // barres restent là, mais on ne sait plus à quelle classe elles correspondent.
+            // Largeur minimale proportionnelle au nombre de classes + défilement horizontal
+            // pour garantir que CHAQUE étiquette reste toujours visible, quel que soit l'écran.
+            <div className="overflow-x-auto">
+              <div style={{ minWidth: `${Math.max(classData.length * 70, 600)}px` }}>
+                <ResponsiveContainer width="100%" height={340}>
+                  <BarChart data={classData} barCategoryGap="20%" barGap={4} margin={{ top: 20, right: 0, left: -20, bottom: 40 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} opacity={0.5} />
+                    <XAxis dataKey="classe" interval={0} angle={-40} textAnchor="end" tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} height={70} />
+                    <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 700 }} tickLine={false} axisLine={false} dx={-10} />
+                    <Tooltip cursor={{ fill: 'transparent' }} content={<CustomTooltip />} />
+                    <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px', fontWeight: 700 }} iconType="circle" />
+                    <Bar dataKey="Payé" fill={BAR_COLORS.paye} radius={[6, 6, 0, 0]} maxBarSize={40} />
+                    <Bar dataKey="Restant" fill={BAR_COLORS.restant} radius={[6, 6, 0, 0]} maxBarSize={40} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           )}
         </div>
 
