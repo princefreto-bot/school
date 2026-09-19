@@ -378,15 +378,6 @@ export const LandingPage: React.FC = () => {
         // Bento grid
         revealFrom(bentoTitleRef.current, { y: 40 });
 
-        // Stats section
-        if (statsSectionRef.current) {
-          gsap.from(statsSectionRef.current.children, {
-            opacity: 0, y: 30, scale: 0.9,
-            duration: 0.6, stagger: 0.12, ease: 'back.out(1.5)',
-            scrollTrigger: { trigger: statsSectionRef.current, start: 'top 85%' },
-          });
-        }
-
         // Cloud section
         revealFrom(cloudTextRef.current, { y: 40 });
 
