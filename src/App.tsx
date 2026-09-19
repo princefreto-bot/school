@@ -7,6 +7,7 @@ import { webPushService } from './services/webPushService';
 import { AppPage } from './types';
 import { Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { ScrollToTop } from './components/ScrollToTop';
+import { DayThemeOverlay } from './components/DayTheme';
 
 import { Capacitor } from '@capacitor/core';
 
@@ -729,6 +730,7 @@ export function App() {
   return (
     <>
       <ScrollToTop />
+      <DayThemeOverlay />
       <Routes>
         {/* Prefixed routes */}
         <Route path="/:lang/confidentialite" element={<Suspense fallback={<LoadingSpinner />}><Confidentialite /></Suspense>} />
