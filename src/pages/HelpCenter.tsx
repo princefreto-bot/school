@@ -2,10 +2,13 @@ import React from 'react';
 import { ArrowLeft, Mail, HelpCircle } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Footer } from '../components/Footer';
+import { MorphBlob } from '../components/MorphBlob';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 export const HelpCenter: React.FC = () => {
   const navigate = useNavigate();
   const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
+  const revealRef = useScrollReveal();
 
   const texts = {
     fr: {
@@ -39,7 +42,9 @@ export const HelpCenter: React.FC = () => {
   const t = texts[lang];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-900">
+    <div ref={revealRef} className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-900 relative overflow-hidden">
+      <MorphBlob color="rgba(245,158,11,0.04)" size={400} style={{ top: '10%', right: '-10%' }} speed={12} />
+      <MorphBlob color="rgba(99,102,241,0.03)" size={350} style={{ bottom: '10%', left: '-10%' }} speed={10} />
       
       {/* HEADER */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60">
@@ -63,18 +68,18 @@ export const HelpCenter: React.FC = () => {
       {/* CONTENT */}
       <main className="flex-1 max-w-4xl mx-auto px-6 py-20 w-full">
         <div className="space-y-6 mb-16 text-center">
-          <span className="text-xs font-black uppercase tracking-widest text-amber-600 bg-amber-500/10 px-3 py-1.5 rounded-full inline-block">
+          <span data-reveal="up" className="text-xs font-black uppercase tracking-widest text-amber-600 bg-amber-500/10 px-3 py-1.5 rounded-full inline-block">
             {t.support}
           </span>
-          <h1 className="text-4xl md:text-6xl font-black text-slate-950 dark:text-white tracking-tight uppercase leading-none">
+          <h1 data-reveal="up" data-reveal-delay="0.1" className="text-4xl md:text-6xl font-black text-slate-950 dark:text-white tracking-tight uppercase leading-none">
             {t.title}
           </h1>
-          <p className="text-lg text-slate-500 dark:text-slate-400 font-medium max-w-2xl mx-auto">
+          <p data-reveal="up" data-reveal-delay="0.2" className="text-lg text-slate-500 dark:text-slate-400 font-medium max-w-2xl mx-auto">
             {t.subtitle}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+        <div data-reveal-stagger className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           
           <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-8 shadow-sm flex flex-col items-center text-center hover:border-amber-500/50 transition-colors">
             <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mb-6">
@@ -109,7 +114,7 @@ export const HelpCenter: React.FC = () => {
 
         </div>
         
-        <div className="bg-slate-950 dark:bg-slate-900 rounded-3xl p-10 text-center relative overflow-hidden">
+        <div data-reveal="scale" className="bg-slate-950 dark:bg-slate-900 rounded-3xl p-10 text-center relative overflow-hidden">
           <div className="relative z-10">
             <h3 className="text-2xl font-black text-white uppercase mb-4">{t.urgentTitle}</h3>
             <p className="text-slate-400 mb-8 max-w-lg mx-auto font-medium">

@@ -9,6 +9,8 @@ import {
   CheckCircle2, AlertTriangle, Globe, Share2, Sparkles
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
+import { MorphBlob } from '../components/MorphBlob';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 // ── Mockup téléphone incliné avec splash screen (logo centré) ─
 type Variant = 'dark' | 'amber' | 'light';
@@ -178,6 +180,7 @@ export const TelechargerApp: React.FC = () => {
   const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
   const t = texts[lang];
   const [origin, setOrigin] = useState('https://dghubschool.com');
+  const revealRef = useScrollReveal();
 
   useEffect(() => {
     if (typeof window !== 'undefined') setOrigin(window.location.origin);
@@ -186,7 +189,7 @@ export const TelechargerApp: React.FC = () => {
   const apkAbsoluteUrl = `${origin}${APK_DOWNLOAD_URL}`;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-['Poppins'] flex flex-col">
+    <div ref={revealRef} className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-['Poppins'] flex flex-col relative overflow-hidden">
       <header className="relative z-50 border-b border-slate-200/50 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
         <nav className="w-full flex items-center justify-between p-4 md:px-8">
           <div className="flex items-center gap-2 text-amber-600 font-black tracking-tighter text-xl select-none cursor-pointer" onClick={() => navigate(`/${lang}`)}>
@@ -292,7 +295,7 @@ export const TelechargerApp: React.FC = () => {
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-12 md:py-16">
 
         {/* Option 1 : APK */}
-        <div className="bg-white dark:bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-6 md:p-8 shadow-xl shadow-amber-500/10 mb-8">
+        <div data-reveal="up" className="bg-white dark:bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-6 md:p-8 shadow-xl shadow-amber-500/10 mb-8">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
               <div className="flex items-center gap-3 mb-3">
@@ -358,7 +361,7 @@ export const TelechargerApp: React.FC = () => {
         </div>
 
         {/* Option 2 : PWA */}
-        <div id="pwa-install" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm mb-8 scroll-mt-24">
+        <div data-reveal="up" id="pwa-install" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm mb-8 scroll-mt-24">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white">
               <Globe className="w-5 h-5" />
@@ -396,7 +399,7 @@ export const TelechargerApp: React.FC = () => {
         </div>
 
         {/* Support */}
-        <div className="text-center bg-slate-900 dark:bg-slate-800 rounded-2xl p-6">
+        <div data-reveal="scale" className="text-center bg-slate-900 dark:bg-slate-800 rounded-2xl p-6">
           <div className="w-10 h-10 mx-auto mb-3 bg-white/10 rounded-xl flex items-center justify-center">
             <Wifi className="w-5 h-5 text-amber-400" />
           </div>

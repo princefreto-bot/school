@@ -3,10 +3,13 @@ import { ArrowLeft, BookOpen } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Footer } from '../components/Footer';
 import { StickerStar, StickerWave, StickerSparkle, StickerHeart } from '../components/Stickers';
+import { MorphBlob } from '../components/MorphBlob';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 export const Newsroom: React.FC = () => {
   const navigate = useNavigate();
   const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
+  const revealRef = useScrollReveal();
 
   const texts = {
     fr: {
@@ -34,8 +37,10 @@ export const Newsroom: React.FC = () => {
   const t = texts[lang];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-900">
-      
+    <div ref={revealRef} className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-900 relative overflow-hidden">
+      <MorphBlob color="rgba(245,158,11,0.04)" size={400} style={{ top: '5%', right: '-12%' }} speed={12} />
+      <MorphBlob color="rgba(99,102,241,0.03)" size={320} style={{ bottom: '15%', left: '-10%' }} speed={10} />
+
       {/* HEADER */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
         <div className="w-full px-6 h-20 flex items-center justify-between">
@@ -58,13 +63,13 @@ export const Newsroom: React.FC = () => {
       {/* CONTENT */}
       <main className="flex-1 max-w-4xl mx-auto px-6 py-20 w-full">
         <div className="space-y-6 mb-16">
-          <span className="text-xs font-black uppercase tracking-widest text-amber-600 bg-amber-500/10 px-3 py-1.5 rounded-full inline-block">
+          <span data-reveal="up" className="text-xs font-black uppercase tracking-widest text-amber-600 bg-amber-500/10 px-3 py-1.5 rounded-full inline-block">
             {t.badge}
           </span>
-          <h1 className="text-4xl md:text-6xl font-black text-slate-950 tracking-tight uppercase leading-none">
+          <h1 data-reveal="up" data-reveal-delay="0.1" className="text-4xl md:text-6xl font-black text-slate-950 tracking-tight uppercase leading-none">
             {t.title}
           </h1>
-          <p className="text-lg text-slate-500 font-medium max-w-2xl">
+          <p data-reveal="up" data-reveal-delay="0.2" className="text-lg text-slate-500 font-medium max-w-2xl">
             {t.subtitle}
           </p>
         </div>
@@ -75,7 +80,7 @@ export const Newsroom: React.FC = () => {
         <StickerWave className="absolute bottom-12 right-[15%] hidden md:block" />
         <StickerSparkle className="absolute top-48 left-[20%] hidden lg:block" />
 
-        <div className="space-y-12">
+        <div data-reveal-stagger className="space-y-12">
           {/* Article 1 */}
           <article className="bg-white border border-slate-200/60 rounded-3xl p-8 md:p-10 shadow-sm">
             <div className="flex items-center gap-4 mb-6">

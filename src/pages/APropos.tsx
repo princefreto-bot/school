@@ -7,11 +7,14 @@ import { ArrowLeft, ArrowRight, ShieldCheck, Heart, Users, Target } from 'lucide
 import { Footer } from '../components/Footer';
 import { BACKEND_URL } from '../config';
 import { StickerStar, StickerHeart, StickerCurvedArrow, StickerWave, StickerNote, StickerCircle, StickerSparkle, StickerCheck } from '../components/Stickers';
+import { MorphBlob } from '../components/MorphBlob';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 export const APropos: React.FC = () => {
   const navigate = useNavigate();
   const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
   const [dbStats, setDbStats] = useState({ schools: 0, students: 0, documents: 0 });
+  const revealRef = useScrollReveal();
 
   useEffect(() => {
     fetch(`${BACKEND_URL}/api/public/stats`)
@@ -111,10 +114,10 @@ export const APropos: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white text-slate-800 font-['Poppins'] relative overflow-hidden flex flex-col">
+    <div ref={revealRef} className="min-h-screen bg-white text-slate-800 font-['Poppins'] relative overflow-hidden flex flex-col">
       {/* Background decoration */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <MorphBlob color="rgba(245,158,11,0.05)" size={500} style={{ top: '-10%', left: '-15%' }} speed={10} />
+      <MorphBlob color="rgba(99,102,241,0.03)" size={400} style={{ bottom: '-10%', right: '-10%' }} speed={14} />
 
       {/* Navigation Header */}
       <header className="relative z-50 border-b border-slate-100 bg-white/80 backdrop-blur-md">
@@ -140,13 +143,13 @@ export const APropos: React.FC = () => {
         <StickerHeart className="absolute top-16 right-8 hidden lg:block" style={{ transform: 'rotate(12deg)', opacity: 0.5 }} />
         <StickerSparkle className="absolute bottom-6 right-[20%] hidden md:block" />
 
-        <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
+        <div data-reveal="up" className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
           {t.badge}
         </div>
-        <h1 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight mb-6 animate-slideUp">
+        <h1 data-reveal="up" data-reveal-delay="0.1" className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight mb-6">
           {t.title}
         </h1>
-        <p className="text-sm md:text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto font-medium">
+        <p data-reveal="up" data-reveal-delay="0.2" className="text-sm md:text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto font-medium">
           {t.desc}
         </p>
       </section>
@@ -161,14 +164,14 @@ export const APropos: React.FC = () => {
         </StickerNote>
 
         <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16 space-y-4">
+          <div data-reveal="up" className="text-center mb-16 space-y-4">
             <h2 className="text-xs font-black uppercase tracking-widest text-amber-600">{t.valuesBadge}</h2>
             <h3 className="text-2xl md:text-4xl font-black text-slate-950 uppercase tracking-tight">
               {t.valuesTitle}
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div data-reveal-stagger className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {values.map((val, idx) => (
               <div key={idx} className="bg-white border border-slate-200 p-6 md:p-8 rounded-3xl shadow-sm flex gap-4 transition-all hover:shadow-md">
                 <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl h-fit shrink-0">
@@ -195,7 +198,7 @@ export const APropos: React.FC = () => {
         <StickerCheck className="absolute bottom-16 left-8 hidden lg:block" style={{ transform: 'rotate(6deg)', opacity: 0.5 }} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
+          <div data-reveal="left" className="space-y-6">
             <h3 className="text-xl md:text-2xl font-black text-slate-950 uppercase tracking-tight leading-snug">
               {t.adaptedTitle}
             </h3>
@@ -206,7 +209,7 @@ export const APropos: React.FC = () => {
               {t.adaptedDesc2}
             </p>
           </div>
-          <div className="p-6 bg-slate-50 border border-slate-200 rounded-3xl space-y-6">
+          <div data-reveal="right" className="p-6 bg-slate-50 border border-slate-200 rounded-3xl space-y-6">
             <h4 className="text-xs font-black uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-3">
               {t.statsTitle}
             </h4>
@@ -242,7 +245,7 @@ export const APropos: React.FC = () => {
         {/* Sticker CTA */}
         <StickerStar className="absolute top-8 left-[10%] hidden md:block" style={{ opacity: 0.3 }} />
 
-        <div className="max-w-3xl mx-auto px-4 space-y-6 relative z-10">
+        <div data-reveal="scale" className="max-w-3xl mx-auto px-4 space-y-6 relative z-10">
           <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight leading-snug">
             {t.ctaTitle}
           </h2>

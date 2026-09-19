@@ -7,11 +7,14 @@ import { Check, HelpCircle, ArrowLeft, Landmark, Users } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import gsap from 'gsap';
 import { StickerStar, StickerHeart, StickerCurvedArrow, StickerNote, StickerCheck, StickerWave, StickerSparkle } from '../components/Stickers';
+import { MorphBlob } from '../components/MorphBlob';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 export const Pricing: React.FC = () => {
   const navigate = useNavigate();
   const { lang = 'fr' } = useParams<{ lang?: 'fr' | 'en' }>();
   const [activeTab, setActiveTab] = useState<'school' | 'parent'>('school');
+  const revealRef = useScrollReveal();
 
   React.useEffect(() => {
     gsap.fromTo('.pricing-animate-in', 
@@ -166,10 +169,10 @@ export const Pricing: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-['Poppins'] relative overflow-hidden flex flex-col">
+    <div ref={revealRef} className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-['Poppins'] relative overflow-hidden flex flex-col">
       {/* Background decoration */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <MorphBlob color="rgba(245,158,11,0.04)" size={450} style={{ top: '-10%', left: '-15%' }} speed={11} />
+      <MorphBlob color="rgba(99,102,241,0.03)" size={380} style={{ bottom: '-10%', right: '-10%' }} speed={13} />
 
       {/* Navigation Header */}
       <header className="relative z-50 border-b border-slate-200/50 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
@@ -296,7 +299,7 @@ export const Pricing: React.FC = () => {
             </div>
 
             {/* Year 2 tiers table */}
-            <div className="max-w-3xl mx-auto mt-10 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+            <div data-reveal="up" className="max-w-3xl mx-auto mt-10 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
               <div className="text-center mb-4">
                 <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/30 px-3 py-1 rounded-full inline-block">
                   {lang === 'fr' ? 'À partir de la 2ème année' : 'From year 2 onward'}
@@ -381,9 +384,9 @@ export const Pricing: React.FC = () => {
       {/* Removed Packs Section */}
 
       {/* FAQ Section */}
-      <section className="pricing-animate-in bg-white dark:bg-slate-950 py-16">
+      <section className="bg-white dark:bg-slate-950 py-16">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="text-center mb-16 space-y-4">
+          <div data-reveal="up" className="text-center mb-16 space-y-4">
             <h2 className="text-xs font-black uppercase tracking-widest text-amber-600 flex items-center justify-center gap-1.5">
               <HelpCircle className="w-4 h-4" /> FAQ
             </h2>
@@ -392,7 +395,7 @@ export const Pricing: React.FC = () => {
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div data-reveal-stagger className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {faqs.map((faq, idx) => (
               <div key={idx} className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 rounded-2xl shadow-sm">
                 <h4 className="text-sm font-black text-slate-900 dark:text-white mb-3 leading-snug">

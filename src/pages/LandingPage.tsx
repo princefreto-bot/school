@@ -357,6 +357,79 @@ export const LandingPage: React.FC = () => {
             scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: 1 },
           });
         }
+
+        // ── Scroll-reveal animations for all sections ──
+        const revealFrom = (el: Element | null, vars: Record<string, unknown>) => {
+          if (!el) return;
+          gsap.from(el, {
+            opacity: 0, duration: 0.9, ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 85%' },
+            ...vars,
+          });
+        };
+
+        // Screenshots / Security / Academics sections
+        revealFrom(screenshotsTitleRef.current, { y: 40 });
+        revealFrom(scan1TextRef.current, { x: -50 });
+        revealFrom(scan1ImgRef.current, { x: 50, delay: 0.15 });
+        revealFrom(scan2TextRef.current, { x: 50 });
+        revealFrom(scan2ImgRef.current, { x: -50, delay: 0.15 });
+
+        // Bento grid
+        revealFrom(bentoTitleRef.current, { y: 40 });
+
+        // Stats section
+        if (statsSectionRef.current) {
+          gsap.from(statsSectionRef.current.children, {
+            opacity: 0, y: 30, scale: 0.9,
+            duration: 0.6, stagger: 0.12, ease: 'back.out(1.5)',
+            scrollTrigger: { trigger: statsSectionRef.current, start: 'top 85%' },
+          });
+        }
+
+        // Cloud section
+        revealFrom(cloudTextRef.current, { y: 40 });
+
+        // Parents section
+        revealFrom(parentsTitleRef.current, { y: 40 });
+        revealFrom(parentsPhoneRef.current, { x: -50, delay: 0.1 });
+        if (parentsCardsRef.current) {
+          gsap.from(parentsCardsRef.current.children, {
+            opacity: 0, y: 25, scale: 0.9,
+            duration: 0.5, stagger: 0.1, ease: 'back.out(1.5)',
+            scrollTrigger: { trigger: parentsCardsRef.current, start: 'top 88%' },
+          });
+        }
+
+        // Pricing section
+        revealFrom(pricingTitleRef.current, { y: 40 });
+        if (pricingCardRef.current) {
+          gsap.from(pricingCardRef.current, {
+            opacity: 0, scale: 0.92, y: 30,
+            duration: 1, ease: 'power3.out',
+            scrollTrigger: { trigger: pricingCardRef.current, start: 'top 85%' },
+          });
+          gsap.to(pricingCardRef.current, {
+            y: -12, ease: 'none',
+            scrollTrigger: { trigger: pricingCardRef.current, start: 'top bottom', end: 'bottom top', scrub: 2 },
+          });
+        }
+
+        // Newsroom section
+        revealFrom(newsroomRef.current, { y: 40 });
+
+        // Final CTA section
+        if (ctaRef.current) {
+          gsap.from(ctaRef.current, {
+            opacity: 0, scale: 0.95, y: 30,
+            duration: 1, ease: 'power3.out',
+            scrollTrigger: { trigger: ctaRef.current, start: 'top 85%' },
+          });
+          gsap.to(ctaRef.current, {
+            y: -15, ease: 'none',
+            scrollTrigger: { trigger: ctaRef.current, start: 'top bottom', end: 'bottom top', scrub: 2 },
+          });
+        }
       });
     });
 
