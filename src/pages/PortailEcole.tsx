@@ -187,10 +187,10 @@ export const PortailEcole: React.FC = () => {
         
         {/* En-tête */}
         <div className="text-center mb-8 portal-animate-item">
-          <div className="w-16 h-16 bg-amber-50 dark:bg-slate-850 border border-amber-100 dark:border-slate-800 rounded-none flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-500/10 p-1">
+          <div className="w-16 h-16 bg-amber-50 dark:bg-slate-850 border border-amber-100 dark:border-slate-800 rounded-none shrink-0 mx-auto mb-4 shadow-lg shadow-amber-500/10 p-1">
             <img 
               src={(schoolSlug && schools.find(s => s.slug === schoolSlug)?.logo_url) || "/logo.svg"} 
-              className="w-full h-full object-contain" 
+              className="block w-full h-full object-contain"
               alt="DGhubSchool" 
               onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
             />
@@ -211,10 +211,10 @@ export const PortailEcole: React.FC = () => {
           {/* Type d'accès (Global vs Établissement) */}
           {schoolSlug && schools.length > 0 && schools.find(s => s.slug === schoolSlug) ? (
             <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-slate-950 border border-amber-100 dark:border-slate-800 rounded-2xl mb-4 portal-animate-item">
-              <div className="w-12 h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center p-1 shadow-sm shrink-0">
+              <div className="w-12 h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1 shadow-sm shrink-0">
                 <img 
                   src={schools.find(s => s.slug === schoolSlug)?.logo_url || "/logo.svg"} 
-                  className="w-full h-full object-contain" 
+                  className="block w-full h-full object-contain"
                   alt="Logo" 
                   onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
                 />

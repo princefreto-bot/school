@@ -22,10 +22,10 @@ const SLIDE_DURATION = 5000;
 
 const SchoolLogo: React.FC<{ size?: string; logoUrl?: string | null }> = ({ size = "w-16 h-16", logoUrl }) => {
   return (
-    <div className={`${size} bg-white border border-slate-200 rounded-[28px] flex items-center justify-center mb-4 shadow-lg shadow-amber-500/10 p-2`}>
+    <div className={`${size} bg-white border border-slate-200 rounded-[28px] shrink-0 mb-4 shadow-lg shadow-amber-500/10 p-2`}>
       <img 
         src={logoUrl || "/logo.svg"} 
-        className="w-full h-full object-contain" 
+        className="block w-full h-full object-contain" 
         alt="DGhubSchool" 
         onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
       />
@@ -466,10 +466,10 @@ export const Login: React.FC = () => {
 
               {schoolSlug && schools.length > 0 && schools.find(s => s.slug === schoolSlug) ? (
                 <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-none mb-4 text-left w-full">
-                  <div className="w-10 h-10 bg-white border border-slate-200 flex items-center justify-center p-1 shrink-0">
+                  <div className="w-10 h-10 bg-white border border-slate-200 p-1 shrink-0">
                     <img 
                       src={schools.find(s => s.slug === schoolSlug)?.logo_url || "/logo.svg"} 
-                      className="w-full h-full object-contain" 
+                      className="block w-full h-full object-contain" 
                       alt="Logo"
                       onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
                     />
@@ -553,10 +553,10 @@ export const Login: React.FC = () => {
 
               {schoolSlug && schools.length > 0 && schools.find(s => s.slug === schoolSlug) ? (
                 <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-none mb-4 text-left w-full">
-                  <div className="w-10 h-10 bg-white border border-slate-200 flex items-center justify-center p-1 shrink-0">
+                  <div className="w-10 h-10 bg-white border border-slate-200 p-1 shrink-0">
                     <img 
                       src={schools.find(s => s.slug === schoolSlug)?.logo_url || "/logo.svg"} 
-                      className="w-full h-full object-contain" 
+                      className="block w-full h-full object-contain" 
                       alt="Logo"
                       onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
                     />
@@ -676,10 +676,10 @@ export const Login: React.FC = () => {
                     
                     {schoolSlug && schools.length > 0 && schools.find(s => s.slug === schoolSlug) ? (
                       <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-none mb-4 text-left w-full">
-                        <div className="w-10 h-10 bg-white border border-slate-200 flex items-center justify-center p-1 shrink-0">
+                        <div className="w-10 h-10 bg-white border border-slate-200 p-1 shrink-0">
                           <img 
                             src={schools.find(s => s.slug === schoolSlug)?.logo_url || "/logo.svg"} 
-                            className="w-full h-full object-contain" 
+                            className="block w-full h-full object-contain" 
                             alt="Logo"
                             onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
                           />

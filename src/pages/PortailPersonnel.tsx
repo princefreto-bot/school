@@ -194,10 +194,10 @@ export const PortailPersonnel: React.FC = () => {
           {/* Sélection établissement */}
           {schoolSlug && schools.length > 0 && schools.find(s => s.slug === schoolSlug) ? (
             <div className="flex items-center gap-3 p-4 bg-indigo-50 dark:bg-slate-950 border border-indigo-100 dark:border-slate-800 rounded-2xl mb-4 portal-animate-item">
-              <div className="w-12 h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center p-1 shadow-sm shrink-0">
+              <div className="w-12 h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1 shadow-sm shrink-0">
                 <img
                   src={schools.find(s => s.slug === schoolSlug)?.logo_url || "/logo.svg"}
-                  className="w-full h-full object-contain"
+                  className="block w-full h-full object-contain"
                   alt="Logo"
                   onError={(e) => { (e.target as HTMLImageElement).src = "/logo.svg" }}
                 />
