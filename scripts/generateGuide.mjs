@@ -332,13 +332,18 @@ y = sectionHeader(doc, y, 4, 'Paiements et reçus');
 y = subTitle(doc, y, 'Enregistrer un paiement');
 y = numberedList(doc, y, [
   'Ouvrez la fiche de l’élève ou la page Paiements.',
-  'Cliquez sur « Enregistrer un paiement ».',
+  'Cliquez sur « Payer » (ou « Enregistrer un paiement »).',
   'Renseignez le montant, la date, le mode de paiement et, si besoin, une réduction et une référence de transaction.',
-  'Le reçu est immédiatement disponible pour impression.',
+  'Le paiement apparaît aussitôt dans l’historique de l’élève, prêt pour l’impression du reçu.',
 ]);
 
-y = subTitle(doc, y, 'Le nouveau reçu de paiement');
-y = paragraph(doc, y, 'Le reçu a été entièrement repensé dans un style comptable sobre et professionnel : en-tête avec logo de l’établissement, informations complètes de l’élève, tableau détaillé des montants, récapitulatif avec le montant payé mis en avant, et un QR code de vérification anti-fraude.');
+y = subTitle(doc, y, 'Générer le reçu d’une transaction');
+y = paragraph(doc, y, 'La génération de reçu se fait exclusivement depuis la page Paiements, au niveau de chaque transaction — jamais depuis la fiche élève. Cela permet de réimprimer le reçu exact d’un versement précis, même ancien, et pas seulement celui du dernier paiement.');
+y = numberedList(doc, y, [
+  'Dans Paiements, cliquez sur la ligne d’un élève pour déplier son historique de transactions.',
+  'Repérez la transaction concernée et cliquez sur son bouton « Reçu ».',
+]);
+y = paragraph(doc, y, 'Le reçu est dans un style comptable sobre et professionnel : en-tête avec logo de l’établissement, informations complètes de l’élève, tableau détaillé des montants, récapitulatif avec le montant payé mis en avant, et un QR code de vérification anti-fraude.');
 y = bulletList(doc, y, [
   'Impression individuelle ou en lot (par classe, par statut).',
   'Vérification d’authenticité d’un reçu via son numéro ou son QR code (page « Vérif. Reçus »).',
@@ -464,7 +469,6 @@ y = bulletList(doc, y, [
   'QR Code unique crypté par élève.',
   'Compatible scan entrée/sortie.',
   'Format numérique et imprimable.',
-  'Verso personnalisable (texte libre) pour le règlement ou les mentions légales.',
 ]);
 
 y = subTitle(doc, y, 'Carte enseignant');
@@ -477,6 +481,9 @@ y = bulletList(doc, y, [
 
 y = subTitle(doc, y, 'Carte d’examen');
 y = paragraph(doc, y, 'Carte spécifique pour les sessions d’examens nationaux (CEPD, BEPC, BAC). Elle contient les informations de l’élève, sa classe, sa section et un numéro de candidat.');
+
+y = subTitle(doc, y, 'Verso personnalisable (les trois cartes)');
+y = paragraph(doc, y, 'Un même texte libre, défini une seule fois dans Paramètres > Verso des cartes, s’imprime au dos des cartes élève, enseignant et examen — règlement intérieur, mentions légales, consignes... Laissé vide, seul le recto est généré (aucun changement pour les écoles qui n’en ont pas besoin). Une fois configuré, les pages verso s’ajoutent automatiquement après les pages recto dans le PDF, prêtes pour une impression recto-verso.');
 
 // ═══════════════════════════════════════════════════════════════
 // SECTION 12 — Scan et présence
@@ -661,7 +668,7 @@ y = bulletList(doc, y, [
   'Logo, cachet et signature du directeur pour les documents officiels.',
   'Informations légales (IFU, RCCM, NIF, site web, N° d’autorisation) affichées sur les reçus et bulletins.',
   'Configuration des années académiques et des périodes (trimestres/semestres).',
-  'Tranches de paiement configurables par classe.',
+  'Tranches de paiement : montant dû configuré directement en FCFA, classe par classe et tranche par tranche (ex : CP1 — 35 000 / 10 000 / 5 000), avec une date d’échéance par tranche utilisée pour calculer les retards dans Recouvrement.',
   'Tarifs différenciés Ancien/Nouveau élève, configurables indépendamment pour chaque classe.',
   'Support Lycée Technique : sections G1, G2, G3, C, D avec classes 1ère et Terminale distinctes.',
   'Heures mensuelles standard pour le calcul des retenues sur salaire.',
