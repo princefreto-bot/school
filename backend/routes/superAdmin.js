@@ -27,6 +27,7 @@ const { getAuditFindings } = require('../controllers/superAdminAuditorController
 const { getOverdueAlerts, markAlertContacted } = require('../controllers/superAdminAlertsController');
 const { listProspects, createProspect, updateProspect, updateProspectStage, deleteProspect } = require('../controllers/prospectsController');
 const { getHandoffToken, redeemHandoff } = require('../controllers/classeurHandoffController');
+const { getPlatformNoticeAdmin, upsertPlatformNotice, deactivatePlatformNotice } = require('../controllers/platformNoticeController');
 
 const {
     getAllCreators,
@@ -94,5 +95,10 @@ router.delete('/prospects/:id', authenticateToken, requireSuperAdmin, deletePros
 // secret interne (voir classeurHandoffController) et non par authenticateToken.
 router.get('/classeur/handoff-token', authenticateToken, requireSuperAdmin, getHandoffToken);
 router.post('/classeur/redeem-handoff', redeemHandoff);
+
+// ── RÉSÉRVÉ SUPERADMIN : NOTICE PLATEFORME (message/image aux établissements) ──
+router.get('/notice', authenticateToken, requireSuperAdmin, getPlatformNoticeAdmin);
+router.put('/notice', authenticateToken, requireSuperAdmin, upsertPlatformNotice);
+router.delete('/notice', authenticateToken, requireSuperAdmin, deactivatePlatformNotice);
 
 module.exports = router;

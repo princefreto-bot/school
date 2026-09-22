@@ -90,6 +90,7 @@ const SUPERADMIN_NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'superadmin_alerts',      label: 'Alertes',         icon: <Bell className="w-[18px] h-[18px]" /> },
   { id: 'superadmin_pipeline',    label: 'Pipeline',        icon: <Target className="w-[18px] h-[18px]" /> },
   { id: 'superadmin_classeur',    label: 'Classeur Intelligent', icon: <Database className="w-[18px] h-[18px]" /> },
+  { id: 'superadmin_notices',     label: 'Notice écoles',   icon: <Megaphone className="w-[18px] h-[18px]" /> },
 ];
 
 const NAV_GROUPS: Record<string, string> = {
@@ -141,6 +142,7 @@ const NAV_GROUPS: Record<string, string> = {
   superadmin_auditor: 'Croissance',
   superadmin_pipeline: 'Croissance',
   superadmin_classeur: 'Croissance',
+  superadmin_notices: 'Croissance',
 };
 
 // ── Real-time clock ──

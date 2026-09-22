@@ -143,6 +143,7 @@ app.use('/api/settings', require('./routes/settings'));
 app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/personnel', require('./routes/personnel'));
 app.use('/api/superadmin', require('./routes/superAdmin')); // 👑 Routes propriétaire SaaS
+app.use('/api/platform-notice', require('./routes/platformNotice'));
 app.use('/api/creator', require('./routes/creator'));
 app.use('/api/documents', require('./routes/document'));
 app.use('/api/withdrawals', require('./routes/withdrawal'));

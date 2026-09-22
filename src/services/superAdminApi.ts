@@ -53,6 +53,12 @@ export const superAdminApi = {
   // Handoff SSO — Classeur Intelligent de Personnes (data.dghubschool.com)
   getClasseurHandoffCode: (): Promise<{ code: string; expiresAt: string }> =>
     request('/superadmin/classeur/handoff-token'),
+
+  // Notice plateforme (message/image affiché aux comptes établissement)
+  getNotice: () => request('/superadmin/notice'),
+  saveNotice: (payload: { title?: string; message?: string; imageUrl?: string | null; active: boolean }) =>
+    request('/superadmin/notice', { method: 'PUT', body: JSON.stringify(payload) }),
+  deactivateNotice: () => request('/superadmin/notice', { method: 'DELETE' }),
 };
 
 export function formatFCFA(n: number) {

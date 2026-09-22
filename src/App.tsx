@@ -18,12 +18,18 @@ const isAppSubdomain = typeof window !== 'undefined' && window.location.hostname
 // En prod web (hors Capacitor, hors sous-domaine app.), login et app doivent vivre
 // exclusivement sur app.dghubschool.com — voir RedirectToAppDomain ci-dessous.
 const shouldRedirectToAppDomain = import.meta.env.PROD && !isCapacitor && !isAppSubdomain;
+// Rôles "compte établissement" ciblés par la notice plateforme (voir PlatformNoticeModal) —
+// jamais les enseignants, secrétaires ou parents. Doit rester synchronisé avec
+// ELIGIBLE_ROLES dans backend/controllers/platformNoticeController.js (le backend filtre
+// de toute façon côté serveur ; ce garde-fou côté client évite juste un fetch inutile).
+const NOTICE_ELIGIBLE_ROLES = ['admin', 'directeur', 'directeur_general', 'comptable'];
 
 
 
 const Login = lazy(() => import('./components/Login').then(m => ({ default: m.Login })));
 const Layout = lazy(() => import('./components/Layout').then(m => ({ default: m.Layout })));
 const AnnouncementPopup = lazy(() => import('./components/AnnouncementPopup').then(m => ({ default: m.AnnouncementPopup })));
+const PlatformNoticeModal = lazy(() => import('./components/PlatformNoticeModal').then(m => ({ default: m.PlatformNoticeModal })));
 const Confidentialite = lazy(() => import('./pages/Confidentialite').then(m => ({ default: m.Confidentialite })));
 const PortailEcole = lazy(() => import('./pages/PortailEcole').then(m => ({ default: m.PortailEcole })));
 const PortailPersonnel = lazy(() => import('./pages/PortailPersonnel').then(m => ({ default: m.PortailPersonnel })));
@@ -94,6 +100,7 @@ const SuperAdminCashflowPage = lazy(() => import('./pages/superadmin/SuperAdminC
 const SuperAdminAuditorPage = lazy(() => import('./pages/superadmin/SuperAdminAuditorPage').then(m => ({ default: m.SuperAdminAuditorPage })));
 const SuperAdminAlertsPage = lazy(() => import('./pages/superadmin/SuperAdminAlertsPage').then(m => ({ default: m.SuperAdminAlertsPage })));
 const SuperAdminPipelinePage = lazy(() => import('./pages/superadmin/SuperAdminPipelinePage').then(m => ({ default: m.SuperAdminPipelinePage })));
+const SuperAdminNoticesPage = lazy(() => import('./pages/superadmin/SuperAdminNoticesPage').then(m => ({ default: m.SuperAdminNoticesPage })));
 const SelectionEnseignant = lazy(() => import('./pages/SelectionEnseignant').then(m => ({ default: m.SelectionEnseignant })));
 const CreatorDashboard = lazy(() => import('./pages/creator/CreatorDashboard').then(m => ({ default: m.CreatorDashboard })));
 const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
@@ -169,7 +176,7 @@ const PageContent: React.FC = () => {
     const superadminPages: AppPage[] = [
       'superadmin_overview', 'superadmin_schools', 'superadmin_creators', 'superadmin_finance',
       'superadmin_withdrawals', 'superadmin_cashflow', 'superadmin_auditor', 'superadmin_alerts',
-      'superadmin_pipeline'
+      'superadmin_pipeline', 'superadmin_notices'
     ];
     const page: AppPage = superadminPages.includes(currentPage as AppPage) ? (currentPage as AppPage) : 'superadmin_overview';
     return (
@@ -185,6 +192,7 @@ const PageContent: React.FC = () => {
               case 'superadmin_auditor': return <SuperAdminAuditorPage />;
               case 'superadmin_alerts': return <SuperAdminAlertsPage />;
               case 'superadmin_pipeline': return <SuperAdminPipelinePage />;
+              case 'superadmin_notices': return <SuperAdminNoticesPage />;
               default: return <SuperAdminOverviewPage />;
             }
           })()}
@@ -797,11 +805,12 @@ export function App() {
                   <PageContent />
                 </Suspense>
                 <AnnouncementPopup />
+                {NOTICE_ELIGIBLE_ROLES.includes(user?.role || '') && <PlatformNoticeModal />}
               </Layout>
             ) : (
               <RedirectToLogin />
             )
-          } 
+          }
         />
         <Route
           path="/:lang"
@@ -813,6 +822,7 @@ export function App() {
                     <PageContent />
                   </Suspense>
                   <AnnouncementPopup />
+                  {NOTICE_ELIGIBLE_ROLES.includes(user?.role || '') && <PlatformNoticeModal />}
                 </Layout>
               ) : (
                 <Suspense fallback={<LoadingSpinner />}><Login /></Suspense>
