@@ -413,6 +413,7 @@ async function syncFromFrontend(req, res) {
                     tranches: appSettings.tranches,
                     class_fees: appSettings.classFees,
                     class_registration_fees: appSettings.classRegistrationFees,
+                    cycle_schedules: appSettings.cycleSchedules,
                     school_motto: appSettings.schoolMotto,
                     school_bp: appSettings.schoolBp,
                     school_telephone: appSettings.schoolTelephone,

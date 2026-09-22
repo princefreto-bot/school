@@ -38,10 +38,10 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
     if (store.classeMatieres !== undefined) payload.classeMatieres = store.classeMatieres;
     if (store.notes !== undefined) payload.notes = store.notes;
 
-    const { 
-        appName, schoolName, schoolYear, 
-        messageRemerciement, messageRappel, 
-        schoolLogo, schoolStamp, cycleSchedules, tranches, classFees,
+    const {
+        appName, schoolName, schoolYear,
+        messageRemerciement, messageRappel,
+        schoolLogo, schoolStamp, cycleSchedules, tranches, classFees, classRegistrationFees,
         schoolMotto, schoolBp, schoolTelephone, schoolAddress, schoolCurrency,
         schoolIfu, schoolRccm, schoolNif, schoolEmail, schoolWebsite, schoolAutorisation, heuresMensuellesStandard,
         countryName, countryMotto, ministereName,
@@ -51,7 +51,13 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
     } = store;
 
     // Si l'un des paramètres de configuration est fourni, on envoie appSettings
-    if (appName !== undefined || schoolName !== undefined || schoolLogo !== undefined || schoolStamp !== undefined || cycleSchedules !== undefined || tranches !== undefined || classFees !== undefined || schoolMotto !== undefined || schoolBp !== undefined || schoolTelephone !== undefined || schoolAddress !== undefined || schoolCurrency !== undefined || schoolIfu !== undefined || schoolRccm !== undefined || schoolNif !== undefined || schoolEmail !== undefined || schoolWebsite !== undefined || schoolAutorisation !== undefined || heuresMensuellesStandard !== undefined || countryName !== undefined || countryMotto !== undefined || ministereName !== undefined || directorSignature !== undefined || directorName !== undefined || directorTitle !== undefined || showStampOnCards !== undefined || showSignatureOnCards !== undefined || showStampOnBulletins !== undefined || showSignatureOnBulletins !== undefined || officialSeal !== undefined || showSealOnCards !== undefined || carteVersoTexte !== undefined) {
+    // ⚠️ classRegistrationFees a été absent de cette liste pendant un temps : les frais
+    // d'inscription se sauvegardaient bien dans le store local (d'où le bouton "Enregistré"
+    // trompeur) mais n'étaient jamais envoyés au backend, donc repartaient à zéro au
+    // rechargement suivant. Si vous ajoutez un nouveau champ à `payload.appSettings`
+    // ci-dessous, ajoutez-le AUSSI à la condition de déclenchement et à la déstructuration
+    // ci-dessus, sinon il subira exactement le même sort silencieusement.
+    if (appName !== undefined || schoolName !== undefined || schoolLogo !== undefined || schoolStamp !== undefined || cycleSchedules !== undefined || tranches !== undefined || classFees !== undefined || classRegistrationFees !== undefined || schoolMotto !== undefined || schoolBp !== undefined || schoolTelephone !== undefined || schoolAddress !== undefined || schoolCurrency !== undefined || schoolIfu !== undefined || schoolRccm !== undefined || schoolNif !== undefined || schoolEmail !== undefined || schoolWebsite !== undefined || schoolAutorisation !== undefined || heuresMensuellesStandard !== undefined || countryName !== undefined || countryMotto !== undefined || ministereName !== undefined || directorSignature !== undefined || directorName !== undefined || directorTitle !== undefined || showStampOnCards !== undefined || showSignatureOnCards !== undefined || showStampOnBulletins !== undefined || showSignatureOnBulletins !== undefined || officialSeal !== undefined || showSealOnCards !== undefined || carteVersoTexte !== undefined) {
         payload.appSettings = {
             appName,
             schoolName,
@@ -63,6 +69,7 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
             cycleSchedules,
             tranches,
             classFees,
+            classRegistrationFees,
             schoolMotto,
             schoolBp,
             schoolTelephone,
