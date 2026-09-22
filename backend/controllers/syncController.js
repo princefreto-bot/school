@@ -577,6 +577,21 @@ async function syncToFrontend(req, res) {
             academicYearId = yearRow.id;
         }
     }
+    // ── FILET ANTI-NULL (miroir du fix POST, incident csyzomacamb 2026-09-14) ──
+    // Si l'année n'a pas pu être résolue depuis l'en-tête, on retombe sur l'année
+    // courante de l'école plutôt que de laisser academicYearId à NULL — sinon le
+    // filtre plus bas ne s'applique pas du tout et on mélange toutes les années.
+    if (!academicYearId) {
+        const { data: fallbackYear } = await supabase
+            .from('academic_years')
+            .select('id')
+            .eq('school_slug', schoolSlug)
+            .order('is_current', { ascending: false })
+            .order('name', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        if (fallbackYear) academicYearId = fallbackYear.id;
+    }
 
     const tbl = (name) => `${name}_${schoolSlug}`;
 
@@ -590,7 +605,13 @@ async function syncToFrontend(req, res) {
             while (hasMore) {
                 let q = supabase.from(tbl(name)).select('*').range(from, from + limit - 1);
                 if (filterByYear && academicYearId) {
-                    q = q.eq('academic_year_id', academicYearId);
+                    // Inclut aussi les lignes historiquement écrites avec academic_year_id
+                    // NULL (bug corrigé côté POST le 2026-09-14, ex: incident csyzomacamb) :
+                    // un filtre strict `.eq()` les exclut à jamais puisque NULL ne matche
+                    // jamais une égalité — elles restaient invisibles dans l'app pour
+                    // toujours. On les rattache ici à l'année courante ; la prochaine
+                    // synchronisation (POST) les réécrit avec le vrai academic_year_id.
+                    q = q.or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`);
                 }
                 if (orderField) q = q.order(orderField, { ascending });
                 
