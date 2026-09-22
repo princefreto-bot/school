@@ -1067,59 +1067,9 @@ export const Parametres: React.FC = () => {
                             <Plus className="w-3.5 h-3.5" /> Ajouter
                         </button>
                     </div>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
-                        Configurez directement le montant dû par classe à chaque tranche (au lieu d'un pourcentage global) — chaque classe peut avoir un montant différent. Les montants sont cumulés d'une tranche à l'autre.
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mb-6">
+                        Configurez directement le montant dû par classe à chaque tranche — chaque classe peut avoir un montant différent. Les montants sont cumulés d'une tranche à l'autre.
                     </p>
-
-                    {/* Modèle Togo — dates et répartition calquées sur l'usage réel des écoles
-                        privées togolaises (ex: rentrée fin août/mi-septembre, 2e versement fin
-                        octobre, 3e fin janvier au T2, 4e fin mars au T3), avec une répartition
-                        dégressive (les 1ères tranches, souvent à l'inscription, pèsent plus lourd). */}
-                    <div className="flex flex-wrap items-center gap-2 mb-6 p-3 bg-indigo-50/60 dark:bg-indigo-500/5 border border-indigo-100 dark:border-indigo-500/10 rounded-xl">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500 dark:text-indigo-400 mr-1">Modèle Togo :</span>
-                        {([3, 4] as const).map((n) => (
-                            <button
-                                key={n}
-                                onClick={() => {
-                                    const years = (schoolYear || '').match(/\d{4}/g);
-                                    const startYear = years?.[0] ? parseInt(years[0], 10) : new Date().getFullYear();
-                                    const endYear = years?.[1] ? parseInt(years[1], 10) : startYear + 1;
-                                    // Répartition dégressive réelle (grille 2025-2026, écoles privées de Lomé) :
-                                    // 35% avant la rentrée / 30% fin octobre / 20% fin janvier / 15% fin mars.
-                                    // Ramenée à 3 tranches (sans le pré-paiement avant rentrée) : 40/35/25.
-                                    const templates: Record<number, { nom: string; date: string; part: number }[]> = {
-                                        3: [
-                                            { nom: 'Tranche 1', date: `${startYear}-10-31`, part: 0.40 },
-                                            { nom: 'Tranche 2', date: `${endYear}-01-31`, part: 0.35 },
-                                            { nom: 'Tranche 3', date: `${endYear}-03-31`, part: 0.25 },
-                                        ],
-                                        4: [
-                                            { nom: 'Tranche 1', date: `${startYear}-08-31`, part: 0.35 },
-                                            { nom: 'Tranche 2', date: `${startYear}-10-31`, part: 0.30 },
-                                            { nom: 'Tranche 3', date: `${endYear}-01-31`, part: 0.20 },
-                                            { nom: 'Tranche 4', date: `${endYear}-03-31`, part: 0.15 },
-                                        ],
-                                    };
-                                    const built = templates[n].map((tpl) => {
-                                        const montants: Record<string, number> = {};
-                                        CLASS_CONFIG.forEach((c) => {
-                                            const effectiveFee = Number(localClassFees[c.name]) || c.ecolage;
-                                            montants[c.name] = Math.round((effectiveFee * tpl.part) / 100) * 100;
-                                        });
-                                        return { id: crypto.randomUUID?.() || `${Date.now()}-${tpl.nom}`, nom: tpl.nom, dateLimite: tpl.date, montants };
-                                    });
-                                    setLocalTranches(built);
-                                    setExpandedTrancheId(null);
-                                }}
-                                className="px-3 py-1.5 bg-white dark:bg-slate-900 hover:bg-indigo-500 hover:text-white border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all"
-                            >
-                                {n} tranches
-                            </button>
-                        ))}
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 basis-full sm:basis-auto">
-                            Remplace la liste actuelle par des dates et montants pré-remplis, modifiables ensuite.
-                        </span>
-                    </div>
 
                     <div className="space-y-3 mb-6">
                         {localTranches.length === 0 ? (
