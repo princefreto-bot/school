@@ -799,7 +799,7 @@ export const Parametres: React.FC = () => {
 
                 {/* ── Verso de la carte scolaire ── */}
                 <div className="pt-6 border-t border-slate-100 dark:border-slate-800/60">
-                    <SectionHeading icon={<CreditCard className="w-4 h-4" />} title="Verso de la carte scolaire" subtitle="Texte libre imprimé au dos de la carte élève (règlement intérieur, mentions légales, consignes...)." />
+                    <SectionHeading icon={<CreditCard className="w-4 h-4" />} title="Verso des cartes" subtitle="Texte libre imprimé au dos des cartes élève, personnel et examen (règlement intérieur, mentions légales, consignes...)." />
                     <textarea
                         className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-y"
                         rows={4}

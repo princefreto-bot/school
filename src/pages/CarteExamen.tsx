@@ -69,6 +69,29 @@ const drawSecurityTexture = (ctx: CanvasRenderingContext2D, w: number, h: number
     ctx.restore();
 };
 
+// Découpe un texte en lignes tenant dans maxWidth — canvas ne wrap jamais le
+// texte automatiquement (contrairement à jsPDF.splitTextToSize côté PDF direct).
+// Respecte les retours à la ligne déjà présents dans le texte source.
+const wrapCanvasText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] => {
+    const lines: string[] = [];
+    for (const paragraph of text.split(/\n/)) {
+        const words = paragraph.split(/\s+/).filter(Boolean);
+        if (words.length === 0) { lines.push(''); continue; }
+        let current = '';
+        for (const word of words) {
+            const test = current ? `${current} ${word}` : word;
+            if (current && ctx.measureText(test).width > maxWidth) {
+                lines.push(current);
+                current = word;
+            } else {
+                current = test;
+            }
+        }
+        if (current) lines.push(current);
+    }
+    return lines;
+};
+
 export const CarteExamen: React.FC = () => {
     const students = useStore((s) => s.students);
     const updateStudent = useStore((s) => s.updateStudent);
@@ -83,6 +106,7 @@ export const CarteExamen: React.FC = () => {
     const showSignatureOnCards = useStore((s) => s.showSignatureOnCards);
     const officialSeal = useStore((s) => s.officialSeal);
     const showSealOnCards = useStore((s) => s.showSealOnCards);
+    const carteVersoTexte = useStore((s) => s.carteVersoTexte);
 
     // Filtres et Recherche
     const [search, setSearch] = useState('');
@@ -91,6 +115,7 @@ export const CarteExamen: React.FC = () => {
 
     // Modals
     const [previewStudentId, setPreviewStudentId] = useState<string | null>(null);
+    const [previewSide, setPreviewSide] = useState<'recto' | 'verso'>('recto');
     const [editStudent, setEditStudent] = useState<Student | null>(null);
     const [generating, setGenerating] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -511,14 +536,86 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
         ctx.restore();
     };
 
-    // Déclencher le rendu écran du Canvas de prévisualisation
+    // Générer le Canvas du verso — texte libre partagé avec les cartes élèves/personnel
+    // (Paramètres > Verso des cartes), même identité visuelle que le recto (drapeau,
+    // texture de sécurité, couleur de l'examen) pour rester cohérent une fois imprimé.
+    const renderVersoCanvas = async (canvas: HTMLCanvasElement, student: Student) => {
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const w = 1012;
+        const h = 638;
+        canvas.width = w;
+        canvas.height = h;
+
+        const exam = getExamenForClasse(student.classe);
+        const examColor = exam ? EXAM_COLORS[exam].primary : '#64748B';
+
+        drawBackgroundWaves(ctx, w, h, examColor);
+        drawSecurityTexture(ctx, w, h);
+
+        drawTogoFlag(ctx, 40, 40, 60, 38);
+
+        ctx.save();
+        ctx.fillStyle = examColor;
+        ctx.textAlign = 'left';
+        ctx.font = 'black 24px Helvetica, Arial, sans-serif';
+        ctx.fillText('RÈGLEMENT DU CANDIDAT', 118, 62);
+        ctx.restore();
+
+        ctx.save();
+        ctx.fillStyle = '#475569';
+        ctx.font = '600 15px Helvetica, Arial, sans-serif';
+        ctx.fillText((schoolName || 'ÉTABLISSEMENT SCOLAIRE').toUpperCase(), 118, 84);
+        ctx.restore();
+
+        const ribbonY = 100;
+        ctx.fillStyle = '#006a4e';
+        ctx.fillRect(40, ribbonY, w - 80, 2);
+        ctx.fillStyle = '#ffc72c';
+        ctx.fillRect(40, ribbonY + 2, w - 80, 2);
+        ctx.fillStyle = '#d21034';
+        ctx.fillRect(40, ribbonY + 4, w - 80, 2);
+
+        if (carteVersoTexte.trim()) {
+            ctx.save();
+            ctx.fillStyle = '#334155';
+            ctx.font = '500 16px Helvetica, Arial, sans-serif';
+            ctx.textAlign = 'left';
+            const maxTextWidth = w - 80;
+            const lines = wrapCanvasText(ctx, carteVersoTexte.trim(), maxTextWidth);
+            let ty = 140;
+            const lineHeight = 24;
+            for (const line of lines) {
+                if (ty > h - 60) break; // évite de déborder sur le pied de page
+                ctx.fillText(line, 40, ty, maxTextWidth);
+                ty += lineHeight;
+            }
+            ctx.restore();
+        }
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.fillStyle = examColor;
+        ctx.font = 'bold 13px Helvetica, Arial, sans-serif';
+        ctx.fillText('DGhubSchool', w / 2, h - 24);
+        ctx.restore();
+    };
+
+    // Revenir au recto à chaque nouvelle ouverture de la prévisualisation
+    useEffect(() => { if (previewStudentId) setPreviewSide('recto'); }, [previewStudentId]);
+
+    // Déclencher le rendu écran du Canvas de prévisualisation (recto ou verso selon l'onglet actif)
     useEffect(() => {
         if (!previewStudentId || !canvasRef.current) return;
         const student = students.find((s) => s.id === previewStudentId);
-        if (student) {
+        if (!student) return;
+        if (previewSide === 'verso') {
+            renderVersoCanvas(canvasRef.current, student);
+        } else {
             renderCardCanvas(canvasRef.current, student);
         }
-    }, [previewStudentId, students, schoolLogo, schoolStamp, officialSeal, directorSignature, directorName, directorTitle, showStampOnCards, showSignatureOnCards, showSealOnCards]);
+    }, [previewStudentId, previewSide, students, schoolLogo, schoolStamp, officialSeal, directorSignature, directorName, directorTitle, showStampOnCards, showSignatureOnCards, showSealOnCards, carteVersoTexte]);
 
     // Télécharger la carte en tant que PNG
     const downloadPNG = async (student: Student) => {
@@ -531,12 +628,20 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
         link.click();
     };
 
-    // Imprimer directement la carte
+    // Imprimer directement la carte (recto, puis verso si configuré — deux pages
+    // imprimées à la suite, pour une impression recto-verso manuelle bord long)
     const printCard = async (student: Student) => {
         const tempCanvas = document.createElement('canvas');
         await renderCardCanvas(tempCanvas, student);
-        const dataUrl = tempCanvas.toDataURL('image/png');
-        
+        const rectoUrl = tempCanvas.toDataURL('image/png');
+
+        let versoUrl = '';
+        if (carteVersoTexte.trim()) {
+            const versoCanvas = document.createElement('canvas');
+            await renderVersoCanvas(versoCanvas, student);
+            versoUrl = versoCanvas.toDataURL('image/png');
+        }
+
         const win = window.open('', '_blank');
         if (!win) return;
         win.document.write(`
@@ -544,24 +649,30 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
             <head>
                 <title>Impression Carte d'Examen - ${student.prenom} ${student.nom}</title>
                 <style>
-                    body { margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; background: #fff; }
+                    body { margin: 0; }
+                    .page { display: flex; align-items: center; justify-content: center; height: 100vh; background: #fff; page-break-after: always; }
                     img { width: 85.6mm; height: 54mm; object-fit: contain; }
                     @page { size: 86mm 55mm; margin: 0; }
                 </style>
             </head>
             <body>
-                <img src="${dataUrl}" onload="window.print(); window.close();" />
+                <div class="page"><img src="${rectoUrl}" /></div>
+                ${versoUrl ? `<div class="page"><img src="${versoUrl}" /></div>` : ''}
+                <script>
+                    window.onload = () => { window.print(); window.close(); };
+                </script>
             </body>
             </html>
         `);
         win.document.close();
     };
 
-    // Télécharger une seule carte en PDF (format carte exact)
+    // Télécharger une seule carte en PDF (recto, puis verso si configuré — format
+    // carte exact, 85.6 x 54 mm par page)
     const downloadPDF = async (student: Student) => {
         const tempCanvas = document.createElement('canvas');
         await renderCardCanvas(tempCanvas, student);
-        const dataUrl = tempCanvas.toDataURL('image/png');
+        const rectoUrl = tempCanvas.toDataURL('image/png');
 
         // Créer un document PDF au format exact d'une carte PVC (85.6 x 54 mm)
         const doc = new jsPDF({
@@ -570,7 +681,16 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
             format: [85.6, 54]
         });
 
-        doc.addImage(dataUrl, 'PNG', 0, 0, 85.6, 54);
+        doc.addImage(rectoUrl, 'PNG', 0, 0, 85.6, 54);
+
+        if (carteVersoTexte.trim()) {
+            const versoCanvas = document.createElement('canvas');
+            await renderVersoCanvas(versoCanvas, student);
+            const versoUrl = versoCanvas.toDataURL('image/png');
+            doc.addPage([85.6, 54], 'landscape');
+            doc.addImage(versoUrl, 'PNG', 0, 0, 85.6, 54);
+        }
+
         doc.save(`carte_examen_${student.prenom}_${student.nom}.pdf`);
     };
 
@@ -623,6 +743,31 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
 
                 cardIndex++;
                 setProgress(Math.round((cardIndex / total) * 100));
+            }
+
+            // ── PAGES VERSO — mêmes positions que le recto (impression recto-verso,
+            // bord long), une page verso ajoutée après chaque page de rectos. ──
+            if (carteVersoTexte.trim()) {
+                const cardsPerPage = cols * rowsMax;
+                const nbRectoPages = Math.ceil(list.length / cardsPerPage);
+
+                for (let pageIdx = 0; pageIdx < nbRectoPages; pageIdx++) {
+                    doc.addPage();
+                    const cardsOnThisPage = Math.min(cardsPerPage, list.length - pageIdx * cardsPerPage);
+
+                    for (let posOnPage = 0; posOnPage < cardsOnThisPage; posOnPage++) {
+                        const student = list[pageIdx * cardsPerPage + posOnPage];
+                        const col = posOnPage % cols;
+                        const row = Math.floor(posOnPage / cols);
+                        const x = marginX + col * (cardW + gapX);
+                        const y = marginY + row * (cardH + gapY);
+
+                        const versoCanvas = document.createElement('canvas');
+                        await renderVersoCanvas(versoCanvas, student);
+                        const versoUrl = versoCanvas.toDataURL('image/png');
+                        doc.addImage(versoUrl, 'PNG', x, y, cardW, cardH, undefined, 'FAST');
+                    }
+                }
             }
 
             doc.save(`cartes_examen_${schoolYear.replace(/\//g, '-')}.pdf`);
@@ -984,8 +1129,24 @@ const drawBackgroundWaves = (ctx: CanvasRenderingContext2D, w: number, h: number
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
                                 Aperçu de la carte PVC (85.60 x 54 mm)
                             </p>
-                            
-                            <div 
+
+                            {carteVersoTexte.trim() && (
+                                <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-4">
+                                    {(['recto', 'verso'] as const).map((side) => (
+                                        <button
+                                            key={side}
+                                            onClick={() => setPreviewSide(side)}
+                                            className={`px-4 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all ${
+                                                previewSide === side ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400'
+                                            }`}
+                                        >
+                                            {side}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div
                                 className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 p-4 rounded-3xl overflow-hidden flex items-center justify-center w-full max-w-[550px]"
                                 style={{ minHeight: '340px' }}
                             >
