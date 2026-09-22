@@ -4,11 +4,10 @@
 import React, { useEffect, useState } from 'react';
 import { useStore } from '../store/useStore';
 import { Student, ExpenseLabel, StudentExpense } from '../types';
-import { RecuPrintButton } from './pdf/RecuPrintButton';
 import { AttestationScolaritePrintButton } from './pdf/AttestationScolaritePrintButton';
 import { expensesApi } from '../services/expensesApi';
 import {
-  X, Download, MessageCircle, Clock, CheckCircle,
+  X, MessageCircle, Clock, CheckCircle,
   AlertTriangle, User, Phone, School, CreditCard,
   TrendingUp, FileText, Camera, Loader2, ShoppingBag, Plus, Trash2
 } from 'lucide-react';
@@ -373,6 +372,7 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
 
           {tab === 'historique' && (
             <div>
+              <p className="text-xs text-gray-400 mb-3">Pour générer le reçu d'une transaction, rendez-vous dans Paiements.</p>
               {student.historiquesPaiements.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center text-gray-400">
                   <Clock className="w-10 h-10 mb-3 opacity-30" />
@@ -579,13 +579,6 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
 
         {/* Actions footer */}
         <div className="border-t border-gray-100 p-4 flex flex-wrap gap-2 bg-gray-50 rounded-b-2xl">
-          <RecuPrintButton
-            student={student}
-            className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-colors shadow-sm"
-            title="Imprimer / exporter le reçu de paiement"
-          >
-            <Download className="w-4 h-4" /> Reçu PDF
-          </RecuPrintButton>
           <AttestationScolaritePrintButton
             student={student}
             className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"

@@ -2,7 +2,6 @@ import React, { useState, useMemo, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { Student } from '../types';
 import { CLASS_CONFIG } from '../data/classConfig';
-import { RecuPrintButton } from '../components/pdf/RecuPrintButton';
 import { ListeNominativePrintButton } from '../components/pdf/ListeNominativePrintButton';
 import { uploadStudentPhoto, deleteStudentPhoto } from '../services/photoService';
 import {
@@ -723,9 +722,6 @@ export const Eleves: React.FC = () => {
                         <button onClick={() => setSelectedStudent(s)} className="p-2 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 rounded-xl text-indigo-600 dark:text-indigo-400 transition-all hover:scale-110" title="Dossier complet">
                           <FileText className="w-4 h-4" />
                         </button>
-                        <RecuPrintButton student={s} className="p-2 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 rounded-xl text-emerald-600 dark:text-emerald-400 transition-all hover:scale-110" title="Générer le reçu">
-                          <Download className="w-4 h-4" />
-                        </RecuPrintButton>
                         <WhatsAppBtn student={s} schoolName={schoolName} />
                         {(user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general' || user?.role === 'comptable') && (
                           <>
