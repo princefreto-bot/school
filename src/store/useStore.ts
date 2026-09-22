@@ -978,7 +978,10 @@ export const useStore = create<AppState>()(
       updateAllSettings: async (newSettings) => {
         console.log('💾 [Store] Saving all settings to cloud...', Object.keys(newSettings));
         const previousYear = get().schoolYear;
+        const isYearChange = !!(newSettings.schoolYear && newSettings.schoolYear !== previousYear);
         set(newSettings);
+
+        let syncError: unknown = null;
         try {
           const result = await syncToBackend(newSettings);
           if (!result) {
@@ -988,17 +991,32 @@ export const useStore = create<AppState>()(
             throw new Error('La synchronisation a échoué.');
           }
           console.log('✅ [Store] All settings synced successfully!');
-          // If the academic year changed, completely reload the page
-          if (newSettings.schoolYear && newSettings.schoolYear !== previousYear) {
-             console.log('🔄 [Store] Academic year changed, clearing data and reloading page...');
-             // Clear data specifically bound to the previous year before reloading
-             set({ students: [], presences: [], activityLogs: [], notes: [] });
-             window.location.reload();
-          }
         } catch (err) {
           console.error('❌ [Store] Error syncing settings:', err);
-          throw err;
+          syncError = err;
         }
+
+        // Changement d'année scolaire : on recharge TOUJOURS, que la sync ait réussi ou
+        // non. Avant ce correctif, le reload n'avait lieu que si syncToBackend réussissait
+        // — en cas d'échec silencieux (réseau, backend endormi...), le `set(newSettings)`
+        // plus haut avait déjà basculé schoolYear en local (badge "Année en cours" sur la
+        // nouvelle année) mais rien n'était rechargé : élèves/notes/paiements restaient
+        // ceux de l'ancienne année indéfiniment, sans que rien ne le signale (incident
+        // rapporté : badge sur 2026-2027 mais navigation toujours dans l'ancienne année).
+        // Recharger inconditionnellement force un fetchAllFromBackend frais qui reflète
+        // l'état RÉEL du serveur, même si ça veut dire revenir à l'ancienne année en cas
+        // d'échec — un état honnête plutôt qu'un badge qui ment.
+        if (isYearChange) {
+          console.log('🔄 [Store] Academic year changed, clearing data and reloading page...');
+          if (syncError) {
+            alert("Le changement d'année scolaire n'a pas pu être confirmé par le serveur. La page va se recharger pour vérifier l'état réel.");
+          }
+          set({ students: [], presences: [], activityLogs: [], notes: [] });
+          window.location.reload();
+          return;
+        }
+
+        if (syncError) throw syncError;
       },
       deleteAcademicYear: async (yearId: string) => {
         const success = await deleteAcademicYearBackend(yearId);
