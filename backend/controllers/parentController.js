@@ -450,7 +450,20 @@ async function getParentData(req, res) {
             .from(`app_settings_${schoolSlug}`)
             .select('*')
             .single();
-        
+
+        // Tranches scindées par année scolaire (year_settings_{slug}) depuis le 2026-09-22 —
+        // voir syncController.js pour le detail. Un parent doit voir les tranches de l'année
+        // EN COURS de l'enfant, jamais celles d'une année passée.
+        let yearTranches = [];
+        if (academicYearId) {
+            const { data: yearSettings } = await supabase
+                .from(`year_settings_${schoolSlug}`)
+                .select('tranches')
+                .eq('academic_year_id', academicYearId)
+                .maybeSingle();
+            yearTranches = yearSettings?.tranches || [];
+        }
+
         const appSettings = dbSettings ? {
             appName: dbSettings.app_name,
             schoolName: dbSettings.school_name,
@@ -459,7 +472,7 @@ async function getParentData(req, res) {
             schoolStamp: dbSettings.school_stamp,
             messageRemerciement: dbSettings.message_remerciement,
             messageRappel: dbSettings.message_rappel,
-            tranches: dbSettings.tranches || [],
+            tranches: yearTranches,
             schoolMotto: dbSettings.school_motto || 'Travail-Rigueur-Succès',
             schoolBp: dbSettings.school_bp || '80159',
             schoolTelephone: dbSettings.school_telephone || '+228 90 17 79 66 / 99 41 40 47',

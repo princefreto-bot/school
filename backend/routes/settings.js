@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { getPublicSettings, getReminderSettings, updateReminderSettings, recalculateFees, recalculateRegistrationFees } = require('../controllers/settingsController');
+const { getPublicSettings, getReminderSettings, updateReminderSettings, recalculateFees, recalculateRegistrationFees, getYearSettingsForYear } = require('../controllers/settingsController');
 const { uploadSchoolAsset, removeSchoolAsset } = require('../controllers/photoController');
 const { authenticateToken, requireSchool, requireSchoolAdmin } = require('../middleware/auth');
 
@@ -21,5 +21,8 @@ router.post('/recalculate-fees', authenticateToken, requireSchool, requireSchool
 
 // Frais d'inscription personnalisés — applique les nouveaux tarifs aux élèves déjà créés
 router.post('/recalculate-registration-fees', authenticateToken, requireSchool, requireSchoolAdmin, recalculateRegistrationFees);
+
+// Tranches/frais d'inscription d'une année scolaire précise — pour "Copier depuis une année précédente"
+router.get('/year-settings', authenticateToken, requireSchool, requireSchoolAdmin, getYearSettingsForYear);
 
 module.exports = router;

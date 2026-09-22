@@ -134,6 +134,28 @@ export const Parametres: React.FC = () => {
   const [tranchesSaved, setTranchesSaved] = useState(false);
   const [expandedTrancheId, setExpandedTrancheId] = useState<string | null>(null);
 
+  // ── Copier tranches/frais d'inscription depuis une année précédente ──
+  // Ces deux réglages sont scindés par année scolaire (jamais hérités automatiquement
+  // d'une année à l'autre) — ce bouton est la SEULE façon de les reporter, sur demande
+  // explicite du directeur.
+  const [copyYearTranches, setCopyYearTranches] = useState('');
+  const [copyingTranches, setCopyingTranches] = useState(false);
+  const [copyYearRegistration, setCopyYearRegistration] = useState('');
+  const [copyingRegistration, setCopyingRegistration] = useState(false);
+
+  const fetchYearSettings = async (year: string): Promise<{ tranches: any[]; classRegistrationFees: Record<string, number> } | null> => {
+    try {
+      const token = localStorage.getItem('parent_token');
+      const res = await fetch(`${API_BASE_URL}/settings/year-settings?year=${encodeURIComponent(year)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  };
+
   // ── Frais de scolarité personnalisés par classe ──
   const classFees = useStore((s) => s.classFees);
   const recalculateStudentFees = useStore((s) => s.recalculateStudentFees);
@@ -1067,9 +1089,40 @@ export const Parametres: React.FC = () => {
                             <Plus className="w-3.5 h-3.5" /> Ajouter
                         </button>
                     </div>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mb-6">
-                        Configurez directement le montant dû par classe à chaque tranche — chaque classe peut avoir un montant différent. Les montants sont cumulés d'une tranche à l'autre.
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
+                        Propres à l'année scolaire en cours — une nouvelle année démarre toujours vierge sur ce réglage, jamais héritée automatiquement.
                     </p>
+
+                    {academicYears.filter((y) => y.name !== schoolYear).length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2 mb-6 p-3 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-xl">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 mr-1">Copier depuis :</span>
+                            <select
+                                value={copyYearTranches}
+                                onChange={(e) => setCopyYearTranches(e.target.value)}
+                                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none"
+                            >
+                                <option value="">Choisir une année...</option>
+                                {academicYears.filter((y) => y.name !== schoolYear).map((y) => (
+                                    <option key={y.id} value={y.name}>{y.name}</option>
+                                ))}
+                            </select>
+                            <button
+                                disabled={!copyYearTranches || copyingTranches}
+                                onClick={async () => {
+                                    setCopyingTranches(true);
+                                    const data = await fetchYearSettings(copyYearTranches);
+                                    setCopyingTranches(false);
+                                    if (data) setLocalTranches(data.tranches || []);
+                                }}
+                                className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-500 text-indigo-600 hover:text-white dark:bg-indigo-500/10 dark:hover:bg-indigo-500 dark:text-indigo-400 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all disabled:opacity-40"
+                            >
+                                {copyingTranches ? 'Copie...' : 'Copier'}
+                            </button>
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500 basis-full sm:basis-auto">
+                                Remplace la liste actuelle (non enregistrée tant que « Enregistrer » n'est pas cliqué).
+                            </span>
+                        </div>
+                    )}
 
                     <div className="space-y-2 mb-6">
                         {localTranches.length === 0 ? (
@@ -1282,9 +1335,47 @@ export const Parametres: React.FC = () => {
                             Frais d'inscription
                         </h3>
                     </div>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mb-6">
-                        Distincts de l'écolage — un montant unique perçu à l'inscription (ou réinscription) de l'élève, suivi séparément. Une classe laissée à 0 n'a pas de frais d'inscription.
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
+                        Distincts de l'écolage — un montant unique perçu à l'inscription (ou réinscription) de l'élève, suivi séparément. Une classe laissée à 0 n'a pas de frais d'inscription. Propres à l'année scolaire en cours, jamais hérités automatiquement d'une année à l'autre.
                     </p>
+
+                    {academicYears.filter((y) => y.name !== schoolYear).length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2 mb-6 p-3 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-xl">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 mr-1">Copier depuis :</span>
+                            <select
+                                value={copyYearRegistration}
+                                onChange={(e) => setCopyYearRegistration(e.target.value)}
+                                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none"
+                            >
+                                <option value="">Choisir une année...</option>
+                                {academicYears.filter((y) => y.name !== schoolYear).map((y) => (
+                                    <option key={y.id} value={y.name}>{y.name}</option>
+                                ))}
+                            </select>
+                            <button
+                                disabled={!copyYearRegistration || copyingRegistration}
+                                onClick={async () => {
+                                    setCopyingRegistration(true);
+                                    const data = await fetchYearSettings(copyYearRegistration);
+                                    setCopyingRegistration(false);
+                                    if (data) {
+                                        const copied: Record<string, string> = {};
+                                        CLASS_CONFIG.forEach((c) => {
+                                            const val = data.classRegistrationFees?.[c.name];
+                                            copied[c.name] = String(val != null ? val : 0);
+                                        });
+                                        setLocalRegistrationFees(copied);
+                                    }
+                                }}
+                                className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-500 text-indigo-600 hover:text-white dark:bg-indigo-500/10 dark:hover:bg-indigo-500 dark:text-indigo-400 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all disabled:opacity-40"
+                            >
+                                {copyingRegistration ? 'Copie...' : 'Copier'}
+                            </button>
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500 basis-full sm:basis-auto">
+                                Remplace les montants actuels (non enregistrés tant que « Enregistrer » n'est pas cliqué).
+                            </span>
+                        </div>
+                    )}
 
                     <div className="space-y-6">
                         {(['Primaire', 'Collège', 'Lycée'] as const).map((cycle) => (

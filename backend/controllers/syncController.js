@@ -409,10 +409,12 @@ async function syncFromFrontend(req, res) {
                     // changement d'année scolaire) ne fournit pas ce champ, et JSON.stringify()
                     // retire les clés `undefined` du corps de requête — ce qui laisse la colonne
                     // intacte côté DB. Un fallback actif aurait au contraire écrasé silencieusement
-                    // les tranches / frais personnalisés à chaque sync partiel ne les concernant pas.
-                    tranches: appSettings.tranches,
+                    // les frais personnalisés à chaque sync partiel ne les concernant pas.
+                    // NOTE: tranches et class_registration_fees ne sont plus écrits ici depuis le
+                    // 2026-09-22 — ils vivent désormais dans year_settings_{slug}, scindés PAR
+                    // ANNÉE SCOLAIRE (voir bloc dédié plus bas). class_fees (écolage) reste ici,
+                    // volontairement toujours partagé entre toutes les années de l'école.
                     class_fees: appSettings.classFees,
-                    class_registration_fees: appSettings.classRegistrationFees,
                     cycle_schedules: appSettings.cycleSchedules,
                     school_motto: appSettings.schoolMotto,
                     school_bp: appSettings.schoolBp,
@@ -461,6 +463,33 @@ async function syncFromFrontend(req, res) {
                 }
             } catch (settingsErr) {
                 console.error('❌ [Sync POST] Exception appSettings:', settingsErr);
+            }
+
+            // Tranches de paiement et frais d'inscription PAR ANNÉE SCOLAIRE — table dédiée
+            // year_settings_{slug}, une ligne par academic_year_id (jamais partagée entre
+            // années, contrairement à app_settings ci-dessus). Seuls les champs réellement
+            // fournis sont inclus (même logique que le bloc app_settings : un sync partiel qui
+            // ne concerne pas ces réglages ne doit jamais les écraser).
+            if (academicYearId && (appSettings.tranches !== undefined || appSettings.classRegistrationFees !== undefined)) {
+                try {
+                    const yearSettingsPayload = {
+                        academic_year_id: academicYearId,
+                        updated_at: new Date().toISOString(),
+                    };
+                    if (appSettings.tranches !== undefined) yearSettingsPayload.tranches = appSettings.tranches;
+                    if (appSettings.classRegistrationFees !== undefined) yearSettingsPayload.class_registration_fees = appSettings.classRegistrationFees;
+
+                    const { error: yearSettingsErr } = await supabase
+                        .from(tbl('year_settings'))
+                        .upsert(yearSettingsPayload, { onConflict: 'academic_year_id' });
+                    if (yearSettingsErr) {
+                        console.error('❌ [Sync POST] Erreur year_settings (tranches/frais inscription):', yearSettingsErr.message);
+                        return res.status(500).json({ error: 'Erreur lors de la synchronisation des tranches/frais d\'inscription: ' + yearSettingsErr.message });
+                    }
+                    console.log(`✅ [Sync POST] year_settings (année ${academicYearId}) sauvegardés avec succès !`);
+                } catch (yearSettingsErr) {
+                    console.error('❌ [Sync POST] Exception year_settings:', yearSettingsErr);
+                }
             }
         }
 
@@ -648,7 +677,8 @@ async function syncToFrontend(req, res) {
             dbNotes,
             announcementReads,
             academicYearsRes,
-            settingsRes
+            settingsRes,
+            yearSettingsRes
         ] = await Promise.all([
             fetchTable('students', 'nom', true, true),
             fetchTable('payments', 'date', false, true),
@@ -661,12 +691,20 @@ async function syncToFrontend(req, res) {
             fetchTable('notes', null, false, true),
             fetchTable('announcement_reads'),
             supabase.from('academic_years').select('*').eq('school_slug', schoolSlug).order('name', { ascending: false }),
-            supabase.from(tbl('app_settings')).select('*').single()
+            supabase.from(tbl('app_settings')).select('*').single(),
+            // Tranches et frais d'inscription PAR ANNÉE SCOLAIRE (year_settings_{slug}) —
+            // academicYearId a déjà été résolu plus haut (en-tête x-academic-year + filet
+            // anti-null). Pas de ligne pour cette année = tranches/frais d'inscription
+            // vides par défaut (nouvelle année vierge), jamais hérités d'une autre année.
+            academicYearId
+                ? supabase.from(tbl('year_settings')).select('tranches, class_registration_fees').eq('academic_year_id', academicYearId).maybeSingle()
+                : Promise.resolve({ data: null })
         ]);
 
         const academicYearsData = academicYearsRes.data || [];
         const appSettings = settingsRes.data;
         const settingsError = settingsRes.error;
+        const yearSettings = yearSettingsRes.data;
 
         console.log('🎨 [Sync GET] appSettings from DB:', {
             found: !!appSettings,
@@ -745,9 +783,12 @@ async function syncToFrontend(req, res) {
                 schoolStamp: appSettings.school_stamp,
                 messageRemerciement: appSettings.message_remerciement,
                 messageRappel: appSettings.message_rappel,
-                tranches: appSettings.tranches || [],
+                // Scindés par année scolaire (year_settings_{slug}) depuis le 2026-09-22 — plus
+                // lus depuis app_settings.tranches / class_registration_fees (colonnes gardées
+                // en base pour compatibilité historique, jamais retournées ici).
+                tranches: yearSettings?.tranches || [],
                 classFees: appSettings.class_fees || {},
-                classRegistrationFees: appSettings.class_registration_fees || {},
+                classRegistrationFees: yearSettings?.class_registration_fees || {},
                 schoolMotto: appSettings.school_motto,
                 schoolBp: appSettings.school_bp,
                 schoolTelephone: appSettings.school_telephone,
