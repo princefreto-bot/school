@@ -2837,13 +2837,20 @@ html {
 }
 
 .page-transition-running {
-  animation: page-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  /* `will-change: transform` (retiré ci-dessous) fait de cet élément le containing
-     block de toute modale `position: fixed` qu'il contient — la modale se centre
-     alors par rapport à la hauteur totale de la page (ex: liste d'élèves longue)
-     au lieu du viewport visible, ce qui la fait apparaître hors écran et oblige à
-     défiler pour l'atteindre. `will-change: opacity` seul n'a pas cet effet de
-     bord et suffit pour cette animation de fondu/translation ponctuelle. */
+  /* `opacity: 1; transform: none;` = état de repos EXPLICITE (hors animation).
+     Avec `fill-mode: both`, la dernière keyframe (`transform: translateY(0)`)
+     restait appliquée en permanence après la fin de l'animation — et un
+     `transform` actif, même l'identité, fait de cet élément le containing block
+     de toute modale `position: fixed` qu'il contient (la modale se centre alors
+     par rapport à la hauteur TOTALE de la page, ex. une longue liste d'élèves,
+     au lieu du viewport visible : elle apparaît hors écran, il faut défiler pour
+     l'atteindre). `fill-mode: backwards` applique la 1ère keyframe pendant le
+     délai (utile avec .delay-*) mais restaure cet état de repos — donc
+     `transform: none` — une fois l'animation terminée : effet visuel identique,
+     sans laisser de containing block derrière soi. */
+  opacity: 1;
+  transform: none;
+  animation: page-in 320ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
   will-change: opacity;
 }
 
@@ -2970,11 +2977,22 @@ html {
   to   { opacity: 1; }
 }
 
-.animate-slideUp    { animation: slideUp    350ms cubic-bezier(0.16, 1, 0.3, 1) both; }
-.animate-slideDown  { animation: slideDown  300ms cubic-bezier(0.16, 1, 0.3, 1) both; }
-.animate-slideRight { animation: slideRight 350ms cubic-bezier(0.16, 1, 0.3, 1) both; }
-.animate-slideLeft  { animation: slideLeft  350ms cubic-bezier(0.16, 1, 0.3, 1) both; }
-.animate-zoomIn     { animation: zoomIn     320ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+/* fill-mode `backwards` (pas `both`) sur ces cinq classes, utilisées dans une
+   trentaine de fichiers (pages entières, modales...) : `both` laissait un
+   `transform` actif en permanence après la fin de l'animation (dernière
+   keyframe = translateY(0)/scale(1), jamais `none`), ce qui fait de l'élément
+   animé le containing block de toute modale `position: fixed` qu'il contient —
+   symptôme observé sur la fiche élève ET la carte d'examen : la modale se
+   centre sur la hauteur totale de la page au lieu du viewport visible.
+   `opacity: 1; transform: none;` explicite l'état de repos ; `backwards`
+   applique la 1ère keyframe pendant `animation-delay` (pour .delay-*) mais
+   restaure cet état de repos une fois l'animation terminée — effet visuel
+   identique, sans laisser de containing block derrière soi. */
+.animate-slideUp    { opacity: 1; transform: none; animation: slideUp    350ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+.animate-slideDown  { opacity: 1; transform: none; animation: slideDown  300ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+.animate-slideRight { opacity: 1; transform: none; animation: slideRight 350ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+.animate-slideLeft  { opacity: 1; transform: none; animation: slideLeft  350ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+.animate-zoomIn     { opacity: 1; transform: none; animation: zoomIn     320ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
 .animate-fadeIn     { animation: fadeIn     250ms ease both; }
 
 /* Stagger delays */
