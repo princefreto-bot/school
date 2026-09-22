@@ -2,6 +2,7 @@
 // FICHE DÉTAILLÉE D'UN ÉLÈVE — Modale complète
 // ============================================================
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useStore } from '../store/useStore';
 import { Student, ExpenseLabel, StudentExpense } from '../types';
 import { AttestationScolaritePrintButton } from './pdf/AttestationScolaritePrintButton';
@@ -171,7 +172,17 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
     reader.readAsDataURL(file);
   };
 
-  return (
+  // Portail vers document.body — indispensable ici : la page appelante enveloppe
+  // toujours son contenu dans un wrapper animé (ex: `animate-slideUp`, utilisé sur
+  // quasiment toutes les pages). Une animation CSS qui manipule `transform` établit
+  // un containing block pour tout descendant `position: fixed`, même après la fin
+  // de l'animation (fill-mode `both` laisse `transform: translateY(0)` appliqué,
+  // qui compte comme "un transform autre que none"). Résultat sans portail : cette
+  // modale plein écran se centre par rapport à la page ENTIÈRE (ex: longue liste
+  // d'élèves) au lieu du viewport visible, et apparaît hors écran en bas de page.
+  // Le portail sort la modale de cet arbre DOM et supprime le problème à la racine,
+  // quel que soit l'ancêtre qui l'appelle.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
 
@@ -602,6 +613,7 @@ export const StudentDetail: React.FC<Props> = ({ student, onClose }) => {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
