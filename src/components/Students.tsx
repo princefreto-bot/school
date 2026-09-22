@@ -2,7 +2,6 @@ import { useState, useMemo, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { parseExcelFile, exportToExcel } from '../utils/excelUtils';
 import { generateStudentCard } from '../utils/pdfUtils';
-import { RecuPrintButton } from './pdf/RecuPrintButton';
 import { Student, Payment } from '../types';
 import { CLASSES } from '../data/classes';
 import { formatMontant, getCycleFromClasse, getEcolageFromClasse } from '../utils/helpers';
@@ -438,13 +437,6 @@ export default function Students() {
                         >
                           <CreditCard className="w-4 h-4" />
                         </button>
-                        <RecuPrintButton
-                          student={student}
-                          className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-purple-600 hover:bg-purple-100 rounded-lg transition-all"
-                          title="Générer reçu"
-                        >
-                          <FileText className="w-4 h-4" />
-                        </RecuPrintButton>
                         <button
                           onClick={(e) => openEditModal(student, e)}
                           className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-amber-600 hover:bg-amber-100 rounded-lg transition-all"
@@ -809,9 +801,10 @@ export default function Students() {
 
               {/* Payment History */}
               <div>
-                <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <h4 className="font-bold text-gray-800 mb-1 flex items-center gap-2">
                   <span className="text-xl">📋</span> Historique des paiements
                 </h4>
+                <p className="text-xs text-gray-400 mb-4">Pour générer le reçu d'une transaction, rendez-vous dans Paiements.</p>
                 {selectedStudent.paiements && selectedStudent.paiements.length > 0 ? (
                   <div className="space-y-3">
                     {selectedStudent.paiements.map((p: Payment, index: number) => (
@@ -844,10 +837,6 @@ export default function Students() {
                 <FileText className="w-4 h-4" />
                 Fiche PDF
               </button>
-              <RecuPrintButton student={selectedStudent} className="btn btn-primary">
-                <FileText className="w-4 h-4" />
-                Reçu PDF
-              </RecuPrintButton>
             </div>
           </div>
         </div>

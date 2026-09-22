@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Student, Payment, User } from '../types';
-import { CreditCard, Plus, X, Check, Search, Clock, ChevronDown, ChevronUp, Loader2, Wallet, ArrowUpRight, TrendingDown, AlertCircle } from 'lucide-react';
+import { CreditCard, Plus, X, Check, Search, Clock, ChevronDown, ChevronUp, Loader2, Wallet, ArrowUpRight, TrendingDown, AlertCircle, FileText } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import { API_BASE_URL } from '../config';
 import { parseResponse, getAuthHeaders } from '../services/apiHelpers';
 import { getCycle } from '../data/classConfig';
+import { RecuPrintButton } from '../components/pdf/RecuPrintButton';
 
 const computeStatus = (restant: number, ecolage: number): 'Soldé' | 'Partiel' | 'Non soldé' => {
   if (restant <= 0) return 'Soldé';
@@ -322,6 +323,14 @@ const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => voi
                     {p.recu && <span className="text-[10px] font-black bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-md uppercase tracking-widest shrink-0">Reçu {p.recu}</span>}
                     {p.note && <span className="text-sm font-medium text-slate-500 dark:text-slate-400 truncate">{p.note}</span>}
                   </div>
+                  <RecuPrintButton
+                    student={student}
+                    payment={p}
+                    className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-700 hover:bg-amber-500 hover:text-white text-slate-600 dark:text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors"
+                    title="Générer le reçu de cette transaction"
+                  >
+                    <FileText className="w-3.5 h-3.5" /> Reçu
+                  </RecuPrintButton>
                 </div>
               ))}
             </div>
