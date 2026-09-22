@@ -138,7 +138,7 @@ export interface Tranche {
   id: string;
   nom: string;
   dateLimite: string; // YYYY-MM-DD
-  pourcentage: number; // 0 à 100
+  montants: Record<string, number>; // nom de classe -> montant FCFA dû (cumulé) à cette tranche
 }
 
 export interface AppSettings extends AdminSettings {

@@ -362,14 +362,16 @@ export function computePriorityList(students: Student[], classComparaisons: Clas
     let trancheRetardText = '';
 
     if (sortedTranches.length > 0) {
-      // Déterminer combien l'élève a payé en %
-      const pctPaye = s.ecolage > 0 ? (s.dejaPaye / s.ecolage) * 100 : 0;
-      let cumPct = 0;
-      
+      // Chaque tranche définit un montant dû par classe, configuré directement en FCFA
+      // (plus un pourcentage global) — un même rang de tranche peut donc représenter des
+      // montants différents d'une classe à l'autre. On cumule les montants des tranches
+      // successives pour obtenir le seuil total attendu à ce stade.
+      let cumMontant = 0;
+
       // Chercher la première tranche non satisfaite
       for (const t of sortedTranches) {
-        cumPct += Number(t.pourcentage || 0);
-        if (pctPaye < cumPct) {
+        cumMontant += Number(t.montants?.[s.classe] || 0);
+        if (s.dejaPaye < cumMontant) {
           // Cette tranche n'est pas complètement payée !
           const limite = new Date(t.dateLimite);
           

@@ -132,6 +132,7 @@ export const Parametres: React.FC = () => {
   const setTranches = useStore((s) => s.setTranches);
   const [localTranches, setLocalTranches] = useState(tranches || []);
   const [tranchesSaved, setTranchesSaved] = useState(false);
+  const [expandedTrancheId, setExpandedTrancheId] = useState<string | null>(null);
 
   // ── Frais de scolarité personnalisés par classe ──
   const classFees = useStore((s) => s.classFees);
@@ -1048,7 +1049,7 @@ export const Parametres: React.FC = () => {
             {/* ── TRANCHES DE PAIEMENT ────────────────────────────── */}
             {(user?.role === 'directeur' || user?.role === 'comptable' || user?.role === 'admin' || user?.role === 'directeur_general') && (
                 <div className="pro-card p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
                         <h3 className="font-black text-lg text-slate-900 dark:text-white flex items-center gap-3">
                             <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl">
                                 <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -1057,14 +1058,18 @@ export const Parametres: React.FC = () => {
                         </h3>
                         <button
                             onClick={() => {
-                                const updated = [...localTranches, { id: crypto.randomUUID?.() || Date.now().toString(), nom: `Tranche ${localTranches.length + 1}`, dateLimite: '', pourcentage: 0 }];
-                                setLocalTranches(updated);
+                                const newTranche = { id: crypto.randomUUID?.() || Date.now().toString(), nom: `Tranche ${localTranches.length + 1}`, dateLimite: '', montants: {} as Record<string, number> };
+                                setLocalTranches([...localTranches, newTranche]);
+                                setExpandedTrancheId(newTranche.id);
                             }}
                             className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-50 hover:bg-indigo-500 text-indigo-600 hover:text-white dark:bg-indigo-500/10 dark:hover:bg-indigo-500 dark:text-indigo-400 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all"
                         >
                             <Plus className="w-3.5 h-3.5" /> Ajouter
                         </button>
                     </div>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mb-6">
+                        Configurez directement le montant dû par classe à chaque tranche (au lieu d'un pourcentage global) — chaque classe peut avoir un montant différent. Les montants sont cumulés d'une tranche à l'autre.
+                    </p>
 
                     <div className="space-y-3 mb-6">
                         {localTranches.length === 0 ? (
@@ -1072,69 +1077,135 @@ export const Parametres: React.FC = () => {
                             <p className="text-sm font-bold text-slate-500">Aucune tranche paramétrée</p>
                         </div>
                         ) : (
-                        localTranches.map((t, idx) => (
-                            <div key={t.id} className="flex flex-col sm:flex-row items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
-                                <input
-                                    type="text"
-                                    value={t.nom}
-                                    onChange={(e) => {
-                                        const updated = [...localTranches];
-                                        updated[idx].nom = e.target.value;
-                                        setLocalTranches(updated);
-                                    }}
-                                    placeholder="Nom (ex: Tranche 1)"
-                                    className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none w-full"
-                                />
-                                <input
-                                    type="date"
-                                    value={t.dateLimite}
-                                    onChange={(e) => {
-                                        const updated = [...localTranches];
-                                        updated[idx].dateLimite = e.target.value;
-                                        setLocalTranches(updated);
-                                    }}
-                                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none w-full sm:w-auto"
-                                />
-                                <div className="flex items-center gap-2 w-full sm:w-auto">
-                                    <div className="relative">
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            max="100"
-                                            value={t.pourcentage}
-                                            onChange={(e) => {
-                                                const updated = [...localTranches];
-                                                updated[idx].pourcentage = Number(e.target.value);
-                                                setLocalTranches(updated);
-                                            }}
-                                            className="w-24 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-8 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-right"
-                                        />
-                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400">%</span>
-                                    </div>
-                                    <button
-                                        onClick={() => {
-                                            const updated = localTranches.filter((_, i) => i !== idx);
+                        localTranches.map((t, idx) => {
+                            const isExpanded = expandedTrancheId === t.id;
+                            const classesConfigured = CLASS_CONFIG.filter((c) => Number(t.montants?.[c.name] || 0) > 0).length;
+                            return (
+                            <div key={t.id} className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                <div className="flex flex-col sm:flex-row items-center gap-3 p-3">
+                                    <input
+                                        type="text"
+                                        value={t.nom}
+                                        onChange={(e) => {
+                                            const updated = [...localTranches];
+                                            updated[idx] = { ...updated[idx], nom: e.target.value };
                                             setLocalTranches(updated);
                                         }}
-                                        className="p-2.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors ml-auto sm:ml-1"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                        placeholder="Nom (ex: Tranche 1)"
+                                        className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none w-full"
+                                    />
+                                    <input
+                                        type="date"
+                                        value={t.dateLimite}
+                                        onChange={(e) => {
+                                            const updated = [...localTranches];
+                                            updated[idx] = { ...updated[idx], dateLimite: e.target.value };
+                                            setLocalTranches(updated);
+                                        }}
+                                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none w-full sm:w-auto"
+                                    />
+                                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                                        <button
+                                            onClick={() => setExpandedTrancheId(isExpanded ? null : t.id)}
+                                            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${
+                                                isExpanded ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                                            }`}
+                                        >
+                                            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                            {classesConfigured > 0 ? `${classesConfigured} classe${classesConfigured > 1 ? 's' : ''}` : 'Montants'}
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                const updated = localTranches.filter((_, i) => i !== idx);
+                                                setLocalTranches(updated);
+                                                if (isExpanded) setExpandedTrancheId(null);
+                                            }}
+                                            className="p-2.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
+
+                                {isExpanded && (
+                                    <div className="border-t border-slate-200 dark:border-slate-700 p-4 bg-white/50 dark:bg-slate-900/40">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Montant dû (cumulé) par classe à cette tranche</p>
+                                            <button
+                                                onClick={() => {
+                                                    const n = localTranches.length || 1;
+                                                    const rank = idx + 1;
+                                                    const montants: Record<string, number> = {};
+                                                    CLASS_CONFIG.forEach((c) => {
+                                                        const effectiveFee = Number(localClassFees[c.name]) || c.ecolage;
+                                                        montants[c.name] = Math.round((effectiveFee * rank) / n / 100) * 100;
+                                                    });
+                                                    const updated = [...localTranches];
+                                                    updated[idx] = { ...updated[idx], montants };
+                                                    setLocalTranches(updated);
+                                                }}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-500 text-indigo-600 hover:text-white dark:bg-indigo-500/10 dark:hover:bg-indigo-500 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
+                                            >
+                                                <RefreshCw className="w-3 h-3" /> Répartir également
+                                            </button>
+                                        </div>
+                                        <div className="space-y-5">
+                                            {(['Primaire', 'Collège', 'Lycée'] as const).map((cycle) => (
+                                                <div key={cycle}>
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{cycle}</p>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                                                        {CLASS_CONFIG.filter((c) => c.cycle === cycle).map((c) => (
+                                                            <div key={c.name} className="flex items-center justify-between gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                                                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{c.name}</span>
+                                                                <div className="relative shrink-0">
+                                                                    <input
+                                                                        type="number"
+                                                                        min={0}
+                                                                        step={500}
+                                                                        value={t.montants?.[c.name] ?? ''}
+                                                                        onChange={(e) => {
+                                                                            const updated = [...localTranches];
+                                                                            const montants = { ...(updated[idx].montants || {}) };
+                                                                            montants[c.name] = Number(e.target.value) || 0;
+                                                                            updated[idx] = { ...updated[idx], montants };
+                                                                            setLocalTranches(updated);
+                                                                        }}
+                                                                        className="w-28 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg pl-2 pr-12 py-1.5 text-xs font-bold text-slate-900 dark:text-white text-right focus:ring-2 focus:ring-indigo-500 outline-none"
+                                                                    />
+                                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-400">{localCurrency || 'FCFA'}</span>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        ))
-                        )}
-                        {localTranches.length > 0 && (
-                        <div className="flex justify-end pt-2">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                                Total : 
-                                <span className={`ml-2 text-sm ${localTranches.reduce((sum, t) => sum + (t.pourcentage || 0), 0) === 100 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                    {localTranches.reduce((sum, t) => sum + (t.pourcentage || 0), 0)}%
-                                </span>
-                            </span>
-                        </div>
+                            );
+                        })
                         )}
                     </div>
+
+                    {localTranches.length > 0 && (
+                        <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Vérification par classe (total des tranches vs écolage)</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                {CLASS_CONFIG.filter((c) => localTranches.some((t) => Number(t.montants?.[c.name] || 0) > 0)).map((c) => {
+                                    const totalConfigured = localTranches.reduce((sum, t) => sum + Number(t.montants?.[c.name] || 0), 0);
+                                    const effectiveFee = Number(localClassFees[c.name]) || c.ecolage;
+                                    const matches = totalConfigured === effectiveFee;
+                                    return (
+                                        <div key={c.name} className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[11px] font-bold ${matches ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400'}`}>
+                                            <span>{c.name}</span>
+                                            <span>{totalConfigured.toLocaleString('fr-FR')} / {effectiveFee.toLocaleString('fr-FR')}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="flex justify-end">
                         <button
