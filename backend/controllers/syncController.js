@@ -107,6 +107,44 @@ async function syncFromFrontend(req, res) {
     // Helper function pour générer les noms de table dynamiques
     const tbl = (name) => `${name}_${schoolSlug}`;
 
+    // Upsert qui NE TOUCHE JAMAIS academic_year_id sur une ligne déjà existante — seule une
+    // toute nouvelle ligne reçoit l'année active de la session. Sans ça (bug corrigé le
+    // 2026-09-23, incident csyzomacamb) : le frontend renvoie souvent tout son état local sur
+    // un sync complet, y compris des élèves/notes/paiements d'une année précédente encore en
+    // mémoire — l'ancien code retamponnait alors CHAQUE ligne avec l'année ACTIVE de la
+    // session, mélangeant silencieusement toutes les années à chaque synchronisation. Ici,
+    // `rows` doit contenir `academic_year_id` (calculé par l'appelant) ; ce champ est retiré
+    // avant l'upsert pour toute ligne dont l'id existe déjà en base.
+    const upsertPreservingYear = async (tableName, rows, onConflict = 'id') => {
+        if (!rows.length) return null;
+        const idField = onConflict.split(',')[0].trim();
+        const existingIds = new Set();
+        for (let i = 0; i < rows.length; i += 500) {
+            const idsChunk = rows.slice(i, i + 500).map(r => r[idField]);
+            const { data: existingRows, error: existErr } = await supabase.from(tbl(tableName)).select(idField).in(idField, idsChunk);
+            if (existErr) return existErr;
+            (existingRows || []).forEach(r => existingIds.add(r[idField]));
+        }
+
+        for (let i = 0; i < rows.length; i += 500) {
+            const chunk = rows.slice(i, i + 500);
+            const newRows = chunk.filter(r => !existingIds.has(r[idField]));
+            const updateRows = chunk
+                .filter(r => existingIds.has(r[idField]))
+                .map(({ academic_year_id, ...rest }) => rest);
+
+            if (newRows.length > 0) {
+                const { error } = await supabase.from(tbl(tableName)).upsert(newRows, { onConflict });
+                if (error) return error;
+            }
+            if (updateRows.length > 0) {
+                const { error } = await supabase.from(tbl(tableName)).upsert(updateRows, { onConflict });
+                if (error) return error;
+            }
+        }
+        return null;
+    };
+
     try {
         if (replace) {
             console.log('🧹 [Sync] Mode Remplacer activé : Nettoyage universel de la base locale...');
@@ -171,13 +209,10 @@ async function syncFromFrontend(req, res) {
                 academic_year_id: academicYearId || null
             }));
 
-            for (let i = 0; i < studentData.length; i += CHUNK_SIZE) {
-                const chunk = studentData.slice(i, i + CHUNK_SIZE);
-                const { error: chunkErr } = await supabase.from(tbl('students')).upsert(chunk, { onConflict: 'id' });
-                if (chunkErr) {
-                    console.error('❌ [Sync POST] Erreur students:', chunkErr.message);
-                    return res.status(500).json({ error: 'Erreur lors de la synchronisation des élèves: ' + chunkErr.message });
-                }
+            const studentsUpsertErr = await upsertPreservingYear('students', studentData, 'id');
+            if (studentsUpsertErr) {
+                console.error('❌ [Sync POST] Erreur students:', studentsUpsertErr.message);
+                return res.status(500).json({ error: 'Erreur lors de la synchronisation des élèves: ' + studentsUpsertErr.message });
             }
 
             // --- Auto-liaison des parents par numéro de téléphone ---
@@ -255,13 +290,10 @@ async function syncFromFrontend(req, res) {
                 const existingIdSet = new Set((alreadyExisting || []).map(p => p.id));
                 const newPayments = allPayments.filter(p => !existingIdSet.has(p.id));
 
-                for (let i = 0; i < allPayments.length; i += CHUNK_SIZE) {
-                    const chunk = allPayments.slice(i, i + CHUNK_SIZE);
-                    const { error: chunkErr } = await supabase.from(tbl('payments')).upsert(chunk, { onConflict: 'id' });
-                    if (chunkErr) {
-                        console.error('❌ [Sync POST] Erreur payments:', chunkErr.message);
-                        return res.status(500).json({ error: 'Erreur lors de la synchronisation des paiements: ' + chunkErr.message });
-                    }
+                const paymentsUpsertErr = await upsertPreservingYear('payments', allPayments, 'id');
+                if (paymentsUpsertErr) {
+                    console.error('❌ [Sync POST] Erreur payments:', paymentsUpsertErr.message);
+                    return res.status(500).json({ error: 'Erreur lors de la synchronisation des paiements: ' + paymentsUpsertErr.message });
                 }
 
                 // Comptabilisation automatique (best-effort, ne bloque jamais la réponse de sync).
@@ -315,13 +347,10 @@ async function syncFromFrontend(req, res) {
                 statut: p.statut,
                 academic_year_id: academicYearId || null
             }));
-            for (let i = 0; i < presenceData.length; i += CHUNK_SIZE) {
-                const chunk = presenceData.slice(i, i + CHUNK_SIZE);
-                const { error: chunkErr } = await supabase.from(tbl('presences')).upsert(chunk, { onConflict: 'id' });
-                if (chunkErr) {
-                    console.error('❌ [Sync POST] Erreur presences:', chunkErr.message);
-                    return res.status(500).json({ error: 'Erreur lors de la synchronisation des présences: ' + chunkErr.message });
-                }
+            const presencesUpsertErr = await upsertPreservingYear('presences', presenceData, 'id');
+            if (presencesUpsertErr) {
+                console.error('❌ [Sync POST] Erreur presences:', presencesUpsertErr.message);
+                return res.status(500).json({ error: 'Erreur lors de la synchronisation des présences: ' + presencesUpsertErr.message });
             }
 
             // --- 3b. Notifier les parents pour les Pointages NOUVEAUX ---
@@ -362,13 +391,10 @@ async function syncFromFrontend(req, res) {
                 date_heure: l.dateHeure,
                 academic_year_id: academicYearId || null
             }));
-            for (let i = 0; i < logData.length; i += CHUNK_SIZE) {
-                const chunk = logData.slice(i, i + CHUNK_SIZE);
-                const { error: chunkErr } = await supabase.from(tbl('activity_logs')).upsert(chunk, { onConflict: 'id' });
-                if (chunkErr) {
-                    console.error('❌ [Sync POST] Erreur activity_logs:', chunkErr.message);
-                    return res.status(500).json({ error: 'Erreur lors de la synchronisation des logs d\'activité: ' + chunkErr.message });
-                }
+            const logsUpsertErr = await upsertPreservingYear('activity_logs', logData, 'id');
+            if (logsUpsertErr) {
+                console.error('❌ [Sync POST] Erreur activity_logs:', logsUpsertErr.message);
+                return res.status(500).json({ error: 'Erreur lors de la synchronisation des logs d\'activité: ' + logsUpsertErr.message });
             }
         }
 
@@ -502,7 +528,7 @@ async function syncFromFrontend(req, res) {
                     categorie: m.categorie,
                     academic_year_id: academicYearId || null
                 }));
-                const { error: matErr } = await supabase.from(tbl('matieres')).upsert(matieresData, { onConflict: 'id' });
+                const matErr = await upsertPreservingYear('matieres', matieresData, 'id');
                 if (matErr) {
                     console.error('❌ [Sync POST] Erreur matieres:', matErr.message);
                     return res.status(500).json({ error: 'Erreur lors de la synchronisation des matières: ' + matErr.message });
@@ -525,7 +551,7 @@ async function syncFromFrontend(req, res) {
                     coefficient: cm.coefficient || 1,
                     academic_year_id: academicYearId || null
                 }));
-                const { error: cmErr } = await supabase.from(tbl('classe_matieres')).upsert(cmData, { onConflict: 'id' });
+                const cmErr = await upsertPreservingYear('classe_matieres', cmData, 'id');
                 if (cmErr) {
                     console.error('❌ [Sync POST] Erreur classeMatieres:', cmErr.message);
                     return res.status(500).json({ error: 'Erreur lors de la synchronisation des liaisons classe-matière: ' + cmErr.message });
@@ -539,29 +565,22 @@ async function syncFromFrontend(req, res) {
 
         if (notes && notes.length > 0) {
             try {
-                const chunkSize = 500;
-                let notesOk = 0;
-                let notesErr = null;
-                for (let i = 0; i < notes.length; i += chunkSize) {
-                    const chunk = notes.slice(i, i + chunkSize).map(n => ({
-                        id: n.id,
-                        eleve_id: n.eleveId,
-                        matiere_id: n.matiereId,
-                        periode: n.periode,
-                        note_classe: n.noteClasse,
-                        note_devoir: n.noteDevoir,
-                        note_compo: n.noteCompo,
-                        academic_year_id: academicYearId || null
-                    }));
-                    const { error: chunkErr } = await supabase.from(tbl('notes')).upsert(chunk, { onConflict: 'id' });
-                    if (chunkErr) {
-                        console.error(`❌ [Sync POST] Erreur notes:`, chunkErr.message);
-                        return res.status(500).json({ error: 'Erreur lors de la synchronisation des notes: ' + chunkErr.message });
-                    } else {
-                        notesOk += chunk.length;
-                    }
+                const notesData = notes.map(n => ({
+                    id: n.id,
+                    eleve_id: n.eleveId,
+                    matiere_id: n.matiereId,
+                    periode: n.periode,
+                    note_classe: n.noteClasse,
+                    note_devoir: n.noteDevoir,
+                    note_compo: n.noteCompo,
+                    academic_year_id: academicYearId || null
+                }));
+                const notesErr = await upsertPreservingYear('notes', notesData, 'id');
+                if (notesErr) {
+                    console.error(`❌ [Sync POST] Erreur notes:`, notesErr.message);
+                    return res.status(500).json({ error: 'Erreur lors de la synchronisation des notes: ' + notesErr.message });
                 }
-                console.log(`✅ [Sync POST] ${notesOk} notes synchronisées avec succès !`);
+                console.log(`✅ [Sync POST] ${notesData.length} notes synchronisées avec succès !`);
             } catch (notesException) {
                 console.error('❌ [Sync POST] Exception notes:', notesException);
             }
