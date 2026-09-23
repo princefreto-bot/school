@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { supabase } = require('../utils/supabase');
 const { getCurrentAcademicYear } = require('../utils/academicYear');
 
@@ -20,6 +21,53 @@ async function resolveAcademicYearId(schoolSlug, req) {
         .single();
 
     return yearRow?.id || null;
+}
+
+/**
+ * GET /api/students/by-year?year=YYYY-YYYY
+ * Liste COMPLÈTE (pas de plafond à 100, contrairement à listStudents qui est une
+ * recherche floue plutôt qu'un inventaire) des élèves d'une année scolaire précise —
+ * pas forcément l'année active de la session. Réservé aux comptes établissement (jamais
+ * les parents) : sert uniquement à la rentrée/promotion (voir promoteStudents).
+ */
+async function listStudentsByYear(req, res) {
+    const { schoolSlug } = req.user;
+    const { year } = req.query;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+    if (!year) return res.status(400).json({ error: 'Paramètre "year" requis.' });
+
+    try {
+        const { data: yearRow, error: yearErr } = await supabase
+            .from('academic_years')
+            .select('id')
+            .eq('school_slug', schoolSlug)
+            .eq('name', year)
+            .maybeSingle();
+        if (yearErr) throw yearErr;
+        if (!yearRow) return res.json({ students: [] });
+
+        const students = [];
+        let from = 0;
+        const pageSize = 1000;
+        while (true) {
+            const { data, error } = await supabase
+                .from(`students_${schoolSlug}`)
+                .select('id, nom, prenom, classe, sexe, photo_url')
+                .eq('academic_year_id', yearRow.id)
+                .order('classe', { ascending: true })
+                .order('nom', { ascending: true })
+                .range(from, from + pageSize - 1);
+            if (error) throw error;
+            students.push(...(data || []));
+            if (!data || data.length < pageSize) break;
+            from += pageSize;
+        }
+
+        return res.json({ students });
+    } catch (err) {
+        console.error('listStudentsByYear error:', err.message);
+        return res.status(500).json({ error: err.message });
+    }
 }
 
 /**
@@ -340,4 +388,121 @@ async function unlinkStudentFromParent(req, res) {
     }
 }
 
-module.exports = { listStudents, linkStudentToParent, unlinkStudentFromParent, countStudents };
+/**
+ * POST /api/students/promote
+ * Rentrée / promotion : crée une NOUVELLE fiche par élève promu, rattachée à l'année
+ * CIBLE, à partir d'une fiche existante de l'année SOURCE — jamais une mutation de la
+ * fiche source (qui doit rester intacte pour l'historique de l'ancienne année : notes,
+ * paiements, bulletins...). Cohérent avec le modèle existant où chaque année scolaire a
+ * ses propres lignes élèves (voir incident csyzomacamb du 2026-09-23).
+ *
+ * body: {
+ *   fromYear: string, toYear: string,
+ *   promotions: [{ studentId, targetClasse, targetCycle, targetEcolage, redoublant }]
+ * }
+ * Le calcul de targetEcolage (tarifs personnalisés par classe, Ancien/Nouveau...) est
+ * fait côté frontend, qui a déjà accès à classFees et à toute la config des classes —
+ * pas dupliqué ici pour éviter une seconde source de vérité qui pourrait diverger.
+ */
+async function promoteStudents(req, res) {
+    const { schoolSlug } = req.user;
+    const { fromYear, toYear, promotions } = req.body;
+    if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+    if (!fromYear || !toYear) return res.status(400).json({ error: 'fromYear et toYear sont requis.' });
+    if (!Array.isArray(promotions) || promotions.length === 0) {
+        return res.status(400).json({ error: 'Aucun élève à promouvoir.' });
+    }
+
+    try {
+        const [{ data: fromYearRow }, { data: toYearRow }] = await Promise.all([
+            supabase.from('academic_years').select('id').eq('school_slug', schoolSlug).eq('name', fromYear).maybeSingle(),
+            supabase.from('academic_years').select('id').eq('school_slug', schoolSlug).eq('name', toYear).maybeSingle(),
+        ]);
+        if (!fromYearRow) return res.status(400).json({ error: `Année source "${fromYear}" introuvable.` });
+        if (!toYearRow) return res.status(400).json({ error: `Année cible "${toYear}" introuvable.` });
+        const fromYearId = fromYearRow.id;
+        const toYearId = toYearRow.id;
+
+        const studentIds = promotions.map((p) => p.studentId);
+        const { data: sourceStudents, error: sourceErr } = await supabase
+            .from(`students_${schoolSlug}`)
+            .select('id, nom, prenom, sexe, telephone_parent, date_naissance, photo_url, ecole_provenance, adsn, academic_year_id')
+            .in('id', studentIds);
+        if (sourceErr) throw sourceErr;
+
+        // Sécurité : n'accepte que les élèves réellement présents dans l'année SOURCE
+        // annoncée — ignore silencieusement toute incohérence plutôt que d'échouer en bloc.
+        const sourceById = new Map((sourceStudents || []).filter((s) => s.academic_year_id === fromYearId).map((s) => [s.id, s]));
+
+        const idMap = new Map(); // ancien id -> nouveau id (pour relier les parents)
+        const newRows = [];
+        let skipped = 0;
+
+        for (const promo of promotions) {
+            const source = sourceById.get(promo.studentId);
+            if (!source || !promo.targetClasse) { skipped++; continue; }
+
+            const newId = crypto.randomUUID();
+            idMap.set(source.id, newId);
+
+            const ecolage = Number(promo.targetEcolage) || 0;
+            newRows.push({
+                id: newId,
+                nom: source.nom,
+                prenom: source.prenom || '',
+                classe: promo.targetClasse,
+                cycle: promo.targetCycle || 'Primaire',
+                ecolage,
+                deja_paye: 0,
+                restant: ecolage,
+                frais_inscription: 0,
+                inscription_paye: 0,
+                inscription_restant: 0,
+                statut_elv: 'ANCIEN',
+                status: 'Non soldé',
+                telephone_parent: source.telephone_parent || null,
+                sexe: source.sexe || 'M',
+                redoublant: !!promo.redoublant,
+                ecole_provenance: source.ecole_provenance || '',
+                date_naissance: source.date_naissance || null,
+                adsn: source.adsn || null,
+                photo_url: source.photo_url || null,
+                academic_year_id: toYearId,
+            });
+        }
+
+        if (newRows.length === 0) {
+            return res.status(400).json({ error: 'Aucun élève valide à promouvoir (vérifiez que les élèves appartiennent bien à l\'année source).' });
+        }
+
+        for (let i = 0; i < newRows.length; i += 500) {
+            const { error: insertErr } = await supabase.from(`students_${schoolSlug}`).insert(newRows.slice(i, i + 500));
+            if (insertErr) throw insertErr;
+        }
+
+        // Reporte les liaisons parent-enfant existantes vers les nouvelles fiches — sans
+        // ça, un parent perdrait l'accès à son enfant dès la rentrée suivante.
+        try {
+            const { data: existingLinks } = await supabase
+                .from(`parent_student_${schoolSlug}`)
+                .select('parent_id, student_id')
+                .in('student_id', Array.from(idMap.keys()));
+            const newLinks = (existingLinks || [])
+                .filter((l) => idMap.has(l.student_id))
+                .map((l) => ({ parent_id: l.parent_id, student_id: idMap.get(l.student_id) }));
+            if (newLinks.length > 0) {
+                await supabase.from(`parent_student_${schoolSlug}`).insert(newLinks);
+            }
+        } catch (linkErr) {
+            console.error('promoteStudents: erreur report liaisons parent-enfant:', linkErr.message);
+            // Non bloquant — les élèves sont promus, le lien parent peut être refait manuellement.
+        }
+
+        return res.json({ promoted: newRows.length, skipped, total: promotions.length });
+    } catch (err) {
+        console.error('promoteStudents error:', err.message);
+        return res.status(500).json({ error: err.message });
+    }
+}
+
+module.exports = { listStudents, listStudentsByYear, linkStudentToParent, unlinkStudentFromParent, countStudents, promoteStudents };

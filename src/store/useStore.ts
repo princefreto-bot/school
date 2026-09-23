@@ -197,6 +197,11 @@ export interface AppState {
   academicYears: { id: string, name: string, isCurrent: boolean }[];
   setAcademicYears: (years: { id: string, name: string, isCurrent: boolean }[]) => void;
   deleteAcademicYear: (yearId: string) => Promise<boolean>;
+  promoteStudents: (payload: {
+    fromYear: string;
+    toYear: string;
+    promotions: { studentId: string; targetClasse: string; targetCycle: string; targetEcolage: number; redoublant: boolean }[];
+  }) => Promise<{ success: boolean; promoted?: number; skipped?: number; error?: string }>;
 
   // Présences
   presences: Presence[];
@@ -1024,6 +1029,20 @@ export const useStore = create<AppState>()(
             set({ academicYears: get().academicYears.filter(y => y.id !== yearId) });
         }
         return success;
+      },
+      promoteStudents: async (payload) => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/students/promote`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) return { success: false, error: data.error || 'Erreur lors de la promotion.' };
+          return { success: true, promoted: data.promoted, skipped: data.skipped };
+        } catch (err) {
+          return { success: false, error: 'Erreur réseau lors de la promotion.' };
+        }
       },
       settings: {
         seuilDeuxiemeTranche: 70,

@@ -162,6 +162,48 @@ export const getAvailablePeriods = (className: string): PeriodeType[] => {
     : ['TRIMESTRE 1', 'TRIMESTRE 2', 'TRIMESTRE 3'];
 };
 
+// Classe suivante par défaut (rentrée / promotion des élèves d'une année sur l'autre —
+// voir Paramètres > Années scolaires > Promouvoir les élèves). `null` = pas de suite
+// automatique fiable : le passage en 3ème choisit une filière (Moderne/Technique), et les
+// classes Tle sont terminales (l'élève quitte l'établissement après le bac). Le directeur
+// reste toujours libre d'ajuster la classe cible manuellement avant de valider.
+const NEXT_CLASS: Record<string, string | null> = {
+  'CI': 'CI 1',
+  'CI 1': 'CI 2',
+  'CI 2': 'CP1',
+  'CP1': 'CP2',
+  'CP2': 'CE1',
+  'CE1': 'CE2',
+  'CE2': 'CM1',
+  'CM1': 'CM2',
+  'CM2': '6EME',
+  '6EME': '5EME',
+  '5EME': '4EME',
+  '4EME': '3EME',
+  '3EME': null, // choix de filière (2nde S/A4/G1/G2/G3/CD) — à sélectionner manuellement
+  '2nde S': '1er D',
+  '2nde A4': '1er A4',
+  '2nde G1': '1ere G1',
+  '2nde G2': '1ere G2',
+  '2nde G3': '1ere G3',
+  '2nde CD': null, // pas de classe de suite standard définie — à choisir manuellement
+  '1er A4': 'Tle A4',
+  '1er D': 'Tle D',
+  '1ere G1': null, // pas de "Tle G1" dans la configuration — à choisir manuellement
+  '1ere G2': 'Tle G2',
+  '1ere G3': 'Tle G3',
+  'Tle A4': null,
+  'Tle D': null,
+  'Tle G2': null,
+  'Tle G3': null,
+};
+
+export const getNextClass = (className: string): string | null => {
+  const config = getClassConfig(className);
+  if (!config) return null;
+  return NEXT_CLASS[config.name] ?? null;
+};
+
 export const CYCLES: Cycle[] = ['Primaire', 'Collège', 'Lycée'];
 
 export const CLASSES_BY_CYCLE: Record<Cycle, string[]> = {
