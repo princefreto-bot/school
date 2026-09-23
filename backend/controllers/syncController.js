@@ -115,15 +115,32 @@ async function syncFromFrontend(req, res) {
     // session, mélangeant silencieusement toutes les années à chaque synchronisation. Ici,
     // `rows` doit contenir `academic_year_id` (calculé par l'appelant) ; ce champ est retiré
     // avant l'upsert pour toute ligne dont l'id existe déjà en base.
+    // `.in()` passe la liste d'ids dans l'URL (requête GET) — avec 500 UUIDs d'un coup
+    // (~18 000 caractères), ça dépasse la longueur d'URL maximale du serveur et échoue en
+    // 500 Internal Server Error. Chunk volontairement petit (100 ids ≈ 3 800 caractères,
+    // large marge de sécurité). Régression du 2026-09-23 : une classe chargée (ex: 90
+    // élèves × 5-6 matières = 450+ notes en un seul sync) déclenchait ça à CHAQUE
+    // sauvegarde de notes — signalé immédiatement en production.
+    const fetchExistingIds = async (tableName, idField, ids) => {
+        const existingIds = new Set();
+        for (let i = 0; i < ids.length; i += 100) {
+            const idsChunk = ids.slice(i, i + 100);
+            if (idsChunk.length === 0) continue;
+            const { data, error } = await supabase.from(tbl(tableName)).select(idField).in(idField, idsChunk);
+            if (error) throw error;
+            (data || []).forEach((r) => existingIds.add(r[idField]));
+        }
+        return existingIds;
+    };
+
     const upsertPreservingYear = async (tableName, rows, onConflict = 'id') => {
         if (!rows.length) return null;
         const idField = onConflict.split(',')[0].trim();
-        const existingIds = new Set();
-        for (let i = 0; i < rows.length; i += 500) {
-            const idsChunk = rows.slice(i, i + 500).map(r => r[idField]);
-            const { data: existingRows, error: existErr } = await supabase.from(tbl(tableName)).select(idField).in(idField, idsChunk);
-            if (existErr) return existErr;
-            (existingRows || []).forEach(r => existingIds.add(r[idField]));
+        let existingIds;
+        try {
+            existingIds = await fetchExistingIds(tableName, idField, rows.map((r) => r[idField]));
+        } catch (existErr) {
+            return existErr;
         }
 
         for (let i = 0; i < rows.length; i += 500) {
@@ -285,9 +302,7 @@ async function syncFromFrontend(req, res) {
             if (allPayments.length > 0) {
                 // Déterminer AVANT l'upsert quels paiements sont réellement nouveaux,
                 // pour ne comptabiliser en écriture que ceux-là (jamais deux fois).
-                const paymentIds = allPayments.map(p => p.id);
-                const { data: alreadyExisting } = await supabase.from(tbl('payments')).select('id').in('id', paymentIds);
-                const existingIdSet = new Set((alreadyExisting || []).map(p => p.id));
+                const existingIdSet = await fetchExistingIds('payments', 'id', allPayments.map(p => p.id));
                 const newPayments = allPayments.filter(p => !existingIdSet.has(p.id));
 
                 const paymentsUpsertErr = await upsertPreservingYear('payments', allPayments, 'id');
@@ -307,9 +322,7 @@ async function syncFromFrontend(req, res) {
             (async () => {
                 try {
                     // Récupérer les IDs des paiements déjà existants pour éviter les doublons de notif
-                    const paymentIds = allPayments.map(p => p.id);
-                    const { data: existingPayments } = await supabase.from(tbl('payments')).select('id').in('id', paymentIds);
-                    const existingIds = new Set((existingPayments || []).map(p => p.id));
+                    const existingIds = await fetchExistingIds('payments', 'id', allPayments.map(p => p.id));
 
                     for (const s of students) {
                         if (Array.isArray(s.historiquesPaiements) && s.historiquesPaiements.length > 0) {
@@ -356,9 +369,7 @@ async function syncFromFrontend(req, res) {
             // --- 3b. Notifier les parents pour les Pointages NOUVEAUX ---
             (async () => {
                 try {
-                    const presenceIds = presences.map(p => p.id);
-                    const { data: existingPres } = await supabase.from(tbl('presences')).select('id').in('id', presenceIds);
-                    const existingIds = new Set((existingPres || []).map(p => p.id));
+                    const existingIds = await fetchExistingIds('presences', 'id', presences.map(p => p.id));
 
                     for (const p of presences) {
                         if (existingIds.has(p.id)) continue; // Déjà notifié ou déjà en base
