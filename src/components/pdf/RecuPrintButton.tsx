@@ -18,12 +18,12 @@ interface RecuPrintButtonProps {
   className?: string;
   title?: string;
   children: React.ReactNode;
-  /** Format papier de l'impression. Défaut : A4. */
+  /** Format papier de l'impression. Défaut : A5 (reçu compact). */
   format?: 'A4' | 'A5';
 }
 
 export const RecuPrintButton: React.FC<RecuPrintButtonProps> = ({
-  student, payment, className, title, children, format = 'A4',
+  student, payment, className, title, children, format = 'A5',
 }) => {
   const {
     schoolName, schoolLogo, schoolAddress, schoolTelephone, schoolEmail,
@@ -85,6 +85,7 @@ export const RecuPrintButton: React.FC<RecuPrintButtonProps> = ({
               cashierName={user?.nom}
               stamp={schoolStamp}
               expenses={expenses}
+              format={format}
               employer={{
                 name: schoolName,
                 logo: schoolLogo,

@@ -18,7 +18,7 @@ interface RecuBulkPrintButtonProps {
 }
 
 export const RecuBulkPrintButton: React.FC<RecuBulkPrintButtonProps> = ({
-  students, className, title, children, format = 'A4',
+  students, className, title, children, format = 'A5',
 }) => {
   const {
     schoolName, schoolLogo, schoolAddress, schoolTelephone, schoolEmail,
@@ -96,6 +96,7 @@ export const RecuBulkPrintButton: React.FC<RecuBulkPrintButtonProps> = ({
                   stamp={schoolStamp}
                   expenses={expensesByStudent[s.id]}
                   employer={employer}
+                  format={format}
                 />
               </div>
             );

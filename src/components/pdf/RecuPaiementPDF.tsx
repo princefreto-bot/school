@@ -43,6 +43,8 @@ interface RecuPaiementPDFProps {
   /** Dépenses liées à l'élève (Maillots, Excursion...) — récapitulatif cumulé depuis
    * le début de l'année, affiché sur chaque reçu quel que soit la transaction documentée. */
   expenses?: StudentExpense[];
+  /** Format papier. A5 (défaut) produit un reçu compact ; A4 garde la mise en page pleine page. */
+  format?: 'A4' | 'A5';
 }
 
 // ── Ligne d'information (clé grise / valeur noire) ──
@@ -289,7 +291,7 @@ const ReceiptFooter: React.FC<{ cashierName?: string; stamp?: string | null; qrV
 // Composant principal
 // ============================================================
 export const RecuPaiementPDF: React.FC<RecuPaiementPDFProps> = ({
-  student, payment, employer, parentName, schoolYear, currency = 'FCFA', cashierName, stamp, expenses,
+  student, payment, employer, parentName, schoolYear, currency = 'FCFA', cashierName, stamp, expenses, format = 'A5',
 }) => {
   const tx = payment
     || (student.historiquesPaiements && student.historiquesPaiements.length
@@ -334,6 +336,12 @@ export const RecuPaiementPDF: React.FC<RecuPaiementPDFProps> = ({
     },
   ];
 
+  // A5 = A4 réduit d'un facteur 1/√2 (les deux formats ISO partagent le même ratio
+  // largeur/hauteur). On garde la mise en page A4 telle quelle et on la réduit avec
+  // `zoom` (contrairement à `transform: scale`, `zoom` modifie la boîte de mise en page
+  // et permet donc à l'impression de paginer correctement sur du papier A5).
+  const isA5 = format === 'A5';
+
   return (
     <div
       className="recu-paiement bg-white text-neutral-900 flex flex-col"
@@ -343,6 +351,7 @@ export const RecuPaiementPDF: React.FC<RecuPaiementPDFProps> = ({
         padding: '12mm 14mm',
         fontFamily: "'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif",
         boxSizing: 'border-box',
+        ...(isA5 ? { zoom: 1 / Math.SQRT2 } : {}),
       }}
     >
       <ReceiptHeader employer={employer} schoolYear={schoolYear} />
