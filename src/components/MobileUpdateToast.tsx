@@ -1,29 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { Smartphone, X, Download } from 'lucide-react';
 import { APK_VERSION, APK_REQUIRES_REINSTALL } from '../data/mobileApp';
+import { useStore } from '../store/useStore';
 
-const STORAGE_KEY = `dghub_mobile_update_seen_${APK_VERSION}`;
+// "Deja vu" par compte (ecole + utilisateur), pas par navigateur : sinon, quand
+// quelqu'un ferme la notification sur un poste partage, le directeur qui se
+// connecte ensuite sur ce meme poste ne la voit jamais.
+const storageKey = (schoolSlug?: string, userId?: string) =>
+  `dghub_mobile_update_seen_${APK_VERSION}_${schoolSlug || 'none'}_${userId || 'anon'}`;
 
 const isNativeApp = () => {
   const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
   return !!cap?.isNativePlatform?.();
 };
 
-const alreadySeen = () => {
-  try { return localStorage.getItem(STORAGE_KEY) === '1'; } catch { return false; }
-};
-
 export const MobileUpdateToast: React.FC = () => {
+  const user = useStore((s) => s.user);
+  const key = storageKey(user?.schoolSlug, user?.id);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (isNativeApp() || alreadySeen()) return;
+    setVisible(false);
+    let seen = false;
+    try { seen = localStorage.getItem(key) === '1'; } catch { /* stockage indisponible */ }
+    if (isNativeApp() || seen) return;
     const t = setTimeout(() => setVisible(true), 1500);
     return () => clearTimeout(t);
-  }, []);
+  }, [key]);
 
   const dismiss = () => {
-    try { localStorage.setItem(STORAGE_KEY, '1'); } catch { /* stockage indisponible */ }
+    try { localStorage.setItem(key, '1'); } catch { /* stockage indisponible */ }
     setVisible(false);
   };
 
