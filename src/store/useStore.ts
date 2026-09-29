@@ -351,6 +351,25 @@ const deduplicateStudents = (list: Student[]): { list: Student[]; countRemoved: 
   return { list: result, countRemoved: removedCount };
 };
 
+// Traçabilité : tout montant payé doit correspondre à une transaction. Crée les versements
+// initiaux (écolage / inscription) saisis à l'inscription ou à l'import.
+export const buildInitialPayments = (
+  studentId: string,
+  amounts: { ecolage?: number; inscription?: number },
+  recu: string | undefined,
+  note: string,
+): Payment[] => {
+  const date = new Date().toISOString();
+  const payments: Payment[] = [];
+  if ((amounts.ecolage || 0) > 0) {
+    payments.push({ id: uuid(), studentId, montant: amounts.ecolage!, date, recu: recu || '', mode: 'Espèces', note, type: 'ecolage' });
+  }
+  if ((amounts.inscription || 0) > 0) {
+    payments.push({ id: uuid(), studentId, montant: amounts.inscription!, date, recu: '', mode: 'Espèces', note, type: 'inscription' });
+  }
+  return payments;
+};
+
 // Réparation des données (cycle, écolage, restant, status). `classFees` = frais
 // personnalisés de l'école (Paramètres > Frais de scolarité) — sans quoi cette fonction
 // « corrigerait » silencieusement chaque étudiant vers le tarif générique à chaque sync.
@@ -681,7 +700,7 @@ export const useStore = create<AppState>()(
         const fraisInscription = isSubjectToRegistrationFee((data as { statutElv?: string }).statutElv)
           ? getEffectiveFraisInscription((data as { classe: string }).classe, get().classRegistrationFees)
           : 0;
-        const inscriptionPaye = (data as { inscriptionPaye?: number }).inscriptionPaye || 0;
+        const inscriptionPaye = fraisInscription > 0 ? ((data as { inscriptionPaye?: number }).inscriptionPaye || 0) : 0;
         const inscriptionRestant = Math.max(0, fraisInscription - inscriptionPaye);
         const studentId = uuid();
         const existing = get().students.find(s => 
@@ -693,6 +712,11 @@ export const useStore = create<AppState>()(
         if (existing) {
           console.warn(`[AddStudent] L'élève ${data.prenom} ${data.nom} existe déjà dans cette classe. Mise à jour de l'existant.`);
           get().updateStudent(existing.id, data);
+          // Les montants ne s'écrasent jamais : seul un surplus devient une transaction.
+          const ecolageGap = ((data as { dejaPaye?: number }).dejaPaye || 0) - (existing.dejaPaye || 0);
+          const inscriptionGap = inscriptionPaye - (existing.inscriptionPaye || 0);
+          if (ecolageGap > 0) get().addPayment(existing.id, { montant: ecolageGap, date: new Date().toISOString(), recu: (data as { recu?: string }).recu || '', mode: 'Espèces', note: "Versement à l'inscription", type: 'ecolage' });
+          if (inscriptionGap > 0) get().addPayment(existing.id, { montant: inscriptionGap, date: new Date().toISOString(), recu: '', mode: 'Espèces', note: "Versement à l'inscription", type: 'inscription' });
           return { success: true };
         }
 
@@ -706,7 +730,12 @@ export const useStore = create<AppState>()(
           inscriptionRestant,
           cycle: getCycle(data.classe),
           status: computeStatus(restant, ecolage),
-          historiquesPaiements: [],
+          historiquesPaiements: buildInitialPayments(
+            studentId,
+            { ecolage: (data as { dejaPaye?: number }).dejaPaye || 0, inscription: inscriptionPaye },
+            (data as { recu?: string }).recu,
+            "Versement à l'inscription",
+          ),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -728,7 +757,9 @@ export const useStore = create<AppState>()(
         }
         return { success: false, error: "L'enregistrement n'a pas pu être synchronisé (connexion instable). Restez sur la page et réessayez." };
       },
-      updateStudent: (id, updates) => {
+      updateStudent: (id, rawUpdates) => {
+        // Les montants payés ne se modifient que via addPayment/deletePayment (traçabilité).
+        const { dejaPaye: _dp, inscriptionPaye: _ip, historiquesPaiements: _hp, ...updates } = rawUpdates;
         const students = get().students.map((s) => {
           if (s.id !== id) return s;
           const updated = { ...s, ...updates, updatedAt: new Date().toISOString() };
@@ -741,10 +772,10 @@ export const useStore = create<AppState>()(
               ? getEffectiveFraisInscription(updated.classe, get().classRegistrationFees)
               : 0;
           }
-          if (updates.dejaPaye !== undefined || updates.classe || updates.statutElv !== undefined) {
+          if (updates.classe || updates.statutElv !== undefined) {
             updated.restant = updated.ecolage - updated.dejaPaye;
           }
-          if (updates.inscriptionPaye !== undefined || updates.classe || updates.statutElv !== undefined) {
+          if (updates.classe || updates.statutElv !== undefined) {
             updated.inscriptionRestant = Math.max(0, (updated.fraisInscription || 0) - (updated.inscriptionPaye || 0));
           }
           updated.status = computeStatus(updated.restant, updated.ecolage);
@@ -768,8 +799,10 @@ export const useStore = create<AppState>()(
       },
       updateMultipleStudents: (updatesList) => {
         const students = get().students.map((s) => {
-          const up = updatesList.find(item => item.id === s.id);
-          if (!up) return s;
+          const found = updatesList.find(item => item.id === s.id);
+          if (!found) return s;
+          const { dejaPaye: _dp, inscriptionPaye: _ip, historiquesPaiements: _hp, ...safeUpdates } = found.updates;
+          const up = { id: found.id, updates: safeUpdates as Partial<Student> };
           const updated = { ...s, ...up.updates, updatedAt: new Date().toISOString() };
           if (up.updates.classe) {
             updated.cycle = getCycle(up.updates.classe);
@@ -780,10 +813,10 @@ export const useStore = create<AppState>()(
               ? getEffectiveFraisInscription(updated.classe, get().classRegistrationFees)
               : 0;
           }
-          if (up.updates.dejaPaye !== undefined || up.updates.classe || up.updates.statutElv !== undefined) {
+          if (up.updates.classe || up.updates.statutElv !== undefined) {
             updated.restant = updated.ecolage - updated.dejaPaye;
           }
-          if (up.updates.inscriptionPaye !== undefined || up.updates.classe || up.updates.statutElv !== undefined) {
+          if (up.updates.classe || up.updates.statutElv !== undefined) {
             updated.inscriptionRestant = Math.max(0, (updated.fraisInscription || 0) - (updated.inscriptionPaye || 0));
           }
           updated.status = computeStatus(updated.restant, updated.ecolage);

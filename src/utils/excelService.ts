@@ -3,7 +3,7 @@ import { Student } from '../types';
 import { CLASSES } from '../data/classes';
 import { generateId, getCycleFromClasse, getEcolageFromClasse, getFraisInscriptionFromClasse } from './helpers';
 import { isSubjectToRegistrationFee } from '../data/classConfig';
-import { useStore } from '../store/useStore';
+import { useStore, buildInitialPayments } from '../store/useStore';
 
 export const importExcel = (file: File, existingStudents?: Student[]): Promise<Student[]> => {
   return new Promise((resolve, reject) => {
@@ -135,6 +135,21 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
           const inscriptionRestant = row[18] === 'SOLDE' ? 0 : (Number(row[18]) || Math.max(0, fraisInscription - inscriptionPaye));
 
           const studentId = existingStudent ? existingStudent.id : generateId();
+
+          // Traçabilité : un montant payé ne baisse jamais via l'import (seule la page Paiements
+          // peut supprimer une transaction) et tout surplus devient une transaction.
+          const finalDejaPaye = Math.max(dejaPaye, existingStudent?.dejaPaye || 0);
+          const finalInscriptionPaye = fraisInscription > 0 ? Math.max(inscriptionPaye, existingStudent?.inscriptionPaye || 0) : (existingStudent?.inscriptionPaye || 0);
+          const newPayments = buildInitialPayments(
+            studentId,
+            {
+              ecolage: finalDejaPaye - (existingStudent?.dejaPaye || 0),
+              inscription: finalInscriptionPaye - (existingStudent?.inscriptionPaye || 0),
+            },
+            recu || undefined,
+            existingStudent ? 'Régularisation (import Excel)' : 'Import initial (Excel)',
+          );
+
           const student: Student = {
             id: studentId,
             nom,
@@ -145,11 +160,11 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
             redoublant,
             ecoleProvenance,
             ecolage,
-            dejaPaye,
-            restant,
+            dejaPaye: finalDejaPaye,
+            restant: Math.max(0, ecolage - finalDejaPaye),
             fraisInscription,
-            inscriptionPaye,
-            inscriptionRestant,
+            inscriptionPaye: finalInscriptionPaye,
+            inscriptionRestant: Math.max(0, fraisInscription - finalInscriptionPaye),
             statutElv: validStatutElv,
             recu,
             adsn: adsn || undefined,
@@ -158,15 +173,7 @@ export const importExcel = (file: File, existingStudents?: Student[]): Promise<S
             status: 'Non soldé', 
             createdAt: existingStudent ? existingStudent.createdAt : new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            historiquesPaiements: existingStudent ? existingStudent.historiquesPaiements : (dejaPaye > 0 ? [{
-              id: generateId(),
-              studentId: studentId,
-              montant: dejaPaye,
-              date: new Date().toISOString(),
-              recu: recu || 'Import initial',
-              methode: 'Espèces',
-              reference: 'Import initial'
-            }] : []),
+            historiquesPaiements: [...(existingStudent?.historiquesPaiements || []), ...newPayments],
             dateNaissance: dateNaissance || existingStudent?.dateNaissance,
             lieuNaissance: lieuNaissance || existingStudent?.lieuNaissance,
             nationalite: nationalite || existingStudent?.nationalite,

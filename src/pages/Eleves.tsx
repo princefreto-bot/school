@@ -208,21 +208,28 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
             <h3 className="text-xs font-black text-slate-800 dark:text-emerald-400 uppercase tracking-widest mb-4">Écolage (1er versement)</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Montant payé (FCFA)</label>
+                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">{student ? 'Total payé (FCFA)' : 'Versement à l\'inscription (FCFA)'}</label>
                 <input
                   type="number" min={0}
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none transition-all dark:text-white"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none transition-all dark:text-white disabled:opacity-60 disabled:cursor-not-allowed"
                   value={form.dejaPaye}
                   onChange={(e) => setForm({ ...form, dejaPaye: Number(e.target.value) })}
+                  disabled={!!student}
                 />
+                <p className="text-[10px] text-slate-400 mt-1.5">
+                  {student
+                    ? 'Non modifiable ici : ajoutez ou supprimez un paiement depuis la page Paiements.'
+                    : 'Enregistré comme une transaction (visible dans Paiements, avec son reçu).'}
+                </p>
               </div>
               <div>
                 <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">N° Reçu associé</label>
                 <input
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none transition-all dark:text-white uppercase"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none transition-all dark:text-white uppercase disabled:opacity-60 disabled:cursor-not-allowed"
                   value={form.recu}
                   onChange={(e) => setForm({ ...form, recu: e.target.value })}
                   placeholder="Ex: R-001"
+                  disabled={!!student}
                 />
               </div>
             </div>
@@ -245,15 +252,17 @@ const StudentModal: React.FC<ModalProps> = ({ student, onClose }) => {
               </p>
             </div>
             <div>
-              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Montant déjà payé (FCFA)</label>
+              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">{student ? 'Inscription payée (FCFA)' : 'Versement à l\'inscription (FCFA)'}</label>
               <input
                 type="number" min={0}
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all dark:text-white"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all dark:text-white disabled:opacity-60 disabled:cursor-not-allowed"
                 value={form.inscriptionPaye}
                 onChange={(e) => setForm({ ...form, inscriptionPaye: Number(e.target.value) })}
-                disabled={form.statutElv !== 'NOUVEAU'}
+                disabled={!!student || form.statutElv !== 'NOUVEAU'}
               />
-              {form.statutElv !== 'NOUVEAU' && (
+              {student ? (
+                <p className="text-[10px] text-slate-400 mt-1.5">Non modifiable ici : ajoutez ou supprimez un paiement depuis la page Paiements.</p>
+              ) : form.statutElv !== 'NOUVEAU' && (
                 <p className="text-[10px] text-slate-400 mt-1.5">Aucun frais d'inscription pour un élève déjà inscrit avant cette année.</p>
               )}
             </div>
