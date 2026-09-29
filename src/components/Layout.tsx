@@ -11,7 +11,7 @@ import {
   ScanLine, IdCard, ShieldCheck, Activity, Database, Megaphone,
   BookOpen, Edit3, FileSpreadsheet, Sun, Moon, Calendar,
   PanelLeftClose, PanelLeftOpen, RefreshCw, Shield, Wallet, Landmark,
-  UserCircle, CalendarX, GraduationCap, HelpCircle
+  UserCircle, CalendarX, GraduationCap, HelpCircle, Mail
 } from 'lucide-react';
 
 import { SupportModal } from './SupportModal';
@@ -91,6 +91,7 @@ const SUPERADMIN_NAV_ITEMS: Omit<NavItem, 'badge'>[] = [
   { id: 'superadmin_pipeline',    label: 'Pipeline',        icon: <Target className="w-[18px] h-[18px]" /> },
   { id: 'superadmin_classeur',    label: 'Classeur Intelligent', icon: <Database className="w-[18px] h-[18px]" /> },
   { id: 'superadmin_notices',     label: 'Notice écoles',   icon: <Megaphone className="w-[18px] h-[18px]" /> },
+  { id: 'superadmin_emails',      label: 'E-mails directeurs', icon: <Mail className="w-[18px] h-[18px]" /> },
 ];
 
 const NAV_GROUPS: Record<string, string> = {
@@ -143,6 +144,7 @@ const NAV_GROUPS: Record<string, string> = {
   superadmin_pipeline: 'Croissance',
   superadmin_classeur: 'Croissance',
   superadmin_notices: 'Croissance',
+  superadmin_emails: 'Croissance',
 };
 
 // ── Real-time clock ──

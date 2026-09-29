@@ -28,6 +28,7 @@ const { getOverdueAlerts, markAlertContacted } = require('../controllers/superAd
 const { listProspects, createProspect, updateProspect, updateProspectStage, deleteProspect } = require('../controllers/prospectsController');
 const { getHandoffToken, redeemHandoff } = require('../controllers/classeurHandoffController');
 const { getPlatformNoticeAdmin, upsertPlatformNotice, deactivatePlatformNotice } = require('../controllers/platformNoticeController');
+const { listDirectorEmails, previewDirectorEmail, testDirectorEmail, sendDirectorEmail } = require('../controllers/directorEmailController');
 
 const {
     getAllCreators,
@@ -100,5 +101,11 @@ router.post('/classeur/redeem-handoff', redeemHandoff);
 router.get('/notice', authenticateToken, requireSuperAdmin, getPlatformNoticeAdmin);
 router.put('/notice', authenticateToken, requireSuperAdmin, upsertPlatformNotice);
 router.delete('/notice', authenticateToken, requireSuperAdmin, deactivatePlatformNotice);
+
+// E-mails directeurs (Resend) — nouveautes, incidents, guides, relances
+router.get('/director-emails', authenticateToken, requireSuperAdmin, listDirectorEmails);
+router.post('/director-emails/preview', authenticateToken, requireSuperAdmin, previewDirectorEmail);
+router.post('/director-emails/test', authenticateToken, requireSuperAdmin, testDirectorEmail);
+router.post('/director-emails/send', authenticateToken, requireSuperAdmin, sendDirectorEmail);
 
 module.exports = router;

@@ -40,6 +40,51 @@ async function sendResendEmail(toEmail, subject, htmlContent) {
     }
 }
 
+/**
+ * Envoi groupe via l'API batch Resend (100 e-mails max par appel).
+ * @param {Array<{to: string, subject: string, html: string, headers?: object}>} emails
+ * @returns {Promise<{sent: number, failed: number}>}
+ */
+async function sendResendBatch(emails) {
+    if (!RESEND_API_KEY) {
+        throw new Error('RESEND_API_KEY n\'est pas configurée sur le serveur (variable d\'environnement manquante).');
+    }
+    const replyTo = process.env.SUPPORT_EMAIL || 'support@dghubschool.com';
+    let sent = 0;
+    let failed = 0;
+    for (let i = 0; i < emails.length; i += 100) {
+        const chunk = emails.slice(i, i + 100);
+        try {
+            const response = await fetch('https://api.resend.com/emails/batch', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${RESEND_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(chunk.map(e => ({
+                    from: FROM_EMAIL,
+                    to: [e.to],
+                    reply_to: replyTo,
+                    subject: e.subject,
+                    html: e.html,
+                    ...(e.headers ? { headers: e.headers } : {})
+                })))
+            });
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.message || `Erreur HTTP ${response.status}`);
+            }
+            sent += chunk.length;
+        } catch (error) {
+            console.error(`[Mailer] Échec d'un lot batch (${chunk.length} e-mails) :`, error.message);
+            failed += chunk.length;
+        }
+        // Limite Resend : 2 requetes/seconde par defaut.
+        if (i + 100 < emails.length) await new Promise(r => setTimeout(r, 600));
+    }
+    return { sent, failed };
+}
+
 async function sendVerificationEmail(toEmail, schoolName, verificationCode) {
     const htmlContent = `
         <div style="font-family: 'Poppins', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #f1f5f9; border-radius: 16px; background-color: #ffffff;">
@@ -197,4 +242,4 @@ async function sendSuperadminLicensePaymentAlert(info) {
     }
 }
 
-module.exports = { sendVerificationEmail, sendPasswordResetEmail, sendSuperadminLicensePaymentAlert };
+module.exports = { sendResendEmail, sendResendBatch, sendVerificationEmail, sendPasswordResetEmail, sendSuperadminLicensePaymentAlert };

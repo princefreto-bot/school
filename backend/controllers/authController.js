@@ -778,6 +778,9 @@ async function verifySchoolEmail(req, res) {
 
         console.log(`🏫 Nouvelle école enregistrée et validée par e-mail : ${school.name} (${school.slug})`);
 
+        // E-mail de bienvenue (guide + contacts support), sans bloquer la reponse.
+        require('../services/directorEmailService').sendWelcomeEmail(school).catch(() => {});
+
         // Signer directement un token JWT pour connecter l'utilisateur
         const token = jwt.sign(
             { id: admin.id, nom: admin.nom, role: admin.role, schoolSlug: school.slug },

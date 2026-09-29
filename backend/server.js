@@ -144,6 +144,7 @@ app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/personnel', require('./routes/personnel'));
 app.use('/api/superadmin', require('./routes/superAdmin')); // 👑 Routes propriétaire SaaS
 app.use('/api/platform-notice', require('./routes/platformNotice'));
+app.use('/api/director-emails', require('./routes/directorEmails'));
 app.use('/api/creator', require('./routes/creator'));
 app.use('/api/documents', require('./routes/document'));
 app.use('/api/withdrawals', require('./routes/withdrawal'));
@@ -656,6 +657,7 @@ const server = app.listen(PORT, () => {
     if (process.env.NODE_ENV === 'production') {
         require('./services/backupService').start();
         require('./services/reminderService').start();
+        require('./services/directorEmailService').start();
     }
 });
 

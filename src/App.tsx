@@ -102,6 +102,7 @@ const SuperAdminAuditorPage = lazy(() => import('./pages/superadmin/SuperAdminAu
 const SuperAdminAlertsPage = lazy(() => import('./pages/superadmin/SuperAdminAlertsPage').then(m => ({ default: m.SuperAdminAlertsPage })));
 const SuperAdminPipelinePage = lazy(() => import('./pages/superadmin/SuperAdminPipelinePage').then(m => ({ default: m.SuperAdminPipelinePage })));
 const SuperAdminNoticesPage = lazy(() => import('./pages/superadmin/SuperAdminNoticesPage').then(m => ({ default: m.SuperAdminNoticesPage })));
+const SuperAdminEmailsPage = lazy(() => import('./pages/superadmin/SuperAdminEmailsPage').then(m => ({ default: m.SuperAdminEmailsPage })));
 const SelectionEnseignant = lazy(() => import('./pages/SelectionEnseignant').then(m => ({ default: m.SelectionEnseignant })));
 const CreatorDashboard = lazy(() => import('./pages/creator/CreatorDashboard').then(m => ({ default: m.CreatorDashboard })));
 const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
@@ -177,7 +178,7 @@ const PageContent: React.FC = () => {
     const superadminPages: AppPage[] = [
       'superadmin_overview', 'superadmin_schools', 'superadmin_creators', 'superadmin_finance',
       'superadmin_withdrawals', 'superadmin_cashflow', 'superadmin_auditor', 'superadmin_alerts',
-      'superadmin_pipeline', 'superadmin_notices'
+      'superadmin_pipeline', 'superadmin_notices', 'superadmin_emails'
     ];
     const page: AppPage = superadminPages.includes(currentPage as AppPage) ? (currentPage as AppPage) : 'superadmin_overview';
     return (
@@ -194,6 +195,7 @@ const PageContent: React.FC = () => {
               case 'superadmin_alerts': return <SuperAdminAlertsPage />;
               case 'superadmin_pipeline': return <SuperAdminPipelinePage />;
               case 'superadmin_notices': return <SuperAdminNoticesPage />;
+              case 'superadmin_emails': return <SuperAdminEmailsPage />;
               default: return <SuperAdminOverviewPage />;
             }
           })()}

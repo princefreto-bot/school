@@ -59,6 +59,15 @@ export const superAdminApi = {
   saveNotice: (payload: { title?: string; message?: string; imageUrl?: string | null; active: boolean }) =>
     request('/superadmin/notice', { method: 'PUT', body: JSON.stringify(payload) }),
   deactivateNotice: () => request('/superadmin/notice', { method: 'DELETE' }),
+
+  // E-mails directeurs (Resend) — nouveautés, incidents, guides, relances
+  getDirectorEmails: () => request('/superadmin/director-emails'),
+  previewDirectorEmail: (payload: { category: string; content: any }) =>
+    request('/superadmin/director-emails/preview', { method: 'POST', body: JSON.stringify(payload) }),
+  testDirectorEmail: (payload: { category: string; subject: string; content: any; to?: string }) =>
+    request('/superadmin/director-emails/test', { method: 'POST', body: JSON.stringify(payload) }),
+  sendDirectorEmail: (payload: { category: string; subject: string; content: any }) =>
+    request('/superadmin/director-emails/send', { method: 'POST', body: JSON.stringify(payload) }),
 };
 
 export function formatFCFA(n: number) {

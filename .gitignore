@@ -50,3 +50,4 @@ android/key.properties
 .agents/
 .claude/settings.local.json
 .claude/skills/
+backend/release-notes/*.preview.html

@@ -1,0 +1,16 @@
+{
+  "category": "update",
+  "subject": "Nouveautés de septembre : reçus A5, promotion des élèves, app Android 1.2",
+  "title": "Ce qui est nouveau sur DGhubSchool",
+  "intro": "Pour cette rentrée, nous avons amélioré DGhubSchool sur les points que vous nous avez le plus remontés. Voici les nouveautés, déjà disponibles sur votre compte :",
+  "highlights": [
+    "**Promotion des élèves** : passez toute une classe en classe supérieure à la rentrée, sans ressaisie",
+    "**Tranches et frais d'inscription par année scolaire**, avec des montants fixés par classe",
+    "**Reçus au format A5 compact** : un reçu par transaction, deux fois moins de papier",
+    "**Chaque montant payé est tracé** par une transaction, et un paiement saisi par erreur peut être supprimé",
+    "**Application Android 1.2** : vous êtes prévenu automatiquement quand une mise à jour sort"
+  ],
+  "body": "Nous avons aussi corrigé plusieurs problèmes de synchronisation des notes et de l'année scolaire. Si quelque chose ne fonctionne pas comme prévu chez vous, dites-le-nous : nous corrigeons vite.",
+  "ctaLabel": "",
+  "ctaUrl": ""
+}
