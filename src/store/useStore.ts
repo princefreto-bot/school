@@ -669,7 +669,7 @@ export const useStore = create<AppState>()(
           const allowed: AppPage[] = [
             'superadmin_overview', 'superadmin_schools', 'superadmin_creators', 'superadmin_finance',
             'superadmin_withdrawals', 'superadmin_cashflow', 'superadmin_auditor', 'superadmin_alerts',
-            'superadmin_pipeline'
+            'superadmin_pipeline', 'superadmin_notices', 'superadmin_emails'
           ];
           if (!allowed.includes(page)) {
             set({ currentPage: 'superadmin_overview' });
