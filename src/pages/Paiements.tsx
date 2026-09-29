@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Student, Payment, User } from '../types';
-import { CreditCard, Plus, X, Check, Search, Clock, ChevronDown, ChevronUp, Loader2, Wallet, ArrowUpRight, TrendingDown, AlertCircle, FileText } from 'lucide-react';
+import { CreditCard, Plus, X, Check, Search, Clock, ChevronDown, ChevronUp, Loader2, Wallet, ArrowUpRight, TrendingDown, AlertCircle, FileText, Trash2 } from 'lucide-react';
 import { CLASS_CONFIG } from '../data/classConfig';
 import { API_BASE_URL } from '../config';
 import { parseResponse, getAuthHeaders } from '../services/apiHelpers';
@@ -240,6 +240,14 @@ const PaymentModal: React.FC<{ student: Student; onClose: () => void }> = ({ stu
 const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => void; user: User | null }> = ({ student, onPay, user }) => {
   if (!user) return null;
 
+  const deletePayment = useStore((s) => s.deletePayment);
+  const canDelete = user.role === 'admin' || user.role === 'directeur' || user.role === 'directeur_general';
+  const handleDeletePayment = (p: Payment) => {
+    const label = `${new Intl.NumberFormat('fr-FR').format(p.montant)} FCFA du ${fmtDate(p.date)}`;
+    if (!window.confirm(`Supprimer ce paiement (${label}) pour ${student.prenom} ${student.nom} ?\n\nCette action est irréversible : le montant sera retiré du total payé de l'élève.`)) return;
+    deletePayment(student.id, p.id);
+  };
+
   const [open, setOpen] = useState(false);
   const taux = Math.round((student.dejaPaye / student.ecolage) * 100);
 
@@ -331,6 +339,16 @@ const StudentPaymentRow: React.FC<{ student: Student; onPay: (s: Student) => voi
                   >
                     <FileText className="w-3.5 h-3.5" /> Reçu
                   </RecuPrintButton>
+                  {canDelete && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleDeletePayment(p); }}
+                      className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-700 hover:bg-rose-500 hover:text-white text-slate-600 dark:text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors"
+                      title="Supprimer ce paiement"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Supprimer
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

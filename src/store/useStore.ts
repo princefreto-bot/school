@@ -91,6 +91,7 @@ export interface AppState {
   updateMultipleStudents: (updates: { id: string; updates: Partial<Student> }[]) => void;
   deleteStudent: (id: string) => void;
   addPayment: (studentId: string, payment: Omit<Payment, 'id' | 'studentId'>) => void;
+  deletePayment: (studentId: string, paymentId: string) => Promise<void>;
 
   // Parents
   parents: Parent[];
@@ -867,6 +868,66 @@ export const useStore = create<AppState>()(
           presences: get().presences,
           activityLogs: get().activityLogs
         }).then(() => set({ lastSyncTimestamp: Date.now() }));
+      },
+      deletePayment: async (studentId, paymentId) => {
+        const students = get().students.map((s) => {
+          if (s.id !== studentId) return s;
+          const payment = s.historiquesPaiements.find((p) => p.id === paymentId);
+          if (!payment) return s;
+          const type = payment.type || 'ecolage';
+          const historiquesPaiements = s.historiquesPaiements.filter((p) => p.id !== paymentId);
+
+          if (type === 'inscription') {
+            const newInscriptionPaye = Math.max(0, (s.inscriptionPaye || 0) - payment.montant);
+            const newInscriptionRestant = Math.max(0, (s.fraisInscription || 0) - newInscriptionPaye);
+            return {
+              ...s,
+              inscriptionPaye: newInscriptionPaye,
+              inscriptionRestant: newInscriptionRestant,
+              historiquesPaiements,
+              updatedAt: new Date().toISOString(),
+            };
+          }
+
+          const newDejaPaye = Math.max(0, s.dejaPaye - payment.montant);
+          const newRestant = Math.max(0, s.ecolage - newDejaPaye);
+          return {
+            ...s,
+            dejaPaye: newDejaPaye,
+            restant: newRestant,
+            status: computeStatus(newRestant, s.ecolage),
+            historiquesPaiements,
+            updatedAt: new Date().toISOString(),
+          };
+        });
+
+        const u = get().user;
+        if (u) {
+          const student = get().students.find(s => s.id === studentId);
+          get().addActivityLog(createActivityLog(u.nom, u.role, 'paiement', `Suppression d'un paiement pour ${student ? student.prenom + ' ' + student.nom : studentId}`));
+        }
+
+        set({ students, lastSyncTimestamp: Date.now() });
+
+        // Le paiement vit dans sa propre table : la sync (upsert seul) ne le supprimerait jamais.
+        try {
+          const res = await fetch(`${API_BASE_URL}/sync/payment/${paymentId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        } catch (err) {
+          console.error('Failed to delete payment from cloud:', err);
+          alert("La suppression du paiement n'a pas pu être enregistrée sur le serveur. Rechargez la page et réessayez.");
+          return;
+        }
+
+        await syncToBackend({
+          students: get().students,
+          presences: get().presences,
+          activityLogs: get().activityLogs
+        });
+        set({ lastSyncTimestamp: Date.now() });
       },
 
       // ── Parents ──────────────────────────────────────────

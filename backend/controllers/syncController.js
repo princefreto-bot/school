@@ -970,6 +970,17 @@ async function deleteNote(req, res) {
     }
 }
 
+async function deletePayment(req, res) {
+    if (!req.user || !['admin', 'directeur', 'directeur_general'].includes(req.user.role)) return res.status(403).json({ error: 'Non autorisé.' });
+    try {
+        const { error } = await supabase.from(`payments_${req.user.schoolSlug}`).delete().eq('id', req.params.id);
+        if (error) throw error;
+        return res.json({ success: true, message: 'Paiement supprimé.' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
 async function deleteStudent(req, res) {
     if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) return res.status(403).json({ error: 'Non autorisé.' });
     try {
@@ -1006,4 +1017,4 @@ async function deleteAcademicYear(req, res) {
     }
 }
 
-module.exports = { syncFromFrontend, syncToFrontend, clearPresences, clearActivityLogs, clearStudents, deleteMatiere, deleteClasseMatiere, deleteNote, deleteStudent, deleteAcademicYear };
+module.exports = { syncFromFrontend, syncToFrontend, clearPresences, clearActivityLogs, clearStudents, deleteMatiere, deleteClasseMatiere, deleteNote, deletePayment, deleteStudent, deleteAcademicYear };
