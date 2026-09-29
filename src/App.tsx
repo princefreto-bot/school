@@ -30,6 +30,7 @@ const Login = lazy(() => import('./components/Login').then(m => ({ default: m.Lo
 const Layout = lazy(() => import('./components/Layout').then(m => ({ default: m.Layout })));
 const AnnouncementPopup = lazy(() => import('./components/AnnouncementPopup').then(m => ({ default: m.AnnouncementPopup })));
 const PlatformNoticeModal = lazy(() => import('./components/PlatformNoticeModal').then(m => ({ default: m.PlatformNoticeModal })));
+const MobileUpdateToast = lazy(() => import('./components/MobileUpdateToast').then(m => ({ default: m.MobileUpdateToast })));
 const Confidentialite = lazy(() => import('./pages/Confidentialite').then(m => ({ default: m.Confidentialite })));
 const PortailEcole = lazy(() => import('./pages/PortailEcole').then(m => ({ default: m.PortailEcole })));
 const PortailPersonnel = lazy(() => import('./pages/PortailPersonnel').then(m => ({ default: m.PortailPersonnel })));
@@ -806,6 +807,7 @@ export function App() {
                 </Suspense>
                 <AnnouncementPopup />
                 {NOTICE_ELIGIBLE_ROLES.includes(user?.role || '') && <PlatformNoticeModal />}
+                <Suspense fallback={null}><MobileUpdateToast /></Suspense>
               </Layout>
             ) : (
               <RedirectToLogin />
@@ -823,6 +825,7 @@ export function App() {
                   </Suspense>
                   <AnnouncementPopup />
                   {NOTICE_ELIGIBLE_ROLES.includes(user?.role || '') && <PlatformNoticeModal />}
+                  <Suspense fallback={null}><MobileUpdateToast /></Suspense>
                 </Layout>
               ) : (
                 <Suspense fallback={<LoadingSpinner />}><Login /></Suspense>

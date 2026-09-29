@@ -11,6 +11,7 @@ import {
 import { Footer } from '../components/Footer';
 import { MorphBlob } from '../components/MorphBlob';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import { APK_DOWNLOAD_URL, APK_VERSION, APK_SIZE } from '../data/mobileApp';
 
 // ── Mockup téléphone incliné avec splash screen (logo centré) ─
 type Variant = 'dark' | 'amber' | 'light';
@@ -105,12 +106,6 @@ const PhoneMockup: React.FC<PhoneMockupProps> = ({
   );
 };
 
-// URL de l'APK à héberger. Deux options :
-// 1) Fichier dans public/ → /downloads/dghubschool.apk (recommandé, servi statiquement)
-// 2) GitHub Releases → https://github.com/.../releases/download/vX.Y.Z/app-release.apk
-const APK_DOWNLOAD_URL = '/downloads/dghubschool.apk';
-const APK_VERSION = '1.1.0';
-const APK_SIZE = '~18 Mo';
 
 const texts = {
   fr: {
@@ -124,7 +119,7 @@ const texts = {
     apkMeta: `Version ${APK_VERSION} · ${APK_SIZE} · Android 7+`,
     qrHint: 'Scannez ce QR code depuis votre téléphone',
     stepsTitle: 'Étapes pour installer l\'APK',
-    step1: 'Cliquez sur « Télécharger l\'APK » ci-dessus.',
+    step1: 'Si l\'ancienne version (1.1.0 ou antérieure) est installée, désinstallez-la d\'abord, puis cliquez sur « Télécharger l\'APK » ci-dessus.',
     step2: 'Une fois le fichier téléchargé, ouvrez-le depuis votre gestionnaire de fichiers ou la barre de notification.',
     step3: 'Autorisez l\'installation d\'applications de cette source si Android le demande (une seule fois).',
     step4: 'Cliquez sur « Installer » puis « Ouvrir ». L\'icône DGhubSchool apparaît sur votre écran d\'accueil.',
@@ -154,7 +149,7 @@ const texts = {
     apkMeta: `Version ${APK_VERSION} · ${APK_SIZE} · Android 7+`,
     qrHint: 'Scan this QR code from your phone',
     stepsTitle: 'Steps to install the APK',
-    step1: 'Click "Download the APK" above.',
+    step1: 'If the old version (1.1.0 or earlier) is installed, uninstall it first, then click "Download the APK" above.',
     step2: 'Once downloaded, open the file from your file manager or the notification bar.',
     step3: 'Allow installation from this source if Android asks (only the first time).',
     step4: 'Tap "Install" then "Open". The DGhubSchool icon will appear on your home screen.',
