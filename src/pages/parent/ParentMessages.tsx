@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { parentApi } from '../../services/parentApi';
 import { MessageSquare, Bell, Loader2, AlertCircle } from 'lucide-react';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 export const ParentMessages: React.FC = () => {
     const [messages, setMessages] = useState<any[]>([]);
@@ -26,8 +27,7 @@ export const ParentMessages: React.FC = () => {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-                <Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" />
-                <p>Récupération de vos messages...</p>
+                <BrandLoader label="Récupération de vos messages" />
             </div>
         );
     }

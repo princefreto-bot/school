@@ -9,6 +9,7 @@ import { formatFCFA } from '../../services/superAdminApi';
 import { CreateCreatorModal } from '../../components/superadmin/CreateCreatorModal';
 import { LinkSchoolModal } from '../../components/superadmin/LinkSchoolModal';
 import { CreatorWithStats, SchoolWithStats } from './types';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 export const SuperAdminCreatorsPage: React.FC = () => {
   const [creators, setCreators] = useState<CreatorWithStats[]>([]);
@@ -84,7 +85,7 @@ export const SuperAdminCreatorsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 text-amber-500 animate-spin" />
+        <BrandLoader />
       </div>
     );
   }

@@ -6,6 +6,7 @@ import { RefreshCw, Check, X, ExternalLink } from 'lucide-react';
 import { API_BASE_URL } from '../../config';
 import { getAuthHeaders } from '../../services/apiHelpers';
 import { formatFCFA } from '../../services/superAdminApi';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 export const SuperAdminWithdrawalsPage: React.FC = () => {
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
@@ -96,7 +97,7 @@ export const SuperAdminWithdrawalsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 text-amber-500 animate-spin" />
+        <BrandLoader />
       </div>
     );
   }

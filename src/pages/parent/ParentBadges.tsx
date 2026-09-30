@@ -1,6 +1,7 @@
 import React from 'react';
 import { useStore } from '../../store/useStore';
 import { Award, ShieldCheck, Zap, Star, Loader2, AlertCircle, TrendingUp, Clock, Medal } from 'lucide-react';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 export const ParentBadges: React.FC = () => {
     const { badges } = useStore();
@@ -32,8 +33,7 @@ export const ParentBadges: React.FC = () => {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center py-20">
-                <Loader2 className="w-12 h-12 animate-spin text-blue-600 mb-4" />
-                <p className="text-slate-500 font-medium">Récupération de vos trophées...</p>
+                <BrandLoader label="Récupération de vos trophées" />
             </div>
         );
     }

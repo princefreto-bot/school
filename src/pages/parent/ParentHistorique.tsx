@@ -4,6 +4,7 @@ import { Clock, Download, Loader2, AlertCircle, CreditCard, UserCheck, Calendar 
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 export const ParentHistorique: React.FC = () => {
     const [payments, setPayments] = useState<any[]>([]);
@@ -86,8 +87,7 @@ export const ParentHistorique: React.FC = () => {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-                <Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" />
-                <p>Chargement de votre historique...</p>
+                <BrandLoader label="Chargement de votre historique" />
             </div>
         );
     }

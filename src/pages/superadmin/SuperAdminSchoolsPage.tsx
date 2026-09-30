@@ -13,6 +13,7 @@ import { useStore } from '../../store/useStore';
 import { formatFCFA } from '../../services/superAdminApi';
 import { CreateSchoolModal } from '../../components/superadmin/CreateSchoolModal';
 import { SchoolWithStats, GlobalStats } from './types';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 function getStatusBadge(status: SchoolWithStats['status']) {
   const map = {
@@ -163,7 +164,7 @@ export const SuperAdminSchoolsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 text-amber-500 animate-spin" />
+        <BrandLoader />
       </div>
     );
   }

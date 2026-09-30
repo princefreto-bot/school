@@ -6,6 +6,7 @@ import { ShieldAlert, RefreshCw, AlertOctagon, AlertTriangle, Info } from 'lucid
 import { superAdminApi } from '../../services/superAdminApi';
 import { StatCard } from '../../components/superadmin/StatCard';
 import { AuditFindingCard, AuditFinding } from '../../components/superadmin/AuditFindingCard';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 type SeverityFilter = 'all' | AuditFinding['severity'];
 
@@ -72,7 +73,7 @@ export const SuperAdminAuditorPage: React.FC = () => {
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <RefreshCw className="w-8 h-8 text-amber-500 animate-spin" />
+          <BrandLoader />
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center bg-slate-900 border border-slate-800 rounded-2xl">

@@ -7,6 +7,7 @@ import { API_BASE_URL } from '../config';
 import { parseResponse, getAuthHeaders } from '../services/apiHelpers';
 import { getCycle } from '../data/classConfig';
 import { RecuPrintButton } from '../components/pdf/RecuPrintButton';
+import { BrandLoader } from '../components/brand/BrandLoader';
 
 const computeStatus = (restant: number, ecolage: number): 'Soldé' | 'Partiel' | 'Non soldé' => {
   if (restant <= 0) return 'Soldé';
@@ -373,8 +374,7 @@ export const Paiements: React.FC = () => {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-12 h-12 animate-spin text-amber-500 mb-6" />
-        <p className="text-sm font-black text-slate-500 uppercase tracking-widest animate-pulse">Chargement de la session...</p>
+        <BrandLoader label="Chargement de la session" />
       </div>
     );
   }
@@ -520,8 +520,7 @@ export const Paiements: React.FC = () => {
       {/* ── LISTE ── */}
       {loading ? (
         <div className="flex flex-col items-center justify-center min-h-[40vh]">
-          <Loader2 className="w-10 h-10 animate-spin text-amber-500 mb-4" />
-          <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest animate-pulse">Chargement des dossiers...</p>
+          <BrandLoader label="Chargement des dossiers" />
         </div>
       ) : students.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-[50vh] text-center animate-fadeIn">

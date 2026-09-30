@@ -8,6 +8,7 @@ import { getAuthHeaders } from '../../services/apiHelpers';
 import { formatFCFA } from '../../services/superAdminApi';
 import { SuperAdminLicensePaymentsPanel } from '../../components/SuperAdminLicensePaymentsPanel';
 import { GlobalStats } from './types';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 export const SuperAdminFinancePage: React.FC = () => {
   const [stats, setStats] = useState<GlobalStats | null>(null);
@@ -69,7 +70,7 @@ export const SuperAdminFinancePage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 text-amber-500 animate-spin" />
+        <BrandLoader />
       </div>
     );
   }

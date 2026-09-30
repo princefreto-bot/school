@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Megaphone, RefreshCw, Upload, X, Save, EyeOff, Info } from 'lucide-react';
 import { superAdminApi } from '../../services/superAdminApi';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 interface Notice {
   id: string;
@@ -126,7 +127,7 @@ export const SuperAdminNoticesPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 text-amber-500 animate-spin" />
+        <BrandLoader />
       </div>
     );
   }

@@ -6,6 +6,7 @@ import { TrendingUp, TrendingDown, Scale, RefreshCw, Info } from 'lucide-react';
 import { superAdminApi, formatFCFA } from '../../services/superAdminApi';
 import { StatCard } from '../../components/superadmin/StatCard';
 import { CashflowChart, CashflowPoint } from '../../components/superadmin/CashflowChart';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 export const SuperAdminCashflowPage: React.FC = () => {
   const [trend, setTrend] = useState<CashflowPoint[]>([]);
@@ -51,7 +52,7 @@ export const SuperAdminCashflowPage: React.FC = () => {
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <RefreshCw className="w-8 h-8 text-amber-500 animate-spin" />
+          <BrandLoader />
         </div>
       ) : (
         <>

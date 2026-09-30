@@ -19,6 +19,7 @@ import { chatApi } from '../services/chatApi';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { superAdminApi } from '../services/superAdminApi';
 import { CLASSEUR_FRONTEND_URL } from '../config';
+import { BrandLoader } from './brand/BrandLoader';
 
 interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: number }
 
@@ -844,9 +845,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         <div className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-xl font-sans select-none pointer-events-auto">
           <div className="text-center space-y-5 animate-in fade-in zoom-in-95 duration-350">
             <div className="flex justify-center">
-              <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/25 rounded-none flex items-center justify-center text-amber-500 shadow-lg shadow-amber-500/5">
-                <RefreshCw className="w-8 h-8 animate-spin" />
-              </div>
+              <BrandLoader size="lg" label="" />
             </div>
             <div className="space-y-1.5">
               <h3 className="text-sm font-black text-slate-100 uppercase tracking-wider">

@@ -15,6 +15,7 @@ import { ParentTodaySchedule } from '../../components/ParentTodaySchedule';
 import { chatApi } from '../../services/chatApi';
 import { API_BASE_URL } from '../../config';
 import { getAuthHeaders } from '../../services/apiHelpers';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 // ── Types annonce ────────────────────────────────────────────
 interface Announcement {
@@ -264,8 +265,7 @@ export const ParentDashboard: React.FC = () => {
     if (loading && children.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-                <Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" />
-                <p className="font-medium">Préparation de votre espace parent...</p>
+                <BrandLoader label="Préparation de votre espace parent" />
                 <p className="text-xs text-slate-400 mt-1">Cela ne prend que quelques secondes.</p>
             </div>
         );

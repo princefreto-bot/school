@@ -5,6 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { BellRing, RefreshCw, Info } from 'lucide-react';
 import { superAdminApi } from '../../services/superAdminApi';
 import { AlertFeedItem, OverdueAlert } from '../../components/superadmin/AlertFeedItem';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 export const SuperAdminAlertsPage: React.FC = () => {
   const [alerts, setAlerts] = useState<OverdueAlert[]>([]);
@@ -47,7 +48,7 @@ export const SuperAdminAlertsPage: React.FC = () => {
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <RefreshCw className="w-8 h-8 text-amber-500 animate-spin" />
+          <BrandLoader />
         </div>
       ) : alerts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center bg-slate-900 border border-slate-800 rounded-2xl">

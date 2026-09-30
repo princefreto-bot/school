@@ -3,6 +3,7 @@ import { parentApi } from '../services/parentApi';
 import { useStore } from '../store/useStore';
 import { Users, Phone, Calendar, MessageSquare, Search, Loader2, UserCheck, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { BrandLoader } from '../components/brand/BrandLoader';
 
 export const ParentsList: React.FC = () => {
     const parents = useStore((s) => s.parents);
@@ -52,8 +53,7 @@ export const ParentsList: React.FC = () => {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center py-20">
-                <Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" />
-                <p className="text-slate-500">Chargement des comptes parents...</p>
+                <BrandLoader label="Chargement des comptes parents" />
             </div>
         );
     }

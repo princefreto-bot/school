@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { parentApi } from '../services/parentApi';
 import { Search, UserPlus, GraduationCap, X, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { BrandLoader } from './brand/BrandLoader';
 
 interface LinkStudentModalProps {
     isOpen: boolean;
@@ -149,8 +150,7 @@ export const LinkStudentModal: React.FC<LinkStudentModalProps> = ({ isOpen, onCl
                     <div className="space-y-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
                         {loading && (
                             <div className="flex flex-col items-center justify-center py-10 text-slate-400">
-                                <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-2" />
-                                <p className="text-xs">Recherche en cours...</p>
+                                <BrandLoader label="Recherche en cours" />
                             </div>
                         )}
 

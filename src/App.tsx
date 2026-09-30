@@ -116,14 +116,7 @@ const SubmitStory = lazy(() => import('./pages/SubmitStory').then(m => ({ defaul
 const TelechargerApp = lazy(() => import('./pages/TelechargerApp').then(m => ({ default: m.TelechargerApp })));
 const CookieConsent = lazy(() => import('./components/CookieConsent').then(m => ({ default: m.CookieConsent })));
 
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center p-12">
-    <div className="flex flex-col items-center gap-3">
-      <div className="spinner-ring" />
-      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider animate-pulse">Chargement...</span>
-    </div>
-  </div>
-);
+const LoadingSpinner = () => <PageLoader />;
 
 const RedirectWithSearch: React.FC<{ to: string }> = ({ to }) => {
   const location = useLocation();
@@ -338,6 +331,7 @@ const PageContent: React.FC = () => {
 };
 
 import { useGridToggle } from './hooks/useGridToggle';
+import { PageLoader, BrandLoader } from './components/brand/BrandLoader';
 
 const pageMetadata: Record<string, Record<string, { title: string; description: string }>> = {
   fr: {
@@ -743,6 +737,13 @@ export function App() {
       <ScrollToTop />
       <DayThemeOverlay />
       <Routes>
+        {import.meta.env.DEV && (
+          <Route path="/:lang/__loader-preview" element={
+            <div className="min-h-screen grid grid-cols-1 md:grid-cols-3 place-items-center gap-8 p-8 bg-slate-50">
+              <BrandLoader size="sm" /><BrandLoader size="md" /><BrandLoader size="lg" label="Préparation de votre école" />
+            </div>
+          } />
+        )}
         {/* Prefixed routes */}
         <Route path="/:lang/confidentialite" element={<Suspense fallback={<LoadingSpinner />}><Confidentialite /></Suspense>} />
         <Route path="/:lang/conditions-utilisation" element={<Suspense fallback={<LoadingSpinner />}><ConditionsUtilisation /></Suspense>} />

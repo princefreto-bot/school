@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Mail, RefreshCw, Send, FlaskConical, Sparkles, AlertTriangle, BookOpen, BellRing, Clock, CheckCircle2 } from 'lucide-react';
 import { superAdminApi } from '../../services/superAdminApi';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 type Category = 'update' | 'incident' | 'guide' | 'reminder';
 
@@ -182,7 +183,7 @@ export const SuperAdminEmailsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 text-amber-500 animate-spin" />
+        <BrandLoader />
       </div>
     );
   }

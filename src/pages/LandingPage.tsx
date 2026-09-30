@@ -31,6 +31,7 @@ import { Footer } from '../components/Footer';
 import { BACKEND_URL } from '../config';
 import { MorphBlob } from '../components/MorphBlob';
 import { AnimatedCounter } from '../components/AnimatedCounter';
+import { WordRise, ScrollWords } from '../components/brand/TextReveal';
 
 // ── Texts (FR / EN) — copywriting conservé ──────────────────
 const TEXTS = {
@@ -643,12 +644,10 @@ export const LandingPage: React.FC = () => {
                 ⚙️ {t.features}
               </span>
               <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight font-jakarta">
-                {lang === 'fr' ? 'Un seul outil. Une puissance infinie.' : 'One tool. Infinite capability.'}
+                <WordRise text={lang === 'fr' ? 'Un seul outil. Une puissance infinie.' : 'One tool. Infinite capability.'} />
               </h2>
               <p className="text-slate-500 text-sm md:text-base font-medium">
-                {lang === 'fr' 
-                  ? 'Fini l\'éparpillement. DGhubSchool réunit tous les aspects critiques du pilotage de votre école.'
-                  : 'No more switching between systems. DGhubSchool unites every critical aspect of your school management.'}
+                <ScrollWords text={lang === 'fr' ? 'Fini l\'éparpillement. DGhubSchool réunit tous les aspects critiques du pilotage de votre école.' : 'No more switching between systems. DGhubSchool unites every critical aspect of your school management.'} />
               </p>
             </div>
 
@@ -661,8 +660,8 @@ export const LandingPage: React.FC = () => {
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-200/50 px-3 py-1 rounded-full">{t.paymentBadge}</span>
                   </div>
-                  <h3 className="text-xl md:text-2xl font-black text-slate-950 group-hover:text-amber-600 transition-colors font-jakarta mb-3">{t.paymentTracking}</h3>
-                  <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-medium mb-6">{t.paymentDesc}</p>
+                  <h3 className="text-xl md:text-2xl font-black text-slate-950 group-hover:text-amber-600 transition-colors font-jakarta mb-3"><WordRise text={t.paymentTracking} /></h3>
+                  <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-medium mb-6"><ScrollWords text={t.paymentDesc} /></p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-slate-200/50">
                   {[
@@ -738,8 +737,8 @@ export const LandingPage: React.FC = () => {
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-200/50 px-3 py-1 rounded-full">{t.qrCardsBadge}</span>
                   </div>
-                  <h3 className="text-xl md:text-2xl font-black text-slate-950 group-hover:text-violet-600 transition-colors font-jakarta mb-3">{t.qrCardsTitle}</h3>
-                  <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-medium mb-6">{t.qrCardsDesc}</p>
+                  <h3 className="text-xl md:text-2xl font-black text-slate-950 group-hover:text-violet-600 transition-colors font-jakarta mb-3"><WordRise text={t.qrCardsTitle} /></h3>
+                  <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-medium mb-6"><ScrollWords text={t.qrCardsDesc} /></p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-slate-200/50">
                   {[
@@ -812,8 +811,8 @@ export const LandingPage: React.FC = () => {
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-200/50 px-3 py-1 rounded-full">{t.timetableBadge}</span>
                   </div>
-                  <h3 className="text-xl md:text-2xl font-black text-slate-950 group-hover:text-rose-600 transition-colors font-jakarta mb-3">{t.timetableTitle}</h3>
-                  <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-medium">{t.timetableDesc}</p>
+                  <h3 className="text-xl md:text-2xl font-black text-slate-950 group-hover:text-rose-600 transition-colors font-jakarta mb-3"><WordRise text={t.timetableTitle} /></h3>
+                  <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-medium"><ScrollWords text={t.timetableDesc} /></p>
                 </div>
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 md:pl-8 md:border-l border-slate-200/50">
                   {[
@@ -849,12 +848,10 @@ export const LandingPage: React.FC = () => {
                 ✨ {lang === 'fr' ? 'Expérience interactive' : 'Interactive Demo'}
               </span>
               <h2 className="text-3xl md:text-4xl font-black text-slate-950 uppercase tracking-tight font-jakarta">
-                {lang === 'fr' ? 'Vivez le scan en direct' : 'Experience the scan live'}
+                <WordRise text={lang === 'fr' ? 'Vivez le scan en direct' : 'Experience the scan live'} />
               </h2>
               <p className="text-slate-500 text-xs md:text-sm font-medium">
-                {lang === 'fr' 
-                  ? 'Cliquez pour simuler le scan de la carte d\'un élève et observez le SMS partir instantanément.'
-                  : 'Click to simulate a student scanning in and watch the SMS alert send instantly.'}
+                <ScrollWords text={lang === 'fr' ? 'Cliquez pour simuler le scan de la carte d\'un élève et observez le SMS partir instantanément.' : 'Click to simulate a student scanning in and watch the SMS alert send instantly.'} />
               </p>
             </div>
 
@@ -968,10 +965,10 @@ export const LandingPage: React.FC = () => {
                     <Shield className="w-3.5 h-3.5 text-indigo-600" />{t.securityLabel}
                   </span>
                   <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight leading-tight font-jakarta">
-                    {t.cloudTitle}
+                    <WordRise text={t.cloudTitle} />
                   </h2>
                   <p className="text-slate-600 text-sm md:text-base leading-relaxed font-medium">
-                    {t.cloudDesc}
+                    <ScrollWords text={t.cloudDesc} />
                   </p>
                 </div>
 
@@ -1036,12 +1033,10 @@ export const LandingPage: React.FC = () => {
                     💡 {lang === 'fr' ? 'À propos de nous' : 'About us'}
                   </span>
                   <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight leading-tight font-jakarta">
-                    {lang === 'fr' ? 'Une plateforme légère conçue pour le terrain' : 'A lightweight platform built for the field'}
+                    <WordRise text={lang === 'fr' ? 'Une plateforme légère conçue pour le terrain' : 'A lightweight platform built for the field'} />
                   </h2>
                   <p className="text-slate-600 text-sm md:text-base leading-relaxed font-medium">
-                    {lang === 'fr'
-                      ? 'DGhubSchool est conçu sur mesure pour s\'adapt parfaitement aux réalités des établissements en Afrique de l\'Ouest. Une plateforme cloud-native légère, sécurisée et optimisée pour s\'exécuter sans accroc même sur des connexions mobiles 2G.'
-                      : 'DGhubSchool is custom-built to match the realities of West African schools. A lightweight, secure, and cloud-native platform optimized to run seamlessly even on 2G mobile connections.'}
+                    <ScrollWords text={lang === 'fr' ? 'DGhubSchool est conçu sur mesure pour s\'adapt parfaitement aux réalités des établissements en Afrique de l\'Ouest. Une plateforme cloud-native légère, sécurisée et optimisée pour s\'exécuter sans accroc même sur des connexions mobiles 2G.' : 'DGhubSchool is custom-built to match the realities of West African schools. A lightweight, secure, and cloud-native platform optimized to run seamlessly even on 2G mobile connections.'} />
                   </p>
                 </div>
 
@@ -1084,8 +1079,8 @@ export const LandingPage: React.FC = () => {
           <MorphBlob color="rgba(245,158,11,0.05)" size={400} style={{ bottom: '5%', left: '0%' }} speed={10} />
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div ref={parentsTitleRef} className="text-center mb-16 space-y-4 max-w-3xl mx-auto">
-              <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight font-jakarta">{t.parentsFocusTitle}</h2>
-              <p className="text-slate-500 text-sm md:text-base font-medium">{t.parentsFocusDesc}</p>
+              <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight font-jakarta"><WordRise text={t.parentsFocusTitle} /></h2>
+              <p className="text-slate-500 text-sm md:text-base font-medium"><ScrollWords text={t.parentsFocusDesc} /></p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
               <div ref={parentsPhoneRef} className="lg:col-span-5 flex justify-center relative">
@@ -1121,15 +1116,15 @@ export const LandingPage: React.FC = () => {
         <section className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-24 space-y-28">
           <div ref={screenshotsTitleRef} className="text-center mb-16 space-y-4">
             <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full font-jakarta">{t.screenshotsTitle}</div>
-            <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight font-jakarta">{t.discoverFeatures}</h2>
-            <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm font-medium">{t.discoverDesc}</p>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight font-jakarta"><WordRise text={t.discoverFeatures} /></h2>
+            <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm font-medium"><ScrollWords text={t.discoverDesc} /></p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div ref={scan1TextRef} className="lg:col-span-5 space-y-6">
               <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded-full inline-block font-jakarta">{t.secBadge}</span>
-              <h3 className="text-2xl md:text-4xl font-black text-slate-950 uppercase leading-tight font-jakarta">{t.securityTitle}</h3>
-              <p className="text-sm md:text-base text-slate-500 leading-relaxed font-medium">{t.securityDesc}</p>
+              <h3 className="text-2xl md:text-4xl font-black text-slate-950 uppercase leading-tight font-jakarta"><WordRise text={t.securityTitle} /></h3>
+              <p className="text-sm md:text-base text-slate-500 leading-relaxed font-medium"><ScrollWords text={t.securityDesc} /></p>
             </div>
             <div ref={scan1ImgRef} className="lg:col-span-7 flex justify-center relative">
               <div className="w-full max-w-lg bg-slate-950 border border-slate-800 p-3 rounded-xl shadow-2xl relative overflow-hidden group">
@@ -1151,8 +1146,8 @@ export const LandingPage: React.FC = () => {
             </div>
             <div ref={scan2TextRef} className="lg:col-span-5 space-y-6 lg:order-2 order-1">
               <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded-full inline-block font-jakarta">{t.acadBadge}</span>
-              <h3 className="text-2xl md:text-4xl font-black text-slate-950 uppercase leading-tight font-jakarta">{t.academicsTitle}</h3>
-              <p className="text-sm md:text-base text-slate-500 leading-relaxed font-medium">{t.academicsDesc}</p>
+              <h3 className="text-2xl md:text-4xl font-black text-slate-950 uppercase leading-tight font-jakarta"><WordRise text={t.academicsTitle} /></h3>
+              <p className="text-sm md:text-base text-slate-500 leading-relaxed font-medium"><ScrollWords text={t.academicsDesc} /></p>
             </div>
           </div>
         </section>
@@ -1193,12 +1188,10 @@ export const LandingPage: React.FC = () => {
                   💬 {lang === 'fr' ? 'Témoignages' : 'Testimonials'}
                 </span>
                 <h2 className="text-3xl md:text-5xl font-black text-slate-950 uppercase tracking-tight font-jakarta">
-                  {lang === 'fr' ? 'Les directeurs en parlent' : 'What school leaders are saying'}
+                  <WordRise text={lang === 'fr' ? 'Les directeurs en parlent' : 'What school leaders are saying'} />
                 </h2>
                 <p className="text-slate-500 text-sm md:text-base font-medium">
-                  {lang === 'fr' 
-                    ? 'Découvrez les retours d\'expérience de ceux qui gèrent leur école au quotidien avec DGhubSchool.'
-                    : 'Discover how school principals manage their daily administration with DGhubSchool.'}
+                  <ScrollWords text={lang === 'fr' ? 'Découvrez les retours d\'expérience de ceux qui gèrent leur école au quotidien avec DGhubSchool.' : 'Discover how school principals manage their daily administration with DGhubSchool.'} />
                 </p>
               </div>
 
@@ -1237,8 +1230,8 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div ref={pricingTitleRef} className="text-center mb-16 space-y-4">
               <span className="text-xs font-black uppercase tracking-widest text-amber-600 block mb-2 font-jakarta">{t.pricingTitle}</span>
-              <h2 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase font-jakarta">{t.pricingSubtitle}</h2>
-              <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm font-medium">{t.pricingDesc}</p>
+              <h2 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase font-jakarta"><WordRise text={t.pricingSubtitle} /></h2>
+              <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm font-medium"><ScrollWords text={t.pricingDesc} /></p>
             </div>
             <div ref={pricingCardRef} className="relative max-w-sm mx-auto group">
               <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-600/10 rounded-xl blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
@@ -1270,8 +1263,8 @@ export const LandingPage: React.FC = () => {
           <div ref={newsroomRef} className="max-w-7xl mx-auto px-6 md:px-8">
             <div className="text-center mb-16 space-y-4">
               <span className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200/40 text-amber-700 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full font-jakarta">{t.newsroomTitle}</span>
-              <h2 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase font-jakarta">{t.newsroomSub}</h2>
-              <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm font-medium">{t.newsroomDesc}</p>
+              <h2 className="text-3xl md:text-5xl font-black text-slate-950 tracking-tight uppercase font-jakarta"><WordRise text={t.newsroomSub} /></h2>
+              <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm font-medium"><ScrollWords text={t.newsroomDesc} /></p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
               <div className="bg-white border border-slate-200/60 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
@@ -1390,14 +1383,10 @@ export const LandingPage: React.FC = () => {
                     🚀 {lang === 'fr' ? 'Lancement' : 'Get Started'}
                   </span>
                   <h3 className="text-xl md:text-3xl font-black uppercase tracking-tight leading-snug font-jakarta">
-                    {lang === 'fr' 
-                      ? 'Envie de moderniser votre établissement ?' 
-                      : 'Want to modernize your institution?'}
+                    <WordRise text={lang === 'fr' ? 'Envie de moderniser votre établissement ?' : 'Want to modernize your institution?'} />
                   </h3>
                   <p className="text-xs md:text-sm text-slate-400 leading-relaxed font-medium max-w-sm">
-                    {lang === 'fr'
-                      ? 'Rejoignez les directeurs d\'écoles qui ont abandonné les calculs manuels et les files d\'attente. Gratuit la 1ère année, aucune carte bancaire requise.'
-                      : 'Join school leaders who have left manual calculations and cash lines behind. Free for year 1, no credit card required.'}
+                    <ScrollWords text={lang === 'fr' ? 'Rejoignez les directeurs d\'écoles qui ont abandonné les calculs manuels et les files d\'attente. Gratuit la 1ère année, aucune carte bancaire requise.' : 'Join school leaders who have left manual calculations and cash lines behind. Free for year 1, no credit card required.'} />
                   </p>
                 </div>
                 <div className="pt-6 relative z-10 text-left">
@@ -1416,14 +1405,10 @@ export const LandingPage: React.FC = () => {
                     💬 {lang === 'fr' ? 'Support WhatsApp' : 'WhatsApp Support'}
                   </span>
                   <h3 className="text-xl md:text-3xl font-black uppercase tracking-tight leading-snug font-jakarta">
-                    {lang === 'fr' 
-                      ? 'Une question ou besoin d\'une démo ?' 
-                      : 'Any questions or need a demo?'}
+                    <WordRise text={lang === 'fr' ? 'Une question ou besoin d\'une démo ?' : 'Any questions or need a demo?'} />
                   </h3>
                   <p className="text-xs md:text-sm text-indigo-200 leading-relaxed font-medium max-w-sm">
-                    {lang === 'fr'
-                      ? 'Notre équipe est à votre écoute pour une présentation sur mesure en direct ou pour vous guider lors de vos premiers pas.'
-                      : 'Our team is here to give you a custom live presentation or guide you through your first steps.'}
+                    <ScrollWords text={lang === 'fr' ? 'Notre équipe est à votre écoute pour une présentation sur mesure en direct ou pour vous guider lors de vos premiers pas.' : 'Our team is here to give you a custom live presentation or guide you through your first steps.'} />
                   </p>
                 </div>
                 <div className="pt-6 relative z-10 flex flex-col sm:flex-row gap-4 font-jakarta">

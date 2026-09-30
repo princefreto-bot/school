@@ -4,6 +4,7 @@ import { getAuthHeaders } from '../../services/apiHelpers';
 import { API_BASE_URL } from '../../config';
 import { Settings, Calendar, Check, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { ParentSatisfactionSurvey } from '../../components/ParentSatisfactionSurvey';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 interface AcademicYear {
   id: string;
@@ -96,8 +97,7 @@ export const ParentSettings: React.FC = () => {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3">
-            <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Chargement des sessions...</p>
+            <BrandLoader label="Chargement des sessions" />
           </div>
         ) : errorMsg ? (
           <div className="flex items-center gap-3 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-600 dark:text-rose-400 text-sm font-semibold">

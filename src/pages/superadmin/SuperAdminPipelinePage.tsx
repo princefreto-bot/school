@@ -7,6 +7,7 @@ import { superAdminApi } from '../../services/superAdminApi';
 import { SuperAdminModal } from '../../components/superadmin/SuperAdminModal';
 import { ProspectStageColumn } from '../../components/superadmin/ProspectStageColumn';
 import { STAGES, Prospect } from '../../components/superadmin/ProspectCard';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 const NewProspectModal: React.FC<{ onClose: () => void; onCreated: () => void }> = ({ onClose, onCreated }) => {
   const [form, setForm] = useState({ name: '', contact_name: '', phone: '', email: '', source: '', notes: '' });
@@ -148,7 +149,7 @@ export const SuperAdminPipelinePage: React.FC = () => {
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <RefreshCw className="w-8 h-8 text-amber-500 animate-spin" />
+          <BrandLoader />
         </div>
       ) : prospects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center bg-slate-900 border border-slate-800 rounded-2xl">

@@ -12,6 +12,7 @@ import { formatFCFA } from '../../services/superAdminApi';
 import { StatCard } from '../../components/superadmin/StatCard';
 import { GlobalStats } from './types';
 import { AppPage } from '../../types';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 // NOTE: cette liste s'enrichit au fil des phases (Alertes, Auditeur, Pipeline)
 // à mesure que leurs pages respectives sont livrées — cf. plan de refonte SuperAdmin.
@@ -68,7 +69,7 @@ export const SuperAdminOverviewPage: React.FC = () => {
 
       {loading ? (
         <div className="flex items-center justify-center h-40">
-          <RefreshCw className="w-8 h-8 text-amber-500 animate-spin" />
+          <BrandLoader />
         </div>
       ) : stats ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

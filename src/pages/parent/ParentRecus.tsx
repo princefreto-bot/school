@@ -4,6 +4,7 @@ import { FileText, Download, Loader2, AlertCircle } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { BrandLoader } from '../../components/brand/BrandLoader';
 
 export const ParentRecus: React.FC = () => {
     const [payments, setPayments] = useState<any[]>([]);
@@ -66,8 +67,7 @@ export const ParentRecus: React.FC = () => {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-                <Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" />
-                <p>Chargement de vos reçus...</p>
+                <BrandLoader label="Chargement de vos reçus" />
             </div>
         );
     }
