@@ -6,8 +6,11 @@ import { useStore } from '../store/useStore';
 // "Deja vu" par compte (ecole + utilisateur), pas par navigateur : sinon, quand
 // quelqu'un ferme la notification sur un poste partage, le directeur qui se
 // connecte ensuite sur ce meme poste ne la voit jamais.
+// Incrementer NOTICE_ROUND pour reafficher la notification a tout le monde
+// (ex. apres l'avoir fermee soi-meme en se connectant sur le compte d'une ecole).
+const NOTICE_ROUND = 2;
 const storageKey = (schoolSlug?: string, userId?: string) =>
-  `dghub_mobile_update_seen_${APK_VERSION}_${schoolSlug || 'none'}_${userId || 'anon'}`;
+  `dghub_mobile_update_seen_${APK_VERSION}_r${NOTICE_ROUND}_${schoolSlug || 'none'}_${userId || 'anon'}`;
 
 const isNativeApp = () => {
   const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
