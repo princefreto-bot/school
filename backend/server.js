@@ -47,6 +47,15 @@ if (IS_PRODUCTION) {
     });
 }
 
+// api.dghubschool.com ne sert que l'API : le site/SPA reste sur dghubschool.com.
+// (Le chemin /api sur le domaine principal continue de fonctionner pour les anciennes versions de l'app.)
+app.use((req, res, next) => {
+    if (req.hostname === 'api.dghubschool.com' && !/^\/(api|uploads)(\/|$)/.test(req.path)) {
+        return res.status(404).json({ error: 'Not found' });
+    }
+    next();
+});
+
 // Activer les en-têtes de sécurité (HSTS, CSP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
 app.use((req, res, next) => {
     if (IS_PRODUCTION) {
@@ -65,7 +74,7 @@ app.use((req, res, next) => {
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         `img-src 'self' data: blob: ${supabaseUrl} ${backupSupabaseUrl} https://img.youtube.com https://i.ytimg.com`,
-        `connect-src 'self' ${supabaseUrl} ${backupSupabaseUrl} ws: wss: http://localhost:* http://127.0.0.1:*`,
+        `connect-src 'self' https://api.dghubschool.com ${supabaseUrl} ${backupSupabaseUrl} ws: wss: http://localhost:* http://127.0.0.1:*`,
         "frame-src 'self' https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com",
         "object-src 'none'",
         "base-uri 'self'",
@@ -92,6 +101,10 @@ app.use(cors((req, callback) => {
         corsOptions.origin = true;
     } else {
         let isAllowed = allowedOrigins.includes(origin) || capacitorOrigins.includes(origin);
+        // Front sur dghubschool.com, app.*, et sous-domaines d'écoles -> API sur api.dghubschool.com
+        if (!isAllowed && /^https:\/\/([a-z0-9-]+\.)*dghubschool\.com$/.test(origin)) {
+            isAllowed = true;
+        }
         if (!isAllowed) {
             try {
                 const host = req.header('Host');

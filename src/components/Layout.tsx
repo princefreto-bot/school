@@ -18,7 +18,7 @@ import { SupportModal } from './SupportModal';
 import { chatApi } from '../services/chatApi';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { superAdminApi } from '../services/superAdminApi';
-import { CLASSEUR_FRONTEND_URL } from '../config';
+import { CLASSEUR_FRONTEND_URL, API_BASE_URL } from '../config';
 import { BrandLoader } from './brand/BrandLoader';
 
 interface NavItem { id: AppPage; label: string; icon: React.ReactNode; badge?: number }
@@ -513,7 +513,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         try {
           const ctrl = new AbortController();
           const tid = setTimeout(() => ctrl.abort(), 3000);
-          const res = await fetch('/api/parent/active-count', { signal: ctrl.signal, headers: getAuthHeaders() }).finally(() => clearTimeout(tid));
+          const res = await fetch(`${API_BASE_URL}/parent/active-count`, { signal: ctrl.signal, headers: getAuthHeaders() }).finally(() => clearTimeout(tid));
           if (res.ok) { const d = await parseResponse(res); setConnectedParentsCount(d.count || 0); }
         } catch {}
       };
