@@ -66,20 +66,23 @@ function buildZipBuffer(filesByName) {
  * Sauvegarde une école : exporte ses tables clés, zippe, upload, purge les
  * anciennes sauvegardes au-delà de RETENTION_DAYS.
  */
-async function backupSchool(schoolSlug) {
+async function backupSchool(schoolSlug, { manual = false } = {}) {
     const filesByName = {};
     for (const table of TABLES_TO_BACKUP) {
         filesByName[table] = await fetchAllRows(`${table}_${schoolSlug}`);
     }
 
     const zipBuffer = await buildZipBuffer(filesByName);
-    const dateStamp = new Date().toISOString().slice(0, 10);
-    const filePath = `${schoolSlug}/${dateStamp}.zip`;
+    const now = new Date().toISOString();
+    // Une sauvegarde n'en écrase jamais une autre : une sauvegarde manuelle prise après un
+    // incident aurait remplacé la dernière sauvegarde saine du jour.
+    const fileName = manual ? `${now.slice(0, 10)}_manuel-${now.slice(11, 19).replace(/:/g, '')}` : now.slice(0, 10);
+    const filePath = `${schoolSlug}/${fileName}.zip`;
 
     const client = supabaseAdmin || supabase;
     const { error: uploadError } = await client.storage
         .from(BUCKET_NAME)
-        .upload(filePath, zipBuffer, { contentType: 'application/zip', upsert: true });
+        .upload(filePath, zipBuffer, { contentType: 'application/zip', upsert: false });
 
     if (uploadError) {
         throw new Error(`Upload sauvegarde échoué pour ${schoolSlug}: ${uploadError.message}`);

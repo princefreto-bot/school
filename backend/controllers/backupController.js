@@ -48,7 +48,7 @@ async function runBackupNow(req, res) {
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
-        const result = await backupSchool(schoolSlug);
+        const result = await backupSchool(schoolSlug, { manual: true });
         return res.json({ success: true, filePath: result.filePath });
     } catch (err) {
         return res.status(500).json({ error: err.message });

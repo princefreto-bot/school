@@ -163,17 +163,13 @@ async function syncFromFrontend(req, res) {
     };
 
     try {
+        // Mode "Remplacer" supprimé (incident csyzomacamb 2026-10-07) : il effaçait TOUS les
+        // élèves de l'école, toutes années confondues, et par cascade leurs notes, paiements,
+        // présences, liens parents et dépenses, pour ne renvoyer que ce que l'appareil avait
+        // en mémoire (une seule année). Aucune synchronisation ne doit jamais effacer en masse.
         if (replace) {
-            console.log('🧹 [Sync] Mode Remplacer activé : Nettoyage universel de la base locale...');
-            
-            await supabase.from(tbl('presences')).delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            await supabase.from(tbl('parent_student')).delete().neq('student_id', '00000000-0000-0000-0000-000000000000');
-            await supabase.from(tbl('payments')).delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            
-            const { error: err4 } = await supabase.from(tbl('students')).delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            if (err4) throw new Error('Le serveur Supabase refuse la suppression : ' + err4.message);
-
-            console.log('✨ [Sync] Base de données cloud remise à zéro (école uniquement).');
+            console.warn(`⛔ [Sync] Requête replace=true refusée pour ${schoolSlug} (rôle ${role}).`);
+            return res.status(400).json({ error: 'Le mode Remplacer est désactivé : il pouvait effacer les données de toutes les années. Contactez le support.' });
         }
 
         const CHUNK_SIZE = 500;
@@ -918,23 +914,11 @@ async function clearActivityLogs(req, res) {
     }
 }
 
+// Désactivé (incident csyzomacamb 2026-10-07) : vidait tous les élèves de toutes les
+// années et, par cascade, notes, paiements, présences, liens parents et dépenses.
 async function clearStudents(req, res) {
-    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) return res.status(403).json({ error: 'Action non autorisée.' });
-    const schoolSlug = req.user.schoolSlug;
-    try {
-        const safeDelete = async (table, filterCol, filterVal) => {
-            const { error } = await supabase.from(`${table}_${schoolSlug}`).delete().neq(filterCol, filterVal);
-            if (error && error.code !== '42P01') throw error;
-        };
-
-        await safeDelete('parent_student', 'student_id', '00000000-0000-0000-0000-000000000000');
-        await safeDelete('payments', 'id', '00000000-0000-0000-0000-000000000000');
-        await safeDelete('students', 'id', '00000000-0000-0000-0000-000000000000');
-        
-        return res.json({ message: 'Base de données des élèves vidée.' });
-    } catch (err) {
-        return res.status(500).json({ error: err.message });
-    }
+    console.warn(`⛔ [Sync] clearStudents refusé pour ${req.user?.schoolSlug} (rôle ${req.user?.role}).`);
+    return res.status(400).json({ error: 'La réinitialisation totale est désactivée. Contactez le support.' });
 }
 
 async function deleteMatiere(req, res) {
