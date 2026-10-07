@@ -892,35 +892,6 @@ async function syncToFrontend(req, res) {
     }
 }
 
-async function clearPresences(req, res) {
-    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) return res.status(403).json({ error: 'Action non autorisée.' });
-    try {
-        const { error } = await supabase.from(`presences_${req.user.schoolSlug}`).delete().neq('id', '00000000-0000-0000-0000-000000000000'); 
-        if (error) throw error;
-        return res.json({ message: 'Historique des présences vidé.' });
-    } catch (err) {
-        return res.status(500).json({ error: err.message });
-    }
-}
-
-async function clearActivityLogs(req, res) {
-    if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable'].includes(req.user.role)) return res.status(403).json({ error: 'Action non autorisée.' });
-    try {
-        const { error } = await supabase.from(`activity_logs_${req.user.schoolSlug}`).delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        if (error) throw error;
-        return res.json({ message: 'Logs d\'activité vidés.' });
-    } catch (err) {
-        return res.status(500).json({ error: err.message });
-    }
-}
-
-// Désactivé (incident csyzomacamb 2026-10-07) : vidait tous les élèves de toutes les
-// années et, par cascade, notes, paiements, présences, liens parents et dépenses.
-async function clearStudents(req, res) {
-    console.warn(`⛔ [Sync] clearStudents refusé pour ${req.user?.schoolSlug} (rôle ${req.user?.role}).`);
-    return res.status(400).json({ error: 'La réinitialisation totale est désactivée. Contactez le support.' });
-}
-
 async function deleteMatiere(req, res) {
     if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable', 'secretaire'].includes(req.user.role)) return res.status(403).json({ error: 'Non autorisé.' });
     try {
@@ -985,13 +956,20 @@ async function deleteAcademicYear(req, res) {
     try {
         const schoolSlug = req.user.schoolSlug;
         const yearId = req.params.id;
-        
-        // Nettoyage manuel au cas où le ON DELETE CASCADE ne serait pas actif sur toutes les tables dynamiques
-        const tables = ['students', 'payments', 'presences', 'notes', 'matieres', 'classe_matieres', 'activity_logs'];
-        for (const t of tables) {
-            await supabase.from(`${t}_${schoolSlug}`).delete().eq('academic_year_id', yearId);
+
+        // Une année ne se supprime que vide : la supprimer effaçait (et cascadait) tous ses
+        // élèves, notes et paiements — perte irréversible pour une année archivée.
+        for (const t of ['students', 'notes', 'payments']) {
+            const { count, error: countErr } = await supabase
+                .from(`${t}_${schoolSlug}`)
+                .select('id', { count: 'exact', head: true })
+                .eq('academic_year_id', yearId);
+            if (countErr) throw countErr;
+            if (count > 0) {
+                return res.status(409).json({ error: "Impossible de supprimer une année scolaire qui contient des élèves, des notes ou des paiements. Ces données seraient perdues définitivement." });
+            }
         }
-        
+
         const { error } = await supabase.from('academic_years').delete().eq('id', yearId).eq('school_slug', schoolSlug);
         if (error) throw error;
         
@@ -1001,4 +979,4 @@ async function deleteAcademicYear(req, res) {
     }
 }
 
-module.exports = { syncFromFrontend, syncToFrontend, clearPresences, clearActivityLogs, clearStudents, deleteMatiere, deleteClasseMatiere, deleteNote, deletePayment, deleteStudent, deleteAcademicYear };
+module.exports = { syncFromFrontend, syncToFrontend, deleteMatiere, deleteClasseMatiere, deleteNote, deletePayment, deleteStudent, deleteAcademicYear };

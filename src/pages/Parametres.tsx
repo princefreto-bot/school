@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { API_BASE_URL } from '../config';
 import {
   Save, School, MessageSquare, Shield, Info,
-  Upload, X, Image, Clock, Plus, Calendar, Trash2, Database, Layers,
+  Upload, X, Image, Clock, Plus, Calendar, Trash2, Layers,
   CheckCircle2, Circle, ChevronDown, Phone, MapPin, Mail, Globe, FileBadge2,
   Landmark, Sparkles, UserSquare2, Wallet, RefreshCw, CreditCard
 } from 'lucide-react';
@@ -1533,44 +1533,6 @@ export const Parametres: React.FC = () => {
                     </div>
                 </div>
             </div>
-
-            {/* ── DANGER ZONE ────────────────────────────── */}
-            {(user?.role === 'admin' || user?.role === 'directeur' || user?.role === 'directeur_general') && (
-                <div className="pro-card p-6 bg-rose-50/50 dark:bg-rose-500/5 backdrop-blur-xl border border-rose-200/50 dark:border-rose-500/20">
-                    <h3 className="font-black text-lg text-rose-700 dark:text-rose-400 flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-rose-100 dark:bg-rose-500/20 rounded-xl">
-                            <Database className="w-5 h-5 text-rose-600 dark:text-rose-400" />
-                        </div>
-                        Maintenance
-                    </h3>
-                    <div className="space-y-3">
-                        <button
-                            onClick={async () => {
-                                if (window.confirm("Voulez-vous vraiment VIDER tout l'historique des scans de présence ? Cette action est irréversible.")) {
-                                    const success = await useStore.getState().clearCloudPresences();
-                                    if (success) alert("Historique des présences vidé.");
-                                }
-                            }}
-                            className="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-rose-100 dark:border-rose-500/20 rounded-2xl hover:border-rose-300 dark:hover:border-rose-500/40 transition-colors group"
-                        >
-                            <span className="text-[11px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest group-hover:text-rose-700 dark:group-hover:text-rose-300">Purger Présences</span>
-                            <Trash2 className="w-4 h-4 text-rose-400" />
-                        </button>
-                        <button
-                            onClick={async () => {
-                                if (window.confirm("Voulez-vous vraiment VIDER tous les logs d'activité ?")) {
-                                    const success = await useStore.getState().clearCloudActivityLogs();
-                                    if (success) alert("Logs d'activité vidés.");
-                                }
-                            }}
-                            className="w-full flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-rose-100 dark:border-rose-500/20 rounded-2xl hover:border-rose-300 dark:hover:border-rose-500/40 transition-colors group"
-                        >
-                            <span className="text-[11px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest group-hover:text-rose-700 dark:group-hover:text-rose-300">Purger Logs</span>
-                            <Trash2 className="w-4 h-4 text-rose-400" />
-                        </button>
-                    </div>
-                </div>
-            )}
 
             {/* ── À PROPOS ──────────────────────────────────────── */}
             <div className="flex items-center justify-center gap-2 text-slate-400 dark:text-slate-600">

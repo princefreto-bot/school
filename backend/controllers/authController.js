@@ -637,6 +637,12 @@ async function verifySchoolEmail(req, res) {
             console.error(`⚠️ Erreur d'activation RLS pour ${school.slug}:`, rlsErr.message);
         }
 
+        // Garde-fou base de données contre les suppressions massives (élèves/notes/paiements)
+        const { error: guardErr } = await supabase.rpc('add_mass_delete_guards', { school_slug: school.slug });
+        if (guardErr) {
+            console.error(`⚠️ Erreur d'installation du garde-fou anti-suppression pour ${school.slug}:`, guardErr.message);
+        }
+
         // Provisionner les tables de comptabilité (plan comptable, journal)
         const { error: accountingRpcErr } = await supabase.rpc('create_accounting_tables', { school_slug: school.slug });
         if (accountingRpcErr) {

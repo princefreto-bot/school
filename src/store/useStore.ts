@@ -228,9 +228,6 @@ export interface AppState {
   setIsSyncing: (s: boolean) => void;
   lastSyncTimestamp: number;
   setLastSyncTimestamp: (t: number) => void;
-  clearCloudPresences: () => Promise<boolean>;
-  clearCloudActivityLogs: () => Promise<boolean>;
-  clearCloudStudents: () => Promise<boolean>;
   fetchPublicSettings: () => Promise<void>;
 
   // Horaires par cycle
@@ -1561,9 +1558,9 @@ export const useStore = create<AppState>()(
             });
 
             if (countRemoved > 0) {
-              console.warn(`🧹 [Sync] Déduplication effectuée : ${rawCount} reçus -> ${repairedStudents.length} uniques (${countRemoved} doublons supprimés).`);
-              console.log("🚀 Lancement du nettoyage permanent sur le Cloud...");
-              syncToBackend(get(), true);
+              // Déduplication locale uniquement : ne jamais "nettoyer" le cloud en masse
+              // (incident csyzomacamb 2026-10-07).
+              console.warn(`🧹 [Sync] Déduplication locale : ${rawCount} reçus -> ${repairedStudents.length} uniques (${countRemoved} doublons masqués).`);
             } else {
               console.log(`✅ [Sync] ${repairedStudents.length} élèves chargés (Source: Cloud).`);
             }
@@ -1627,54 +1624,6 @@ export const useStore = create<AppState>()(
           console.error('💥 [Sync] Erreur fatale lors de la synchronisation:', err);
         } finally {
           set({ isSyncing: false });
-        }
-      },
-      clearCloudPresences: async () => {
-        try {
-          const res = await fetch(`${API_BASE_URL}/sync/presences`, {
-            method: 'DELETE',
-            headers: getAuthHeaders()
-          });
-          if (res.ok) {
-            set({ presences: [] });
-            return true;
-          }
-          return false;
-        } catch (err) {
-          console.error('Failed to clear presences:', err);
-          return false;
-        }
-      },
-      clearCloudActivityLogs: async () => {
-        try {
-          const res = await fetch(`${API_BASE_URL}/sync/logs`, {
-            method: 'DELETE',
-            headers: getAuthHeaders()
-          });
-          if (res.ok) {
-            set({ activityLogs: [] });
-            return true;
-          }
-          return false;
-        } catch (err) {
-          console.error('Failed to clear logs:', err);
-          return false;
-        }
-      },
-      clearCloudStudents: async () => {
-        try {
-          const res = await fetch(`${API_BASE_URL}/sync/students`, {
-            method: 'DELETE',
-            headers: getAuthHeaders()
-          });
-          if (res.ok) {
-            set({ students: [] });
-            return true;
-          }
-          return false;
-        } catch (err) {
-          console.error('Failed to clear students:', err);
-          return false;
         }
       },
       fetchPublicSettings: async () => {

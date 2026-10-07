@@ -13,10 +13,9 @@ import { useStore } from '../store/useStore';
  * Appeler cette fonction depuis l'application React.
  *
  * @param {AppState} store - L'état complet du store Zustand
- * @param {boolean} replace - Si vrai, vide la base avant d'insérer
  * @returns {Promise<any>} - Résultat de la sync
  */
-export async function syncToBackend(store: Partial<AppState>, replace: boolean = false) {
+export async function syncToBackend(store: Partial<AppState>) {
     // 🛡️ Sécurité SaaS : Les parents n'ont pas accès à l'API /sync (réservée admin)
     // On vérifie le rôle pour éviter les erreurs 403 persistantes dans le dashboard parent
     const currentUser = (store as any).user || null;
@@ -25,7 +24,7 @@ export async function syncToBackend(store: Partial<AppState>, replace: boolean =
         return null;
     }
 
-    const payload: any = { replace };
+    const payload: any = {};
     
     // N'inclure que les champs fournis dans l'objet store pour éviter d'envoyer des tableaux vides par erreur
     if (store.students !== undefined) payload.students = store.students;

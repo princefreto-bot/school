@@ -66,12 +66,10 @@ export const ImportExport = () => {
         setMessage({ type: 'success', text: `Mise à jour du serveur (${replace ? 'Mode Remplacement' : 'Mode Fusion'})...` });
         const currentState = useStore.getState();
         
-        // ATTENTION : On n'envoie JAMAIS replace=true au backend depuis le fichier Excel
-        // sinon le backend supprimerait la totalité des notes, présences et paiements!
-        const syncResult = await syncToBackend({ 
+        const syncResult = await syncToBackend({
           students: newStudents,
           parents: currentState.parents
-        }, false);
+        });
         setIsSyncing(false);
 
         if (syncResult) {

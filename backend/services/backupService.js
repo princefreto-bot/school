@@ -8,7 +8,11 @@ const { supabase, supabaseAdmin } = require('../utils/supabase');
 
 const BUCKET_NAME = 'school-backups';
 const RETENTION_DAYS = 30;
-const TABLES_TO_BACKUP = ['students', 'payments', 'notes', 'presences', 'badges'];
+const TABLES_TO_BACKUP = [
+    'students', 'payments', 'notes', 'presences', 'badges',
+    'parent_student', 'student_expenses', 'exam_sessions', 'exam_notes',
+    'matieres', 'classe_matieres', 'year_settings', 'app_settings', 'activity_logs',
+];
 
 /**
  * Récupère toutes les lignes d'une table dynamique par pages de 1000
