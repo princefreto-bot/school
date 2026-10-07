@@ -1,0 +1,15 @@
+{
+  "category": "update",
+  "subject": "Nouveauté : les bulletins des années passées, et vos données mieux protégées",
+  "title": "Ce qui est nouveau sur DGhubSchool",
+  "intro": "Voici les améliorations de cette semaine, déjà disponibles sur votre compte :",
+  "highlights": [
+    "**Bulletins des années passées** : dans Bulletins, choisissez l'« Année consultée » pour recalculer et imprimer les bulletins d'une année précédente, sans changer l'année en cours pour le reste de votre équipe",
+    "**Vos données mieux protégées** : notes, paiements et élèves ne peuvent plus être effacés en masse, même par erreur",
+    "**Sauvegardes quotidiennes plus complètes** : elles incluent désormais aussi les liens parents, les dépenses élèves, les examens, les matières et le journal d'activité",
+    "**Une année scolaire qui contient des élèves, des notes ou des paiements ne peut plus être supprimée**"
+  ],
+  "body": "Les anciens boutons de « nettoyage » et de « purge », qui pouvaient effacer des données sans retour possible, ont été retirés. Si vous avez besoin de corriger des doublons ou des erreurs de saisie, contactez-nous : nous le faisons avec vous, sans risque pour vos données.",
+  "ctaLabel": "",
+  "ctaUrl": ""
+}
