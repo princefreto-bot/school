@@ -892,6 +892,95 @@ async function syncToFrontend(req, res) {
     }
 }
 
+// GET /api/sync/archive?year=2024-2025 — lecture seule des données académiques d'une année
+// (bulletins d'une année passée) sans changer l'année active de l'école pour tous.
+const ARCHIVE_ROLES = ['admin', 'directeur', 'directeur_general', 'proviseur', 'censeur'];
+
+async function getYearArchive(req, res) {
+    const { role, schoolSlug } = req.user || {};
+    if (!schoolSlug || !ARCHIVE_ROLES.includes(role)) return res.status(403).json({ error: 'Non autorisé.' });
+
+    const yearName = String(req.query.year || '').trim();
+    if (!yearName) return res.status(400).json({ error: 'Paramètre year requis.' });
+
+    try {
+        const { data: yearRow, error: yearErr } = await supabase
+            .from('academic_years').select('id').eq('school_slug', schoolSlug).eq('name', yearName).maybeSingle();
+        if (yearErr) throw yearErr;
+        if (!yearRow) return res.status(404).json({ error: `Année scolaire ${yearName} introuvable.` });
+
+        const fetchYear = async (name) => {
+            const rows = [];
+            for (let from = 0; ; from += 1000) {
+                const { data, error } = await supabase
+                    .from(`${name}_${schoolSlug}`).select('*')
+                    .eq('academic_year_id', yearRow.id)
+                    .range(from, from + 999);
+                if (error) {
+                    if (error.code === '42P01') return rows;
+                    throw error;
+                }
+                rows.push(...(data || []));
+                if (!data || data.length < 1000) return rows;
+            }
+        };
+
+        const [students, notes, matieres, classeMatieres, presences] = await Promise.all([
+            fetchYear('students'), fetchYear('notes'), fetchYear('matieres'), fetchYear('classe_matieres'), fetchYear('presences'),
+        ]);
+
+        return res.json({
+            year: yearName,
+            students: students.map(s => ({
+                ...s,
+                dejaPaye: s.deja_paye,
+                fraisInscription: s.frais_inscription || 0,
+                inscriptionPaye: s.inscription_paye || 0,
+                inscriptionRestant: s.inscription_restant || 0,
+                statutElv: s.statut_elv || undefined,
+                telephone: s.telephone_parent,
+                sexe: s.sexe || 'M',
+                redoublant: s.redoublant || false,
+                ecoleProvenance: s.ecole_provenance || '',
+                dateNaissance: s.date_naissance || null,
+                adsn: s.adsn || null,
+                photoUrl: s.photo_url || null,
+                historiquesPaiements: []
+            })),
+            notes: notes.map(n => ({
+                id: n.id,
+                eleveId: n.eleve_id,
+                matiereId: n.matiere_id,
+                periode: n.periode,
+                noteClasse: n.note_classe !== undefined ? Number(n.note_classe) : null,
+                noteDevoir: n.note_devoir !== undefined ? Number(n.note_devoir) : null,
+                noteCompo: n.note_compo !== undefined ? Number(n.note_compo) : null
+            })),
+            matieres: matieres.map(m => ({ id: m.id, nom: m.nom, categorie: m.categorie })),
+            classeMatieres: classeMatieres.map(cm => ({
+                id: cm.id,
+                classe: cm.classe,
+                matiereId: cm.matiere_id,
+                professeur: cm.professeur,
+                professeurId: cm.professeur_id || null,
+                coefficient: cm.coefficient
+            })),
+            presences: presences.map(pr => ({
+                id: pr.id,
+                eleveId: pr.student_id,
+                eleveNom: pr.eleve_nom,
+                elevePrenom: pr.eleve_prenom,
+                eleveClasse: pr.eleve_classe,
+                date: pr.date,
+                heure: pr.heure,
+                statut: pr.statut
+            }))
+        });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
 async function deleteMatiere(req, res) {
     if (!req.user || !['admin', 'directeur', 'directeur_general', 'comptable', 'secretaire'].includes(req.user.role)) return res.status(403).json({ error: 'Non autorisé.' });
     try {
@@ -979,4 +1068,4 @@ async function deleteAcademicYear(req, res) {
     }
 }
 
-module.exports = { syncFromFrontend, syncToFrontend, deleteMatiere, deleteClasseMatiere, deleteNote, deletePayment, deleteStudent, deleteAcademicYear };
+module.exports = { syncFromFrontend, syncToFrontend, getYearArchive, deleteMatiere, deleteClasseMatiere, deleteNote, deletePayment, deleteStudent, deleteAcademicYear };

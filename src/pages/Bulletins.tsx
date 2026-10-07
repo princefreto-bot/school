@@ -4,12 +4,24 @@ import { BulletinTogoPDF } from '../components/pdf/BulletinTogoPDF';
 import { calculerBulletinsClasse, BulletinEleveResultat, getPeriodesAntérieures } from '../utils/bulletinCalculations';
 import { getAvailablePeriods } from '../data/classConfig';
 import { useReactToPrint } from 'react-to-print';
-import { FileSpreadsheet, Printer, Users, Award, ShieldCheck } from 'lucide-react';
-import { PeriodeType } from '../types';
+import { FileSpreadsheet, Printer, Users, Award, ShieldCheck, Archive, Loader2 } from 'lucide-react';
+import { PeriodeType, Student, Matiere, ClasseMatiere, Note, Presence } from '../types';
+import { API_BASE_URL } from '../config';
+import { getAuthHeaders } from '../services/apiHelpers';
+
+interface YearArchive {
+    students: Student[];
+    matieres: Matiere[];
+    classeMatieres: ClasseMatiere[];
+    notes: Note[];
+    presences: Presence[];
+}
 
 export const Bulletins: React.FC = () => {
-    const { 
-        currentPeriode, setCurrentPeriode, students, matieres, classeMatieres, notes,
+    const {
+        currentPeriode, setCurrentPeriode, students: activeStudents, matieres: activeMatieres,
+        classeMatieres: activeClasseMatieres, notes: activeNotes, presences: activePresences,
+        academicYears,
         schoolName, schoolLogo, schoolStamp, schoolYear,
         schoolMotto, schoolBp, schoolTelephone, schoolAddress, schoolCurrency,
         countryName, countryMotto, ministereName,
@@ -17,7 +29,14 @@ export const Bulletins: React.FC = () => {
         officialSeal, directorSignature
     } = useStore();
 
-    const classesList = Array.from(new Set(students.map(s => s.classe))).sort();
+    // Consultation d'une année passée en lecture seule : ne change jamais l'année active
+    // de l'école (qui vaut pour tous les comptes).
+    const [consultedYear, setConsultedYear] = useState(schoolYear);
+    const [archive, setArchive] = useState<YearArchive | null>(null);
+    const [archiveLoading, setArchiveLoading] = useState(false);
+    const [archiveError, setArchiveError] = useState('');
+    const isArchive = !!consultedYear && consultedYear !== schoolYear;
+
     const [selectedClasse, setSelectedClasse] = useState('');
     const [editableSchoolYear, setEditableSchoolYear] = useState('');
     const [bulletinsCalcules, setBulletinsCalcules] = useState<BulletinEleveResultat[]>([]);
@@ -26,6 +45,48 @@ export const Bulletins: React.FC = () => {
     // Jamais envoyées au backend : uniquement utilisées pour le calcul en local
     // de la moyenne annuelle cumulée du bulletin en cours.
     const [manualOverrides, setManualOverrides] = useState<Record<string, Partial<Record<PeriodeType, number>>>>({});
+
+    React.useEffect(() => {
+        if (!consultedYear && schoolYear) setConsultedYear(schoolYear);
+    }, [consultedYear, schoolYear]);
+
+    React.useEffect(() => {
+        setSelectedClasse('');
+        setBulletinsCalcules([]);
+        setManualOverrides({});
+        setEditableSchoolYear(consultedYear || schoolYear);
+        setArchiveError('');
+        if (!consultedYear || consultedYear === schoolYear) {
+            setArchive(null);
+            return;
+        }
+        let cancelled = false;
+        setArchiveLoading(true);
+        fetch(`${API_BASE_URL}/sync/archive?year=${encodeURIComponent(consultedYear)}`, { headers: getAuthHeaders() })
+            .then(async (res) => {
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
+                if (!cancelled) setArchive(data);
+            })
+            .catch((err: Error) => {
+                if (!cancelled) {
+                    setArchive(null);
+                    setArchiveError(`Impossible de charger l'année ${consultedYear} : ${err.message === 'Failed to fetch' ? 'serveur injoignable, vérifiez la connexion' : err.message}.`);
+                }
+            })
+            .finally(() => { if (!cancelled) setArchiveLoading(false); });
+        return () => { cancelled = true; };
+    }, [consultedYear, schoolYear]);
+
+    const students = isArchive ? (archive?.students || []) : activeStudents;
+    const matieres = isArchive ? (archive?.matieres || []) : activeMatieres;
+    const classeMatieres = isArchive ? (archive?.classeMatieres || []) : activeClasseMatieres;
+    const notes = isArchive ? (archive?.notes || []) : activeNotes;
+    const presences = isArchive ? (archive?.presences || []) : activePresences;
+
+    const yearOptions = Array.from(new Set([schoolYear, ...academicYears.map(y => y.name)].filter(Boolean))).sort().reverse();
+
+    const classesList = Array.from(new Set(students.map(s => s.classe))).sort();
 
     const elevesDeLaClasse = selectedClasse ? students.filter(s => s.classe === selectedClasse) : [];
     const periodesAnterieures = selectedClasse ? getPeriodesAntérieures(currentPeriode) : [];
@@ -62,12 +123,6 @@ export const Bulletins: React.FC = () => {
         }
     }, [selectedClasse, currentPeriode, setCurrentPeriode]);
 
-    React.useEffect(() => {
-        if (schoolYear) {
-            setEditableSchoolYear(schoolYear);
-        }
-    }, [schoolYear]);
-
     // Component ref for printing
     const printRef = useRef<HTMLDivElement>(null);
 
@@ -93,7 +148,7 @@ export const Bulletins: React.FC = () => {
             matieres,
             classeMatieres,
             notes,
-            useStore.getState().presences,
+            presences,
             manualOverrides
         );
         setBulletinsCalcules(resultats);
@@ -117,14 +172,45 @@ export const Bulletins: React.FC = () => {
                 </div>
             </div>
 
+            {isArchive && (
+                <div className="flex items-start gap-3 p-4 bg-indigo-50 border border-indigo-200 rounded-2xl text-indigo-900">
+                    <Archive className="w-5 h-5 mt-0.5 shrink-0" />
+                    <p className="text-sm font-semibold">
+                        Consultation de l'année <b>{consultedYear}</b> en lecture seule. L'année active de l'école reste <b>{schoolYear}</b> pour tous les utilisateurs.
+                        {archiveLoading && ' Chargement des données…'}
+                        {!archiveLoading && archive && ` ${archive.students.length} élèves, ${archive.notes.length} notes.`}
+                    </p>
+                </div>
+            )}
+            {archiveError && (
+                <p className="text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3">{archiveError}</p>
+            )}
+
             {/* Outils de génération */}
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-wrap gap-4 items-end">
+                <div className="flex-1 min-w-[160px]">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Année consultée</label>
+                    <div className="relative">
+                        <select
+                            value={consultedYear}
+                            onChange={(e) => setConsultedYear(e.target.value)}
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 font-bold"
+                        >
+                            {yearOptions.map(y => (
+                                <option key={y} value={y}>{y}{y === schoolYear ? ' (active)' : ''}</option>
+                            ))}
+                        </select>
+                        {archiveLoading && <Loader2 className="w-4 h-4 animate-spin absolute right-8 top-3.5 text-gray-400" />}
+                    </div>
+                </div>
+
                 <div className="flex-1 min-w-[180px]">
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Classe</label>
                     <select
                         value={selectedClasse}
                         onChange={(e) => setSelectedClasse(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 font-bold"
+                        disabled={archiveLoading}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 font-bold disabled:opacity-50"
                     >
                         <option value="">Sélectionner une classe...</option>
                         {classesList.map(c => <option key={c} value={c}>{c}</option>)}

@@ -3,12 +3,13 @@
 // ============================================================
 const router = require('express').Router();
 const { authenticateToken } = require('../middleware/auth');
-const { syncFromFrontend, syncToFrontend, deleteMatiere, deleteClasseMatiere, deleteNote, deletePayment, deleteStudent, deleteAcademicYear } = require('../controllers/syncController');
+const { syncFromFrontend, syncToFrontend, getYearArchive, deleteMatiere, deleteClasseMatiere, deleteNote, deletePayment, deleteStudent, deleteAcademicYear } = require('../controllers/syncController');
 
 // Route protégée : seuls les utilisateurs authentifiés (directeur/comptable) peuvent synchroniser
 router.use(authenticateToken);
 router.post('/', syncFromFrontend);
 router.get('/', syncToFrontend);
+router.get('/archive', getYearArchive);
 
 // Deletions individuelles pour académique
 router.delete('/matiere/:id', deleteMatiere);
