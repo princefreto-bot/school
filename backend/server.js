@@ -65,7 +65,7 @@ app.use((req, res, next) => {
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         `img-src 'self' data: blob: ${supabaseUrl} ${backupSupabaseUrl} https://img.youtube.com https://i.ytimg.com`,
-        `connect-src 'self' ${supabaseUrl} ${backupSupabaseUrl} ws: wss: http://localhost:* http://127.0.0.1:*`,
+        `connect-src 'self' ${supabaseUrl} ${backupSupabaseUrl} wss:${IS_PRODUCTION ? '' : ' ws: http://localhost:* http://127.0.0.1:*'}`,
         "frame-src 'self' https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com",
         "object-src 'none'",
         "base-uri 'self'",
@@ -202,9 +202,15 @@ app.get('/api/testimonials', async (req, res) => {
 
 app.post('/api/testimonials', async (req, res) => {
     try {
-        const { name, role, school_name, content } = req.body;
+        const { name, role, school_name, content } = req.body || {};
         if (!name || !role || !content) {
             return res.status(400).json({ error: 'Nom, rôle et contenu requis' });
+        }
+        // Formulaire public : longueurs bornées (anti-spam et anti-abus de stockage).
+        const tooLong = [[name, 100], [role, 100], [school_name || '', 150], [content, 2000]]
+            .some(([v, max]) => typeof v !== 'string' || v.length > max);
+        if (tooLong) {
+            return res.status(400).json({ error: 'Champs trop longs ou invalides.' });
         }
         
         const { data, error } = await supabase

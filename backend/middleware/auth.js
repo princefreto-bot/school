@@ -1,8 +1,26 @@
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../config');
 
+// Écoles suspendues (mise à jour toutes les 60 s) : une suspension coupe aussi les sessions
+// déjà ouvertes, pas seulement les nouvelles connexions (jetons valables 7 jours).
+const SUSPENDED_TTL_MS = 60 * 1000;
+let suspendedCache = { at: 0, slugs: new Set() };
+async function getSuspendedSlugs() {
+    if (Date.now() - suspendedCache.at < SUSPENDED_TTL_MS) return suspendedCache.slugs;
+    try {
+        const { supabase } = require('../utils/supabase');
+        const { data, error } = await supabase.from('schools').select('slug').eq('status', 'suspended');
+        if (error) throw error;
+        suspendedCache = { at: Date.now(), slugs: new Set((data || []).map((s) => s.slug)) };
+    } catch {
+        // Lecture impossible : on garde la dernière liste connue, sans bloquer personne.
+        suspendedCache.at = Date.now();
+    }
+    return suspendedCache.slugs;
+}
+
 // ── Middleware d'authentification de base ──────────────────────
-function authenticateToken(req, res, next) {
+async function authenticateToken(req, res, next) {
     let token = null;
     const authHeader = req.headers['authorization'];
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -23,10 +41,16 @@ function authenticateToken(req, res, next) {
             return res.status(401).json({ error: 'Session expirée ou invalide.' });
         }
         req.user = payload; // Contient id, nom, role, schoolSlug (ou null pour superadmin/creator)
-        return next();
     } catch (err) {
         return res.status(401).json({ error: 'Session expirée ou invalide.' });
     }
+    if (req.user.schoolSlug && req.user.role !== 'superadmin' && !req.user.impersonating) {
+        const suspended = await getSuspendedSlugs();
+        if (suspended.has(req.user.schoolSlug)) {
+            return res.status(403).json({ error: "L'accès à cet établissement est suspendu." });
+        }
+    }
+    return next();
 }
 
 // ── Middleware SuperAdmin uniquement ───────────────────────────

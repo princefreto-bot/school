@@ -175,6 +175,11 @@ async function uploadSchoolAsset(req, res) {
         return res.status(400).json({ error: 'Type d\'asset invalide (logo, stamp, seal, signature attendus).' });
     }
 
+    // La signature du directeur et le sceau officiel engagent la direction : pas le comptable.
+    if (['signature', 'seal'].includes(assetType) && !['admin', 'directeur', 'directeur_general'].includes(role)) {
+        return res.status(403).json({ error: 'Seule la direction peut modifier la signature ou le sceau.' });
+    }
+
     if (!imageBase64 || typeof imageBase64 !== 'string') {
         return res.status(400).json({ error: 'Image base64 manquante.' });
     }
@@ -258,6 +263,10 @@ async function removeSchoolAsset(req, res) {
 
     if (!assetType || !['logo', 'stamp', 'seal', 'signature'].includes(assetType)) {
         return res.status(400).json({ error: 'Type d\'asset invalide (logo, stamp, seal, signature).' });
+    }
+
+    if (['signature', 'seal'].includes(assetType) && !['admin', 'directeur', 'directeur_general'].includes(role)) {
+        return res.status(403).json({ error: 'Seule la direction peut modifier la signature ou le sceau.' });
     }
 
     // Mapping assetType → colonne DB
