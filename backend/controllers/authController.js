@@ -654,6 +654,12 @@ async function verifySchoolEmail(req, res) {
             console.error(`⚠️ Erreur d'installation du garde-fou anti-suppression pour ${school.slug}:`, guardErr.message);
         }
 
+        // Montants payés calculés par la base à partir des transactions
+        const { error: integrityErr } = await supabase.rpc('add_payment_integrity_triggers', { school_slug: school.slug });
+        if (integrityErr) {
+            console.error(`⚠️ Erreur d'installation de l'intégrité des paiements pour ${school.slug}:`, integrityErr.message);
+        }
+
         // Provisionner les tables de comptabilité (plan comptable, journal)
         const { error: accountingRpcErr } = await supabase.rpc('create_accounting_tables', { school_slug: school.slug });
         if (accountingRpcErr) {

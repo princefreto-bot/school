@@ -19,6 +19,7 @@ const MODULE_RPCS = [
     'create_license_payments_table',
     'create_staff_tracking_tables',
     'add_mass_delete_guards',
+    'add_payment_integrity_triggers',
 ];
 
 async function healAllSchoolSchemas() {
