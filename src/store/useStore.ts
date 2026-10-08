@@ -92,6 +92,9 @@ export interface AppState {
   deleteStudent: (id: string) => void;
   addPayment: (studentId: string, payment: Omit<Payment, 'id' | 'studentId'>) => void;
   deletePayment: (studentId: string, paymentId: string) => Promise<void>;
+  // Élèves modifiés localement mais pas encore confirmés par le serveur.
+  pendingStudentIds: string[];
+  syncStudentChanges: (ids: string[]) => Promise<boolean>;
 
   // Parents
   parents: Parent[];
@@ -433,7 +436,7 @@ export const useStore = create<AppState>()(
       tranches: [],
       setTranches: (tranches) => {
         set({ tranches });
-        syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
+        syncToBackend({ tranches }).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
       classFees: {},
       setClassFees: (classFees) => set({ classFees }),
@@ -743,16 +746,31 @@ export const useStore = create<AppState>()(
 
         // Synchro attendue (pas fire-and-forget) : un logout/fermeture d'onglet juste
         // après l'ajout ne doit jamais faire disparaître un élève jamais écrit en base.
+        if (await get().syncStudentChanges([student.id])) return { success: true };
+        return { success: false, error: "L'enregistrement n'a pas pu être synchronisé (connexion instable). Restez sur la page et réessayez." };
+      },
+      pendingStudentIds: [],
+      // N'envoie que les élèves modifiés (et ceux dont un envoi précédent a échoué) : renvoyer
+      // tous les élèves de l'appareil écrasait, depuis un appareil pas encore rafraîchi, les
+      // modifications faites entre-temps par un autre utilisateur (ex: total payé d'un élève
+      // encaissé par le comptable remis à son ancienne valeur).
+      syncStudentChanges: async (ids) => {
+        const pending = new Set([...get().pendingStudentIds, ...ids]);
+        set({ pendingStudentIds: Array.from(pending) });
+        const toSend = get().students.filter((s) => pending.has(s.id));
         const result = await syncToBackend({
-          students: get().students,
+          students: toSend,
           presences: get().presences,
           activityLogs: get().activityLogs
         });
-        if (result) {
-          set({ lastSyncTimestamp: Date.now() });
-          return { success: true };
-        }
-        return { success: false, error: "L'enregistrement n'a pas pu être synchronisé (connexion instable). Restez sur la page et réessayez." };
+        if (!result) return false;
+        const sent = new Set(toSend.map((s) => s.id));
+        const existing = new Set(get().students.map((s) => s.id));
+        set({
+          pendingStudentIds: get().pendingStudentIds.filter((id) => !sent.has(id) && existing.has(id)),
+          lastSyncTimestamp: Date.now()
+        });
+        return true;
       },
       updateStudent: (id, rawUpdates) => {
         // Les montants payés ne se modifient que via addPayment/deletePayment (traçabilité).
@@ -786,13 +804,7 @@ export const useStore = create<AppState>()(
         }
 
         set({ students });
-
-        // Background sync
-        syncToBackend({
-          students: get().students,
-          presences: get().presences,
-          activityLogs: get().activityLogs
-        }).then(() => set({ lastSyncTimestamp: Date.now() }));
+        get().syncStudentChanges([id]);
       },
       updateMultipleStudents: (updatesList) => {
         const students = get().students.map((s) => {
@@ -826,13 +838,7 @@ export const useStore = create<AppState>()(
         }
 
         set({ students });
-
-        // Background sync
-        syncToBackend({
-          students: get().students,
-          presences: get().presences,
-          activityLogs: get().activityLogs
-        }).then(() => set({ lastSyncTimestamp: Date.now() }));
+        get().syncStudentChanges(updatesList.map((u) => u.id));
       },
       deleteStudent: async (id) => {
         const u = get().user;
@@ -891,13 +897,7 @@ export const useStore = create<AppState>()(
         }
 
         set({ students });
-
-        // Background sync
-        syncToBackend({
-          students: get().students,
-          presences: get().presences,
-          activityLogs: get().activityLogs
-        }).then(() => set({ lastSyncTimestamp: Date.now() }));
+        get().syncStudentChanges([studentId]);
       },
       deletePayment: async (studentId, paymentId) => {
         const students = get().students.map((s) => {
@@ -952,12 +952,7 @@ export const useStore = create<AppState>()(
           return;
         }
 
-        await syncToBackend({
-          students: get().students,
-          presences: get().presences,
-          activityLogs: get().activityLogs
-        });
-        set({ lastSyncTimestamp: Date.now() });
+        await get().syncStudentChanges([studentId]);
       },
 
       // ── Parents ──────────────────────────────────────────
@@ -1157,12 +1152,7 @@ export const useStore = create<AppState>()(
       presences: [],
       addPresence: (presence) => {
         set({ presences: [presence, ...get().presences] });
-        // Background sync
-        syncToBackend({
-          students: get().students,
-          presences: get().presences,
-          activityLogs: get().activityLogs
-        }).then(() => set({ lastSyncTimestamp: Date.now() }));
+        get().syncStudentChanges([]);
       },
       getPresencesToday: () => {
         const today = new Date().toISOString().split('T')[0];
@@ -1189,8 +1179,7 @@ export const useStore = create<AppState>()(
       ],
       setCycleSchedules: (schedules) => {
         set({ cycleSchedules: schedules });
-        // Sync to backend
-        syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
+        syncToBackend({ cycleSchedules: schedules }).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
       getHeureLimite: (cycle: string) => {
         const schedule = get().cycleSchedules.find(s => s.cycle === cycle);
@@ -1232,9 +1221,6 @@ export const useStore = create<AppState>()(
         } catch (err) {
           console.error('❌ Erreur envoi annonce backend:', err);
         }
-
-        // Sync global pour garder la cohérence
-        syncToBackend(get()).then(() => set({ lastSyncTimestamp: Date.now() }));
       },
       deleteAnnouncement: async (id) => {
         set({
