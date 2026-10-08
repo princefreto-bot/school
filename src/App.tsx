@@ -646,6 +646,27 @@ export function App() {
     };
   }, [isAuthenticated, fetchAllFromBackend, isOnline]);
 
+  // ── Rafraîchissement automatique (personnel) ──────────────────
+  // Sans lui, un poste ouvert toute la journée affichait des soldes périmés (risque de
+  // double encaissement). Les modifications locales en attente partent toujours AVANT,
+  // pour ne jamais être écrasées par la version serveur.
+  React.useEffect(() => {
+    if (!isAuthenticated || !user || ['superadmin', 'creator', 'parent'].includes(user.role)) return;
+    const refresh = async () => {
+      if (!navigator.onLine || document.visibilityState !== 'visible') return;
+      const st = useStore.getState();
+      if (st.pendingStudentIds.length > 0 && !(await st.syncStudentChanges([]))) return;
+      st.fetchAllFromBackend();
+    };
+    const iv = setInterval(refresh, 3 * 60 * 1000);
+    const onVisible = () => { if (document.visibilityState === 'visible') refresh(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(iv);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [isAuthenticated, user]);
+
   // ── Écoute des messages du Service Worker (navigation depuis push) ──
   React.useEffect(() => {
     if (!('serviceWorker' in navigator)) return;

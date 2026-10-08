@@ -664,6 +664,8 @@ const server = app.listen(PORT, () => {
     // arrêtait silencieusement les sauvegardes et les relances.
     if (IS_PRODUCTION) {
         console.error('⏰ [Cron] Démarrage des tâches planifiées (sauvegardes, relances, e-mails).');
+        require('./services/schemaHealService').healAllSchoolSchemas()
+            .catch((err) => console.error('⚠️ [SchemaHeal] Échec:', err.message));
         require('./services/backupService').start();
         require('./services/reminderService').start();
         require('./services/directorEmailService').start();

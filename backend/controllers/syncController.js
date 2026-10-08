@@ -74,7 +74,7 @@ async function syncFromFrontend(req, res) {
         }
     }
 
-    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur', 'enseignant', 'secretaire'].includes(role)) {
+    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'surveillant', 'proviseur', 'censeur', 'enseignant', 'secretaire'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
     }
 
@@ -627,7 +627,7 @@ async function syncToFrontend(req, res) {
     }
 
     const { role, schoolSlug } = req.user;
-    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'proviseur', 'censeur', 'enseignant', 'secretaire'].includes(role)) {
+    if (!['admin', 'directeur', 'directeur_general', 'comptable', 'superviseur', 'surveillant', 'proviseur', 'censeur', 'enseignant', 'secretaire'].includes(role)) {
         return res.status(403).json({ error: 'Permission refusée.' });
     }
 
@@ -759,16 +759,25 @@ async function syncToFrontend(req, res) {
             schoolName: appSettings?.school_name,
         });
 
+        // Minimisation des données selon le rôle : l'enseignant (saisie des notes) ne reçoit ni
+        // finances ni téléphones ; le surveillant (scans, cartes) garde le résumé financier et le
+        // téléphone affichés au portail, mais pas l'historique des paiements, les notes ni le journal.
+        const isTeacher = role === 'enseignant';
+        const isGuard = role === 'superviseur' || role === 'surveillant';
+
         const studentMap = new Map();
         students.forEach(s => {
+            const base = isTeacher
+                ? { ...s, telephone_parent: null, license_key: null, deja_paye: 0, restant: 0, inscription_paye: 0, inscription_restant: 0 }
+                : s;
             studentMap.set(s.id, {
-                ...s,
-                dejaPaye: s.deja_paye,
+                ...base,
+                dejaPaye: base.deja_paye,
                 fraisInscription: s.frais_inscription || 0,
-                inscriptionPaye: s.inscription_paye || 0,
-                inscriptionRestant: s.inscription_restant || 0,
+                inscriptionPaye: base.inscription_paye || 0,
+                inscriptionRestant: base.inscription_restant || 0,
                 statutElv: s.statut_elv || undefined,
-                telephone: s.telephone_parent,
+                telephone: base.telephone_parent,
                 sexe: s.sexe || 'M',
                 redoublant: s.redoublant || false,
                 ecoleProvenance: s.ecole_provenance || '',
@@ -779,7 +788,7 @@ async function syncToFrontend(req, res) {
             });
         });
 
-        payments.forEach(p => {
+        (isTeacher || isGuard ? [] : payments).forEach(p => {
             const s = studentMap.get(p.student_id);
             if (s) {
                 s.historiquesPaiements.push({
@@ -799,7 +808,7 @@ async function syncToFrontend(req, res) {
 
         return res.json({
             students: Array.from(studentMap.values()),
-            presences: presences.map(pr => ({
+            presences: (isTeacher ? [] : presences).map(pr => ({
                 id: pr.id,
                 eleveId: pr.student_id,
                 eleveNom: pr.eleve_nom,
@@ -809,7 +818,7 @@ async function syncToFrontend(req, res) {
                 heure: pr.heure,
                 statut: pr.statut
             })),
-            activityLogs: logs.map(l => ({
+            activityLogs: (isTeacher || isGuard ? [] : logs).map(l => ({
                 id: l.id,
                 utilisateur: l.utilisateur,
                 utilisateurRole: l.utilisateur_role,
@@ -817,7 +826,7 @@ async function syncToFrontend(req, res) {
                 description: l.description,
                 dateHeure: l.date_heure
             })),
-            links: links || [],
+            links: isTeacher || isGuard ? [] : (links || []),
             appSettings: appSettings ? {
                 appName: appSettings.app_name,
                 schoolName: schoolDisplayName,
@@ -881,7 +890,7 @@ async function syncToFrontend(req, res) {
                 professeurId: cm.professeur_id || null,
                 coefficient: cm.coefficient
             })) : undefined,
-            notes: dbNotes ? dbNotes.map(n => ({
+            notes: dbNotes ? (isGuard ? [] : dbNotes).map(n => ({
                 id: n.id,
                 eleveId: n.eleve_id,
                 matiereId: n.matiere_id,
