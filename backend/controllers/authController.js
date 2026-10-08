@@ -271,15 +271,26 @@ async function register(req, res) {
 const SCHOOL_PORTAL_ROLES = ['admin', 'directeur', 'directeur_general'];
 const PERSONNEL_PORTAL_ROLES = ['enseignant', 'secretaire', 'comptable', 'censeur', 'proviseur', 'superviseur', 'surveillant'];
 
+// Identifiant de connexion (téléphone ou e-mail) et identifiant d'école : validés avant
+// toute requête, car ils servent à construire des filtres et des noms de tables.
+const LOGIN_INPUT_RE = /^[A-Za-z0-9@._+\-\s]{3,100}$/;
+const SLUG_RE = /^[a-z0-9]{2,80}$/;
+
 async function login(req, res) {
     const { telephone, password, schoolSlug, portal } = req.body; // portal: 'parent' ou 'school'
 
-    if (!telephone || !password) {
+    if (!telephone || !password || typeof telephone !== 'string' || typeof password !== 'string') {
         return res.status(400).json({ error: 'Champs requis : telephone, password.' });
+    }
+    if (schoolSlug && (typeof schoolSlug !== 'string' || !SLUG_RE.test(schoolSlug))) {
+        return res.status(404).json({ error: 'Établissement introuvable.' });
     }
 
     try {
         const input = telephone.trim();
+        if (!LOGIN_INPUT_RE.test(input)) {
+            return res.status(401).json({ error: 'Identifiants (téléphone/email ou mot de passe) incorrects.' });
+        }
         console.log(`🔍 [Auth] Tentative login pour: ${input} (Portail: ${portal || 'non spécifié'})`);
 
         const lockKey = loginLockKey(schoolSlug, input);
@@ -296,7 +307,7 @@ async function login(req, res) {
         const { data: superadmin } = await supabase
             .from('superadmins')
             .select('*')
-            .or(`telephone.eq.${input}`) // Supporte login téléphone
+            .eq('telephone', input)
             .maybeSingle();
 
         if (superadmin) {
@@ -328,7 +339,7 @@ async function login(req, res) {
         const { data: creator } = await supabase
             .from('creators')
             .select('*')
-            .or(`telephone.eq.${input}`)
+            .eq('telephone', input)
             .maybeSingle();
 
         if (creator) {
@@ -381,11 +392,11 @@ async function login(req, res) {
         }
 
         // ── 3. Chercher l'utilisateur dans la table de l'établissement (par téléphone OU email) ──
-        const { data: user, error } = await supabase
-            .from(`profiles_${schoolSlug}`)
-            .select('*')
-            .or(`telephone.eq.${input},email.eq.${input}`)
-            .maybeSingle();
+        const profiles = () => supabase.from(`profiles_${schoolSlug}`).select('*');
+        let { data: user, error } = await profiles().eq('telephone', input).maybeSingle();
+        if (!error && !user) {
+            ({ data: user, error } = await profiles().eq('email', input).maybeSingle());
+        }
 
         if (error || !user) {
             await recordLoginFailure(lockKey);
@@ -878,42 +889,48 @@ async function resendVerificationEmail(req, res) {
 async function requestPasswordReset(req, res) {
     const { email, schoolSlug } = req.body;
 
-    if (!email || !schoolSlug) {
+    if (!email || !schoolSlug || typeof email !== 'string' || typeof schoolSlug !== 'string') {
         return res.status(400).json({ error: 'Champs requis : email, schoolSlug.' });
     }
 
+    // Même réponse que l'adresse existe ou non (pas d'énumération des comptes).
+    const genericResponse = { success: true, message: 'Si cette adresse email existe pour cet établissement, un lien de réinitialisation a été envoyé.' };
+
     try {
         const input = email.trim();
+        if (!SLUG_RE.test(schoolSlug) || !LOGIN_INPUT_RE.test(input)) return res.json(genericResponse);
 
-        // Vérifier si l'utilisateur existe dans l'école
+        const { data: school } = await supabase.from('schools').select('slug').eq('slug', schoolSlug).maybeSingle();
+        if (!school) return res.json(genericResponse);
+
         const { data: user, error } = await supabase
             .from(`profiles_${schoolSlug}`)
             .select('id, nom, role, password')
             .eq('email', input)
             .maybeSingle();
 
-        if (error || !user) {
-            return res.status(404).json({ error: "Cette adresse e-mail n'est pas enregistrée pour cet établissement." });
-        }
+        if (error || !user) return res.json(genericResponse);
 
-        // Créer un token stateless incluant une partie du hash pour l'invalider après changement
+        // Jeton à usage unique (purpose) : jamais accepté comme session par authenticateToken,
+        // et invalidé dès que le mot de passe change (préfixe du hash).
         const hashPrefix = user.password.substring(0, 15);
         const token = jwt.sign(
-            { id: user.id, role: user.role, schoolSlug, hashPrefix },
+            { id: user.id, schoolSlug, hashPrefix, purpose: 'password_reset' },
             JWT_SECRET,
             { expiresIn: '1h' }
         );
 
         // Envoyer l'e-mail via file d'attente
         const { addEmailJob } = require('../services/queueService');
-        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/#/reset-password?token=${token}`;
-        
+        const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+        const resetLink = `${frontendUrl}/fr/reset-password?token=${encodeURIComponent(token)}`;
+
         await addEmailJob('send-password-reset', {
             to: input,
             resetLink
         });
 
-        return res.json({ success: true, message: 'Si cette adresse email existe pour cet établissement, un lien de réinitialisation a été envoyé.' });
+        return res.json(genericResponse);
     } catch (err) {
         console.error('RequestPasswordReset Error:', err.message);
         return res.status(500).json({ error: 'Erreur lors de la demande de réinitialisation.' });
@@ -928,8 +945,11 @@ async function resetPassword(req, res) {
     }
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const { id, role, schoolSlug, hashPrefix } = decoded;
+        const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+        const { id, schoolSlug, hashPrefix, purpose } = decoded;
+        if (purpose !== 'password_reset' || !hashPrefix || !SLUG_RE.test(schoolSlug || '')) {
+            return res.status(400).json({ error: 'Le lien de réinitialisation est invalide ou a expiré.' });
+        }
 
         // Récupérer l'utilisateur pour vérifier que le mot de passe n'a pas déjà changé
         const { data: user, error } = await supabase

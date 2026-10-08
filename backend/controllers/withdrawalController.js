@@ -81,11 +81,12 @@ async function getBalance(req, res) {
  * L'école demande un retrait.
  */
 async function requestWithdrawal(req, res) {
-    const { schoolSlug } = req.user;
-    const { amount, recipientName, recipientPhone, proofImageUrl } = req.body;
+    const { schoolSlug, id: userId, nom: userName, role } = req.user;
+    const { recipientName, recipientPhone, proofImageUrl } = req.body;
+    const amount = Number(req.body.amount);
 
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
-    if (!amount || amount <= 0 || !recipientName || !recipientPhone || !proofImageUrl) {
+    if (!Number.isFinite(amount) || amount <= 0 || !recipientName || !recipientPhone || !proofImageUrl) {
         return res.status(400).json({ error: 'Données manquantes ou invalides.' });
     }
 
@@ -103,7 +104,10 @@ async function requestWithdrawal(req, res) {
                 recipient_name: recipientName,
                 recipient_phone: recipientPhone,
                 proof_image_url: proofImageUrl,
-                status: 'pending'
+                status: 'pending',
+                requested_by_id: userId ? String(userId) : null,
+                requested_by_name: userName || null,
+                requested_by_role: role || null
             })
             .select('*')
             .single();

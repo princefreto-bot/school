@@ -1,4 +1,27 @@
+const crypto = require('crypto');
 const { supabase } = require('../utils/supabase');
+
+// Rôles du personnel ayant la messagerie (miroir de rolePermissions côté app).
+const CHAT_STAFF_ROLES = ['admin', 'directeur', 'directeur_general', 'comptable', 'proviseur', 'censeur', 'secretaire'];
+const CHAT_DELETE_ROLES = ['admin', 'directeur', 'directeur_general', 'comptable'];
+const ADMIN_BOXES = ['administration', 'comptabilite'];
+const staffBox = (role) => (role === 'comptable' ? 'comptabilite' : 'administration');
+const canUseChat = (role) => role === 'parent' || CHAT_STAFF_ROLES.includes(role);
+
+// Une conversation n'est accessible qu'à son parent ou au personnel de la boîte concernée
+// (même règle que la liste des conversations). Retourne null sinon.
+async function loadAccessibleConversation(user, conversationId) {
+    if (!conversationId) return null;
+    const { data: conv, error } = await supabase
+        .from(`conversations_${user.schoolSlug}`)
+        .select('id, parent_id, admin_role')
+        .eq('id', conversationId)
+        .maybeSingle();
+    if (error || !conv) return null;
+    if (user.role === 'parent') return conv.parent_id === user.id ? conv : null;
+    if (!CHAT_STAFF_ROLES.includes(user.role)) return null;
+    return conv.admin_role === staffBox(user.role) ? conv : null;
+}
 
 /**
  * Récupère les conversations pour l'utilisateur connecté
@@ -6,6 +29,7 @@ const { supabase } = require('../utils/supabase');
 async function getConversations(req, res) {
     const { id, role, schoolSlug } = req.user;
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+    if (!canUseChat(role)) return res.status(403).json({ error: 'Messagerie non disponible pour ce rôle.' });
 
     try {
         let query = supabase.from(`conversations_${schoolSlug}`).select(`
@@ -15,11 +39,8 @@ async function getConversations(req, res) {
 
         if (role === 'parent') {
             query = query.eq('parent_id', id);
-        } else if (role === 'comptable') {
-            query = query.eq('admin_role', 'comptabilite');
         } else {
-            // Autres admins voient l'administration
-            query = query.eq('admin_role', 'administration');
+            query = query.eq('admin_role', staffBox(role));
         }
 
         const { data, error } = await query.order('updated_at', { ascending: false });
@@ -46,6 +67,9 @@ async function getMessages(req, res) {
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
 
     try {
+        const conv = await loadAccessibleConversation(req.user, conversationId);
+        if (!conv) return res.status(404).json({ error: 'Conversation introuvable.' });
+
         const { data, error } = await supabase
             .from(`messages_${schoolSlug}`)
             .select('*')
@@ -74,9 +98,16 @@ async function sendMessage(req, res) {
     const { conversationId, text, imageUrl, targetRole } = req.body;
     const { id, role, schoolSlug } = req.user;
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+    if (!canUseChat(role)) return res.status(403).json({ error: 'Messagerie non disponible pour ce rôle.' });
+    if (targetRole && !ADMIN_BOXES.includes(targetRole)) return res.status(400).json({ error: 'Destinataire invalide.' });
 
     try {
         let convId = conversationId;
+
+        if (convId) {
+            const conv = await loadAccessibleConversation(req.user, convId);
+            if (!conv) return res.status(404).json({ error: 'Conversation introuvable.' });
+        }
 
         // Si parent initie sans conversationId
         if (!convId && role === 'parent') {
@@ -104,6 +135,7 @@ async function sendMessage(req, res) {
 
             const { parentId, adminRole } = req.body;
             if (!parentId) return res.status(400).json({ error: "parentId manquant pour l'initiation." });
+            if (adminRole && !ADMIN_BOXES.includes(adminRole)) return res.status(400).json({ error: 'Boîte de destination invalide.' });
 
             const { data: conv, error: convErr } = await supabase
                 .from(`conversations_${schoolSlug}`)
@@ -150,6 +182,7 @@ async function sendMessage(req, res) {
 async function getUnreadCount(req, res) {
     const { id, role, schoolSlug } = req.user;
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+    if (!canUseChat(role)) return res.json(0);
 
     try {
         let query = supabase
@@ -161,8 +194,7 @@ async function getUnreadCount(req, res) {
         if (role === 'parent') {
             query = query.eq('conversations.parent_id', id);
         } else {
-            // For admins, count messages in their conversations
-            query = query.eq('conversations.admin_role', role === 'comptable' ? 'comptabilite' : 'administration');
+            query = query.eq('conversations.admin_role', staffBox(role));
         }
 
         const { count, error } = await query;
@@ -174,10 +206,13 @@ async function getUnreadCount(req, res) {
     }
 }
 async function uploadImage(req, res) {
+    if (!canUseChat(req.user?.role)) return res.status(403).json({ error: 'Messagerie non disponible pour ce rôle.' });
     if (!req.file) return res.status(400).json({ error: 'Aucun fichier.' });
 
     try {
-        const fileName = `${Date.now()}_${req.file.originalname}`;
+        // Nom aléatoire (le nom d'origine fourni par le client n'est jamais réutilisé).
+        const ext = (req.file.mimetype.split('/')[1] || 'jpg').replace(/[^a-z0-9]/gi, '').slice(0, 5);
+        const fileName = `${req.user.schoolSlug}/${Date.now()}_${crypto.randomBytes(8).toString('hex')}.${ext}`;
         const { data, error } = await supabase.storage
             .from('messages')
             .upload(fileName, req.file.buffer, {
@@ -255,10 +290,14 @@ async function initiateConversation(req, res) {
  */
 async function deleteConversation(req, res) {
     const { id: conversationId } = req.params;
-    const { schoolSlug } = req.user;
+    const { schoolSlug, role } = req.user;
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+    if (!CHAT_DELETE_ROLES.includes(role)) return res.status(403).json({ error: 'Suppression réservée à la direction.' });
 
     try {
+        const conv = await loadAccessibleConversation(req.user, conversationId);
+        if (!conv) return res.status(404).json({ error: 'Conversation introuvable.' });
+
         // Suppression des messages liés d'abord pour éviter les erreurs de clé étrangère
         await supabase
             .from(`messages_${schoolSlug}`)

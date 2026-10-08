@@ -155,6 +155,9 @@ export const SuperAdminWithdrawalsPage: React.FC = () => {
                   </div>
                   <p className="text-slate-300 text-sm font-bold">{formatFCFA(w.amount)}</p>
                   <p className="text-slate-500 text-xs">{w.recipient_name} · {w.recipient_phone}</p>
+                  <p className="text-slate-500 text-[11px]">
+                    Demandé par : {w.requested_by_name ? `${w.requested_by_name} (${w.requested_by_role || '?'})` : 'non enregistré'}
+                  </p>
                   <div className="flex gap-3 mt-1.5">
                     {w.proof_image_url && (
                       <a href={w.proof_image_url} target="_blank" rel="noreferrer" className="text-[11px] font-black text-blue-400 hover:underline flex items-center gap-1">

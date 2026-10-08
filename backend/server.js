@@ -641,8 +641,8 @@ if (fs.existsSync(frontendDir)) {
 
 // ── Gestion globale des erreurs ───────────────────────────────
 app.use((err, req, res, _next) => {
-    console.error('❌ Erreur serveur:', err.message);
-    res.status(500).json({ error: 'Erreur interne du serveur.', detail: err.message });
+    console.error('❌ Erreur serveur:', req.method, req.originalUrl, err.stack || err.message);
+    res.status(500).json({ error: 'Erreur interne du serveur.' });
 });
 
 // ── Démarrage ─────────────────────────────────────────────────
@@ -660,7 +660,10 @@ const server = app.listen(PORT, () => {
 
     // Sauvegardes automatiques quotidiennes — uniquement en production pour
     // ne pas tourner à chaque redémarrage en dev.
-    if (process.env.NODE_ENV === 'production') {
+    // Même détection que le reste du serveur (NODE_ENV ou RENDER) : un NODE_ENV oublié
+    // arrêtait silencieusement les sauvegardes et les relances.
+    if (IS_PRODUCTION) {
+        console.error('⏰ [Cron] Démarrage des tâches planifiées (sauvegardes, relances, e-mails).');
         require('./services/backupService').start();
         require('./services/reminderService').start();
         require('./services/directorEmailService').start();

@@ -15,7 +15,11 @@ function authenticateToken(req, res, next) {
         return res.status(401).json({ error: 'Accès refusé. Token manquant.' });
     }
     try {
-        const payload = jwt.verify(token, JWT_SECRET);
+        const payload = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+        // Un jeton à usage spécial (ex: réinitialisation de mot de passe) n'est jamais une session.
+        if (payload.purpose) {
+            return res.status(401).json({ error: 'Session expirée ou invalide.' });
+        }
         req.user = payload; // Contient id, nom, role, schoolSlug (ou null pour superadmin/creator)
         return next();
     } catch (err) {
@@ -50,14 +54,21 @@ function requireSchool(req, res, next) {
     next();
 }
 
-// ── Middleware rôle école (admin / directeur / etc.) ──────────
-function requireSchoolAdmin(req, res, next) {
-    const schoolAdminRoles = ['admin', 'directeur', 'directeur_general', 'comptable', 'proviseur', 'censeur', 'superviseur'];
-    if (!req.user || !schoolAdminRoles.includes(req.user.role)) {
+const requireRoles = (roles) => (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
         return res.status(403).json({ error: 'Permission refusée. Rôle insuffisant.' });
     }
     next();
-}
+};
+
+// ── Encadrement de l'école (hors surveillant, dont le rôle se limite aux scans) ──
+const requireSchoolAdmin = requireRoles(['admin', 'directeur', 'directeur_general', 'comptable', 'proviseur', 'censeur']);
+
+// ── Finances : comptabilité, paie, retraits, sauvegardes (rôles ayant ces pages) ──
+const requireFinanceAdmin = requireRoles(['admin', 'directeur', 'directeur_general', 'comptable']);
+
+// ── Direction : rentrée/promotion, opérations structurantes ──
+const requireDirection = requireRoles(['admin', 'directeur', 'directeur_general']);
 
 // ── Middleware Créateur de contenu uniquement ───────────────────
 function requireCreator(req, res, next) {
@@ -67,4 +78,4 @@ function requireCreator(req, res, next) {
     next();
 }
 
-module.exports = { authenticateToken, requireSuperAdmin, requireSchool, requireSchoolAdmin, requireCreator };
+module.exports = { authenticateToken, requireSuperAdmin, requireSchool, requireSchoolAdmin, requireFinanceAdmin, requireDirection, requireCreator, requireRoles };

@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const withdrawalController = require('../controllers/withdrawalController');
-const { authenticateToken, requireSchool, requireSchoolAdmin } = require('../middleware/auth');
+const { authenticateToken, requireSchool, requireFinanceAdmin } = require('../middleware/auth');
 
 router.use(authenticateToken);
 router.use(requireSchool);
-router.use(requireSchoolAdmin);
+router.use(requireFinanceAdmin);
 
 router.get('/balance', withdrawalController.getBalance);
 router.post('/request', withdrawalController.requestWithdrawal);

@@ -1,19 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const payrollController = require('../controllers/payrollController');
-const { authenticateToken, requireSchool, requireSchoolAdmin } = require('../middleware/auth');
+const { authenticateToken, requireSchool, requireFinanceAdmin } = require('../middleware/auth');
 
 router.use(authenticateToken);
 router.use(requireSchool);
 
-// ── Libre-service salarié (tout membre authentifié de l'établissement) ──
+// â”€â”€ Libre-service salariÃ© (tout membre authentifiÃ© de l'Ã©tablissement) â”€â”€
 // Doit rester AVANT le verrou requireSchoolAdmin ci-dessous.
 router.get('/self/roster', payrollController.getSelfRoster);
 router.get('/self/payslips/mine', payrollController.getMySelfPayslips);
 router.post('/self/payslips', payrollController.getSelfPayslips);
 
-// ── Espace administrateur (direction / comptabilité) ──
-router.use(requireSchoolAdmin);
+// â”€â”€ Espace administrateur (direction / comptabilitÃ©) â”€â”€
+router.use(requireFinanceAdmin);
 
 router.get('/config', payrollController.getConfig);
 router.get('/staff', payrollController.getStaffSalaries);

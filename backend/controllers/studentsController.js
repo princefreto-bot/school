@@ -77,9 +77,15 @@ async function listStudentsByYear(req, res) {
 async function listStudents(req, res) {
     const { nom, prenom, classe, search } = req.query;
     const parentId = req.user ? req.user.id : null;
+    const isParent = req.user?.role === 'parent';
 
     const schoolSlug = req.user ? req.user.schoolSlug : null;
     if (!schoolSlug) return res.status(403).json({ error: 'Accès non autorisé.' });
+
+    // Un parent cherche SON enfant : il doit taper un nom, et ne peut pas lister l'école entière.
+    if (isParent && String(search || nom || '').trim().length < 2) {
+        return res.json({ students: [], total: 0 });
+    }
 
     try {
         const academicYearId = await resolveAcademicYearId(schoolSlug, req);
@@ -96,9 +102,10 @@ async function listStudents(req, res) {
         }
 
         if (search || nom) {
-            const q = (search || nom).toLowerCase().trim();
-            // Recherche flexible : nom, prénom, ou combinaison
-            query = query.or(`nom.ilike.%${q}%,prenom.ilike.%${q}%`);
+            // Les caractères de syntaxe des filtres (, ( ) * % \ :) sont retirés : la saisie est
+            // insérée dans une expression .or() et ne doit jamais pouvoir en ajouter une condition.
+            const q = String(search || nom).toLowerCase().replace(/[,()*%\\:"]/g, ' ').trim().slice(0, 60);
+            if (q) query = query.or(`nom.ilike.%${q}%,prenom.ilike.%${q}%`);
         }
 
         if (prenom && !search && prenom !== nom) {
@@ -111,7 +118,7 @@ async function listStudents(req, res) {
 
         const { data: students, error } = await query
             .order('nom', { ascending: true })
-            .limit(100);
+            .limit(isParent ? 20 : 100);
 
         if (error) throw error;
 
