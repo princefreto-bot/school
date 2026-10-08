@@ -298,7 +298,13 @@ export const RecuPaiementPDF: React.FC<RecuPaiementPDFProps> = ({
       ? [...student.historiquesPaiements].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
       : undefined);
 
-  const numero = tx?.recu || student.recu || `REC-${student.id.slice(0, 8).toUpperCase()}`;
+  // Numéro propre à la transaction : sans saisie manuelle, il dérive de l'identifiant du
+  // paiement (unique), jamais de l'élève — sinon tous les reçus d'un élève portaient le même
+  // numéro et la vérification par QR échouait.
+  const numero = tx?.recu
+    || (tx?.id ? `REC-${tx.id.replace(/-/g, '').slice(0, 10).toUpperCase()}` : '')
+    || student.recu
+    || `REC-${student.id.slice(0, 8).toUpperCase()}`;
   const when = tx?.date ? new Date(tx.date) : new Date(student.updatedAt);
   const date = when.toLocaleDateString('fr-FR');
   const heure = when.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
@@ -326,8 +332,9 @@ export const RecuPaiementPDF: React.FC<RecuPaiementPDFProps> = ({
   const reste = isInscription ? (student.inscriptionRestant || 0) : student.restant;
   const solde = reste <= 0;
 
-  // QR : le numéro de reçu suffit à la vérification (page Vérif. Reçus).
-  const qrValue = numero;
+  // QR : numéro saisi s'il existe, sinon l'identifiant complet du paiement (retrouvé à coup
+  // sûr par la page Vérif. Reçus).
+  const qrValue = tx?.recu || tx?.id || numero;
 
   const detailRows: DetailRow[] = [
     {

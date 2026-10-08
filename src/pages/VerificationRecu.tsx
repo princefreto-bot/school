@@ -22,15 +22,20 @@ export const VerificationRecu: React.FC = () => {
     // ── Recherche dans tous les paiements ──────────────────────
     const rechercherRecu = () => {
         if (!codeRecherche.trim()) return;
+        const code = codeRecherche.trim().toLowerCase();
+        // Numéro court imprimé quand aucun numéro n'a été saisi : REC- + 10 premiers caractères
+        // de l'identifiant du paiement (voir RecuPaiementPDF).
+        const shortId = /^rec-[0-9a-f]{10}$/.test(code) ? code.slice(4) : null;
 
         for (const student of students) {
             const payments = student.historiquesPaiements || [];
             for (const p of payments) {
                 // Chercher par code de reçu ou par ID de paiement
                 if (
-                    p.recu?.toLowerCase() === codeRecherche.trim().toLowerCase() ||
-                    p.id?.toLowerCase() === codeRecherche.trim().toLowerCase() ||
-                    p.reference?.toLowerCase() === codeRecherche.trim().toLowerCase()
+                    p.recu?.toLowerCase() === code ||
+                    p.id?.toLowerCase() === code ||
+                    p.reference?.toLowerCase() === code ||
+                    (shortId !== null && !p.recu && p.id?.replace(/-/g, '').toLowerCase().startsWith(shortId))
                 ) {
                     setFoundPayment({
                         nom: student.nom,
