@@ -5,6 +5,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Megaphone, RefreshCw, Upload, X, Save, EyeOff, Info } from 'lucide-react';
 import { superAdminApi } from '../../services/superAdminApi';
 import { BrandLoader } from '../../components/brand/BrandLoader';
+import { MaintenanceToggleCard } from './MaintenanceToggleCard';
 
 interface Notice {
   id: string;
@@ -134,6 +135,7 @@ export const SuperAdminNoticesPage: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-3xl">
+      <MaintenanceToggleCard />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-black text-white">Notice écoles</h1>

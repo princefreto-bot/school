@@ -60,6 +60,12 @@ export const superAdminApi = {
     request('/superadmin/notice', { method: 'PUT', body: JSON.stringify(payload) }),
   deactivateNotice: () => request('/superadmin/notice', { method: 'DELETE' }),
 
+  // Mode "Mise à jour en cours" (bloque l'accès des écoles)
+  getMaintenance: (): Promise<{ active: boolean; message: string; updatedAt?: string | null }> =>
+    request('/superadmin/maintenance'),
+  setMaintenance: (payload: { active: boolean; message?: string }) =>
+    request('/superadmin/maintenance', { method: 'PUT', body: JSON.stringify(payload) }),
+
   // E-mails directeurs (Resend) — nouveautés, incidents, guides, relances
   getDirectorEmails: () => request('/superadmin/director-emails'),
   previewDirectorEmail: (payload: { category: string; content: any }) =>

@@ -8,6 +8,7 @@ import { AppPage } from './types';
 import { Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { ScrollToTop } from './components/ScrollToTop';
 import { DayThemeOverlay } from './components/DayTheme';
+import { MaintenanceGate } from './components/MaintenanceGate';
 
 import { Capacitor } from '@capacitor/core';
 
@@ -733,7 +734,7 @@ export function App() {
   }
 
   return (
-    <>
+    <MaintenanceGate>
       <ScrollToTop />
       <DayThemeOverlay />
       <Routes>
@@ -868,6 +869,6 @@ export function App() {
       <Suspense fallback={null}>
         <CookieConsent />
       </Suspense>
-    </>
+    </MaintenanceGate>
   );
 }

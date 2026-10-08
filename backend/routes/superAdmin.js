@@ -29,6 +29,7 @@ const { listProspects, createProspect, updateProspect, updateProspectStage, dele
 const { getHandoffToken, redeemHandoff } = require('../controllers/classeurHandoffController');
 const { getPlatformNoticeAdmin, upsertPlatformNotice, deactivatePlatformNotice } = require('../controllers/platformNoticeController');
 const { listDirectorEmails, previewDirectorEmail, testDirectorEmail, sendDirectorEmail } = require('../controllers/directorEmailController');
+const { getMaintenanceAdmin, setMaintenance } = require('../controllers/maintenanceController');
 
 const {
     getAllCreators,
@@ -98,6 +99,9 @@ router.get('/classeur/handoff-token', authenticateToken, requireSuperAdmin, getH
 router.post('/classeur/redeem-handoff', redeemHandoff);
 
 // ── RÉSÉRVÉ SUPERADMIN : NOTICE PLATEFORME (message/image aux établissements) ──
+router.get('/maintenance', authenticateToken, requireSuperAdmin, getMaintenanceAdmin);
+router.put('/maintenance', authenticateToken, requireSuperAdmin, setMaintenance);
+
 router.get('/notice', authenticateToken, requireSuperAdmin, getPlatformNoticeAdmin);
 router.put('/notice', authenticateToken, requireSuperAdmin, upsertPlatformNotice);
 router.delete('/notice', authenticateToken, requireSuperAdmin, deactivatePlatformNotice);

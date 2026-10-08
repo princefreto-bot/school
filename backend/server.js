@@ -131,6 +131,12 @@ const { globalLimiter, authLimiter } = require('./middleware/rateLimiter');
 // Appliquer le limiteur global à toutes les requêtes API (hors static)
 app.use('/api', globalLimiter);
 
+// Mode "Mise à jour en cours" (interrupteur superadmin) — avant toutes les routes métier.
+const { maintenanceGuard } = require('./middleware/maintenance');
+const { getMaintenance } = require('./controllers/maintenanceController');
+app.get('/api/maintenance', getMaintenance);
+app.use('/api', maintenanceGuard);
+
 // ── Routes API ────────────────────────────────────────────────
 // Appliquer le limiteur plus strict aux routes d'authentification
 app.use('/api/auth', authLimiter, require('./routes/auth'));
