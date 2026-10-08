@@ -423,7 +423,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const toggleTheme = useStore((s) => s.toggleTheme);
   const updateAllSettings = useStore((s) => s.updateAllSettings);
   const academicYears = useStore((s) => s.academicYears) || [];
-  const settings = useStore((s) => s.settings);
   const lastSyncTimestamp = useStore((s) => s.lastSyncTimestamp);
 
   const [newYearName, setNewYearName] = useState(() => {
@@ -459,7 +458,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
     setYearLoading(true);
     try {
-      await updateAllSettings({ ...settings, schoolYear: newYearName });
+      await updateAllSettings({ schoolYear: newYearName });
     } catch (err) {
       setYearError("Erreur lors de la création.");
     } finally {

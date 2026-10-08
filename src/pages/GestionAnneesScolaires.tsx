@@ -325,7 +325,6 @@ export const GestionAnneesScolaires: React.FC = () => {
   const currentSchoolYear = useStore((s) => s.schoolYear);
   const deleteAcademicYear = useStore((s) => s.deleteAcademicYear);
   const updateAllSettings = useStore((s) => s.updateAllSettings);
-  const settings = useStore((s) => s.settings);
 
   const [showNewModal, setShowNewModal] = useState(false);
   const [showPromoteModal, setShowPromoteModal] = useState(false);
@@ -364,7 +363,7 @@ export const GestionAnneesScolaires: React.FC = () => {
     try {
       // Pour créer l'année, on simule un changement d'année, ce qui va forcer sa création côté backend,
       // puis on recharge la page pour activer cette nouvelle année.
-      await updateAllSettings({ ...settings, schoolYear: newYearName });
+      await updateAllSettings({ schoolYear: newYearName });
     } catch (err) {
       setError("Erreur lors de la création.");
       setLoading(false);
@@ -375,7 +374,7 @@ export const GestionAnneesScolaires: React.FC = () => {
     if (yearName === currentSchoolYear) return;
 
     if (window.confirm(`Voulez-vous basculer sur l'année scolaire ${yearName} ? L'application va se recharger.`)) {
-      await updateAllSettings({ ...settings, schoolYear: yearName });
+      await updateAllSettings({ schoolYear: yearName });
     }
   };
 

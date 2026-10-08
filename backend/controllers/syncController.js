@@ -420,6 +420,14 @@ async function syncFromFrontend(req, res) {
                 }
             }
 
+            // Le nom par défaut du store (jamais saisi par l'école) ne doit jamais écraser le
+            // vrai nom : c'est ainsi que des écoles se retrouvaient « Établissement Scolaire »
+            // sur leurs bulletins après un changement d'année (incident csyzomacamb 2026-10-07).
+            if (typeof appSettings.schoolName === 'string') {
+                const name = appSettings.schoolName.trim();
+                if (!name || name === 'Établissement Scolaire') delete appSettings.schoolName;
+            }
+
             console.log('🎨 [Sync POST] Saving appSettings:', {
                 appName: appSettings.appName,
                 schoolName: appSettings.schoolName,
@@ -468,11 +476,13 @@ async function syncFromFrontend(req, res) {
                     official_seal: appSettings.officialSeal,
                     director_name: appSettings.directorName,
                     director_title: appSettings.directorTitle,
-                    show_stamp_on_cards: appSettings.showStampOnCards !== undefined ? appSettings.showStampOnCards : true,
-                    show_signature_on_cards: appSettings.showSignatureOnCards !== undefined ? appSettings.showSignatureOnCards : true,
-                    show_seal_on_cards: appSettings.showSealOnCards !== undefined ? appSettings.showSealOnCards : true,
-                    show_stamp_on_bulletins: appSettings.showStampOnBulletins !== undefined ? appSettings.showStampOnBulletins : true,
-                    show_signature_on_bulletins: appSettings.showSignatureOnBulletins !== undefined ? appSettings.showSignatureOnBulletins : true,
+                    // Pas de défaut `true` : un sync partiel (ex: changement d'année) réactivait
+                    // sinon cachet/signature que l'école avait désactivés.
+                    show_stamp_on_cards: appSettings.showStampOnCards,
+                    show_signature_on_cards: appSettings.showSignatureOnCards,
+                    show_seal_on_cards: appSettings.showSealOnCards,
+                    show_stamp_on_bulletins: appSettings.showStampOnBulletins,
+                    show_signature_on_bulletins: appSettings.showSignatureOnBulletins,
                     carte_verso_texte: appSettings.carteVersoTexte,
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'id' });
@@ -704,7 +714,8 @@ async function syncToFrontend(req, res) {
             announcementReads,
             academicYearsRes,
             settingsRes,
-            yearSettingsRes
+            yearSettingsRes,
+            schoolRowRes
         ] = await Promise.all([
             fetchTable('students', 'nom', true, true),
             fetchTable('payments', 'date', false, true),
@@ -724,13 +735,19 @@ async function syncToFrontend(req, res) {
             // vides par défaut (nouvelle année vierge), jamais hérités d'une autre année.
             academicYearId
                 ? supabase.from(tbl('year_settings')).select('tranches, class_registration_fees').eq('academic_year_id', academicYearId).maybeSingle()
-                : Promise.resolve({ data: null })
+                : Promise.resolve({ data: null }),
+            supabase.from('schools').select('name').eq('slug', schoolSlug).maybeSingle()
         ]);
 
         const academicYearsData = academicYearsRes.data || [];
         const appSettings = settingsRes.data;
         const settingsError = settingsRes.error;
         const yearSettings = yearSettingsRes.data;
+        // Nom jamais renseigné (ou remis au défaut) : on affiche le nom officiel du registre.
+        const storedName = (appSettings?.school_name || '').trim();
+        const schoolDisplayName = storedName && storedName !== 'Établissement Scolaire'
+            ? appSettings.school_name
+            : (schoolRowRes?.data?.name || appSettings?.school_name);
 
         console.log('🎨 [Sync GET] appSettings from DB:', {
             found: !!appSettings,
@@ -803,7 +820,7 @@ async function syncToFrontend(req, res) {
             links: links || [],
             appSettings: appSettings ? {
                 appName: appSettings.app_name,
-                schoolName: appSettings.school_name,
+                schoolName: schoolDisplayName,
                 schoolYear: appSettings.school_year,
                 schoolLogo: appSettings.school_logo,
                 schoolStamp: appSettings.school_stamp,
