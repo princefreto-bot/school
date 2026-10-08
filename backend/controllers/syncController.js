@@ -925,8 +925,14 @@ async function getYearArchive(req, res) {
             }
         };
 
+        // scope=matieres : uniquement le catalogue et les coefficients (copie vers une autre année).
+        const onlyMatieres = req.query.scope === 'matieres';
         const [students, notes, matieres, classeMatieres, presences] = await Promise.all([
-            fetchYear('students'), fetchYear('notes'), fetchYear('matieres'), fetchYear('classe_matieres'), fetchYear('presences'),
+            onlyMatieres ? [] : fetchYear('students'),
+            onlyMatieres ? [] : fetchYear('notes'),
+            fetchYear('matieres'),
+            fetchYear('classe_matieres'),
+            onlyMatieres ? [] : fetchYear('presences'),
         ]);
 
         return res.json({

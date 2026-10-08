@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useStore } from '../store/useStore';
-import { MatiereCategorie } from '../types';
+import { MatiereCategorie, Matiere, ClasseMatiere } from '../types';
 import { v4 as uuid } from '../utils/uuid';
 import { personnelApi } from '../services/personnelApi';
-import { BookOpen, Plus, Trash2, Settings2, Users, Layers, Library } from 'lucide-react';
+import { syncToBackend } from '../services/backendSync';
+import { API_BASE_URL } from '../config';
+import { getAuthHeaders } from '../services/apiHelpers';
+import { BookOpen, Plus, Trash2, Settings2, Users, Layers, Library, Copy, Loader2 } from 'lucide-react';
 
 const FREE_TEXT_OPTION = '__free_text__';
 
@@ -11,8 +14,75 @@ export const GestionAcademique: React.FC = () => {
     const {
         matieres, addMatiere, deleteMatiere,
         classeMatieres, addClasseMatiere, deleteClasseMatiere,
-        students
+        students, academicYears, schoolYear
     } = useStore();
+
+    // Copie optionnelle du catalogue et des coefficients d'une autre année vers l'année active
+    // (chaque année a les siens ; jamais de copie automatique).
+    const otherYears = academicYears.map(y => y.name).filter(n => n && n !== schoolYear).sort().reverse();
+    const [copyFrom, setCopyFrom] = useState('');
+    const [copying, setCopying] = useState(false);
+    const copySource = copyFrom || otherYears[0] || '';
+
+    const handleCopyFromYear = async () => {
+        if (!copySource) return;
+        if (!window.confirm(`Copier les matières et coefficients de ${copySource} vers ${schoolYear} ?\n\nLes matières et coefficients déjà présents en ${schoolYear} ne seront ni dupliqués ni modifiés.`)) return;
+        setCopying(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/sync/archive?year=${encodeURIComponent(copySource)}&scope=matieres`, { headers: getAuthHeaders() });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
+
+            const state = useStore.getState();
+            const idByName = new Map(state.matieres.map(m => [m.nom.trim().toLowerCase(), m.id]));
+            const idMap = new Map<string, string>();
+            const newMatieres: Matiere[] = [];
+            for (const m of data.matieres as Matiere[]) {
+                const key = m.nom.trim().toLowerCase();
+                const existingId = idByName.get(key);
+                if (existingId) {
+                    idMap.set(m.id, existingId);
+                    continue;
+                }
+                const id = uuid();
+                idMap.set(m.id, id);
+                idByName.set(key, id);
+                newMatieres.push({ id, nom: m.nom, categorie: m.categorie });
+            }
+
+            const existingPairs = new Set(state.classeMatieres.map(cm => `${cm.classe}|${cm.matiereId}`));
+            const newLiaisons: ClasseMatiere[] = [];
+            for (const cm of data.classeMatieres as ClasseMatiere[]) {
+                const matiereId = idMap.get(cm.matiereId);
+                if (!matiereId) continue;
+                const pair = `${cm.classe}|${matiereId}`;
+                if (existingPairs.has(pair)) continue;
+                existingPairs.add(pair);
+                newLiaisons.push({
+                    id: uuid(), classe: cm.classe, matiereId,
+                    professeur: cm.professeur || '', professeurId: cm.professeurId || null, coefficient: cm.coefficient,
+                });
+            }
+
+            if (newMatieres.length === 0 && newLiaisons.length === 0) {
+                alert(`Rien à copier : tout ce qui existe en ${copySource} est déjà présent en ${schoolYear}.`);
+                return;
+            }
+
+            const matieresNext = [...state.matieres, ...newMatieres];
+            const liaisonsNext = [...state.classeMatieres, ...newLiaisons];
+            useStore.setState({ matieres: matieresNext, classeMatieres: liaisonsNext });
+            const ok = await syncToBackend({ matieres: matieresNext, classeMatieres: liaisonsNext });
+            useStore.setState({ lastSyncTimestamp: Date.now() });
+            alert(ok
+                ? `${newMatieres.length} matière(s) et ${newLiaisons.length} coefficient(s) copiés de ${copySource} vers ${schoolYear}.`
+                : "La copie n'a pas pu être enregistrée sur le serveur. Rechargez la page et réessayez.");
+        } catch (err) {
+            alert(`Copie impossible : ${(err as Error).message}`);
+        } finally {
+            setCopying(false);
+        }
+    };
 
     const classesList = Array.from(new Set(students.map(s => s.classe))).sort();
     const [activeTab, setActiveTab] = useState<'matieres' | 'liaisons'>('matieres');
@@ -97,6 +167,39 @@ export const GestionAcademique: React.FC = () => {
                     </p>
                 </div>
             </div>
+
+            {otherYears.length > 0 && (
+                <div className={`pro-card p-5 flex flex-col md:flex-row md:items-center gap-4 border ${matieres.length === 0 ? 'bg-amber-50/80 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30' : 'bg-white/60 dark:bg-slate-900/60 border-slate-200/50 dark:border-slate-800'}`}>
+                    <div className="flex-1">
+                        <p className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                            <Copy className="w-4 h-4 text-indigo-500" /> Copier depuis une autre année
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            {matieres.length === 0
+                                ? `Aucune matière n'est encore définie pour ${schoolYear}. Reprenez le catalogue et les coefficients d'une année précédente en un clic.`
+                                : `Ajoute à ${schoolYear} les matières et coefficients manquants d'une autre année (rien n'est dupliqué ni modifié).`}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <select
+                            value={copySource}
+                            onChange={(e) => setCopyFrom(e.target.value)}
+                            className="px-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold dark:text-white"
+                        >
+                            {otherYears.map(y => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                        <button
+                            type="button"
+                            onClick={handleCopyFromYear}
+                            disabled={copying}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-colors disabled:opacity-60"
+                        >
+                            {copying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
+                            Copier vers {schoolYear}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* ── TABS ── */}
             <div className="flex gap-2 p-2 bg-slate-100/50 dark:bg-slate-800/50 backdrop-blur-md rounded-2xl border border-slate-200/50 dark:border-slate-700/50 w-fit">
