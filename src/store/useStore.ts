@@ -3,7 +3,7 @@
 // ============================================================
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Student, User, AppPage, Payment, Parent, AppSettings, Presence, ActivityLog, CycleSchedule, Announcement, AnnouncementRead, Matiere, ClasseMatiere, Note, PeriodeType } from '../types';
+import { Student, User, AppPage, Payment, Parent, Presence, ActivityLog, CycleSchedule, Announcement, AnnouncementRead, Matiere, ClasseMatiere, Note, PeriodeType } from '../types';
 import { API_BASE_URL, BACKEND_URL } from '../config';
 import { getEcolage, getCycle, getEffectiveEcolage, getEffectiveFraisInscription, isSubjectToRegistrationFee } from '../data/classConfig';
 import { getCurrentAcademicYear } from '../utils/helpers';
@@ -196,8 +196,6 @@ export interface AppState {
     showSignatureOnBulletins?: boolean,
     carteVersoTexte?: string
   }) => Promise<void>;
-  settings: AppSettings;
-  updateSettings: (settings: AppSettings) => void;
   academicYears: { id: string, name: string, isCurrent: boolean }[];
   setAcademicYears: (years: { id: string, name: string, isCurrent: boolean }[]) => void;
   deleteAcademicYear: (yearId: string) => Promise<boolean>;
@@ -1130,24 +1128,6 @@ export const useStore = create<AppState>()(
           return { success: false, error: 'Erreur réseau lors de la promotion.' };
         }
       },
-      settings: {
-        seuilDeuxiemeTranche: 70,
-        schoolName: 'Établissement Scolaire',
-        schoolYear: getCurrentAcademicYear(),
-        messageRemerciement: "Nous vous remercions sincèrement pour votre ponctualité dans le règlement de la scolarité. Votre soutien contribue au bon fonctionnement de notre établissement.",
-        messageRappel: "Nous vous rappelons cordialement que le règlement du solde de scolarité est attendu. Veuillez régulariser votre situation dans les meilleurs délais.",
-        currency: 'FCFA',
-        nomEcole: 'Établissement Scolaire',
-        anneScolaire: getCurrentAcademicYear(),
-        adresse: 'Adresse de l\'établissement',
-        telephone: '+229 XX XX XX XX',
-        email: 'contact@ecole.ci',
-        badgeParentResponsable: 'Parent Responsable',
-        badge2emeTranche: '2ème Tranche Validée',
-        tranches: []
-      },
-      updateSettings: (newSettings) => set({ settings: newSettings }),
-
       // ── Présences ─────────────────────────────────────────
       presences: [],
       addPresence: (presence) => {

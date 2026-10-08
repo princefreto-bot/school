@@ -67,9 +67,9 @@ const getAppreciation = (moy: number): string => {
 };
 
 /**
- * Retourne les périodes précédentes à prendre en compte pour le cumul annuel.
- * T1 ⇒ [] (pas de cumul), T2 ⇒ [T1], T3 ⇒ [T1, T2]
- * S1 ⇒ [] (pas de cumul), S2 ⇒ [S1]
+ * Retourne les périodes précédentes à prendre en compte pour le cumul annuel, calculé
+ * uniquement sur la dernière période de l'année :
+ * T1, T2 ⇒ [] (pas de cumul), T3 ⇒ [T1, T2] ; S1 ⇒ [], S2 ⇒ [S1].
  */
 export const getPeriodesAntérieures = (periode: PeriodeType): PeriodeType[] => {
     switch (periode) {
