@@ -8,6 +8,7 @@ import {
     FileText, Play, Download
 } from 'lucide-react';
 import { LinkStudentModal } from '../../components/LinkStudentModal';
+import { AuthImage } from '../../components/AuthImage';
 import { LicensePaymentsPanel } from '../../components/LicensePaymentsPanel';
 import { SupportModal } from '../../components/SupportModal';
 import { LicenseLockScreen } from '../../components/LicenseLockScreen';
@@ -779,13 +780,13 @@ export const ParentDashboard: React.FC = () => {
                                                                 {(doc.file_url?.toLowerCase().endsWith('.png') || doc.file_url?.toLowerCase().endsWith('.jpg') || doc.file_url?.toLowerCase().endsWith('.jpeg')) && (
                                                                     <div 
                                                                         onClick={() => setPreviewImage({ 
-                                                                            url: `${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`, 
+                                                                            url: `${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}`, 
                                                                             title: doc.title 
                                                                         })}
                                                                         className="mt-3 block relative w-full h-28 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 flex items-center justify-center group/thumb cursor-zoom-in"
                                                                     >
-                                                                        <img 
-                                                                            src={`${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`} 
+                                                                        <AuthImage
+                                                                            src={`${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}`}
                                                                             alt={doc.title}
                                                                             className="w-full h-full object-cover transition-transform duration-300 group-hover/thumb:scale-105"
                                                                             onError={(e) => {
@@ -803,7 +804,7 @@ export const ParentDashboard: React.FC = () => {
                                                             <div className="mt-3 flex gap-2 w-full">
                                                                 <button
                                                                     onClick={() => handleDownloadFile(
-                                                                        `${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`, 
+                                                                        `${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}`, 
                                                                         doc.title, 
                                                                         'png'
                                                                     )}
@@ -814,7 +815,7 @@ export const ParentDashboard: React.FC = () => {
                                                                 </button>
                                                                 <button
                                                                     onClick={() => handleDownloadFile(
-                                                                        `${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}?token=${localStorage.getItem('parent_token')}`, 
+                                                                        `${API_BASE_URL}/documents/file/${doc.file_url.split('/').pop()}`, 
                                                                         doc.title, 
                                                                         'pdf'
                                                                     )}
@@ -888,7 +889,7 @@ export const ParentDashboard: React.FC = () => {
                         </button>
                     </div>
                     <div className="flex-grow flex items-center justify-center p-4">
-                        <img src={previewImage.url} alt={previewImage.title} className="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-slate-800" />
+                        <AuthImage src={previewImage.url} alt={previewImage.title} className="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-slate-800" />
                     </div>
                     <div className="flex justify-center gap-4 p-4">
                         <button 

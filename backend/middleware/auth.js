@@ -7,7 +7,9 @@ function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     if (authHeader && authHeader.startsWith('Bearer ')) {
         token = authHeader.split(' ')[1];
-    } else if (req.query && req.query.token) {
+    } else if (req.query && req.query.token && req.method === 'GET' && /\/(personnel-)?documents\/file\//.test(req.originalUrl)) {
+        // Jeton dans l'URL toléré uniquement pour ouvrir un fichier de document (anciennes
+        // versions de l'app mobile) : il fuit dans l'historique et les journaux, jamais ailleurs.
         token = req.query.token;
     }
 

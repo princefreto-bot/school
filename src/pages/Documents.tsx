@@ -4,6 +4,7 @@ import { Student } from '../types';
 import { API_BASE_URL } from '../config';
 import { getAuthHeaders, parseResponse } from '../services/apiHelpers';
 import { DocumentScanner } from '../components/DocumentScanner';
+import { AuthImage } from '../components/AuthImage';
 import { 
   FileText, Search, User, Calendar, Download, Trash, Plus, 
   AlertCircle, CheckCircle, Shield, Award, Sparkles, Filter, X 
@@ -336,8 +337,7 @@ export const Documents: React.FC = () => {
                     {documents.map((doc) => {
                       const badge = getDocTypeBadge(doc.document_type);
                       const filename = doc.file_url.split('/').pop();
-                      const token = localStorage.getItem('parent_token');
-                      const fileUrl = `${API_BASE_URL}/documents/file/${filename}?token=${token}`;
+                      const fileUrl = `${API_BASE_URL}/documents/file/${filename}`;
                       
                       return (
                         <div 
@@ -372,8 +372,8 @@ export const Documents: React.FC = () => {
                                 onClick={() => setPreviewImage({ url: fileUrl, title: doc.title })}
                                 className="mt-3 block relative w-full h-32 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-805 flex items-center justify-center group/thumb cursor-zoom-in"
                               >
-                                <img 
-                                  src={fileUrl} 
+                                <AuthImage
+                                  src={fileUrl}
                                   alt={doc.title}
                                   className="w-full h-full object-cover transition-transform duration-300 group-hover/thumb:scale-105"
                                   onError={(e) => {
@@ -450,7 +450,7 @@ export const Documents: React.FC = () => {
             </button>
           </div>
           <div className="flex-grow flex items-center justify-center p-4">
-            <img src={previewImage.url} alt={previewImage.title} className="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-slate-800" />
+            <AuthImage src={previewImage.url} alt={previewImage.title} className="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-slate-800" />
           </div>
           <div className="flex justify-center gap-4 p-4">
             <button 
